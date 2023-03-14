@@ -6,6 +6,7 @@ DevSecOps Security Tools
 
 # Project layout
 
+```
 ├───.github
 │   └───workflows
 │       |___engine_core.yaml         -> CD pipeline for the engine core.
@@ -26,6 +27,7 @@ DevSecOps Security Tools
 |           |   |___driven_adapters
 |           |   |___entry_points
 |           |   |___helpers
+```
 
 # How can I help?
 
