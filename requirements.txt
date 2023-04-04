@@ -9,6 +9,8 @@ multipledispatch
 flake8
 black
 pre-commit
+PyYAML
+checkov==2.2.229
 
 
 

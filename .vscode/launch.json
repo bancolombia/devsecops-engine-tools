@@ -10,7 +10,24 @@
             "type": "python",
             "request": "launch",
             "program": "C:/Users/cesospin/Documents/dev/NU0429001_devsecops_engine/engine_sast/engine_iac/src/domain/usecases/iac_scan_docker_usecase.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "env": {
+                "BUILD_BUILDID": "2688",
+                "BUILD_DEFINITIONNAME": "NU0051001_Engagement_Services_MR",
+                "BUILD_REPOSITORY_ID": "57a0ece4-aa98-4a6a-a1f3-a17b2207fb6f",
+                "BUILD_REPOSITORY_NAME": "NU0051001_Engagement_Services_MR",
+                "BUILD_SOURCEBRANCH": "refs/heads/master",
+                "BUILD_STAGINGDIRECTORY" : "BUILD_STAGINGDIRECTORY",
+                "BUILD_SOURCEBRANCHMESSAGE": "",
+                "BUILD_SOURCEBRANCHNAME": "master",
+                "BUILD_SOURCEVERSION": "2d545969a76516156d76e1c88f8e699537e889bd",
+                "BUILD_ARTIFACTSTAGINGDIRECTORY": "/tmp",
+                "SYSTEM_ACCESSTOKEN_LOCAL": "token",
+                "SYSTEM_DEFAULTWORKINGDIRECTORY": "C:/Users/cesospin/Documents/dev/NU0051001_Engagement_Services_MR/ds_ms_alias_identity/",
+                "SYSTEM_DEFINITIONID": "1",
+                "SYSTEM_TEAMFOUNDATIONCOLLECTIONURI": "https://grupobancolombia.visualstudio.com/",
+                "SYSTEM_TEAMPROJECTID": "Vicepresidencia Servicios de Tecnología"
+            }
         }
     ]
 }
