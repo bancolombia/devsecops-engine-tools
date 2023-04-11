@@ -13,7 +13,5 @@ class BuildVariables(Enum):
 
 
 class SystemVariables(Enum):
-    System_DefaultWorkingDirectory = "System.DefaultWorkingDirectory".replace(
-        ".", "_"
-    ).upper()
+    System_DefaultWorkingDirectory = "System.DefaultWorkingDirectory".replace(".", "_").upper()
     System_StageName = "System.StageName".replace(".", "_").upper()

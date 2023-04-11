@@ -4,7 +4,7 @@ from multipledispatch import dispatch
 
 
 class AzureDevopsRemoteConfig:
-    """Info API in https://learn.microsoft.com/en-us/rest/api/azure/devops/git/items/get?view=azure-devops-rest-7.0&tabs=HTTP
+    """Info API in https://learn.microsoft.com/en-us/rest/api/azure/devopsgit/items/get?view=azure-devops-rest-7.0&tabs=HTTP
     ---------
     Parameters
     ----------
@@ -65,23 +65,17 @@ class AzureDevopsRemoteConfig:
         return HTTPBasicAuth(user, token)
 
     def send_get_request(self, url, headers, params, auth):
-        rs = requests.get(
-            url=url, auth=auth, headers=headers, verify=self.VERIFY_SSL, params=params
-        )
+        rs = requests.get(url=url, auth=auth, headers=headers, verify=self.VERIFY_SSL, params=params)
         return rs
 
     def send_post_request(self, url, headers, params, auth):
-        rs = requests.post(
-            url=url, auth=auth, headers=headers, verify=self.VERIFY_SSL, params=params
-        )
+        rs = requests.post(url=url, auth=auth, headers=headers, verify=self.VERIFY_SSL, params=params)
         return rs
 
     def set_headers(self):
         headers = {}
         headers["content-type"] = "application/json"
-        headers["accept"] = "api-version={api_version}".format(
-            api_version=self.API_VERSION
-        )
+        headers["accept"] = "api-version={api_version}".format(api_version=self.API_VERSION)
         return headers
 
     def get_repos(self, organization, project):
