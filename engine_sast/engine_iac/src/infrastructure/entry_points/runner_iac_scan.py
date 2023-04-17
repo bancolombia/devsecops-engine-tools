@@ -1,7 +1,4 @@
 from engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
-from engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
-    AzureDevopsIntegration,
-)
 from devsecops_engine_utilities.azuredevops.infrastructure.AzureDevopsRemoteConfig import (
     AzureDevopsRemoteConfig,
 )
@@ -9,6 +6,7 @@ from engine_sast.engine_iac.src.domain.model.PipelineConfig import PipelineConfi
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_pipeline_config import (
     get_pipeline_config,
 )
+from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import CheckovTool
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
     CheckovConfig,
@@ -42,8 +40,9 @@ checkov_config = CheckovConfig(
     directories=pipeline.default_working_directory,
 )
 checkov_config.create_config_dict()
-
-iac_scan = IacScan(AzureDevopsIntegration, CheckovTool)
+checkov_run = CheckovTool(checkov_config=checkov_config)
+checkov_run.create_config_file()
+iac_scan = IacScan(checkov_run)
 iac_scan.process()
 
 # create_config_file(checkov_config=checkov_config)

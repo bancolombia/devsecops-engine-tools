@@ -9,7 +9,7 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "C:/Users/cesospin/Documents/dev/NU0429001_devsecops_engine/engine_sast/engine_iac/src/domain/usecases/iac_scan_docker_usecase.py",
+            "program": "C:/Users/cesospin/Documents/dev/NU0429001_devsecops_engine/engine_sast/engine_iac/src/infrastructure/entry_points/runner_iac_scan.py",
             "console": "integratedTerminal",
             "env": {
                 "BUILD_BUILDID": "2688",

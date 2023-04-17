@@ -1,4 +1,5 @@
 from enum import Enum
+from engine_sast.engine_iac.src.domain.model.gateways.config_tool_gateway import ConfigToolGateway
 
 
 class CheckovConfigEnum(Enum):
@@ -18,7 +19,7 @@ class CheckovConfigEnum(Enum):
     EXTERNAL_CHECKS_GIT = "external-checks-git"
 
 
-class CheckovConfig:
+class CheckovConfig(ConfigToolGateway):
     dict_confg_file = {}
 
     def __init__(
@@ -84,3 +85,5 @@ class CheckovConfig:
 
         if self.evaluate_variables is not None:
             self.dict_confg_file[CheckovConfigEnum.EVALUATE_VARIABLES.value] = self.evaluate_variables
+
+        return self.dict_confg_file
