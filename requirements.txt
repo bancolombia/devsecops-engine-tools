@@ -10,7 +10,7 @@ flake8
 black
 pre-commit
 PyYAML
-checkov==2.2.229
+checkov==2.3.243
 
 
 

@@ -12,7 +12,9 @@ class CheckovTool(ToolGateway):
         self.checkov_config = checkov_config
 
     def create_config_file(self):
-        with open(self.checkov_config.path_config_file + self.CHECKOV_CONFIG_FILE, "w") as file:
+        with open(
+            self.checkov_config.path_config_file + self.checkov_config.config_file_name + self.CHECKOV_CONFIG_FILE, "w"
+        ) as file:
             yaml.dump(self.checkov_config.dict_confg_file, file)
             file.close()
 
@@ -20,7 +22,7 @@ class CheckovTool(ToolGateway):
         cmd = [
             "checkov",
             "--config-file",
-            self.checkov_config.path_config_file + self.CHECKOV_CONFIG_FILE,
+            self.checkov_config.path_config_file + self.checkov_config.config_file_name + self.CHECKOV_CONFIG_FILE,
         ]
         result = subprocess.run(
             cmd,

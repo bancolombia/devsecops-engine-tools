@@ -1,6 +1,10 @@
 import requests
+import urllib3
 from requests.auth import HTTPBasicAuth
 from multipledispatch import dispatch
+
+
+urllib3.disable_warnings()
 
 
 class AzureDevopsRemoteConfig:

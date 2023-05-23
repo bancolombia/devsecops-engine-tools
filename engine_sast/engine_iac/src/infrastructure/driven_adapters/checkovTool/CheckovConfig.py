@@ -25,6 +25,7 @@ class CheckovConfig(ConfigToolGateway):
     def __init__(
         self,
         path_config_file,
+        config_file_name,
         directories,
         branch=None,
         checks=[],
@@ -39,6 +40,7 @@ class CheckovConfig(ConfigToolGateway):
         skip_download=True,
     ):
         self.path_config_file = path_config_file
+        self.config_file_name = config_file_name
         self.branch = branch
         self.checks = checks
         self.compact = compact

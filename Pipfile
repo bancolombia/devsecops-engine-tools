@@ -15,7 +15,6 @@ flake8 = "*"
 pre-commit = "*"
 black = "*"
 pyyaml = "*"
-checkov = "==2.2.229"
 
 [dev-packages]
 
