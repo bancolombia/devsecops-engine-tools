@@ -3,6 +3,8 @@ import argparse
 import configparser
 import threading
 import queue
+import json
+from prettytable import PrettyTable, DOUBLE_BORDER
 from engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
 from devsecops_engine_utilities.azuredevops.infrastructure.AzureDevopsRemoteConfig import (
     AzureDevopsRemoteConfig,
@@ -61,10 +63,37 @@ def get_inputs_from_config_file():
     )
 
 
-def async_scan(queue, iacScan: IacScan):
+def extract_check_id_checkov(chekov_ouput_json, rules_docs_json: dict, myTable: PrettyTable):
+    check_severity_dict = {"High": 0, "Medium": 0, "Low": 0}
+    count_rows = 0
+    if chekov_ouput_json is not None and "results" in chekov_ouput_json:
+        for vuls in chekov_ouput_json["results"]["failed_checks"]:
+            check_severity_dict[rules_docs_json[vuls["check_id"]]["severity"]] += 1
+            myTable.add_row(
+                [
+                    rules_docs_json[vuls["check_id"]]["severity"],
+                    rules_docs_json[vuls["check_id"]]["checkID"],
+                    vuls["resource"],
+                    vuls["file_path"],
+                ]
+            )
+            count_rows = +1
+    return [check_severity_dict, count_rows]
+
+
+def print_table(myTable: PrettyTable):
+    myTable.align["Severity"] = "l"
+    myTable.align["CheckID"] = "l"
+    myTable.align["Resource"] = "l"
+    myTable.align["guideline"] = "l"
+    myTable.set_style(DOUBLE_BORDER)
+    print(myTable)
+
+
+def async_scan(queue, iacScan: IacScan, rules):
     result = []
     output = iacScan.process()
-    result.append(output)
+    result.append([json.loads(output), rules])
     queue.put(result)
 
 
@@ -104,7 +133,7 @@ def init_engine_azure(
         checkov_run = CheckovTool(checkov_config=checkov_config)
         checkov_run.create_config_file()
         iac_scan = IacScan(checkov_run)
-        t = threading.Thread(target=async_scan, args=(output_queue, iac_scan))
+        t = threading.Thread(target=async_scan, args=(output_queue, iac_scan, data_file_tool["RULES"][rule]))
         t.start()
         threads.append(t)
 
@@ -119,5 +148,7 @@ def init_engine_azure(
         results.extend(result)
 
     # Imprime los resultados
+    myTable = PrettyTable(["Severity", "CheckID", "Resource", "file_path"])
     for i, result in enumerate(results):
-        print(f"Tarea {i+1}: {result}")
+        extract_check_id_checkov(result[0], result[1], myTable)
+    print_table(myTable)
