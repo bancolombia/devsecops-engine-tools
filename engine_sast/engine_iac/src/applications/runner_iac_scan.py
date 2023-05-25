@@ -14,9 +14,7 @@ def main():
             azure_remote_config_path,
             azure_user,
             azure_token,
-            remote_config_checkov_version,
-            remote_config_checkov_rules_docker,
-            remote_config_checkov_rules_k8s,
+            tool,
         ) = (
             get_inputs_from_config_file() or get_inputs_from_cli()
         )
@@ -27,9 +25,7 @@ def main():
             azure_remote_config_path=azure_remote_config_path,
             azure_user=azure_user,
             azure_token=azure_token,
-            remote_config_checkov_version=remote_config_checkov_version,
-            remote_config_checkov_rules_docker=remote_config_checkov_rules_docker,
-            remote_config_checkov_rules_k8s=remote_config_checkov_rules_k8s,
+            tool=tool,
         )
 
     except ValueError as e:

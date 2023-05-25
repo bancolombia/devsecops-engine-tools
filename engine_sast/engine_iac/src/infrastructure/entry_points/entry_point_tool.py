@@ -1,6 +1,8 @@
 import argparse
 import argparse
 import configparser
+import threading
+import queue
 from engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
 from devsecops_engine_utilities.azuredevops.infrastructure.AzureDevopsRemoteConfig import (
     AzureDevopsRemoteConfig,
@@ -24,9 +26,8 @@ def get_inputs_from_cli(args):
     parser.add_argument("--azure_remote_config_path", type=str, required=True, help="")
     parser.add_argument("--azure_user", type=str, required=True, help="")
     parser.add_argument("--azure_token_azure", type=str, required=True, help="")
-    parser.add_argument("--remote_config_checkov_version", type=str, required=False, help="")
-    parser.add_argument("--remote_config_checkov_rules_docker", type=str, required=True, help="")
-    parser.add_argument("--remote_config_checkov_rules_k8s", type=str, required=True, help="")
+    parser.add_argument("--tool", type=str, required=False, help="")
+
     args = parser.parse_args()
     return (
         args.azure_organization,
@@ -35,9 +36,7 @@ def get_inputs_from_cli(args):
         args.azure_remote_config_path,
         args.azure_user,
         args.azure_token_azure,
-        args.remote_config_checkov_version,
-        args.remote_config_checkov_rules_docker,
-        args.remote_config_checkov_rules_k8s,
+        args.tool,
     )
 
 
@@ -50,13 +49,7 @@ def get_inputs_from_config_file():
     azure_remote_config_path = config.get("enginesast.engineiac", "azure_remote_config_path", fallback=None)
     azure_user = config.get("enginesast.engineiac", "azure_user", fallback=None)
     azure_token = config.get("enginesast.engineiac", "azure_token", fallback=None)
-    remote_config_checkov_version = config.get("enginesast.engineiac", "remote_config_checkov_version", fallback=None)
-    remote_config_checkov_rules_docker = config.get(
-        "enginesast.engineiac", "remote_config_checkov_rules_docker", fallback=None
-    )
-    remote_config_checkov_rules_k8s = config.get(
-        "enginesast.engineiac", "remote_config_checkov_rules_k8s", fallback=None
-    )
+    tool = config.get("enginesast.engineiac", "tool", fallback=None)
     return (
         azure_organization,
         azure_project,
@@ -64,57 +57,67 @@ def get_inputs_from_config_file():
         azure_remote_config_path,
         azure_user,
         azure_token,
-        remote_config_checkov_version,
-        remote_config_checkov_rules_docker,
-        remote_config_checkov_rules_k8s,
+        tool,
     )
 
 
+def async_scan(queue, iacScan: IacScan):
+    result = []
+    output = iacScan.process()
+    result.append(output)
+    queue.put(result)
+
+
 def init_engine_azure(
-    azure_organization,
-    azure_project,
-    azure_remote_config_repo,
-    azure_remote_config_path,
-    azure_user,
-    azure_token,
-    remote_config_checkov_version,
-    remote_config_checkov_rules_docker,
-    remote_config_checkov_rules_k8s,
+    azure_organization, azure_project, azure_remote_config_repo, azure_remote_config_path, azure_user, azure_token, tool
 ):
     pipeline_config = PipelineConfig()
     pipeline = get_pipeline_config(pipeline_config=pipeline_config)
     azure_devops_remote_config = AzureDevopsRemoteConfig(
-        api_version=7.0, verify_ssl=False, organization=azure_organization, project=azure_project
+        api_version=7.0,
+        verify_ssl=False,
+        organization=azure_organization,
+        project=azure_project,
+        repository_id=azure_remote_config_repo,
+        path_file=azure_remote_config_path,
+        user=azure_user,
+        token=azure_token,
     )
-    azure_devops_remote_config.repository_id = azure_remote_config_repo
-    azure_devops_remote_config.path_file = azure_remote_config_path
-    azure_devops_remote_config.user = azure_user
-    azure_devops_remote_config.token = azure_token
     data_file = azure_devops_remote_config.get_source_item()
-    data_file = data_file.json()
-    checkov_config_docker_scan = CheckovConfig(
-        path_config_file="",
-        config_file_name=remote_config_checkov_rules_docker,
-        checks=data_file[remote_config_checkov_rules_docker],
-        soft_fail=False,
-        directories=pipeline.default_working_directory,
-    )
-    checkov_config_docker_scan.create_config_dict()
-    checkov_run_docker = CheckovTool(checkov_config=checkov_config_docker_scan)
-    checkov_run_docker.create_config_file()
-    iac_scan_docker_scan = IacScan(checkov_run_docker)
-    iac_scan_docker_scan.process()
+    data_file_tool = data_file.json()[tool]
 
-    checkov_config_k8s_scan = CheckovConfig(
-        path_config_file="",
-        config_file_name=remote_config_checkov_rules_k8s,
-        checks=data_file[remote_config_checkov_rules_k8s],
-        soft_fail=False,
-        directories=pipeline.default_working_directory,
-    )
+    # Crea una cola para almacenar las salidas de las tareas
+    output_queue = queue.Queue()
 
-    checkov_config_k8s_scan.create_config_dict()
-    checkov_run_k8s = CheckovTool(checkov_config=checkov_config_k8s_scan)
-    checkov_run_k8s.create_config_file()
-    iac_scan_k8s_scan = IacScan(checkov_run_k8s)
-    iac_scan_k8s_scan.process()
+    # Crea una lista para almacenar los hilos
+    threads = []
+
+    for rule in data_file_tool["RULES"]:
+        checkov_config = CheckovConfig(
+            path_config_file="",
+            config_file_name=rule,
+            checks=list(data_file_tool["RULES"][rule].keys()),
+            soft_fail=False,
+            directories=pipeline.default_working_directory,
+        )
+        checkov_config.create_config_dict()
+        checkov_run = CheckovTool(checkov_config=checkov_config)
+        checkov_run.create_config_file()
+        iac_scan = IacScan(checkov_run)
+        t = threading.Thread(target=async_scan, args=(output_queue, iac_scan))
+        t.start()
+        threads.append(t)
+
+    # Espera a que todos los hilos terminen
+    for t in threads:
+        t.join()
+
+    # Recopila las salidas de las tareas
+    results = []
+    while not output_queue.empty():
+        result = output_queue.get()
+        results.extend(result)
+
+    # Imprime los resultados
+    for i, result in enumerate(results):
+        print(f"Tarea {i+1}: {result}")
