@@ -4,14 +4,12 @@ import configparser
 import threading
 import queue
 import json
+import os
+import pyfiglet
 from prettytable import PrettyTable, DOUBLE_BORDER
 from engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
 from devsecops_engine_utilities.azuredevops.infrastructure.AzureDevopsRemoteConfig import (
     AzureDevopsRemoteConfig,
-)
-from engine_sast.engine_iac.src.domain.model.PipelineConfig import PipelineConfig
-from engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_pipeline_config import (
-    get_pipeline_config,
 )
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import CheckovTool
@@ -81,6 +79,11 @@ def extract_check_id_checkov(chekov_ouput_json, rules_docs_json: dict, myTable: 
     return [check_severity_dict, count_rows]
 
 
+def print_logo():
+    result = pyfiglet.figlet_format("DevSecOps Bancolombia", font="slant")
+    print(result)
+
+
 def print_table(myTable: PrettyTable):
     myTable.align["Severity"] = "l"
     myTable.align["CheckID"] = "l"
@@ -100,8 +103,9 @@ def async_scan(queue, iacScan: IacScan, rules):
 def init_engine_azure(
     azure_organization, azure_project, azure_remote_config_repo, azure_remote_config_path, azure_user, azure_token, tool
 ):
-    pipeline_config = PipelineConfig()
-    pipeline = get_pipeline_config(pipeline_config=pipeline_config)
+    print_logo()
+    # pipeline_config = PipelineConfig()
+    # pipeline = get_pipeline_config(pipeline_config=pipeline_config)
     azure_devops_remote_config = AzureDevopsRemoteConfig(
         api_version=7.0,
         verify_ssl=False,
@@ -127,7 +131,7 @@ def init_engine_azure(
             config_file_name=rule,
             checks=list(data_file_tool["RULES"][rule].keys()),
             soft_fail=False,
-            directories=pipeline.default_working_directory,
+            directories=os.environ["ARTIFACT_PATH"],
         )
         checkov_config.create_config_dict()
         checkov_run = CheckovTool(checkov_config=checkov_config)

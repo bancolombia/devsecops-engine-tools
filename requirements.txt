@@ -12,6 +12,7 @@ pre-commit
 PyYAML
 checkov==2.3.243
 pyfiglet==0.7
+prettytable
 
 
 

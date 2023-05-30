@@ -19,14 +19,13 @@ class CheckovTool(ToolGateway):
             file.close()
 
     def run_tool(self):
-        cmd = [
-            "checkov",
-            "--config-file",
-            self.checkov_config.path_config_file + self.checkov_config.config_file_name + self.CHECKOV_CONFIG_FILE,
-        ]
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            shell=True,
+        command = (
+            "checkov --config-file "
+            + self.checkov_config.path_config_file
+            + self.checkov_config.config_file_name
+            + self.CHECKOV_CONFIG_FILE
         )
-        return result.stdout.decode()
+        result = subprocess.run(command, capture_output=True, text=True, shell=True)
+        output = result.stdout.strip()
+        # error = result.stderr.strip()
+        return output
