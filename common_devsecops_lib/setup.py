@@ -32,6 +32,8 @@ setuptools.setup(
         "devsecops_engine_utilities.github",
         "devsecops_engine_utilities.github.infrastructure",
         "devsecops_engine_utilities.github.models",
+        "devsecops_engine_utilities.input_validations",
+        "devsecops_engine_utilities.utils",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

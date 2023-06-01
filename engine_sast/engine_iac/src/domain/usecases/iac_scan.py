@@ -6,5 +6,4 @@ class IacScan:
         self.tool_run = tool_run
 
     def process(self):
-        print("Init Use case iac_scan")
         return self.tool_run.run_tool()

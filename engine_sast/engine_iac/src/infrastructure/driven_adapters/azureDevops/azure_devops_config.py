@@ -1,22 +1,32 @@
-from devsecops_engine_utilities.azuredevops.infrastructure.AzureDevopsRemoteConfig import (
-    AzureDevopsRemoteConfig,
-)
-
+import json
+from azure.devops.connection import Connection
+from msrest.authentication import BasicTokenAuthentication
 from engine_sast.engine_iac.src.domain.model.gateways.remote_config_gateway import RemoteConfigGateway
+from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
+    SystemVariables,
+)
 
 
 class AzureDevopsIntegration(RemoteConfigGateway):
-    def get_remote_config(self, config_remote: AzureDevopsRemoteConfig):
-        self.azure_devops_remote_config = AzureDevopsRemoteConfig(
-            api_version=config_remote.api_version, verify_ssl=False
-        )
-        return self.azure_devops_remote_config.get_source_item(
-            api_version=config_remote.api_version,
-            verify_ssl=config_remote.verify_ssl,
-            organization=config_remote.organization,
-            project=config_remote.project,
-            repository_id=config_remote.repository_id,
-            path_file=config_remote.path_file,
-            user=config_remote.user,
-            token=config_remote.token,
-        )
+    def get_azure_connection(self):
+        try:
+            system_AccessToken = SystemVariables.System_AccessToken.value()
+            system_TeamFoundationCollectionUri = SystemVariables.System_TeamFoundationCollectionUri.value()
+            credentials = BasicTokenAuthentication({"access_token": system_AccessToken})
+            self.connection = Connection(base_url=system_TeamFoundationCollectionUri, creds=credentials)
+            return self.connection
+        except Exception as e:
+            raise Exception("Error al obtener la conexión de Azure DevOps: " + str(e))
+
+    def get_remote_json_config(self, remote_config_repo, remote_config_path):
+        try:
+            git_client = self.connection.clients.get_git_client()
+            system_TeamProjectId = SystemVariables.System_TeamProjectId.value()
+            file_content = git_client.get_item_text(
+                repository_id=remote_config_repo, path=remote_config_path, project=system_TeamProjectId
+            )
+            data = json.loads(b"".join(file_content).decode("utf-8"))
+            return data
+        except Exception as e:
+            # Arrojar una excepción personalizada
+            raise Exception("Error al obtener el archivo de configuración remoto: " + str(e))
