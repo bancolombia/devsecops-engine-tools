@@ -1,6 +1,6 @@
 variables:
-  url_repository_artifactory_pdn: https://artifactory.apps.bancolombia.com/api/pypi/pypi-bancolombia
-  url_repository_artifactory_qa: https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/qa_artifact
+  url_repository_artifactory_pdn: 'https://artifactory.apps.bancolombia.com/api/pypi/pypi-bancolombia'
+  url_repository_artifactory_qa: 'https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/qa_artifact'
 
 steps:
 - task: UsePythonVersion@0
