@@ -1,19 +1,24 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
 
+variables:
+  - name: system.debug 
+    value: 'false'
+  - group: Artifactory
+  
 trigger:
-- trunk
+  branches:
+   include:
+   - trunk
+   - feature/*
 
-pool:
-  vmImage: ubuntu-latest
+resources:
+- repo: self
+  clean: true 
+  fetchDepth: 1
+
+queue:
+  name: Release-cloud
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- template: pipelines/build.yml
+- template: pipelines/deploy.yml
