@@ -6,7 +6,7 @@ steps:
     versionSpec: '>= 3.6'
   enabled: false
   
-- task: SonarSource.sonarqube.15B84CA1-B62F-4A2A-A403-89B77A063157.SonarQubePrepare@4
+- task: SonarQubePrepare@4
   displayName: 'Prepare analysis on SonarQube'
   inputs:
     SonarQube: SonarQube
@@ -17,10 +17,9 @@ steps:
     cliProjectVersion: $(Build.BuildNumber)
     cliSources: $(componentName)
     extraProperties: |
-      sonar.branch.name=$(Build.SourceBranchName)
       sonar.verbose=true
       sonar.sources=$(System.DefaultWorkingDirectory)/$(componentName)
-      sonar.python.coverage.reportPaths =coverage.xml
+      sonar.python.coverage.reportPaths =$(System.DefaultWorkingDirectory)/$(componentName)/coverage.xml
       sonar.language=py
       sonar.exclusion=**/pipelines/**,**/test/**,**/example/**,**setup.py/**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
       sonar.coverage.exclusions = **/pipelines/**,**/test/**,**/example/**,**setup.py/**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
@@ -34,7 +33,7 @@ steps:
     source $(venv)/bin/activate
     python -m pip install --upgrade pip -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
     python -m pip install -r requirements.txt -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
-    python -m pytest -x --cov=bunker --cov-config=.coveragerc
+    python -m pytest -x --cov=$(System.DefaultWorkingDirectory)/$(componentName) --cov-config=.coveragerc
     python -m coverage report -m
     python -m coverage xml
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
@@ -56,10 +55,10 @@ steps:
     pathToSources: $(System.DefaultWorkingDirectory)/$(componentName)
   continueOnError: false
 
-- task: SonarSource.sonarqube.6D01813A-9589-4B15-8491-8164AEB38055.SonarQubeAnalyze@4
+- task: SonarQubeAnalyze@4
   displayName: 'Run Code Analysis'
 
-- task: SimondeLang.sonar-buildbreaker.sonar-buildbreaker.sonar-buildbreaker@8
+- task: sonar-buildbreaker@8
   displayName: 'Break build on quality gate failure'
   inputs:
     SonarQube: SonarQube
