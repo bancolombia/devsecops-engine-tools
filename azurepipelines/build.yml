@@ -29,8 +29,8 @@ steps:
   displayName: install python basics
 
 - script: |
-    python3 -m virtualenv venv
-    source venv/bin/activate
+    python3 -m virtualenv _venv
+    source _venv/bin/activate
     python -m pip install --upgrade pip -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
     python -m pip install -r requirements.txt -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
     python -m pytest -x --cov=$(System.DefaultWorkingDirectory)/$(componentName) --cov-config=.coveragerc
