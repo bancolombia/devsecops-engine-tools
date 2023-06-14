@@ -1,7 +1,3 @@
-variables:
-  url_repository_artifactory_pdn: 'https://artifactory.apps.bancolombia.com/api/pypi/pypi-bancolombia'
-  url_repository_artifactory_qa: 'https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/qa_artifact'
-
 steps:
 - task: UsePythonVersion@0
   displayName: 'Use Python'
@@ -12,8 +8,8 @@ steps:
 - script: |
     python3 -m pip install --upgrade pip -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
     python3 -m pip install setuptools virtualenv wheel -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
-    python3 -m virtualenv $(venv)
-    source $(venv)/bin/activate
+    python3 -m virtualenv _venv
+    source _venv/bin/activate
     python3 -m pip install -r requirements.txt -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
     echo "[distutils]" >> .pypirc
     echo "index-servers = local" >> .pypirc

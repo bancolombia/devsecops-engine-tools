@@ -3,8 +3,12 @@ name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
 variables:
   - name: system.debug 
     value: 'false'
+  - name: url_repository_artifactory_pdn
+    value: 'https://artifactory.apps.bancolombia.com/api/pypi/pypi-bancolombia'
+  - name: url_repository_artifactory_qa
+    value: 'https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/qa_artifact'
   - group: Artifactory
-  
+
   
 trigger:
   branches:
