@@ -1,0 +1,64 @@
+steps:
+
+- task: UsePythonVersion@0
+  displayName: 'Use Python'
+  inputs:
+    versionSpec: '>= 3.6'
+  enabled: false
+  
+- task: SonarQubePrepare@4
+  displayName: 'Prepare analysis on SonarQube'
+  inputs:
+    SonarQube: SonarQube
+    scannerMode: CLI
+    configMode: manual
+    cliProjectKey: $(Build.Repository.Name)_$(componentName)
+    cliProjectName: $(Build.Repository.Name)_$(componentName)
+    cliProjectVersion: $(Build.BuildNumber)
+    cliSources: $(componentName)
+    extraProperties: |
+      sonar.verbose=true
+      sonar.sources=$(System.DefaultWorkingDirectory)/$(componentName)
+      sonar.python.coverage.reportPaths =$(System.DefaultWorkingDirectory)/$(componentName)/coverage.xml
+      sonar.language=py
+      sonar.exclusion=**/pipelines/**,**/test/**,**/example/**,**setup.py/**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
+      sonar.coverage.exclusions = **/pipelines/**,**/test/**,**/example/**,**setup.py/**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
+- script:  |
+    python3 -m pip install --upgrade pip -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+    python3 -m pip install setuptools virtualenv wheel -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+  displayName: install python basics
+
+- script: |
+    python3 -m virtualenv _venv
+    source _venv/bin/activate
+    python -m pip install --upgrade pip -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+    python -m pip install -r requirements.txt -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+    python -m pytest -x --cov=$(System.DefaultWorkingDirectory)/$(componentName) --cov-config=.coveragerc
+    python -m coverage report -m
+    python -m coverage xml
+  workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
+  displayName: 'Run Unit Test'
+
+
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results **/out*.xml'
+  inputs:
+    testResultsFiles: '**/out*.xml'
+    searchFolder: $(System.DefaultWorkingDirectory)/$(componentName)
+
+
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage from coverage.xml'
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: coverage.xml
+    pathToSources: $(System.DefaultWorkingDirectory)/$(componentName)
+  continueOnError: false
+
+- task: SonarQubeAnalyze@4
+  displayName: 'Run Code Analysis'
+
+- task: sonar-buildbreaker@8
+  displayName: 'Break build on quality gate failure'
+  inputs:
+    SonarQube: SonarQube
