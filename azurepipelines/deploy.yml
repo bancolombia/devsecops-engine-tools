@@ -1,6 +1,6 @@
-parameters:
-   url_repository_artifactory_pdn: https://artifactory.apps.bancolombia.com/api/pypi/pypi-bancolombia
-   url_repository_artifactory_qa: https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/qa_artifact
+variables:
+  url_repository_artifactory_pdn: https://artifactory.apps.bancolombia.com/api/pypi/pypi-bancolombia
+  url_repository_artifactory_qa: https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/qa_artifact
 
 steps:
 - task: UsePythonVersion@0
@@ -19,9 +19,9 @@ steps:
     echo "index-servers = local" >> .pypirc
     echo "[local]" >> .pypirc
     if [ "$(Build.SourceBranch)" == "refs/heads/trunk" ]; then
-      echo "repository:${{url_repository_artifactory_pdn}}" >> .pypirc
+      echo "repository:$(url_repository_artifactory_pdn)" >> .pypirc
     else
-      echo "repository:${{url_repository_artifactory_qa}}" >> .pypirc
+      echo "repository:$(url_repository_artifactory_qa)" >> .pypirc
     fi
     echo "username: $(Artifactory.user)" >> .pypirc
     echo "password: $(Artifactory.Password)" >> .pypirc

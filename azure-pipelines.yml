@@ -5,6 +5,7 @@ variables:
     value: 'false'
   - group: Artifactory
   
+  
 trigger:
   branches:
    include:
