@@ -4,6 +4,7 @@
 .pytest*
 *pycache*
 *_pycache_*
+*test*
 
 #Distribucioes de lib
 **dist**
