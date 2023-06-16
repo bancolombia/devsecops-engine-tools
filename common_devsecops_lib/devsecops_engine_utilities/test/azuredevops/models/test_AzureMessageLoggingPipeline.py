@@ -5,9 +5,9 @@ from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline i
 @pytest.mark.parametrize(
     "pipeline_result, expected_output",
     [
-        (AzureMessageResultPipeline.Failed, "##vso[task.complete result=Failed;]DONE"),
-        (AzureMessageResultPipeline.SucceededWithIssues, "##vso[task.complete result=SucceededWithIssues;]DONE"),
-        (AzureMessageResultPipeline.Succeeded, "##vso[task.complete result=Succeeded;]DONE"),
+        (AzureMessageResultPipeline.Failed, '##vso[task.complete result=Failed;]DONE'),
+        (AzureMessageResultPipeline.SucceededWithIssues, '##vso[task.complete result=SucceededWithIssues;]DONE'),
+        (AzureMessageResultPipeline.Succeeded, '##vso[task.complete result=Succeeded;]DONE'),
     ],
 )
 def test_azure_message_result_pipeline(pipeline_result, expected_output):

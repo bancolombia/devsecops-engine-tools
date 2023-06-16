@@ -4,6 +4,6 @@ from enum import Enum
 
 
 class AzureMessageResultPipeline(Enum):
-    Failed = '"##vso[task.complete result=Failed;]DONE"'
-    SucceededWithIssues = '"##vso[task.complete result=SucceededWithIssues;]DONE"'
-    Succeeded = '"##vso[task.complete result=Succeeded;]DONE"'
+    Failed = '##vso[task.complete result=Failed;]DONE'
+    SucceededWithIssues = '##vso[task.complete result=SucceededWithIssues;]DONE'
+    Succeeded = '##vso[task.complete result=Succeeded;]DONE'
