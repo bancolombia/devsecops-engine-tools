@@ -1,2 +1,5 @@
-multipledispatch
-pyfiglet
+multipledispatch==0.6.0
+pyfiglet==0.7
+setuptools==67.6.0
+wheel==0.40.0
+pipenv==2023.3.20
