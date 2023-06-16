@@ -10,7 +10,7 @@
 **dist**
 **.egg-info/
 *.pyc
-**_pycache_*¨*
+**_pycache_**
 
 #Ignorar cualquir archivo TXT
 **.txt

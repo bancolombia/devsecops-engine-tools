@@ -1,5 +1,4 @@
 import setuptools
-from devsecops_engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_VERSION
 
 
 def get_readme():
@@ -14,7 +13,7 @@ def get_requirements():
 
 setuptools.setup(
     name="devsecops_engine_sast",
-    version=DEVSECOPS_ENGINE_UTILITIES_VERSION,
+    version="0.0.1",
     author="Bancolombia devsecops Team ",
     author_email="devsecops@bancolombia.com.co",
     description="tool sast for engine devsecops",
@@ -22,7 +21,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/bancolombia/NU0429001_devsecops_engine",
     package_dir={
-        "devsecops_engine_sast": "devsecops_engine_sast",
+        "devsecops_engine_tool": "devsecops_engine_tool",
     },
     packages=[
         "engine_sast",

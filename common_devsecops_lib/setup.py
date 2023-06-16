@@ -1,5 +1,4 @@
 import setuptools
-from devsecops_engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_VERSION
 
 
 def get_readme():
@@ -14,7 +13,7 @@ def get_requirements():
 
 setuptools.setup(
     name="devsecops_engine_utilities",
-    version=DEVSECOPS_ENGINE_UTILITIES_VERSION,
+    version="0.0.1",
     author="Bancolombia devsecops Team ",
     author_email="devsecops@bancolombia.com.co",
     description="Common utilities tools for engine devsecops",
