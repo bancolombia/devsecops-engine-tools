@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+    
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            //"program": "C:/Users/cesospin/Documents/dev/NU0429001_devsecops_engine/engine_sast/engine_iac/src/applications/runner_iac_scan.py",
+            "program": "C:/Users/cesospin/Documents/dev/NU0429001_devsecops_engine/test2.py",
+            "console": "integratedTerminal",
+            "env": {
+                "BUILD_BUILDID": "2688",
+                "BUILD_DEFINITIONNAME": "NU0051001_Engagement_Services_MR",
+                "BUILD_REPOSITORY_ID": "57a0ece4-aa98-4a6a-a1f3-a17b2207fb6f",
+                "BUILD_REPOSITORY_NAME": "NU0051001_Engagement_Services_MR",
+                "BUILD_SOURCEBRANCH": "refs/heads/master",
+                "BUILD_STAGINGDIRECTORY" : "BUILD_STAGINGDIRECTORY",
+                "ARTIFACT_PATH": "C:/Users/cesospin/Documents/dev/NU0051001_Engagement_Services_MR/ds_ms_alias_identity/",
+                "BUILD_SOURCEBRANCHMESSAGE": "",
+                "BUILD_SOURCEBRANCHNAME": "master",
+                "BUILD_SOURCEVERSION": "2d545969a76516156d76e1c88f8e699537e889bd",
+                "BUILD_ARTIFACTSTAGINGDIRECTORY": "/tmp",
+                "SYSTEM_ACCESSTOKEN_LOCAL": "token",
+                "SYSTEM_DEFAULTWORKINGDIRECTORY": "C:/Users/cesospin/Documents/dev/NU0051001_Engagement_Services_MR/ds_ms_alias_identity/",
+                "SYSTEM_DEFINITIONID": "1",
+                "SYSTEM_ACCESSTOKEN" : "SYSTEM_ACCESSTOKEN",
+                "SYSTEM_TEAMFOUNDATIONCOLLECTIONURI": "https://grupobancolombia.visualstudio.com/",
+                "SYSTEM_TEAMPROJECTID": "Vicepresidencia Servicios de Tecnología"
+            }
+        }
+    ]
+}
