@@ -36,7 +36,7 @@ class CmdbUserCase:
         return request
 
     def get_code_app(self, engagement_name: str):
-        m = re.search("((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_",
+        m = re.search(r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_",
                       engagement_name, re.IGNORECASE)
         if m is None:
             logger.error(f"Engagement name {engagement_name} not match")
