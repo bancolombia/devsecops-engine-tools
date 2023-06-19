@@ -25,3 +25,4 @@ htmlcov
 .coverage
 Pipfile
 Pipfile-lock
+prueba.py
