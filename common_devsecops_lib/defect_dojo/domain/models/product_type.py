@@ -1,6 +1,6 @@
 import dataclasses
 from typing import List
-from devsecops_lib.helper.dataclass_classmethod import FromDictMixin
+from helper.dataclass_classmethod import FromDictMixin
 
 
 @dataclasses.dataclass

@@ -1,10 +1,10 @@
-from devsecops_lib.vultracker.domain.request_objects.import_scan\
+from defect_dojo.domain.request_objects.import_scan\
     import ImportScanRequest
-from devsecops_lib.vultracker.domain.serializers.import_scan\
+from defect_dojo.domain.serializers.import_scan\
     import ImportScanSerializer
-from devsecops_lib.vultracker.domain.user_case.cmdb\
+from defect_dojo.domain.user_case.cmdb\
      import CmdbUserCase
-from devsecops_lib.vultracker.infraestructure.driver_adapters.cmdb\
+from defect_dojo.infraestructure.driver_adapters.cmdb\
     import CmdbRestConsumer
 
 

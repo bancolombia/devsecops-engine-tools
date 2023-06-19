@@ -1,16 +1,16 @@
 from marshmallow import ValidationError
-from devsecops_lib.helper.logger_info import MyLogger
-from devsecops_lib.vultracker.infraestructure.driver_adapters.\
+from helper.logger_info import MyLogger
+from defect_dojo.infraestructure.driver_adapters.\
     import_scan import ImportScanRestConsumer
-from devsecops_lib.vultracker.infraestructure.driver_adapters.\
+from defect_dojo.infraestructure.driver_adapters.\
     product_type import ProductTypeRestConsumer
-from devsecops_lib.vultracker.infraestructure.driver_adapters.\
+from defect_dojo.infraestructure.driver_adapters.\
     product import ProductRestConsumer
-from devsecops_lib.vultracker.infraestructure.driver_adapters.\
+from defect_dojo.infraestructure.driver_adapters.\
     scan_configurations import ScanConfigrationRestConsumer
-from devsecops_lib.vultracker.domain.request_objects.import_scan\
+from defect_dojo.domain.request_objects.import_scan\
     import ImportScanRequest
-from devsecops_lib.vultracker.domain.user_case.import_scan import ImportScanUserCase
+from defect_dojo.domain.user_case.import_scan import ImportScanUserCase
 logger = MyLogger.__call__().get_logger()
 
 

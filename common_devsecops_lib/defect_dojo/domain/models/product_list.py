@@ -1,7 +1,7 @@
 import dataclasses
 from typing import List
-from devsecops_lib.helper.dataclass_classmethod import FromDictMixin
-from devsecops_lib.vultracker.domain.models.product import Product
+from helper.dataclass_classmethod import FromDictMixin
+from defect_dojo.domain.models.product import Product
 
 
 @dataclasses.dataclass

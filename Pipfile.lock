@@ -237,7 +237,7 @@
             "hashes": [
                 "sha256:0eeca7d4adc92e68bb3bcfde38c2c93533b3778a919a27a6f406fa870ac918db"
             ],
-            "path": "./common_devsecops_lib/dist/devsecops_engine_utilities-0.0.1-py3-none-any.whl",
+            "path": "./common_defect_dojo.dist/devsecops_engine_utilities-0.0.1-py3-none-any.whl",
             "version": "==0.0.1"
         },
         "distlib": {

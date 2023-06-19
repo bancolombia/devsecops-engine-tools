@@ -1,8 +1,8 @@
 import re
-from devsecops_lib.vultracker.infraestructure.driver_adapters.cmdb import CmdbRestConsumer
-from devsecops_lib.vultracker.domain.request_objects.import_scan import ImportScanRequest
-from devsecops_lib.helper.validation_error import ValidationError
-from devsecops_lib.helper.logger_info import MyLogger
+from defect_dojo.infraestructure.driver_adapters.cmdb import CmdbRestConsumer
+from defect_dojo.domain.request_objects.import_scan import ImportScanRequest
+from helper.validation_error import ValidationError
+from helper.logger_info import MyLogger
 logger = MyLogger.__call__().get_logger()
 
 product_type_name_map = { 

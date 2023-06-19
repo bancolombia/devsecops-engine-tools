@@ -1,12 +1,12 @@
 import requests
 import json
-from devsecops_lib.helper.logger_info import MyLogger
-from devsecops_lib.helper.validation_error import ValidationError
-from devsecops_lib.vultracker.domain.request_objects.import_scan\
+from helper.logger_info import MyLogger
+from helper.validation_error import ValidationError
+from defect_dojo.domain.request_objects.import_scan\
     import ImportScanRequest
-from devsecops_lib.vultracker.domain.models.scan_configuration\
+from defect_dojo.domain.models.scan_configuration\
     import ScanConfiguration
-from devsecops_lib.vultracker.infraestructure.driver_adapters.\
+from defect_dojo.infraestructure.driver_adapters.\
     settings.settings import VERIFY_CERTIFICATE
 
 logger = MyLogger.__call__().get_logger()

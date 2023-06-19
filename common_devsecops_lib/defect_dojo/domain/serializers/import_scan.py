@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields, post_load, validate
-from devsecops_lib.vultracker.domain.request_objects.import_scan import ImportScanRequest
+from defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 list_scan_type = [
     "Acunetix Scan",
     "Acunetix360 Scan",
