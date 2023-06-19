@@ -18,7 +18,7 @@ trigger:
 
 resources:
 - repo: self
-  clean: true 
+  clean: true
   fetchDepth: 1
 
 queue:
