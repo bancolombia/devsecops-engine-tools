@@ -1,0 +1,30 @@
+steps:
+- task: UsePythonVersion@0
+  displayName: 'Use Python'
+  inputs:
+    versionSpec: '>= 3.6'
+  enabled: false
+
+- script: |
+    python3 -m pip install --upgrade pip -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+    python3 -m pip install setuptools virtualenv wheel -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+    python3 -m virtualenv _venv
+    source _venv/bin/activate
+    python -m pip install -r requirements.txt -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+    echo "[distutils]" >> .pypirc
+    echo "index-servers = local" >> .pypirc
+    echo "[local]" >> .pypirc
+    if [ "$(Build.SourceBranch)" == "refs/heads/trunk" ]; then
+      echo "repository:$(url_repository_artifactory_pdn)" >> .pypirc
+    else
+      echo "repository:$(url_repository_artifactory_qa)" >> .pypirc
+    fi
+    echo "username: $(Artifactory.user)" >> .pypirc
+    echo "password: $(Artifactory.Password)" >> .pypirc
+    cp .pypirc $HOME
+    python setup.py bdist_wheel upload -r local
+    python setup.py sdist upload -r local
+  workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
+  displayName: 'Artifact creation and upload'
+
+

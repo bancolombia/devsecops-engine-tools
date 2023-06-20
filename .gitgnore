@@ -4,16 +4,17 @@
 .pytest*
 *pycache*
 *_pycache_*
-DO  *.pytest*
-.env
-burp*
+*test*
 
-#Ignorar rootCA
-rootCA*
-BurpSuite.pem
+#Distribucioes de lib
+**dist**
+**.egg-info/
+*.pyc
+**_pycache_**
 
 #Ignorar cualquir archivo TXT
-#*.txt
+**.txt
+*.pyc
 data
 
 #Archivos de Pruebas
@@ -23,5 +24,4 @@ out_report.xml
 htmlcov
 .coverage
 Pipfile
-
-jwt_keys
+Pipfile-lock
