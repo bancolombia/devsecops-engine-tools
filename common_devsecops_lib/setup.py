@@ -24,6 +24,7 @@ setuptools.setup(
         "devsecops_engine_utilities": "devsecops_engine_utilities",
     },
     packages=[
+        "defect_dojo",
         "devsecops_engine_utilities",
         "devsecops_engine_utilities.azuredevops",
         "devsecops_engine_utilities.azuredevops.infrastructure",
