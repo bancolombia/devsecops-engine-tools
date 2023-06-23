@@ -36,7 +36,6 @@ steps:
     python -m pytest -x --cov=$(System.DefaultWorkingDirectory)/$(componentName) --cov-config=.coveragerc
     python -m coverage report -m
     python -m coverage xml
-  workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Run Unit Test'
 
 
@@ -44,7 +43,7 @@ steps:
   displayName: 'Publish Test Results **/out*.xml'
   inputs:
     testResultsFiles: '**/out*.xml'
-    searchFolder: $(System.DefaultWorkingDirectory)
+    searchFolder: $(System.DefaultWorkingDirectory)/$(componentName)
 
 
 - task: PublishCodeCoverageResults@1
