@@ -33,7 +33,7 @@ steps:
     source _venv/bin/activate
     python -m pip install --upgrade pip -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
     python -m pip install -r requirements.txt -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
-    python -m pytest -x --cov=$(System.DefaultWorkingDirectory) --cov-config=.coveragerc
+    python -m pytest -x --cov=$(System.DefaultWorkingDirectory)/$(componentName) --cov-config=.coveragerc
     python -m coverage report -m
     python -m coverage xml
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
