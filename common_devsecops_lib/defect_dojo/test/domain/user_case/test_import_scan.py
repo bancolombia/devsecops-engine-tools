@@ -31,7 +31,7 @@ def import_scan_request_instance(par_scan_type) -> ImportScanRequest:
         host_vultracker="http://localhost:8000",
         scan_type=par_scan_type,
         engagement_name="test engagement name",
-        file="defect_dojo/tests/files/xray_scan.json",
+        file="defect_dojo/test/files/xray_scan.json",
         tags="evc",
     )
     return request
@@ -57,7 +57,7 @@ def test_user_case_creation():
 
 def mock_rest_import_scan(file_path):
     mock_import_scan = MagicMock()
-    with open(f"defect_dojo/tests/files/{file_path}", "r") as fp:
+    with open(f"defect_dojo/test/files/{file_path}", "r") as fp:
         data = json.load(fp)
         import_scan_object = ImportScanRequest.from_dict(data)
         assert import_scan_object.scan_type == data["scan_type"]

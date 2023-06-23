@@ -3,7 +3,7 @@ from defect_dojo.domain.models.product_list import ProductList
 
 
 def test_product_from_mixin():
-    with open("defect_dojo/tests/files/response_product.json",
+    with open("defect_dojo/test/files/response_product.json",
               "r") as fp:
         data = json.load(fp)
         product_obj = ProductList.from_dict(data)

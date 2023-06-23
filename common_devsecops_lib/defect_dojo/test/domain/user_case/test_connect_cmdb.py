@@ -43,7 +43,7 @@ def test_execute():
         "host_vultracker": "http://localhost:8000",
         "scan_type": "JFrog Xray Scan",
         "engagement_name": "NU0429001_Acceptance Tests",
-        "file": "defect_dojo/tests/files/xray_scan.json",
+        "file": "defect_dojo/test/files/xray_scan.json",
         "tags": "evc",
     }
     request: ImportScanRequest = ImportScanSerializer().load(request)
