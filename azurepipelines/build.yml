@@ -44,7 +44,7 @@ steps:
   displayName: 'Publish Test Results **/out*.xml'
   inputs:
     testResultsFiles: '**/out*.xml'
-    searchFolder: $(System.DefaultWorkingDirectory)/$(componentName)
+    searchFolder: $(System.DefaultWorkingDirectory)
 
 
 - task: PublishCodeCoverageResults@1
