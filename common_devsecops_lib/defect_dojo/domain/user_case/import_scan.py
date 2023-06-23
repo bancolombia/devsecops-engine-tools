@@ -1,4 +1,3 @@
-import pprint
 import re
 from helper.validation_error import ValidationError
 from helper.logger_info import MyLogger
@@ -12,11 +11,6 @@ from defect_dojo.infraestructure.driver_adapters.\
     scan_configurations import ScanConfigrationRestConsumer
 from defect_dojo.domain.request_objects.import_scan\
     import ImportScanRequest
-from defect_dojo.domain.models.product_type import ProductType
-from defect_dojo.domain.models.product_type_list import ProductTypeList
-from defect_dojo.domain.models.product import Product
-from defect_dojo.domain.models.product_list import ProductList
-from defect_dojo.domain.models.scan_configuration import ScanConfiguration
 logger = MyLogger.__call__().get_logger()
 
 
@@ -45,7 +39,8 @@ class ImportScanUserCase:
             logger.info(f"Match {request.scan_type}")
             product_types = self.__rest_product_type.get_product_types(request)
             if product_types.results == []:
-                product_type = self.__rest_product_type.post_product_type(request)
+                product_type = self.__rest_product_type.\
+                    post_product_type(request)
                 product_type_id = product_type
                 logger.info(f"product_type created: {product_type.name} with id {product_type.id}")
             else:

@@ -1,5 +1,4 @@
 import dataclasses
-from helper.dataclass_classmethod import FromDictMixin
 
 
 @dataclasses.dataclass

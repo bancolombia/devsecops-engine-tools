@@ -172,7 +172,8 @@ class ImportScanSerializer(Schema):
     minimum_severity = fields.Str(required=False)
     active = fields.Str(required=False, load_default="true")
     verified = fields.Str(required=False, load_default="true")
-    scan_type = fields.Str(required=True, validate=validate.OneOf(list_scan_type))
+    scan_type = fields.Str(required=True,
+                           validate=validate.OneOf(list_scan_type))
     endpoint_to_add = fields.Str(required=False)
     file = fields.Str(required=False)
     product_type_name = fields.Str(required=False)
