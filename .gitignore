@@ -23,6 +23,7 @@ report.html
 out_report.xml
 htmlcov
 .coverage
+coverage.xml
 Pipfile
 Pipfile-lock
 prueba.py
