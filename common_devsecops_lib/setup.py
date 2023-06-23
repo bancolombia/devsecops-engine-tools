@@ -1,4 +1,4 @@
-import setuptools
+from setuptools import setup, find_packages
 
 
 def get_readme():
@@ -11,7 +11,7 @@ def get_requirements():
         return fh.read()
 
 
-setuptools.setup(
+setup(
     name="devsecops_engine_utilities",
     version="0.0.1",
     author="Bancolombia devsecops Team ",
@@ -23,18 +23,7 @@ setuptools.setup(
     package_dir={
         "devsecops_engine_utilities": "devsecops_engine_utilities",
     },
-    packages=[
-        "defect_dojo",
-        "devsecops_engine_utilities",
-        "devsecops_engine_utilities.azuredevops",
-        "devsecops_engine_utilities.azuredevops.infrastructure",
-        "devsecops_engine_utilities.azuredevops.models",
-        "devsecops_engine_utilities.github",
-        "devsecops_engine_utilities.github.infrastructure",
-        # "devsecops_engine_utilities.github.models", "no hay module"
-        "devsecops_engine_utilities.input_validations",
-        "devsecops_engine_utilities.utils",
-    ],
+    packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
@@ -50,7 +39,7 @@ setuptools.setup(
         'pytest-azurepipelines==1.0.3',
         'pytest-cov==4.1.0',
         'coverage==7.2.7',
-        'requests==2.28.2',
+        'requests==2.31.0',
         'mock==5.0.2',
         'marshmallow==3.19.0',
         'requests-toolbelt==1.0.0',

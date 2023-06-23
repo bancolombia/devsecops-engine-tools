@@ -43,7 +43,6 @@ class ImportScanUserCase:
 
         if re.search(" API ", request.scan_type):
             logger.info(f"Match {request.scan_type}")
-            pprint.pprint(self.__rest_product_type.get_product_types)
             product_types = self.__rest_product_type.get_product_types(request)
             if product_types.results == []:
                 product_type = self.__rest_product_type.post_product_type(request)
