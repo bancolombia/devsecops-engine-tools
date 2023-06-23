@@ -12,8 +12,8 @@ steps:
     SonarQube: SonarQube
     scannerMode: CLI
     configMode: manual
-    cliProjectKey: 'NU0429001_devsecops_engine'
-    cliProjectName: 'NU0429001_devsecops_engine'
+    cliProjectKey: '$(Build.Repository.Name)'
+    cliProjectName: '$(Build.Repository.Name)'
     cliProjectVersion: '$(Build.BuildNumber)'
     extraProperties: |
       sonar.verbose=true
