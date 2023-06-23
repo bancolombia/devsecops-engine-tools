@@ -10,14 +10,14 @@ class CustomFormatter(logging.Formatter):
     red = "\x1b[31;20m"
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
-    format = '%(asctime)s [%(levelname)s | %(filename)s | %(funcName)s | %(lineno)d] > %(message)s'
+    format = "%(asctime)s [%(levelname)s | %(filename)s | %(funcName)s | %(lineno)d] > %(message)s"
 
     FORMATS = {
         logging.DEBUG: grey + format + reset,
         logging.INFO: grey + format + reset,
         logging.WARNING: yellow + format + reset,
         logging.ERROR: red + format + reset,
-        logging.CRITICAL: bold_red + format + reset
+        logging.CRITICAL: bold_red + format + reset,
     }
 
     def format(self, record):
@@ -31,21 +31,23 @@ class SingletonType(type):
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
-            cls._instances[cls] = super(SingletonType, cls)\
-                .__call__(*args, **kwargs)
+            cls._instances[cls] = super(SingletonType, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
 
 class MyLogger(metaclass=SingletonType):
-    """resive como parametro bool si es 
+    """resive como parametro bool si es
     True cre un archivo de logs por default is False"""
+
     _logger = None
-    
+
     def __init__(self, log_file=False):
         self._log_file = log_file
         self._logger = logging.getLogger("crumbs")
         self._logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s [%(levelname)s | %(filename)s | %(funcName)s | %(lineno)d] > %(message)s')
+        formatter = logging.Formatter(
+            "%(asctime)s [%(levelname)s | %(filename)s | %(funcName)s | %(lineno)d] > %(message)s"
+        )
 
         if log_file:
             # log with file log
@@ -53,7 +55,7 @@ class MyLogger(metaclass=SingletonType):
             dirname = "./log"
             if not os.path.isdir(dirname):
                 os.mkdir(dirname)
-            file_handler = logging.FileHandler(dirname + "/log_" + now.strftime("%Y-%m-%d")+".log")
+            file_handler = logging.FileHandler(dirname + "/log_" + now.strftime("%Y-%m-%d") + ".log")
             print("file_handler", file_handler)
             file_handler.setFormatter(formatter)
             self._logger.addHandler(file_handler)
@@ -64,6 +66,7 @@ class MyLogger(metaclass=SingletonType):
 
     def get_logger(self):
         return self._logger
+
 
 # forma de llamado
 # if __name__ == "__main__":

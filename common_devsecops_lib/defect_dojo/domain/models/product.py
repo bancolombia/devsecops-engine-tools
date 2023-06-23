@@ -8,9 +8,9 @@ class Product(FromDictMixin):
     id: int = 0
     findings_count: int = 0
     findings_list: List[None] = dataclasses.field(default_factory=list)
-    tags:  List[None] = dataclasses.field(default_factory=list)
+    tags: List[None] = dataclasses.field(default_factory=list)
     product_meta: List[None] = dataclasses.field(default_factory=list)
-    name: int = "" 
+    name: int = ""
     description: str = ""
     created: str = ""
     prod_numeric_grade: int = 0
@@ -30,8 +30,6 @@ class Product(FromDictMixin):
     team_manager = None
     prod_type: int = 0
     sla_configuration: int = 0
-    members:  List[int] = dataclasses.field(default_factory=list)
+    members: List[int] = dataclasses.field(default_factory=list)
     authorization_groups: List[None] = dataclasses.field(default_factory=list)
     regulations: List[None] = dataclasses.field(default_factory=list)
-
-

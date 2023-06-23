@@ -38,7 +38,6 @@ class ImportScanRequest:
     token_vultracker: str = ""
     host_vultracker: str = ""
 
-
     @classmethod
     def from_dict(cls, obj):
         obj = cls(
@@ -59,7 +58,7 @@ class ImportScanRequest:
             push_to_jira=obj["push_to_jira"],
             api_scan_configuration=obj["api_scan_configuration"],
             create_finding_groups_for_all_findings=obj["create_finding_groups_for_all_findings"],
-            )
+        )
         return obj
 
     def to_dict(self):
@@ -77,10 +76,9 @@ class ImportScanRequest:
             "deduplication_on_engagement": self.deduplication_on_engagement,
             "lead": self.lead,
             "close_old_findings": self.close_old_findings,
-            "close_old_findings_product_scope":
-                self.close_old_findings_product_scope,
+            "close_old_findings_product_scope": self.close_old_findings_product_scope,
             "push_to_jira": self.push_to_jira,
             "api_scan_configuration": self.api_scan_configuration,
             "build_id": self.build_id,
-            }
+        }
         return r

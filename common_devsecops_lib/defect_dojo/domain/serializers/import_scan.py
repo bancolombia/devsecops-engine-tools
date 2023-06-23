@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields, post_load, validate
 from defect_dojo.domain.request_objects.import_scan import ImportScanRequest
+
 list_scan_type = [
     "Acunetix Scan",
     "Acunetix360 Scan",
@@ -160,11 +161,7 @@ list_scan_type = [
     "Yarn Audit Scan",
     "ZAP Scan",
 ]
-group_by_list = [
-    "component_name",
-    "component_name+component_version",
-    "file_path",
-    "finding_title"]
+group_by_list = ["component_name", "component_name+component_version", "file_path", "finding_title"]
 
 
 class ImportScanSerializer(Schema):
@@ -172,8 +169,7 @@ class ImportScanSerializer(Schema):
     minimum_severity = fields.Str(required=False)
     active = fields.Str(required=False, load_default="true")
     verified = fields.Str(required=False, load_default="true")
-    scan_type = fields.Str(required=True,
-                           validate=validate.OneOf(list_scan_type))
+    scan_type = fields.Str(required=True, validate=validate.OneOf(list_scan_type))
     endpoint_to_add = fields.Str(required=False)
     file = fields.Str(required=False)
     product_type_name = fields.Str(required=False)
@@ -206,7 +202,7 @@ class ImportScanSerializer(Schema):
     host = fields.Url(required=True)
     token_vultracker = fields.Str(required=True)
     host_vultracker = fields.Str(required=True)
-    
+
     @post_load
     def make_cmdb(self, data, **kwargs):
         return ImportScanRequest(**data)
