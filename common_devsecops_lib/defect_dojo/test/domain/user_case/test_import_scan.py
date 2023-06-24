@@ -148,3 +148,4 @@ def test_execute(
     assert isinstance(request, ImportScanRequest)
     response = uc.execute(request)
     assert response.scan_type == import_scan_request_instance.scan_type
+    assert response.to_dict()["scan_type"] == import_scan_request_instance.scan_type
