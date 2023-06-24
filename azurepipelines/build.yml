@@ -20,8 +20,8 @@ steps:
       sonar.sources=$(System.DefaultWorkingDirectory)/$(componentName)
       sonar.python.coverage.reportPaths =$(System.DefaultWorkingDirectory)/$(componentName)/coverage.xml
       sonar.language=py
-      sonar.exclusion=**/devsecops_engine_utilities/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**Dockerfile**,**/coverage/**,**/azure-pipelines.yml/**
-      sonar.coverage.exclusions=**/devsecops_engine_utilities/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
+      sonar.exclusion=**/devsecops_engine_utilities/**,**/applications/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**Dockerfile**,**/coverage/**,**/azure-pipelines.yml/**
+      sonar.coverage.exclusions=**/devsecops_engine_utilities/**,**/applications/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
 - script:  |
     python3 -m pip install --upgrade pip -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
     python3 -m pip install setuptools virtualenv wheel -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
