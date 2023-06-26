@@ -145,6 +145,13 @@ def mock_rest_scan_configuration():
             mock_rest_scan_configuration(),
             import_scan_request_instance("SonarQube API Import"),
         ),
+        (
+            mock_rest_import_scan("sonar_qube.json"),
+            mock_rest_product_type(),
+            mock_rest_product(product_result_empty=True),
+            mock_rest_scan_configuration(),
+            import_scan_request_instance("SonarQube API Import"),
+        ),
     ],
 )
 def test_execute_sucessfull(
