@@ -20,11 +20,13 @@ from defect_dojo.domain.request_objects.import_scan\
     import ImportScanRequest
 from defect_dojo.domain.user_case.import_scan\
     import ImportScanUserCase
+from helper.validation_error import ValidationError
 
 
-def import_scan_request_instance(par_scan_type) -> ImportScanRequest:
+def import_scan_request_instance(par_scan_type,
+                                 product_name="test product name") -> ImportScanRequest:
     request = ImportScanRequest(
-        product_name="test product name",
+        product_name=product_name,
         token="123456789",
         host="https://test/test.com",
         token_vultracker="123456789101212",
@@ -130,7 +132,7 @@ def mock_rest_scan_configuration():
         ),
     ],
 )
-def test_execute(
+def test_execute_sucessfull(
     mock_rest_import_scan,
     mock_rest_product_type,
     mock_rest_product,
@@ -149,3 +151,48 @@ def test_execute(
     response = uc.execute(request)
     assert response.scan_type == import_scan_request_instance.scan_type
     assert response.to_dict()["scan_type"] == import_scan_request_instance.scan_type
+
+
+@pytest.mark.parametrize(
+    """mock_rest_import_scan,
+    mock_rest_product_type,
+    mock_rest_product,
+    mock_rest_scan_configuration,
+    import_scan_request_instance""",
+    [
+        (
+            mock_rest_import_scan("import_scan_xray.json"), 
+            mock_rest_product_type(),
+            mock_rest_product(),
+            mock_rest_scan_configuration(),
+            import_scan_request_instance("Xray Scan", ""),
+        ),
+        (
+            mock_rest_import_scan("sonar_qube.json"),
+            mock_rest_product_type(),
+            mock_rest_product(),
+            mock_rest_scan_configuration(),
+            import_scan_request_instance("Xray Scan", None),
+        ),
+    ],
+)
+def test_execute_error(
+    mock_rest_import_scan,
+    mock_rest_product_type,
+    mock_rest_product,
+    mock_rest_scan_configuration,
+    import_scan_request_instance,
+):
+    request = import_scan_request_instance
+    uc = ImportScanUserCase(
+        rest_import_scan=mock_rest_import_scan,
+        rest_product_type=mock_rest_product_type,
+        rest_product=mock_rest_product,
+        rest_scan_configuration=mock_rest_scan_configuration,
+    )
+    assert isinstance(uc, ImportScanUserCase)
+    assert isinstance(request, ImportScanRequest)
+    print("pasoooo")
+    with pytest.raises(ValidationError) as e:
+        response = uc.execute(request)
+        assert str(e.value) == "Name product not found"

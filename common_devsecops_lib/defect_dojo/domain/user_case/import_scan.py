@@ -27,7 +27,6 @@ class ImportScanUserCase:
         product_type_id = None
         product_id = None
         tools_configurations = 1
-
         if (request.product_name or request.product_type_name) == "":
             logger.error("Name product not found")
             raise ValidationError("Name product not found")
