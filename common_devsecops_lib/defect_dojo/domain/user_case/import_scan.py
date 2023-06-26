@@ -77,3 +77,4 @@ class ImportScanUserCase:
                     return self.__rest_import_scan.import_scan(request, files)
             except Exception as e:
                 logger.error(e)
+                raise ValidationError(e)

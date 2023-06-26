@@ -1,30 +1,31 @@
 import pytest
 import json
 from unittest.mock import MagicMock
-from defect_dojo.domain.models.product_type_list\
-    import ProductTypeList
-from defect_dojo.domain.models.scan_configuration\
-    import ScanConfiguration
+from defect_dojo.domain.models.product_type_list import ProductTypeList
+from defect_dojo.domain.models.scan_configuration import ScanConfiguration
 from defect_dojo.domain.models.product_list import ProductList
 from defect_dojo.domain.models.product import Product
 from defect_dojo.domain.models.product_type import ProductType
-from defect_dojo.infraestructure.driver_adapters.import_scan\
-    import ImportScanRestConsumer
-from defect_dojo.infraestructure.driver_adapters.product_type\
-    import ProductTypeRestConsumer
-from defect_dojo.infraestructure.driver_adapters.product\
-    import ProductRestConsumer
-from defect_dojo.infraestructure.driver_adapters\
-    .scan_configurations import ScanConfigrationRestConsumer
-from defect_dojo.domain.request_objects.import_scan\
-    import ImportScanRequest
-from defect_dojo.domain.user_case.import_scan\
-    import ImportScanUserCase
+from defect_dojo.infraestructure.driver_adapters.import_scan import (
+    ImportScanRestConsumer,
+)
+from defect_dojo.infraestructure.driver_adapters.product_type import (
+    ProductTypeRestConsumer,
+)
+from defect_dojo.infraestructure.driver_adapters.product import ProductRestConsumer
+from defect_dojo.infraestructure.driver_adapters.scan_configurations import (
+    ScanConfigrationRestConsumer,
+)
+from defect_dojo.domain.request_objects.import_scan import ImportScanRequest
+from defect_dojo.domain.user_case.import_scan import ImportScanUserCase
 from helper.validation_error import ValidationError
 
 
-def import_scan_request_instance(par_scan_type,
-                                 product_name="test product name") -> ImportScanRequest:
+def import_scan_request_instance(
+    par_scan_type,
+    product_name="test product name",
+    file="defect_dojo/test/files/xray_scan.json",
+) -> ImportScanRequest:
     request = ImportScanRequest(
         product_name=product_name,
         token="123456789",
@@ -33,7 +34,7 @@ def import_scan_request_instance(par_scan_type,
         host_vultracker="http://localhost:8000",
         scan_type=par_scan_type,
         engagement_name="test engagement name",
-        file="defect_dojo/test/files/xray_scan.json",
+        file=file,
         tags="evc",
     )
     return request
@@ -70,7 +71,7 @@ def mock_rest_import_scan(file_path):
     return mock_import_scan
 
 
-def mock_rest_product_type():
+def mock_rest_product_type(product_type_empty=False):
     mock_rest_product_type = MagicMock()
     products = [
         ProductType(
@@ -83,18 +84,26 @@ def mock_rest_product_type():
             created="2023-06-08T19:47:54.838527Z",
         )
     ]
-    mock_rest_product_type.get_product_types.return_value = ProductTypeList(
-        count=1, results=products
-    )
+    if product_type_empty:
+        mock_rest_product_type.get_product_types.return_value = ProductTypeList(
+            count=1, results=[]
+        )
+    else:
+        mock_rest_product_type.get_product_types.return_value = ProductTypeList(
+            count=1, results=products
+        )
     mock_rest_product_type.post_product_type.return_value = products[0]
     return mock_rest_product_type
 
 
-def mock_rest_product():
+def mock_rest_product(product_result_empty=False):
     mock_product = MagicMock()
-    products = ProductList(count=1, results=[Product(id=1, name="product name test")])
-    mock_product.get_products.return_value = products
     product = Product(id=1, name="product name test")
+    if product_result_empty:
+        products = ProductList(count=1, results=[])
+    else:
+        products = ProductList(count=1, results=[product])
+    mock_product.get_products.return_value = products
     mock_product.post_product.return_value = product
     return mock_product
 
@@ -102,13 +111,12 @@ def mock_rest_product():
 def mock_rest_scan_configuration():
     mock_scan_configuration = MagicMock()
     mock_scan_configuration.post_api_scan_configuration.return_value = (
-        ScanConfiguration(id=1,
-                          service_key_1="service key",
-                          tool_configuration=1)
+        ScanConfiguration(id=1, service_key_1="service key", tool_configuration=1)
     )
     return mock_scan_configuration
 
 
+# 3. if parameter product_type_empty == True then product_type.resultr == []
 @pytest.mark.parametrize(
     """mock_rest_import_scan,
     mock_rest_product_type,
@@ -126,6 +134,13 @@ def mock_rest_scan_configuration():
         (
             mock_rest_import_scan("sonar_qube.json"),
             mock_rest_product_type(),
+            mock_rest_product(),
+            mock_rest_scan_configuration(),
+            import_scan_request_instance("SonarQube API Import"),
+        ),
+        (
+            mock_rest_import_scan("sonar_qube.json"),
+            mock_rest_product_type(product_type_empty=True),
             mock_rest_product(),
             mock_rest_scan_configuration(),
             import_scan_request_instance("SonarQube API Import"),
@@ -161,7 +176,7 @@ def test_execute_sucessfull(
     import_scan_request_instance""",
     [
         (
-            mock_rest_import_scan("import_scan_xray.json"), 
+            mock_rest_import_scan("import_scan_xray.json"),
             mock_rest_product_type(),
             mock_rest_product(),
             mock_rest_scan_configuration(),
@@ -173,6 +188,13 @@ def test_execute_sucessfull(
             mock_rest_product(),
             mock_rest_scan_configuration(),
             import_scan_request_instance("Xray Scan", None),
+        ),
+        (
+            mock_rest_import_scan("sonar_qube.json"),
+            mock_rest_product_type(),
+            mock_rest_product(),
+            mock_rest_scan_configuration(),
+            import_scan_request_instance("Xray Scan", file="incorrect url"),
         ),
     ],
 )
@@ -192,7 +214,5 @@ def test_execute_error(
     )
     assert isinstance(uc, ImportScanUserCase)
     assert isinstance(request, ImportScanRequest)
-    print("pasoooo")
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(ValidationError):
         response = uc.execute(request)
-        assert str(e.value) == "Name product not found"
