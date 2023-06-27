@@ -14,7 +14,7 @@ steps:
     echo "[distutils]" >> .pypirc
     echo "index-servers = local" >> .pypirc
     echo "[local]" >> .pypirc
-    echo "repository:$(url_repository_artifactory_qa)" >> .pypirc
+    echo "repository:$(url_repository_artifactory_pdn)" >> .pypirc
     echo "username: $(Artifactory.user)" >> .pypirc
     echo "password: $(Artifactory.Password)" >> .pypirc
     cp .pypirc $HOME
