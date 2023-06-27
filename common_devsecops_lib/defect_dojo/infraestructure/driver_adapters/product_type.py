@@ -24,7 +24,6 @@ class ProductTypeRestConsumer:
 
         response = requests.request("POST", url, headers=headers, data=data)
         if response.status_code != 201:
-            logger.info(response)
             raise ValidationError(response)
         product_type_object = ProductType.from_dict(response.json())
         return product_type_object
@@ -34,8 +33,7 @@ class ProductTypeRestConsumer:
         headers = {"Authorization": f"Token {self.__token}"}
         response = requests.request("GET", url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
-            logger.info(response)
-            raise ValidationError(response.json())
+            raise ValidationError(response)
         product_type_object = ProductTypeList.from_dict(response.json())
         return product_type_object
 
@@ -46,7 +44,6 @@ class ProductTypeRestConsumer:
 
         response = requests.request("GET", url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
-            logger.info(response)
             raise ValidationError(response)
         logger.info(response)
         product_type_object = ProductTypeList.from_dict(response.json())

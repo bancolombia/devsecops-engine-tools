@@ -36,7 +36,7 @@ class ImportScanUserCase:
             product_types = self.__rest_product_type.get_product_types(request)
             if product_types.results == []:
                 product_type = self.__rest_product_type.post_product_type(request)
-                product_type_id = product_type
+                product_type_id = product_type.id
                 logger.info(f"product_type created: {product_type.name} with id {product_type.id}")
             else:
                 product_type_id = product_types.results[0].id
@@ -47,7 +47,8 @@ class ImportScanUserCase:
 
             products = self.__rest_product.get_products(request)
             if products.results == []:
-                product = self.__rest_product.post_product(request, product_type_id)
+                product = self.__rest_product.post_product(request,
+                                                           product_type_id)
                 product_id = product.id
                 logger.info(
                     f"product created: {product.name}\
@@ -76,5 +77,4 @@ class ImportScanUserCase:
                     files = [("file", ("name_file", file, "application"))]
                     return self.__rest_import_scan.import_scan(request, files)
             except Exception as e:
-                logger.error(e)
                 raise ValidationError(e)

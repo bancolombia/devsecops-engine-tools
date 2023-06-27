@@ -18,7 +18,10 @@ class Vultracker:
             rest_product_type = ProductTypeRestConsumer(request)
             rest_product = ProductRestConsumer(request)
             rest_scan_configuration = ScanConfigrationRestConsumer(request)
-            uc = ImportScanUserCase(rest_import_scan, rest_product_type, rest_product, rest_scan_configuration)
+            uc = ImportScanUserCase(rest_import_scan,
+                                    rest_product_type,
+                                    rest_product,
+                                    rest_scan_configuration)
             response = uc.execute(request)
             return response
         except ValidationError as error:

@@ -19,20 +19,27 @@ class ProductRestConsumer:
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
         response = requests.request("GET", url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
-            logger.info(response)
-            raise ValidationError(response.json())
+            raise ValidationError(response)
         products_object = ProductList.from_dict(response.json())
         return products_object
 
     def post_product(self, request: ImportScanRequest, product_type_id: int) -> Product:
         url = f"{self.__host}/api/v2/products/"
 
-        data = {"name": request.product_name, "description": request.product_name, "prod_type": product_type_id}
+        data = {"name": request.product_name,
+                "description": request.product_name,
+                "prod_type": product_type_id}
 
         headers = {"Authorization": f"Token {self.__token}"}
-        response = requests.request("POST", url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
+        response = requests.request("POST",
+                                    url,
+                                    headers=headers,
+                                    data=data,
+                                    verify=VERIFY_CERTIFICATE)
+        print(url)
+        print(data)
+        print(self.__token)
         if response.status_code != 201:
-            logger.info(response)
-            raise ValidationError(response.json())
+            raise ValidationError(response)
         product_object = Product.from_dict(response.json())
         return product_object

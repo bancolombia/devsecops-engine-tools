@@ -23,8 +23,7 @@ class EngagementRestConsumer:
 
         response = requests.request("GET", url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
-            logger.error(response)
-            raise ValidationError(response.json())
+            raise ValidationError(response)
 
         return response.json()
 
@@ -41,8 +40,7 @@ class EngagementRestConsumer:
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
         response = requests.request("POST", url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
         if response.status_code != 201:
-            logger.error(response)
-            raise ValidationError(response.json())
+            raise ValidationError(response)
         logger.info(response)
 
         return response.json()

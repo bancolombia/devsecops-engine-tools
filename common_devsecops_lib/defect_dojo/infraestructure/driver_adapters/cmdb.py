@@ -22,7 +22,6 @@ class CmdbRestConsumer:
         response = requests.request("POST", self.__host, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
 
         if response.status_code != 200:
-            logger.error(response)
             raise ValidationError(response)
         if response.json() == []:
             logger.error(f"Engagement: {request.code_app} not found")

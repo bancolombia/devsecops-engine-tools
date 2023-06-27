@@ -32,7 +32,6 @@ class ScanConfigrationRestConsumer:
 
         response = requests.request("POST", url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
         if response.status_code != 201:
-            logger.error(response.json())
-            raise ValidationError(response.json())
+            raise ValidationError(response)
         scan_configuration_object = ScanConfiguration.from_dict(response.json())
         return scan_configuration_object
