@@ -29,8 +29,9 @@ steps:
       python3 setup.py bdist_wheel upload -r local
       python3 setup.py sdist upload -r local
     else
-      python -m build
-      curl -u$(Artifactory.user):$(Artifactory.Password) -T $(System.DefaultWorkingDirectory)/$(componentName)/$(TARGET_FILE_PATH) "https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/$(System.DefaultWorkingDirectory)/$(componentName)/$(TARGET_FILE_PATH)"
+      python3 -m pip install build
+      python3 -m build
+      curl -u $(Artifactory.user):$(Artifactory.Password) -T $(System.DefaultWorkingDirectory)/$(componentName)/$(TARGET_FILE_PATH) "https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/$(System.DefaultWorkingDirectory)/$(componentName)/$(TARGET_FILE_PATH)"
     fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Artifact creation and upload'
