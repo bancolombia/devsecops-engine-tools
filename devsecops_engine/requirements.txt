@@ -1,11 +1,11 @@
 setuptools==67.6.0
 wheel==0.40.0
 pipenv==2023.3.20
-pytest
-pytest-cov
+pytest==7.3.1 
+pytest-cov==4.1.0
 coverage_badge
 requests==2.28.2
-multipledispatch
+multipledispatch==0.6.0
 flake8
 black
 pre-commit
@@ -14,6 +14,7 @@ checkov==2.3.243
 pyfiglet==0.7
 prettytable
 azure-devops
+build
 
 
 
