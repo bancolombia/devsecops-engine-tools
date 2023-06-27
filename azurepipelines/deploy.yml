@@ -16,14 +16,15 @@ steps:
     echo "[local]" >> .pypirc
     if [ "$(Build.SourceBranch)" == "refs/heads/trunk" ]; then
       echo "repository:$(url_repository_artifactory_pdn)" >> .pypirc
+      echo "username: $(Artifactory.user)" >> .pypirc
+      echo "password: $(Artifactory.Password)" >> .pypirc
+      cp .pypirc $HOME
+      python3 setup.py bdist_wheel upload -r local
+      python3 setup.py sdist upload -r local
     else
-      echo "repository:$(url_repository_artifactory_qa)" >> .pypirc
+      python3 -m build
+      curl -u$(Artifactory.user):$(Artifactory.Password) -T $(System.DefaultWorkingDirectory)/$(componentName)/$(TARGET_FILE_PATH) "https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/$(System.DefaultWorkingDirectory)/$(componentName)/$(TARGET_FILE_PATH)"
     fi
-    echo "username: $(Artifactory.user)" >> .pypirc
-    echo "password: $(Artifactory.Password)" >> .pypirc
-    cp .pypirc $HOME
-    python3 setup.py bdist_wheel upload -r local
-    python3 setup.py sdist upload -r local
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Artifact creation and upload'
 
