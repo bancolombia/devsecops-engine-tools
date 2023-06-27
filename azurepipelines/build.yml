@@ -31,7 +31,7 @@ steps:
     else
       python3 -m pip install build
       python3 -m build
-      curl -u $(Artifactory.user):$(Artifactory.Password) -T $(System.DefaultWorkingDirectory)/$(componentName)/$(TARGET_FILE_PATH) "https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/$(System.DefaultWorkingDirectory)/$(componentName)/$(TARGET_FILE_PATH)"
+      curl -u $(Artifactory.user):$(Artifactory.Password) -T $(System.DefaultWorkingDirectory)/$(componentName)/$(TARGET_FILE_PATH) "https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/sast/"
     fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Artifact creation and upload'
