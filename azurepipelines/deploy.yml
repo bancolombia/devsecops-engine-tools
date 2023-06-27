@@ -14,6 +14,8 @@ steps:
     echo "[distutils]" >> .pypirc
     echo "index-servers = local" >> .pypirc
     echo "[local]" >> .pypirc
+    echo "username: $(Artifactory.user)" >> .pypirc
+    echo "password: $(Artifactory.Password)" >> .pypirc
     cp .pypirc $HOME
     python3 setup.py bdist_wheel upload -r local
     python3 setup.py sdist upload -r local
