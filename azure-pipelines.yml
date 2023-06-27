@@ -26,4 +26,4 @@ queue:
 
 steps:
 - template: azurepipelines/build.yml
-- template: azurepipelines/deploy.yml
+# - template: azurepipelines/deploy.yml
