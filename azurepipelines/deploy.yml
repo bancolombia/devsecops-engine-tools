@@ -14,9 +14,13 @@ steps:
     echo "[distutils]" >> .pypirc
     echo "index-servers = local" >> .pypirc
     echo "[local]" >> .pypirc
-    echo "repository:$(url_repository_artifactory_pdn)" >> .pypirc
-    echo "username: $(Artifactory.user)" >> .pypirc
-    echo "password: $(Artifactory.Password)" >> .pypirc
+    if [ "$(Build.SourceBranch)" == "refs/heads/trunk" ]; then
+      echo "repository:$(url_repository_artifactory_pdn)" >> .pypirc
+      echo "username: $(Artifactory.user)" >> .pypirc
+      echo "password: $(Artifactory.Password)" >> .pypirc
+    else
+      echo "repository:$(url_repository_artifactory_qa)" >> .pypirc
+    fi
     cp .pypirc $HOME
     python3 setup.py bdist_wheel upload -r local
     python3 setup.py sdist upload -r local
