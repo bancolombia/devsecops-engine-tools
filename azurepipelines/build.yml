@@ -25,6 +25,13 @@ steps:
     else
       python3 -m pip install build
       python3 -m build
+      FILE_PATH=$(find dist/ -name "*.whl" -type f -print -quit)
+      if [[ -z "$FILE_PATH" ]]; then
+          echo "No se encontró ningún archivo WHL en la carpeta dist/"
+      else
+          WORKING_DIRECTORY=$(System.DefaultWorkingDirectory)/$(componentName)
+          curl -u $(Artifactory.user):$(Artifactory.Password) -T $(WORKING_DIRECTORY)/$(TARGET_FILE_PATH) $(REPO_ARTIFACTORY_DEVSECOPS)
+      fi
       curl -u $(Artifactory.user):$(Artifactory.Password) -T $(System.DefaultWorkingDirectory)/$(componentName)/$(TARGET_FILE_PATH) "https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/sast/"
     fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
