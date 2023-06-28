@@ -7,11 +7,11 @@ steps:
   enabled: false
 
 - script: |
-    python3 -m pip install --upgrade pip -i $(ARTIFACTORY_URL) $(ARTIFACTORY_HOST)
-    python3 -m pip install setuptools virtualenv wheel -i $(ARTIFACTORY_URL) $(ARTIFACTORY_HOST)
+    python3 -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
+    python3 -m pip install setuptools virtualenv wheel -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python3 -m virtualenv _venv
     source _venv/bin/activate
-    python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) $(ARTIFACTORY_HOST)
+    python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     echo "[distutils]" >> .pypirc
     echo "index-servers = local" >> .pypirc
     echo "[local]" >> .pypirc
@@ -60,15 +60,15 @@ steps:
       sonar.exclusion=**/devsecops_engine_utilities/**,**/applications/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**,**/azure-pipelines.yml/**
       sonar.coverage.exclusions=**/devsecops_engine_utilities/**,**/applications/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
 - script:  |
-    python3 -m pip install --upgrade pip -i $(ARTIFACTORY_URL) $(ARTIFACTORY_HOST)
-    python3 -m pip install setuptools virtualenv wheel -i $(ARTIFACTORY_URL) $(ARTIFACTORY_HOST)
+    python3 -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
+    python3 -m pip install setuptools virtualenv wheel -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
   displayName: install python basics
 
 - script: |
     python3 -m virtualenv _venv
     source _venv/bin/activate
-    python -m pip install --upgrade pip -i $(ARTIFACTORY_URL) $(ARTIFACTORY_HOST)
-    python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) $(ARTIFACTORY_HOST)
+    python -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
+    python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python -m pytest -x --cov=$(System.DefaultWorkingDirectory)/$(componentName) --cov-config=.coveragerc
     python -m coverage report -m
     python -m coverage xml
