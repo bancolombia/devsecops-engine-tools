@@ -10,7 +10,7 @@
         "sources": [
             {
                 "name": "pypi",
-                "url": "https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple",
+                "url": "$(ARTIFACTORY_URL)",
                 "verify_ssl": false
             }
         ]

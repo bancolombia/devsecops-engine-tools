@@ -6,11 +6,11 @@ steps:
   enabled: false
 
 - script: |
-    python3 -m pip install --upgrade pip -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
-    python3 -m pip install setuptools virtualenv wheel -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+    python3 -m pip install --upgrade pip -i $(ARTIFACTORY_URL) $(ARTIFACTORY_HOST)
+    python3 -m pip install setuptools virtualenv wheel -i $(ARTIFACTORY_URL) $(ARTIFACTORY_HOST)
     python3 -m virtualenv _venv
     source _venv/bin/activate
-    python -m pip install -r requirements.txt -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+    python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) $(ARTIFACTORY_HOST)
     echo "[distutils]" >> .pypirc
     echo "index-servers = local" >> .pypirc
     echo "[local]" >> .pypirc
