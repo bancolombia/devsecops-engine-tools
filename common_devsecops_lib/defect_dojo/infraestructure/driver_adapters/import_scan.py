@@ -37,7 +37,6 @@ class ImportScanRestConsumer:
         if response.status_code != 201:
             logger.error(response.status_code)
             raise ValidationError(response)
-        response = ImportScanRequest.from_dict(response)
         return response
 
     def import_scan(self, request: ImportScanRequest, files):
