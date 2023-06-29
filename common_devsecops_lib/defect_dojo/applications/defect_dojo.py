@@ -10,7 +10,7 @@ from defect_dojo.domain.user_case.import_scan import ImportScanUserCase
 logger = MyLogger.__call__().get_logger()
 
 
-class Vultracker:
+class DefectDojo:
     @staticmethod
     def send_import_scan(request: ImportScanRequest):
         try:
