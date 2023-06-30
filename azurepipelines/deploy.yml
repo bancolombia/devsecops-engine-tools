@@ -30,7 +30,7 @@ steps:
           echo "No se encontró ningún archivo WHL en la carpeta dist/"
       else
           ABSOLUTE_PATH=$(readlink -f "$FILE_PATH")
-          curl -u $(Artifactory.user):$(Artifactory.Password) -T $ABSOLUTE_PATH $(REPO_ARTIFACTORY_DEVSECOPS)
+          curl -u $(Artifactory.user):$(Artifactory.Password) -T $ABSOLUTE_PATH $(url_repository_artifactory_qa)
       fi
     fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)

@@ -1,6 +1,6 @@
 # Virtual Enviroment python
 .venv
-.vscode
+*.vscode*
 .pytest*
 *pycache*
 *_pycache_*
