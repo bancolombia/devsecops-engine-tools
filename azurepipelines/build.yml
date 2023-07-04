@@ -18,7 +18,7 @@ steps:
     extraProperties: |
       sonar.verbose=true
       sonar.sources=$(System.DefaultWorkingDirectory)/$(componentName)
-      sonar.python.coverage.reportPaths =$(System.DefaultWorkingDirectory)/$(componentName)/coverage.xml
+      sonar.python.coverage.reportPaths=$(System.DefaultWorkingDirectory)/$(componentName)/coverage.xml
       sonar.language=py
       sonar.exclusion=**/applications/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**,**/azure-pipelines.yml/**
       sonar.coverage.exclusions=**/applications/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
