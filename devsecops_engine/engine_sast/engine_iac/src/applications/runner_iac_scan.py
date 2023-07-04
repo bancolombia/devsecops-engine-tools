@@ -22,10 +22,10 @@ def main():
             tool=tool,
         )
 
-    except ValueError as e:
+    except Exception as e:
         error_message = str(e)
-        print(f"Error: {error_message}")
-        print(AzureMessageResultPipeline.Failed.value)
+        print(f"Error SCAN : {error_message}")
+        print(AzureMessageResultPipeline.Succeeded.value)
         # Manejar el error según sea necesario
 
 

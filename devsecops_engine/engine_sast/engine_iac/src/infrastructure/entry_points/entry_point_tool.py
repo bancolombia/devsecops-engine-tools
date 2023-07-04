@@ -4,18 +4,19 @@ import configparser
 import threading
 import queue
 import json
+import os
+import re
 from prettytable import PrettyTable, DOUBLE_BORDER
 from engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import CheckovTool
+
+# from engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
     CheckovConfig,
 )
 from devsecops_engine_utilities.utils.printers import (
     Printers,
-)
-from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
-    ReleaseVariables,
 )
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
     AzureDevopsIntegration,
@@ -83,31 +84,48 @@ def async_scan(queue, iacScan: IacScan, rules):
     queue.put(result)
 
 
+def search_folders():
+    directorio_actual = os.getcwd()
+    patron = r"(?i)(?!.*test).*?(AW|NU).*"
+    carpetas_coincidentes = []
+    carpetas = [
+        carpeta for carpeta in os.listdir(directorio_actual) if os.path.isdir(os.path.join(directorio_actual, carpeta))
+    ]
+    carpetas_coincidentes = [
+        os.path.normpath(os.path.join(directorio_actual, carpeta)) for carpeta in carpetas if re.match(patron, carpeta)
+    ]
+
+    return carpetas_coincidentes
+
+
 def init_engine_sast_rm(remote_config_repo, remote_config_path, tool):
     Printers.print_logo_tool()
+    folders_to_scan = search_folders()
     azure_devops_integration = AzureDevopsIntegration()
     azure_devops_integration.get_azure_connection()
     data_file_tool = azure_devops_integration.get_remote_json_config(
         remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
     )[tool]
+    # data_file_tool = json.loads(remote_config)[tool]
     output_queue = queue.Queue()
     # Crea una lista para almacenar los hilos
     threads = []
-    for rule in data_file_tool["RULES"]:
-        checkov_config = CheckovConfig(
-            path_config_file="",
-            config_file_name=rule,
-            checks=list(data_file_tool["RULES"][rule].keys()),
-            soft_fail=False,
-            directories=ReleaseVariables.Artifact_Path.value(),
-        )
-        checkov_config.create_config_dict()
-        checkov_run = CheckovTool(checkov_config=checkov_config)
-        checkov_run.create_config_file()
-        iac_scan = IacScan(checkov_run)
-        t = threading.Thread(target=async_scan, args=(output_queue, iac_scan, data_file_tool["RULES"][rule]))
-        t.start()
-        threads.append(t)
+    for folder in folders_to_scan:
+        for rule in data_file_tool["RULES"]:
+            checkov_config = CheckovConfig(
+                path_config_file="",
+                config_file_name=rule,
+                checks=list(data_file_tool["RULES"][rule].keys()),
+                soft_fail=False,
+                directories=folder,
+            )
+            checkov_config.create_config_dict()
+            checkov_run = CheckovTool(checkov_config=checkov_config)
+            checkov_run.create_config_file()
+            iac_scan = IacScan(checkov_run)
+            t = threading.Thread(target=async_scan, args=(output_queue, iac_scan, data_file_tool["RULES"][rule]))
+            t.start()
+            threads.append(t)
     # Espera a que todos los hilos terminen
     for t in threads:
         t.join()
@@ -118,7 +136,13 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool):
         results.extend(result)
 
     # Imprime los resultados
-    myTable = PrettyTable(["Severity", "CheckID", "Resource", "file_path"])
+    table = PrettyTable(["Severity", "CheckID", "Resource", "file_path"])
     for i, result in enumerate(results):
-        extract_check_id_checkov(result[0], result[1], myTable)
-    print_table(myTable)
+        extract_check_id_checkov(result[0], result[1], table)
+    if len(table._rows) != 0:
+        table = PrettyTable(["Severity", "CheckID", "Resource", "file_path"])
+        print(
+            "##vso[task.logissue type=warning]There are {len_row} breaches to resolve check info".format(
+                len_row=len(table._rows)
+            )
+        )
