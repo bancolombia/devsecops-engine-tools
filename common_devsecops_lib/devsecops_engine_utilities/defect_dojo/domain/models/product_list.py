@@ -1,6 +1,6 @@
 import dataclasses
 from typing import List
-from devsecops_engine_utilities.helper.dataclass_classmethod import FromDictMixin
+from devsecops_engine_utilities.utils.dataclass_classmethod import FromDictMixin
 from devsecops_engine_utilities.defect_dojo.domain.models.product import Product
 
 

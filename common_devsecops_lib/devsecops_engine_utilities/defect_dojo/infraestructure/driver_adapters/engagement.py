@@ -1,7 +1,7 @@
 import requests
 import json
-from devsecops_engine_utilities.helper.validation_error import ValidationError
-from devsecops_engine_utilities.helper.logger_info import MyLogger
+from devsecops_engine_utilities.utils.validation_error import ValidationError
+from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
 from datetime import datetime
