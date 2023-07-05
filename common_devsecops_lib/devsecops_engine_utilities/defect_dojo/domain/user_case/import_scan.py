@@ -1,6 +1,6 @@
 import re
-from devsecops_engine_utilities.helper.validation_error import ValidationError
-from devsecops_engine_utilities.helper.logger_info import MyLogger
+from devsecops_engine_utilities.utils.validation_error import ValidationError
+from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.\
     import_scan import ImportScanRestConsumer
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.\

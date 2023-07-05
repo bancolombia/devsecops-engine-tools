@@ -1,5 +1,5 @@
 import dataclasses
-from devsecops_engine_utilities.helper.dataclass_classmethod import FromDictMixin
+from devsecops_engine_utilities.utils.dataclass_classmethod import FromDictMixin
 
 
 @dataclasses.dataclass

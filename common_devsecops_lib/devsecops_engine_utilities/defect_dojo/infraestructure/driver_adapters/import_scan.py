@@ -1,8 +1,8 @@
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
-from devsecops_engine_utilities.helper.logger_info import MyLogger
-from devsecops_engine_utilities.helper.validation_error import ValidationError
+from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
 
 logger = MyLogger.__call__().get_logger()
@@ -16,34 +16,34 @@ class ImportScanRestConsumer:
     def import_scan_api(self, request: ImportScanRequest):
         url = f"{self.__host}/api/v2/import-scan/"
         data = {
-            # "scan_date": request.scan_date,
-            # "minimum_severity": request.minimum_severity,
+            "scan_date": request.scan_date,
+            "minimum_severity": request.minimum_severity,
             "active": request.active,
             "verified": request.verified,
-            # "scan_type": request.scan_type,
-            # "endpoint_to_add": request.endpoint_to_add,
+            "scan_type": request.scan_type,
+            "endpoint_to_add": request.endpoint_to_add,
             # "file": request.file,
             "product_type_name": request.product_type_name,
             "product_name": request.product_name,
-            # "engagement_name": request.engagement_name,
-            # "engagement_end_date": request.engagement_end_date,
-            # "source_code_management_uri": request.source_code_management_uri,
-            # "engagement": str(request.engagement) if request.engagement!=0 else "",
+            "engagement_name": "defect-dojo",#TODO: SOLO TEST, RENOMBRAR AL ERMINAR LOS TEST
+            "engagement_end_date": request.engagement_end_date,
+            "source_code_management_uri": request.source_code_management_uri,
+            "engagement": str(request.engagement) if request.engagement!=0 else "",
             "auto_create_context": request.auto_create_context,
-            # "deduplication_on_engagement": request.deduplication_on_engagement,
-            # "lead": request.lead,
-            # "tags": request.tags,
-            # "close_old_findings": request.close_old_findings,
-            # "close_old_findings_product_scope": request.close_old_findings_product_scope,
-            # "push_to_jira": request.push_to_jira,
-            # "environment": request.environment,
-            # "version": request.version,
-            # "build_id": request.build_id,
-            # "branch_tag": request.branch_tag,
-            # "commit_hash": request.commit_hash,
-            # "api_scan_configuration": str(request.api_scan_configuration) if request.api_scan_configuration!=0 else "",
-            # "service": request.service,
-            # "group_by": request.group_by
+            "deduplication_on_engagement": request.deduplication_on_engagement,
+            "lead": request.lead,
+            "tags": request.tags,
+            "close_old_findings": str(request.close_old_findings),
+            "close_old_findings_product_scope": str(request.close_old_findings_product_scope),
+            "push_to_jira": str(request.push_to_jira),
+            "environment": request.environment,
+            "version": request.version,
+            "build_id": request.build_id,
+            "branch_tag": request.branch_tag,
+            "commit_hash": request.commit_hash,
+            "api_scan_configuration": str(request.api_scan_configuration) if request.api_scan_configuration!=0 else "",
+            "service": request.service,
+            "group_by": request.group_by
         }
         multipart_data = MultipartEncoder(fields=data)
 
@@ -56,6 +56,7 @@ class ImportScanRestConsumer:
 
         if response.status_code != 201:
             logger.error(response.status_code)
+            logger.error(response.json())
             raise ValidationError(f"dojo: {response}")
         return response
 

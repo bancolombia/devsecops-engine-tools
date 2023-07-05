@@ -19,7 +19,7 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.scan
 )
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.defect_dojo.domain.user_case.import_scan import ImportScanUserCase
-from devsecops_engine_utilities.helper.validation_error import ValidationError
+from devsecops_engine_utilities.utils.validation_error import ValidationError
 
 
 def import_scan_request_instance(

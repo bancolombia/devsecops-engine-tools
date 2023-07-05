@@ -1,4 +1,4 @@
-from devsecops_engine_utilities.helper.logger_info import MyLogger
+from devsecops_engine_utilities.utils.logger_info import MyLogger
 from requests import Response
 logger = MyLogger.__call__().get_logger()
 
