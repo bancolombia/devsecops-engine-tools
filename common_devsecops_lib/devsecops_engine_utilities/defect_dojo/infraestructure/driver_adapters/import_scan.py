@@ -25,7 +25,7 @@ class ImportScanRestConsumer:
             # "file": request.file,
             "product_type_name": request.product_type_name,
             "product_name": request.product_name,
-            "engagement_name": "defect-dojo",#TODO: SOLO TEST, RENOMBRAR AL ERMINAR LOS TEST
+            "engagement_name": request.engagement_name,
             "engagement_end_date": request.engagement_end_date,
             "source_code_management_uri": request.source_code_management_uri,
             "engagement": str(request.engagement) if request.engagement!=0 else "",
