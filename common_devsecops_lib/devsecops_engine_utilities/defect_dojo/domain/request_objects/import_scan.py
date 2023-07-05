@@ -13,6 +13,8 @@ class ImportScanRequest:
     product_type_name: str = ""
     product_name: str = ""
     engagement_name: str = ""
+    engagement_end_date: str = ""
+    source_code_management_uri: str = ""
     engagement: int = 0
     auto_create_context: str = ""
     deduplication_on_engagement: str = ""
@@ -22,15 +24,16 @@ class ImportScanRequest:
     close_old_findings_product_scope: str = ""
     push_to_jira: str = ""
     environment: str = ""
+    version: str = "" 
     build_id: str = ""
     branch_tag: str = ""
     commit_hash: str = ""
     api_scan_configuration: int = 0
     service: str = ""
     group_by: str = ""
-    test_title: str = ""
-    product_description: str = ""
     create_finding_groups_for_all_findings: str = ""
+    # ****another parameter outside defect dojo*****
+    product_description: str = ""
     tools_configuration: str = ""
     code_app: str = ""
     token: str = ""
@@ -41,6 +44,7 @@ class ImportScanRequest:
     @classmethod
     def from_dict(cls, obj):
         obj = cls(
+            scan_date=obj.get("scan_date"),
             minimum_severity=obj.get("minimum_severity"),
             active=obj.get("active"),
             verified=obj.get("verified"),
@@ -50,13 +54,24 @@ class ImportScanRequest:
             product_type_name=obj.get("product_type_name"),
             product_name=obj.get("product_name"),
             engagement_name=obj.get("engagement_name"),
+            engagement_end_date=obj.get("engagement_end_date"),
+            source_code_management_uri=obj.get("source_code_management_uri"),
+            engagement=obj.get("engagement"),
             auto_create_context=obj.get("auto_create_context"),
             deduplication_on_engagement=obj.get("deduplication_on_engagement"),
             lead=obj.get("lead"),
+            tags=obj.get("tags"),
             close_old_findings=obj.get("close_old_findings"),
             close_old_findings_product_scope=obj.get("close_old_findings_product_scope"),
             push_to_jira=obj.get("push_to_jira"),
+            environment=obj.get("environment"),
+            version=obj.get("version"),
+            build_id=obj.get("build_id"),
+            branch_tag=obj.get("branch_tag"),
+            commit_hash=obj.get("commit_hash"),
             api_scan_configuration=obj.get("api_scan_configuration"),
+            service=obj.get("service"),
+            group_by=obj.get("group_by"),
             create_finding_groups_for_all_findings=obj.get("create_finding_groups_for_all_findings"),
         )
         return obj

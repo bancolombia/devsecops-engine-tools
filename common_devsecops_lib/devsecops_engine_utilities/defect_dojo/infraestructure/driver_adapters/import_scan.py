@@ -16,14 +16,34 @@ class ImportScanRestConsumer:
     def import_scan_api(self, request: ImportScanRequest):
         url = f"{self.__host}/api/v2/import-scan/"
         data = {
+            # "scan_date": request.scan_date,
+            # "minimum_severity": request.minimum_severity,
             "active": request.active,
             "verified": request.verified,
-            "scan_type": request.scan_type,
-            "product_name": request.product_name,
-            "engagement_name": request.engagement_name,
-            "auto_create_context": request.auto_create_context,
+            # "scan_type": request.scan_type,
+            # "endpoint_to_add": request.endpoint_to_add,
+            # "file": request.file,
             "product_type_name": request.product_type_name,
-            "api_scan_configuration": str(request.api_scan_configuration),
+            "product_name": request.product_name,
+            # "engagement_name": request.engagement_name,
+            # "engagement_end_date": request.engagement_end_date,
+            # "source_code_management_uri": request.source_code_management_uri,
+            # "engagement": str(request.engagement) if request.engagement!=0 else "",
+            "auto_create_context": request.auto_create_context,
+            # "deduplication_on_engagement": request.deduplication_on_engagement,
+            # "lead": request.lead,
+            # "tags": request.tags,
+            # "close_old_findings": request.close_old_findings,
+            # "close_old_findings_product_scope": request.close_old_findings_product_scope,
+            # "push_to_jira": request.push_to_jira,
+            # "environment": request.environment,
+            # "version": request.version,
+            # "build_id": request.build_id,
+            # "branch_tag": request.branch_tag,
+            # "commit_hash": request.commit_hash,
+            # "api_scan_configuration": str(request.api_scan_configuration) if request.api_scan_configuration!=0 else "",
+            # "service": request.service,
+            # "group_by": request.group_by
         }
         multipart_data = MultipartEncoder(fields=data)
 
@@ -36,19 +56,40 @@ class ImportScanRestConsumer:
 
         if response.status_code != 201:
             logger.error(response.status_code)
-            raise ValidationError(response)
+            raise ValidationError(f"dojo: {response}")
         return response
 
     def import_scan(self, request: ImportScanRequest, files):
         url = f"{self.__host}/api/v2/import-scan/"
         payload = {
+            "scan_date": request.scan_date,
+            "minimum_severity": request.minimum_severity,
             "active": request.active,
             "verified": request.verified,
             "scan_type": request.scan_type,
+            "endpoint_to_add": request.endpoint_to_add,
+            "file": request.file,
+            "product_type_name": request.product_type_name,
             "product_name": request.product_name,
             "engagement_name": request.engagement_name,
+            "engagement_end_date": request.engagement_end_date,
+            "source_code_management_uri": request.source_code_management_uri,
+            "engagement": request.engagement if request.engagement!=0 else "",
             "auto_create_context": request.auto_create_context,
-            "product_type_name": request.product_type_name,
+            "deduplication_on_engagement": request.deduplication_on_engagement,
+            "lead": request.lead,
+            "tags": request.tags,
+            "close_old_findings": request.close_old_findings,
+            "close_old_findings_product_scope": request.close_old_findings_product_scope,
+            "push_to_jira": request.push_to_jira,
+            "environment": request.environment,
+            "version": request.version,
+            "build_id": request.build_id,
+            "branch_tag": request.branch_tag,
+            "commit_hash": request.commit_hash,
+            "api_scan_configuration": str(request.api_scan_configuration) if request.api_scan_configuration!=0 else "",
+            "service": request.service,
+            "group_by": request.group_by
         }
 
         headers = {"Authorization": f"Token {self.__token}"}

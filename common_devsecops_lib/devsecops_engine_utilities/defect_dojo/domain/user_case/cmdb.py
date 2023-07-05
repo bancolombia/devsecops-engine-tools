@@ -26,7 +26,8 @@ class CmdbUserCase:
         request.product_type_name = product_type_name_map.get(
             product_data.product_type_name, product_data.product_type_name
         )
-        request.product_name = product_data.product_name
+        # request.product_name = product_data.product_name
+        request.product_name = "defect_dojo"
         request.tags = product_data.tag_product
         request.product_description = product_data.product_description
         logger.info(f"product_type_name: {request.product_type_name}")
