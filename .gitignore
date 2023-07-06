@@ -26,3 +26,4 @@ coverage.xml
 Pipfile
 Pipfile-lock
 prueba.py
+main.py
