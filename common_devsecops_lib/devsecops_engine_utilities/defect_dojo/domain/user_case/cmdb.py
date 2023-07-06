@@ -1,8 +1,10 @@
 import re
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.cmdb import CmdbRestConsumer
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
+from devsecops_engine_utilities.defect_dojo.infraestructure.repository.settings import SettingRepo
 from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities.utils.azure_devops_api import AzureDevopsApi
 
 logger = MyLogger.__call__().get_logger()
 
@@ -17,10 +19,13 @@ product_type_name_map = {
 
 
 class CmdbUserCase:
-    def __init__(self, rest_consumer_cmdb: CmdbRestConsumer) -> None:
+    def __init__(self, rest_consumer_cmdb: CmdbRestConsumer,
+                 settings: SettingRepo) -> None:
         self.__rc_cmdb = rest_consumer_cmdb
+        self.__settings = settings
 
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
+        # self.get_cmdb_mapping()
         request.code_app = self.get_code_app(request.engagement_name)
         product_data = self.__rc_cmdb.get_product_info(request)
         request.product_type_name = product_type_name_map.get(
@@ -37,10 +42,22 @@ class CmdbUserCase:
         return request
 
     def get_code_app(self, engagement_name: str):
-        m = re.search(r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_", engagement_name, re.IGNORECASE)
+        m = re.search(r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_",
+                      engagement_name, re.IGNORECASE)
         if m is None:
             logger.error(f"Engagement name {engagement_name} not match")
             raise ValidationError("Engagement name not match")
         code_app = m.group(1)
         logger.debug(code_app)
         return code_app.lower()
+
+    def get_cmdb_mapping(self):
+        azure_devops_api = AzureDevopsApi(
+            personal_access_token=self.__settings.personal_access_token,
+            system_team_project_id=self.__settings.system_team_project_id,
+            organization_url=self.__settings.organization_url)
+
+        azure_devops_api.get_remote_json_config(
+            remote_config_repo=self.__settings.remote_config_repo,
+            remote_config_path=self.__settings.remote_config_path)
+
