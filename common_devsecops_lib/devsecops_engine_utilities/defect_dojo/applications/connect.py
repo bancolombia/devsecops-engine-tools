@@ -17,7 +17,8 @@ class Connect:
         request: ImportScanRequest = ImportScanSerializer().load(kwargs)
         rc = CmdbRestConsumer(request,
                               token=request.token_cmdb,
-                              host=request.host_cmdb)
+                              host=request.host_cmdb,
+                              mapping_cmdb=request.cmdb_mapping)
         uc = CmdbUserCase(rest_consumer_cmdb=rc)
         response = uc.execute(request)
         return response

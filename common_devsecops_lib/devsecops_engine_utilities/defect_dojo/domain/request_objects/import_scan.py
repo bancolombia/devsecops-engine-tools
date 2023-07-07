@@ -40,6 +40,14 @@ class ImportScanRequest:
     host_cmdb: str = ""
     token_defect_dojo: str = ""
     host_defect_dojo: str = ""
+    # *** config map ***
+    organization_url: str = ""
+    personal_access_token: str = ""
+    repository_id: str = ""
+    remote_config_path: str = ""
+    project_remote_config: str = ""
+    cmdb_mapping: dict = None
+    product_type_name_mapping: dict = None
 
     @classmethod
     def from_dict(cls, obj):
@@ -73,6 +81,13 @@ class ImportScanRequest:
             service=obj.get("service"),
             group_by=obj.get("group_by"),
             create_finding_groups_for_all_findings=obj.get("create_finding_groups_for_all_findings"),
+            organization_url=obj.get("organization_url"),
+            personal_access_token=obj.get("personal_access_token"),
+            repository_id=obj.get("remote_config_repo"),
+            remote_config_path=obj.get("remote_config_path"),
+            project_remote_config=obj.get("project_remote_config"),
+            cmdb_mapping=obj.get("cmdb_mapping"),
+            product_type_name_mapping=obj.get("product_type_name_mapping")
         )
         return obj
 

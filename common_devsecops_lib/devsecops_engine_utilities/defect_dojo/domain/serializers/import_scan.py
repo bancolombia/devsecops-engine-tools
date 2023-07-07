@@ -202,6 +202,13 @@ class ImportScanSerializer(Schema):
     host_cmdb = fields.Url(required=True)
     token_defect_dojo = fields.Str(required=True)
     host_defect_dojo = fields.Str(required=True)
+    organization_url = fields.Str(required=True)
+    personal_access_token = fields.Str(required=True)
+    repository_id = fields.Str(required=True)
+    remote_config_path = fields.Str(required=True)
+    project_remote_config = fields.Str(required=True)
+    cmdb_mapping=fields.Dict(required=True)
+    product_type_name_mapping = fields.Dict(required=False)
 
     @post_load
     def make_cmdb(self, data, **kwargs):
