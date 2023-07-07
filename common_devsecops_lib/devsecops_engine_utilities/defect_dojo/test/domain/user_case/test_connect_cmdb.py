@@ -85,6 +85,10 @@ def test_execute(engagement_name):
     # mock class azureDevopsApi
     mock_utils_azure = MagicMock(spec=AzureDevopsApi)
     mock_utils_azure.get_azure_connection.return_value = mock_connection
+    azure_devops_api = AzureDevopsApi(personal_access_token="asjfdiajf",
+                                      project_remote_config="project remote test",
+                                      organization_url="http://organization_url/")
+    
 
     uc = CmdbUserCase(rest_consumer_cmdb=mock_rc,
                       utils_azure=mock_utils_azure)
