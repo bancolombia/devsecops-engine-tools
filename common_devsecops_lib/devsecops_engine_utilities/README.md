@@ -65,5 +65,8 @@ if __name__ == "__main__":
 
     response = DefectDojo.send_import_scan(request)
 
+
+https://dev.azure.com/{organization}/{project}/_git/{repository}
+
 # How can I help?
 

@@ -10,9 +10,13 @@ logger = MyLogger.__call__().get_logger()
 
 
 class CmdbRestConsumer:
-    def __init__(self, request: ImportScanRequest, token: str, host: str) -> None:
+    def __init__(self, request: ImportScanRequest,
+                 token: str,
+                 host: str,
+                 mapping_cmdb: dict) -> None:
         self.__token = token
         self.__host = host
+        self.__mapping_cmdb = mapping_cmdb
 
     def get_product_info(self, request: ImportScanRequest) -> Cmdb:
         data = json.dumps({"codapp": request.code_app})
@@ -27,13 +31,13 @@ class CmdbRestConsumer:
             logger.error(f"Engagement: {request.code_app} not found")
             raise ValidationError("Engagement not found")
         data = response.json()[0]
-        data_map = {
-            "product_type_name": data["nombreevc"],
-            "product_name": data["nombreapp"],
-            "tag_product": data["nombreentorno"],
-            "product_description": data["arearesponsableti"],
-            "codigo_app": data["CodigoApp"],
-        }
-
+        data_map = self.mapping_cmdb(data)
+        logger.info(data_map)
         cmdb_object = Cmdb.from_dict(data_map)
         return cmdb_object
+    
+    def mapping_cmdb(self, data):
+        data_map = {}
+        for key, value in self.__mapping_cmdb.items():
+            data_map[key] = data[value]
+        return data_map

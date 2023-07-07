@@ -23,7 +23,7 @@ class CmdbUserCase:
         self.__rc_cmdb = rest_consumer_cmdb
 
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
-        # self.get_cmdb_mapping()
+        self.get_cmdb_mapping(request)
         request.code_app = self.get_code_app(request.engagement_name)
         product_data = self.__rc_cmdb.get_product_info(request)
         request.product_type_name = product_type_name_map.get(
@@ -32,11 +32,6 @@ class CmdbUserCase:
         request.product_name = product_data.product_name
         request.tags = product_data.tag_product
         request.product_description = product_data.product_description
-        logger.info(f"product_type_name: {request.product_type_name}")
-        logger.info(f"product_name: {request.product_name}")
-        logger.info(f"tags product: {request.tags}")
-        logger.info(f"product description: {request.product_description}")
-        logger.info(f"code app:  {request.code_app}")
         return request
 
     def get_code_app(self, engagement_name: str):
@@ -49,13 +44,13 @@ class CmdbUserCase:
         logger.debug(code_app)
         return code_app.lower()
 
-    def get_cmdb_mapping(self):
+    def get_cmdb_mapping(self, request: ImportScanRequest):
         azure_devops_api = AzureDevopsApi(
-            personal_access_token=self.__settings.personal_access_token,
-            system_team_project_id=self.__settings.system_team_project_id,
-            organization_url=self.__settings.organization_url)
+            personal_access_token=request.personal_access_token,
+            project_remote_config=request.project_remote_config,
+            organization_url=request.organization_url)
 
-        azure_devops_api.get_remote_json_config(
-            remote_config_repo=self.__settings.remote_config_repo,
-            remote_config_path=self.__settings.remote_config_path)
+        product_type_name_map=azure_devops_api.get_remote_json_config(
+            repository_id=request.repository_id,
+            remote_config_path=request.remote_config_path)
 
