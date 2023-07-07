@@ -8,7 +8,6 @@ from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables impo
 logger = MyLogger.__call__().get_logger()
 
 class AzureDevopsApi():
-    #TODO: Singleton
 
     def __init__(self,
                  personal_access_token: str,
@@ -18,9 +17,8 @@ class AzureDevopsApi():
         self.__personal_access_token = personal_access_token
         self.__organization_url = organization_url
         self.__project_remote_config = project_remote_config
-        self.__connection = self.__get_azure_connection()
 
-    def __get_azure_connection(self) -> Connection:
+    def get_azure_connection(self) -> Connection:
         try:
             credentials = BasicAuthentication(
                 username="",
@@ -36,15 +34,18 @@ class AzureDevopsApi():
                 "Error al obtener la conexión de Azure DevOps: " + str(e)
                 )
 
-    def get_remote_json_config(self, repository_id, remote_config_path):
+    def get_remote_json_config(self, connection: Connection,
+                               repository_id,
+                               remote_config_path):
         try:
-            git_client = self.__connection.clients.get_git_client()
+            git_client = connection.clients.get_git_client()
             file_content = git_client.get_item_text(
                 repository_id=repository_id,
                 path=remote_config_path,
                 project=self.__project_remote_config
             )
             data = json.loads(b"".join(file_content).decode("utf-8"))
+            logger.info(data)
             return data
         except Exception as e:
             # Arrojar una excepción personalizada

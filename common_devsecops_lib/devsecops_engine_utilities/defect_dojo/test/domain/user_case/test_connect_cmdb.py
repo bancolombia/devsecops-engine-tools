@@ -10,6 +10,8 @@ from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan i
     ImportScanRequest,
 )
 from devsecops_engine_utilities.utils.validation_error import ValidationError
+from devsecops_engine_utilities.utils.azure_devops_api import AzureDevopsApi
+from azure.devops.connection import Connection
 from devsecops_engine_utilities.defect_dojo.domain.user_case.cmdb import CmdbUserCase
 
 
@@ -46,7 +48,19 @@ def get_cmdb_instance():
 def test_execute(engagement_name):
     mock_rest_consumer_cmdb = get_cmdb_instance()
     request = {
+        "cmdb_mapping": {
+            "product_type_name": "nombreevc",
+            "product_name": "nombreapp",
+            "tag_product": "nombreentorno",
+            "product_description": "arearesponsableti",
+            "codigo_app": "CodigoApp",
+        },
+        "organization_url": "https://organizaciont.visualstudio.com/",
+        "personal_access_token": "tokenxxxx12354564",
         "product_name": "test product name",
+        "repository_id": "repositoryid_or_name_repository",
+        "remote_config_path": "/Vultracker/cmdb_mapping.json",
+        "project_remote_config": "Vicepresidencia Servicios de Tecnología",
         "token_cmdb": "123456789",
         "host_cmdb": "http://localhost:8000",
         "token_defect_dojo": "123456789101212",
@@ -57,10 +71,24 @@ def test_execute(engagement_name):
         "tags": "evc",
     }
     request: ImportScanRequest = ImportScanSerializer().load(request)
-    rc = mock_rest_consumer_cmdb(
+    mock_rc = mock_rest_consumer_cmdb(
         request, token="91qewuro9quowedafj", host="https://localhost:8000"
     )
-    uc = CmdbUserCase(rest_consumer_cmdb=rc)
+    # response file contect json
+    file_content = [b'{"key": "value"}']
+    # mock git client
+    mock_git_client = MagicMock()
+    mock_git_client.get_item_text.return_value = file_content
+    # mock conecction
+    mock_connection = MagicMock()
+    mock_connection.clients.get_git_client.return_value = mock_git_client
+    # mock class azureDevopsApi
+    mock_utils_azure = MagicMock(spec=AzureDevopsApi)
+    mock_utils_azure.get_azure_connection.return_value = mock_connection
+
+    uc = CmdbUserCase(rest_consumer_cmdb=mock_rc,
+                      utils_azure=mock_utils_azure)
+
     response = uc.execute(request)
     assert response.scan_type == "JFrog Xray Scan"
     assert response.code_app == "nu0429001"
@@ -71,6 +99,6 @@ def test_execute(engagement_name):
     [("error"), ("nu12212error")]
 )
 def test_get_code_app(engagement_name):
-    uc = CmdbUserCase(rest_consumer_cmdb=None)
+    uc = CmdbUserCase(rest_consumer_cmdb=None, utils_azure=None)
     with pytest.raises(ValidationError):
         uc.get_code_app(engagement_name)
