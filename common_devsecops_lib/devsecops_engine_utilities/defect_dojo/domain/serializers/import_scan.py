@@ -198,8 +198,8 @@ class ImportScanSerializer(Schema):
     create_finding_groups_for_all_findings = fields.Str(required=False)
     tools_configuration = fields.Int(required=False)
     code_app = fields.Str(required=False)
-    token = fields.Str(required=True)
-    host = fields.Url(required=True)
+    token_cmdb = fields.Str(required=True)
+    host_cmdb = fields.Url(required=True)
     token_defect_dojo = fields.Str(required=True)
     host_defect_dojo = fields.Str(required=True)
 

@@ -36,8 +36,8 @@ class ImportScanRequest:
     product_description: str = ""
     tools_configuration: str = ""
     code_app: str = ""
-    token: str = ""
-    host: str = ""
+    token_cmdb: str = ""
+    host_cmdb: str = ""
     token_defect_dojo: str = ""
     host_defect_dojo: str = ""
 

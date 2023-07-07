@@ -27,3 +27,4 @@ Pipfile
 Pipfile-lock
 prueba.py
 main.py
+common_devsecops_lib/sheckov_scan.json

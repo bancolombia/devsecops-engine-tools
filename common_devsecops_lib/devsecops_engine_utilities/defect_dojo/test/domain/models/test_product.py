@@ -1,5 +1,5 @@
 import json
-from settings import DEVSECOPS_ENGINE_UTILITIES_PATH
+from devsecops_engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_PATH
 from devsecops_engine_utilities.defect_dojo.domain.models.product_list import ProductList
 
 
