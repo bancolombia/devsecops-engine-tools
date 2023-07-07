@@ -19,12 +19,24 @@ product_type_name_map = {
 
 
 class CmdbUserCase:
-    def __init__(self, rest_consumer_cmdb: CmdbRestConsumer) -> None:
+    def __init__(self, rest_consumer_cmdb: CmdbRestConsumer,
+                 utils_azure: AzureDevopsApi) -> None:
+
         self.__rc_cmdb = rest_consumer_cmdb
+        self.__utils_azure = utils_azure
 
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
-        self.get_cmdb_mapping(request)
+        # Connection config map
+        connection = self.__utils_azure.get_azure_connection()
+        product_type_name_map = self.__utils_azure.get_remote_json_config(
+            connection=connection,
+            repository_id=request.repository_id,
+            remote_config_path=request.remote_config_path)
+
+        # regular exprecion
         request.code_app = self.get_code_app(request.engagement_name)
+
+        # connect cmdb
         product_data = self.__rc_cmdb.get_product_info(request)
         request.product_type_name = product_type_name_map.get(
             product_data.product_type_name, product_data.product_type_name
@@ -32,6 +44,7 @@ class CmdbUserCase:
         request.product_name = product_data.product_name
         request.tags = product_data.tag_product
         request.product_description = product_data.product_description
+
         return request
 
     def get_code_app(self, engagement_name: str):
@@ -44,13 +57,4 @@ class CmdbUserCase:
         logger.debug(code_app)
         return code_app.lower()
 
-    def get_cmdb_mapping(self, request: ImportScanRequest):
-        azure_devops_api = AzureDevopsApi(
-            personal_access_token=request.personal_access_token,
-            project_remote_config=request.project_remote_config,
-            organization_url=request.organization_url)
-
-        product_type_name_map=azure_devops_api.get_remote_json_config(
-            repository_id=request.repository_id,
-            remote_config_path=request.remote_config_path)
 
