@@ -1,5 +1,5 @@
 import pytest
-from settings import DEVSECOPS_ENGINE_UTILITIES_PATH
+from devsecops_engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_PATH
 from unittest.mock import MagicMock
 from devsecops_engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
 from devsecops_engine_utilities.defect_dojo.domain.serializers.import_scan import ImportScanSerializer
@@ -47,8 +47,8 @@ def test_execute(engagement_name):
     mock_rest_consumer_cmdb = get_cmdb_instance()
     request = {
         "product_name": "test product name",
-        "token": "123456789",
-        "host": "http://localhost:8000",
+        "token_cmdb": "123456789",
+        "host_cmdb": "http://localhost:8000",
         "token_defect_dojo": "123456789101212",
         "host_defect_dojo": "http://localhost:8000",
         "scan_type": "JFrog Xray Scan",

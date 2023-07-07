@@ -16,6 +16,6 @@ REMOTE_CONFIG_PATH = "https://grupobancolombia.visualstudio.com/Vicepresidencia%
 print(REMOTE_CONFIG_PATH)
 SYSTEM_TEAM_PROJECT_ID = ""
 # ORGANIZATION_URL = "https://dev.azure.com/PNFEngineTest/"
-ORGANIZATION_URL = "https://grupobancolombia.visualstudio.com/Vicepresidencia%20Servicios%20de%20Tecnolog%C3%ADa"
+ORGANIZATION_URL = "https://grupobancolombia.visualstudio.com/Vicepresidencia%20Servicios%20de%20Tecnolog%C3%ADa/"
         
 print(ORGANIZATION_URL)

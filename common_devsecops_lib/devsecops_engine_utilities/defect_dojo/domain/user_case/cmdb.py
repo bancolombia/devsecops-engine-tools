@@ -19,10 +19,8 @@ product_type_name_map = {
 
 
 class CmdbUserCase:
-    def __init__(self, rest_consumer_cmdb: CmdbRestConsumer,
-                 settings: SettingRepo) -> None:
+    def __init__(self, rest_consumer_cmdb: CmdbRestConsumer) -> None:
         self.__rc_cmdb = rest_consumer_cmdb
-        self.__settings = settings
 
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
         # self.get_cmdb_mapping()

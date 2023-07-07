@@ -1,6 +1,6 @@
 import pytest
 import json
-from settings import DEVSECOPS_ENGINE_UTILITIES_PATH
+from devsecops_engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_PATH
 from unittest.mock import MagicMock
 from devsecops_engine_utilities.defect_dojo.domain.models.product_type_list import ProductTypeList
 from devsecops_engine_utilities.defect_dojo.domain.models.scan_configuration import ScanConfiguration
@@ -29,8 +29,8 @@ def import_scan_request_instance(
 ) -> ImportScanRequest:
     request = ImportScanRequest(
         product_name=product_name,
-        token="123456789",
-        host="https://test/test.com",
+        token_cmdb="123456789",
+        host_cmdb="https://test/test.com",
         token_defect_dojo="123456789101212",
         host_defect_dojo="http://localhost:8000",
         scan_type=par_scan_type,

@@ -15,13 +15,9 @@ class Connect:
     # Configuration Management Database aws
     def cmdb(**kwargs) -> ImportScanRequest:
         request: ImportScanRequest = ImportScanSerializer().load(kwargs)
-        rc = CmdbRestConsumer(request, token=request.token, host=request.host)
-        repo_settings = SettingRepo(
-            personal_access_token=PERSONAL_ACCESS_TOKEN,
-            remote_config_path=REMOTE_CONFIG_PATH,
-            remote_config_repo=REMOTE_CONFIG_REPO,
-            system_team_project_id=SYSTEM_TEAM_PROJECT_ID,
-            organization_url=ORGANIZATION_URL)
-        uc = CmdbUserCase(rest_consumer_cmdb=rc, settings=repo_settings)
+        rc = CmdbRestConsumer(request,
+                              token=request.token_cmdb,
+                              host=request.host_cmdb)
+        uc = CmdbUserCase(rest_consumer_cmdb=rc)
         response = uc.execute(request)
         return response

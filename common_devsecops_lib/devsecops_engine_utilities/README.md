@@ -39,9 +39,9 @@ if __name__ == "__main__":
     # Example Checkov Scan file
 
     request: ImportScanRequest = Connect.cmdb(
-        token="4n9bde64nd07ebcu86shbco7m39n0",
+        token_cmdb="4n9bde64nd07ebcu86shbco7m39n0",
         host="host cmdb",
-        token_defect_dojo="test56de11694e2fe83238235db9b007bb8736beae349011ec",
+        token_cmdb_defect_dojo="test56de11694e2fe83238235db9b007bb8736beae349011ec",
         host_defect_dojo="http://localhost:8000",
         scan_type="Checkov Scan",
         engagement_name="Engagement_Services_xxxxxxx",
@@ -54,9 +54,9 @@ if __name__ == "__main__":
     # # Example api Scan sonnar
 
     request: ImportScanRequest = Connect.cmdb(
-        token="4n9bde64nd07ebcu86shbco7m39n0",
+        token_cmdb="4n9bde64nd07ebcu86shbco7m39n0",
         host="https://cmdb.amazonaws.com",
-        token_defect_dojo="test56de11694e2fe8238949845db9b007bb8736beae349011ec",
+        token_cmdb_defect_dojo="test56de11694e2fe8238949845db9b007bb8736beae349011ec",
         host_defect_dojo="http://localhost:8000",
         scan_type="SonarQube API Import",
         engagement_name="Engagement_Services_xxxxxx",
