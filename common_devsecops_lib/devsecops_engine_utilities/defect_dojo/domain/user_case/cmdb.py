@@ -1,29 +1,26 @@
 import re
-from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.cmdb import CmdbRestConsumer
-from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
-from devsecops_engine_utilities.defect_dojo.infraestructure.repository.settings import SettingRepo
-from devsecops_engine_utilities.utils.validation_error import ValidationError
-from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities.utils.azure_devops_api import AzureDevopsApi
+from devsecops_engine_utilities.defect_dojo.infraestructure.\
+    driver_adapters.cmdb import CmdbRestConsumer
+from devsecops_engine_utilities.defect_dojo.domain.\
+    request_objects.import_scan import ImportScanRequest
+from devsecops_engine_utilities.utils.\
+    validation_error import ValidationError
+from devsecops_engine_utilities.utils.\
+    logger_info import MyLogger
+from devsecops_engine_utilities.azuredevops.\
+    infrastructure.azure_devops_api import AzureDevopsApi
 
 logger = MyLogger.__call__().get_logger()
-
-product_type_name_map = {
-    "ADMINISTRATIVO Y FINANCIERO": "Apoyo Administrativo Y Financiero",
-    "ARQUITECTURA DE TI": "CDE - ARQUITECTURA DE TI",
-    "AUTENTICACION Y MONITOREO": "EVC - AUTENTICACION Y MONITOREO",
-    "BIENESTAR FINANCI MIS ALIADOS": "EVC - BIENESTAR FINANCIERO",
-    "CDE ARQUITECTURA": "CDE - ARQUITECTURA DE TI",
-    "CDE DEVSECOPS, ING. SOFTWARE Y PRUEBAS": "CDE - INGENIERIA DE SOFTWARE DEVEXP",
-}
 
 
 class CmdbUserCase:
     def __init__(self, rest_consumer_cmdb: CmdbRestConsumer,
-                 utils_azure: AzureDevopsApi) -> None:
+                 utils_azure: AzureDevopsApi,
+                 expression) -> None:
 
         self.__rc_cmdb = rest_consumer_cmdb
         self.__utils_azure = utils_azure
+        self.__expression = expression
 
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
         # Connection config map
@@ -48,7 +45,7 @@ class CmdbUserCase:
         return request
 
     def get_code_app(self, engagement_name: str):
-        m = re.search(r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_",
+        m = re.search(self.__expression,
                       engagement_name, re.IGNORECASE)
         if m is None:
             logger.error(f"Engagement name {engagement_name} not match")

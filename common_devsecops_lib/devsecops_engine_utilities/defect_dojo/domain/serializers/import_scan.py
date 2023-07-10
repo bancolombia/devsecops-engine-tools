@@ -209,6 +209,7 @@ class ImportScanSerializer(Schema):
     project_remote_config = fields.Str(required=True)
     cmdb_mapping=fields.Dict(required=True)
     product_type_name_mapping = fields.Dict(required=False)
+    expression = fields.Str(required=True)
 
     @post_load
     def make_cmdb(self, data, **kwargs):

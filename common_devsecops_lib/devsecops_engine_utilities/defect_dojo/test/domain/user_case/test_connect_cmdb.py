@@ -10,7 +10,7 @@ from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan i
     ImportScanRequest,
 )
 from devsecops_engine_utilities.utils.validation_error import ValidationError
-from devsecops_engine_utilities.utils.azure_devops_api import AzureDevopsApi
+from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import AzureDevopsApi
 from azure.devops.connection import Connection
 from devsecops_engine_utilities.defect_dojo.domain.user_case.cmdb import CmdbUserCase
 
