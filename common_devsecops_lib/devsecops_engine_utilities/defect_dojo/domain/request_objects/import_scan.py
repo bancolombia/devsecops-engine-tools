@@ -48,6 +48,7 @@ class ImportScanRequest:
     project_remote_config: str = ""
     cmdb_mapping: dict = None
     product_type_name_mapping: dict = None
+    expression: str = ""
 
     @classmethod
     def from_dict(cls, obj):
@@ -87,7 +88,8 @@ class ImportScanRequest:
             remote_config_path=obj.get("remote_config_path"),
             project_remote_config=obj.get("project_remote_config"),
             cmdb_mapping=obj.get("cmdb_mapping"),
-            product_type_name_mapping=obj.get("product_type_name_mapping")
+            product_type_name_mapping=obj.get("product_type_name_mapping"),
+            expression=obj.get("expression")
         )
         return obj
 
