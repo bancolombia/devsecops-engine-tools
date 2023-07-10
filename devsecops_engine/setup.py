@@ -13,7 +13,7 @@ def get_requirements():
 
 setuptools.setup(
     name="devsecops_engine_sast",
-    version="0.0.1",
+    version="1.0.0",
     author="Bancolombia devsecops Team ",
     author_email="devsecops@bancolombia.com.co",
     description="tool sast for engine devsecops",

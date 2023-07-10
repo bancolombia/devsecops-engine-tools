@@ -45,7 +45,6 @@ class AzureDevopsApi():
                 project=self.__project_remote_config
             )
             data = json.loads(b"".join(file_content).decode("utf-8"))
-            logger.info(data)
             return data
         except Exception as e:
             # Arrojar una excepción personalizada
