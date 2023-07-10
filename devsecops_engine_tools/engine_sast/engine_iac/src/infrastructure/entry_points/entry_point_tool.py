@@ -10,7 +10,7 @@ from engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import CheckovTool
 
-from engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
+# from engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
     CheckovConfig,
 )
@@ -72,10 +72,10 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool):
     Printers.print_logo_tool()
     azure_devops_integration = AzureDevopsIntegration()
     azure_devops_integration.get_azure_connection()
-    # data_file_tool = azure_devops_integration.get_remote_json_config(
-    #    remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
-    # )[tool]
-    data_file_tool = json.loads(remote_config)[tool]
+    data_file_tool = azure_devops_integration.get_remote_json_config(
+        remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
+    )[tool]
+    # data_file_tool = json.loads(remote_config)[tool]
     folders_to_scan = search_folders(data_file_tool["SEARCH_PATTERN"], data_file_tool["IGNORE_SEARCH_PATTERN"])
 
     output_queue = queue.Queue()
