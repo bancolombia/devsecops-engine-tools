@@ -6,7 +6,10 @@ from devsecops_engine_utilities.defect_dojo.\
     domain.user_case.cmdb import CmdbUserCase
 from devsecops_engine_utilities.defect_dojo.\
     infraestructure.driver_adapters.cmdb import CmdbRestConsumer
-from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import AzureDevopsApi
+from devsecops_engine_utilities.azuredevops.\
+    infrastructure.azure_devops_api import AzureDevopsApi
+from devsecops_engine_utilities.utils.session_manager\
+    import SessionManager
 
 
 class Connect:
@@ -14,16 +17,17 @@ class Connect:
     # Configuration Management Database aws
     def cmdb(**kwargs) -> ImportScanRequest:
         request: ImportScanRequest = ImportScanSerializer().load(kwargs)
-        rc = CmdbRestConsumer(request,
-                              token=request.token_cmdb,
-                              host=request.host_cmdb,
-                              mapping_cmdb=request.cmdb_mapping)
+        rc = CmdbRestConsumer(
+            token=request.token_cmdb,
+            host=request.host_cmdb,
+            mapping_cmdb=request.cmdb_mapping,
+            session=SessionManager())
 
         utils_azure = AzureDevopsApi(
             personal_access_token=request.personal_access_token,
             project_remote_config=request.project_remote_config,
             organization_url=request.organization_url)
-
+        
         uc = CmdbUserCase(rest_consumer_cmdb=rc,
                           utils_azure=utils_azure,
                           expression=request.expression)
