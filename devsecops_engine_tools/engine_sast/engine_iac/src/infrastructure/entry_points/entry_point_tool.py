@@ -19,6 +19,7 @@ from devsecops_engine_utilities.utils.printers import (
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
     AzureDevopsIntegration,
 )
+from engine_sast.engine_iac.src.domain.model.ResultScanObject import ResultScanObject
 
 
 def get_inputs_from_cli(args):
@@ -55,7 +56,10 @@ def get_inputs_from_config_file():
 def async_scan(queue, iacScan: IacScan, rules):
     result = []
     output = iacScan.process()
-    result.append([json.loads(output), rules])
+    result_object = ResultScanObject()
+    result_object.result_json = json.loads(output)
+    result_object.rules_scan = rules
+    result.append(result_object)
     queue.put(result)
 
 
@@ -75,10 +79,10 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     Printers.print_logo_tool()
     azure_devops_integration = AzureDevopsIntegration()
     azure_devops_integration.get_azure_connection()
-    # data_file_tool = azure_devops_integration.get_remote_json_config(
-    #     remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
-    # )[tool]
-    data_file_tool = json.loads(remote_config)[tool]
+    data_file_tool = azure_devops_integration.get_remote_json_config(
+        remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
+    )[tool]
+    # data_file_tool = json.loads(remote_config)[tool]
     folders_to_scan = search_folders(data_file_tool["SEARCH_PATTERN"], data_file_tool["IGNORE_SEARCH_PATTERN"])
 
     output_queue = queue.Queue()
