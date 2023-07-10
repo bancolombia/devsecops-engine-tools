@@ -86,13 +86,9 @@ def mock_rest_product_type(product_type_empty=False):
         )
     ]
     if product_type_empty:
-        mock_rest_product_type.get_product_types.return_value = ProductTypeList(
-            count=1, results=[]
-        )
+        mock_rest_product_type.get_product_types.return_value = ProductTypeList(count=1, results=[])
     else:
-        mock_rest_product_type.get_product_types.return_value = ProductTypeList(
-            count=1, results=products
-        )
+        mock_rest_product_type.get_product_types.return_value = ProductTypeList(count=1, results=products)
     mock_rest_product_type.post_product_type.return_value = products[0]
     return mock_rest_product_type
 
@@ -111,8 +107,8 @@ def mock_rest_product(product_result_empty=False):
 
 def mock_rest_scan_configuration():
     mock_scan_configuration = MagicMock()
-    mock_scan_configuration.post_api_scan_configuration.return_value = (
-        ScanConfiguration(id=1, service_key_1="service key", tool_configuration=1)
+    mock_scan_configuration.post_api_scan_configuration.return_value = ScanConfiguration(
+        id=1, service_key_1="service key", tool_configuration=1
     )
     return mock_scan_configuration
 
@@ -223,4 +219,4 @@ def test_execute_error(
     assert isinstance(uc, ImportScanUserCase)
     assert isinstance(request, ImportScanRequest)
     with pytest.raises(ValidationError):
-        response = uc.execute(request)
+        uc.execute(request)

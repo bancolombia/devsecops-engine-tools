@@ -24,7 +24,7 @@ class ImportScanRequest:
     close_old_findings_product_scope: str = ""
     push_to_jira: str = ""
     environment: str = ""
-    version: str = "" 
+    version: str = ""
     build_id: str = ""
     branch_tag: str = ""
     commit_hash: str = ""
@@ -89,7 +89,7 @@ class ImportScanRequest:
             project_remote_config=obj.get("project_remote_config"),
             cmdb_mapping=obj.get("cmdb_mapping"),
             product_type_name_mapping=obj.get("product_type_name_mapping"),
-            expression=obj.get("expression")
+            expression=obj.get("expression"),
         )
         return obj
 

@@ -1,5 +1,4 @@
-from devsecops_engine_utilities.defect_dojo.domain.models.scan_configuration_list\
-    import ScanConfigurationList
+from devsecops_engine_utilities.defect_dojo.domain.models.scan_configuration_list import ScanConfigurationList
 
 
 class TestScanConfigurationList:

@@ -1,5 +1,4 @@
 import argparse
-import argparse
 import configparser
 import threading
 import queue
@@ -10,7 +9,7 @@ from engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import CheckovTool
 
-# from engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
+from engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
     CheckovConfig,
 )
@@ -27,12 +26,14 @@ def get_inputs_from_cli(args):
     parser.add_argument("--azure_remote_config_repo", type=str, required=True, help="")
     parser.add_argument("--azure_remote_config_path", type=str, required=True, help="")
     parser.add_argument("--tool", type=str, required=True, help="")
+    parser.add_argument("--environment", type=str, required=True, help="")
 
     args = parser.parse_args()
     return (
         args.azure_remote_config_repo,
         args.azure_remote_config_path,
         args.tool,
+        args.environment,
     )
 
 
@@ -42,10 +43,12 @@ def get_inputs_from_config_file():
     azure_remote_config_repo = config.get("enginesast.engineiac", "azure_remote_config_repo", fallback=None)
     azure_remote_config_path = config.get("enginesast.engineiac", "azure_remote_config_path", fallback=None)
     tool = config.get("enginesast.engineiac", "tool", fallback=None)
+    environment = config.get("enginesast.engineiac", "environment", fallback=None)
     return (
         azure_remote_config_repo,
         azure_remote_config_path,
         tool,
+        environment,
     )
 
 
@@ -68,14 +71,14 @@ def search_folders(search_pattern, ignore_pattern):
     return matching_folders
 
 
-def init_engine_sast_rm(remote_config_repo, remote_config_path, tool):
+def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environment):
     Printers.print_logo_tool()
     azure_devops_integration = AzureDevopsIntegration()
     azure_devops_integration.get_azure_connection()
-    data_file_tool = azure_devops_integration.get_remote_json_config(
-        remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
-    )[tool]
-    # data_file_tool = json.loads(remote_config)[tool]
+    # data_file_tool = azure_devops_integration.get_remote_json_config(
+    #     remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
+    # )[tool]
+    data_file_tool = json.loads(remote_config)[tool]
     folders_to_scan = search_folders(data_file_tool["SEARCH_PATTERN"], data_file_tool["IGNORE_SEARCH_PATTERN"])
 
     output_queue = queue.Queue()
@@ -86,7 +89,10 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool):
             checkov_config = CheckovConfig(
                 path_config_file="",
                 config_file_name=rule,
-                checks=list(data_file_tool["RULES"][rule].keys()),
+                # checks=list(data_file_tool["RULES"][rule].keys()),
+                checks=[
+                    key for key, value in data_file_tool["RULES"][rule].items() if value["environment"].get(environment)
+                ],
                 soft_fail=False,
                 directories=folder,
             )
@@ -105,4 +111,4 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool):
     while not output_queue.empty():
         result = output_queue.get()
         results.extend(result)
-    return result
+    return results

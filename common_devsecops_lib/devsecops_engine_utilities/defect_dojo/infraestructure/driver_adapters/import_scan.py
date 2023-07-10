@@ -28,7 +28,7 @@ class ImportScanRestConsumer:
             "engagement_name": request.engagement_name,
             "engagement_end_date": request.engagement_end_date,
             "source_code_management_uri": request.source_code_management_uri,
-            "engagement": str(request.engagement) if request.engagement!=0 else "",
+            "engagement": str(request.engagement) if request.engagement != 0 else "",
             "auto_create_context": request.auto_create_context,
             "deduplication_on_engagement": request.deduplication_on_engagement,
             "lead": request.lead,
@@ -41,18 +41,16 @@ class ImportScanRestConsumer:
             "build_id": request.build_id,
             "branch_tag": request.branch_tag,
             "commit_hash": request.commit_hash,
-            "api_scan_configuration": str(request.api_scan_configuration) if request.api_scan_configuration!=0 else "",
+            "api_scan_configuration": str(request.api_scan_configuration)
+            if request.api_scan_configuration != 0
+            else "",
             "service": request.service,
-            "group_by": request.group_by
+            "group_by": request.group_by,
         }
         multipart_data = MultipartEncoder(fields=data)
 
-        headers = {"Authorization": f"Token {self.__token}",
-                   "Content-Type": multipart_data.content_type}
-        response = requests.post(url,
-                                 headers=headers,
-                                 data=multipart_data,
-                                 verify=VERIFY_CERTIFICATE)
+        headers = {"Authorization": f"Token {self.__token}", "Content-Type": multipart_data.content_type}
+        response = requests.post(url, headers=headers, data=multipart_data, verify=VERIFY_CERTIFICATE)
 
         if response.status_code != 201:
             logger.error(response.status_code)
@@ -75,7 +73,7 @@ class ImportScanRestConsumer:
             "engagement_name": request.engagement_name,
             "engagement_end_date": request.engagement_end_date,
             "source_code_management_uri": request.source_code_management_uri,
-            "engagement": request.engagement if request.engagement!=0 else "",
+            "engagement": request.engagement if request.engagement != 0 else "",
             "auto_create_context": request.auto_create_context,
             "deduplication_on_engagement": request.deduplication_on_engagement,
             "lead": request.lead,
@@ -88,9 +86,11 @@ class ImportScanRestConsumer:
             "build_id": request.build_id,
             "branch_tag": request.branch_tag,
             "commit_hash": request.commit_hash,
-            "api_scan_configuration": str(request.api_scan_configuration) if request.api_scan_configuration!=0 else "",
+            "api_scan_configuration": str(request.api_scan_configuration)
+            if request.api_scan_configuration != 0
+            else "",
             "service": request.service,
-            "group_by": request.group_by
+            "group_by": request.group_by,
         }
 
         headers = {"Authorization": f"Token {self.__token}"}
