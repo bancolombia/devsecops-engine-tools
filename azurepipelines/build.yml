@@ -32,6 +32,7 @@ steps:
     source _venv/bin/activate
     python -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
+    python -m pip install -r requirements_test.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python -m pytest -x --cov=$(System.DefaultWorkingDirectory)/$(componentName) --cov-config=.coveragerc
     python -m coverage report -m
     python -m coverage xml
