@@ -13,7 +13,7 @@ def get_requirements():
 
 setup(
     name="devsecops_engine_utilities",
-    version="0.0.5",
+    version="0.0.1",
     author="Bancolombia devsecops Team ",
     author_email="devsecops@bancolombia.com.co",
     description="Common utilities tools for engine devsecops",
@@ -23,7 +23,6 @@ setup(
     package_dir={
         "devsecops_engine_utilities": "devsecops_engine_utilities",
     },
-    # packages=find_packages(),
     packages=[
         "devsecops_engine_utilities",
         "devsecops_engine_utilities.defect_dojo",
