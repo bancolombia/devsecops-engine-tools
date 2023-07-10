@@ -207,7 +207,7 @@ class ImportScanSerializer(Schema):
     repository_id = fields.Str(required=True)
     remote_config_path = fields.Str(required=True)
     project_remote_config = fields.Str(required=True)
-    cmdb_mapping=fields.Dict(required=True)
+    cmdb_mapping = fields.Dict(required=True)
     product_type_name_mapping = fields.Dict(required=False)
     expression = fields.Str(required=True)
 

@@ -10,10 +10,7 @@ logger = MyLogger.__call__().get_logger()
 
 
 class CmdbRestConsumer:
-    def __init__(self, request: ImportScanRequest,
-                 token: str,
-                 host: str,
-                 mapping_cmdb: dict) -> None:
+    def __init__(self, request: ImportScanRequest, token: str, host: str, mapping_cmdb: dict) -> None:
         self.__token = token
         self.__host = host
         self.__mapping_cmdb = mapping_cmdb
@@ -24,11 +21,7 @@ class CmdbRestConsumer:
 
         logger.info("Search info of name product")
 
-        response = requests.request("POST",
-                                    self.__host,
-                                    headers=headers,
-                                    data=data,
-                                    verify=VERIFY_CERTIFICATE)
+        response = requests.request("POST", self.__host, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
 
         if response.status_code != 200:
             raise ValidationError(response)
@@ -40,7 +33,7 @@ class CmdbRestConsumer:
         logger.info(data_map)
         cmdb_object = Cmdb.from_dict(data_map)
         return cmdb_object
-    
+
     def mapping_cmdb(self, data):
         data_map = {}
         for key, value in self.__mapping_cmdb.items():

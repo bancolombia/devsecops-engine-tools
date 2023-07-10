@@ -26,16 +26,10 @@ class ProductRestConsumer:
     def post_product(self, request: ImportScanRequest, product_type_id: int) -> Product:
         url = f"{self.__host}/api/v2/products/"
 
-        data = {"name": request.product_name,
-                "description": request.product_name,
-                "prod_type": product_type_id}
+        data = {"name": request.product_name, "description": request.product_name, "prod_type": product_type_id}
 
         headers = {"Authorization": f"Token {self.__token}"}
-        response = requests.request("POST",
-                                    url,
-                                    headers=headers,
-                                    data=data,
-                                    verify=VERIFY_CERTIFICATE)
+        response = requests.request("POST", url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
         print(url)
         print(data)
         print(self.__token)

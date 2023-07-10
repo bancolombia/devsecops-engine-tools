@@ -13,6 +13,7 @@ def runner_engine_iac():
             remote_config_repo,
             remote_config_path,
             tool,
+            environment,
         ) = (
             get_inputs_from_cli(sys.argv[1:]) or get_inputs_from_config_file()
         )
@@ -20,6 +21,7 @@ def runner_engine_iac():
             remote_config_repo=remote_config_repo,
             remote_config_path=remote_config_path,
             tool=tool,
+            environment=environment,
         )
 
     except Exception as e:
