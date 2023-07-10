@@ -63,6 +63,7 @@ def test_execute(engagement_name):
         "project_remote_config": "Vicepresidencia Servicios de Tecnología",
         "token_cmdb": "123456789",
         "host_cmdb": "http://localhost:8000",
+        "expression":"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS))_",
         "token_defect_dojo": "123456789101212",
         "host_defect_dojo": "http://localhost:8000",
         "scan_type": "JFrog Xray Scan",
@@ -91,7 +92,8 @@ def test_execute(engagement_name):
     
 
     uc = CmdbUserCase(rest_consumer_cmdb=mock_rc,
-                      utils_azure=mock_utils_azure)
+                      utils_azure=mock_utils_azure,
+                      expression=r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)")
 
     response = uc.execute(request)
     assert response.scan_type == "JFrog Xray Scan"
@@ -103,6 +105,9 @@ def test_execute(engagement_name):
     [("error"), ("nu12212error")]
 )
 def test_get_code_app(engagement_name):
-    uc = CmdbUserCase(rest_consumer_cmdb=None, utils_azure=None)
+    uc = CmdbUserCase(
+        rest_consumer_cmdb=None,
+        utils_azure=None,
+        expression=r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_")
     with pytest.raises(ValidationError):
         uc.get_code_app(engagement_name)
