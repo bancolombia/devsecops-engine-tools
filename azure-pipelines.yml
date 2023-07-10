@@ -22,4 +22,5 @@ queue:
 
 steps:
 - template: azurepipelines/build.yml
+- template: azurepipelines/integration-test.yml
 - template: azurepipelines/deploy.yml
