@@ -37,7 +37,7 @@ class CmdbUserCase:
         request.code_app = self.get_code_app(request.engagement_name)
 
         # connect cmdb
-        product_data = self.__rc_cmdb.get_product_info(request)
+        product_data = self.__rc_cmdb.get_product_info(request.code_app)
         request.product_type_name = product_type_name_map.get(
             product_data.product_type_name, product_data.product_type_name
         )

@@ -11,7 +11,8 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.\
     scan_configurations import ScanConfigrationRestConsumer
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.\
     import_scan import ImportScanRequest
-
+import urllib3
+urllib3.disable_warnings()
 logger = MyLogger.__call__().get_logger()
 
 
