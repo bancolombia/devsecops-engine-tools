@@ -1,0 +1,7 @@
+setuptools==68.0.0
+wheel==0.40.0
+pipenv==2023.6.18
+pytest==7.3.2
+pytest-azurepipelines==1.0.4
+pytest-cov==4.1.0
+coverage==7.2.7
