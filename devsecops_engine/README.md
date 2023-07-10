@@ -27,7 +27,7 @@ NU0429001_devsecops_engine
 |               infraestructure
 |                   driven_adapters
 |                   entry_points
-|                   helpers
+|                   utils.
 ```
 
 # How can I help?
