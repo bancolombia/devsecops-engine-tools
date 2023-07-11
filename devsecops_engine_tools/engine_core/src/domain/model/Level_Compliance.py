@@ -1,6 +1,9 @@
+from dataclasses import dataclass
+
+@dataclass
 class LevelCompliance:
-    critical =None
-    high = None
-    medium = None
-    low = None
-    unknown = None
+    critical: int
+    high: int
+    medium: int
+    low: int
+    unknown: int
