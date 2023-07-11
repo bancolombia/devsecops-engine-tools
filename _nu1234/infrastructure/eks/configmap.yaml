@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: #{service}#-configmap
+  namespace: #{namespace}#
+  labels:
+    app.kubernetes.io/name: #{service}#
+    app.kubernetes.io/instance: #{service}#-v1.0
+    app.kubernetes.io/version: v1.0
+    app.kubernetes.io/part-of: #{service}#
+data:
+  SERVER_PORT: "#{server-port}#"
+  APP_CODE: #{application-code}#
+  APP_NAME: #{application-code}#-#{name}#
+  PROJECT_NAME: #{project-name}#
+  ENV: #{env}#
+  CHANNEL: #{channel}#
+  REST_TIMEOUT: "#{rest-timeout}#"
+  ROUTES_BASE: #{routes-base}#
+  SECRETS_MANAGER_REGION: #{secrets-manager-region}#
+  SECRETS_MANAGER_CACHE_SECONDS: "#{secrets-manager-cache-seconds}#"
+  SECRETS_MANAGER_CACHE_SIZE: "#{secrets-manager-cache-size}#"
+  ALIAS_TIMEOUT: "#{alias-timeout}#"
+  ALIAS_URI_BASE: #{alias-uri-base}#
+  IDENTITY_TIMEOUT: "#{identity-timeout}#"
+  IDENTITY_URI_BASE: #{identity-uri-base}#
+  MDM_URI_BASE: #{mdm-uri-base}#
+  MDM_QUERY_TYPE: #{mdm-query-type}#
+  MDM_IDTYPE_DOCEXT: #{mdm-idtype-docext}#
+  MDM_TIMEOUT: "#{mdm-timeout}#"
+  LOCAL_ZONE:  "#{local-zone}#"
+  SECRET_NAME_BANKING_CORE: #{secret-name-banking-core}#
+  LOG4J_LEVEL: #{log-level}#

@@ -6,16 +6,14 @@ import argparse
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("--azure_remote_config_repo", type=str, required=True, help="")
-    parser.add_argument("--azure_remote_config_path_exclusions", type=str, required=True, help="")
-    parser.add_argument("--azure_remote_config_path_iac", type=str, required=True, help="")
+    parser.add_argument("--azure_remote_config_path", type=str, required=True, help="")
     parser.add_argument("--tool", type=str, required=True, help="")
     parser.add_argument("--environment", type=str, required=True, help="")
 
     args = parser.parse_args()
     return (
         args.azure_remote_config_repo,
-        args.azure_remote_config_path_exclusions,
-        args.azure_remote_config_path_iac,
+        args.azure_remote_config_path,
         args.tool,
         args.environment,
     )
