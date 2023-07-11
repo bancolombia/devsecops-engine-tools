@@ -15,43 +15,31 @@ class EngagementRestConsumer:
         self.__host = host
         self.__session = session
 
-    def get_engagement(self, request: ImportScanRequest):
+    def get_engagement(self, product_name):
         url = f"{self.__host}/api/v2/engagements/"
 
-        data = json.dumps({"name": request.product_name})
+        data = json.dumps({"name": product_name})
 
-        headers = {
-            "Authorization": f"Token {self.__token}",
-            "Content-Type": "application/json"}
+        headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
 
-        response = self.__session.get(
-            url=url,
-            headers=headers,
-            data=data,
-            verify=VERIFY_CERTIFICATE)
+        response = self.__session.get(url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
             raise ValidationError(response)
 
         return response.json()
 
-    def post_engagement(self, request: ImportScanRequest, product_id):
+    def post_engagement(self, engagement_name, product_id):
         url = f"{self.__host}/api/v2/engagements/"
         data = json.dumps(
             {
-                "name": request.engagement_name,
+                "name": engagement_name,
                 "target_start": str(datetime.now().date()),
                 "target_end": str(datetime.now().date()),
                 "product": product_id,
             }
         )
-        headers = {
-            "Authorization": f"Token {self.__token}",
-            "Content-Type": "application/json"}
-        response = self.__session.post(
-            url=url,
-            headers=headers,
-            data=data,
-            verify=VERIFY_CERTIFICATE)
+        headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
+        response = self.__session.post(url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
         if response.status_code != 201:
             raise ValidationError(response)
         logger.info(response)

@@ -29,19 +29,19 @@ repos:
             \__init__.py|
             \test\"""
       language_version: python3.10
-  - repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.5
-    hooks:
-      - id: autopep8
-        args:
-          - --in-place
-          - --aggressive
-          - --max-line-length=79
-          - --verbose
-  - repo: https://github.com/PyCQA/autoflake
-    rev: v2.0.2
-    hooks:
-      - id: autoflake
+  # - repo: https://github.com/pre-commit/mirrors-autopep8
+  #   rev: v1.5
+  #   hooks:
+  #     - id: autopep8
+  #       args:
+  #         - --in-place
+  #         - --aggressive
+  #         - --max-line-length=79
+  #         - --verbose
+  # - repo: https://github.com/PyCQA/autoflake
+  #   rev: v2.0.2
+  #   hooks:
+  #     - id: autoflake
   - repo: https://github.com/PyCQA/flake8
     rev: 6.0.0
     hooks:
