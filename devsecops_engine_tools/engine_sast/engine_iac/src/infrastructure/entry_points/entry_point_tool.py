@@ -24,8 +24,16 @@ from engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure
 
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--azure_remote_config_repo", type=str, required=True, help="")
-    parser.add_argument("--azure_remote_config_path", type=str, required=True, help="")
+    parser.add_argument(
+        "--azure_remote_config_repo",
+        type=str,
+        required=True,
+        help="")
+    parser.add_argument(
+        "--azure_remote_config_path",
+        type=str,
+        required=True,
+        help="")
     parser.add_argument("--tool", type=str, required=True, help="")
 
     args = parser.parse_args()
@@ -39,8 +47,14 @@ def get_inputs_from_cli(args):
 def get_inputs_from_config_file():
     config = configparser.ConfigParser()
     config.read("devsecops_engine.ini", encoding="utf-8")
-    azure_remote_config_repo = config.get("enginesast.engineiac", "azure_remote_config_repo", fallback=None)
-    azure_remote_config_path = config.get("enginesast.engineiac", "azure_remote_config_path", fallback=None)
+    azure_remote_config_repo = config.get(
+        "enginesast.engineiac",
+        "azure_remote_config_repo",
+        fallback=None)
+    azure_remote_config_path = config.get(
+        "enginesast.engineiac",
+        "azure_remote_config_path",
+        fallback=None)
     tool = config.get("enginesast.engineiac", "tool", fallback=None)
     return (
         azure_remote_config_repo,
@@ -58,7 +72,8 @@ def async_scan(queue, iacScan: IacScan, rules):
 
 def search_folders(search_pattern, ignore_pattern):
     current_directory = os.getcwd()
-    patron = "(?i)(?!.*" + "|".join(ignore_pattern) + ").*?(" + "|".join(search_pattern) + ").*"
+    patron = "(?i)(?!.*" + "|".join(ignore_pattern) + \
+        ").*?(" + "|".join(search_pattern) + ").*"
     folders = [
         carpeta for carpeta in os.listdir(current_directory) if os.path.isdir(os.path.join(current_directory, carpeta))
     ]
@@ -76,7 +91,9 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool):
         remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
     )[tool]
     # data_file_tool = json.loads(remote_config)[tool]
-    folders_to_scan = search_folders(data_file_tool["SEARCH_PATTERN"], data_file_tool["IGNORE_SEARCH_PATTERN"])
+    folders_to_scan = search_folders(
+        data_file_tool["SEARCH_PATTERN"],
+        data_file_tool["IGNORE_SEARCH_PATTERN"])
 
     output_queue = queue.Queue()
     # Crea una lista para almacenar los hilos
@@ -94,7 +111,12 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool):
             checkov_run = CheckovTool(checkov_config=checkov_config)
             checkov_run.create_config_file()
             iac_scan = IacScan(checkov_run)
-            t = threading.Thread(target=async_scan, args=(output_queue, iac_scan, data_file_tool["RULES"][rule]))
+            t = threading.Thread(
+                target=async_scan,
+                args=(
+                    output_queue,
+                    iac_scan,
+                    data_file_tool["RULES"][rule]))
             t.start()
             threads.append(t)
     # Espera a que todos los hilos terminen

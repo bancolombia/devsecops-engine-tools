@@ -1,17 +1,15 @@
 import re
 from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.\
-    import_scan import ImportScanRestConsumer
-from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.\
-    product_type import ProductTypeRestConsumer
-from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.\
-    product import ProductRestConsumer
-from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.\
-    scan_configurations import ScanConfigrationRestConsumer
-from devsecops_engine_utilities.defect_dojo.domain.request_objects.\
-    import_scan import ImportScanRequest
+from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.import_scan import ImportScanRestConsumer
+from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.product_type import ProductTypeRestConsumer
+from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.product import ProductRestConsumer
+from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.scan_configurations import (
+    ScanConfigrationRestConsumer,
+)
+from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 import urllib3
+
 urllib3.disable_warnings()
 logger = MyLogger.__call__().get_logger()
 
@@ -41,9 +39,11 @@ class ImportScanUserCase:
             logger.info(f"Match {request.scan_type}")
             product_types = self.__rest_product_type.get_product_types(request)
             if product_types.results == []:
-                product_type = self.__rest_product_type.post_product_type(request)
+                product_type = self.__rest_product_type.post_product_type(
+                    request)
                 product_type_id = product_type.id
-                logger.info(f"product_type created: {product_type.name} with id {product_type.id}")
+                logger.info(
+                    f"product_type created: {product_type.name} with id {product_type.id}")
             else:
                 product_type_id = product_types.results[0].id
                 logger.info(
@@ -53,8 +53,8 @@ class ImportScanUserCase:
 
             products = self.__rest_product.get_products(request)
             if products.results == []:
-                product = self.__rest_product.post_product(request,
-                                                           product_type_id)
+                product = self.__rest_product.post_product(
+                    request, product_type_id)
                 product_id = product.id
                 logger.info(
                     f"product created: {product.name}\

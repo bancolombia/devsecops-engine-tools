@@ -35,6 +35,3 @@ steps:
     fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Artifact creation and upload'
-
-
-

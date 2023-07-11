@@ -58,32 +58,50 @@ class CheckovConfig(ConfigToolGateway):
         if self.compact is not None:
             self.dict_confg_file[CheckovConfigEnum.COMPACT.value] = self.compact
         else:
-            raise ValueError("El valor" + CheckovConfigEnum.COMPACT.value + "no puede ser nulo")
+            raise ValueError(
+                "El valor" +
+                CheckovConfigEnum.COMPACT.value +
+                "no puede ser nulo")
 
         if self.quiet is not None:
             self.dict_confg_file[CheckovConfigEnum.QUIET.value] = self.quiet
         else:
-            raise ValueError("El valor" + CheckovConfigEnum.QUIET.value + "no puede ser nulo")
+            raise ValueError(
+                "El valor" +
+                CheckovConfigEnum.QUIET.value +
+                "no puede ser nulo")
 
         if self.checks is not None:
             self.dict_confg_file[CheckovConfigEnum.CHECKS.value] = self.checks
         else:
-            raise ValueError("El valor" + CheckovConfigEnum.CHECKS.value + "no puede ser nulo")
+            raise ValueError(
+                "El valor" +
+                CheckovConfigEnum.CHECKS.value +
+                "no puede ser nulo")
 
         if self.output is not None:
             self.dict_confg_file[CheckovConfigEnum.OUTPUT.value] = self.output
         else:
-            raise ValueError("El valor" + CheckovConfigEnum.OUTPUT.value + "no puede ser nulo")
+            raise ValueError(
+                "El valor" +
+                CheckovConfigEnum.OUTPUT.value +
+                "no puede ser nulo")
 
         if self.soft_fail is not None:
             self.dict_confg_file[CheckovConfigEnum.SOFT_FAIL.value] = self.soft_fail
         else:
-            raise ValueError("El valor" + CheckovConfigEnum.CHECKS.value + "no puede ser nulo")
+            raise ValueError(
+                "El valor" +
+                CheckovConfigEnum.CHECKS.value +
+                "no puede ser nulo")
 
         if self.directories is not None:
             self.dict_confg_file[CheckovConfigEnum.DIRECTORIES.value] = self.directories
         else:
-            raise ValueError("El valor" + CheckovConfigEnum.DIRECTORIES.value + "no puede ser nulo")
+            raise ValueError(
+                "El valor" +
+                CheckovConfigEnum.DIRECTORIES.value +
+                "no puede ser nulo")
 
         if self.evaluate_variables is not None:
             self.dict_confg_file[CheckovConfigEnum.EVALUATE_VARIABLES.value] = self.evaluate_variables

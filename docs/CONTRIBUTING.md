@@ -1,6 +1,6 @@
 # How to contribute
 
-To contribute  
+To contribute
 
 ...
 
