@@ -3,15 +3,22 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.utils.validation_error import ValidationError
-from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
+from devsecops_engine_utilities.defect_dojo.infraestructure.\
+    driver_adapters.settings.settings import VERIFY_CERTIFICATE
+from devsecops_engine_utilities.utils.session_manager import\
+    SessionManager
 
 logger = MyLogger.__call__().get_logger()
 
 
 class ImportScanRestConsumer:
-    def __init__(self, request: ImportScanRequest):
+    def __init__(
+        self,
+        request: ImportScanRequest,
+        session: SessionManager):
         self.__token = request.token_defect_dojo
         self.__host = request.host_defect_dojo
+        self.__session = session
 
     def import_scan_api(self, request: ImportScanRequest):
         url = f"{self.__host}/api/v2/import-scan/"
@@ -49,10 +56,11 @@ class ImportScanRestConsumer:
 
         headers = {"Authorization": f"Token {self.__token}",
                    "Content-Type": multipart_data.content_type}
-        response = requests.post(url,
-                                 headers=headers,
-                                 data=multipart_data,
-                                 verify=VERIFY_CERTIFICATE)
+        response = self.__session.post(
+            url,
+            headers=headers,
+            data=multipart_data,
+            verify=VERIFY_CERTIFICATE)
 
         if response.status_code != 201:
             logger.error(response.status_code)
@@ -95,7 +103,13 @@ class ImportScanRestConsumer:
 
         headers = {"Authorization": f"Token {self.__token}"}
 
-        response = requests.request("POST", url, headers=headers, data=payload, files=files, verify=VERIFY_CERTIFICATE)
+        response = self.__session.post(
+            url,
+            headers=headers,
+            data=payload,
+            files=files,
+            verify=VERIFY_CERTIFICATE)
+
         if response.status_code != 201:
             logger.info(payload)
             logger.info(response.json())
