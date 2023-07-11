@@ -1,4 +1,3 @@
-import requests
 import json
 from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.utils.logger_info import MyLogger
@@ -11,9 +10,7 @@ logger = MyLogger.__call__().get_logger()
 
 
 class EngagementRestConsumer:
-    def __init__(self, token: str,
-                 host: str,
-                 session: SessionManager):
+    def __init__(self, token: str, host: str, session: SessionManager):
         self.__token = token
         self.__host = host
         self.__session = session
@@ -23,13 +20,15 @@ class EngagementRestConsumer:
 
         data = json.dumps({"name": request.product_name})
 
-        headers = {"Authorization": f"Token {self.__token}",
-                   "Content-Type": "application/json"}
+        headers = {
+            "Authorization": f"Token {self.__token}",
+            "Content-Type": "application/json"}
 
-        response = self.__session.get(url=url,
-                                      headers=headers,
-                                      data=data,
-                                      verify=VERIFY_CERTIFICATE)
+        response = self.__session.get(
+            url=url,
+            headers=headers,
+            data=data,
+            verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
             raise ValidationError(response)
 
@@ -45,12 +44,14 @@ class EngagementRestConsumer:
                 "product": product_id,
             }
         )
-        headers = {"Authorization": f"Token {self.__token}",
-                   "Content-Type": "application/json"}
-        response = self.__session.post(url=url,
-                                       headers=headers,
-                                       data=data,
-                                       verify=VERIFY_CERTIFICATE)
+        headers = {
+            "Authorization": f"Token {self.__token}",
+            "Content-Type": "application/json"}
+        response = self.__session.post(
+            url=url,
+            headers=headers,
+            data=data,
+            verify=VERIFY_CERTIFICATE)
         if response.status_code != 201:
             raise ValidationError(response)
         logger.info(response)

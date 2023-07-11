@@ -31,7 +31,9 @@ class SingletonType(type):
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
-            cls._instances[cls] = super(SingletonType, cls).__call__(*args, **kwargs)
+            cls._instances[cls] = super(
+                SingletonType, cls).__call__(
+                *args, **kwargs)
         return cls._instances[cls]
 
 
@@ -55,7 +57,8 @@ class MyLogger(metaclass=SingletonType):
             dirname = "./log"
             if not os.path.isdir(dirname):
                 os.mkdir(dirname)
-            file_handler = logging.FileHandler(dirname + "/log_" + now.strftime("%Y-%m-%d") + ".log")
+            file_handler = logging.FileHandler(
+                dirname + "/log_" + now.strftime("%Y-%m-%d") + ".log")
             print("file_handler", file_handler)
             file_handler.setFormatter(formatter)
             self._logger.addHandler(file_handler)

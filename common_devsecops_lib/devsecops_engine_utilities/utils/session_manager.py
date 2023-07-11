@@ -1,7 +1,7 @@
 import requests
 
-class SessionManager:
 
+class SessionManager:
     _instance = None
 
     def __new__(cls):
