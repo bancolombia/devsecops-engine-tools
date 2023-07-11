@@ -14,4 +14,8 @@ class CheckovDeserializeConfig:
         self.exclusions_path = json_data[tool]["EXCLUSIONS_PATH"]
         self.level_compliance = LevelCompliance(json_data[tool]["LEVEL_COMPLIANCE"][environment])
         self.rules_data_type = json_data[tool]["RULES"]
-        self.exclusions = {}
+        self.scope_pipeline = ""
+        self.exclusions = None
+        self.exclusions_all = None
+        self.exclusions_scope = None
+        self.rules_all = {}

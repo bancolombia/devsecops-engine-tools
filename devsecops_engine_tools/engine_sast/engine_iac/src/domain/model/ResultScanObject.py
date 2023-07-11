@@ -1,5 +1,9 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class ResultScanObject:
-    result_json = {}
-    rules_scan = {}
-    exclusions = {}
-    scope_pipeline = ""
+    rules_scan_list: list
+    exclusions_all: dict
+    exclusions_scope: dict
+    scope_pipeline: str

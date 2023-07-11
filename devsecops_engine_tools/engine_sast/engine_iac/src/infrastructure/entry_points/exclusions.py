@@ -34,8 +34,6 @@ exclusion = """{
         }
 	},
 	"AW11111111_ProyectoEjemplo": {
-		"Exclusions":
-        {
 			"SCA": {
 				"Exclusions": [
 					{
@@ -68,6 +66,5 @@ exclusion = """{
 					}
 				]
 			}
-        }
 	}
 }"""
