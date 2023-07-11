@@ -1,6 +1,9 @@
 import argparse
 
 from engine_sast.engine_iac.src.applications.runner_iac_scan import runner_engine_iac
+from engine_core.src.domain.model.Vulnerability import Vulnerability
+from engine_core.src.domain.model.Level_Compliance import LevelCompliance
+from engine_core.src.domain.model.Exclusions import Exclusions
 
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
@@ -22,7 +25,15 @@ def get_inputs_from_cli(args):
 # IMPORTANTEEEE: En los entry points se conecta los driven adapter, con los casos de uso
 def init_engine_core():
     result_list_engine_iac = runner_engine_iac() # lista con exclusion All de tool en este caso checkov, lista con exclusion pipeline de tool, compliance de tool), result_json, rules_scan ***** [[escaneo_docker1,reglas],[escaneo_k8s1,reglas2]]
-    # use_case_break_build(list_vulnerabilities,umbrales)
+    
+    #va dentro de un for, donde voy cargando todo lo que saco de lo que me pasa Cesarillo
+    #    exclusion_for_pipeline = Exclusions()
+    #    vulnerability_exclusions_pipeline[] = Vulnerability() 
+    #acaba for
+    level_compliance_defined = LevelCompliance() #Le paso los datos que obtenga de lo que manda Cesarillo
+
+    
+    break_build(list_vulnerabilities,umbrales)
     print("init_engine_core")
 
 init_engine_core()
