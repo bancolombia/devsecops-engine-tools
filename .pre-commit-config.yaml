@@ -26,7 +26,8 @@ repos:
             buck-out|
             build|
             dist |
-            \__init__.py"""
+            \__init__.py|
+            \test\"""
       language_version: python3.10
   - repo: https://github.com/pre-commit/mirrors-autopep8
     rev: v1.5
@@ -59,4 +60,4 @@ repos:
           # check out their meaning here
           # https://flake8.pycqa.org/en/latest/user/error-codes.html
           - "--ignore=E501,F811,W503"
-          - "--exclude=*\__init__.py"
+          - "--exclude=*\__init__.py | *test"
