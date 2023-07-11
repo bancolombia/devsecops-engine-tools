@@ -13,7 +13,8 @@ class CheckovTool(ToolGateway):
 
     def create_config_file(self):
         with open(
-            self.checkov_config.path_config_file + self.checkov_config.config_file_name + self.CHECKOV_CONFIG_FILE, "w"
+            self.checkov_config.path_config_file +
+                self.checkov_config.config_file_name + self.CHECKOV_CONFIG_FILE, "w"
         ) as file:
             yaml.dump(self.checkov_config.dict_confg_file, file)
             file.close()
@@ -25,7 +26,11 @@ class CheckovTool(ToolGateway):
             + self.checkov_config.config_file_name
             + self.CHECKOV_CONFIG_FILE
         )
-        result = subprocess.run(command, capture_output=True, text=True, shell=True)
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            shell=True)
         output = result.stdout.strip()
         # error = result.stderr.strip()
         # TODO revisar el stderr para manejo de excepciones.

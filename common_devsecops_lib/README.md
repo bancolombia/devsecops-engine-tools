@@ -11,5 +11,3 @@ devsecops_engine_utilities
 ├───Models -> Class and enum .
 
 ```
-
-

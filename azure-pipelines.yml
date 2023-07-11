@@ -1,11 +1,11 @@
 name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
 
 variables:
-  - name: system.debug 
+  - name: system.debug
     value: 'false'
   - group: Artifactory
 
-  
+
 trigger:
   branches:
    include:
