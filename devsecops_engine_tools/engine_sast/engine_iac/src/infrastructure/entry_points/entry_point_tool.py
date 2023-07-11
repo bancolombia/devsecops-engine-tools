@@ -57,15 +57,10 @@ def get_inputs_from_config_file():
     )
 
 
-def async_scan(queue, iacScan: IacScan, rules, exclusions, scope_pipeline):
+def async_scan(queue, iacScan: IacScan):
     result = []
     output = iacScan.process()
-    result_object = ResultScanObject()
-    result_object.result_json = json.loads(output)
-    result_object.rules_scan = rules
-    result_object.exclusions = exclusions
-    result_object.scope_pipeline = scope_pipeline
-    result.append(result_object)
+    result.append(json.loads(output))
     queue.put(result)
 
 
@@ -93,8 +88,12 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     # data_config.exclusions = json.loads(azure_devops_integration.get_remote_json_config(
     #     remote_config_repo=remote_config_repo, remote_config_path=data_config.exclusions_path
     # ))
+    data_config.scope_pipeline = ReleaseVariables.Release_Definitionname.value()
     data_config.exclusions = json.loads(exclusion)
-    scope_pipeline = ReleaseVariables.Release_Definitionname.value()
+    if data_config.exclusions.get("All") is not None:
+        data_config.exclusions_all = data_config.exclusions.get("All").get(tool)
+    if data_config.exclusions.get(data_config.scope_pipeline) is not None:
+        data_config.exclusions_scope = data_config.exclusions.get(data_config.scope_pipeline).get(tool)
     folders_to_scan = search_folders(data_config.search_pattern, data_config.ignore_search_pattern)
     output_queue = queue.Queue()
     # Crea una lista para almacenar los hilos
@@ -116,14 +115,12 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
             checkov_run = CheckovTool(checkov_config=checkov_config)
             checkov_run.create_config_file()
             iac_scan = IacScan(checkov_run)
+            data_config.rules_all.update(data_config.rules_data_type[rule])
             t = threading.Thread(
                 target=async_scan,
                 args=(
                     output_queue,
                     iac_scan,
-                    data_config.rules_data_type[rule],
-                    data_config.exclusions,
-                    scope_pipeline,
                 ),
             )
             t.start()
@@ -132,8 +129,15 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     for t in threads:
         t.join()
     # Recopila las salidas de las tareas
-    results = []
+    result_scans = []
     while not output_queue.empty():
         result = output_queue.get()
-        results.extend(result)
-    return results
+        result_scans.extend(result)
+
+    result_scan_object = ResultScanObject(
+        scope_pipeline=data_config.scope_pipeline,
+        rules_scan_list=result_scans,
+        exclusions_all=data_config.exclusions_all,
+        exclusions_scope=data_config.exclusions_scope,
+    )
+    return result_scan_object
