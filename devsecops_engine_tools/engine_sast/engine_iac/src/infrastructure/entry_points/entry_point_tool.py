@@ -8,18 +8,22 @@ import re
 from engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import CheckovTool
-
 from engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
+from engine_sast.engine_iac.src.infrastructure.entry_points.exclusions import exclusion
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
     CheckovConfig,
 )
 from devsecops_engine_utilities.utils.printers import (
     Printers,
 )
+from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import ReleaseVariables
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
     AzureDevopsIntegration,
 )
 from engine_sast.engine_iac.src.domain.model.ResultScanObject import ResultScanObject
+from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovDeserializeConfig import (
+    CheckovDeserializeConfig,
+)
 
 
 def get_inputs_from_cli(args):
@@ -53,12 +57,14 @@ def get_inputs_from_config_file():
     )
 
 
-def async_scan(queue, iacScan: IacScan, rules):
+def async_scan(queue, iacScan: IacScan, rules, exclusions, scope_pipeline):
     result = []
     output = iacScan.process()
     result_object = ResultScanObject()
     result_object.result_json = json.loads(output)
     result_object.rules_scan = rules
+    result_object.exclusions = exclusions
+    result_object.scope_pipeline = scope_pipeline
     result.append(result_object)
     queue.put(result)
 
@@ -79,23 +85,29 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     Printers.print_logo_tool()
     azure_devops_integration = AzureDevopsIntegration()
     azure_devops_integration.get_azure_connection()
-    data_file_tool = azure_devops_integration.get_remote_json_config(
-        remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
-    )[tool]
-    # data_file_tool = json.loads(remote_config)[tool]
-    folders_to_scan = search_folders(data_file_tool["SEARCH_PATTERN"], data_file_tool["IGNORE_SEARCH_PATTERN"])
-
+    # data_file_tool = azure_devops_integration.get_remote_json_config(
+    #     remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
+    # )
+    data_file_tool = json.loads(remote_config)
+    data_config = CheckovDeserializeConfig(json_data=data_file_tool, tool=tool, environment=environment)
+    # data_config.exclusions = json.loads(azure_devops_integration.get_remote_json_config(
+    #     remote_config_repo=remote_config_repo, remote_config_path=data_config.exclusions_path
+    # ))
+    data_config.exclusions = json.loads(exclusion)
+    scope_pipeline = ReleaseVariables.Release_Definitionname.value()
+    folders_to_scan = search_folders(data_config.search_pattern, data_config.ignore_search_pattern)
     output_queue = queue.Queue()
     # Crea una lista para almacenar los hilos
     threads = []
     for folder in folders_to_scan:
-        for rule in data_file_tool["RULES"]:
+        for rule in data_config.rules_data_type:
             checkov_config = CheckovConfig(
                 path_config_file="",
                 config_file_name=rule,
-                # checks=list(data_file_tool["RULES"][rule].keys()),
                 checks=[
-                    key for key, value in data_file_tool["RULES"][rule].items() if value["environment"].get(environment)
+                    key
+                    for key, value in data_config.rules_data_type[rule].items()
+                    if value["environment"].get(environment)
                 ],
                 soft_fail=False,
                 directories=folder,
@@ -104,7 +116,16 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
             checkov_run = CheckovTool(checkov_config=checkov_config)
             checkov_run.create_config_file()
             iac_scan = IacScan(checkov_run)
-            t = threading.Thread(target=async_scan, args=(output_queue, iac_scan, data_file_tool["RULES"][rule]))
+            t = threading.Thread(
+                target=async_scan,
+                args=(
+                    output_queue,
+                    iac_scan,
+                    data_config.rules_data_type[rule],
+                    data_config.exclusions,
+                    scope_pipeline,
+                ),
+            )
             t.start()
             threads.append(t)
     # Espera a que todos los hilos terminen
