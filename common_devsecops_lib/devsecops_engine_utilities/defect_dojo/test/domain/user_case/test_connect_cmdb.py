@@ -11,7 +11,6 @@ from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan i
 )
 from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import AzureDevopsApi
-from azure.devops.connection import Connection
 from devsecops_engine_utilities.defect_dojo.domain.user_case.cmdb import CmdbUserCase
 
 
@@ -29,6 +28,7 @@ def import_scan_request_instance(par_scan_type) -> ImportScanRequest:
     )
     return request
 
+
 def get_cmdb_instance():
     mock_rest_consumer_cmdb = MagicMock(spec=CmdbRestConsumer)
     mock_rest_consumer_cmdb.get_product_info.return_value = Cmdb(
@@ -39,12 +39,10 @@ def get_cmdb_instance():
         codigo_app="nu0429001",
     )
     return mock_rest_consumer_cmdb
-    
 
-@pytest.mark.parametrize(
-    "engagement_name",
-    [("NU0429001_Acceptance Tests"), ("NU0429001_Acceptance Tests23")]
-)
+
+@pytest.mark.parametrize("engagement_name",
+                         [("NU0429001_Acceptance Tests"), ("NU0429001_Acceptance Tests23")])
 def test_execute(engagement_name):
     mock_rest_consumer_cmdb = get_cmdb_instance()
     request = {
@@ -63,7 +61,7 @@ def test_execute(engagement_name):
         "project_remote_config": "Vicepresidencia Servicios de Tecnología",
         "token_cmdb": "123456789",
         "host_cmdb": "http://localhost:8000",
-        "expression":"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS))_",
+        "expression": "((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS))_",
         "token_defect_dojo": "123456789101212",
         "host_defect_dojo": "http://localhost:8000",
         "scan_type": "JFrog Xray Scan",
@@ -73,8 +71,9 @@ def test_execute(engagement_name):
     }
     request: ImportScanRequest = ImportScanSerializer().load(request)
     mock_rc = mock_rest_consumer_cmdb(
-        request, token="91qewuro9quowedafj", host="https://localhost:8000"
-    )
+        request,
+        token="91qewuro9quowedafj",
+        host="https://localhost:8000")
     # response file contect json
     file_content = [b'{"key": "value"}']
     # mock git client
@@ -86,28 +85,27 @@ def test_execute(engagement_name):
     # mock class azureDevopsApi
     mock_utils_azure = MagicMock(spec=AzureDevopsApi)
     mock_utils_azure.get_azure_connection.return_value = mock_connection
-    azure_devops_api = AzureDevopsApi(personal_access_token="asjfdiajf",
-                                      project_remote_config="project remote test",
-                                      organization_url="http://organization_url/")
-    
+    AzureDevopsApi(
+        personal_access_token="asjfdiajf",
+        project_remote_config="project remote test",
+        organization_url="http://organization_url/",
+    )
 
-    uc = CmdbUserCase(rest_consumer_cmdb=mock_rc,
-                      utils_azure=mock_utils_azure,
-                      expression=r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)")
+    uc = CmdbUserCase(
+        rest_consumer_cmdb=mock_rc,
+        utils_azure=mock_utils_azure,
+        expression=r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)",
+    )
 
     response = uc.execute(request)
     assert response.scan_type == "JFrog Xray Scan"
     assert response.code_app == "nu0429001"
 
 
-@pytest.mark.parametrize(
-    "engagement_name",
-    [("error"), ("nu12212error")]
-)
+@pytest.mark.parametrize("engagement_name", [("error"), ("nu12212error")])
 def test_get_code_app(engagement_name):
     uc = CmdbUserCase(
-        rest_consumer_cmdb=None,
-        utils_azure=None,
-        expression=r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_")
+        rest_consumer_cmdb=None, utils_azure=None, expression=r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_"
+    )
     with pytest.raises(ValidationError):
         uc.get_code_app(engagement_name)

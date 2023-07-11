@@ -1,6 +1,8 @@
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from requests import Response
+
 logger = MyLogger.__call__().get_logger()
+
 
 class ValidationError(Exception):
     def __init__(self, message):
@@ -8,4 +10,3 @@ class ValidationError(Exception):
             super().__init__(message.json())
         else:
             super().__init__(message)
-    

@@ -4,7 +4,7 @@
 
 Fixes # (issue)
 
-## New/Edited policies 
+## New/Edited policies
 
 ### Description
 *Include a description of what makes it a violation and any relevant external links.*

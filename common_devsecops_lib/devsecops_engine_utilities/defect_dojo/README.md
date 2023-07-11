@@ -8,7 +8,7 @@ path_file = os.path.dirname(os.path.realpath(__file__))
 if __name__ == "__main__":
     # Example Checkov Scan file
 
-    
+
     request: ImportScanRequest = Connect.cmdb(
         cmdb_mapping={
             "product_type_name": "nombreevc",

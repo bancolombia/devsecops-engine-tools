@@ -18,7 +18,7 @@ NU0429001_devsecops_engine
 |
 ├───engine_core -> Code and Docker file for the engine_core.
 |           test
-|           src 
+|           src
 |               applications
 |               deploment
 |               domain
@@ -31,4 +31,3 @@ NU0429001_devsecops_engine
 ```
 
 # How can I help?
-
