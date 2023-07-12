@@ -22,6 +22,8 @@ from engine_sast.engine_iac.src.domain.model.ResultScanObject import ResultScanO
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovDeserializeConfig import (
     CheckovDeserializeConfig,
 )
+from engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
+from engine_sast.engine_iac.src.infrastructure.entry_points.exclusions import exclusion
 
 
 def get_inputs_from_cli(args):
