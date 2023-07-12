@@ -3,6 +3,7 @@ from devsecops_engine_utilities.defect_dojo.domain.serializers.import_scan impor
 from devsecops_engine_utilities.defect_dojo.domain.user_case.cmdb import CmdbUserCase
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.cmdb import CmdbRestConsumer
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import AzureDevopsApi
+from devsecops_engine_utilities.utils.session_manager import SessionManager
 
 
 class Connect:
@@ -11,7 +12,10 @@ class Connect:
     def cmdb(**kwargs) -> ImportScanRequest:
         request: ImportScanRequest = ImportScanSerializer().load(kwargs)
         rc = CmdbRestConsumer(
-            request, token=request.token_cmdb, host=request.host_cmdb, mapping_cmdb=request.cmdb_mapping
+            token=request.token_cmdb,
+            host=request.host_cmdb,
+            mapping_cmdb=request.cmdb_mapping,
+            session=SessionManager(),
         )
 
         utils_azure = AzureDevopsApi(
@@ -20,7 +24,10 @@ class Connect:
             organization_url=request.organization_url,
         )
 
-        uc = CmdbUserCase(rest_consumer_cmdb=rc, utils_azure=utils_azure, expression=request.expression)
+        uc = CmdbUserCase(
+            rest_consumer_cmdb=rc,
+            utils_azure=utils_azure,
+            expression=request.expression)
 
         response = uc.execute(request)
         return response

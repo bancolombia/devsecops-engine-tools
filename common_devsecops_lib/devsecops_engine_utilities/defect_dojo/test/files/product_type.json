@@ -1,0 +1,11 @@
+{
+    "id": 163,
+    "name": "defect-dojo type",
+    "description": null,
+    "critical_product": false,
+    "key_product": false,
+    "updated": "2023-07-11T16:44:08.397702Z",
+    "created": "2023-07-11T16:44:08.397714Z",
+    "members": [],
+    "authorization_groups": []
+}

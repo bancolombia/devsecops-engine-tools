@@ -1,12 +1,20 @@
 repos:
--   repo: https://github.com/psf/black
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-json
+      - id: name-tests-test
+      - id: no-commit-to-branch
+  - repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
     - id: black
       args: # arguments to configure black
           - --line-length=120
           - --include='\.pyi?$'
-
           # these folders wont be formatted by black
           - --exclude="""\.git |
             \.__pycache__|
@@ -17,20 +25,35 @@ repos:
             _build|
             buck-out|
             build|
-            dist"""
+            dist |
+            \__init__.py|
+            \test\"""
       language_version: python3.10
+  # - repo: https://github.com/pre-commit/mirrors-autopep8
+  #   rev: v1.5
+  #   hooks:
+  #     - id: autopep8
+  #       args:
+  #         - --in-place
+  #         - --aggressive
+  #         - --max-line-length=79
+  #         - --verbose
+  # - repo: https://github.com/PyCQA/autoflake
+  #   rev: v2.0.2
+  #   hooks:
+  #     - id: autoflake
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        args: # arguments to configure flake8
+          # making isort line length compatible with black
+          - "--max-line-length=120"
+          - "--max-complexity=18"
+          - "--select=B,C,E,F,W,T4,B9"
 
-- repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
-  hooks:
-    - id: flake8
-      args: # arguments to configure flake8
-        # making isort line length compatible with black
-        - "--max-line-length=120"
-        - "--max-complexity=18"
-        - "--select=B,C,E,F,W,T4,B9"
-
-        # these are errors that will be ignored by flake8
-        # check out their meaning here
-        # https://flake8.pycqa.org/en/latest/user/error-codes.html
-        - "--ignore=E501,F811,W503,E712,F401,E101,W191,W291"
+          # these are errors that will be ignored by flake8
+          # check out their meaning here
+          # https://flake8.pycqa.org/en/latest/user/error-codes.html
+          - "--ignore=E501,F811,W503"
+          - "--exclude=*\__init__.py | *test"

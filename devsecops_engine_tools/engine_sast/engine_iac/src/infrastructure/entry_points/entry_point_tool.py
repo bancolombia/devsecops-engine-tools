@@ -8,8 +8,6 @@ import re
 from engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import CheckovTool
-from engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
-from engine_sast.engine_iac.src.infrastructure.entry_points.exclusions import exclusion
 from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
     CheckovConfig,
 )
