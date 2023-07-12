@@ -27,9 +27,13 @@ def get_inputs_from_cli(args):
 def init_engine_core():
     result_list_engine_iac = runner_engine_iac() # lista con exclusion All de tool en este caso checkov, lista con exclusion pipeline de tool, compliance de tool), result_json list (según la cantidad de escaneos) , rules_scan (todas k8s y docker)
     total_list_vulnerability = []
-    for result in result_list_engine_iac:
-        total_list_vulnerability.append(CheckovDeserealizator.get_list_vulnerability(results_list=result.result_json))
+    rules_scaned = result_list_engine_iac.rules_scaned
+    total_list_exclusions = result_list_engine_iac.exclusions_all.keys + result_list_engine_iac.exclusions_scope.keys
+    scope_pipeline = result_list_engine_iac.scope_pipeline
+    
     #va dentro de un for, donde voy cargando todo lo que saco de lo que me pasa Cesarillo
+    for result in result_list_engine_iac.rules_scan_list:
+        total_list_vulnerability.append(CheckovDeserealizator.get_list_vulnerability(results_list=result.results.failed_checks))
     #    exclusion_for_pipeline = Exclusions()
     #    vulnerability_exclusions_pipeline[] = Vulnerability() 
     #acaba for
