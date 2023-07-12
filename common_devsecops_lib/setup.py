@@ -59,7 +59,6 @@ setup(
         "pytest==7.3.1",
         "pytest-azurepipelines==1.0.3",
         "pytest-cov==4.1.0",
-        "coverage==7.2.7",
         "requests==2.31.0",
         "mock==5.0.2",
         "marshmallow==3.19.0",
@@ -67,6 +66,7 @@ setup(
         "isodate==0.6.1",
         "pytz==2023.3",
         "python-dateutil==2.8.2",
+        "azure-devops==7.1.0b3",
     ],
     python_requires=">=3.8",
 )

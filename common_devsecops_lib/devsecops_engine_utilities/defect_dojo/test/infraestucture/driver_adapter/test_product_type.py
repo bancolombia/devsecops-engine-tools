@@ -1,56 +1,50 @@
-# import pytest
-# from unittest.mock import Mock
-# from devsecops_engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
-# from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.cmdb import (
-#     CmdbRestConsumer,
-# )
-# from devsecops_engine_utilities.utils.validation_error import ValidationError
-# from devsecops_engine_utilities.defect_dojo.test.files.get_response import get_response
-# from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.engagement import EngagementRestConsumer
-
-# def session_manager(status_code):
-#     # Mocks
-#     session_mock = Mock()
-#     response_mock_get = Mock()
-#     response_mock_get.status_code = status_code
-#     response_mock_get.json.return_value = get_response("product_types.json")
-#     # mocke method post
-#     response_mock_post = Mock()
-#     response_mock_post.status_code = status_code
-#     response_mock_post.json.return_value = get_response("product_types.json")["results"][0]
-#     # mock method get y post
-#     session_mock.get.return_value = response_mock_get
-#     session_mock.post.return_value = response_mock_post
-#     return session_mock
+import pytest
+from unittest.mock import Mock
+from devsecops_engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
+from devsecops_engine_utilities.utils.validation_error import ValidationError
+from devsecops_engine_utilities.defect_dojo.test.files.get_response import (
+    get_response,
+    session_manager_post,
+    session_manager_get,
+)
+from devsecops_engine_utilities.defect_dojo.domain.models.product_type_list import ProductTypeList
+from devsecops_engine_utilities.defect_dojo.domain.models.product_type import ProductType
+from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.product_type import ProductTypeRestConsumer
+from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 
 
-# def test_get_engagement_info_success():
-#     session_mock = session_manager(status_code=200)
-#     # Crear una instancia de CmdbRestConsumer con los mocks
-#     rest_engagement = EngagementRestConsumer(
-#         "token12345",
-#         "http://hosttest.com",
-#         session_mock,
-#     )
+def test_get_product_type_info_success():
+    session_mock = session_manager_get(status_code=200, response_json_file="product_type_list.json")
+    rest_product_type = ProductTypeRestConsumer(ImportScanRequest(), session_mock)
+    product_type_obj = rest_product_type.get_product_types("product_type name test")
 
-#     # Llamar al método bajo prueba
-#     engagement_obj = rest_engagement.get_engagement("NU0212001_test_engagement_name")
-
-#     # Verificar el resultado
-#     assert isinstance(engagement_obj, dict)
-#     print("debug", engagement_obj)
-#     assert engagement_obj["count"] == 1
-#     assert isinstance(engagement_obj["results"], list)
-#     assert engagement_obj["results"][0]["name"] == "NU0212001_test_engagement_name"
+    # Verificar el resultado
+    assert isinstance(product_type_obj, ProductTypeList)
+    assert product_type_obj.count == 1
+    assert isinstance(product_type_obj.results, list)
+    assert product_type_obj.results[0].name == "product_type name test"
+    assert product_type_obj.results[0].id == 162
 
 
-# def test_get_product_info_failure():
-#     session_mock = session_manager(500)
-#     consumer = CmdbRestConsumer(
-#         "token12345",
-#         "http://hosttest.com",
-#         {"product_name": "name_cmdb", "product_type_name": "product_type_name_cmdb"},
-#         session_mock,
-#     )
-#     with pytest.raises(ValidationError):
-#         consumer.get_product_info(123)
+def test_get_product_type_info_failure():
+    session_mock = session_manager_get(status_code=500, response_json_file="product_type_list.json")
+    rest_product_type = ProductTypeRestConsumer(ImportScanRequest(), session_mock)
+    with pytest.raises(ValidationError):
+        rest_product_type.get_product_types("product_type name test")
+
+
+def test_post_product_type_info_sucessfull():
+    session_mock = session_manager_post(status_code=201, response_json_file="product_type.json")
+    rest_product_type = ProductTypeRestConsumer(ImportScanRequest(), session_mock)
+    response = rest_product_type.post_product_type("product_type name test")
+    assert isinstance(response, ProductType)
+    assert response.id == 163
+    assert response.updated == "2023-07-11T16:44:08.397702Z"
+    assert isinstance(response.members, list)
+
+
+def test_post_product_type_info_failure():
+    session_mock = session_manager_post(status_code=500, response_json_file="product_type.json")
+    rest_product_type = ProductTypeRestConsumer(ImportScanRequest(), session_mock)
+    with pytest.raises(ValidationError):
+        rest_product_type.post_product_type("NU0212001_test_engagement_name")
