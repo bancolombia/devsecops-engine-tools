@@ -16,14 +16,12 @@ class ProductTypeRestConsumer:
         self.__host = request.host_defect_dojo
         self.__session = session
 
-    def post_product_type(self, request: ImportScanRequest) -> ProductType:
+    def post_product_type(self, product_type_name: str) -> ProductType:
         url = f"{self.__host}/api/v2/product_types/"
 
-        data = json.dumps({"name": request.product_type_name})
+        data = json.dumps({"name": product_type_name})
 
-        headers = {
-            "Authorization": f"Token {self.__token}",
-            "Content-Type": "application/json"}
+        headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
 
         response = self.__session.post(url, headers=headers, data=data)
 
@@ -32,11 +30,10 @@ class ProductTypeRestConsumer:
         product_type_object = ProductType.from_dict(response.json())
         return product_type_object
 
-    def get_product_types(self, request: ImportScanRequest) -> ProductTypeList:
-        url = f"{self.__host}/api/v2/product_types/?name={request.product_type_name}"
+    def get_product_types(self, product_type_name: str) -> ProductTypeList:
+        url = f"{self.__host}/api/v2/product_types/?name={product_type_name}"
         headers = {"Authorization": f"Token {self.__token}"}
-        response = self.__session.get(
-            url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
+        response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
             raise ValidationError(response)
         product_type_object = ProductTypeList.from_dict(response.json())
@@ -47,8 +44,7 @@ class ProductTypeRestConsumer:
 
         headers = {"Authorization": f"Token {self.__token}"}
 
-        response = self.__session.get(
-            url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
+        response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
             raise ValidationError(response)
         logger.info(response)

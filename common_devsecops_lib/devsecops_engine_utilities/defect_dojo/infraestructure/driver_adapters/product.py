@@ -17,31 +17,21 @@ class ProductRestConsumer:
 
     def get_products(self, request: ImportScanRequest) -> ProductList:
         url = f"{self.__host}/api/v2/products/?name={request.product_name}"
-        headers = {
-            "Authorization": f"Token {self.__token}",
-            "Content-Type": "application/json"}
-        response = self.__session.get(
-            url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
+        headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
+        response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
             raise ValidationError(response)
         products_object = ProductList.from_dict(response.json())
         return products_object
 
-    def post_product(self, request: ImportScanRequest,
-                     product_type_id: int) -> Product:
+    def post_product(self, product_name, product_type_id: int) -> Product:
         url = f"{self.__host}/api/v2/products/"
 
-        data = {
-            "name": request.product_name,
-            "description": request.product_name,
-            "prod_type": product_type_id}
+        data = {"name": product_name, "description": product_name, "prod_type": product_type_id}
 
         headers = {"Authorization": f"Token {self.__token}"}
-        response = self.__session(
-            url,
-            headers=headers,
-            data=data,
-            verify=VERIFY_CERTIFICATE)
+        response = self.__session.post(url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
+        print("este es el status code ", response.status_code)
         if response.status_code != 201:
             raise ValidationError(response)
         product_object = Product.from_dict(response.json())
