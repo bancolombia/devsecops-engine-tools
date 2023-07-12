@@ -8,6 +8,7 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.scan
 )
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.defect_dojo.domain.user_case.import_scan import ImportScanUserCase
+from devsecops_engine_utilities.utils.session_manager import SessionManager
 
 logger = MyLogger.__call__().get_logger()
 
@@ -16,11 +17,20 @@ class DefectDojo:
     @staticmethod
     def send_import_scan(request: ImportScanRequest):
         try:
-            rest_import_scan = ImportScanRestConsumer(request)
-            rest_product_type = ProductTypeRestConsumer(request)
-            rest_product = ProductRestConsumer(request)
-            rest_scan_configuration = ScanConfigrationRestConsumer(request)
-            uc = ImportScanUserCase(rest_import_scan, rest_product_type, rest_product, rest_scan_configuration)
+            rest_import_scan = ImportScanRestConsumer(
+                request, session=SessionManager())
+            rest_product_type = ProductTypeRestConsumer(
+                request, session=SessionManager())
+            rest_product = ProductRestConsumer(
+                request, session=SessionManager())
+
+            rest_scan_configuration = ScanConfigrationRestConsumer(
+                request, session=SessionManager())
+            uc = ImportScanUserCase(
+                rest_import_scan,
+                rest_product_type,
+                rest_product,
+                rest_scan_configuration)
             response = uc.execute(request)
             return response
         except ValidationError as error:

@@ -7,12 +7,8 @@ from devsecops_engine_utilities.defect_dojo.domain.models.scan_configuration imp
 from devsecops_engine_utilities.defect_dojo.domain.models.product_list import ProductList
 from devsecops_engine_utilities.defect_dojo.domain.models.product import Product
 from devsecops_engine_utilities.defect_dojo.domain.models.product_type import ProductType
-from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.import_scan import (
-    ImportScanRestConsumer,
-)
-from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.product_type import (
-    ProductTypeRestConsumer,
-)
+from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.import_scan import ImportScanRestConsumer
+from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.product_type import ProductTypeRestConsumer
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.product import ProductRestConsumer
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.scan_configurations import (
     ScanConfigrationRestConsumer,
@@ -20,6 +16,7 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.scan
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.defect_dojo.domain.user_case.import_scan import ImportScanUserCase
 from devsecops_engine_utilities.utils.validation_error import ValidationError
+from devsecops_engine_utilities.utils.session_manager import SessionManager
 
 
 def import_scan_request_instance(
@@ -44,10 +41,11 @@ def import_scan_request_instance(
 def test_user_case_creation():
     request = import_scan_request_instance("Xray scan")
     assert isinstance(request, ImportScanRequest)
-    rest_import_scan = ImportScanRestConsumer(request)
-    rest_product_type = ProductTypeRestConsumer(request)
-    rest_product = ProductRestConsumer(request)
-    rest_scan_configuration = ScanConfigrationRestConsumer(request)
+    rest_import_scan = ImportScanRestConsumer(request, SessionManager())
+    rest_product_type = ProductTypeRestConsumer(request, SessionManager())
+    rest_product = ProductRestConsumer(request, SessionManager())
+    rest_scan_configuration = ScanConfigrationRestConsumer(
+        request, SessionManager())
     uc = ImportScanUserCase(
         rest_import_scan=rest_import_scan,
         rest_product_type=rest_product_type,
@@ -86,9 +84,11 @@ def mock_rest_product_type(product_type_empty=False):
         )
     ]
     if product_type_empty:
-        mock_rest_product_type.get_product_types.return_value = ProductTypeList(count=1, results=[])
+        mock_rest_product_type.get_product_types.return_value = ProductTypeList(
+            count=1, results=[])
     else:
-        mock_rest_product_type.get_product_types.return_value = ProductTypeList(count=1, results=products)
+        mock_rest_product_type.get_product_types.return_value = ProductTypeList(
+            count=1, results=products)
     mock_rest_product_type.post_product_type.return_value = products[0]
     return mock_rest_product_type
 
@@ -169,7 +169,8 @@ def test_execute_sucessfull(
     assert isinstance(request, ImportScanRequest)
     response = uc.execute(request)
     assert response.scan_type == import_scan_request_instance.scan_type
-    assert response.to_dict()["scan_type"] == import_scan_request_instance.scan_type
+    assert response.to_dict(
+    )["scan_type"] == import_scan_request_instance.scan_type
 
 
 @pytest.mark.parametrize(

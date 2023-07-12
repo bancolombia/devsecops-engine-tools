@@ -1,0 +1,21 @@
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 162,
+            "name": "product_type name test",
+            "description": null,
+            "critical_product": false,
+            "key_product": false,
+            "updated": "2023-07-11T13:29:05.233277Z",
+            "created": "2023-07-11T13:29:05.233290Z",
+            "members": [
+                35
+            ],
+            "authorization_groups": []
+        }
+    ],
+    "prefetch": {}
+}

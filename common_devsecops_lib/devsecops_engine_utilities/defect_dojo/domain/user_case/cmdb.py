@@ -9,7 +9,8 @@ logger = MyLogger.__call__().get_logger()
 
 
 class CmdbUserCase:
-    def __init__(self, rest_consumer_cmdb: CmdbRestConsumer, utils_azure: AzureDevopsApi, expression) -> None:
+    def __init__(self, rest_consumer_cmdb: CmdbRestConsumer,
+                 utils_azure: AzureDevopsApi, expression) -> None:
         self.__rc_cmdb = rest_consumer_cmdb
         self.__utils_azure = utils_azure
         self.__expression = expression

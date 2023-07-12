@@ -12,11 +12,15 @@ class AzureDevopsIntegration(RemoteConfigGateway):
         try:
             system_AccessToken = SystemVariables.System_AccessToken.value()
             system_TeamFoundationCollectionUri = SystemVariables.System_TeamFoundationCollectionUri.value()
-            credentials = BasicTokenAuthentication({"access_token": system_AccessToken})
-            self.connection = Connection(base_url=system_TeamFoundationCollectionUri, creds=credentials)
+            credentials = BasicTokenAuthentication(
+                {"access_token": system_AccessToken})
+            self.connection = Connection(
+                base_url=system_TeamFoundationCollectionUri,
+                creds=credentials)
             return self.connection
         except Exception as e:
-            raise Exception("Error al obtener la conexión de Azure DevOps: " + str(e))
+            raise Exception(
+                "Error al obtener la conexión de Azure DevOps: " + str(e))
 
     def get_remote_json_config(self, remote_config_repo, remote_config_path):
         try:
@@ -29,4 +33,5 @@ class AzureDevopsIntegration(RemoteConfigGateway):
             return data
         except Exception as e:
             # Arrojar una excepción personalizada
-            raise Exception("Error al obtener el archivo de configuración remoto: " + str(e))
+            raise Exception(
+                "Error al obtener el archivo de configuración remoto: " + str(e))
