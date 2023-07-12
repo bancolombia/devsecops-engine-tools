@@ -12,8 +12,7 @@ def session_manager(status_code):
     session_mock = Mock()
     response_mock = Mock()
     response_mock.status_code = status_code
-    response_mock.json.return_value = [
-        {"name_cmdb": "NU0429001_Test", "product_type_name_cmdb": "software"}]
+    response_mock.json.return_value = [{"name_cmdb": "NU0429001_Test", "product_type_name_cmdb": "software"}]
     session_mock.post.return_value = response_mock
     return session_mock
 
