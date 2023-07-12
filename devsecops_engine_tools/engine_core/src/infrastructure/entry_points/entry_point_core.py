@@ -4,7 +4,7 @@ from engine_sast.engine_iac.src.applications.runner_iac_scan import runner_engin
 from engine_core.src.domain.model.Vulnerability import Vulnerability
 from engine_core.src.domain.model.Level_Compliance import LevelCompliance
 from engine_core.src.domain.model.Exclusions import Exclusions
-from engine_core.src.infrastructure.driven_adapters.checkov.Checkov_Deserealizator import CheckovDeserealizator
+from engine_core.src.infrastructure.driven_adapters.checkov.Checkov_deserealizator import CheckovDeserealizator
 
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
