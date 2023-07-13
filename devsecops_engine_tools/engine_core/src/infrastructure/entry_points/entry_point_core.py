@@ -1,10 +1,10 @@
 import argparse
 
 from engine_sast.engine_iac.src.applications.runner_iac_scan import runner_engine_iac
-from engine_core.src.domain.model.Vulnerability import Vulnerability
-from engine_core.src.domain.model.Level_Compliance import LevelCompliance
 from engine_core.src.domain.model.Exclusions import Exclusions
+from engine_core.src.domain.model.InputCore import InputCore
 from engine_core.src.infrastructure.driven_adapters.checkov.Checkov_deserealizator import CheckovDeserealizator
+from engine_core.src.domain.usecases.break_build import BreakBuild
 
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
@@ -21,26 +21,18 @@ def get_inputs_from_cli(args):
         args.environment,
     )
 
-# def init_engine_core(remote_config_repo, remote_config_path, tool):
-
 # IMPORTANTEEEE: En los entry points se conecta los driven adapter, con los casos de uso
+# def init_engine_core(remote_config_repo, remote_config_path, tool):
 def init_engine_core():
-    result_list_engine_iac = runner_engine_iac() # lista con exclusion All de tool en este caso checkov, lista con exclusion pipeline de tool, compliance de tool), result_json list (según la cantidad de escaneos) , rules_scan (todas k8s y docker)
-    total_list_vulnerability = []
+    result_list_engine_iac = runner_engine_iac()
     rules_scaned = result_list_engine_iac.rules_scaned
-    total_list_exclusions = list(result_list_engine_iac.exclusions_all.keys()).extend(list(result_list_engine_iac.exclusions_scope.keys()))
+    totalized_exclusions = list(result_list_engine_iac.exclusions_all.keys())
+    totalized_exclusions.extend(list(result_list_engine_iac.exclusions_scope.keys()))
+    level_compliance_defined = result_list_engine_iac.level_compliance
     scope_pipeline = result_list_engine_iac.scope_pipeline
-    
-    #va dentro de un for, donde voy cargando todo lo que saco de lo que me pasa Cesarillo
-    for result in result_list_engine_iac.rules_scan_list:
-        total_list_vulnerability.append(CheckovDeserealizator.get_list_vulnerability(results_list=result.results.failed_checks))
-    #    exclusion_for_pipeline = Exclusions()
-    #    vulnerability_exclusions_pipeline[] = Vulnerability() 
-    #acaba for
-    level_compliance_defined = LevelCompliance() #Le paso los datos que obtenga de lo que manda Cesarillo
-
-    
-    # break_build(list_vulnerabilities,umbrales)
+    checkov_deserealizator = CheckovDeserealizator(result_list_engine_iac.results_scan_list)
+    input_core = InputCore(totalized_exclusions=totalized_exclusions, level_compliance_defined=level_compliance_defined, rules_scaned=rules_scaned)
+    BreakBuild(deserializer_gateway=checkov_deserealizator,input_core=input_core)
     print("init_engine_core")
 
 init_engine_core()

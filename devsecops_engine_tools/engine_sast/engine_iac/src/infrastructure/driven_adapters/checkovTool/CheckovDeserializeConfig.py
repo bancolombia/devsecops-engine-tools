@@ -1,10 +1,4 @@
-class LevelCompliance:
-    def __init__(self, data):
-        self.critical = data["Critical"]
-        self.high = data["High"]
-        self.medium = data["Medium"]
-        self.low = data["Low"]
-
+from engine_sast.engine_iac.src.domain.model.LevelCompliance import LevelCompliance
 
 class CheckovDeserializeConfig:
     def __init__(self, json_data, tool, environment):
