@@ -1,10 +1,12 @@
 from dataclasses import dataclass
+from engine_sast.engine_iac.src.domain.model.LevelCompliance import LevelCompliance
 
 
 @dataclass
 class ResultScanObject:
-    rules_scan_list: list
+    results_scan_list: list
     exclusions_all: dict
     exclusions_scope: dict
     rules_scaned : dict
     scope_pipeline: str
+    level_compliance: LevelCompliance

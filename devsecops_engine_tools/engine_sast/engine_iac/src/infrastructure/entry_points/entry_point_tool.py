@@ -136,9 +136,10 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
 
     result_scan_object = ResultScanObject(
         scope_pipeline=data_config.scope_pipeline,
-        rules_scan_list=result_scans,
+        results_scan_list=result_scans,
         rules_scaned=data_config.rules_all,
         exclusions_all=data_config.exclusions_all,
         exclusions_scope=data_config.exclusions_scope,
+        level_compliance=data_config.level_compliance
     )
     return result_scan_object
