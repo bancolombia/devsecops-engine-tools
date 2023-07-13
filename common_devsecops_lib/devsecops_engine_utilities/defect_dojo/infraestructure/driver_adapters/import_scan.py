@@ -50,13 +50,8 @@ class ImportScanRestConsumer:
         }
         multipart_data = MultipartEncoder(fields=data)
 
-        headers = {"Authorization": f"Token {self.__token}",
-                   "Content-Type": multipart_data.content_type}
-        response = self.__session.post(
-            url,
-            headers=headers,
-            data=multipart_data,
-            verify=VERIFY_CERTIFICATE)
+        headers = {"Authorization": f"Token {self.__token}", "Content-Type": multipart_data.content_type}
+        response = self.__session.post(url, headers=headers, data=multipart_data, verify=VERIFY_CERTIFICATE)
 
         if response.status_code != 201:
             logger.error(response.status_code)
@@ -101,12 +96,7 @@ class ImportScanRestConsumer:
 
         headers = {"Authorization": f"Token {self.__token}"}
 
-        response = self.__session.post(
-            url,
-            headers=headers,
-            data=payload,
-            files=files,
-            verify=VERIFY_CERTIFICATE)
+        response = self.__session.post(url, headers=headers, data=payload, files=files, verify=VERIFY_CERTIFICATE)
 
         if response.status_code != 201:
             logger.info(payload)
@@ -114,5 +104,9 @@ class ImportScanRestConsumer:
             logger.error(response)
             raise ValidationError(response)
         logger.info(f"Sucessfull {response}")
-        response = ImportScanRequest.from_dict(response.json())
+        try:
+            response = ImportScanRequest.from_dict(response.json())
+        except Exception as e:
+            logger.error(f"from dict import Scan: {response.json()}")
+            raise ValidationError(e)
         return response

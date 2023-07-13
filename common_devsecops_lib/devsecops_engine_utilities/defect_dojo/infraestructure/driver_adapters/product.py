@@ -21,7 +21,11 @@ class ProductRestConsumer:
         response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
             raise ValidationError(response)
-        products_object = ProductList.from_dict(response.json())
+        try:
+            products_object = ProductList.from_dict(response.json())
+        except Exception as e:
+            logger.error(f"from dict product: {response.json()}")
+            raise ValidationError(e)
         return products_object
 
     def post_product(self, product_name, product_type_id: int) -> Product:
@@ -34,5 +38,9 @@ class ProductRestConsumer:
         print("este es el status code ", response.status_code)
         if response.status_code != 201:
             raise ValidationError(response)
-        product_object = Product.from_dict(response.json())
+        try:
+            product_object = Product.from_dict(response.json())
+        except Exception as e:
+            logger.error(f"form dict product: {response.json()}")
+            raise ValidationError(e)
         return product_object
