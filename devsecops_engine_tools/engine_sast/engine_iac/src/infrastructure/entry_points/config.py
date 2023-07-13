@@ -19,7 +19,7 @@ remote_config = """{
                         "qa": true
                     },
                     "guideline": "https://URL_WIKI.com",
-                    "severity": "High",
+                    "severity": "Medium",
                     "cvss" : ""          
                 },
                 "CKV_DOCKER_3" : {
@@ -230,7 +230,7 @@ remote_config = """{
                         "qa": true
                     },
                     "guideline": "https://URL_WIKI.com",
-                    "severity": "High",
+                    "severity": "Critical",
                     "cvss" : ""  
                 },
                 "CKV_K8S_29": {
@@ -351,7 +351,7 @@ remote_config = """{
                         "qa": true
                     },
                     "guideline": "https://URL_WIKI.com",
-                    "severity": "High",
+                    "severity": "Critical",
                     "cvss" : ""  
                 },
                 "CKV_K8S_155": {
