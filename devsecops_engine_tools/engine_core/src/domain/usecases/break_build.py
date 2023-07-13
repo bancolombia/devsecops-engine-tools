@@ -1,39 +1,69 @@
 from dataclasses import dataclass, replace
+from functools import reduce
+from prettytable import PrettyTable, DOUBLE_BORDER
+
 from engine_core.src.domain.model.gateway.gateway_deserealizator import DeseralizatorGateway
 from engine_core.src.domain.model.InputCore import InputCore
+from engine_core.src.domain.model.Vulnerability import Vulnerability
+from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import AzureMessageResultPipeline
 
 
 @dataclass
 class BreakBuild:
-    deserializer_gateway : DeseralizatorGateway
-    input_core : InputCore
+    deserializer_gateway: DeseralizatorGateway
+    input_core: InputCore
+
+    def print_table(self, vulnerabilities_without_exclusions_list: list[Vulnerability]):
+        vulnerability_table = PrettyTable(["Severity", "ID", "Where"])
+
+        for vulnerability in vulnerabilities_without_exclusions_list:
+            vulnerability_table.add_row(
+                [vulnerability.severity, vulnerability.id, vulnerability.where_vulnerability])
+            
+        severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+        sorted_table = PrettyTable()
+        sorted_table.field_names = vulnerability_table.field_names
+        sorted_table.add_rows(sorted(vulnerability_table._rows, key=lambda row: severity_order[row[0]]))
+
+        sorted_table.align["Severity"] = "l"
+        sorted_table.align["ID"] = "l"
+        sorted_table.align["Where"] = "l"
+        sorted_table.set_style(DOUBLE_BORDER)
+
+        if len(sorted_table.rows) > 0:
+            print(sorted_table)
 
     def __post_init__(self):
         vulnerabilities_list = self.deserializer_gateway.get_list_vulnerability()
         level_compliance = self.input_core.level_compliance_defined
         exclusions = self.input_core.totalized_exclusions
         rules_scaned = self.input_core.rules_scaned
-        checkSeverity = { "critical": 0, "high": 0, "medium": 0, "low": 0 }
 
         if len(vulnerabilities_list) != 0:
-            vulnerabilities_list_with_severity = list(map(lambda vulnerability: replace(vulnerability, severity= rules_scaned[vulnerability.id].get("severity")), vulnerabilities_list))
-            vulnerabilities_excluded_list = list(filter(lambda item: exclusions.get(item.id) != None, vulnerabilities_list_with_severity))
-            vulnerabilities_without_exclusions_list = list(filter(lambda item: exclusions.get(item.id) == None, vulnerabilities_list_with_severity))
+            vulnerabilities_list_with_severity = list(map(lambda vulnerability: replace(
+                vulnerability, severity=rules_scaned[vulnerability.id].get("severity").lower()), vulnerabilities_list))
+            vulnerabilities_excluded_list = list(filter(lambda item: exclusions.get(
+                item.id) != None, vulnerabilities_list_with_severity))
+            vulnerabilities_without_exclusions_list = list(filter(
+                lambda item: exclusions.get(item.id) == None, vulnerabilities_list_with_severity))
 
-            for vulnerability in vulnerabilities_without_exclusions_list:
-                if vulnerability.severity.lower() in checkSeverity:
-                    checkSeverity[vulnerability.severity.lower()] += 1
+            vulnerabilities_critical = reduce(lambda count, vulnerability: count + 1 if vulnerability.severity ==
+                                              'critical' else count, vulnerabilities_without_exclusions_list, 0)
+            vulnerabilities_high = reduce(lambda count, vulnerability: count + 1 if vulnerability.severity ==
+                                          'high' else count, vulnerabilities_without_exclusions_list, 0)
+            vulnerabilities_medium = reduce(lambda count, vulnerability: count + 1 if vulnerability.severity ==
+                                            'medium' else count, vulnerabilities_without_exclusions_list, 0)
+            vulnerabilities_low = reduce(lambda count, vulnerability: count + 1 if vulnerability.severity ==
+                                         'low' else count, vulnerabilities_without_exclusions_list, 0)
+            vulnerabilities_unknown = reduce(lambda count, vulnerability: count + 1 if vulnerability.severity ==
+                                             'unknown' else count, vulnerabilities_without_exclusions_list, 0)
 
-            # vulnerabilities_critical_list = list(filter(lambda item: item.severity.lower() == "critical", vulnerabilities_without_exclusions_list))
-            # vulnerabilities_high = len(list(filter(lambda item: item.severity.lower() == "high", vulnerabilities_without_exclusions_list)))
-            # # vulnerabilities_medium_list = list(filter(lambda item: item.severity.lower() == "medium", vulnerabilities_without_exclusions_list))
-            # count = 0
-            # vulnerabilities_high_reduce = reduce(lambda count, vulnerability: count + 1 if vulnerability.severity == "high" else count, vulnerabilities_without_exclusions_list)
-
-            # # vulnerabilities_medium = reduce(lambda count, vulnerability: count + 1 if vulnerability.severity == 'medium' else count, vulnerabilities_without_exclusions_list, 0)
-            # vulnerabilities_low_list = list(filter(lambda item: item.severity.lower() == "low", vulnerabilities_without_exclusions_list))
-            # vulnerabilities_unknown_list = list(filter(lambda item: exclusions.get(item.severity.lower()) == "unknown", vulnerabilities_without_exclusions_list))
-            
-            print()
+            if vulnerabilities_critical >= level_compliance.critical or vulnerabilities_high >= level_compliance.high or vulnerabilities_medium >= level_compliance.medium or vulnerabilities_low >= level_compliance.low:
+                self.print_table(vulnerabilities_without_exclusions_list)
+                print('Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is not greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)'.format(
+                    vulnerabilities_critical, vulnerabilities_high, vulnerabilities_medium, vulnerabilities_low, level_compliance.critical, level_compliance.high, level_compliance.medium, level_compliance.low))
+                print(AzureMessageResultPipeline.Failed)
+                exit(1)
         else:
-            return len(vulnerabilities_list)
+            print(AzureMessageResultPipeline.Succeeded)
+            exit(0)
