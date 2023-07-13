@@ -14,11 +14,11 @@ class BreakBuild:
     input_core: InputCore
 
     def print_table(self, vulnerabilities_without_exclusions_list: list[Vulnerability]):
-        vulnerability_table = PrettyTable(["Severity", "ID", "Where"])
+        vulnerability_table = PrettyTable(["Severity", "ID", "Description", "Where"])
 
         for vulnerability in vulnerabilities_without_exclusions_list:
             vulnerability_table.add_row(
-                [vulnerability.severity, vulnerability.id, vulnerability.where_vulnerability])
+                [vulnerability.severity, vulnerability.id, vulnerability.description, vulnerability.where_vulnerability])
             
         severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
         sorted_table = PrettyTable()
@@ -26,6 +26,7 @@ class BreakBuild:
         sorted_table.add_rows(sorted(vulnerability_table._rows, key=lambda row: severity_order[row[0]]))
 
         sorted_table.align["Severity"] = "l"
+        sorted_table.align["Description"] = "l"
         sorted_table.align["ID"] = "l"
         sorted_table.align["Where"] = "l"
         sorted_table.set_style(DOUBLE_BORDER)
