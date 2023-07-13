@@ -1,5 +1,5 @@
-from engine_core.src.domain.model.gateway.gateway_deserealizator import DeseralizatorGateway
-from engine_core.src.domain.model.Vulnerability import Vulnerability
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.gateway_deserealizator import DeseralizatorGateway
+from devsecops_engine_tools.engine_core.src.domain.model.Vulnerability import Vulnerability
 from datetime import datetime
 from dataclasses import dataclass
 

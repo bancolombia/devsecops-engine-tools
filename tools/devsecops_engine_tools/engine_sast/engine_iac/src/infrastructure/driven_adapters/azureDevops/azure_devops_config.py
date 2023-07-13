@@ -1,7 +1,7 @@
 import json
 from azure.devops.connection import Connection
 from msrest.authentication import BasicTokenAuthentication
-from engine_sast.engine_iac.src.domain.model.gateways.remote_config_gateway import RemoteConfigGateway
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.remote_config_gateway import RemoteConfigGateway
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
     SystemVariables,
 )

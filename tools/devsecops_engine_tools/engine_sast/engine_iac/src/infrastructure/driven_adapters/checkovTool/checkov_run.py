@@ -1,7 +1,7 @@
 import yaml
 import subprocess
-from engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import ToolGateway
-from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import ToolGateway
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
 
 
 class CheckovTool(ToolGateway):

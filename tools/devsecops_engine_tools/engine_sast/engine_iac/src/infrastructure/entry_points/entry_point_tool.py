@@ -5,25 +5,25 @@ import queue
 import json
 import os
 import re
-from engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
-from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
-from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import CheckovTool
-from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import CheckovTool
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
     CheckovConfig,
 )
 from devsecops_engine_utilities.utils.printers import (
     Printers,
 )
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import ReleaseVariables
-from engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
     AzureDevopsIntegration,
 )
-from engine_sast.engine_iac.src.domain.model.ResultScanObject import ResultScanObject
-from engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovDeserializeConfig import (
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.ResultScanObject import ResultScanObject
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovDeserializeConfig import (
     CheckovDeserializeConfig,
 )
-from engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
-from engine_sast.engine_iac.src.infrastructure.entry_points.exclusions import exclusion
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.exclusions import exclusion
 
 
 def get_inputs_from_cli(args):
