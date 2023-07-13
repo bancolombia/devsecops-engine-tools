@@ -1,10 +1,10 @@
-from devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_scan import runner_engine_iac
+from devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core import init_engine_core
 from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import AzureMessageResultPipeline
 
 
 def main():
     try:
-        print(runner_engine_iac())
+        print(init_engine_core())
     except Exception as e:
         print(f"Error SCAN : {str(e)}")
         print(AzureMessageResultPipeline.Succeeded.value)

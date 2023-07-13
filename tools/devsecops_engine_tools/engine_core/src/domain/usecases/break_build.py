@@ -2,9 +2,9 @@ from dataclasses import dataclass, replace
 from functools import reduce
 from prettytable import PrettyTable, DOUBLE_BORDER
 
-from engine_core.src.domain.model.gateway.gateway_deserealizator import DeseralizatorGateway
-from engine_core.src.domain.model.InputCore import InputCore
-from engine_core.src.domain.model.Vulnerability import Vulnerability
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.gateway_deserealizator import DeseralizatorGateway
+from devsecops_engine_tools.engine_core.src.domain.model.InputCore import InputCore
+from devsecops_engine_tools.engine_core.src.domain.model.Vulnerability import Vulnerability
 from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import AzureMessageResultPipeline
 
 
