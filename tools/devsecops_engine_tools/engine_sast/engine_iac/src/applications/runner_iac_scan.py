@@ -1,5 +1,5 @@
 import sys
-from engine_sast.engine_iac.src.infrastructure.entry_points.entry_point_tool import (
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.entry_point_tool import (
     get_inputs_from_cli,
     get_inputs_from_config_file,
     init_engine_sast_rm,
