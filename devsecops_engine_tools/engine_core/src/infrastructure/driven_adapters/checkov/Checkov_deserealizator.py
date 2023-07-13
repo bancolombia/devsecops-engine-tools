@@ -14,7 +14,7 @@ class CheckovDeserealizator(DeseralizatorGateway):
         # la forma de mapear de json a objetos
 
         for result in self.results_scan_list:
-            if "failed_checks" in result:
+            if "failed_checks" in str(result):
                 for scan in result["results"]["failed_checks"]:
                     vulnerability_open = Vulnerability( 
                             id = scan.get("check_id"),
