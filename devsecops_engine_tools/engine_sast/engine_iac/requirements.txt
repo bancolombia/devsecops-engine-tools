@@ -1,2 +1,0 @@
-checkov==2.2.229
-PyYAML
