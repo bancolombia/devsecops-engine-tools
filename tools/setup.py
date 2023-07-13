@@ -12,16 +12,16 @@ def get_requirements():
 
 
 setup(
-    name="devsecops_engine_utilities",
-    version="2.0.2",
+    name="devsecops_engine_tool",
+    version="1.0.0",
     author="Bancolombia devsecops Team ",
     author_email="devsecops@bancolombia.com.co",
-    description="Common utilities tools for engine devsecops",
+    description="tool for devsecops strategy",
     long_description=get_readme(),
     long_description_content_type="text/markdown",
     url="https://github.com/bancolombia/NU0429001_devsecops_engine",
     package_dir={
-        "devsecops_engine_utilities": "devsecops_engine_utilities",
+        "devsecops_engine_tool": "devsecops_engine_tool",
     },
     packages=find_packages(exclude=['**test**']),
     classifiers=[
