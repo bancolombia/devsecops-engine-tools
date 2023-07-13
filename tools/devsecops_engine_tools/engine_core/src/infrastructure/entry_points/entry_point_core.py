@@ -27,7 +27,7 @@ def init_engine_core():
     result_list_engine_iac = runner_engine_iac()
     rules_scaned = result_list_engine_iac.rules_scaned
     totalized_exclusions = result_list_engine_iac.exclusions_all
-    totalized_exclusions.update(result_list_engine_iac.exclusions_scope)
+    if result_list_engine_iac.exclusions_scope != None: totalized_exclusions.update(result_list_engine_iac.exclusions_scope)
     level_compliance_defined = result_list_engine_iac.level_compliance
     scope_pipeline = result_list_engine_iac.scope_pipeline
     checkov_deserealizator = CheckovDeserealizator(result_list_engine_iac.results_scan_list)
