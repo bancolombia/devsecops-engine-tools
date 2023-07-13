@@ -13,7 +13,7 @@ def get_requirements():
 
 setup(
     name="devsecops_engine_utilities",
-    version="2.0.1",
+    version="2.0.3",
     author="Bancolombia devsecops Team ",
     author_email="devsecops@bancolombia.com.co",
     description="Common utilities tools for engine devsecops",
@@ -56,11 +56,7 @@ setup(
         "setuptools==67.6.0",
         "wheel==0.40.0",
         "pipenv==2023.3.20",
-        "pytest==7.3.1",
-        "pytest-azurepipelines==1.0.3",
-        "pytest-cov==4.1.0",
         "requests==2.31.0",
-        "mock==5.0.2",
         "marshmallow==3.19.0",
         "requests-toolbelt==1.0.0",
         "isodate==0.6.1",

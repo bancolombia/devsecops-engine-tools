@@ -9,8 +9,7 @@ logger = MyLogger.__call__().get_logger()
 
 
 class CmdbUserCase:
-    def __init__(self, rest_consumer_cmdb: CmdbRestConsumer,
-                 utils_azure: AzureDevopsApi, expression) -> None:
+    def __init__(self, rest_consumer_cmdb: CmdbRestConsumer, utils_azure: AzureDevopsApi, expression) -> None:
         self.__rc_cmdb = rest_consumer_cmdb
         self.__utils_azure = utils_azure
         self.__expression = expression
@@ -37,9 +36,9 @@ class CmdbUserCase:
         return request
 
     def get_code_app(self, engagement_name: str):
-        m = re.search(self.__expression, engagement_name, re.IGNORECASE)
+        m = re.search(r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_", engagement_name, re.IGNORECASE)
         if m is None:
-            logger.error(f"Engagement name {engagement_name} not match")
+            logger.error(f"Engagement name {engagement_name} not match whit expression: {self.__expression}")
             raise ValidationError("Engagement name not match")
         code_app = m.group(1)
         logger.debug(code_app)
