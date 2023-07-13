@@ -15,8 +15,7 @@ class ScanConfigrationRestConsumer:
         self.__host = request.host_defect_dojo
         self.__session = session
 
-    def post_api_scan_configuration(
-            self, request: ImportScanRequest, product_id: int, tool_configuration_id: int):
+    def post_api_scan_configuration(self, request: ImportScanRequest, product_id: int, tool_configuration_id: int):
         url = f"{self.__host}/api/v2/product_api_scan_configurations/"
 
         headers = {
@@ -32,13 +31,12 @@ class ScanConfigrationRestConsumer:
             }
         )
 
-        response = self.__session.post(
-            url=url,
-            headers=headers,
-            data=data,
-            verify=VERIFY_CERTIFICATE)
+        response = self.__session.post(url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
         if response.status_code != 201:
             raise ValidationError(response)
-        scan_configuration_object = ScanConfiguration.from_dict(
-            response.json())
+        try:
+            scan_configuration_object = ScanConfiguration.from_dict(response.json())
+        except Exception as e:
+            logger.error(f"from dict scanConfiguration {response.json()}")
+            ValidationError(e)
         return scan_configuration_object
