@@ -26,13 +26,13 @@ def get_inputs_from_cli(args):
 def init_engine_core():
     result_list_engine_iac = runner_engine_iac()
     rules_scaned = result_list_engine_iac.rules_scaned
-    totalized_exclusions = list(result_list_engine_iac.exclusions_all.keys())
-    totalized_exclusions.extend(list(result_list_engine_iac.exclusions_scope.keys()))
+    totalized_exclusions = result_list_engine_iac.exclusions_all
+    totalized_exclusions.update(result_list_engine_iac.exclusions_scope)
     level_compliance_defined = result_list_engine_iac.level_compliance
     scope_pipeline = result_list_engine_iac.scope_pipeline
     checkov_deserealizator = CheckovDeserealizator(result_list_engine_iac.results_scan_list)
-    input_core = InputCore(totalized_exclusions=totalized_exclusions, level_compliance_defined=level_compliance_defined, rules_scaned=rules_scaned)
-    BreakBuild(deserializer_gateway=checkov_deserealizator,input_core=input_core)
-    print("init_engine_core")
+    input_core = InputCore(totalized_exclusions=totalized_exclusions, level_compliance_defined=level_compliance_defined, rules_scaned=rules_scaned, scope_pipeline=scope_pipeline)
+    break_build_result = BreakBuild(deserializer_gateway=checkov_deserealizator,input_core=input_core).validate_level_compliance()
+    print(break_build_result)
 
 init_engine_core()
