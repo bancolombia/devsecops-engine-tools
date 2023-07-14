@@ -38,7 +38,6 @@ class ImportScanUserCase:
         product_type_id = None
         product_id = None
         tools_configurations = 1
-        scan_configuration: ScanConfigrationRestConsumer = None
         if (request.product_name or request.product_type_name) == "":
             logger.error("Name product not found")
             raise ValidationError("Name product not found")
@@ -78,12 +77,19 @@ class ImportScanUserCase:
                     request, product_id, tools_configurations
                 )
                 request.api_scan_configuration = scan_configuration.id
+                logger.debug(f"Scan configuration create service_key_1 : {scan_configuration.service_key_1}")
             else:
+                logger.debug(
+                    f"Scan configuration found service_key: {scan_configuration_list.results[0].service_key_1}"
+                )
                 request.api_scan_configuration = scan_configuration_list.results[0].id
-
+            logger.debug(f"search Engagement name: {request.engagement_name}")
             engagement = self.__rest_engagement.get_engagement(request.engagement_name)
             if engagement.results == []:
                 engagement = self.__rest_engagement.post_engagement(request.engagement_name, product_id)
+                logger.debug(f"Egagement created: {engagement.name}")
+            else:
+                logger.debug(f"Engagement found: {engagement.results[0].name}")
 
             response = self.__rest_import_scan.import_scan_api(request)
             logger.info(f"End process Succesfull!!!: {response}")

@@ -7,6 +7,7 @@ from devsecops_engine_utilities.defect_dojo.domain.models.scan_configuration imp
 from devsecops_engine_utilities.defect_dojo.domain.models.product_list import ProductList
 from devsecops_engine_utilities.defect_dojo.domain.models.product import Product
 from devsecops_engine_utilities.defect_dojo.domain.models.product_type import ProductType
+from devsecops_engine_utilities.defect_dojo.domain.models.engagement import Engagement, EngagementList
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.import_scan import ImportScanRestConsumer
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.product_type import ProductTypeRestConsumer
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.product import ProductRestConsumer
@@ -14,6 +15,7 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.scan
     ScanConfigrationRestConsumer,
 )
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
+from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.engagement import EngagementRestConsumer
 from devsecops_engine_utilities.defect_dojo.domain.user_case.import_scan import ImportScanUserCase
 from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.utils.session_manager import SessionManager
@@ -44,8 +46,8 @@ def test_user_case_creation():
     rest_import_scan = ImportScanRestConsumer(request, SessionManager())
     rest_product_type = ProductTypeRestConsumer(request, SessionManager())
     rest_product = ProductRestConsumer(request, SessionManager())
-    rest_scan_configuration = ScanConfigrationRestConsumer(
-        request, SessionManager())
+    rest_scan_configuration = ScanConfigrationRestConsumer(request, SessionManager())
+    rest_engagement = EngagementRestConsumer(request, SessionManager())
     uc = ImportScanUserCase(
         rest_import_scan=rest_import_scan,
         rest_product_type=rest_product_type,
@@ -84,11 +86,9 @@ def mock_rest_product_type(product_type_empty=False):
         )
     ]
     if product_type_empty:
-        mock_rest_product_type.get_product_types.return_value = ProductTypeList(
-            count=1, results=[])
+        mock_rest_product_type.get_product_types.return_value = ProductTypeList(count=1, results=[])
     else:
-        mock_rest_product_type.get_product_types.return_value = ProductTypeList(
-            count=1, results=products)
+        mock_rest_product_type.get_product_types.return_value = ProductTypeList(count=1, results=products)
     mock_rest_product_type.post_product_type.return_value = products[0]
     return mock_rest_product_type
 
@@ -103,6 +103,11 @@ def mock_rest_product(product_result_empty=False):
     mock_product.get_products.return_value = products
     mock_product.post_product.return_value = product
     return mock_product
+
+
+def mock_rest_engagement(product_result_empyt=False):
+    mock_product = MagicMock()
+    engagement = Engagement()
 
 
 def mock_rest_scan_configuration():
@@ -169,8 +174,7 @@ def test_execute_sucessfull(
     assert isinstance(request, ImportScanRequest)
     response = uc.execute(request)
     assert response.scan_type == import_scan_request_instance.scan_type
-    assert response.to_dict(
-    )["scan_type"] == import_scan_request_instance.scan_type
+    assert response.to_dict()["scan_type"] == import_scan_request_instance.scan_type
 
 
 @pytest.mark.parametrize(
@@ -209,6 +213,7 @@ def test_execute_error(
     mock_rest_product,
     mock_rest_scan_configuration,
     import_scan_request_instance,
+    mock_rest_engagement,
 ):
     request = import_scan_request_instance
     uc = ImportScanUserCase(
@@ -216,6 +221,7 @@ def test_execute_error(
         rest_product_type=mock_rest_product_type,
         rest_product=mock_rest_product,
         rest_scan_configuration=mock_rest_scan_configuration,
+        rest_engagement=mock_rest_engagement,
     )
     assert isinstance(uc, ImportScanUserCase)
     assert isinstance(request, ImportScanRequest)
