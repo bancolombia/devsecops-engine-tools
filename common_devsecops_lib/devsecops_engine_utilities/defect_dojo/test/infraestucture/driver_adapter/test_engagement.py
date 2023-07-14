@@ -8,14 +8,14 @@ from devsecops_engine_utilities.defect_dojo.test.files.get_response import (
     session_manager_get,
 )
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.engagement import EngagementRestConsumer
+from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 
 
 def test_get_engagement_info_success():
     session_mock = session_manager_get(status_code=200, response_json_file="engagement_list.json")
     # Crear una instancia de CmdbRestConsumer con los mocks
     rest_engagement = EngagementRestConsumer(
-        "token12345",
-        "http://hosttest.com",
+        ImportScanRequest(),
         session_mock,
     )
 
@@ -32,8 +32,7 @@ def test_get_engagement_info_success():
 def test_get_engagement_info_failure():
     session_mock = session_manager_get(status_code=500, response_json_file="engagement_list.json")
     rest_engagement = EngagementRestConsumer(
-        "token12345",
-        "http://hosttest.com",
+        ImportScanRequest(),
         session_mock,
     )
     with pytest.raises(ValidationError):
@@ -43,19 +42,17 @@ def test_get_engagement_info_failure():
 def test_post_engagement_info_sucessfull():
     session_mock = session_manager_post(status_code=201, response_json_file="engagement.json")
     rest_engagement = EngagementRestConsumer(
-        "token12345",
-        "http://hosttest.com",
+        ImportScanRequest(),
         session_mock,
     )
     response = rest_engagement.post_engagement(engagement_name="NU0212001_test_engagement_name", product_id=195)
-    assert response["id"] == 195
+    assert response.id == 195
 
 
 def test_post_engagement_info_failure():
     session_mock = session_manager_post(status_code=500, response_json_file="engagement.json")
     rest_engagement = EngagementRestConsumer(
-        "token12345",
-        "http://hosttest.com",
+        ImportScanRequest(),
         session_mock,
     )
     with pytest.raises(ValidationError):
