@@ -49,7 +49,6 @@ class ImportScanRestConsumer:
             "service": request.service,
             "group_by": request.group_by,
         }
-        logger.warning(data)
         multipart_data = MultipartEncoder(fields=data)
 
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": multipart_data.content_type}

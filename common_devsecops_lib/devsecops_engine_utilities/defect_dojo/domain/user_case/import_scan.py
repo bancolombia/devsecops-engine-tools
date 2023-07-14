@@ -7,6 +7,10 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.prod
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.scan_configurations import (
     ScanConfigrationRestConsumer,
 )
+from devsecops_engine_utilities.defect_dojo.domain.models.scan_configuration import (
+    ScanConfiguration,
+    ScanConfigurationList,
+)
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.engagement import EngagementRestConsumer
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 import urllib3
@@ -34,17 +38,13 @@ class ImportScanUserCase:
         product_type_id = None
         product_id = None
         tools_configurations = 1
+        scan_configuration: ScanConfigrationRestConsumer = None
         if (request.product_name or request.product_type_name) == "":
             logger.error("Name product not found")
             raise ValidationError("Name product not found")
 
         if re.search(" API ", request.scan_type):
             logger.info(f"Match {request.scan_type}")
-            # Todo elimiar variables de test
-            # request.product_name="defect-dojo"
-            # request.engagement_name="defect-dojo"
-            # request.api_scan_configuration="defect-dojo"
-            # request.product_type_name="defect-dojo type"
             product_types = self.__rest_product_type.get_product_types(request.product_type_name)
             if product_types.results == []:
                 product_type = self.__rest_product_type.post_product_type(request.product_type_name)
@@ -71,15 +71,19 @@ class ImportScanUserCase:
                     f"product found: {request.product_name}\
                     with id: {product_id}"
                 )
-            scan_configuration = self.__rest_scan_configurations.post_api_scan_configuration(
-                request, product_id, tools_configurations
-            )
+
+            scan_configuration_list = self.__rest_scan_configurations.get_api_scan_configuration(request)
+            if scan_configuration_list.results == []:
+                scan_configuration = self.__rest_scan_configurations.post_api_scan_configuration(
+                    request, product_id, tools_configurations
+                )
+                request.api_scan_configuration = scan_configuration.id
+            else:
+                request.api_scan_configuration = scan_configuration_list.results[0].id
 
             engagement = self.__rest_engagement.get_engagement(request.engagement_name)
             if engagement.results == []:
                 engagement = self.__rest_engagement.post_engagement(request.engagement_name, product_id)
-
-            request.api_scan_configuration = scan_configuration.id
 
             response = self.__rest_import_scan.import_scan_api(request)
             logger.info(f"End process Succesfull!!!: {response}")
