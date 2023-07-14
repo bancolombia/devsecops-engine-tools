@@ -4,6 +4,7 @@ from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
 from devsecops_engine_utilities.utils.session_manager import SessionManager
+import datetime
 
 logger = MyLogger.__call__().get_logger()
 
@@ -27,10 +28,10 @@ class ImportScanRestConsumer:
             "product_type_name": request.product_type_name,
             "product_name": request.product_name,
             "engagement_name": request.engagement_name,
-            "engagement_end_date": request.engagement_end_date,
+            "engagement_end_date": "2023-02-23",
             "source_code_management_uri": request.source_code_management_uri,
             "engagement": str(request.engagement) if request.engagement != 0 else "",
-            "auto_create_context": request.auto_create_context,
+            "auto_create_context": "false",
             "deduplication_on_engagement": request.deduplication_on_engagement,
             "lead": request.lead,
             "tags": request.tags,
@@ -48,6 +49,7 @@ class ImportScanRestConsumer:
             "service": request.service,
             "group_by": request.group_by,
         }
+        logger.warning(data)
         multipart_data = MultipartEncoder(fields=data)
 
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": multipart_data.content_type}

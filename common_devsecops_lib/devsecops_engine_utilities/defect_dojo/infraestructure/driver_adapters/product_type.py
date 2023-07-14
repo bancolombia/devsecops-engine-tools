@@ -40,7 +40,8 @@ class ProductTypeRestConsumer:
         try:
             product_type_object = ProductTypeList.from_dict(response.json())
         except Exception as e:
-            logger.error(f"from dict- error:{response.json()}")
+            logger.debug(f"from dict- error {response}")
+            logger.error(f"from dict- error:{response.text}")
             raise ValidationError(e)
         return product_type_object
 
