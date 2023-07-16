@@ -84,7 +84,7 @@ class ImportScanUserCase:
                 )
                 request.api_scan_configuration = scan_configuration_list.results[0].id
             logger.debug(f"search Engagement name: {request.engagement_name}")
-            engagement = self.__rest_engagement.get_engagement(request.engagement_name)
+            engagement = self.__rest_engagement.get_engagements(request.engagement_name)
             if engagement.results == []:
                 engagement = self.__rest_engagement.post_engagement(request.engagement_name, product_id)
                 logger.debug(f"Egagement created: {engagement.name}")

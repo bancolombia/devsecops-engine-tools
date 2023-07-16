@@ -17,9 +17,7 @@ class CmdbUserCase:
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
         # Connection config map
         connection = self.__utils_azure.get_azure_connection()
-        product_type_name_map = self.__utils_azure.get_remote_json_config(
-            connection=connection, repository_id=request.repository_id, remote_config_path=request.remote_config_path
-        )
+        product_type_name_map = self.__utils_azure.get_remote_json_config(connection=connection)
 
         # regular exprecion
         request.code_app = self.get_code_app(request.engagement_name)

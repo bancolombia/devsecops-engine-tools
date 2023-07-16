@@ -9,6 +9,7 @@ from devsecops_engine_utilities.defect_dojo.test.files.get_response import (
 )
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.engagement import EngagementRestConsumer
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
+from devsecops_engine_utilities.defect_dojo.domain.models.engagement import Engagement, EngagementList
 
 
 def test_get_engagement_info_success():
@@ -20,13 +21,13 @@ def test_get_engagement_info_success():
     )
 
     # Llamar al método bajo prueba
-    engagement_obj = rest_engagement.get_engagement("NU0212001_test_engagement_name")
+    engagement_obj = rest_engagement.get_engagements("NU0212001_test_engagement_name")
 
     # Verificar el resultado
-    assert isinstance(engagement_obj, dict)
-    assert engagement_obj["count"] == 1
-    assert isinstance(engagement_obj["results"], list)
-    assert engagement_obj["results"][0]["name"] == "NU0212001_test_engagement_name"
+    assert isinstance(engagement_obj, EngagementList)
+    assert engagement_obj.count == 1
+    assert isinstance(engagement_obj.results, list)
+    assert engagement_obj.results[0].name == "NU0212001_test_engagement_name"
 
 
 def test_get_engagement_info_failure():
@@ -36,7 +37,7 @@ def test_get_engagement_info_failure():
         session_mock,
     )
     with pytest.raises(ValidationError):
-        rest_engagement.get_engagement("NU0212001_test_engagement_name")
+        rest_engagement.get_engagements("NU0212001_test_engagement_name")
 
 
 def test_post_engagement_info_sucessfull():
@@ -56,4 +57,4 @@ def test_post_engagement_info_failure():
         session_mock,
     )
     with pytest.raises(ValidationError):
-        rest_engagement.get_engagement("NU0212001_test_engagement_name")
+        rest_engagement.get_engagements("NU0212001_test_engagement_name")
