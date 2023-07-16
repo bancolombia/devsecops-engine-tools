@@ -35,7 +35,6 @@ class ProductRestConsumer:
 
         headers = {"Authorization": f"Token {self.__token}"}
         response = self.__session.post(url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
-        print("este es el status code ", response.status_code)
         if response.status_code != 201:
             raise ValidationError(response)
         try:
