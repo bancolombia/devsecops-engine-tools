@@ -53,6 +53,7 @@ def test_user_case_creation():
         rest_product_type=rest_product_type,
         rest_product=rest_product,
         rest_scan_configuration=rest_scan_configuration,
+        rest_engagement=rest_engagement,
     )
     assert isinstance(uc, object)
     assert hasattr(uc, "__init__")
@@ -93,10 +94,10 @@ def mock_rest_product_type(product_type_empty=False):
     return mock_rest_product_type
 
 
-def mock_rest_product(product_result_empty=False):
+def mock_rest_product(result_list_empty=False):
     mock_product = MagicMock()
     product = Product(id=1, name="product name test")
-    if product_result_empty:
+    if result_list_empty:
         products = ProductList(count=1, results=[])
     else:
         products = ProductList(count=1, results=[product])
@@ -105,9 +106,16 @@ def mock_rest_product(product_result_empty=False):
     return mock_product
 
 
-def mock_rest_engagement(product_result_empyt=False):
-    mock_product = MagicMock()
-    engagement = Engagement()
+def mock_rest_engagement(result_list_empty=False):
+    if result_list_empty:
+        engagements = EngagementList(count=0, results=[])
+        return engagements
+    mock_engagement = MagicMock()
+    engagement = Engagement(id=3, name="name engagement test")
+    engagement = EngagementList(count=1, results=[engagement])
+    mock_engagement.get_engagements.return_value = engagement
+    mock_engagement.post_engagement.return_value = engagement.results[0]
+    return mock_engagement
 
 
 def mock_rest_scan_configuration():
@@ -124,7 +132,8 @@ def mock_rest_scan_configuration():
     mock_rest_product_type,
     mock_rest_product,
     mock_rest_scan_configuration,
-    import_scan_request_instance""",
+    import_scan_request_instance,
+    mock_rest_engagement""",
     [
         (
             mock_rest_import_scan("import_scan_xray.json"),
@@ -132,6 +141,7 @@ def mock_rest_scan_configuration():
             mock_rest_product(),
             mock_rest_scan_configuration(),
             import_scan_request_instance("Xray Scan"),
+            mock_rest_engagement(),
         ),
         (
             mock_rest_import_scan("sonar_qube.json"),
@@ -139,6 +149,7 @@ def mock_rest_scan_configuration():
             mock_rest_product(),
             mock_rest_scan_configuration(),
             import_scan_request_instance("SonarQube API Import"),
+            mock_rest_engagement(),
         ),
         (
             mock_rest_import_scan("sonar_qube.json"),
@@ -146,13 +157,15 @@ def mock_rest_scan_configuration():
             mock_rest_product(),
             mock_rest_scan_configuration(),
             import_scan_request_instance("SonarQube API Import"),
+            mock_rest_engagement(),
         ),
         (
             mock_rest_import_scan("sonar_qube.json"),
             mock_rest_product_type(),
-            mock_rest_product(product_result_empty=True),
+            mock_rest_product(result_list_empty=True),
             mock_rest_scan_configuration(),
             import_scan_request_instance("SonarQube API Import"),
+            mock_rest_engagement(),
         ),
     ],
 )
@@ -162,6 +175,7 @@ def test_execute_sucessfull(
     mock_rest_product,
     mock_rest_scan_configuration,
     import_scan_request_instance,
+    mock_rest_engagement,
 ):
     request = import_scan_request_instance
     uc = ImportScanUserCase(
@@ -169,6 +183,7 @@ def test_execute_sucessfull(
         rest_product_type=mock_rest_product_type,
         rest_product=mock_rest_product,
         rest_scan_configuration=mock_rest_scan_configuration,
+        rest_engagement=mock_rest_engagement,
     )
     assert isinstance(uc, ImportScanUserCase)
     assert isinstance(request, ImportScanRequest)
@@ -182,7 +197,8 @@ def test_execute_sucessfull(
     mock_rest_product_type,
     mock_rest_product,
     mock_rest_scan_configuration,
-    import_scan_request_instance""",
+    import_scan_request_instance,
+    mock_rest_engagement""",
     [
         (
             mock_rest_import_scan("import_scan_xray.json"),
@@ -190,6 +206,7 @@ def test_execute_sucessfull(
             mock_rest_product(),
             mock_rest_scan_configuration(),
             import_scan_request_instance("Xray Scan", ""),
+            mock_rest_engagement(),
         ),
         (
             mock_rest_import_scan("sonar_qube.json"),
@@ -197,6 +214,7 @@ def test_execute_sucessfull(
             mock_rest_product(),
             mock_rest_scan_configuration(),
             import_scan_request_instance("Xray Scan", None),
+            mock_rest_engagement(),
         ),
         (
             mock_rest_import_scan("sonar_qube.json"),
@@ -204,6 +222,7 @@ def test_execute_sucessfull(
             mock_rest_product(),
             mock_rest_scan_configuration(),
             import_scan_request_instance("Xray Scan", file="incorrect url"),
+            mock_rest_engagement(),
         ),
     ],
 )

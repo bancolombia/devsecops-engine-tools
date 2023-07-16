@@ -16,7 +16,7 @@ class EngagementRestConsumer:
         self.__host = request.host_defect_dojo
         self.__session = session
 
-    def get_engagement(self, product_name):
+    def get_engagements(self, product_name):
         url = f"{self.__host}/api/v2/engagements/"
 
         data = json.dumps({"name": product_name})
