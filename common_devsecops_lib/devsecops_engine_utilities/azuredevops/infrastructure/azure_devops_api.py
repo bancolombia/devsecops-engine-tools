@@ -26,8 +26,6 @@ class AzureDevopsApi:
         self.__remote_config_path = remote_config_path
 
     def segment_url(self):
-        print("init")
-        print(self.__compact_remote_config_url)
         if self.__compact_remote_config_url:
             url_parts = urlsplit(self.__compact_remote_config_url)
             path = unquote(url_parts.path)
@@ -37,7 +35,6 @@ class AzureDevopsApi:
             self.__repository_id = path_parts[3]
             query_parts = url_parts.query.split("=")
             self.__remote_config_path = query_parts[1]
-        print("not paso")
 
     def get_azure_connection(self) -> Connection:
         self.segment_url()
