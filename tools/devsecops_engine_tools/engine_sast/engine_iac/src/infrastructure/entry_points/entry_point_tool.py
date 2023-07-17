@@ -80,16 +80,16 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     Printers.print_logo_tool()
     azure_devops_integration = AzureDevopsIntegration()
     azure_devops_integration.get_azure_connection()
-    # data_file_tool = azure_devops_integration.get_remote_json_config(
-    #     remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
-    # )
-    data_file_tool = json.loads(remote_config)
+    data_file_tool = azure_devops_integration.get_remote_json_config(
+        remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
+    )
+    # data_file_tool = json.loads(remote_config)
     data_config = CheckovDeserializeConfig(json_data=data_file_tool, tool=tool, environment=environment)
-    # data_config.exclusions = azure_devops_integration.get_remote_json_config(
-    #     remote_config_repo=remote_config_repo, remote_config_path=data_config.exclusions_path
-    # )
+    data_config.exclusions = azure_devops_integration.get_remote_json_config(
+        remote_config_repo=remote_config_repo, remote_config_path=data_config.exclusions_path
+    )
     data_config.scope_pipeline = ReleaseVariables.Release_Definitionname.value()
-    data_config.exclusions = json.loads(exclusion)
+    # data_config.exclusions = json.loads(exclusion)
     if data_config.exclusions.get("All") is not None:
         data_config.exclusions_all = data_config.exclusions.get("All").get(tool)
     if data_config.exclusions.get(data_config.scope_pipeline) is not None:
