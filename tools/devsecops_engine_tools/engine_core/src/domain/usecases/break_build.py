@@ -43,6 +43,7 @@ class BreakBuild:
         if len(vulnerabilities_list) != 0:
             vulnerabilities_list_with_severity = list(map(lambda vulnerability: replace(
                 vulnerability, severity=rules_scaned[vulnerability.id].get("severity").lower()), vulnerabilities_list))
+            #Esta lista de excluidas no se imprimira para dejar un resultado más limpio
             vulnerabilities_excluded_list = list(filter(lambda item: exclusions.get(
                 item.id) != None, vulnerabilities_list_with_severity))
             vulnerabilities_without_exclusions_list = list(filter(

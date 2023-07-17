@@ -2,14 +2,10 @@ from devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_po
 from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import AzureMessageResultPipeline
 
 
-def main():
+def application_core():
     try:
         init_engine_core()
     except Exception as e:
         print(f"Error SCAN : {str(e)}")
         #print(AzureMessageResultPipeline.Succeeded.value)
         # Manejar el error según sea necesario
-
-
-if __name__ == "__main__":
-    main()
