@@ -16,14 +16,12 @@ class EngagementRestConsumer:
         self.__host = request.host_defect_dojo
         self.__session = session
 
-    def get_engagements(self, product_name):
-        url = f"{self.__host}/api/v2/engagements/"
-
-        data = json.dumps({"name": product_name})
+    def get_engagements(self, engagement_name):
+        url = f"{self.__host}/api/v2/engagements/?name={engagement_name}"
 
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
 
-        response = self.__session.get(url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
+        response = self.__session.get(url=url, headers=headers, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
             logger.error(response.json())
             raise ValidationError(response)
