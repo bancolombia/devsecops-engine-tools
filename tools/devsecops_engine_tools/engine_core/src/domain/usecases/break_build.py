@@ -5,7 +5,7 @@ from prettytable import PrettyTable, DOUBLE_BORDER
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.gateway_deserealizator import DeseralizatorGateway
 from devsecops_engine_tools.engine_core.src.domain.model.InputCore import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.Vulnerability import Vulnerability
-from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import AzureMessageResultPipeline
+from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import AzureMessageResultPipeline, AzureMessageLoggingPipeline
 
 
 @dataclass
@@ -62,11 +62,14 @@ class BreakBuild:
 
             if vulnerabilities_critical >= level_compliance.critical or vulnerabilities_high >= level_compliance.high or vulnerabilities_medium >= level_compliance.medium or vulnerabilities_low >= level_compliance.low:
                 self.print_table(vulnerabilities_without_exclusions_list)
-                print('Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)'.format(
-                    vulnerabilities_critical, vulnerabilities_high, vulnerabilities_medium, vulnerabilities_low, level_compliance.critical, level_compliance.high, level_compliance.medium, level_compliance.low))
+                print(AzureMessageLoggingPipeline.ErrorLogging.get_message('Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)'.format(
+                    vulnerabilities_critical, vulnerabilities_high, vulnerabilities_medium, vulnerabilities_low, level_compliance.critical, level_compliance.high, level_compliance.medium, level_compliance.low)))
                 print(AzureMessageResultPipeline.Failed.value)
             else:
                 self.print_table(vulnerabilities_without_exclusions_list)
+                print(AzureMessageLoggingPipeline.WarningLogging.get_message('Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is not greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)'.format(
+                    vulnerabilities_critical, vulnerabilities_high, vulnerabilities_medium, vulnerabilities_low, level_compliance.critical, level_compliance.high, level_compliance.medium, level_compliance.low)))
                 print(AzureMessageResultPipeline.Succeeded.value)
         else:
+            print(AzureMessageLoggingPipeline.SucceededLogging.get_message("There are no vulnerabilities"))
             print(AzureMessageResultPipeline.Succeeded.value)
