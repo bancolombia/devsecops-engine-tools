@@ -45,7 +45,7 @@ class ScanConfigrationRestConsumer:
             scan_configuration_object = ScanConfiguration.from_dict(response.json())
         except Exception as e:
             logger.error(f"from dict scanConfiguration {response.json()}")
-            ValidationError(e)
+            raise ValidationError(e)
         return scan_configuration_object
 
     def get_api_scan_configuration(self, request: ImportScanRequest) -> ScanConfigurationList:
