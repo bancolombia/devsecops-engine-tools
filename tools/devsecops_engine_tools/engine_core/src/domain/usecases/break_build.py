@@ -61,10 +61,8 @@ class BreakBuild:
 
             if vulnerabilities_critical >= level_compliance.critical or vulnerabilities_high >= level_compliance.high or vulnerabilities_medium >= level_compliance.medium or vulnerabilities_low >= level_compliance.low:
                 self.print_table(vulnerabilities_without_exclusions_list)
-                print('Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is not greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)'.format(
+                print('Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)'.format(
                     vulnerabilities_critical, vulnerabilities_high, vulnerabilities_medium, vulnerabilities_low, level_compliance.critical, level_compliance.high, level_compliance.medium, level_compliance.low))
-                print(AzureMessageResultPipeline.Failed)
-                exit(1)
+                print(AzureMessageResultPipeline.Failed.value)
         else:
-            print(AzureMessageResultPipeline.Succeeded)
-            exit(0)
+            print(AzureMessageResultPipeline.Succeeded.value)
