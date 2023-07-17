@@ -28,7 +28,7 @@ class ImportScanRestConsumer:
             "product_type_name": request.product_type_name,
             "product_name": request.product_name,
             "engagement_name": request.engagement_name,
-            "engagement_end_date": "2023-02-23",
+            "engagement_end_date": request.engagement_end_date,
             "source_code_management_uri": request.source_code_management_uri,
             "engagement": str(request.engagement) if request.engagement != 0 else "",
             "auto_create_context": "false",
