@@ -48,6 +48,8 @@ class ImportScanRequest:
     project_remote_config: str = ""
     cmdb_mapping: dict = None
     product_type_name_mapping: dict = None
+    compact_remote_config_url: str = None
+    # ** Expression
     expression: str = ""
 
     @classmethod
@@ -71,8 +73,7 @@ class ImportScanRequest:
             lead=obj.get("lead"),
             tags=obj.get("tags"),
             close_old_findings=obj.get("close_old_findings"),
-            close_old_findings_product_scope=obj.get(
-                "close_old_findings_product_scope"),
+            close_old_findings_product_scope=obj.get("close_old_findings_product_scope"),
             push_to_jira=obj.get("push_to_jira"),
             environment=obj.get("environment"),
             version=obj.get("version"),
@@ -82,8 +83,7 @@ class ImportScanRequest:
             api_scan_configuration=obj.get("api_scan_configuration"),
             service=obj.get("service"),
             group_by=obj.get("group_by"),
-            create_finding_groups_for_all_findings=obj.get(
-                "create_finding_groups_for_all_findings"),
+            create_finding_groups_for_all_findings=obj.get("create_finding_groups_for_all_findings"),
             organization_url=obj.get("organization_url"),
             personal_access_token=obj.get("personal_access_token"),
             repository_id=obj.get("remote_config_repo"),
@@ -92,6 +92,7 @@ class ImportScanRequest:
             cmdb_mapping=obj.get("cmdb_mapping"),
             product_type_name_mapping=obj.get("product_type_name_mapping"),
             expression=obj.get("expression"),
+            compact_remote_config_url=obj.get("compact_remote_config_url"),
         )
         return obj
 

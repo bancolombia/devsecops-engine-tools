@@ -5,7 +5,7 @@
     "scan_type": "Xray Scan",
     "endpoint_to_add": null,
     "file": null,
-    "product_type_name": "defec-dojo",
+    "product_type_name": "defect-dojo",
     "product_name": "product name test",
     "engagement_name": "engagement name test",
     "auto_create_context": true,
