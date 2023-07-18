@@ -17,3 +17,4 @@ class AzureMessageLoggingPipeline(BaseEnum):
     WarningLogging = "##[warning]"
     ErrorLogging = "##[error]"
     SucceededLogging = "##[section]"
+    InfoLogging = "##[command]"
