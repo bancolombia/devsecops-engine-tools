@@ -73,3 +73,5 @@ class BreakBuild:
         else:
             print(AzureMessageLoggingPipeline.SucceededLogging.get_message("There are no vulnerabilities"))
             print(AzureMessageResultPipeline.Succeeded.value)
+        
+        print(AzureMessageLoggingPipeline.InfoLogging.get_message("If you have doubts, visit https://discuss.apps.bancolombia.com/t/lanzamiento-csa-analisis-de-seguridad-en-contenedores/6199"))

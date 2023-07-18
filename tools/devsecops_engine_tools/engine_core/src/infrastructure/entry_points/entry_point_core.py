@@ -21,8 +21,6 @@ def get_inputs_from_cli(args):
         args.environment,
     )
 
-# IMPORTANTEEEE: En los entry points se conecta los driven adapter, con los casos de uso
-# def init_engine_core(remote_config_repo, remote_config_path, tool):
 def init_engine_core():
     result_list_engine_iac = runner_engine_iac()
     rules_scaned = result_list_engine_iac.rules_scaned
@@ -33,6 +31,5 @@ def init_engine_core():
     checkov_deserealizator = CheckovDeserealizator(result_list_engine_iac.results_scan_list)
     input_core = InputCore(totalized_exclusions=totalized_exclusions, level_compliance_defined=level_compliance_defined, rules_scaned=rules_scaned, scope_pipeline=scope_pipeline)
     break_build_result = BreakBuild(deserializer_gateway=checkov_deserealizator,input_core=input_core)
-    #print(break_build_result)
 
 init_engine_core()
