@@ -1,3 +1,7 @@
+#Proof Archives
+_AW1234
+_nu1234
+
 # Virtual Enviroment python
 .venv
 *.vscode*
@@ -10,6 +14,8 @@
 **.egg-info/
 *.pyc
 **_pycache_**
+**build**
+**build/lib**
 
 #Ignorar cualquir archivo TXT
 **.txt
@@ -28,3 +34,4 @@ Pipfile-lock
 prueba.py
 main.py
 common_devsecops_lib/sheckov_scan.json
+_core_test*
