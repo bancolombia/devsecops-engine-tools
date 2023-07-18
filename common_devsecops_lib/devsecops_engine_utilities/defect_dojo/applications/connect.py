@@ -22,12 +22,12 @@ class Connect:
             personal_access_token=request.personal_access_token,
             project_remote_config=request.project_remote_config,
             organization_url=request.organization_url,
+            compact_remote_config_url=request.compact_remote_config_url,
+            repository_id=request.repository_id,
+            remote_config_path=request.remote_config_path,
         )
 
-        uc = CmdbUserCase(
-            rest_consumer_cmdb=rc,
-            utils_azure=utils_azure,
-            expression=request.expression)
+        uc = CmdbUserCase(rest_consumer_cmdb=rc, utils_azure=utils_azure, expression=request.expression)
 
         response = uc.execute(request)
         return response
