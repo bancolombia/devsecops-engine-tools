@@ -161,11 +161,7 @@ list_scan_type = [
     "Yarn Audit Scan",
     "ZAP Scan",
 ]
-group_by_list = [
-    "component_name",
-    "component_name+component_version",
-    "file_path",
-    "finding_title"]
+group_by_list = ["component_name", "component_name+component_version", "file_path", "finding_title"]
 
 
 class ImportScanSerializer(Schema):
@@ -173,9 +169,7 @@ class ImportScanSerializer(Schema):
     minimum_severity = fields.Str(required=False)
     active = fields.Str(required=False, load_default="true")
     verified = fields.Str(required=False, load_default="true")
-    scan_type = fields.Str(
-        required=True,
-        validate=validate.OneOf(list_scan_type))
+    scan_type = fields.Str(required=True, validate=validate.OneOf(list_scan_type))
     endpoint_to_add = fields.Str(required=False)
     file = fields.Str(required=False)
     product_type_name = fields.Str(required=False)
@@ -204,17 +198,21 @@ class ImportScanSerializer(Schema):
     create_finding_groups_for_all_findings = fields.Str(required=False)
     tools_configuration = fields.Int(required=False)
     code_app = fields.Str(required=False)
+    # defect-dojo credential
     token_cmdb = fields.Str(required=True)
     host_cmdb = fields.Url(required=True)
     token_defect_dojo = fields.Str(required=True)
     host_defect_dojo = fields.Str(required=True)
-    organization_url = fields.Str(required=True)
-    personal_access_token = fields.Str(required=True)
-    repository_id = fields.Str(required=True)
-    remote_config_path = fields.Str(required=True)
-    project_remote_config = fields.Str(required=True)
     cmdb_mapping = fields.Dict(required=True)
     product_type_name_mapping = fields.Dict(required=False)
+    # Config remote credential
+    compact_remote_config_url = fields.Str(required=False)
+    organization_url = fields.Str(required=False)
+    personal_access_token = fields.Str(required=False)
+    repository_id = fields.Str(required=False)
+    remote_config_path = fields.Str(required=False)
+    project_remote_config = fields.Str(required=False)
+    # regulare expression
     expression = fields.Str(required=True)
 
     @post_load

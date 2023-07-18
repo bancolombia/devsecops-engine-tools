@@ -4,6 +4,7 @@ from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
 from devsecops_engine_utilities.utils.session_manager import SessionManager
+import datetime
 
 logger = MyLogger.__call__().get_logger()
 
@@ -14,7 +15,7 @@ class ImportScanRestConsumer:
         self.__host = request.host_defect_dojo
         self.__session = session
 
-    def import_scan_api(self, request: ImportScanRequest):
+    def import_scan_api(self, request: ImportScanRequest) -> ImportScanRequest:
         url = f"{self.__host}/api/v2/import-scan/"
         data = {
             "scan_date": request.scan_date,
@@ -30,7 +31,7 @@ class ImportScanRestConsumer:
             "engagement_end_date": request.engagement_end_date,
             "source_code_management_uri": request.source_code_management_uri,
             "engagement": str(request.engagement) if request.engagement != 0 else "",
-            "auto_create_context": request.auto_create_context,
+            "auto_create_context": "false",
             "deduplication_on_engagement": request.deduplication_on_engagement,
             "lead": request.lead,
             "tags": request.tags,
@@ -50,18 +51,18 @@ class ImportScanRestConsumer:
         }
         multipart_data = MultipartEncoder(fields=data)
 
-        headers = {"Authorization": f"Token {self.__token}",
-                   "Content-Type": multipart_data.content_type}
-        response = self.__session.post(
-            url,
-            headers=headers,
-            data=multipart_data,
-            verify=VERIFY_CERTIFICATE)
+        headers = {"Authorization": f"Token {self.__token}", "Content-Type": multipart_data.content_type}
+        response = self.__session.post(url, headers=headers, data=multipart_data, verify=VERIFY_CERTIFICATE)
 
         if response.status_code != 201:
             logger.error(response.status_code)
             logger.error(response.json())
             raise ValidationError(f"dojo: {response}")
+        try:
+            response = ImportScanRequest().from_dict(response.json())
+        except Exception as e:
+            logger.error(f"from dict import Scan: {response.json()}")
+            raise ValidationError(e)
         return response
 
     def import_scan(self, request: ImportScanRequest, files):
@@ -101,12 +102,7 @@ class ImportScanRestConsumer:
 
         headers = {"Authorization": f"Token {self.__token}"}
 
-        response = self.__session.post(
-            url,
-            headers=headers,
-            data=payload,
-            files=files,
-            verify=VERIFY_CERTIFICATE)
+        response = self.__session.post(url, headers=headers, data=payload, files=files, verify=VERIFY_CERTIFICATE)
 
         if response.status_code != 201:
             logger.info(payload)
@@ -114,5 +110,9 @@ class ImportScanRestConsumer:
             logger.error(response)
             raise ValidationError(response)
         logger.info(f"Sucessfull {response}")
-        response = ImportScanRequest.from_dict(response.json())
+        try:
+            response = ImportScanRequest.from_dict(response.json())
+        except Exception as e:
+            logger.error(f"from dict import Scan: {response.json()}")
+            raise ValidationError(e)
         return response
