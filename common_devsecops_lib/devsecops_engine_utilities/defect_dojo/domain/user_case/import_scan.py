@@ -7,6 +7,11 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.prod
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.scan_configurations import (
     ScanConfigrationRestConsumer,
 )
+from devsecops_engine_utilities.defect_dojo.domain.models.scan_configuration import (
+    ScanConfiguration,
+    ScanConfigurationList,
+)
+from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.engagement import EngagementRestConsumer
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 import urllib3
 
@@ -21,11 +26,13 @@ class ImportScanUserCase:
         rest_product_type: ProductTypeRestConsumer,
         rest_product: ProductRestConsumer,
         rest_scan_configuration: ScanConfigrationRestConsumer,
+        rest_engagement: EngagementRestConsumer,
     ):
         self.__rest_import_scan = rest_import_scan
         self.__rest_product_type = rest_product_type
         self.__rest_product = rest_product
         self.__rest_scan_configurations = rest_scan_configuration
+        self.__rest_engagement = rest_engagement
 
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
         product_type_id = None
@@ -64,11 +71,25 @@ class ImportScanUserCase:
                     with id: {product_id}"
                 )
 
-            scan_configuration = self.__rest_scan_configurations.post_api_scan_configuration(
-                request, product_id, tools_configurations
-            )
-
-            request.api_scan_configuration = scan_configuration.id
+            scan_configuration_list = self.__rest_scan_configurations.get_api_scan_configuration(request)
+            if scan_configuration_list.results == []:
+                scan_configuration = self.__rest_scan_configurations.post_api_scan_configuration(
+                    request, product_id, tools_configurations
+                )
+                request.api_scan_configuration = scan_configuration.id
+                logger.debug(f"Scan configuration create service_key_1 : {scan_configuration.service_key_1}")
+            else:
+                logger.debug(
+                    f"Scan configuration found service_key: {scan_configuration_list.results[0].service_key_1}"
+                )
+                request.api_scan_configuration = scan_configuration_list.results[0].id
+            logger.debug(f"search Engagement name: {request.engagement_name}")
+            engagement = self.__rest_engagement.get_engagements(request.engagement_name)
+            if engagement.results == []:
+                engagement = self.__rest_engagement.post_engagement(request.engagement_name, product_id)
+                logger.debug(f"Egagement created: {engagement.name}")
+            else:
+                logger.debug(f"Engagement found: {engagement.results[0].name}")
 
             response = self.__rest_import_scan.import_scan_api(request)
             logger.info(f"End process Succesfull!!!: {response}")
