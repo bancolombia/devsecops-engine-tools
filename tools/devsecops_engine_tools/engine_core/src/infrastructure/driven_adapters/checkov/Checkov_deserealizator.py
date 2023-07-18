@@ -8,7 +8,7 @@ from dataclasses import dataclass
 class CheckovDeserealizator(DeseralizatorGateway):
     results_scan_list: list
 
-    def get_list_vulnerability(self) -> list[Vulnerability]:
+    def get_list_vulnerability(self) -> 'list[Vulnerability]':
         list_open_vulnerbailities = []
         #TODO OCVELEZ: Mirar si es posible hacer uso de la librería https://pypi.org/project/attrdict/ para mejorar
         # la forma de mapear de json a objetos

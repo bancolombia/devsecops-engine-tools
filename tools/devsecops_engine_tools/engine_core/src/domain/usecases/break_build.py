@@ -13,7 +13,7 @@ class BreakBuild:
     deserializer_gateway: DeseralizatorGateway
     input_core: InputCore
 
-    def print_table(self, vulnerabilities_without_exclusions_list: list[Vulnerability]):
+    def print_table(self, vulnerabilities_without_exclusions_list: 'list[Vulnerability]'):
         vulnerability_table = PrettyTable(["Severity", "ID", "Description", "Where"])
 
         for vulnerability in vulnerabilities_without_exclusions_list:
