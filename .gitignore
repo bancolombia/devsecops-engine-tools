@@ -15,6 +15,7 @@ _nu1234
 *.pyc
 **_pycache_**
 **build**
+**build/lib**
 
 #Ignorar cualquir archivo TXT
 **.txt
