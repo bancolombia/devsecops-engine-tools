@@ -15,7 +15,7 @@ class ImportScanRestConsumer:
         self.__host = request.host_defect_dojo
         self.__session = session
 
-    def import_scan_api(self, request: ImportScanRequest):
+    def import_scan_api(self, request: ImportScanRequest) -> ImportScanRequest:
         url = f"{self.__host}/api/v2/import-scan/"
         data = {
             "scan_date": request.scan_date,
@@ -58,6 +58,11 @@ class ImportScanRestConsumer:
             logger.error(response.status_code)
             logger.error(response.json())
             raise ValidationError(f"dojo: {response}")
+        try:
+            response = ImportScanRequest().from_dict(response.json())
+        except Exception as e:
+            logger.error(f"from dict import Scan: {response.json()}")
+            raise ValidationError(e)
         return response
 
     def import_scan(self, request: ImportScanRequest, files):

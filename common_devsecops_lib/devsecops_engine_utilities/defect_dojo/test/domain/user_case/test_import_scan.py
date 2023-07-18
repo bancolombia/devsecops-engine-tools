@@ -136,7 +136,7 @@ def mock_rest_scan_configuration():
     mock_rest_engagement""",
     [
         (
-            mock_rest_import_scan("import_scan_xray.json"),
+            mock_rest_import_scan("import_scan.json"),
             mock_rest_product_type(),
             mock_rest_product(),
             mock_rest_scan_configuration(),
@@ -201,7 +201,7 @@ def test_execute_sucessfull(
     mock_rest_engagement""",
     [
         (
-            mock_rest_import_scan("import_scan_xray.json"),
+            mock_rest_import_scan("import_scan.json"),
             mock_rest_product_type(),
             mock_rest_product(),
             mock_rest_scan_configuration(),
