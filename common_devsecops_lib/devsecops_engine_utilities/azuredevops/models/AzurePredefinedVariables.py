@@ -44,4 +44,4 @@ class BuildVariables(BaseEnum):
 
 
 class ReleaseVariables(BaseEnum):
-    Artifact_Path = "Artifact.Path"
+    Release_Definitionname = "Release.DefinitionName"
