@@ -4,8 +4,9 @@ from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan i
 from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import AzureDevopsApi
+from devsecops_engine_utilities.settings import DEBUG
 
-logger = MyLogger.__call__().get_logger()
+logger = MyLogger.__call__(debug=DEBUG).get_logger()
 
 
 class CmdbUserCase:

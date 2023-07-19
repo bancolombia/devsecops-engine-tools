@@ -23,8 +23,7 @@ steps:
       python3 setup.py bdist_wheel upload -r local
       python3 setup.py sdist upload -r local
     else
-      python3 -m pip install build
-      python3 -m build
+      python3 setup.py bdist_wheel
       FILE_PATH=$(find dist/ -name "*.whl" -type f -print -quit)
       if [[ -z "$FILE_PATH" ]]; then
           echo "No se encontró ningún archivo WHL en la carpeta dist/"

@@ -41,10 +41,13 @@ class MyLogger(metaclass=SingletonType):
 
     _logger = None
 
-    def __init__(self, log_file=False):
+    def __init__(self, log_file=False, debug=True):
         self._log_file = log_file
         self._logger = logging.getLogger("crumbs")
-        self._logger.setLevel(logging.DEBUG)
+        if debug:
+            self._logger.setLevel(logging.DEBUG)
+        else:
+            self._logger.setLevel(logging.WARNING)
         formatter = logging.Formatter(
             "%(asctime)s [%(levelname)s | %(filename)s | %(funcName)s | %(lineno)d] > %(message)s"
         )

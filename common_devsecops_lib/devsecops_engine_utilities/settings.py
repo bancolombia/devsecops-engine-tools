@@ -1,5 +1,6 @@
 import os
 import platform
+from decouple import config
 
 # common_devsecops_lib settings
 DEVSECOPS_ENGINE_UTILITIES_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -10,18 +11,18 @@ DEVSECOPS_ENGINE_UTILITIES_RUNNER_PYTHON_COMPILER = platform.python_compiler()
 DEVSECOPS_ENGINE_UTILITIES_VERSION = "0.0.3"
 
 # defect-dojo settings
-
-ORGANIZATION_URL = ("",)
-PERSONAL_ACCESS_TOKEN = ("",)
-REPOSITORY_ID = ("",)
-REMOTE_CONFIG_PATH = ("",)
-PROJECT_REMOTE_CONFIG = ("",)
-TOKEN_CMDB = ("",)
-HOST_CMDB = ("",)
-EXPRESSION = (r"",)
-TOKEN_DEFECT_DOJO = ("",)
-HOST_DEFECT_DOJO = ("",)
-SCAN_TYPE = ("",)
-ENGAGEMENT_NAME = ("",)
-FILE = (f"",)
-TAGS = ("",)
+DEBUG = config("DEBUG", default=False, cast=bool)
+ORGANIZATION_URL = config("ORGANIZATION_URL", default="")
+PERSONAL_ACCESS_TOKEN = config("PERSONAL_ACCESS_TOKEN", default="")
+REPOSITORY_ID = config("REPOSITORY_ID", default="")
+REMOTE_CONFIG_PATH = config("REMOTE_CONFIG_PATH", default="")
+PROJECT_REMOTE_CONFIG = config("PROJECT_REMOTE_CONFIG", default="")
+TOKEN_CMDB = config("TOKEN_CMDB", default="")
+HOST_CMDB = config("HOST_CMDB", default="")
+EXPRESSION = config("EXPRESSION", default="")
+TOKEN_DEFECT_DOJO = config("TOKEN_DEFECT_DOJO", default="")
+HOST_DEFECT_DOJO = config("HOST_DEFECT_DOJO", default="")
+SCAN_TYPE = config("SCAN_TYPE", default="")
+ENGAGEMENT_NAME = config("ENGAGEMENT_NAME", default="")
+FILE = config("FILE", default="")
+TAGS = config("TAGS", default="")
