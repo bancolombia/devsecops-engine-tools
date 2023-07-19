@@ -4,13 +4,13 @@ from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
 from devsecops_engine_utilities.utils.session_manager import SessionManager
+from devsecops_engine_utilities.settings import DEBUG
 
-logger = MyLogger.__call__().get_logger()
+logger = MyLogger.__call__(debug=DEBUG).get_logger()
 
 
 class CmdbRestConsumer:
-    def __init__(self, token: str, host: str, mapping_cmdb: dict,
-                 session: SessionManager) -> None:
+    def __init__(self, token: str, host: str, mapping_cmdb: dict, session: SessionManager) -> None:
         self.__token = token
         self.__host = host
         self.__mapping_cmdb = mapping_cmdb
@@ -18,17 +18,11 @@ class CmdbRestConsumer:
 
     def get_product_info(self, code_app: int) -> Cmdb:
         data = json.dumps({"codapp": code_app})
-        headers = {
-            "tokenkey": self.__token,
-            "Content-Type": "application/json"}
+        headers = {"tokenkey": self.__token, "Content-Type": "application/json"}
 
         logger.info("Search info of name product")
 
-        response = self.__session.post(
-            self.__host,
-            headers=headers,
-            data=data,
-            verify=VERIFY_CERTIFICATE)
+        response = self.__session.post(self.__host, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
 
         if response.status_code != 200:
             raise ValidationError(response)
