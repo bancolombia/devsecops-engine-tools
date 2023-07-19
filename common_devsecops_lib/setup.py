@@ -1,4 +1,4 @@
-from setuptools import setup,find_packages
+from setuptools import setup, find_packages
 
 
 def get_readme():
@@ -13,7 +13,7 @@ def get_requirements():
 
 setup(
     name="devsecops_engine_utilities",
-    version="2.0.12",
+    version="2.0.13",
     author="Bancolombia devsecops Team ",
     author_email="devsecops@bancolombia.com.co",
     description="Common utilities tools for engine devsecops",
@@ -23,7 +23,7 @@ setup(
     package_dir={
         "devsecops_engine_utilities": "devsecops_engine_utilities",
     },
-    packages=find_packages(exclude=['**test**']),
+    packages=find_packages(exclude=["**test**"]),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

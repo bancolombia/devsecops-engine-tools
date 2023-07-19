@@ -6,8 +6,9 @@ from devsecops_engine_utilities.defect_dojo.domain.models.product_type_list impo
 from devsecops_engine_utilities.defect_dojo.domain.models.product_type import ProductType
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
 from devsecops_engine_utilities.utils.session_manager import SessionManager
+from devsecops_engine_utilities.settings import DEBUG
 
-logger = MyLogger.__call__().get_logger()
+logger = MyLogger.__call__(debug=DEBUG).get_logger()
 
 
 class ProductTypeRestConsumer:

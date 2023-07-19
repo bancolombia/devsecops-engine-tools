@@ -4,8 +4,9 @@ from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.utils.validation_error import ValidationError
+from devsecops_engine_utilities.settings import DEBUG
 
-logger = MyLogger.__call__().get_logger()
+logger = MyLogger.__call__(debug=DEBUG).get_logger()
 
 
 class AzureDevopsApi:

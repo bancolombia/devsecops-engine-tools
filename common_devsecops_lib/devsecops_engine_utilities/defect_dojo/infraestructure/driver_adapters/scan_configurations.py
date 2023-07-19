@@ -9,8 +9,9 @@ from devsecops_engine_utilities.defect_dojo.domain.models.scan_configuration imp
 from devsecops_engine_utilities.defect_dojo.domain.models.scan_configuration import ScanConfiguration
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
 from devsecops_engine_utilities.utils.session_manager import SessionManager
+from devsecops_engine_utilities.settings import DEBUG
 
-logger = MyLogger.__call__().get_logger()
+logger = MyLogger.__call__(debug=DEBUG).get_logger()
 
 
 class ScanConfigrationRestConsumer:
