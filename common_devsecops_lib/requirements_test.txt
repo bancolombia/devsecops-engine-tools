@@ -6,3 +6,4 @@ pytest-azurepipelines==1.0.4
 pytest-cov==4.1.0
 coverage==7.2.7
 pre-commit==3.2.2
+marshmallow==3.19.0
