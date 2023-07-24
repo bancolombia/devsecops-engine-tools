@@ -7,5 +7,5 @@ pytz==2023.3
 python-dateutil==2.8.2
 azure-devops==7.1.0b3
 python-decouple==3.8
-requests_toolbelt
-python-dateutil
+requests_toolbelt==1.0.0
+python-dateutil==2.8.2
