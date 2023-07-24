@@ -5,6 +5,5 @@ pytest
 pytest-azurepipelines==1.0.4
 pytest-cov==4.1.0
 coverage
-pre-commit
-marshmallow
-requests_toolbelt
+pre-commit==3.2.2
+mock==5.0.2
