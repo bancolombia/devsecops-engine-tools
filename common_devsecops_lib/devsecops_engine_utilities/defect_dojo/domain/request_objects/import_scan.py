@@ -29,7 +29,7 @@ class ImportScanRequest:
     branch_tag: str = ""
     commit_hash: str = ""
     api_scan_configuration: int = 0
-    test_id: int = (0,)
+    test_id: int = 0
     service: str = ""
     group_by: str = ""
     create_finding_groups_for_all_findings: str = ""
