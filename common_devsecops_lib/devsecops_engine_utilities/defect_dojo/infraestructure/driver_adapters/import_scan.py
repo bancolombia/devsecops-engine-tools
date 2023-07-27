@@ -66,7 +66,7 @@ class ImportScanRestConsumer:
             raise ValidationError(e)
         return response
 
-    def import_scan(self, request: ImportScanRequest, files):
+    def import_scan(self, request: ImportScanRequest, files) -> ImportScanRequest:
         url = f"{self.__host}/api/v2/import-scan/"
         payload = {
             "scan_date": request.scan_date,
