@@ -103,7 +103,7 @@ class ImportScanUserCase:
                     logger.info("read file succesfull !!!")
                     files = [("file", ("name_file", file, "application"))]
                     response = self.__rest_import_scan.import_scan(request, files)
-                    response.test_url = f"{request.host_defect_dojo}/{str(response.test_id)}"
+                    response.test_url = f"{request.host_defect_dojo}/test/{str(response.test_id)}"
                     logger.info(f"End process Succesfull!!!: {response}")
                     return response
             except Exception as e:
