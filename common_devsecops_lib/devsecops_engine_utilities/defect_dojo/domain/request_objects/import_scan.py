@@ -29,6 +29,7 @@ class ImportScanRequest:
     branch_tag: str = ""
     commit_hash: str = ""
     api_scan_configuration: int = 0
+    test_id: int = 0
     service: str = ""
     group_by: str = ""
     create_finding_groups_for_all_findings: str = ""
@@ -51,6 +52,8 @@ class ImportScanRequest:
     compact_remote_config_url: str = None
     # ** Expression
     expression: str = ""
+    # ** Test url
+    test_url: str = ""
 
     @classmethod
     def from_dict(cls, obj):
@@ -81,6 +84,7 @@ class ImportScanRequest:
             branch_tag=obj.get("branch_tag"),
             commit_hash=obj.get("commit_hash"),
             api_scan_configuration=obj.get("api_scan_configuration"),
+            test_id=obj.get("test_id"),
             service=obj.get("service"),
             group_by=obj.get("group_by"),
             create_finding_groups_for_all_findings=obj.get("create_finding_groups_for_all_findings"),
