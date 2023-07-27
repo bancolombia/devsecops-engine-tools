@@ -94,7 +94,7 @@ class ImportScanUserCase:
                 logger.debug(f"Engagement found: {engagement.results[0].name}")
 
             response = self.__rest_import_scan.import_scan_api(request)
-            response.test_url = f"{request.host_defect_dojo}/{str(response.test_id)}"
+            response.test_url = f"{request.host_defect_dojo}/test/{str(response.test_id)}"
             logger.info(f"End process Succesfull!!!: {response}")
             return response
         else:
