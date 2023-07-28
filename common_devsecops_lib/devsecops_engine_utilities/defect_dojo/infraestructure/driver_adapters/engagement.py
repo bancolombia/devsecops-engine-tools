@@ -37,6 +37,8 @@ class EngagementRestConsumer:
                 "target_start": str(datetime.now().date()),
                 "target_end": str(datetime.now().date()),
                 "product": product_id,
+                "engagement_type": "CI/CD",
+                "status": "In Progress",
             }
         )
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
