@@ -1,6 +1,6 @@
 import os
 from enum import Enum
-from devsecops_engine_utilities.input_validations.env_utils import EnvVariables
+from common_devsecops_lib.devsecops_engine_utilities.input_validations.env_utils import EnvVariables
 
 """ Info de https://learn.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch
 Build variables (DevOps Services) https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml """
