@@ -1,10 +1,10 @@
 import argparse
 
-from devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_scan import runner_engine_iac
-from devsecops_engine_tools.engine_core.src.domain.model.Exclusions import Exclusions
-from devsecops_engine_tools.engine_core.src.domain.model.InputCore import InputCore
-from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.checkov.Checkov_deserealizator import CheckovDeserealizator
-from devsecops_engine_tools.engine_core.src.domain.usecases.break_build import BreakBuild
+from tools.devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_scan import runner_engine_iac
+from tools.devsecops_engine_tools.engine_core.src.domain.model.Exclusions import Exclusions
+from tools.devsecops_engine_tools.engine_core.src.domain.model.InputCore import InputCore
+from tools.devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.checkov.Checkov_deserealizator import CheckovDeserealizator
+from tools.devsecops_engine_tools.engine_core.src.domain.usecases.break_build import BreakBuild
 
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
