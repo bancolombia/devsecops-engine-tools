@@ -34,7 +34,7 @@ class ProductRestConsumer:
 
         data = {
             "name": request.product_name,
-            "description": "LDC-" + request.product_description,
+            "description": "LDC-" + request.product_description.upper(),
             "prod_type": product_type_id,
         }
 
