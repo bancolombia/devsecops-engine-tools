@@ -19,6 +19,8 @@ class DefectDojo:
     @staticmethod
     def send_import_scan(request: ImportScanRequest):
         try:
+            if isinstance(request, ValidationError):
+                return request
             rest_import_scan = ImportScanRestConsumer(request, session=SessionManager())
             rest_product_type = ProductTypeRestConsumer(request, session=SessionManager())
             rest_product = ProductRestConsumer(request, session=SessionManager())
@@ -34,5 +36,6 @@ class DefectDojo:
             )
             response = uc.execute(request)
             return response
-        except ValidationError as error:
-            logger.error(error.messages)
+        except ValidationError as e:
+            logger.error(e.messages)
+            return e

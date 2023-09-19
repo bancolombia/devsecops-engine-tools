@@ -1,6 +1,6 @@
+from marshmallow import ValidationError
 import json
 from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.defect_dojo.domain.models.scan_configuration import (
     ScanConfiguration,
@@ -41,12 +41,12 @@ class ScanConfigrationRestConsumer:
         response = self.__session.post(url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
         if response.status_code != 201:
             logger.error(response.json())
-            raise ValidationError(response)
+            raise ValidationError({"error": response.json()})
         try:
             scan_configuration_object = ScanConfiguration.from_dict(response.json())
         except Exception as e:
             logger.error(f"from dict scanConfiguration {response.json()}")
-            raise ValidationError(e)
+            raise ValidationError({"error": e})
         return scan_configuration_object
 
     def get_api_scan_configuration(self, request: ImportScanRequest) -> ScanConfigurationList:
@@ -58,6 +58,6 @@ class ScanConfigrationRestConsumer:
         response = self.__session.get(url=url, headers=headers, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
             logger.error(response.json())
-            raise ValidationError(response)
+            raise ValidationError({"error": response.json()})
         response = ScanConfigurationList.from_dict(response.json())
         return response
