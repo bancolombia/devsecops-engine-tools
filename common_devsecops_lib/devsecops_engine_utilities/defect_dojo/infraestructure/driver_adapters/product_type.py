@@ -1,5 +1,5 @@
 import json
-from marshmallow import ValidationError
+from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.defect_dojo.domain.models.product_type_list import ProductTypeList
@@ -24,13 +24,13 @@ class ProductTypeRestConsumer:
         response = self.__session.post(url, headers=headers, data=data)
 
         if response.status_code != 201:
-            raise ValidationError({"error": response.json()})
+            raise ApiError(response.json())
         try:
             product_type_object = ProductType.from_dict(response.json())
         except Exception as e:
             log = f"from dict product_type: {response.json}"
             logger.error(log)
-            raise ValidationError({"error": e})
+            raise ApiError(e)
         return product_type_object
 
     def get_product_types(self, product_type_name: str) -> ProductTypeList:
@@ -38,13 +38,13 @@ class ProductTypeRestConsumer:
         headers = {"Authorization": f"Token {self.__token}"}
         response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
-            raise ValidationError(response)
+            raise ApiError(response.json())
         try:
             product_type_object = ProductTypeList.from_dict(response.json())
         except Exception as e:
             logger.debug(f"from dict- error {response}")
             logger.error(f"from dict- error:{response.text}")
-            raise ValidationError({"error": e})
+            raise ApiError(e)
         return product_type_object
 
     def get_product_type_id(self, id: int):
@@ -54,7 +54,7 @@ class ProductTypeRestConsumer:
 
         response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
-            raise ValidationError({"error": response.json()})
+            raise ApiError(response.json())
         logger.info(response)
         product_type_object = ProductTypeList.from_dict(response.json())
         return product_type_object

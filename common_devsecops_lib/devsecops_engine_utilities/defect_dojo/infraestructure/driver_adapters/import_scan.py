@@ -1,5 +1,5 @@
 import datetime
-from marshmallow import ValidationError
+from devsecops_engine_utilities.utils.api_error import ApiError
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.utils.logger_info import MyLogger
@@ -58,12 +58,12 @@ class ImportScanRestConsumer:
         if response.status_code != 201:
             logger.error(response.status_code)
             logger.error(response.json())
-            raise ValidationError({"error": response.json()})
+            raise ApiError(response.json())
         try:
             response = ImportScanRequest().from_dict(response.json())
         except Exception as e:
             logger.error(f"from dict import Scan: {response.json()}")
-            raise ValidationError({"error": response.json()})
+            raise ApiError(response.json())
         return response
 
     def import_scan(self, request: ImportScanRequest, files) -> ImportScanRequest:
@@ -109,11 +109,11 @@ class ImportScanRestConsumer:
             logger.info(payload)
             logger.info(response.json())
             logger.error(response)
-            raise ValidationError({"error": response.json()})
+            raise ApiError(response.json())
         logger.info(f"Sucessfull {response}")
         try:
             response = ImportScanRequest.from_dict(response.json())
         except Exception as e:
             logger.error(f"from dict import Scan: {response.json()}")
-            raise ValidationError({"error": e})
+            raise ApiError(e)
         return response

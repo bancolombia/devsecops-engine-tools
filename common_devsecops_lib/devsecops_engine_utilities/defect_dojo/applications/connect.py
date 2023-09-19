@@ -1,4 +1,4 @@
-from marshmallow import ValidationError
+from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.defect_dojo.domain.serializers.import_scan import ImportScanSerializer
 from devsecops_engine_utilities.defect_dojo.domain.user_case.cmdb import CmdbUserCase

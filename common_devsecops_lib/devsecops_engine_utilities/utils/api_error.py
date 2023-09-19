@@ -3,6 +3,8 @@ from marshmallow import ValidationError
 from requests import Response
 
 
-class ValidationErrorBase(ValidationError):
+class ApiError(ValidationError):
     def __init__(self, message):
-        super().__init__({"error": message})
+        if isinstance(message, dict):
+            message = message.get("detail")
+        super().__init__({"message": str(message)})

@@ -1,5 +1,5 @@
 import json
-from marshmallow import ValidationError
+from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
@@ -25,7 +25,7 @@ class EngagementRestConsumer:
         response = self.__session.get(url=url, headers=headers, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
             logger.error(response.json())
-            raise ValidationError({"error": response.json()})
+            raise ApiError(response.json())
         response = EngagementList().from_dict(response.json())
         return response
 
@@ -45,6 +45,6 @@ class EngagementRestConsumer:
         response = self.__session.post(url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
         if response.status_code != 201:
             logger.error(response.json())
-            raise ValidationError({"error": response.json()})
+            raise ApiError(response.json())
         response = Engagement().from_dict(response.json())
         return response

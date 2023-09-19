@@ -1,7 +1,7 @@
 import json
 import pytest
 from unittest.mock import Mock
-from devsecops_engine_utilities.utils.validation_error import ValidationError
+from common_devsecops_lib.devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.defect_dojo.test.files.get_response import session_manager_post
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_PATH
@@ -38,7 +38,7 @@ def test_post_import_scan_api_info_failure():
         request,
         session_mock,
     )
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         rest_import_scan.import_scan_api(request)
 
 
@@ -50,5 +50,5 @@ def test_post_import_scan_info_failure():
         request,
         session_mock,
     )
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         rest_import_scan.import_scan(request, file)
