@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from devsecops_engine_utilities.utils.validation_error import ValidationError
+from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.defect_dojo.test.files.get_response import (
     get_response,
     session_manager_post,
@@ -30,14 +30,16 @@ def test_get_product_info_failure():
     session_mock = session_manager_get(status_code=500, response_json_file="product_list.json")
     request = ImportScanRequest()
     rest_product = ProductRestConsumer(ImportScanRequest(), session_mock)
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         rest_product.get_products(request)
 
 
 def test_post_product_info_sucessfull():
     session_mock = session_manager_post(status_code=201, response_json_file="product.json")
     rest_product = ProductRestConsumer(ImportScanRequest(), session_mock)
-    response = rest_product.post_product("NU0212001_product name test_NU0212001", 278)
+    request = ImportScanRequest()
+    request.product_name = "NU0212001_product name test_NU0212001"
+    response = rest_product.post_product(request, 278)
     assert isinstance(response, Product)
     assert response.id == 278
     assert response.created == "2023-07-11T22:22:51.397136Z"
@@ -49,5 +51,5 @@ def test_post_product_info_sucessfull():
 def test_post_product_info_failure():
     session_mock = session_manager_post(status_code=500, response_json_file="product.json")
     rest_product_type = ProductRestConsumer(ImportScanRequest(), session_mock)
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         rest_product_type.post_product(ImportScanRequest(), 278)

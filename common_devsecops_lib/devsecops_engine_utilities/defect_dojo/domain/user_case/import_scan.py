@@ -1,6 +1,6 @@
 import re
-from devsecops_engine_utilities.settings import DEBUG
-from devsecops_engine_utilities.utils.validation_error import ValidationError
+from devsecops_engine_utilities.utils.api_error import ApiError
+from devsecops_engine_utilities.settings import SETTING_LOGGER
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.import_scan import ImportScanRestConsumer
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.product_type import ProductTypeRestConsumer
@@ -16,7 +16,7 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.enga
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 import urllib3
 
-logger = MyLogger.__call__(debug=DEBUG).get_logger()
+logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 
 urllib3.disable_warnings()
 
@@ -41,8 +41,9 @@ class ImportScanUserCase:
         product_id = None
         tools_configurations = 1
         if (request.product_name or request.product_type_name) == "":
-            logger.error("Name product not found")
-            raise ValidationError("Name product not found")
+            log = f"Name product {request.product_name} not found"
+            logger.error(log)
+            raise ApiError(log)
 
         if re.search(" API ", request.scan_type):
             logger.info(f"Match {request.scan_type}")
@@ -60,7 +61,7 @@ class ImportScanUserCase:
 
             products = self.__rest_product.get_products(request)
             if products.results == []:
-                product = self.__rest_product.post_product(request.product_name, product_type_id)
+                product = self.__rest_product.post_product(request, product_type_id)
                 product_id = product.id
                 logger.info(
                     f"product created: {product.name}\
@@ -107,4 +108,4 @@ class ImportScanUserCase:
                     logger.info(f"End process Succesfull!!!: {response}")
                     return response
             except Exception as e:
-                raise ValidationError(e)
+                raise ApiError(e)
