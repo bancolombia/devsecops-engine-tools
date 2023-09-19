@@ -1,7 +1,7 @@
 import json
 import pytest
 from unittest.mock import Mock
-from common_devsecops_lib.devsecops_engine_utilities.utils.api_error import ApiError
+from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.defect_dojo.test.files.get_response import session_manager_post
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_PATH

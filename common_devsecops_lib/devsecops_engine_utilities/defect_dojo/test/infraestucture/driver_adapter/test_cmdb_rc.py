@@ -4,21 +4,23 @@ from devsecops_engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
 
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.cmdb import CmdbRestConsumer
 
-from common_devsecops_lib.devsecops_engine_utilities.utils.api_error import ApiError
+from devsecops_engine_utilities.utils.api_error import ApiError
 
 
-def session_manager(status_code):
+def session_manager(status_code, message):
     # Mocks
     session_mock = Mock()
     response_mock = Mock()
     response_mock.status_code = status_code
-    response_mock.json.return_value = [{"name_cmdb": "NU0429001_Test", "product_type_name_cmdb": "software"}]
+    response_mock.json.return_value = message
     session_mock.post.return_value = response_mock
     return session_mock
 
 
 def test_get_product_info_success():
-    session_mock = session_manager(status_code=200)
+    session_mock = session_manager(
+        status_code=200, message=[{"name_cmdb": "NU0429001_Test", "product_type_name_cmdb": "software"}]
+    )
     # Crear una instancia de CmdbRestConsumer con los mocks
     consumer = CmdbRestConsumer(
         "token12345",
@@ -37,7 +39,7 @@ def test_get_product_info_success():
 
 
 def test_get_product_info_failure():
-    session_mock = session_manager(500)
+    session_mock = session_manager(500, {"Message": "Error mock"})
     consumer = CmdbRestConsumer(
         "token12345",
         "http://hosttest.com",
