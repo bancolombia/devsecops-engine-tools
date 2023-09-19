@@ -29,10 +29,14 @@ class ProductRestConsumer:
             raise ApiError(e)
         return products_object
 
-    def post_product(self, product_name, product_type_id: int) -> Product:
+    def post_product(self, request: ImportScanRequest, product_type_id: int) -> Product:
         url = f"{self.__host}/api/v2/products/"
 
-        data = {"name": product_name, "description": product_name, "prod_type": product_type_id}
+        data = {
+            "name": request.product_name,
+            "description": "LDC-" + request.product_description,
+            "prod_type": product_type_id,
+        }
 
         headers = {"Authorization": f"Token {self.__token}"}
         response = self.__session.post(url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)

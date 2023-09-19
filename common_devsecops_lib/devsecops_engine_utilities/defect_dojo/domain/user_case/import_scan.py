@@ -61,7 +61,7 @@ class ImportScanUserCase:
 
             products = self.__rest_product.get_products(request)
             if products.results == []:
-                product = self.__rest_product.post_product(request.product_name, product_type_id)
+                product = self.__rest_product.post_product(request, product_type_id)
                 product_id = product.id
                 logger.info(
                     f"product created: {product.name}\
