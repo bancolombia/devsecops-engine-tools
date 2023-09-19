@@ -1,6 +1,6 @@
 import json
+from marshmallow import ValidationError
 from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.defect_dojo.domain.models.product_type_list import ProductTypeList
 from devsecops_engine_utilities.defect_dojo.domain.models.product_type import ProductType
@@ -24,12 +24,13 @@ class ProductTypeRestConsumer:
         response = self.__session.post(url, headers=headers, data=data)
 
         if response.status_code != 201:
-            raise ValidationError(response)
+            raise ValidationError({"error": response.json()})
         try:
             product_type_object = ProductType.from_dict(response.json())
         except Exception as e:
-            logger.error(f"from dict product_type: {response.json}")
-            raise ValidationError(e)
+            log = f"from dict product_type: {response.json}"
+            logger.error(log)
+            raise ValidationError({"error": e})
         return product_type_object
 
     def get_product_types(self, product_type_name: str) -> ProductTypeList:
@@ -43,7 +44,7 @@ class ProductTypeRestConsumer:
         except Exception as e:
             logger.debug(f"from dict- error {response}")
             logger.error(f"from dict- error:{response.text}")
-            raise ValidationError(e)
+            raise ValidationError({"error": e})
         return product_type_object
 
     def get_product_type_id(self, id: int):
@@ -53,7 +54,7 @@ class ProductTypeRestConsumer:
 
         response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
         if response.status_code != 200:
-            raise ValidationError(response)
+            raise ValidationError({"error": response.json()})
         logger.info(response)
         product_type_object = ProductTypeList.from_dict(response.json())
         return product_type_object

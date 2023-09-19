@@ -1,7 +1,7 @@
 import re
+from marshmallow.exceptions import ValidationError
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.cmdb import CmdbRestConsumer
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
-from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import AzureDevopsApi
 from devsecops_engine_utilities.settings import SETTING_LOGGER
@@ -37,8 +37,9 @@ class CmdbUserCase:
     def get_code_app(self, engagement_name: str):
         m = re.search(r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_", engagement_name, re.IGNORECASE)
         if m is None:
-            logger.error(f"Engagement name {engagement_name} not match whit expression: {self.__expression}")
-            raise ValidationError("Engagement name not match")
+            e = f"Engagement name {engagement_name} not match whit expression: {self.__expression}"
+            logger.error(e)
+            raise ValidationError({"error": e})
         code_app = m.group(1)
         logger.debug(code_app)
         return code_app.lower()

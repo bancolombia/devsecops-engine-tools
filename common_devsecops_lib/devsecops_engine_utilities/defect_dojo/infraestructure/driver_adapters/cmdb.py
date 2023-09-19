@@ -1,6 +1,6 @@
 import json
+from marshmallow import ValidationError
 from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
 from devsecops_engine_utilities.utils.session_manager import SessionManager
@@ -25,10 +25,11 @@ class CmdbRestConsumer:
         response = self.__session.post(self.__host, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
 
         if response.status_code != 200:
-            raise ValidationError(response)
+            raise ValidationError({"error": response.json()})
         if response.json() == []:
-            logger.error(f"Engagement: {code_app} not found")
-            raise ValidationError("Engagement not found")
+            e = f"Engagement: {code_app} not found"
+            logger.error(e)
+            raise ValidationError({"error": e})
         data = response.json()[0]
         data_map = self.mapping_cmdb(data)
         logger.info(data_map)
