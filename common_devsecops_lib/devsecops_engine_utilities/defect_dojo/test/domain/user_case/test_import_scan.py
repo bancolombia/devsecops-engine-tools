@@ -17,7 +17,7 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.scan
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.engagement import EngagementRestConsumer
 from devsecops_engine_utilities.defect_dojo.domain.user_case.import_scan import ImportScanUserCase
-from devsecops_engine_utilities.utils.validation_error import ValidationError
+from common_devsecops_lib.devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.utils.session_manager import SessionManager
 
 
@@ -244,5 +244,5 @@ def test_execute_error(
     )
     assert isinstance(uc, ImportScanUserCase)
     assert isinstance(request, ImportScanRequest)
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         uc.execute(request)

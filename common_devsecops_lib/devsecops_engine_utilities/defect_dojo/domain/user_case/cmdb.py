@@ -1,5 +1,5 @@
 import re
-from marshmallow.exceptions import ValidationError
+from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.cmdb import CmdbRestConsumer
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.utils.logger_info import MyLogger
@@ -39,7 +39,7 @@ class CmdbUserCase:
         if m is None:
             e = f"Engagement name {engagement_name} not match whit expression: {self.__expression}"
             logger.error(e)
-            raise ValidationError({"error": e})
+            raise ApiError(e)
         code_app = m.group(1)
         logger.debug(code_app)
         return code_app.lower()

@@ -1,5 +1,5 @@
 import pytest
-from marshmallow import ValidationError
+from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_PATH
 from unittest.mock import MagicMock
 from devsecops_engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
@@ -103,5 +103,5 @@ def test_get_code_app(engagement_name):
     uc = CmdbUserCase(
         rest_consumer_cmdb=None, utils_azure=None, expression=r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_"
     )
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         uc.get_code_app(engagement_name)

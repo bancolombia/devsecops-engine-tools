@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from devsecops_engine_utilities.utils.validation_error import ValidationError
+from common_devsecops_lib.devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.defect_dojo.test.files.get_response import (
     get_response,
     session_manager_post,
@@ -30,7 +30,7 @@ def test_get_product_info_failure():
     session_mock = session_manager_get(status_code=500, response_json_file="product_list.json")
     request = ImportScanRequest()
     rest_product = ProductRestConsumer(ImportScanRequest(), session_mock)
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         rest_product.get_products(request)
 
 
@@ -49,5 +49,5 @@ def test_post_product_info_sucessfull():
 def test_post_product_info_failure():
     session_mock = session_manager_post(status_code=500, response_json_file="product.json")
     rest_product_type = ProductRestConsumer(ImportScanRequest(), session_mock)
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         rest_product_type.post_product(ImportScanRequest(), 278)

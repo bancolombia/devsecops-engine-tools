@@ -1,5 +1,5 @@
 import json
-from marshmallow import ValidationError
+from devsecops_engine_utilities.utils.api_error import ApiError
 from urllib.parse import urlsplit, unquote
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
@@ -46,7 +46,7 @@ class AzureDevopsApi:
 
             return connection
         except Exception as e:
-            raise ValidationError({"error": "Error getting Azure DevOps connection: " + str(e)})
+            raise ApiError("Error getting Azure DevOps connection: " + str(e))
 
     def get_remote_json_config(self, connection: Connection):
         try:
@@ -61,4 +61,4 @@ class AzureDevopsApi:
         except Exception as e:
             # Arrojar una excepción personalizada
             logger.error(str(e))
-            raise ValidationError({"error": "Error getting remote configuration file: " + str(e)})
+            raise ApiError("Error getting remote configuration file: " + str(e))

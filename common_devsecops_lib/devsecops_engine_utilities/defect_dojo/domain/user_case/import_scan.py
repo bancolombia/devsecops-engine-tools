@@ -1,5 +1,5 @@
 import re
-from marshmallow import ValidationError
+from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.settings import SETTING_LOGGER
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.import_scan import ImportScanRestConsumer
@@ -41,9 +41,9 @@ class ImportScanUserCase:
         product_id = None
         tools_configurations = 1
         if (request.product_name or request.product_type_name) == "":
-            log = {"error": f"Name product {request.product_name} not found"}
+            log = f"Name product {request.product_name} not found"
             logger.error(log)
-            raise ValidationError(log)
+            raise ApiError(log)
 
         if re.search(" API ", request.scan_type):
             logger.info(f"Match {request.scan_type}")
@@ -108,4 +108,4 @@ class ImportScanUserCase:
                     logger.info(f"End process Succesfull!!!: {response}")
                     return response
             except Exception as e:
-                raise ValidationError(e)
+                raise ApiError(e)

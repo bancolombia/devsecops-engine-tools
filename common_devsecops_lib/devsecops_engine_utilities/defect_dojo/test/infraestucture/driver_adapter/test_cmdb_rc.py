@@ -4,7 +4,7 @@ from devsecops_engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
 
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.cmdb import CmdbRestConsumer
 
-from devsecops_engine_utilities.utils.validation_error import ValidationError
+from common_devsecops_lib.devsecops_engine_utilities.utils.api_error import ApiError
 
 
 def session_manager(status_code):
@@ -44,5 +44,5 @@ def test_get_product_info_failure():
         {"product_name": "name_cmdb", "product_type_name": "product_type_name_cmdb"},
         session_mock,
     )
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         consumer.get_product_info(123)
