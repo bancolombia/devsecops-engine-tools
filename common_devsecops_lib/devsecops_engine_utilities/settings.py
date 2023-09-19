@@ -12,6 +12,8 @@ DEVSECOPS_ENGINE_UTILITIES_VERSION = "0.0.3"
 
 # defect-dojo settings
 DEBUG = config("DEBUG", default=False, cast=bool)
+DISABLE = config("DISABLE", default=False, cast=bool)
+SETTING_LOGGER = {"debug": DEBUG, "disable": DISABLE, "log_file": False}
 ORGANIZATION_URL = config("ORGANIZATION_URL", default="")
 PERSONAL_ACCESS_TOKEN = config("PERSONAL_ACCESS_TOKEN", default="")
 REPOSITORY_ID = config("REPOSITORY_ID", default="")

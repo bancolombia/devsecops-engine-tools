@@ -6,9 +6,9 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.sett
 from devsecops_engine_utilities.defect_dojo.domain.models.engagement import Engagement, EngagementList
 from devsecops_engine_utilities.utils.session_manager import SessionManager
 from datetime import datetime
-from devsecops_engine_utilities.settings import DEBUG
+from devsecops_engine_utilities.settings import SETTING_LOGGER
 
-logger = MyLogger.__call__(debug=DEBUG).get_logger()
+logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 
 
 class EngagementRestConsumer:

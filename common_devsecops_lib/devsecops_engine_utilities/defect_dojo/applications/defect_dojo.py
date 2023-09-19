@@ -10,9 +10,9 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.enga
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.defect_dojo.domain.user_case.import_scan import ImportScanUserCase
 from devsecops_engine_utilities.utils.session_manager import SessionManager
-from devsecops_engine_utilities.settings import DEBUG
+from devsecops_engine_utilities.settings import SETTING_LOGGER
 
-logger = MyLogger.__call__(debug=DEBUG).get_logger()
+logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 
 
 class DefectDojo:

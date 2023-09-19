@@ -1,5 +1,5 @@
 import re
-from devsecops_engine_utilities.settings import DEBUG
+from devsecops_engine_utilities.settings import SETTING_LOGGER
 from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.import_scan import ImportScanRestConsumer
@@ -16,7 +16,7 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.enga
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 import urllib3
 
-logger = MyLogger.__call__(debug=DEBUG).get_logger()
+logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 
 urllib3.disable_warnings()
 

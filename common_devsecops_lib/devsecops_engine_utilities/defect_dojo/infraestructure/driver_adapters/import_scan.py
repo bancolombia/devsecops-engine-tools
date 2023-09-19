@@ -5,9 +5,9 @@ from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
 from devsecops_engine_utilities.utils.session_manager import SessionManager
-from devsecops_engine_utilities.settings import DEBUG
+from devsecops_engine_utilities.settings import SETTING_LOGGER
 
-logger = MyLogger.__call__(debug=DEBUG).get_logger()
+logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 
 
 class ImportScanRestConsumer:
