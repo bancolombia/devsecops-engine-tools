@@ -1,13 +1,13 @@
 import datetime
+from devsecops_engine_utilities.utils.api_error import ApiError
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
 from devsecops_engine_utilities.utils.session_manager import SessionManager
-from devsecops_engine_utilities.settings import DEBUG
+from devsecops_engine_utilities.settings import SETTING_LOGGER
 
-logger = MyLogger.__call__(debug=DEBUG).get_logger()
+logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 
 
 class ImportScanRestConsumer:
@@ -58,12 +58,12 @@ class ImportScanRestConsumer:
         if response.status_code != 201:
             logger.error(response.status_code)
             logger.error(response.json())
-            raise ValidationError(f"dojo: {response}")
+            raise ApiError(response.json())
         try:
             response = ImportScanRequest().from_dict(response.json())
         except Exception as e:
             logger.error(f"from dict import Scan: {response.json()}")
-            raise ValidationError(e)
+            raise ApiError(response.json())
         return response
 
     def import_scan(self, request: ImportScanRequest, files) -> ImportScanRequest:
@@ -109,11 +109,11 @@ class ImportScanRestConsumer:
             logger.info(payload)
             logger.info(response.json())
             logger.error(response)
-            raise ValidationError(response)
+            raise ApiError(response.json())
         logger.info(f"Sucessfull {response}")
         try:
             response = ImportScanRequest.from_dict(response.json())
         except Exception as e:
             logger.error(f"from dict import Scan: {response.json()}")
-            raise ValidationError(e)
+            raise ApiError(e)
         return response

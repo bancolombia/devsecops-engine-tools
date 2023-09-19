@@ -1,4 +1,5 @@
 import pytest
+from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_PATH
 from unittest.mock import MagicMock
 from devsecops_engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
@@ -9,7 +10,6 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.cmdb
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import (
     ImportScanRequest,
 )
-from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import AzureDevopsApi
 from devsecops_engine_utilities.defect_dojo.domain.user_case.cmdb import CmdbUserCase
 
@@ -41,8 +41,7 @@ def get_cmdb_instance():
     return mock_rest_consumer_cmdb
 
 
-@pytest.mark.parametrize("engagement_name",
-                         [("NU0429001_Acceptance Tests"), ("NU0429001_Acceptance Tests23")])
+@pytest.mark.parametrize("engagement_name", [("NU0429001_Acceptance Tests"), ("NU0429001_Acceptance Tests23")])
 def test_execute(engagement_name):
     mock_rest_consumer_cmdb = get_cmdb_instance()
     request = {
@@ -70,10 +69,7 @@ def test_execute(engagement_name):
         "tags": "evc",
     }
     request: ImportScanRequest = ImportScanSerializer().load(request)
-    mock_rc = mock_rest_consumer_cmdb(
-        request,
-        token="91qewuro9quowedafj",
-        host="https://localhost:8000")
+    mock_rc = mock_rest_consumer_cmdb(request, token="91qewuro9quowedafj", host="https://localhost:8000")
     # response file contect json
     file_content = [b'{"key": "value"}']
     # mock git client
@@ -107,5 +103,5 @@ def test_get_code_app(engagement_name):
     uc = CmdbUserCase(
         rest_consumer_cmdb=None, utils_azure=None, expression=r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_"
     )
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         uc.get_code_app(engagement_name)
