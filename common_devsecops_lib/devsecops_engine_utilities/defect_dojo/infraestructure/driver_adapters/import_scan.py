@@ -82,7 +82,7 @@ class ImportScanRestConsumer:
             "engagement_end_date": request.engagement_end_date,
             "source_code_management_uri": request.source_code_management_uri,
             "engagement": request.engagement if request.engagement != 0 else "",
-            "auto_create_context": request.auto_create_context,
+            "auto_create_context": "false",
             "deduplication_on_engagement": request.deduplication_on_engagement,
             "lead": request.lead,
             "tags": request.tags,
