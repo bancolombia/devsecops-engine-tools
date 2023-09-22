@@ -21,11 +21,10 @@ class ProductTypeRestConsumer:
         url = f"{self.__host}/api/v2/product_types/"
         data = json.dumps({"name": product_type_name})
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
-        response = self.__session.post(url, headers=headers, data=data)
-
-        if response.status_code != 201:
-            raise ApiError(response.json())
         try:
+            response = self.__session.post(url, headers=headers, data=data)
+            if response.status_code != 201:
+                raise ApiError(response.json())
             product_type_object = ProductType.from_dict(response.json())
         except Exception as e:
             log = f"from dict product_type: {response.json}"
@@ -36,14 +35,12 @@ class ProductTypeRestConsumer:
     def get_product_types(self, product_type_name: str) -> ProductTypeList:
         url = f"{self.__host}/api/v2/product_types/?name={product_type_name}"
         headers = {"Authorization": f"Token {self.__token}"}
-        response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
-        if response.status_code != 200:
-            raise ApiError(response.json())
         try:
+            response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
+            if response.status_code != 200:
+                raise ApiError(response.json())
             product_type_object = ProductTypeList.from_dict(response.json())
         except Exception as e:
-            logger.debug(f"from dict- error {response}")
-            logger.error(f"from dict- error:{response.text}")
             raise ApiError(e)
         return product_type_object
 
@@ -51,10 +48,12 @@ class ProductTypeRestConsumer:
         url = f"{self.__host}/api/v2/product_types/{id}/"
 
         headers = {"Authorization": f"Token {self.__token}"}
-
-        response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
-        if response.status_code != 200:
-            raise ApiError(response.json())
-        logger.info(response)
-        product_type_object = ProductTypeList.from_dict(response.json())
+        try:
+            response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
+            if response.status_code != 200:
+                raise ApiError(response.json())
+            logger.info(response)
+            product_type_object = ProductTypeList.from_dict(response.json())
+        except Exception as e:
+            raise ApiError(e)
         return product_type_object
