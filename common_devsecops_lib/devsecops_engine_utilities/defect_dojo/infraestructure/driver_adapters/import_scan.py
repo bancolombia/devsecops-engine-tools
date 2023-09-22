@@ -53,13 +53,12 @@ class ImportScanRestConsumer:
         multipart_data = MultipartEncoder(fields=data)
 
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": multipart_data.content_type}
-        response = self.__session.post(url, headers=headers, data=multipart_data, verify=VERIFY_CERTIFICATE)
-
-        if response.status_code != 201:
-            logger.error(response.status_code)
-            logger.error(response.json())
-            raise ApiError(response.json())
         try:
+            response = self.__session.post(url, headers=headers, data=multipart_data, verify=VERIFY_CERTIFICATE)
+            if response.status_code != 201:
+                logger.error(response.status_code)
+                logger.error(response.json())
+                raise ApiError(response.json())
             response = ImportScanRequest().from_dict(response.json())
         except Exception as e:
             logger.error(f"from dict import Scan: {response.json()}")
@@ -102,16 +101,14 @@ class ImportScanRestConsumer:
         }
 
         headers = {"Authorization": f"Token {self.__token}"}
-
-        response = self.__session.post(url, headers=headers, data=payload, files=files, verify=VERIFY_CERTIFICATE)
-
-        if response.status_code != 201:
-            logger.info(payload)
-            logger.info(response.json())
-            logger.error(response)
-            raise ApiError(response.json())
-        logger.info(f"Sucessfull {response}")
         try:
+            response = self.__session.post(url, headers=headers, data=payload, files=files, verify=VERIFY_CERTIFICATE)
+            if response.status_code != 201:
+                logger.info(payload)
+                logger.info(response.json())
+                logger.error(response)
+                raise ApiError(response.json())
+            logger.info(f"Sucessfull {response}")
             response = ImportScanRequest.from_dict(response.json())
         except Exception as e:
             logger.error(f"from dict import Scan: {response.json()}")

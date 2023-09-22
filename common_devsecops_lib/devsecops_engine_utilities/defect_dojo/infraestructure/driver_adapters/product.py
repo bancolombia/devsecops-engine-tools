@@ -19,10 +19,10 @@ class ProductRestConsumer:
     def get_products(self, request: ImportScanRequest) -> ProductList:
         url = f"{self.__host}/api/v2/products/?name={request.product_name}"
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
-        response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
-        if response.status_code != 200:
-            raise ApiError(response.json())
         try:
+            response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
+            if response.status_code != 200:
+                raise ApiError(response.json())
             products_object = ProductList.from_dict(response.json())
         except Exception as e:
             logger.error(f"from dict product: {response.json()}")
@@ -34,15 +34,14 @@ class ProductRestConsumer:
 
         data = {
             "name": request.product_name,
-            "description": "LDC-" + request.product_description.upper(),
+            "description": "AREA RESPONSABLE TI:" + request.product_description.upper(),
             "prod_type": product_type_id,
         }
-
         headers = {"Authorization": f"Token {self.__token}"}
-        response = self.__session.post(url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
-        if response.status_code != 201:
-            raise ApiError(response.json())
         try:
+            response = self.__session.post(url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
+            if response.status_code != 201:
+                raise ApiError(response.json())
             product_object = Product.from_dict(response.json())
         except Exception as e:
             logger.error(f"form dict product: {response.json()}")
