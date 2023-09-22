@@ -37,12 +37,11 @@ class ScanConfigrationRestConsumer:
                 "tool_configuration": tool_configuration_id,
             }
         )
-
-        response = self.__session.post(url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
-        if response.status_code != 201:
-            logger.error(response.json())
-            raise ApiError(response.json())
         try:
+            response = self.__session.post(url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
+            if response.status_code != 201:
+                logger.error(response.json())
+                raise ApiError(response.json())
             scan_configuration_object = ScanConfiguration.from_dict(response.json())
         except Exception as e:
             logger.error(f"from dict scanConfiguration {response.json()}")
@@ -55,9 +54,12 @@ class ScanConfigrationRestConsumer:
             "Authorization": f"Token {self.__token}",
             "Conten-Type": "application/json",
         }
-        response = self.__session.get(url=url, headers=headers, verify=VERIFY_CERTIFICATE)
-        if response.status_code != 200:
-            logger.error(response.json())
-            raise ApiError(response.json())
-        response = ScanConfigurationList.from_dict(response.json())
+        try:
+            response = self.__session.get(url=url, headers=headers, verify=VERIFY_CERTIFICATE)
+            if response.status_code != 200:
+                logger.error(response.json())
+                raise ApiError(response.json())
+            response = ScanConfigurationList.from_dict(response.json())
+        except Exception as e:
+            raise ApiError(e)
         return response
