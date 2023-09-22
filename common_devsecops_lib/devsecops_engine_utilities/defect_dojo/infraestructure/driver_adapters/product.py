@@ -34,7 +34,7 @@ class ProductRestConsumer:
 
         data = {
             "name": request.product_name,
-            "description": "AREA RESPONSABLE TI:" + request.product_description.upper(),
+            "description": "AREA RESPONSABLE TI: " + request.product_description.upper(),
             "prod_type": product_type_id,
         }
         headers = {"Authorization": f"Token {self.__token}"}
