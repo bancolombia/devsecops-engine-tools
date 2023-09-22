@@ -46,7 +46,7 @@ class MyLogger(metaclass=SingletonType):
         if kwargs["debug"]:
             self._logger.setLevel(logging.DEBUG)
         else:
-            self._logger.setLevel(logging.WARNING)
+            self._logger.setLevel(logging.CRITICAL)
         formatter = logging.Formatter(
             "%(asctime)s [%(levelname)s | %(filename)s | %(funcName)s | %(lineno)d] > %(message)s"
         )
