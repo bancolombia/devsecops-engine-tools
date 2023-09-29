@@ -12,10 +12,11 @@ class ScanConfiguration(FromDictMixin):
     product: int = 0
     tool_configuration: int = 0
 
-
+    
 @dataclasses.dataclass
 class ScanConfigurationList(FromDictMixin):
     count: int = 2
     next = None
     previous = None
+    results: List[ScanConfiguration] = dataclasses.field(default_factory=list)
     results: List[ScanConfiguration] = dataclasses.field(default_factory=list)
