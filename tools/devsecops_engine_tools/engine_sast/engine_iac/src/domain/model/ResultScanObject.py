@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from tools.devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.LevelCompliance import LevelCompliance
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.LevelCompliance import LevelCompliance
 
 
 @dataclass

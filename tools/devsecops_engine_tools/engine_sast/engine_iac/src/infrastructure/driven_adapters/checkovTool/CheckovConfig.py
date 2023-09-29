@@ -1,5 +1,5 @@
 from enum import Enum
-from tools.devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.config_tool_gateway import ConfigToolGateway
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.config_tool_gateway import ConfigToolGateway
 
 
 class CheckovConfigEnum(Enum):
