@@ -1,4 +1,4 @@
-from setuptools import setup,find_packages
+from setuptools import setup, find_packages
 
 
 def get_readme():
@@ -23,7 +23,7 @@ setup(
     package_dir={
         "devsecops_engine_tools": "devsecops_engine_tools",
     },
-    packages=find_packages(exclude=['**test**']),
+    packages=find_packages(exclude=["**test**"]),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

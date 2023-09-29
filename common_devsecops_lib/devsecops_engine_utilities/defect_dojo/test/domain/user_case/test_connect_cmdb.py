@@ -41,8 +41,7 @@ def get_cmdb_instance():
     return mock_rest_consumer_cmdb
 
 
-@pytest.mark.parametrize("engagement_name",
-                         [("NU0429001_Acceptance Tests"), ("NU0429001_Acceptance Tests23")])
+@pytest.mark.parametrize("engagement_name", [("NU0429001_Acceptance Tests"), ("NU0429001_Acceptance Tests23")])
 def test_execute(engagement_name):
     mock_rest_consumer_cmdb = get_cmdb_instance()
     request = {
@@ -70,10 +69,7 @@ def test_execute(engagement_name):
         "tags": "evc",
     }
     request: ImportScanRequest = ImportScanSerializer().load(request)
-    mock_rc = mock_rest_consumer_cmdb(
-        request,
-        token="91qewuro9quowedafj",
-        host="https://localhost:8000")
+    mock_rc = mock_rest_consumer_cmdb(request, token="91qewuro9quowedafj", host="https://localhost:8000")
     # response file contect json
     file_content = [b'{"key": "value"}']
     # mock git client

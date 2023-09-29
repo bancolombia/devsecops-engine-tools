@@ -6,8 +6,12 @@ import json
 import os
 import re
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
-from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
-from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import CheckovTool
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
+    CheckovConfig,
+)
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import (
+    CheckovTool,
+)
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
     CheckovConfig,
 )
@@ -140,6 +144,6 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
         rules_scaned=data_config.rules_all,
         exclusions_all=data_config.exclusions_all,
         exclusions_scope=data_config.exclusions_scope,
-        level_compliance=data_config.level_compliance
+        level_compliance=data_config.level_compliance,
     )
     return result_scan_object

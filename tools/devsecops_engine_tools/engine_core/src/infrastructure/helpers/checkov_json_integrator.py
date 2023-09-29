@@ -27,9 +27,7 @@ def checks_integration(result_list):
                 + result_one.get("summary", {}).get("parsing_errors", 0),
                 "resource_count": result_one.get("summary", {}).get("resource_count", 0)
                 + result_two.get("summary", {}).get("resource_count", 0),
-                "checkov_version": result_one.get("summary", {}).get(
-                    "checkov_version", None
-                ),
+                "checkov_version": result_one.get("summary", {}).get("checkov_version", None),
             },
         }
 
