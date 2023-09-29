@@ -12,7 +12,7 @@ class ScanConfiguration(FromDictMixin):
     product: int = 0
     tool_configuration: int = 0
 
-    
+
 @dataclasses.dataclass
 class ScanConfigurationList(FromDictMixin):
     count: int = 2

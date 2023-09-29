@@ -7,5 +7,5 @@ def application_core():
         init_engine_core()
     except Exception as e:
         print(f"Error SCAN : {str(e)}")
-        #print(AzureMessageResultPipeline.Succeeded.value)
+        # print(AzureMessageResultPipeline.Succeeded.value)
         # Manejar el error según sea necesario
