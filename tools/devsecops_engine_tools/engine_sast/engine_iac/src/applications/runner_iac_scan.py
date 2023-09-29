@@ -28,3 +28,8 @@ def runner_engine_iac():
         print(AzureMessageResultPipeline.Succeeded.value)
         raise Exception(f"Error SCAN : {str(e)}")
         # Manejar el error según sea necesario
+
+
+
+if __name__ == "__main__":
+    runner_engine_iac()
