@@ -1,7 +1,0 @@
-import os
-import argparse
-import sys
-import json
-from common_devsecops_lib.devsecops_engine_utilities.defect_dojo.applications.defect_dojo import DefectDojo
-from common_devsecops_lib.devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
-from common_devsecops_lib.devsecops_engine_utilities.defect_dojo.applications.connect import Connect

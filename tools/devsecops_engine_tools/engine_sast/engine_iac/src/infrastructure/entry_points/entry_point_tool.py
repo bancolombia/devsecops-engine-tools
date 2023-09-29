@@ -5,25 +5,25 @@ import queue
 import json
 import os
 import re
-from tools.devsecops_engine_tools.engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
-from tools.devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
-from tools.devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import CheckovTool
-from tools.devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import CheckovConfig
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import CheckovTool
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
     CheckovConfig,
 )
-from common_devsecops_lib.devsecops_engine_utilities.utils.printers import (
+from devsecops_engine_utilities.utils.printers import (
     Printers,
 )
-from common_devsecops_lib.devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import ReleaseVariables
-from tools.devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
+from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import ReleaseVariables
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
     AzureDevopsIntegration,
 )
-from tools.devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.ResultScanObject import ResultScanObject
-from tools.devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovDeserializeConfig import (
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.ResultScanObject import ResultScanObject
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovDeserializeConfig import (
     CheckovDeserializeConfig,
 )
-from tools.devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
-from tools.devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.exclusions import exclusion
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.exclusions import exclusion
 
 
 def get_inputs_from_cli(args):
@@ -66,13 +66,11 @@ def async_scan(queue, iacScan: IacScan):
 
 def search_folders(search_pattern, ignore_pattern):
     current_directory = os.getcwd()
-    patron = "(?i)(?!.*" + "|".join(ignore_pattern) + ").*?(" + "|".join(search_pattern) + ").*"
-    folders = [
-        carpeta for carpeta in os.listdir(current_directory) if os.path.isdir(os.path.join(current_directory, carpeta))
-    ]
+    patron = "(?i)(?=.*?(" + "|".join(search_pattern) + "))(?!.*?(" + "|".join(ignore_pattern) + ")).*"
     matching_folders = [
-        os.path.normpath(os.path.join(current_directory, carpeta)) for carpeta in folders if re.match(patron, carpeta)
+        carpeta for carpeta in os.listdir(current_directory) if os.path.isdir(os.path.join(current_directory, carpeta)) and re.match(patron, carpeta)
     ]
+    matching_folders = [os.path.normpath(os.path.join(current_directory, carpeta)) for carpeta in matching_folders]
     return matching_folders
 
 
@@ -80,16 +78,16 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     Printers.print_logo_tool()
     azure_devops_integration = AzureDevopsIntegration()
     azure_devops_integration.get_azure_connection()
-    #data_file_tool = azure_devops_integration.get_remote_json_config(
-    #    remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
-    #)
-    data_file_tool = json.loads(remote_config)
+    data_file_tool = azure_devops_integration.get_remote_json_config(
+        remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
+    )
+    # data_file_tool = json.loads(remote_config)
     data_config = CheckovDeserializeConfig(json_data=data_file_tool, tool=tool, environment=environment)
-    #data_config.exclusions = azure_devops_integration.get_remote_json_config(
-    #    remote_config_repo=remote_config_repo, remote_config_path=data_config.exclusions_path
-    #)
+    data_config.exclusions = azure_devops_integration.get_remote_json_config(
+        remote_config_repo=remote_config_repo, remote_config_path=data_config.exclusions_path
+    )
     data_config.scope_pipeline = ReleaseVariables.Release_Definitionname.value()
-    data_config.exclusions = json.loads(exclusion)
+    # data_config.exclusions = json.loads(exclusion)
     if data_config.exclusions.get("All") is not None:
         data_config.exclusions_all = data_config.exclusions.get("All").get(tool)
     if data_config.exclusions.get(data_config.scope_pipeline) is not None:
