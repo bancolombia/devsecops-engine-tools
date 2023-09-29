@@ -12,7 +12,6 @@ from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline i
 class BreakBuild:
     deserializer_gateway: DeseralizatorGateway
     input_core: InputCore
-    print("INPUT CORE EN BREAK BUILD {input_core}\n", )
     def print_table(self, vulnerabilities_without_exclusions_list: 'list[Vulnerability]'):
         vulnerability_table = PrettyTable(["Severity", "ID", "Description", "Where"])
 
@@ -39,7 +38,6 @@ class BreakBuild:
         level_compliance = self.input_core.level_compliance_defined
         exclusions = self.input_core.totalized_exclusions
         rules_scaned = self.input_core.rules_scaned
-        print("LEVEL COMPLIANCE EN BREAK BUILD POST_INIT",level_compliance)
         if len(vulnerabilities_list) != 0:
             vulnerabilities_list_with_severity = list(map(lambda vulnerability: replace(
                 vulnerability, severity=rules_scaned[vulnerability.id].get("severity").lower()), vulnerabilities_list))
