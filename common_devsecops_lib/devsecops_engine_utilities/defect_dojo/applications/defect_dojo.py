@@ -37,5 +37,4 @@ class DefectDojo:
             response = uc.execute(request)
             return response
         except ApiError as e:
-            logger.error(e.messages)
             return e
