@@ -6,5 +6,6 @@ from requests import Response
 class ApiError(ValidationError):
     def __init__(self, message):
         if isinstance(message, dict):
-            message = message.get("detail")
-        super().__init__({"message": str(message)})
+            m = str(message.get("message")) if message.get("message") else ""
+            m += str(message.get("detail")) if message.get("detail") else ""
+            super().__init__({"message": str(m)})

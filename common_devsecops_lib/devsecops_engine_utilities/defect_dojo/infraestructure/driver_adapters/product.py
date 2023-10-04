@@ -35,6 +35,7 @@ class ProductRestConsumer:
         data = {
             "name": request.product_name,
             "description": "AREA RESPONSABLE TI: " + request.product_description.upper(),
+            "enable_full_risk_acceptance": True,
             "prod_type": product_type_id,
         }
         headers = {"Authorization": f"Token {self.__token}"}
