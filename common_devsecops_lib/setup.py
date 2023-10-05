@@ -13,7 +13,7 @@ def get_requirements():
 
 setup(
     name="devsecops_engine_utilities",
-    version="2.3.19",
+    version="2.3.20",
     author="Bancolombia devsecops Team ",
     author_email="devsecops@bancolombia.com.co",
     description="Common utilities tools for engine devsecops",
