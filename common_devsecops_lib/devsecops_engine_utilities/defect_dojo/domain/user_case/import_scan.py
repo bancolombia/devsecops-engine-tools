@@ -96,7 +96,7 @@ class ImportScanUserCase:
         else:
             engagement = [engagement for engagement in engagement.results if engagement.product == product_id]
             if engagement:
-                logger.debug(f"Engagement found: {engagement.name} whit product id: {engagement.product}")
+                logger.debug(f"Engagement found: {engagement[0].name} whit product id: {engagement[0].product}")
             else:
                 engagement = self.__rest_engagement.post_engagement(request.engagement_name, product_id)
                 logger.debug(f"Egagement created: {engagement.name} whit product id {engagement.product}")
