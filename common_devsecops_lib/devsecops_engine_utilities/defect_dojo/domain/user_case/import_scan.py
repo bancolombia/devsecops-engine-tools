@@ -55,7 +55,7 @@ class ImportScanUserCase:
             product_type_id = product_types.results[0].id
             logger.info(
                 f"product_type found: {product_types.results[0].name}\
-                    with id {product_id}"
+                    with id {product_type_id}"
             )
 
         products = self.__rest_product.get_products(request)
@@ -94,7 +94,12 @@ class ImportScanUserCase:
             engagement = self.__rest_engagement.post_engagement(request.engagement_name, product_id)
             logger.debug(f"Egagement created: {engagement.name}")
         else:
-            logger.debug(f"Engagement found: {engagement.results[0].name}")
+            engagement = [engagement for engagement in engagement.results if engagement.product == product_id]
+            if engagement:
+                logger.debug(f"Engagement found: {engagement.name} whit product id: {engagement.product}")
+            else:
+                engagement = self.__rest_engagement.post_engagement(request.engagement_name, product_id)
+                logger.debug(f"Egagement created: {engagement.name} whit product id {engagement.product}")
 
         if api_scan_bool:
             response = self.__rest_import_scan.import_scan_api(request)
