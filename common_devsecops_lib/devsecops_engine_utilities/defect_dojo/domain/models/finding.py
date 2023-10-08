@@ -14,16 +14,16 @@ class Finding(FromDictMixin):
     age: int = 0
     sla_days_remaining: int = 0
     finding_meta: List[None] = dataclasses.field(default_factory=list)
-    related_fields: None
-    jira_creation: None
-    jira_change: None
+    related_fields = None
+    jira_creation = None
+    jira_change = None
     display_status: str = ""
     finding_groups: List[None] = dataclasses.field(default_factory=list)
     vulnerability_ids: List[None] = dataclasses.field(default_factory=list)
     reporter: int = 0
     title: int = 0
     date: str = ""
-    sla_start_date: None
+    sla_start_date = None
     cwe: int = 0
     cvssv3 = None
     cvssv3_score = None
@@ -84,3 +84,12 @@ class Finding(FromDictMixin):
     notes: List[None] = dataclasses.field(default_factory=list)
     files: List[None] = dataclasses.field(default_factory=list)
     found_by: List[None] = dataclasses.field(default_factory=list)
+
+
+@dataclasses.dataclass
+class FindingList(FromDictMixin):
+    count: int = 0
+    next = None
+    previous = None
+    results: List[Finding] = dataclasses.field(default_factory=list)
+    prefetch = None
