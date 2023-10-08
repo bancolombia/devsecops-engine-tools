@@ -11,4 +11,4 @@ class SessionManager:
         cls._host = host
         if not cls._instance:
             cls._instance = requests.Session()
-        return cls._instance
+        return cls
