@@ -3,6 +3,8 @@ from devsecops_engine_utilities.defect_dojo.domain.serializers.finding import Fi
 from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.settings import SETTING_LOGGER
+import datetime
+import pytz
 
 logger = MyLogger.__call__(**SETTING_LOGGER)
 
@@ -15,5 +17,7 @@ class FindingUserCase:
         findings = self.__rest_finding.get(request)
         if findings.results == []:
             raise ApiError(f"Finding con Id {request.get('unique_id_from_tool')} not found")
-        request_close = {"is_mitigated": "True"}
+        tz = pytz.timezone("America/Bogota")
+        date = datetime.datetime.now(tz=tz).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        request_close = {"is_mitigated": "True", "mitigated": date}
         return self.__rest_finding.close(request_close, findings.results[0].id)
