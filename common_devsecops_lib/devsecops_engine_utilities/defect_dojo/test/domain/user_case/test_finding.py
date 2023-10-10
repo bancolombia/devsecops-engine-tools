@@ -1,11 +1,18 @@
-# from devsecops_engine_utilities.defect_dojo.domain.user_case.finding import FindingUserCase
-# from devsecops_engine_utilities.utils.session_manager import SessionManager
-# from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.finding import FindingRestConsumer
+from unittest.mock import Mock
+from devsecops_engine_utilities.defect_dojo.domain.user_case.finding import FindingUserCase
+from devsecops_engine_utilities.utils.session_manager import SessionManager
+from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.finding import FindingRestConsumer
+from devsecops_engine_utilities.defect_dojo.domain.models.finding import Finding, FindingList
+from requests import Response
 
-# def test_execute():
-#     session = SessionManager(token="test_token8643f700137f71c15f8980", host="http://localhost:8000/")
-#     rest_consumer = FindingRestConsumer(session)
-# assert rest_consumer.__token == "test_token8643f700137f71c15f8980"
-# assert rest_consumer.__host == "http://localhost:8000/"
 
-# Creation mocks, _rest_finding.get and __rest_finding_close
+def test_execute():
+    mock_rest_finding = Mock()
+    # Creation mocks, get and close
+    mock_rest_finding.get.return_value = FindingList(count=1, results=[Finding(id=1), Finding(id=2)])
+    response = Response()
+    response.status_code = 200
+    mock_rest_finding.close.return_value = response
+    uc = FindingUserCase(mock_rest_finding)
+    response = uc.execute({"active": "true"})
+    assert response.status_code == 200

@@ -14,7 +14,7 @@ class CmdbRestConsumer:
         self.__token = token
         self.__host = host
         self.__mapping_cmdb = mapping_cmdb
-        self.__session = session
+        self.__session = session._instance
 
     def get_product_info(self, code_app: int) -> Cmdb:
         data = json.dumps({"codapp": code_app})
