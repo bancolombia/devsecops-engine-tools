@@ -8,29 +8,19 @@ path_file = os.path.dirname(os.path.realpath(__file__))
 if __name__ == "__main__":
     # Example Checkov Scan file
 
-
-    request: ImportScanRequest = Connect.cmdb(
-        cmdb_mapping={
-            "product_type_name": "nombreevc",
-            "product_name": "nombreapp",
-            "tag_product": "nombreentorno",
-            "product_description": "arearesponsableti",
-            "codigo_app": "CodigoApp",
-        },
-        organization_url="https://test.test.com/",
-        personal_access_token="28394tokenk-test",
-        repository_id="name_engagemeent or id repositoroy",
-        remote_config_path="paht of file .json",
-        project_remote_config="project name",
-        token_cmdb="token1293983",
-        host_cmdb="https://test.test.com",
-        token_defect_dojo="tokentest1312342",
-        expression=r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_",
-        host_defect_dojo="http://localhost:8000",
-        scan_type="Checkov Scan",
-        engagement_name="",
-        file=f"{path_file}/sheckov_scan.json",
-        tags="evc",
+     request: ImportScanRequest = Connect.cmdb(
+        cmdb_mapping=settings.CMDB_MAPPING
+        compact_remote_config_url=settings.COMPACT_REMOTE_CONFIG_URL,
+        personal_access_token=settings.PERSONAL_ACCESS_TOKEN,
+        token_cmdb=settings.TOKEN_CMDB,
+        host_cmdb=settings.HOST_CMDB,
+        expression=settings.EXPRESSION,
+        token_defect_dojo=settings.TOKEN_DEFECT_DOJO,
+        host_defect_dojo=settings.HOST_DEFECT_DOJO,
+        scan_type=scan_type, # checkov Scan file
+        engagement_name=settings.ENGAGEMENT_NAME,
+        tags=settings.TAGS,
+        branch_tag=settings.BRANCH_TAG,
     )
 
     response = DefectDojo.send_import_scan(request)
@@ -38,27 +28,18 @@ if __name__ == "__main__":
     # # Example api Scan sonnar
 
        request: ImportScanRequest = Connect.cmdb(
-        cmdb_mapping={
-            "product_type_name": "nombreevc",
-            "product_name": "nombreapp",
-            "tag_product": "nombreentorno",
-            "product_description": "arearesponsableti",
-            "codigo_app": "CodigoApp",
-        },
-        organization_url="https://test.test.com/",
-        personal_access_token="28394tokenk-test",
-        repository_id="name_engagemeent or id repositoroy",
-        remote_config_path="paht of file .json",
-        project_remote_config="project name",
-        token_cmdb="token1293983",
-        host_cmdb="https://test.test.com",
-        expression=r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_",
-        token_defect_dojo="tokentest1312342",
-        host_defect_dojo="http://localhost:8000",
-        scan_type="SonarQube API Import",
-        engagement_name="",
-        file=f"{path_file}/sheckov_scan.json",
-        tags="evc",
+        cmdb_mapping=settings.CMDB_MAPPING
+        compact_remote_config_url=settings.COMPACT_REMOTE_CONFIG_URL,
+        personal_access_token=settings.PERSONAL_ACCESS_TOKEN,
+        token_cmdb=settings.TOKEN_CMDB,
+        host_cmdb=settings.HOST_CMDB,
+        expression=settings.EXPRESSION,
+        token_defect_dojo=settings.TOKEN_DEFECT_DOJO,
+        host_defect_dojo=settings.HOST_DEFECT_DOJO,
+        scan_type=scan_type, # SonarQube API Import
+        engagement_name=settings.ENGAGEMENT_NAME,
+        tags=settings.TAGS,
+        branch_tag=settings.BRANCH_TAG, # example main or master
     )
 
 
@@ -66,3 +47,11 @@ if __name__ == "__main__":
 
 
 https://dev.azure.com/{organization}/{project}/_git/{repository}
+
+## run Integration test
+
+In this module you will find the integration tests of the methods implemented in the library and it can also serve as documentation.
+
+be located in the directory common_devsecops_lib and execute command
+
+    python -m integrations_test.defect_dojo
