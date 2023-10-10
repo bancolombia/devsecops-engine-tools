@@ -18,7 +18,7 @@ class ScanConfigrationRestConsumer:
     def __init__(self, request: ImportScanRequest, session: SessionManager) -> ScanConfiguration:
         self.__token = request.token_defect_dojo
         self.__host = request.host_defect_dojo
-        self.__session = session
+        self.__session = session._instance
 
     def post_api_scan_configuration(
         self, request: ImportScanRequest, product_id: int, tool_configuration_id: int
@@ -58,6 +58,7 @@ class ScanConfigrationRestConsumer:
             response = self.__session.get(url=url, headers=headers, verify=VERIFY_CERTIFICATE)
             if response.status_code != 200:
                 logger.error(response.json())
+                print("debug 6", response)
                 raise ApiError(response.json())
             response = ScanConfigurationList.from_dict(response.json())
         except Exception as e:

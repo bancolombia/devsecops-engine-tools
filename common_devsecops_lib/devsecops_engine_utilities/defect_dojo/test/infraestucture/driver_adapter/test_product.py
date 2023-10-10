@@ -35,7 +35,7 @@ def test_get_product_info_failure():
 
 
 def test_post_product_info_sucessfull():
-    session_mock = session_manager_post(status_code=201, response_json_file="product.json")
+    session_mock = session_manager_post(status_code=201, mock_response="product.json")
     rest_product = ProductRestConsumer(ImportScanRequest(), session_mock)
     request = ImportScanRequest()
     request.product_name = "NU0212001_product name test_NU0212001"
@@ -49,7 +49,7 @@ def test_post_product_info_sucessfull():
 
 
 def test_post_product_info_failure():
-    session_mock = session_manager_post(status_code=500, response_json_file="product.json")
+    session_mock = session_manager_post(status_code=500, mock_response="product.json")
     rest_product_type = ProductRestConsumer(ImportScanRequest(), session_mock)
     with pytest.raises(ApiError):
         rest_product_type.post_product(ImportScanRequest(), 278)
