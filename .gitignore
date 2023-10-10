@@ -23,7 +23,7 @@ _nu1234
 data
 
 #Archivos de Pruebas
-*/test_file/*
+**/.env
 test-output.xml
 report.html
 out_report.xml
