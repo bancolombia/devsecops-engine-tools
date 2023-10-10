@@ -1,0 +1,203 @@
+[
+  {
+    "SchemaVersion": "2018-10-08",
+    "Id": "arn:aws:securityhub:us-east-1:teest123:subscription/aws-foundational-security-best-test123/finding/test123",
+    "ProductArn": "arn:aws:securityhub:us-east-1::test123",
+    "ProductName": "Security Hub",
+    "CompanyName": "AWS",
+    "Region": "us-east-1",
+    "GeneratorId": "aws-foundational-security-best-test123",
+    "AwsAccountId": "TEST123",
+    "Types": [
+      "types test"
+    ],
+    "FirstObservedAt": "2023-06-10T01:30:34.683Z",
+    "LastObservedAt": "2023-09-14T20:09:22.099Z",
+    "CreatedAt": "2023-06-10T01:30:34.683Z",
+    "UpdatedAt": "2023-09-14T20:09:14.063Z",
+    "Severity": {
+      "Product": 70,
+      "Label": "HIGH",
+      "Normalized": 70,
+      "Original": "HIGH"
+    },
+    "Title": "Title test 1",
+    "Description": "description test",
+    "Remediation": {
+      "Recommendation": {
+        "Text": "test tesxt",
+        "Url": "test url"
+      }
+    },
+    "ProductFields": {
+      "StandardsArn": "arn:aws:securityhub:::standards/aws-foundational-test123",
+      "StandardsSubscriptionArn": "arn:aws:securityhub:us-east-1:TEST123:subscription/aws-foundational-test123",
+      "ControlId": "EC2.8",
+      "RecommendationUrl": "https://docs.aws.amazon.com/",
+      "RelatedAWSResources:0/name": "securityhub-ec2-imdsv2-check-test123",
+      "RelatedAWSResources:0/type": "AWS::Config::ConfigRule",
+      "StandardsControlArn": "arn:aws:securityhub:us-east-1:TEST123:control/aws-foundational-security-best-test123",
+      "aws/securityhub/ProductName": "Security Hub",
+      "aws/securityhub/CompanyName": "AWS",
+      "Resources:0/Id": "arn:aws:ec2:us-east-1:TEST123:instance/i-test123",
+      "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::test123/arn:aws:securityhub:us-east-1:TEST123:subscription/aws-foundational-security-best-test123/finding/796e5249-4908-4d90-8f7f-669ccaf44104"
+    },
+    "Resources": [
+      {
+        "Type": "AwsEc2Instance",
+        "Id": "arn:aws:ec2:us-east-1:TEST123:instance/i-test123",
+        "Partition": "aws",
+        "Region": "us-east-1",
+        "Details": {
+          "AwsEc2Instance": {
+            "ImageId": "ami-0e1a79e5b408c8e4a",
+            "IamInstanceProfileArn": "arn:aws:iam::TEST123:instance-profile/test123-test123",
+            "VpcId": "vpc-test123",
+            "SubnetId": "subnet-test123",
+            "LaunchedAt": "2023-04-02T12:07:11.000Z",
+            "NetworkInterfaces": [
+              {
+                "NetworkInterfaceId": "eni-test123"
+              }
+            ],
+            "VirtualizationType": "hvm",
+            "MetadataOptions": {
+              "HttpEndpoint": "enabled",
+              "HttpPutResponseHopLimit": 1,
+              "HttpTokens": "optional"
+            },
+            "Monitoring": {
+              "State": "disabled"
+            }
+          }
+        }
+      }
+    ],
+    "Compliance": {
+      "Status": "FAILED",
+      "SecurityControlId": "EC2.8",
+      "AssociatedStandards": [
+        {
+          "StandardsId": "standards/aws-foundational-test123"
+        }
+      ]
+    },
+    "WorkflowState": "NEW",
+    "Workflow": {
+      "Status": "NOTIFIED"
+    },
+    "RecordState": "ACTIVE",
+    "FindingProviderFields": {
+      "Severity": {
+        "Label": "HIGH",
+        "Original": "HIGH"
+      },
+      "Types": [
+        "types test"
+      ]
+    },
+    "ProcessedAt": "2023-09-14T20:09:24.497Z"
+  },
+  {
+    "SchemaVersion": "2018-10-08",
+    "Id": "arn:aws:securityhub:us-east-1:teest1234:subscription/aws-foundational-security-best-test123/finding/test1234",
+    "ProductArn": "arn:aws:securityhub:us-east-1::test123",
+    "ProductName": "Security Hub",
+    "CompanyName": "AWS",
+    "Region": "us-east-1",
+    "GeneratorId": "aws-foundational-test123/Lambda.2",
+    "AwsAccountId": "TEST123",
+    "Types": [
+      "Software and Configuration Checks/Industry and Regulatory Standards/AWS-Foundational-Security-Best-Practices"
+    ],
+    "FirstObservedAt": "2023-09-04T13:47:35.827Z",
+    "LastObservedAt": "2023-09-14T20:42:44.572Z",
+    "CreatedAt": "2023-09-04T13:47:35.827Z",
+    "UpdatedAt": "2023-09-14T20:42:30.186Z",
+    "Severity": {
+      "Product": 0,
+      "Label": "INFORMATIONAL",
+      "Normalized": 0,
+      "Original": "INFORMATIONAL"
+    },
+    "Title": "Title test 2",
+    "Description": "description test",
+    "Remediation": {
+      "Recommendation": {
+        "Text": "test recomendation",
+        "Url": "test url"
+      }
+    },
+    "ProductFields": {
+      "StandardsArn": "arn:aws:securityhub:::standards/aws-foundational-test123",
+      "StandardsSubscriptionArn": "arn:aws:securityhub:us-east-1:TEST123:subscription/aws-foundational-test123",
+      "ControlId": "Lambda.2",
+      "RecommendationUrl": "https://docs.aws.amazon.com/console/securityhub/Lambda.2/remediation",
+      "RelatedAWSResources:0/name": "securityhub-lambda-function-settings-check-19fd57fb",
+      "RelatedAWSResources:0/type": "AWS::Config::ConfigRule",
+      "StandardsControlArn": "arn:aws:securityhub:us-east-1:TEST123:control/aws-foundational-test123/Lambda.2",
+      "aws/securityhub/ProductName": "Security Hub",
+      "aws/securityhub/CompanyName": "AWS",
+      "Resources:0/Id": "arn:aws:lambda:us-east-1:TEST123:function:integracion_test",
+      "aws/securityhub/FindingId": "arn:aws:securityhub:us-east-1::test123/arn:aws:securityhub:us-east-1:TEST123:subscription/aws-foundational-test123/Lambda.2/finding/ace60523-0328-4084-a958-e2950b7db14b"
+    },
+    "Resources": [
+      {
+        "Type": "Type test",
+        "Id": "arn:aws:lambda:us-east-1:TEST123:function:integracion_test",
+        "Partition": "aws",
+        "Region": "us-east-1",
+        "Details": {
+          "Type test": {
+            "CodeSha256": "test123",
+            "FunctionName": "integracion_test",
+            "Handler": "test123",
+            "LastModified": "2023-09-13T16:59:53.000Z",
+            "MemorySize": 256,
+            "RevisionId": "1237",
+            "Role": "arn:aws:iam::TEST123:role/test123",
+            "Runtime": "python3.8",
+            "Timeout": 900,
+            "TracingConfig": {
+              "Mode": "PassThrough"
+            },
+            "VpcConfig": {
+              "SecurityGroupIds": [
+                "sg-test123"
+              ],
+              "SubnetIds": [
+                "subnet-test123",
+                "subnet-test123"
+              ]
+            },
+            "Version": "$LATEST"
+          }
+        }
+      }
+    ],
+    "Compliance": {
+      "Status": "PASSED",
+      "SecurityControlId": "Lambda.2",
+      "AssociatedStandards": [
+        {
+          "StandardsId": "standards/aws-foundational-test123"
+        }
+      ]
+    },
+    "WorkflowState": "NEW",
+    "Workflow": {
+      "Status": "RESOLVED"
+    },
+    "RecordState": "ACTIVE",
+    "FindingProviderFields": {
+      "Severity": {
+        "Label": "INFORMATIONAL",
+        "Original": "INFORMATIONAL"
+      },
+      "Types": [
+        "types test"
+      ]
+    },
+    "ProcessedAt": "2023-09-14T20:42:49.116Z"
+  }
+]
