@@ -1,4 +1,3 @@
-import os
 from devsecops_engine_utilities.defect_dojo import DefectDojo, ImportScanRequest, Connect, Finding
 from devsecops_engine_utilities.utils.session_manager import SessionManager
 from devsecops_engine_utilities import settings
