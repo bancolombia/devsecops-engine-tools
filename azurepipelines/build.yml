@@ -39,13 +39,21 @@ steps:
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Run Unit Test'
 
+- script: |
+    if [ "$(Build.SourceBranch)" == "refs/heads/trunk" ]; then
+      echo "Integration tests are only run in feature branch"
+    else
+      source _venv/bin/activate
+      python -m integrations_test.defect_dojo
+    fi
+  workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
+  displayName: 'Integration Test'
 
 - task: PublishTestResults@2
   displayName: 'Publish Test Results **/out*.xml'
   inputs:
     testResultsFiles: '**/out*.xml'
     searchFolder: $(System.DefaultWorkingDirectory)/$(componentName)
-
 
 - task: PublishCodeCoverageResults@1
   displayName: 'Publish code coverage from coverage.xml'

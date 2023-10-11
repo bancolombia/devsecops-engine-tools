@@ -15,7 +15,7 @@ class EngagementRestConsumer:
     def __init__(self, request: ImportScanRequest, session: SessionManager):
         self.__token = request.token_defect_dojo
         self.__host = request.host_defect_dojo
-        self.__session = session
+        self.__session = session._instance
 
     def get_engagements(self, engagement_name):
         url = f"{self.__host}/api/v2/engagements/?name={engagement_name}"
