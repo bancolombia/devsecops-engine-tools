@@ -48,6 +48,8 @@ steps:
     fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Integration Test'
+  env:
+    PERSONAL_ACCESS_TOKEN: $(System.AccessToken)
 
 - task: PublishTestResults@2
   displayName: 'Publish Test Results **/out*.xml'
