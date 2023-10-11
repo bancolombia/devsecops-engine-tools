@@ -39,13 +39,16 @@ steps:
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Run Unit Test'
 
+- script: |
+    python -m integrations_test.defect_dojo
+  workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
+  displayName: 'Integration Test'
 
 - task: PublishTestResults@2
   displayName: 'Publish Test Results **/out*.xml'
   inputs:
     testResultsFiles: '**/out*.xml'
     searchFolder: $(System.DefaultWorkingDirectory)/$(componentName)
-
 
 - task: PublishCodeCoverageResults@1
   displayName: 'Publish code coverage from coverage.xml'
