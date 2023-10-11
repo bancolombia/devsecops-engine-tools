@@ -58,7 +58,6 @@ class ScanConfigrationRestConsumer:
             response = self.__session.get(url=url, headers=headers, verify=VERIFY_CERTIFICATE)
             if response.status_code != 200:
                 logger.error(response.json())
-                print("debug 6", response)
                 raise ApiError(response.json())
             response = ScanConfigurationList.from_dict(response.json())
         except Exception as e:
