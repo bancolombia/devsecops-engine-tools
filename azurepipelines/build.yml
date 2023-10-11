@@ -45,7 +45,7 @@ steps:
     else
       source _venv/bin/activate
       python -m integrations_test.defect_dojo
-    if
+    fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Integration Test'
 
