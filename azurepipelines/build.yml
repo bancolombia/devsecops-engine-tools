@@ -40,6 +40,7 @@ steps:
   displayName: 'Run Unit Test'
 
 - script: |
+    source _venv/bin/activate
     python -m integrations_test.defect_dojo
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Integration Test'
