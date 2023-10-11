@@ -41,7 +41,7 @@ def test_get_engagement_info_failure():
 
 
 def test_post_engagement_info_sucessfull():
-    session_mock = session_manager_post(status_code=201, response_json_file="engagement.json")
+    session_mock = session_manager_post(status_code=201, mock_response="engagement.json")
     rest_engagement = EngagementRestConsumer(
         ImportScanRequest(),
         session_mock,
@@ -51,7 +51,7 @@ def test_post_engagement_info_sucessfull():
 
 
 def test_post_engagement_info_failure():
-    session_mock = session_manager_post(status_code=500, response_json_file="engagement.json")
+    session_mock = session_manager_post(status_code=500, mock_response="engagement.json")
     rest_engagement = EngagementRestConsumer(
         ImportScanRequest(),
         session_mock,

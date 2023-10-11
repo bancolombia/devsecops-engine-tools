@@ -15,7 +15,7 @@ class ProductTypeRestConsumer:
     def __init__(self, request: ImportScanRequest, session: SessionManager):
         self.__token = request.token_defect_dojo
         self.__host = request.host_defect_dojo
-        self.__session = session
+        self.__session = session._instance
 
     def post_product_type(self, product_type_name: str) -> ProductType:
         url = f"{self.__host}/api/v2/product_types/"

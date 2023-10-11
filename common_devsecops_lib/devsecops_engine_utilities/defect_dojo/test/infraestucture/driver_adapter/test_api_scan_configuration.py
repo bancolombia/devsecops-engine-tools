@@ -41,7 +41,7 @@ def test_get_scan_configrations_info_failure():
 
 
 def test_post_scan_configuration_info_sucessfull():
-    session_mock = session_manager_post(status_code=201, response_json_file="scan_configuration.json")
+    session_mock = session_manager_post(status_code=201, mock_response="scan_configuration.json")
     request = ImportScanRequest()
     rest_scan_configurations = ScanConfigrationRestConsumer(request, session_mock)
     # The engagement must be equal to service_key
@@ -55,7 +55,7 @@ def test_post_scan_configuration_info_sucessfull():
 
 
 def test_post_product_info_failure():
-    session_mock = session_manager_post(status_code=500, response_json_file="scan_configuration.json")
+    session_mock = session_manager_post(status_code=500, mock_response="scan_configuration.json")
     rest_scan_configuration = ScanConfigrationRestConsumer(ImportScanRequest(), session_mock)
     with pytest.raises(ApiError):
         rest_scan_configuration.post_api_scan_configuration(ImportScanRequest(), 1, 1)

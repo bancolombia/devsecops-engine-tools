@@ -34,7 +34,7 @@ def test_get_product_type_info_failure():
 
 
 def test_post_product_type_info_sucessfull():
-    session_mock = session_manager_post(status_code=201, response_json_file="product_type.json")
+    session_mock = session_manager_post(status_code=201, mock_response="product_type.json")
     rest_product_type = ProductTypeRestConsumer(ImportScanRequest(), session_mock)
     response = rest_product_type.post_product_type("product_type name test")
     assert isinstance(response, ProductType)
@@ -44,7 +44,7 @@ def test_post_product_type_info_sucessfull():
 
 
 def test_post_product_type_info_failure():
-    session_mock = session_manager_post(status_code=500, response_json_file="product_type.json")
+    session_mock = session_manager_post(status_code=500, mock_response="product_type.json")
     rest_product_type = ProductTypeRestConsumer(ImportScanRequest(), session_mock)
     with pytest.raises(ApiError):
         rest_product_type.post_product_type("NU0212001_test_engagement_name")
