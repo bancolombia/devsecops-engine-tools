@@ -20,10 +20,8 @@ PERSONAL_ACCESS_TOKEN = config("PERSONAL_ACCESS_TOKEN", default="", cast=str)
 REPOSITORY_ID = config("REPOSITORY_ID", default="", cast=str)
 REMOTE_CONFIG_PATH = config("REMOTE_CONFIG_PATH", default="")
 PROJECT_REMOTE_CONFIG = config("PROJECT_REMOTE_CONFIG", default="", cast=str)
-TOKEN_CMDB = config("TOKEN_CMDB", default="4n9bde64nd07ebcu86shbco7m39n0", cast=str)
-HOST_CMDB = config(
-    "HOST_CMDB", default="https://55v20mng66.execute-api.us-east-1.amazonaws.com/dev/aws-inventory", cast=str
-)
+TOKEN_CMDB = config("TOKEN_CMDB", default="", cast=str)
+HOST_CMDB = config("HOST_CMDB", default="", cast=str)
 EXPRESSION = config("EXPRESSION", default="", cast=str)
 TOKEN_DEFECT_DOJO = config("TOKEN_DEFECT_DOJO", default="", cast=str)
 HOST_DEFECT_DOJO = config("HOST_DEFECT_DOJO", default="http://localhost:8000", cast=str)
