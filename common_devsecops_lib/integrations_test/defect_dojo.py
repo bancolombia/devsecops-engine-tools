@@ -2,6 +2,7 @@ from devsecops_engine_utilities.defect_dojo import DefectDojo, ImportScanRequest
 from devsecops_engine_utilities.utils.session_manager import SessionManager
 from devsecops_engine_utilities import settings
 from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities.utils.api_error import ApiError
 from tabulate import tabulate
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
@@ -88,4 +89,4 @@ if __name__ == "__main__":
 
     except Exception as e:
         logger.error(e)
-        raise e
+        raise ApiError(e)
