@@ -1,8 +1,10 @@
 from devsecops_engine_utilities.defect_dojo import DefectDojo, ImportScanRequest, Connect, Finding
 from devsecops_engine_utilities.utils.session_manager import SessionManager
 from devsecops_engine_utilities import settings
+from devsecops_engine_utilities.utils.logger_info import MyLogger
 from tabulate import tabulate
 
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 path_file = settings.DEVSECOPS_ENGINE_UTILITIES_PATH
 work_directory = "/defect_dojo/test/files/request_file"
 path_file = path_file + work_directory
@@ -51,40 +53,50 @@ def validate_response(response, **kwargs):
 
 if __name__ == "__main__":
     table = []
-    if settings.INTEGRATION_TEST:
-        # # test integration Aws security Finding
-        response = import_scan(
-            scan_type="AWS Security Finding Format (ASFF) Scan", file_path=f"{path_file}/aws_security_finding.json"
-        )
-        assert hasattr(response, "test_url")
-        assert response.engagement_name == settings.ENGAGEMENT_NAME
-        assert response.scan_type == "AWS Security Finding Format (ASFF) Scan"
-        # end_point, description, status, result,
-        table.append(validate_response(response, scan_type="AWS Security Hub", end_point="impor_scan"))
+    try:
+        if settings.INTEGRATION_TEST:
+            # # test integration Aws security Finding
+            response = import_scan(
+                scan_type="AWS Security Finding Format (ASFF) Scan", file_path=f"{path_file}/aws_security_finding.json"
+            )
+            logger.debug(f"AWS Segurity {response}")
+            assert hasattr(response, "test_url")
+            assert response.engagement_name == settings.ENGAGEMENT_NAME
+            assert response.scan_type == "AWS Security Finding Format (ASFF) Scan"
+            # end_point, description, status, result,
+            table.append(validate_response(response, scan_type="AWS Security Hub", end_point="impor_scan"))
 
-        response = import_scan(scan_type="Jfrog Xray On Demand Binary Scan", file_path=f"{path_file}/xray.json")
-        assert hasattr(response, "test_url")
-        assert response.engagement_name == settings.ENGAGEMENT_NAME
-        assert response.scan_type == "Jfrog Xray On Demand Binary Scan"
-        table.append(validate_response(response, scan_type="Jfrog Xray", end_point="impor_scan"))
+            response = import_scan(scan_type="Jfrog Xray On Demand Binary Scan", file_path=f"{path_file}/xray.json")
+            logger.debug(f"Jfrog Xray: {response}")
+            assert hasattr(response, "test_url")
+            assert response.engagement_name == settings.ENGAGEMENT_NAME
+            assert response.scan_type == "Jfrog Xray On Demand Binary Scan"
+            table.append(validate_response(response, scan_type="Jfrog Xray", end_point="impor_scan"))
 
-        # # test integration Checkov
-        response = import_scan(scan_type="Checkov Scan", file_path=f"{path_file}/checkov.json")
-        assert hasattr(response, "test_url")
-        assert response.engagement_name == settings.ENGAGEMENT_NAME
-        assert response.scan_type == "Checkov Scan"
-        table.append(validate_response(response, scan_type="Checkov Scan", end_point="impor_scan"))
+            # # test integration Checkov
+            response = import_scan(scan_type="Checkov Scan", file_path=f"{path_file}/checkov.json")
+            logger.debug(f"Checkov Scan: {response}")
+            assert hasattr(response, "test_url")
+            assert response.engagement_name == settings.ENGAGEMENT_NAME
+            assert response.scan_type == "Checkov Scan"
+            table.append(validate_response(response, scan_type="Checkov Scan", end_point="impor_scan"))
 
-        # # test SonarQuebe
-        response = import_scan(scan_type="SonarQube API Import")
-        assert hasattr(response, "test_url")
-        assert response.engagement_name == settings.ENGAGEMENT_NAME
-        assert response.scan_type == "SonarQube API Import"
-        table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
-        ## test integration Finding close
-        session = SessionManager(token=settings.TOKEN_DEFECT_DOJO, host="http://localhost:8000/")
-        response = Finding.close_finding(session, unique_id_from_tool="1")
-        table.append(validate_response(response, end_point="finding.close"))
-        print(tabulate(table, headers=["End_point", "Description", "Status", "Result"]))
-    else:
-        print("Test integration disable")
+            # # test SonarQuebe
+            response = import_scan(scan_type="SonarQube API Import")
+            logger.debug(f"SonarQube Api Import: {response}")
+            assert hasattr(response, "test_url")
+            assert response.engagement_name == settings.ENGAGEMENT_NAME
+            assert response.scan_type == "SonarQube API Import"
+            table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
+
+            ## test integration Finding close
+            session = SessionManager(token=settings.TOKEN_DEFECT_DOJO, host="http://localhost:8000/")
+            response = Finding.close_finding(session, unique_id_from_tool="1")
+            logger.debug(f"Finding_close: {response}")
+            table.append(validate_response(response, end_point="finding.close"))
+            print(tabulate(table, headers=["End_point", "Description", "Status", "Result"]))
+        else:
+            print("Test integration disable")
+
+    except Exception as e:
+        raise e
