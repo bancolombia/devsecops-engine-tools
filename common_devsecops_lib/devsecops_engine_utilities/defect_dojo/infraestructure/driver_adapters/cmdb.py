@@ -23,6 +23,7 @@ class CmdbRestConsumer:
         try:
             response = self.__session.post(self.__host, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
             if response.status_code != 200:
+                logger.error(response)
                 raise ApiError(response.json()["Message"])
             if response.json() == []:
                 e = f"Engagement: {code_app} not found"
@@ -33,6 +34,7 @@ class CmdbRestConsumer:
             logger.info(data_map)
             cmdb_object = Cmdb.from_dict(data_map)
         except Exception as e:
+            logger.error(e)
             raise ApiError(e)
         return cmdb_object
 
