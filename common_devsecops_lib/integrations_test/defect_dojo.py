@@ -77,7 +77,7 @@ if __name__ == "__main__":
             table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
 
             ## test integration Finding close
-            session = SessionManager(token=settings.TOKEN_DEFECT_DOJO, host="http://localhost:8000/")
+            session = SessionManager(token=settings.TOKEN_DEFECT_DOJO, host=settings.HOST_DEFECT_DOJO)
             response = Finding.close_finding(session, unique_id_from_tool="1")
             logger.debug(f"Finding_close: {response}")
             table.append(validate_response(response, end_point="finding.close"))
