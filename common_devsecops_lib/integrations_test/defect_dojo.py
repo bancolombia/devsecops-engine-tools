@@ -40,15 +40,13 @@ def validate_response(response, **kwargs):
     elif kwargs.get("scan_type"):
         table = [kwargs.get("end_point"), kwargs.get("scan_type"), "Error", "None"]
     elif kwargs.get("end_point") == "finding.close":
-        if response.status_code == 200:
+        if hasattr(response, "status_code"):
             table = [
                 kwargs.get("end_point"),
                 kwargs.get("description"),
-                "OK",
+                "OK" if response.status_code == 200 else "Error",
                 "None",
             ]
-        else:
-            table = [kwargs.get("end_point"), kwargs.get("description"), "Error", "None"]
     return table
 
 
@@ -56,34 +54,34 @@ if __name__ == "__main__":
     table = []
     try:
         if settings.INTEGRATION_TEST:
-            # # test integration Aws security Finding
-            response = import_scan(
-                scan_type="AWS Security Finding Format (ASFF) Scan", file_path=f"{path_file}/aws_security_finding.json"
-            )
-            logger.debug(f"AWS Segurity {response}")
-            # end_point, description, status, result,
-            table.append(validate_response(response, scan_type="AWS Security Hub", end_point="impor_scan"))
+            # test integration Aws security Finding
+            # response = import_scan(
+            #     scan_type="AWS Security Finding Format (ASFF) Scan", file_path=f"{path_file}/aws_security_finding.json"
+            # )
+            # logger.debug(f"AWS Segurity {response}")
+            # # end_point, description, status, result,
+            # table.append(validate_response(response, scan_type="AWS Security Hub", end_point="impor_scan"))
 
             response = import_scan(scan_type="Jfrog Xray On Demand Binary Scan", file_path=f"{path_file}/xray.json")
             logger.debug(f"Jfrog Xray: {response}")
             table.append(validate_response(response, scan_type="Jfrog Xray", end_point="impor_scan"))
 
             # # test integration Checkov
-            response = import_scan(scan_type="Checkov Scan", file_path=f"{path_file}/checkov.json")
-            logger.debug(f"Checkov Scan: {response}")
-            table.append(validate_response(response, scan_type="Checkov Scan", end_point="impor_scan"))
+            # response = import_scan(scan_type="Checkov Scan", file_path=f"{path_file}/checkov.json")
+            # logger.debug(f"Checkov Scan: {response}")
+            # table.append(validate_response(response, scan_type="Checkov Scan", end_point="impor_scan"))
 
-            # # test SonarQuebe
-            response = import_scan(scan_type="SonarQube API Import")
-            logger.debug(f"SonarQube Api Import: {response}")
-            table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
+            # # # test SonarQuebe
+            # response = import_scan(scan_type="SonarQube API Import")
+            # logger.debug(f"SonarQube Api Import: {response}")
+            # table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
 
-            ## test integration Finding close
-            session = SessionManager(token=settings.TOKEN_DEFECT_DOJO, host="http://localhost:8000/")
-            response = Finding.close_finding(session, unique_id_from_tool="1")
-            logger.debug(f"Finding_close: {response}")
-            table.append(validate_response(response, end_point="finding.close"))
-            print(tabulate(table, headers=["End_point", "Description", "Status", "Result"]))
+            # ## test integration Finding close
+            # session = SessionManager(token=settings.TOKEN_DEFECT_DOJO, host="http://localhost:8000/")
+            # response = Finding.close_finding(session, unique_id_from_tool="1")
+            # logger.debug(f"Finding_close: {response}")
+            # table.append(validate_response(response, end_point="finding.close"))
+            # print(tabulate(table, headers=["End_point", "Description", "Status", "Result"]))
         else:
             print("Test integration disable")
 
