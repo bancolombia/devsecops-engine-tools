@@ -24,4 +24,4 @@ class Finding:
             uc = FindingUserCase(rest_finding)
             return uc.execute(request)
         except Exception as e:
-            raise ApiError(e)
+            raise e
