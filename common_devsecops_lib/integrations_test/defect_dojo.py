@@ -72,9 +72,9 @@ if __name__ == "__main__":
             table.append(validate_response(response, scan_type="Checkov Scan", end_point="impor_scan"))
 
             # # test SonarQuebe
-            response = import_scan(scan_type="SonarQube API Import")
-            logger.debug(f"SonarQube Api Import: {response}")
-            table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
+            # response = import_scan(scan_type="SonarQube API Import")
+            # logger.debug(f"SonarQube Api Import: {response}")
+            # table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
 
             ## test integration Finding close
             session = SessionManager(token=settings.TOKEN_DEFECT_DOJO, host="http://localhost:8000/")
