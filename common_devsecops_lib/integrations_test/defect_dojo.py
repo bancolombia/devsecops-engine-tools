@@ -55,33 +55,33 @@ if __name__ == "__main__":
     try:
         if settings.INTEGRATION_TEST:
             # test integration Aws security Finding
-            # response = import_scan(
-            #     scan_type="AWS Security Finding Format (ASFF) Scan", file_path=f"{path_file}/aws_security_finding.json"
-            # )
-            # logger.debug(f"AWS Segurity {response}")
-            # # end_point, description, status, result,
-            # table.append(validate_response(response, scan_type="AWS Security Hub", end_point="impor_scan"))
+            response = import_scan(
+                scan_type="AWS Security Finding Format (ASFF) Scan", file_path=f"{path_file}/aws_security_finding.json"
+            )
+            logger.debug(f"AWS Segurity {response}")
+            # end_point, description, status, result,
+            table.append(validate_response(response, scan_type="AWS Security Hub", end_point="impor_scan"))
 
             response = import_scan(scan_type="Jfrog Xray On Demand Binary Scan", file_path=f"{path_file}/xray.json")
             logger.debug(f"Jfrog Xray: {response}")
             table.append(validate_response(response, scan_type="Jfrog Xray", end_point="impor_scan"))
 
-            # # test integration Checkov
-            # response = import_scan(scan_type="Checkov Scan", file_path=f"{path_file}/checkov.json")
-            # logger.debug(f"Checkov Scan: {response}")
-            # table.append(validate_response(response, scan_type="Checkov Scan", end_point="impor_scan"))
+            # test integration Checkov
+            response = import_scan(scan_type="Checkov Scan", file_path=f"{path_file}/checkov.json")
+            logger.debug(f"Checkov Scan: {response}")
+            table.append(validate_response(response, scan_type="Checkov Scan", end_point="impor_scan"))
 
-            # # # test SonarQuebe
-            # response = import_scan(scan_type="SonarQube API Import")
-            # logger.debug(f"SonarQube Api Import: {response}")
-            # table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
+            # # test SonarQuebe
+            response = import_scan(scan_type="SonarQube API Import")
+            logger.debug(f"SonarQube Api Import: {response}")
+            table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
 
-            # ## test integration Finding close
-            # session = SessionManager(token=settings.TOKEN_DEFECT_DOJO, host="http://localhost:8000/")
-            # response = Finding.close_finding(session, unique_id_from_tool="1")
-            # logger.debug(f"Finding_close: {response}")
-            # table.append(validate_response(response, end_point="finding.close"))
-            # print(tabulate(table, headers=["End_point", "Description", "Status", "Result"]))
+            ## test integration Finding close
+            session = SessionManager(token=settings.TOKEN_DEFECT_DOJO, host="http://localhost:8000/")
+            response = Finding.close_finding(session, unique_id_from_tool="1")
+            logger.debug(f"Finding_close: {response}")
+            table.append(validate_response(response, end_point="finding.close"))
+            print(tabulate(table, headers=["End_point", "Description", "Status", "Result"]))
         else:
             print("Test integration disable")
 
