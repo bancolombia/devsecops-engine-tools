@@ -111,6 +111,7 @@ class ImportScanUserCase:
                 with open(request.file, "rb") as file:
                     logger.info("read file succesfull !!!")
                     files = [("file", ("name_file", file, "application"))]
+                    logger.warning(request)
                     response = self.__rest_import_scan.import_scan(request, files)
                     response.test_url = f"{request.host_defect_dojo}/test/{str(response.test_id)}"
                     logger.info(f"End process Succesfull!!!: {response}")

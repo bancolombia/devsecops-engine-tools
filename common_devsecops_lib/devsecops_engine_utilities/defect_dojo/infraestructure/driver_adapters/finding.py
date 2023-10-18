@@ -26,7 +26,6 @@ class FindingRestConsumer:
             findings = FindingList.from_dict(response.json())
             logger.debug(findings)
         except Exception as e:
-            logger.error(response.json())
             raise ApiError(e)
         return findings
 
