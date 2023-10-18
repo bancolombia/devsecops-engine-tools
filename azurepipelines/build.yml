@@ -21,7 +21,7 @@ steps:
       sonar.python.coverage.reportPaths=$(System.DefaultWorkingDirectory)/$(componentName)/coverage.xml
       sonar.language=py
       sonar.exclusion=**/applications/**,**/integrations_test/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**,**/azure-pipelines.yml/**
-      sonar.coverage.exclusions=**/applications/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
+      sonar.coverage.exclusions=**/applications/**,**/integrations_test/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
 - script:  |
     python3 -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python3 -m pip install setuptools virtualenv wheel -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
