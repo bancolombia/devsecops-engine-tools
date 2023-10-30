@@ -22,5 +22,11 @@ class FindingUserCase:
         tz = pytz.timezone("America/Bogota")
         date = datetime.datetime.now(tz=tz).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         logger.debug(f"date: {date}")
-        request_close = {"is_mitigated": "True", "mitigated": date}
-        return self.__rest_finding.close(request_close, findings.results[0].id)
+        response = None
+        for finding in findings.results:
+            request_close = {"is_mitigated": "True", "mitigated": date}
+            try:
+                response = self.__rest_finding.close(request_close, finding.id)
+            except Exception as e:
+                raise ApiError(e)
+        return response
