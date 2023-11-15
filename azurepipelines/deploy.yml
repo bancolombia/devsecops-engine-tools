@@ -1,10 +1,14 @@
 steps:
 
+
 - task: UsePythonVersion@0
   displayName: 'Use Python'
   inputs:
     versionSpec: '>= 3.6'
   enabled: false
+
+- task: versioner@1
+  displayName: 'Version v'
 
 - script: |
     python3 -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
@@ -12,25 +16,35 @@ steps:
     python3 -m virtualenv _venv
     source _venv/bin/activate
     python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
-    echo "[distutils]" >> .pypirc
-    echo "index-servers = local" >> .pypirc
-    echo "[local]" >> .pypirc
-    if [ "$(Build.SourceBranch)" == "refs/heads/trunk" ]; then
-      echo "repository:$(url_repository_artifactory_pdn)" >> .pypirc
-      echo "username: $(Artifactory.user)" >> .pypirc
-      echo "password: $(Artifactory.Password)" >> .pypirc
-      cp .pypirc $HOME
-      python3 setup.py bdist_wheel upload -r local
-      python3 setup.py sdist upload -r local
-    else
-      python3 setup.py bdist_wheel
-      FILE_PATH=$(find dist/ -name "*.whl" -type f -print -quit)
-      if [[ -z "$FILE_PATH" ]]; then
-          echo "No se encontró ningún archivo WHL en la carpeta dist/"
-      else
-          ABSOLUTE_PATH=$(readlink -f "$FILE_PATH")
-          curl -u $(Artifactory.user):$(Artifactory.Password) -T $ABSOLUTE_PATH $(url_repository_artifactory_qa)
-      fi
-    fi
+    python3 setup.py bdist_wheel
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
-  displayName: 'Artifact creation and upload'
+  displayName: 'Artifact creation'
+
+- task: ArtifactoryGenericUpload@2
+  displayName: "Artifactory Generic Upload Qa"
+  inputs:
+    artifactoryService: Artifactory
+    fileSpec: |
+      {
+        "files": [
+          {
+            "pattern": "$(System.DefaultWorkingDirectory)/$(componentName)/*.whl",
+            "target": "$(url_repository_artifactory_qa)/"
+          }
+        ]
+      }
+
+- task: ArtifactoryGenericUpload@2
+  displayName: "Artifactory Generic Upload Pdn"
+  inputs:
+    artifactoryService: Artifactory
+    fileSpec: |
+      {
+        "files": [
+          {
+            "pattern": "$(System.DefaultWorkingDirectory)/$(componentName)/*.whl",
+            "target": "common-pypi/devsecops_engine_utilities/$(tag.version)/"
+          }
+        ]
+      }
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
