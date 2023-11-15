@@ -28,7 +28,7 @@ steps:
       {
         "files": [
           {
-            "pattern": "$(System.DefaultWorkingDirectory)/$(componentName)/devsecops_engine_utilities*.whl",
+            "pattern": "$(System.DefaultWorkingDirectory)/$(componentName)/dist/*.whl",
             "target": "$(url_repository_artifactory_qa)/"
           }
         ]
@@ -42,7 +42,7 @@ steps:
       {
         "files": [
           {
-            "pattern": "$(System.DefaultWorkingDirectory)/$(componentName)/devsecops_engine_utilities*.whl",
+            "pattern": "$(System.DefaultWorkingDirectory)/$(componentName)/dist/*.whl",
             "target": "common-pypi/devsecops_engine_utilities/$(version)/"
           }
         ]
