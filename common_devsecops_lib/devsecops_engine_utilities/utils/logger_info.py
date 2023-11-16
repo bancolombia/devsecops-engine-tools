@@ -41,18 +41,17 @@ class MyLogger(metaclass=SingletonType):
 
     _logger = None
 
-    def __init__(self, log_file=False, debug=True):
-        self._log_file = log_file
+    def __init__(self, *args, **kwargs):
         self._logger = logging.getLogger("crumbs")
-        if debug:
+        if kwargs["debug"]:
             self._logger.setLevel(logging.DEBUG)
         else:
-            self._logger.setLevel(logging.WARNING)
+            self._logger.setLevel(logging.CRITICAL)
         formatter = logging.Formatter(
             "%(asctime)s [%(levelname)s | %(filename)s | %(funcName)s | %(lineno)d] > %(message)s"
         )
 
-        if log_file:
+        if kwargs["log_file"]:
             # log with file log
             now = datetime.datetime.now()
             dirname = "./log"

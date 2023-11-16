@@ -1,12 +1,12 @@
 import json
+from devsecops_engine_utilities.utils.api_error import ApiError
 from urllib.parse import urlsplit, unquote
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities.utils.validation_error import ValidationError
-from devsecops_engine_utilities.settings import DEBUG
+from devsecops_engine_utilities.settings import SETTING_LOGGER
 
-logger = MyLogger.__call__(debug=DEBUG).get_logger()
+logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 
 
 class AzureDevopsApi:
@@ -46,7 +46,7 @@ class AzureDevopsApi:
 
             return connection
         except Exception as e:
-            raise Exception("Error al obtener la conexión de Azure DevOps: " + str(e))
+            raise ApiError("Error getting Azure DevOps connection: " + str(e))
 
     def get_remote_json_config(self, connection: Connection):
         try:
@@ -61,4 +61,4 @@ class AzureDevopsApi:
         except Exception as e:
             # Arrojar una excepción personalizada
             logger.error(str(e))
-            raise Exception("Error al obtener el archivo de configuración remoto: " + str(e))
+            raise ApiError("Error getting remote configuration file: " + str(e))
