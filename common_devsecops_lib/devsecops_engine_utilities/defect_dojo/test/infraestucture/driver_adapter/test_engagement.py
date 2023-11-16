@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from devsecops_engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
-from devsecops_engine_utilities.utils.validation_error import ValidationError
+from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.defect_dojo.test.files.get_response import (
     get_response,
     session_manager_post,
@@ -36,12 +36,12 @@ def test_get_engagement_info_failure():
         ImportScanRequest(),
         session_mock,
     )
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         rest_engagement.get_engagements("NU0212001_test_engagement_name")
 
 
 def test_post_engagement_info_sucessfull():
-    session_mock = session_manager_post(status_code=201, response_json_file="engagement.json")
+    session_mock = session_manager_post(status_code=201, mock_response="engagement.json")
     rest_engagement = EngagementRestConsumer(
         ImportScanRequest(),
         session_mock,
@@ -51,10 +51,10 @@ def test_post_engagement_info_sucessfull():
 
 
 def test_post_engagement_info_failure():
-    session_mock = session_manager_post(status_code=500, response_json_file="engagement.json")
+    session_mock = session_manager_post(status_code=500, mock_response="engagement.json")
     rest_engagement = EngagementRestConsumer(
         ImportScanRequest(),
         session_mock,
     )
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         rest_engagement.get_engagements("NU0212001_test_engagement_name")

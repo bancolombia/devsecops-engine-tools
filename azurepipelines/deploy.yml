@@ -12,25 +12,39 @@ steps:
     python3 -m virtualenv _venv
     source _venv/bin/activate
     python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
-    echo "[distutils]" >> .pypirc
-    echo "index-servers = local" >> .pypirc
-    echo "[local]" >> .pypirc
-    if [ "$(Build.SourceBranch)" == "refs/heads/trunk" ]; then
-      echo "repository:$(url_repository_artifactory_pdn)" >> .pypirc
-      echo "username: $(Artifactory.user)" >> .pypirc
-      echo "password: $(Artifactory.Password)" >> .pypirc
-      cp .pypirc $HOME
-      python3 setup.py bdist_wheel upload -r local
-      python3 setup.py sdist upload -r local
-    else
-      python3 setup.py bdist_wheel
-      FILE_PATH=$(find dist/ -name "*.whl" -type f -print -quit)
-      if [[ -z "$FILE_PATH" ]]; then
-          echo "No se encontró ningún archivo WHL en la carpeta dist/"
-      else
-          ABSOLUTE_PATH=$(readlink -f "$FILE_PATH")
-          curl -u $(Artifactory.user):$(Artifactory.Password) -T $ABSOLUTE_PATH $(url_repository_artifactory_qa)
-      fi
-    fi
+    python3 setup.py bdist_wheel
+    file=$(find dist/ -name "*.whl" -type f -print -quit)
+    version=$(echo "$file" | awk -F'-' '{print $2}' | sed 's/^v//')
+    echo "Versión: $version"
+    echo "##vso[task.setvariable variable=version]$version"
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
-  displayName: 'Artifact creation and upload'
+  displayName: 'Artifact creation'
+
+- task: ArtifactoryGenericUpload@2
+  displayName: "Artifactory Generic Upload QA"
+  inputs:
+    artifactoryService: Artifactory
+    fileSpec: |
+      {
+        "files": [
+          {
+            "pattern": "$(System.DefaultWorkingDirectory)/$(componentName)/dist/*.whl",
+            "target": "$(url_repository_artifactory_qa)/"
+          }
+        ]
+      }
+
+- task: ArtifactoryGenericUpload@2
+  displayName: "Artifactory Generic Upload PDN"
+  inputs:
+    artifactoryService: Artifactory
+    fileSpec: |
+      {
+        "files": [
+          {
+            "pattern": "$(System.DefaultWorkingDirectory)/$(componentName)/dist/*.whl",
+            "target": "common-pypi/devsecops_engine_utilities/$(version)/"
+          }
+        ]
+      }
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))

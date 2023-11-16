@@ -1,4 +1,5 @@
 import pytest
+from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_PATH
 from unittest.mock import MagicMock
 from devsecops_engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
@@ -9,7 +10,6 @@ from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.cmdb
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import (
     ImportScanRequest,
 )
-from devsecops_engine_utilities.utils.validation_error import ValidationError
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import AzureDevopsApi
 from devsecops_engine_utilities.defect_dojo.domain.user_case.cmdb import CmdbUserCase
 
@@ -103,5 +103,5 @@ def test_get_code_app(engagement_name):
     uc = CmdbUserCase(
         rest_consumer_cmdb=None, utils_azure=None, expression=r"((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS)\d+)_"
     )
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApiError):
         uc.get_code_app(engagement_name)
