@@ -30,22 +30,6 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_poin
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.exclusions import exclusion
 
 
-def get_inputs_from_cli(args):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--azure_remote_config_repo", type=str, required=True, help="")
-    parser.add_argument("--azure_remote_config_path", type=str, required=True, help="")
-    parser.add_argument("--tool", type=str, required=True, help="")
-    parser.add_argument("--environment", type=str, required=True, help="")
-
-    args = parser.parse_args()
-    return (
-        args.azure_remote_config_repo,
-        args.azure_remote_config_path,
-        args.tool,
-        args.environment,
-    )
-
-
 def get_inputs_from_config_file():
     config = configparser.ConfigParser()
     config.read("devsecops_engine.ini", encoding="utf-8")
