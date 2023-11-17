@@ -1,21 +1,23 @@
 import sys
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.entry_point_tool import (
-    get_inputs_from_cli,
     get_inputs_from_config_file,
     init_engine_sast_rm,
 )
-from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import AzureMessageResultPipeline
+from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
+    AzureMessageResultPipeline,
+)
 
 
-def runner_engine_iac():
+def runner_engine_iac(remote_config_repo, remote_config_path, tool, environment):
     try:
         (
             remote_config_repo,
             remote_config_path,
-            tool,
             environment,
         ) = (
-            get_inputs_from_cli(sys.argv[1:]) or get_inputs_from_config_file()
+            remote_config_repo,
+            remote_config_path,
+            environment or get_inputs_from_config_file(),
         )
         return init_engine_sast_rm(
             remote_config_repo=remote_config_repo,
