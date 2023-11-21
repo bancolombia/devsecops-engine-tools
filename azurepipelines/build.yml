@@ -12,8 +12,8 @@ steps:
     SonarQube: SonarQube
     scannerMode: CLI
     configMode: manual
-    cliProjectKey: '$(Build.Repository.Name)_$(componentName)'
-    cliProjectName: '$(Build.Repository.Name)_$(componentName)'
+    cliProjectKey: '$(Build.DefinitionName)_$(componentName)'
+    cliProjectName: '$(Build.DefinitionName)_$(componentName)'
     cliProjectVersion: '$(Build.BuildNumber)'
     extraProperties: |
       sonar.verbose=true
