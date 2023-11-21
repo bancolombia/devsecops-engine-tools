@@ -1,0 +1,26 @@
+name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
+
+variables:
+  - name: system.debug
+    value: 'false'
+  - name: componentName
+    value: 'devsecops_engine_tools'
+
+
+trigger:
+  branches:
+   include:
+   - trunk
+   - feature/*
+
+resources:
+- repo: self
+  clean: true
+  fetchDepth: 1
+
+queue:
+  name: Release-cloud
+
+steps:
+- template: azurepipelines/build.yml
+- template: azurepipelines/deploy.yml
