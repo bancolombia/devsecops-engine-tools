@@ -48,7 +48,7 @@ steps:
     fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Integration Test'
-  condition: contains($(componentName), 'devsecops_engine_utilities')
+  condition: contains(variables['componentName'], 'common_devsecops_lib)
   env:
     PERSONAL_ACCESS_TOKEN: $(System.AccessToken)
 
