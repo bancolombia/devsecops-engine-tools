@@ -41,6 +41,7 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_poin
 
 ENGINESAST_ENGINEIAC = "enginesast.engineiac"
 
+
 def get_inputs_from_config_file():
     config = configparser.ConfigParser()
     config.read("devsecops_engine.ini", encoding="utf-8")
@@ -104,7 +105,7 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
         remote_config_path=data_config.exclusions_path,
     )
     data_config.scope_pipeline = ReleaseVariables.Release_Definitionname.value()
-    
+
     if data_config.exclusions.get("All") is not None:
         data_config.exclusions_all = data_config.exclusions.get("All").get(tool)
     if data_config.exclusions.get(data_config.scope_pipeline) is not None:
