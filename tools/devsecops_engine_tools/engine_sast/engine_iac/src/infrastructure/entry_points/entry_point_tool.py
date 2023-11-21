@@ -5,7 +5,9 @@ import queue
 import json
 import os
 import re
-from devsecops_engine_tools.engine_sast.engine_iac.src.domain.usecases.iac_scan import IacScan
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.usecases.iac_scan import (
+    IacScan,
+)
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
     CheckovConfig,
 )
@@ -18,25 +20,38 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
 from devsecops_engine_utilities.utils.printers import (
     Printers,
 )
-from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import ReleaseVariables
+from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
+    ReleaseVariables,
+)
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
     AzureDevopsIntegration,
 )
-from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.ResultScanObject import ResultScanObject
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.ResultScanObject import (
+    ResultScanObject,
+)
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovDeserializeConfig import (
     CheckovDeserializeConfig,
 )
-from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.config import remote_config
-from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.exclusions import exclusion
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.config import (
+    remote_config,
+)
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.exclusions import (
+    exclusion,
+)
 
+ENGINESAST_ENGINEIAC = "enginesast.engineiac"
 
 def get_inputs_from_config_file():
     config = configparser.ConfigParser()
     config.read("devsecops_engine.ini", encoding="utf-8")
-    azure_remote_config_repo = config.get("enginesast.engineiac", "azure_remote_config_repo", fallback=None)
-    azure_remote_config_path = config.get("enginesast.engineiac", "azure_remote_config_path", fallback=None)
-    tool = config.get("enginesast.engineiac", "tool", fallback=None)
-    environment = config.get("enginesast.engineiac", "environment", fallback=None)
+    azure_remote_config_repo = config.get(
+        ENGINESAST_ENGINEIAC, "azure_remote_config_repo", fallback=None
+    )
+    azure_remote_config_path = config.get(
+        ENGINESAST_ENGINEIAC, "azure_remote_config_path", fallback=None
+    )
+    tool = config.get(ENGINESAST_ENGINEIAC, "tool", fallback=None)
+    environment = config.get(ENGINESAST_ENGINEIAC, "environment", fallback=None)
     return (
         azure_remote_config_repo,
         azure_remote_config_path,
@@ -45,21 +60,31 @@ def get_inputs_from_config_file():
     )
 
 
-def async_scan(queue, iacScan: IacScan):
+def async_scan(queue, iac_scan: IacScan):
     result = []
-    output = iacScan.process()
+    output = iac_scan.process()
     result.append(json.loads(output))
     queue.put(result)
 
 
 def search_folders(search_pattern, ignore_pattern):
     current_directory = os.getcwd()
-    patron = "(?i)(?!.*" + "|".join(ignore_pattern) + ").*?(" + "|".join(search_pattern) + ").*"
+    patron = (
+        "(?i)(?!.*"
+        + "|".join(ignore_pattern)
+        + ").*?("
+        + "|".join(search_pattern)
+        + ").*"
+    )
     folders = [
-        carpeta for carpeta in os.listdir(current_directory) if os.path.isdir(os.path.join(current_directory, carpeta))
+        carpeta
+        for carpeta in os.listdir(current_directory)
+        if os.path.isdir(os.path.join(current_directory, carpeta))
     ]
     matching_folders = [
-        os.path.normpath(os.path.join(current_directory, carpeta)) for carpeta in folders if re.match(patron, carpeta)
+        os.path.normpath(os.path.join(current_directory, carpeta))
+        for carpeta in folders
+        if re.match(patron, carpeta)
     ]
     return matching_folders
 
@@ -71,18 +96,24 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     data_file_tool = azure_devops_integration.get_remote_json_config(
         remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
     )
-    # data_file_tool = json.loads(remote_config)
-    data_config = CheckovDeserializeConfig(json_data=data_file_tool, tool=tool, environment=environment)
+    data_config = CheckovDeserializeConfig(
+        json_data=data_file_tool, tool=tool, environment=environment
+    )
     data_config.exclusions = azure_devops_integration.get_remote_json_config(
-        remote_config_repo=remote_config_repo, remote_config_path=data_config.exclusions_path
+        remote_config_repo=remote_config_repo,
+        remote_config_path=data_config.exclusions_path,
     )
     data_config.scope_pipeline = ReleaseVariables.Release_Definitionname.value()
-    # data_config.exclusions = json.loads(exclusion)
+    
     if data_config.exclusions.get("All") is not None:
         data_config.exclusions_all = data_config.exclusions.get("All").get(tool)
     if data_config.exclusions.get(data_config.scope_pipeline) is not None:
-        data_config.exclusions_scope = data_config.exclusions.get(data_config.scope_pipeline).get(tool)
-    folders_to_scan = search_folders(data_config.search_pattern, data_config.ignore_search_pattern)
+        data_config.exclusions_scope = data_config.exclusions.get(
+            data_config.scope_pipeline
+        ).get(tool)
+    folders_to_scan = search_folders(
+        data_config.search_pattern, data_config.ignore_search_pattern
+    )
     output_queue = queue.Queue()
     # Crea una lista para almacenar los hilos
     threads = []
