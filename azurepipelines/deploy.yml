@@ -17,7 +17,7 @@ steps:
     version=$(echo "$file" | awk -F'-' '{print $2}' | sed 's/^v//')
     echo "Versión: $version"
     echo "##vso[task.setvariable variable=version]$version"
-  workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
+  workingDirectory: $(System.DefaultWorkingDirectory)/$(pathComponentName)
   displayName: 'Artifact creation'
 
 - task: ArtifactoryGenericUpload@2
@@ -28,7 +28,7 @@ steps:
       {
         "files": [
           {
-            "pattern": "$(System.DefaultWorkingDirectory)/$(componentName)/dist/*.whl",
+            "pattern": "$(System.DefaultWorkingDirectory)/$(pathComponentName)/dist/*.whl",
             "target": "$(url_repository_artifactory_qa)/"
           }
         ]
@@ -42,8 +42,8 @@ steps:
       {
         "files": [
           {
-            "pattern": "$(System.DefaultWorkingDirectory)/$(componentName)/dist/*.whl",
-            "target": "common-pypi/devsecops_engine_utilities/$(version)/"
+            "pattern": "$(System.DefaultWorkingDirectory)/$(pathComponentName)/dist/*.whl",
+            "target": "common-pypi/$(packageName)/$(version)/"
           }
         ]
       }
