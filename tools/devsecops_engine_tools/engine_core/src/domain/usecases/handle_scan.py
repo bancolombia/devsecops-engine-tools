@@ -9,7 +9,7 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.check
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.send_defect_dojo import (
     send_defect_dojo,
 )
-from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.checkov.checkov_deserealizator import (
+from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.checkov.CheckovDeserealizator import (
     CheckovDeserealizator,
 )
 
