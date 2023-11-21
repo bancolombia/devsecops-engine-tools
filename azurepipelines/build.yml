@@ -12,8 +12,8 @@ steps:
     SonarQube: SonarQube
     scannerMode: CLI
     configMode: manual
-    cliProjectKey: '$(repositoryName)'
-    cliProjectName: '$(repositoryName)'
+    cliProjectKey: '$(Build.Repository.Name)_$(componentName)'
+    cliProjectName: '$(Build.Repository.Name)_$(componentName)'
     cliProjectVersion: '$(Build.BuildNumber)'
     extraProperties: |
       sonar.verbose=true
@@ -48,6 +48,7 @@ steps:
     fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Integration Test'
+  condition: contains($(componentName), 'devsecops_engine_utilities')
   env:
     PERSONAL_ACCESS_TOKEN: $(System.AccessToken)
 
