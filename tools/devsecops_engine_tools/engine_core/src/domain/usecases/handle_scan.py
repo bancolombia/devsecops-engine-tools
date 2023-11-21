@@ -20,8 +20,7 @@ class HandleScan:
     dict_args: dict[str, any]
 
     def process(self):
-        match self.dict_args["tool"]:
-            case "engine_iac":
+            if "engine_iac" in self.dict_args["tool"]:
                 result_list_engine_iac = runner_engine_iac(
                     self.dict_args["azure_remote_config_repo"],
                     self.dict_args["azure_remote_config_path"],
@@ -47,11 +46,9 @@ class HandleScan:
                     scope_pipeline=scope_pipeline,
                 )
                 return checkov_deserealizator, input_core
-            case "engine_dast":
+            elif "engine_dast" in self.dict_args["tool"]:
                 print("not yet enabled")
-            case "engine_secret":
+            elif "engine_secret" in self.dict_args["tool"]:
                 print("not yet enabled")
-            case "engine_dependencies":
+            elif "engine_dependencies" in self.dict_args["tool"]:
                 print("not yet enabled")
-            case _:
-                print("default")
