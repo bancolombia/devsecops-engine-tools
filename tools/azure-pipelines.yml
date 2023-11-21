@@ -22,5 +22,5 @@ queue:
   name: Release-cloud
 
 steps:
-- template: azurepipelines/build.yml
-- template: azurepipelines/deploy.yml
+- template: ../azurepipelines/build.yml
+- template: ../azurepipelines/deploy.yml
