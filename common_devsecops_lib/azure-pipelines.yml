@@ -2,27 +2,29 @@ name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
 
 variables:
   - name: system.debug
-    value: 'false'
+    value: "false"
   - name: pathComponentName
-    value: 'common_devsecops_lib'
+    value: "common_devsecops_lib"
   - name: packageName
-    value: 'devsecops_engine_utilities'
-
+    value: "devsecops_engine_utilities"
 
 trigger:
   branches:
-   include:
-   - trunk
-   - feature/*
+    include:
+      - trunk
+      - feature/*
+  paths:
+    include:
+      - "common_devsecops_lib/*"
 
 resources:
-- repo: self
-  clean: true
-  fetchDepth: 1
+  - repo: self
+    clean: true
+    fetchDepth: 1
 
 queue:
   name: Release-cloud
 
 steps:
-- template: ../azurepipelines/build.yml
-- template: ../azurepipelines/deploy.yml
+  - template: ../azurepipelines/build.yml
+  - template: ../azurepipelines/deploy.yml
