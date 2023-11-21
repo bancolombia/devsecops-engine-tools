@@ -3,7 +3,9 @@ name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
 variables:
   - name: system.debug
     value: 'false'
-  - name: componentName
+  - name: pathComponentName
+    value: 'tools'
+  - name: packageName
     value: 'devsecops_engine_tools'
 
 
