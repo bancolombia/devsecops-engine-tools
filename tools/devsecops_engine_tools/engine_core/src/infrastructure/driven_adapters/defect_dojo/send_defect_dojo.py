@@ -8,7 +8,9 @@ from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables impo
     BuildVariables,
     ReleaseVariables,
 )
-from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import AzureDevopsApi
+from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import (
+    AzureDevopsApi,
+)
 
 
 def send_defect_dojo(scan_type, path_file, dict_args):
@@ -23,8 +25,8 @@ def send_defect_dojo(scan_type, path_file, dict_args):
         branch_name = BuildVariables.Build_SourceBranchName.value()
         base_compact_remote_config_url = f'https://{SystemVariables.System_TeamFoundationCollectionUri.value().rstrip("/").split("/")[-1]}.visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/{dict_args["azure_remote_config_repo"]}?path=/'
         utils_azure = AzureDevopsApi(
-                personal_access_token=SystemVariables.System_AccessToken.value(),
-                compact_remote_config_url=f'{base_compact_remote_config_url}{dict_args["defect_dojo_mapping_path"]}',
+            personal_access_token=SystemVariables.System_AccessToken.value(),
+            compact_remote_config_url=f'{base_compact_remote_config_url}{dict_args["defect_dojo_mapping_path"]}',
         )
         connection = utils_azure.get_azure_connection()
         config_tool = utils_azure.get_remote_json_config(connection=connection)

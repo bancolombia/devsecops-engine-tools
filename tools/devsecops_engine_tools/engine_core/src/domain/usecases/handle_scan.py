@@ -9,11 +9,11 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.check
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.send_defect_dojo import (
     send_defect_dojo,
 )
-from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.checkov.Checkov_deserealizator import (
+from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.checkov.checkov_deserealizator import (
     CheckovDeserealizator,
 )
 
-
+MESSAGE_ENABLED = "not yet enabled"
 
 @dataclass
 class HandleScan:
@@ -47,8 +47,8 @@ class HandleScan:
                 )
                 return checkov_deserealizator, input_core
             elif "engine_dast" in self.dict_args["tool"]:
-                print("not yet enabled")
+                print(MESSAGE_ENABLED)
             elif "engine_secret" in self.dict_args["tool"]:
-                print("not yet enabled")
+                print(MESSAGE_ENABLED)
             elif "engine_dependencies" in self.dict_args["tool"]:
-                print("not yet enabled")
+                print(MESSAGE_ENABLED)

@@ -12,10 +12,10 @@ from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables impo
 class AzureDevopsIntegration(RemoteConfigGateway):
     def get_azure_connection(self):
         try:
-            system_AccessToken = SystemVariables.System_AccessToken.value()
-            system_TeamFoundationCollectionUri = SystemVariables.System_TeamFoundationCollectionUri.value()
-            credentials = BasicTokenAuthentication({"access_token": system_AccessToken})
-            self.connection = Connection(base_url=system_TeamFoundationCollectionUri, creds=credentials)
+            system_access_token = SystemVariables.System_AccessToken.value()
+            system_team_foundation_collectionuri = SystemVariables.System_TeamFoundationCollectionUri.value()
+            credentials = BasicTokenAuthentication({"access_token": system_access_token})
+            self.connection = Connection(base_url=system_team_foundation_collectionuri, creds=credentials)
             return self.connection
         except Exception as e:
             raise Exception("Error al obtener la conexión de Azure DevOps: " + str(e))
@@ -23,9 +23,9 @@ class AzureDevopsIntegration(RemoteConfigGateway):
     def get_remote_json_config(self, remote_config_repo, remote_config_path):
         try:
             git_client = self.connection.clients.get_git_client()
-            system_TeamProjectId = SystemVariables.System_TeamProjectId.value()
+            system_team_projectid = SystemVariables.System_TeamProjectId.value()
             file_content = git_client.get_item_text(
-                repository_id=remote_config_repo, path=remote_config_path, project=system_TeamProjectId
+                repository_id=remote_config_repo, path=remote_config_path, project=system_team_projectid
             )
             data = json.loads(b"".join(file_content).decode("utf-8"))
             return data
