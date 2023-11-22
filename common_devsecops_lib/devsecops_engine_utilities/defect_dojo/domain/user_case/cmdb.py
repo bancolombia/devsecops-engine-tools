@@ -18,16 +18,20 @@ class CmdbUserCase:
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
         # Connection config map
         connection = self.__utils_azure.get_azure_connection()
-        product_type_name_map = self.__utils_azure.get_remote_json_config(connection=connection)
+        remote_config = self.__utils_azure.get_remote_json_config(connection=connection)
 
         # regular exprecion
         request.code_app = self.get_code_app(request.engagement_name)
 
         # connect cmdb
         product_data = self.__rc_cmdb.get_product_info(request.code_app)
-        request.product_type_name = product_type_name_map.get(
-            product_data.product_type_name, product_data.product_type_name
-        )
+        search_type_product = next((key for key, list in remote_config.get("products_sync_with_other_productype", {}).items() if request.code_app in list), None)
+        if search_type_product:
+            request.product_type_name = search_type_product
+        else:
+            request.product_type_name = remote_config["types_product"].get(
+                product_data.product_type_name, product_data.product_type_name
+            )
         request.product_name = product_data.product_name
         request.tags = product_data.tag_product
         request.product_description = product_data.product_description
