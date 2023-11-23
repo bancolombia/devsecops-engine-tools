@@ -83,6 +83,7 @@ if __name__ == "__main__":
             table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
 
             ## test integration Finding close
+            Printers.print_title("Finding Close")
             session = SessionManager(token=settings.TOKEN_DEFECT_DOJO, host=settings.HOST_DEFECT_DOJO)
             response = Finding.close_finding(session, unique_id_from_tool="1")
             logger.debug(f"Finding_close: {response}")
