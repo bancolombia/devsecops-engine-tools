@@ -73,7 +73,7 @@ class ImportScanUserCase:
             # Product_type name is unique and product_name is unique
             product_id = products.results[0].id
             if products.results[0].prod_type != product_type_id:
-                raise ValueError(
+                logger.warning(
                     f"The product: {product_id} does not belong to the product_type con id: {product_type_id}"
                 )
             logger.info(
