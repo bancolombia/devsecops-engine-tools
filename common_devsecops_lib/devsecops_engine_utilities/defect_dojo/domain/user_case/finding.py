@@ -15,7 +15,6 @@ class FindingUserCase:
 
     def execute(self, request):
         findings = self.__rest_finding.get(request)
-        logger.debug(findings)
         if findings.results == []:
             logger.error("Finding con Id {request.get('unique_id_from_tool')} not found")
             raise ApiError(f"Finding con Id {request.get('unique_id_from_tool')} not found")

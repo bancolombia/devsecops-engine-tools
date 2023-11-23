@@ -24,7 +24,6 @@ class FindingRestConsumer:
             if response.status_code != 200:
                 raise ApiError(response.json())
             findings = FindingList.from_dict(response.json())
-            logger.debug(findings)
         except Exception as e:
             raise ApiError(e)
         return findings
