@@ -89,10 +89,10 @@ if __name__ == "__main__":
             table.append(validate_response(response, end_point="finding.close"))
             print(tabulate(table, headers=["End_point", "Description", "Status", "Result"]))
             if any(item[2] == "Error" for item in table):
-                print("Warning! Errors were found in the integration")
-                print('"##vso[task.complete result=SucceededWithIssues;]DONE"')
+                logger.warning("Warning! Errors were found in the integration")
+                logger.debug('"##vso[task.complete result=SucceededWithIssues;]DONE"')
         else:
-            print("Test integration disable")
+            logger.warning("Test integration disable")
 
     except Exception as e:
         logger.error(e)
