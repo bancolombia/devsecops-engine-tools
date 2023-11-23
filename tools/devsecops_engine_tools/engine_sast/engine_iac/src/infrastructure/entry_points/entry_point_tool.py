@@ -97,7 +97,7 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     data_file_tool = azure_devops_integration.get_remote_json_config(
         remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
     )
-    #data_file_tool = json.loads(remote_config) -> Esto es para pruebas locales
+    # data_file_tool = json.loads(remote_config) -> Esto es para pruebas locales
     data_config = CheckovDeserializeConfig(
         json_data=data_file_tool, tool=tool, environment=environment
     )

@@ -11,7 +11,7 @@ from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables impo
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import (
     AzureDevopsApi,
 )
-from tools.devsecops_engine_tools.engine_core.src.infrastructure.helpers.file_generator_tool import (
+from devsecops_engine_tools.engine_core.src.infrastructure.helpers.file_generator_tool import (
     generate_file_from_tool,
 )
 
@@ -68,7 +68,11 @@ def send_defect_dojo(scan_type, result_list, dict_args):
             )
 
             response = DefectDojo.send_import_scan(request)
-            print("Report sent to defect dojo: ", response.test_url)
+            if hasattr(response, "test_url"):
+                print("Report sent to defect dojo: ", response.test_url)
+            else:
+                print(response)
+                print('"##vso[task.complete result=SucceededWithIssues;]DONE"')
     except Exception as ex:
         print("Handling run-time error send_defect_dojo info:")
         print(ex)
