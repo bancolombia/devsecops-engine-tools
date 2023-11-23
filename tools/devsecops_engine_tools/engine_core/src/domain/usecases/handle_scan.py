@@ -3,9 +3,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.InputCore import InputC
 from devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_scan import (
     runner_engine_iac,
 )
-from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.checkov.checkov_json_integrator import (
-    checks_integration,
-)
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.send_defect_dojo import (
     send_defect_dojo,
 )
@@ -29,9 +26,8 @@ class HandleScan:
                 "CHECKOV",
                 self.dict_args["environment"],
             )
-            file_path = checks_integration(result_list_engine_iac.results_scan_list)
             if self.dict_args["send_to_defectdojo"]:
-                send_defect_dojo("Checkov Scan", file_path, self.dict_args)
+                send_defect_dojo("Checkov Scan", result_list_engine_iac.results_scan_list, self.dict_args)
             rules_scaned = result_list_engine_iac.rules_scaned
             totalized_exclusions = result_list_engine_iac.exclusions_all
             if result_list_engine_iac.exclusions_scope != None:
