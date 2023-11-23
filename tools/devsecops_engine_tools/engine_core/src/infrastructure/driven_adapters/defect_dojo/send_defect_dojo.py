@@ -11,9 +11,13 @@ from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables impo
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import (
     AzureDevopsApi,
 )
+from tools.devsecops_engine_tools.engine_core.src.infrastructure.helpers.file_generator_tool import (
+    generate_file_from_tool,
+)
 
 
-def send_defect_dojo(scan_type, path_file, dict_args):
+def send_defect_dojo(scan_type, result_list, dict_args):
+    file_path = generate_file_from_tool(scan_type, result_list)
     try:
         enviroment_mapping = {
             "dev": "Development",
@@ -53,7 +57,7 @@ def send_defect_dojo(scan_type, path_file, dict_args):
                 scan_type=scan_type,
                 engagement_name=BuildVariables.Build_DefinitionName.value(),
                 service=BuildVariables.Build_DefinitionName.value(),
-                file=path_file,
+                file=file_path,
                 version=BuildVariables.Build_BuildId.value(),
                 build_id=BuildVariables.Build_BuildNumber.value(),
                 source_code_management_uri=source_code_management_uri,
