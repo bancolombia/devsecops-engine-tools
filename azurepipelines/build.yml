@@ -44,7 +44,7 @@ steps:
       echo "Integration tests are only run in feature branch"
     else
       source _venv/bin/activate
-      python -m integrations_test.defect_dojo
+      python test_integrations_defect_dojo.py
     fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
   displayName: 'Integration Test'
