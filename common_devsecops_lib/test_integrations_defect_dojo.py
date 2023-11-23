@@ -73,12 +73,11 @@ if __name__ == "__main__":
 
             # test integration Checkov
             Printers.print_title("Checkov Scan")
-            response = import_scan(scan_type="Jfrog Xray On Demand Binary Scan", file_path=f"{path_file}/xray.json")
             response = import_scan(scan_type="Checkov Scan", file_path=f"{path_file}/checkov.json")
             table.append(validate_response(response, scan_type="Checkov Scan", end_point="impor_scan"))
 
             # # test SonarQuebe
-            Printers.print_title("Checkov Scan")
+            Printers.print_title("SonarQube API Import")
             response = import_scan(scan_type="SonarQube API Import")
             logger.debug(f"SonarQube Api Import: {response}")
             table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
