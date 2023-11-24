@@ -104,8 +104,8 @@ class ImportScanRestConsumer:
         try:
             response = self.__session.post(url, headers=headers, data=payload, files=files, verify=VERIFY_CERTIFICATE)
             if response.status_code != 201:
-                logger.info(payload)
-                logger.info(response.json())
+                logger.error(payload)
+                logger.error(response.json())
                 logger.error(response)
                 raise ApiError(response.json())
             logger.info(f"Sucessfull {response}")
