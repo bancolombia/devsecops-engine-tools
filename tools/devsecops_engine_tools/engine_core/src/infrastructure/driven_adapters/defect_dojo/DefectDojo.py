@@ -33,10 +33,17 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "qa": "Staging",
                 "pdn": "Production",
             }
-            source_code_management_uri = f"{SystemVariables.System_TeamFoundationCollectionUri.value()}{BuildVariables.Build_Project_Name.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
+            source_code_management_uri = (
+                f"{SystemVariables.System_TeamFoundationCollectionUri.value()}"
+                f"{BuildVariables.Build_Project_Name.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
+            )
             source_code_management_uri = source_code_management_uri.replace(" ", "%20")
             branch_name = BuildVariables.Build_SourceBranchName.value()
-            base_compact_remote_config_url = f'https://{SystemVariables.System_TeamFoundationCollectionUri.value().rstrip("/").split("/")[-1]}.visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/{dict_args["azure_remote_config_repo"]}?path=/'
+            base_compact_remote_config_url = (
+                f"https://{SystemVariables.System_TeamFoundationCollectionUri.value()}.rstrip('/').split('/')"
+                "/[-1]}.visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/"
+                f"{dict_args['azure_remote_config_repo']}?path=/"
+            )
             utils_azure = AzureDevopsApi(
                 personal_access_token=SystemVariables.System_AccessToken.value(),
                 compact_remote_config_url=f'{base_compact_remote_config_url}{dict_args["defect_dojo_mapping_path"]}',
