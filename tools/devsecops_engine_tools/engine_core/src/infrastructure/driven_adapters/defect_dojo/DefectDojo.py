@@ -40,8 +40,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             source_code_management_uri = source_code_management_uri.replace(" ", "%20")
             branch_name = BuildVariables.Build_SourceBranchName.value()
             base_compact_remote_config_url = (
-                f"https://{SystemVariables.System_TeamFoundationCollectionUri.value()}.rstrip('/').split('/')"
-                "/[-1]}.visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/"
+                f"https://{SystemVariables.System_TeamFoundationCollectionUri.value().rstrip('/').split('/')[-1]}"
+                f".visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/"
                 f"{dict_args['azure_remote_config_repo']}?path=/"
             )
             utils_azure = AzureDevopsApi(
