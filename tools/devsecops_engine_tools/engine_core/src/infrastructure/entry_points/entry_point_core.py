@@ -33,11 +33,10 @@ def get_inputs_from_cli(args):
     }
 
 
-def init_engine_core():
+def init_engine_core(vulnerability_management_gateway: any, deserializer_gateway: any):
     args = get_inputs_from_cli(sys.argv[1:])
-    instance = HandleScan(dict_args=args)
-    deserializer_gateway, input_core = instance.process()
-    BreakBuild(deserializer_gateway=deserializer_gateway, input_core=input_core)
-
-
-init_engine_core()
+    instance = HandleScan(
+        vulnerability_management_gateway, deserializer_gateway, dict_args=args
+    )
+    vulnerabilities_list, input_core = instance.process()
+    BreakBuild(vulnerabilities_list=vulnerabilities_list, input_core=input_core)

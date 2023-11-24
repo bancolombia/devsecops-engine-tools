@@ -19,4 +19,3 @@ class ScanConfigurationList(FromDictMixin):
     next = None
     previous = None
     results: List[ScanConfiguration] = dataclasses.field(default_factory=list)
-    results: List[ScanConfiguration] = dataclasses.field(default_factory=list)

@@ -2,7 +2,6 @@ from dataclasses import dataclass, replace
 from functools import reduce
 from prettytable import PrettyTable, DOUBLE_BORDER
 
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.gateway_deserealizator import DeseralizatorGateway
 from devsecops_engine_tools.engine_core.src.domain.model.InputCore import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.Vulnerability import Vulnerability
 from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
@@ -13,7 +12,7 @@ from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline i
 
 @dataclass
 class BreakBuild:
-    deserializer_gateway: DeseralizatorGateway
+    vulnerabilities_list: list
     input_core: InputCore
 
     def print_table(self, vulnerabilities_without_exclusions_list: "list[Vulnerability]"):
@@ -39,18 +38,17 @@ class BreakBuild:
             print(sorted_table)
 
     def __post_init__(self):
-        vulnerabilities_list = self.deserializer_gateway.get_list_vulnerability()
         level_compliance = self.input_core.level_compliance_defined
         exclusions = self.input_core.totalized_exclusions
         rules_scaned = self.input_core.rules_scaned
 
-        if len(vulnerabilities_list) != 0:
+        if len(self.vulnerabilities_list) != 0:
             vulnerabilities_list_with_severity = list(
                 map(
                     lambda vulnerability: replace(
                         vulnerability, severity=rules_scaned[vulnerability.id].get("severity").lower()
                     ),
-                    vulnerabilities_list,
+                    self.vulnerabilities_list,
                 )
             )
             # Esta lista de excluidas no se imprimira para dejar un resultado más limpio
