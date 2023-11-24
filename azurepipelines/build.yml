@@ -20,8 +20,8 @@ steps:
       sonar.sources=$(System.DefaultWorkingDirectory)/$(pathComponentName)
       sonar.python.coverage.reportPaths=$(System.DefaultWorkingDirectory)/$(pathComponentName)/coverage.xml
       sonar.language=py
-      sonar.exclusion=**/applications/**,**/integrations_test/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**,**/azure-pipelines.yml/**
-      sonar.coverage.exclusions=**/applications/**,**/integrations_test/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
+      sonar.exclusion=**/applications/**,**/test_integrations_defect_dojo/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**,**/azure-pipelines.yml/**
+      sonar.coverage.exclusions=**/applications/**,**/test_integrations_defect_dojo/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
 - script:  |
     python3 -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python3 -m pip install setuptools virtualenv wheel -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
@@ -44,13 +44,15 @@ steps:
       echo "Integration tests are only run in feature branch"
     else
       source _venv/bin/activate
-      python -m integrations_test.defect_dojo
+      python test_integrations_defect_dojo.py
     fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(pathComponentName)
   displayName: 'Integration Test'
   condition: eq(variables['pathComponentName'], 'common_devsecops_lib')
   env:
     PERSONAL_ACCESS_TOKEN: $(System.AccessToken)
+    TOKEN_CMDB: $(TOKEN_CMDB)
+    TOKEN_DEFECT_DOJO: $(TOKEN_DEFECT_DOJO)
 
 - task: PublishTestResults@2
   displayName: 'Publish Test Results **/out*.xml'
