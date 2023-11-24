@@ -52,6 +52,9 @@ class ImportScanUserCase:
             product_type_id = product_type.id
             logger.info(f"product_type created: {product_type.name} with id {product_type.id}")
         else:
+            if len(product_types.results) != 1:
+                logger.warning(f"there is more than one product type with the name: {product_types.results}")
+
             product_type_id = product_types.results[0].id
             logger.info(
                 f"product_type found: {product_types.results[0].name}\
@@ -67,7 +70,12 @@ class ImportScanUserCase:
                     found with id: {product.id}"
             )
         else:
+            # Product_type name is unique and product_name is unique
             product_id = products.results[0].id
+            if products.results[0].prod_type != product_type_id:
+                logger.warning(
+                    f"The product: {product_id} does not belong to the product_type con id: {product_type_id}"
+                )
             logger.info(
                 f"product found: {request.product_name}\
                 with id: {product_id}"
@@ -111,10 +119,8 @@ class ImportScanUserCase:
                 with open(request.file, "rb") as file:
                     logger.info("read file succesfull !!!")
                     files = [("file", ("name_file", file, "application"))]
-                    logger.warning(request)
                     response = self.__rest_import_scan.import_scan(request, files)
                     response.test_url = f"{request.host_defect_dojo}/test/{str(response.test_id)}"
-                    logger.info(f"End process Succesfull!!!: {response}")
                     return response
             except Exception as e:
                 raise ApiError(e)
