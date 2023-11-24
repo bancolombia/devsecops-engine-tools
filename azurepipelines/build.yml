@@ -12,13 +12,13 @@ steps:
     SonarQube: SonarQube
     scannerMode: CLI
     configMode: manual
-    cliProjectKey: '$(repositoryName)'
-    cliProjectName: '$(repositoryName)'
+    cliProjectKey: 'NU0429001_devsecops_engine_$(pathComponentName)'
+    cliProjectName: 'NU0429001_devsecops_engine_$(pathComponentName)'
     cliProjectVersion: '$(Build.BuildNumber)'
     extraProperties: |
       sonar.verbose=true
-      sonar.sources=$(System.DefaultWorkingDirectory)/$(componentName)
-      sonar.python.coverage.reportPaths=$(System.DefaultWorkingDirectory)/$(componentName)/coverage.xml
+      sonar.sources=$(System.DefaultWorkingDirectory)/$(pathComponentName)
+      sonar.python.coverage.reportPaths=$(System.DefaultWorkingDirectory)/$(pathComponentName)/coverage.xml
       sonar.language=py
       sonar.exclusion=**/applications/**,**/integrations_test/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**,**/azure-pipelines.yml/**
       sonar.coverage.exclusions=**/applications/**,**/integrations_test/**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
@@ -33,10 +33,10 @@ steps:
     python -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python -m pip install -r requirements_test.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
-    python -m pytest -x --cov=$(System.DefaultWorkingDirectory)/$(componentName) --cov-config=.coveragerc
+    python -m pytest -x --cov=$(System.DefaultWorkingDirectory)/$(pathComponentName) --cov-config=.coveragerc
     python -m coverage report -m
     python -m coverage xml
-  workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
+  workingDirectory: $(System.DefaultWorkingDirectory)/$(pathComponentName)
   displayName: 'Run Unit Test'
 
 - script: |
@@ -46,8 +46,9 @@ steps:
       source _venv/bin/activate
       python -m integrations_test.defect_dojo
     fi
-  workingDirectory: $(System.DefaultWorkingDirectory)/$(componentName)
+  workingDirectory: $(System.DefaultWorkingDirectory)/$(pathComponentName)
   displayName: 'Integration Test'
+  condition: eq(variables['pathComponentName'], 'common_devsecops_lib')
   env:
     PERSONAL_ACCESS_TOKEN: $(System.AccessToken)
 
@@ -55,14 +56,14 @@ steps:
   displayName: 'Publish Test Results **/out*.xml'
   inputs:
     testResultsFiles: '**/out*.xml'
-    searchFolder: $(System.DefaultWorkingDirectory)/$(componentName)
+    searchFolder: $(System.DefaultWorkingDirectory)/$(pathComponentName)
 
 - task: PublishCodeCoverageResults@1
   displayName: 'Publish code coverage from coverage.xml'
   inputs:
     codeCoverageTool: Cobertura
     summaryFileLocation: coverage.xml
-    pathToSources: $(System.DefaultWorkingDirectory)/$(componentName)
+    pathToSources: $(System.DefaultWorkingDirectory)/$(pathComponentName)
   continueOnError: false
 
 - task: SonarQubeAnalyze@4

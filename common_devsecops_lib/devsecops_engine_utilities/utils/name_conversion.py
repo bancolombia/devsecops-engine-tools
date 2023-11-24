@@ -18,8 +18,7 @@ def dict_casing_conversion(obj, conversion_function):
             conversion_function(key): dict_casing_conversion(value, conversion_function) for key, value in obj.items()
         }
     elif isinstance(obj, list):
-        return [dict_casing_conversion(
-            element, conversion_function) for element in obj]
+        return [dict_casing_conversion(element, conversion_function) for element in obj]
     return obj
 
 

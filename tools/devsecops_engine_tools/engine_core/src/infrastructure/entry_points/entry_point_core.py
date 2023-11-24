@@ -1,10 +1,13 @@
 import argparse
+import sys
 
-from devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_scan import runner_engine_iac
-from devsecops_engine_tools.engine_core.src.domain.model.Exclusions import Exclusions
-from devsecops_engine_tools.engine_core.src.domain.model.InputCore import InputCore
-from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.checkov.Checkov_deserealizator import CheckovDeserealizator
-from devsecops_engine_tools.engine_core.src.domain.usecases.break_build import BreakBuild
+from devsecops_engine_tools.engine_core.src.domain.usecases.break_build import (
+    BreakBuild,
+)
+from devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan import (
+    HandleScan,
+)
+
 
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
@@ -12,24 +15,28 @@ def get_inputs_from_cli(args):
     parser.add_argument("--azure_remote_config_path", type=str, required=True, help="")
     parser.add_argument("--tool", type=str, required=True, help="")
     parser.add_argument("--environment", type=str, required=True, help="")
+    parser.add_argument("--send_to_defectdojo", type=bool, required=False, help="")
+    parser.add_argument("--defect_dojo_mapping_path", type=str, required=False, help="")
+    parser.add_argument("--token_cmdb", required=False, help="")
+    parser.add_argument("--token_defect_dojo", required=False, help="")
 
     args = parser.parse_args()
-    return (
-        args.azure_remote_config_repo,
-        args.azure_remote_config_path,
-        args.tool,
-        args.environment,
+    return {
+        "azure_remote_config_repo": args.azure_remote_config_repo,
+        "azure_remote_config_path": args.azure_remote_config_path,
+        "tool": args.tool,
+        "environment": args.environment,
+        "send_to_defectdojo": args.send_to_defectdojo,
+        "defect_dojo_mapping_path": args.defect_dojo_mapping_path,
+        "token_cmdb": args.token_cmdb,
+        "token_defect_dojo": args.token_defect_dojo,
+    }
+
+
+def init_engine_core(vulnerability_management_gateway: any, deserializer_gateway: any):
+    args = get_inputs_from_cli(sys.argv[1:])
+    instance = HandleScan(
+        vulnerability_management_gateway, deserializer_gateway, dict_args=args
     )
-
-def init_engine_core():
-    result_list_engine_iac = runner_engine_iac()
-    rules_scaned = result_list_engine_iac.rules_scaned
-    totalized_exclusions = result_list_engine_iac.exclusions_all
-    if result_list_engine_iac.exclusions_scope != None: totalized_exclusions.update(result_list_engine_iac.exclusions_scope)
-    level_compliance_defined = result_list_engine_iac.level_compliance
-    scope_pipeline = result_list_engine_iac.scope_pipeline
-    checkov_deserealizator = CheckovDeserealizator(result_list_engine_iac.results_scan_list)
-    input_core = InputCore(totalized_exclusions=totalized_exclusions, level_compliance_defined=level_compliance_defined, rules_scaned=rules_scaned, scope_pipeline=scope_pipeline)
-    break_build_result = BreakBuild(deserializer_gateway=checkov_deserealizator,input_core=input_core)
-
-init_engine_core()
+    vulnerabilities_list, input_core = instance.process()
+    BreakBuild(vulnerabilities_list=vulnerabilities_list, input_core=input_core)
