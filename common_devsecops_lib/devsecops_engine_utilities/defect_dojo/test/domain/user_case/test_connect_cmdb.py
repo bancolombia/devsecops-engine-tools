@@ -56,7 +56,7 @@ def test_execute(engagement_name):
         "personal_access_token": "tokenxxxx12354564",
         "product_name": "test product name",
         "repository_id": "repositoryid_or_name_repository",
-        "remote_config_path": "/Vultracker/cmdb_mapping.json",
+        "remote_config_path": "/defect_dojo/cmdb_mapping.json",
         "project_remote_config": "Vicepresidencia Servicios de Tecnología",
         "token_cmdb": "123456789",
         "host_cmdb": "http://localhost:8000",
