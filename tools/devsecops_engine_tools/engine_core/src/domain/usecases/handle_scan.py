@@ -8,6 +8,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.gateway_deserea
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_management_gateway import (
     VulnerabilityManagementGateway,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.secrets_manager_gateway import (
+    SecretsManagerGateway,
+)
 
 
 MESSAGE_ENABLED = "not yet enabled"
@@ -18,25 +21,31 @@ class HandleScan:
         self,
         vulnerability_management: VulnerabilityManagementGateway,
         deseralizator_gateway: DeseralizatorGateway,
-        dict_args: dict[str, any],
+        secrets_manager_gateway: SecretsManagerGateway,
+        dict_args: any,
     ):
         self.vulnerability_management = vulnerability_management
         self.deseralizator_gateway = deseralizator_gateway
+        self.secrets_manager_gateway = secrets_manager_gateway
         self.dict_args = dict_args
 
     def process(self):
+        secret_tool = None
+        if self.dict_args["use_secrets_manager"] == "True":
+            secret_tool = self.secrets_manager_gateway.get_secret(self.dict_args)
         if "engine_iac" in self.dict_args["tool"]:
             result_list_engine_iac = runner_engine_iac(
                 self.dict_args["azure_remote_config_repo"],
-                self.dict_args["azure_remote_config_path"],
+                "SAST/IAC/configTools.json",
                 "CHECKOV",
                 self.dict_args["environment"],
             )
-            if self.dict_args["send_to_defectdojo"]:
+            if self.dict_args["send_to_defectdojo"] == "True":
                 self.vulnerability_management.send_vulnerability_management(
                     "Checkov Scan",
                     result_list_engine_iac.results_scan_list,
                     self.dict_args,
+                    secret_tool
                 )
             rules_scaned = result_list_engine_iac.rules_scaned
             totalized_exclusions = result_list_engine_iac.exclusions_all
