@@ -14,8 +14,8 @@ def get_inputs_from_cli(args):
     parser.add_argument("--azure_remote_config_repo", type=str, required=True, help="")
     parser.add_argument("--tool", type=str, required=True, help="")
     parser.add_argument("--environment", type=str, required=True, help="")
-    parser.add_argument("--use_secrets_manager", type=bool, required=True, help="")
-    parser.add_argument("--send_to_defectdojo", type=bool, required=False, help="")
+    parser.add_argument("--use_secrets_manager", type=str, required=False, help="")
+    parser.add_argument("--send_to_defectdojo", type=str, required=False, help="")
     parser.add_argument("--token_cmdb", required=False, help="")
     parser.add_argument("--token_defect_dojo", required=False, help="")
 
