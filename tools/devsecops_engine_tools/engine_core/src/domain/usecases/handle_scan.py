@@ -30,8 +30,9 @@ class HandleScan:
         self.dict_args = dict_args
 
     def process(self):
-        if self.dict_args["use_secrets_manager"]:
-            self.secret_tool = self.secrets_manager_gateway.get_secret(self.dict_args)
+        secret_tool = None
+        if self.dict_args["use_secrets_manager"] == "True":
+            secret_tool = self.secrets_manager_gateway.get_secret(self.dict_args)
         if "engine_iac" in self.dict_args["tool"]:
             result_list_engine_iac = runner_engine_iac(
                 self.dict_args["azure_remote_config_repo"],
@@ -39,12 +40,12 @@ class HandleScan:
                 "CHECKOV",
                 self.dict_args["environment"],
             )
-            if self.dict_args["send_to_defectdojo"]:
+            if self.dict_args["send_to_defectdojo"] == "True":
                 self.vulnerability_management.send_vulnerability_management(
                     "Checkov Scan",
                     result_list_engine_iac.results_scan_list,
                     self.dict_args,
-                    self.secret_tool
+                    secret_tool
                 )
             rules_scaned = result_list_engine_iac.rules_scaned
             totalized_exclusions = result_list_engine_iac.exclusions_all
