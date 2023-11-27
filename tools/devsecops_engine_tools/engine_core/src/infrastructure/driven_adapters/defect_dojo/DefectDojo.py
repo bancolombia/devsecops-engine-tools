@@ -25,8 +25,13 @@ from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline i
 
 @dataclass
 class DefectDojoPlatform(VulnerabilityManagementGateway):
-    def send_vulnerability_management(self, scan_type, result_list, dict_args):
+    def send_vulnerability_management(
+        self, scan_type, result_list, dict_args, secret_tool
+    ):
         file_path = generate_file_from_tool(scan_type, result_list)
+        token_dd = dict_args["token_defect_dojo"] if dict_args["token_defect_dojo"] is not None else secret_tool["token_defect_dojo"]
+        token_cmdb = dict_args["token_cmdb"] if dict_args["token_cmdb"] is not None else secret_tool["token_cmdb"]
+
         try:
             enviroment_mapping = {
                 "dev": "Development",
@@ -40,13 +45,13 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             source_code_management_uri = source_code_management_uri.replace(" ", "%20")
             branch_name = BuildVariables.Build_SourceBranchName.value()
             base_compact_remote_config_url = (
-                f"https://{SystemVariables.System_TeamFoundationCollectionUri.value().rstrip('/').split('/')[-1]}"
+                f"https://{SystemVariables.System_TeamFoundationCollectionUri.value().rstrip('/').split('/')[-1].replace('.visualstudio.com','')}"
                 f".visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/"
                 f"{dict_args['azure_remote_config_repo']}?path=/"
             )
             utils_azure = AzureDevopsApi(
                 personal_access_token=SystemVariables.System_AccessToken.value(),
-                compact_remote_config_url=f'{base_compact_remote_config_url}{dict_args["defect_dojo_mapping_path"]}',
+                compact_remote_config_url=f'{base_compact_remote_config_url}resources/ConfigTool.json',
             )
             connection = utils_azure.get_azure_connection()
             config_tool = utils_azure.get_remote_json_config(connection=connection)
@@ -63,13 +68,13 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         "product_description": "arearesponsableti",
                         "codigo_app": "CodigoApp",
                     },
-                    compact_remote_config_url=f'{base_compact_remote_config_url}{config_tool["CMDB_MAPPING_PATH"]}',
+                    compact_remote_config_url=f'{base_compact_remote_config_url}{config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB_MAPPING_PATH"]}',
                     personal_access_token=SystemVariables.System_AccessToken.value(),
-                    token_cmdb=dict_args["token_cmdb"],
-                    host_cmdb=config_tool["HOST_CMDB"],
-                    expression=config_tool["REGEX_EXPRESSION_CMDB"],
-                    token_defect_dojo=dict_args["token_defect_dojo"],
-                    host_defect_dojo=config_tool["HOST_DEFECT_DOJO"],
+                    token_cmdb=token_cmdb,
+                    host_cmdb=config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_CMDB"],
+                    expression=config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["REGEX_EXPRESSION_CMDB"],
+                    token_defect_dojo=token_dd,
+                    host_defect_dojo=config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"],
                     scan_type=scan_type,
                     engagement_name=BuildVariables.Build_DefinitionName.value(),
                     service=BuildVariables.Build_DefinitionName.value(),
