@@ -7,6 +7,8 @@ class CheckovDeserializeConfig:
         self.search_pattern = json_data[tool]["SEARCH_PATTERN"]
         self.ignore_search_pattern = json_data[tool]["IGNORE_SEARCH_PATTERN"]
         self.exclusions_path = json_data[tool]["EXCLUSIONS_PATH"]
+        self.use_external_checks_git = json_data[tool]["USE_EXTERNAL_CHECKS_GIT"]
+        self.external_checks_git = json_data[tool]["EXTERNAL_CHECKS_GIT"]
         self.level_compliance = LevelCompliance(json_data[tool]["LEVEL_COMPLIANCE"][environment])
         self.rules_data_type = json_data[tool]["RULES"]
         self.scope_pipeline = ""

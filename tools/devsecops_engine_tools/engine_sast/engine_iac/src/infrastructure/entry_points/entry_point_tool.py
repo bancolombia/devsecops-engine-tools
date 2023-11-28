@@ -116,6 +116,10 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     folders_to_scan = search_folders(
         data_config.search_pattern, data_config.ignore_search_pattern
     )
+
+    # Create configuration ssh external checks
+    
+
     output_queue = queue.Queue()
     # Crea una lista para almacenar los hilos
     threads = []
@@ -130,6 +134,7 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
                     if value["environment"].get(environment)
                 ],
                 soft_fail=False,
+                external_checks_git= data_config.external_checks_git if data_config.use_external_checks_git == "True" else [],
                 directories=folder,
             )
             checkov_config.create_config_dict()
