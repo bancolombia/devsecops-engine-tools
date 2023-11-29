@@ -39,6 +39,7 @@ class HandleScan:
                 "SAST/IAC/configTools.json",
                 "CHECKOV",
                 self.dict_args["environment"],
+                secret_tool
             )
             if self.dict_args["send_to_defectdojo"] == "True":
                 self.vulnerability_management.send_vulnerability_management(

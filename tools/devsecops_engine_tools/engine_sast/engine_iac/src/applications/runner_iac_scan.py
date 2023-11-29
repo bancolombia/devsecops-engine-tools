@@ -8,7 +8,9 @@ from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline i
 )
 
 
-def runner_engine_iac(remote_config_repo, remote_config_path, tool, environment):
+def runner_engine_iac(
+    remote_config_repo, remote_config_path, tool, environment, secret_tool
+):
     try:
         (
             remote_config_repo,
@@ -24,6 +26,7 @@ def runner_engine_iac(remote_config_repo, remote_config_path, tool, environment)
             remote_config_path=remote_config_path,
             tool=tool,
             environment=environment,
+            secret_tool=secret_tool
         )
 
     except Exception as e:
