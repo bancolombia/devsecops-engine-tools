@@ -23,6 +23,9 @@ from devsecops_engine_utilities.utils.printers import (
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
     ReleaseVariables,
 )
+from devsecops_engine_utilities.ssh.managment_private_key import (
+    create_ssh_private_file,add_ssh_private_key,decode_base64,
+)
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
     AzureDevopsIntegration,
 )
@@ -90,7 +93,7 @@ def search_folders(search_pattern, ignore_pattern):
     return matching_folders
 
 
-def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environment):
+def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environment,secret_tool):
     Printers.print_logo_tool()
     azure_devops_integration = AzureDevopsIntegration()
     azure_devops_integration.get_azure_connection()
@@ -118,7 +121,12 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     )
 
     # Create configuration ssh external checks
-    
+    if data_config.use_external_checks_git == "True":
+        ssh_key_content = decode_base64(secret_tool, "repository_ssh_private_key")
+        ssh_key_file_path = "/tmp/ssh_key_file"
+        create_ssh_private_file(ssh_key_file_path, ssh_key_content)
+        ssh_key_password = decode_base64(secret_tool, "repository_ssh_password")
+        add_ssh_private_key(ssh_key_file_path, ssh_key_password)
 
     output_queue = queue.Queue()
     # Crea una lista para almacenar los hilos
