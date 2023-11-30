@@ -29,7 +29,7 @@ def add_ssh_private_key(ssh_key_file_path, ssh_key_password):
         
         # Iniciar un nuevo shell y evaluar el comando ssh-agent
         comando_ssh_agent = "eval $(ssh-agent -s)"
-        proceso_shell = pexpect.spawn("/bin/bash", ["-c", comando_ssh_agent])
+        proceso_shell = pexpect.spawn("/bin/sh", ["-c", comando_ssh_agent])
 
         # Esperar a que se complete la inicialización de ssh-agent
         proceso_shell.expect(pexpect.EOF)
