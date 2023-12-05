@@ -3,12 +3,26 @@ import pexpect
 import platform
 import base64
 
-def decode_base64 (secret_data,key_name):
 
+def decode_base64(secret_data, key_name):
     key_name_secret = secret_data[key_name]
+    return base64.b64decode(key_name_secret).decode("utf-8")
 
-    secreto_decodificado = base64.b64decode(key_name_secret).decode('utf-8')
-    return secreto_decodificado
+def config_knowns_hosts(host, ssh_key):
+    try:
+        if platform.system() != "Linux":
+            raise Exception("This script is only compatible with Linux systems")
+        known_hosts_file_path = os.path.expanduser("~/.ssh/known_hosts")
+        line_to_add = f"{host} ssh-rsa {ssh_key}\n"
+        if not os.path.exists(known_hosts_file_path):
+            with open(known_hosts_file_path, "w") as known_hosts_file:
+                known_hosts_file.write(line_to_add)
+        else:
+            with open(known_hosts_file_path, 'a') as known_hosts_file:
+                known_hosts_file.write(line_to_add)
+        print("File known_hosts configured sucessfull.")
+    except Exception as e:
+        print(f"An error ocurred while configuring file: {e}")
 
 def create_ssh_private_file(ssh_key_file_path, ssh_key_content):
     try:
@@ -24,26 +38,32 @@ def create_ssh_private_file(ssh_key_file_path, ssh_key_content):
 
 def add_ssh_private_key(ssh_key_file_path, ssh_key_password):
     try:
-        if platform.system() != 'Linux':
-            raise Exception("Este script solo es compatible con sistemas Linux")
-        
+        if platform.system() != "Linux":
+            raise Exception("This script is only compatible with Linux systems")
+
         # Iniciar un nuevo shell y evaluar el comando ssh-agent
-        comando_ssh_agent = "eval $(ssh-agent -s)"
-        proceso_shell = pexpect.spawn("/bin/sh", ["-c", comando_ssh_agent])
+        ssh_process = pexpect.spawn("ssh-agent -s")
+        ssh_process.expect("SSH_AUTH_SOCK=(.*?);")
+        ssh_auth_sock = ssh_process.match.group(1).decode()
+        ssh_process.expect("SSH_AGENT_PID=(.*?);")
+        ssh_agent_pid = ssh_process.match.group(1).decode()
+        
+        agent_env = {"SSH_AUTH_SOCK": ssh_auth_sock, "SSH_AGENT_PID": ssh_agent_pid}
 
         # Esperar a que se complete la inicialización de ssh-agent
-        proceso_shell.expect(pexpect.EOF)
+        ssh_process.expect(pexpect.EOF)
 
         # Agregar la clave privada al ssh-agent proporcionando la contraseña
-        proceso_sshadd = pexpect.spawn(f"ssh-add {ssh_key_file_path}" )
+        ssh_add_process = pexpect.spawn(f"ssh-add {ssh_key_file_path}", env=agent_env)
 
         # Esperar la solicitud de contraseña y proporcionarla
-        proceso_sshadd.expect("Enter passphrase", timeout=5)
-        proceso_sshadd.sendline(ssh_key_password)
+        ssh_add_process.expect("Enter passphrase", timeout=5)
+        ssh_add_process.sendline(ssh_key_password)
 
         # Esperar a que se complete la operación
-        proceso_sshadd.expect(pexpect.EOF)
+        ssh_add_process.expect(pexpect.EOF)
 
         print("Private key add sucessfull.")
+        return agent_env
     except Exception as e:
         print(f"An error ocurred adding private key: {e}")
