@@ -27,8 +27,9 @@ class CheckovTool(ToolGateway):
             + self.checkov_config.config_file_name
             + self.CHECKOV_CONFIG_FILE
         )
-        result = subprocess.run(command, capture_output=True, text=True, shell=True)
+        result = subprocess.run(command, capture_output=True, text=True, shell=True, env=self.checkov_config.env)
         output = result.stdout.strip()
         # error = result.stderr.strip()
+        print(result.stderr.strip())
         # TODO revisar el stderr para manejo de excepciones.
         return output
