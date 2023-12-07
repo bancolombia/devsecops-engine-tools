@@ -2,7 +2,7 @@ from marshmallow import Schema, fields, validate
 
 
 class FindingSerializer(Schema):
-    active = fields.Bool(requeride=True)
+    active = fields.Bool(requeride=False)
     component_name = fields.Str(requeride=False)
     component_version = fields.Str(requeride=False)
     created = fields.Str(requeride=False)
