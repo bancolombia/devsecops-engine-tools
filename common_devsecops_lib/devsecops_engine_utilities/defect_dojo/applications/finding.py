@@ -30,7 +30,6 @@ class Finding:
             raise e
 
     @staticmethod
-    # @validateserializer
     def get_finding(session, **request):
         try:
             Finding.serializer(**request)
