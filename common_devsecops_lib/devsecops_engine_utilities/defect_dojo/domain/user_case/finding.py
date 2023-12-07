@@ -24,10 +24,7 @@ class FindingUserCase:
         response = None
         for finding in findings.results:
             request_close = {"is_mitigated": "True", "mitigated": date}
-            try:
-                response = self.__rest_finding.close(request_close, finding.id)
-            except Exception as e:
-                raise ApiError(e)
+            response = self.__rest_finding.close(request_close, finding.id)
         return response
 
 
@@ -36,9 +33,6 @@ class FindingGetUserCase:
         self.__rest_finding = rest_finding
 
     def execute(self, request):
-        try:
-            response = self.__rest_finding.get(request)
-            logger.debug(f"finding: {response}")
-        except Exception as e:
-            raise ApiError(e)
+        response = self.__rest_finding.get(request)
+        logger.debug(f"finding: {response}")
         return response

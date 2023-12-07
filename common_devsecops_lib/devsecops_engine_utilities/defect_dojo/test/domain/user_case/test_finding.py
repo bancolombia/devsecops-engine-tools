@@ -1,4 +1,6 @@
+import pytest
 from unittest.mock import Mock
+from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.defect_dojo.domain.user_case.finding import FindingUserCase, FindingGetUserCase
 from devsecops_engine_utilities.utils.session_manager import SessionManager
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.finding import FindingRestConsumer
