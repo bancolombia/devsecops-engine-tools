@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, validate
 
 
 class FindingSerializer(Schema):
@@ -60,6 +60,9 @@ class FindingSerializer(Schema):
     review_request_by = fields.List(fields.Int, requerided=False)
     reviewers = fields.List(fields.Int, requerided=False)
     risk_accetance = fields.Int(requerided=False)
+    risk_status = fields.Str(
+        required=False, validate=validate.OneOf(["Risk Pending", "Risk Rejected", "Risk Accepted", "Risk Active"])
+    )
     risk_accepted = fields.Bool(requerided=False)
     sast_sink_object = fields.Str(requeride=False)
     sast_source_object = fields.Str(requeride=False)
