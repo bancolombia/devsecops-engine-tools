@@ -29,3 +29,16 @@ class FindingUserCase:
             except Exception as e:
                 raise ApiError(e)
         return response
+
+
+class FindingGetUserCase:
+    def __init__(self, rest_finding: FindingRestConsumer):
+        self.__rest_finding = rest_finding
+
+    def execute(self, request):
+        try:
+            response = self.__rest_finding.get(request)
+            logger.debug(f"finding: {response}")
+        except Exception as e:
+            raise ApiError(e)
+        return response

@@ -40,6 +40,7 @@ class Finding(FromDictMixin):
     false_p: bool = None
     duplicate: bool = None
     out_of_scope: bool = None
+    risk_status: str = ""
     risk_accepted: bool = None
     under_review: bool = None
     last_status_update: str = ""
