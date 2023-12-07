@@ -13,3 +13,11 @@ def test_close_finding():
     parameter = [name for name, parameter in firm.parameters.items()]
     assert "session" in parameter
     assert "request" in parameter
+
+
+def test_get_finding():
+    session = SessionManager(token="test_token8643f700137f71c15f8980", host="http://localhost:8000/")
+    firm = inspect.signature(Finding.get_finding)
+    parameter = [name for name, parameter in firm.parameters.items()]
+    assert "session" in parameter
+    assert "request" in parameter
