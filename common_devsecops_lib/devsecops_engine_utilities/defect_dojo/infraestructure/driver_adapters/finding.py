@@ -34,7 +34,7 @@ class FindingRestConsumer:
         try:
             response = self.__session.post(url, headers=headers, data=json.dumps(request), verify=VERIFY_CERTIFICATE)
             if response.status_code == 404:
-                raise ApiError(message=f"Finding whit id {id} not found")
+                raise ApiError(response.json())
             if response.status_code != 200:
                 raise ApiError(response.json())
             logger.debug(response)

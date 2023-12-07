@@ -16,8 +16,8 @@ class FindingUserCase:
     def execute(self, request):
         findings = self.__rest_finding.get(request)
         if findings.results == []:
-            logger.error("Finding con Id {request.get('unique_id_from_tool')} not found")
-            raise ApiError(f"Finding con Id {request.get('unique_id_from_tool')} not found")
+            logger.error("Finding con Id_from_tool {request.get('unique_id_from_tool')} not found")
+            raise ApiError(f"Finding con Id_from_tool {request.get('unique_id_from_tool')} not found")
         tz = pytz.timezone("America/Bogota")
         date = datetime.datetime.now(tz=tz).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         logger.debug(f"date: {date}")
