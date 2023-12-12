@@ -3,7 +3,9 @@ from functools import reduce
 from prettytable import PrettyTable, DOUBLE_BORDER
 
 from devsecops_engine_tools.engine_core.src.domain.model.InputCore import InputCore
-from devsecops_engine_tools.engine_core.src.domain.model.Vulnerability import Vulnerability
+from devsecops_engine_tools.engine_core.src.domain.model.Vulnerability import (
+    Vulnerability,
+)
 from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
     AzureMessageResultPipeline,
     AzureMessageLoggingPipeline,
@@ -15,18 +17,27 @@ class BreakBuild:
     vulnerabilities_list: list
     input_core: InputCore
 
-    def print_table(self, vulnerabilities_without_exclusions_list: "list[Vulnerability]"):
+    def print_table(
+        self, vulnerabilities_without_exclusions_list: "list[Vulnerability]"
+    ):
         vulnerability_table = PrettyTable(["Severity", "ID", "Description", "Where"])
 
         for vulnerability in vulnerabilities_without_exclusions_list:
             vulnerability_table.add_row(
-                [vulnerability.severity, vulnerability.id, vulnerability.description, vulnerability.where_vulnerability]
+                [
+                    vulnerability.severity,
+                    vulnerability.id,
+                    vulnerability.description,
+                    vulnerability.where_vulnerability,
+                ]
             )
 
         severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
         sorted_table = PrettyTable()
         sorted_table.field_names = vulnerability_table.field_names
-        sorted_table.add_rows(sorted(vulnerability_table._rows, key=lambda row: severity_order[row[0]]))
+        sorted_table.add_rows(
+            sorted(vulnerability_table._rows, key=lambda row: severity_order[row[0]])
+        )
 
         sorted_table.align["Severity"] = "l"
         sorted_table.align["Description"] = "l"
@@ -40,47 +51,61 @@ class BreakBuild:
     def __post_init__(self):
         level_compliance = self.input_core.level_compliance_defined
         exclusions = self.input_core.totalized_exclusions
-        rules_scaned = self.input_core.rules_scaned
 
         if len(self.vulnerabilities_list) != 0:
-            vulnerabilities_list_with_severity = list(
-                map(
-                    lambda vulnerability: replace(
-                        vulnerability, severity=rules_scaned[vulnerability.id].get("severity").lower()
-                    ),
-                    self.vulnerabilities_list,
-                )
-            )
+            vulnerabilities_list = self.vulnerabilities_list
+
             # Esta lista de excluidas no se imprimira para dejar un resultado más limpio
             vulnerabilities_excluded_list = list(
-                filter(lambda item: exclusions.get(item.id) != None, vulnerabilities_list_with_severity)
+                filter(
+                    lambda item: any(
+                        exclusion["id"] == item.id
+                        and exclusion["where"] in item.where_vulnerability
+                        for exclusion in exclusions
+                    ),
+                    vulnerabilities_list,
+                )
             )
+
             vulnerabilities_without_exclusions_list = list(
-                filter(lambda item: exclusions.get(item.id) == None, vulnerabilities_list_with_severity)
+                filter(
+                    lambda v: v not in vulnerabilities_excluded_list,
+                    vulnerabilities_list,
+                )
             )
 
             vulnerabilities_critical = reduce(
-                lambda count, vulnerability: count + 1 if vulnerability.severity == "critical" else count,
+                lambda count, vulnerability: count + 1
+                if vulnerability.severity == "critical"
+                else count,
                 vulnerabilities_without_exclusions_list,
                 0,
             )
             vulnerabilities_high = reduce(
-                lambda count, vulnerability: count + 1 if vulnerability.severity == "high" else count,
+                lambda count, vulnerability: count + 1
+                if vulnerability.severity == "high"
+                else count,
                 vulnerabilities_without_exclusions_list,
                 0,
             )
             vulnerabilities_medium = reduce(
-                lambda count, vulnerability: count + 1 if vulnerability.severity == "medium" else count,
+                lambda count, vulnerability: count + 1
+                if vulnerability.severity == "medium"
+                else count,
                 vulnerabilities_without_exclusions_list,
                 0,
             )
             vulnerabilities_low = reduce(
-                lambda count, vulnerability: count + 1 if vulnerability.severity == "low" else count,
+                lambda count, vulnerability: count + 1
+                if vulnerability.severity == "low"
+                else count,
                 vulnerabilities_without_exclusions_list,
                 0,
             )
             vulnerabilities_unknown = reduce(
-                lambda count, vulnerability: count + 1 if vulnerability.severity == "unknown" else count,
+                lambda count, vulnerability: count + 1
+                if vulnerability.severity == "unknown"
+                else count,
                 vulnerabilities_without_exclusions_list,
                 0,
             )
@@ -125,7 +150,11 @@ class BreakBuild:
                 )
                 print(AzureMessageResultPipeline.Succeeded.value)
         else:
-            print(AzureMessageLoggingPipeline.SucceededLogging.get_message("There are no vulnerabilities"))
+            print(
+                AzureMessageLoggingPipeline.SucceededLogging.get_message(
+                    "There are no vulnerabilities"
+                )
+            )
             print(AzureMessageResultPipeline.Succeeded.value)
 
         print(

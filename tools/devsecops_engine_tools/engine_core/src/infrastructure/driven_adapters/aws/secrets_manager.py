@@ -15,29 +15,17 @@ from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api impo
 
 @dataclass
 class SecretsManager(SecretsManagerGateway):
-    def get_secret(self, dict_args):
-        base_compact_remote_config_url = (
-            f"https://{SystemVariables.System_TeamFoundationCollectionUri.value().rstrip('/').split('/')[-1].replace('.visualstudio.com','')}"
-            f".visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/"
-            f"{dict_args['azure_remote_config_repo']}?path=/resources/ConfigTool.json"
-        )
-        utils_azure = AzureDevopsApi(
-            personal_access_token=SystemVariables.System_AccessToken.value(),
-            compact_remote_config_url=base_compact_remote_config_url,
-        )
-        connection = utils_azure.get_azure_connection()
-        config_tool = utils_azure.get_remote_json_config(connection=connection)
-
-        temp_credentials = self.assume_role(
-            config_tool["SECRET_MANAGER"]["AWS"]["ROLE_ARN"]
-        )
+    def get_secret(self, config_tool):
+        # temp_credentials = self.assume_role(
+        #     config_tool["SECRET_MANAGER"]["AWS"]["ROLE_ARN"]
+        # )
         session = boto3.session.Session()
         client = session.client(
             service_name="secretsmanager",
             region_name=config_tool["SECRET_MANAGER"]["AWS"]["REGION_NAME"],
-            aws_access_key_id=temp_credentials["AccessKeyId"],
-            aws_secret_access_key=temp_credentials["SecretAccessKey"],
-            aws_session_token=temp_credentials["SessionToken"],
+            # aws_access_key_id=temp_credentials["AccessKeyId"],
+            # aws_secret_access_key=temp_credentials["SecretAccessKey"],
+            # aws_session_token=temp_credentials["SessionToken"],
         )
 
         try:
