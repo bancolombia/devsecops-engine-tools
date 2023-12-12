@@ -132,8 +132,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         ).results
         return [
             {
-                "id": finding.vuln_id_from_tool,
-                "where": finding.file_path,
+                "Id": finding.vuln_id_from_tool,
+                "Where": finding.file_path,
                 "Create_Date": finding.accepted_risks[-1]["created"],
                 "Expired_Date": finding.accepted_risks[-1]["expiration_date"],
             }
