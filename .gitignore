@@ -36,3 +36,5 @@ prueba.py
 main.py
 common_devsecops_lib/sheckov_scan.json
 _core_test*
+
+*.DS_Store
