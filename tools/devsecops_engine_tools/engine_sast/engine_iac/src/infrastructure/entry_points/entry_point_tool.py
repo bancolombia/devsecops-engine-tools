@@ -167,14 +167,14 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
         result_scans, data_config.rules_all
     )
 
-    totalized_exclusions = data_config.exclusions_all
-    if data_config.exclusions_scope != None:
-        totalized_exclusions.update(data_config.exclusions_scope)
+    totalized_exclusions = []
+    totalized_exclusions.extend(data_config.exclusions_all) if data_config.exclusions_all is not None else None
+    totalized_exclusions.extend(data_config.exclusions_scope) if data_config.exclusions_scope is not None else None
 
-    input_break = InputCore(
+    input_core = InputCore(
         totalized_exclusions=totalized_exclusions,
         level_compliance_defined=data_config.level_compliance,
         path_file_results=generate_file_from_tool(tool, result_scans),
         scope_pipeline=data_config.scope_pipeline,
     )
-    return vulnerabilities_list, input_break
+    return vulnerabilities_list, input_core
