@@ -1,6 +1,7 @@
 import argparse
 import configparser
 import threading
+import platform
 import queue
 import json
 import os
@@ -126,7 +127,7 @@ def init_engine_sast_rm(
     )
 
     # Create configuration ssh external checks
-    if data_config.use_external_checks_git == "True":
+    if data_config.use_external_checks_git == "True" and platform.system() != "Linux":
         config_knowns_hosts(
             data_config.repository_ssh_host, data_config.repository_public_key_fp
         )

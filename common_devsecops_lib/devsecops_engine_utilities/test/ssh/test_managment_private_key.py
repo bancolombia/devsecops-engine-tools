@@ -1,6 +1,6 @@
 import os
 import tempfile
-from unittest.mock import patch
+from unittest.mock import patch, call
 from unittest import mock
 
 from devsecops_engine_utilities.ssh.managment_private_key import (
@@ -18,17 +18,15 @@ def test_decode_base64():
     assert result == "secret1"
 
 
-@mock.patch("platform.system")
-def test_config_knowns_hosts(platform_system):
+@patch("builtins.print")
+def test_config_knowns_hosts(mock_print):
     known_hosts_file_path = "~/.ssh/known_hosts"
     host = "example.com"
     ssh_key = "ssh-rsa ABCD1234"
 
-    platform_system.return_value = "Linux"
-
     config_knowns_hosts(host, ssh_key)
 
-    assert platform_system.called
+    mock_print.mocked_print.mock_calls == [call('"File known_hosts configured sucessfull."')]
 
 
 def test_create_ssh_private_file():
@@ -42,12 +40,9 @@ def test_create_ssh_private_file():
             assert content == ssh_key_content
 
 
-@mock.patch("platform.system")
-def test_add_ssh_private_key(platform_system):
-    platform_system.return_value = "Linux"
-
+def test_add_ssh_private_key():
     ssh_key_file_path = "/path/to/ssh/key"
     ssh_key_password = "password"
     agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
-    
+
     assert agent_env == None
