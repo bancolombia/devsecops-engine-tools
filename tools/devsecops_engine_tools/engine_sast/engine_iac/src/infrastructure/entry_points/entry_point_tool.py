@@ -26,9 +26,6 @@ from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables impo
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
     AzureDevopsIntegration,
 )
-from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.ResultScanObject import (
-    ResultScanObject,
-)
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovDeserializeConfig import (
     CheckovDeserializeConfig,
 )
@@ -38,6 +35,16 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_poin
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.exclusions import (
     exclusion,
 )
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovDeserealizator import (
+    CheckovDeserealizator,
+)
+from devsecops_engine_tools.engine_core.src.domain.model.InputCore import (
+    InputCore,
+)
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
+    generate_file_from_tool,
+)
+
 
 ENGINESAST_ENGINEIAC = "enginesast.engineiac"
 
@@ -155,12 +162,19 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
         result = output_queue.get()
         result_scans.extend(result)
 
-    result_scan_object = ResultScanObject(
-        scope_pipeline=data_config.scope_pipeline,
-        results_scan_list=result_scans,
-        rules_scaned=data_config.rules_all,
-        exclusions_all=data_config.exclusions_all,
-        exclusions_scope=data_config.exclusions_scope,
-        level_compliance=data_config.level_compliance,
+    checkov_deserealizator = CheckovDeserealizator()
+    vulnerabilities_list = checkov_deserealizator.get_list_vulnerability(
+        result_scans, data_config.rules_all
     )
-    return result_scan_object
+
+    totalized_exclusions = data_config.exclusions_all
+    if data_config.exclusions_scope != None:
+        totalized_exclusions.update(data_config.exclusions_scope)
+
+    input_break = InputCore(
+        totalized_exclusions=totalized_exclusions,
+        level_compliance_defined=data_config.level_compliance,
+        path_file_results=generate_file_from_tool(tool, result_scans),
+        scope_pipeline=data_config.scope_pipeline,
+    )
+    return vulnerabilities_list, input_break

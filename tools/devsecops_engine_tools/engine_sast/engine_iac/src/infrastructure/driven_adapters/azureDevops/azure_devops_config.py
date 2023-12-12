@@ -1,6 +1,6 @@
 import json
 from azure.devops.connection import Connection
-from msrest.authentication import BasicTokenAuthentication
+from msrest.authentication import BasicTokenAuthentication, BasicAuthentication
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.remote_config_gateway import (
     RemoteConfigGateway,
 )
@@ -14,7 +14,8 @@ class AzureDevopsIntegration(RemoteConfigGateway):
         try:
             system_access_token = SystemVariables.System_AccessToken.value()
             system_team_foundation_collectionuri = SystemVariables.System_TeamFoundationCollectionUri.value()
-            credentials = BasicTokenAuthentication({"access_token": system_access_token})
+            # credentials = BasicTokenAuthentication({"access_token": system_access_token})
+            credentials = BasicAuthentication(username="", password=system_access_token)
             self.connection = Connection(base_url=system_team_foundation_collectionuri, creds=credentials)
             return self.connection
         except Exception as e:
