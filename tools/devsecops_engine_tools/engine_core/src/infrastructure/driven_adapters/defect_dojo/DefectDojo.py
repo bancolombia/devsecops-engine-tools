@@ -22,7 +22,7 @@ from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline i
 @dataclass
 class DefectDojoPlatform(VulnerabilityManagementGateway):
     def send_vulnerability_management(
-        self, scan_type, file_path, dict_args, secret_tool, config_tool
+        self, scan_type, input_core, dict_args, secret_tool, config_tool
     ):
         token_dd = (
             dict_args["token_vulnerability_management"]
@@ -79,9 +79,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         "DEFECT_DOJO"
                     ]["HOST_DEFECT_DOJO"],
                     scan_type=scan_type,
-                    engagement_name=BuildVariables.Build_DefinitionName.value(),
-                    service=BuildVariables.Build_DefinitionName.value(),
-                    file=file_path,
+                    engagement_name=input_core.scope_pipeline,
+                    service=input_core.scope_pipeline,
+                    file=input_core.path_file_results,
                     version=BuildVariables.Build_BuildId.value(),
                     build_id=BuildVariables.Build_BuildNumber.value(),
                     source_code_management_uri=source_code_management_uri,

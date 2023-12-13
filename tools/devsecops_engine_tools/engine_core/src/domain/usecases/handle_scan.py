@@ -43,17 +43,17 @@ class HandleScan:
             if self.dict_args["use_vulnerability_management"] == "True":
                 self.vulnerability_management.send_vulnerability_management(
                     "Checkov Scan",
-                    input_core.path_file_results,
+                    input_core,
                     self.dict_args,
                     secret_tool,
-                    config_tool
+                    config_tool,
                 )
-                input_core.totalized_exclusions =  (
+                input_core.totalized_exclusions.extend(
                     self.vulnerability_management.get_findings_risk_acceptance(
                         input_core.scope_pipeline,
                         self.dict_args,
                         secret_tool,
-                        config_tool
+                        config_tool,
                     )
                 )
 
