@@ -10,6 +10,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.secrets_manager
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
+    VulnerabilityManagement,
+)
 
 
 MESSAGE_ENABLED = "not yet enabled"
@@ -37,17 +40,39 @@ class HandleScan:
             vulnerabilities_list, input_core = runner_engine_iac(
                 self.dict_args["remote_config_repo"],
                 "SAST/IAC/configTools.json",
-                "CHECKOV",
+                config_tool["ENGINE_IAC"],
                 self.dict_args["environment"],
             )
             if self.dict_args["use_vulnerability_management"] == "True":
-                self.vulnerability_management.send_vulnerability_management(
-                    "Checkov Scan",
-                    input_core,
-                    self.dict_args,
-                    secret_tool,
-                    config_tool,
-                )
+                try:
+                    self.vulnerability_management.send_vulnerability_management(
+                        VulnerabilityManagement(
+                            config_tool["ENGINE_IAC"],
+                            input_core,
+                            self.dict_args,
+                            secret_tool,
+                            config_tool,
+                            self.devops_platform_gateway.get_source_code_management_uri(),
+                            self.devops_platform_gateway.get_variable("branch_name"),
+                            self.devops_platform_gateway.get_base_compact_remote_config_url(
+                                self.dict_args["remote_config_repo"]
+                            ),
+                            self.devops_platform_gateway.get_variable("access_token"),
+                            self.devops_platform_gateway.get_variable("version"),
+                            self.devops_platform_gateway.get_variable("build_id"),
+                            self.devops_platform_gateway.get_variable("branch_tag"),
+                            self.devops_platform_gateway.get_variable("commit_hash"),
+                            self.devops_platform_gateway.get_variable("environment"),
+                        )
+                    )
+                except Exception as ex:
+                    self.devops_platform_gateway.logging(
+                        "warning",
+                        "Error sending report to vulnerability management with the following error: {0} ".format(
+                            ex
+                        ),
+                    )
+
                 input_core.totalized_exclusions.extend(
                     self.vulnerability_management.get_findings_risk_acceptance(
                         input_core.scope_pipeline,

@@ -15,7 +15,9 @@ def get_inputs_from_cli(args):
     parser.add_argument("--tool", type=str, required=True, help="")
     parser.add_argument("--environment", type=str, required=True, help="")
     parser.add_argument("--use_secrets_manager", type=str, required=False, help="")
-    parser.add_argument("--use_vulnerability_management", type=str, required=False, help="")
+    parser.add_argument(
+        "--use_vulnerability_management", type=str, required=False, help=""
+    )
     parser.add_argument("--token_cmdb", required=False, help="")
     parser.add_argument("--token_vulnerability_management", required=False, help="")
 
@@ -34,7 +36,8 @@ def get_inputs_from_cli(args):
 def init_engine_core(
     vulnerability_management_gateway: any,
     secrets_manager_gateway: any,
-    devops_platform_gateway: any
+    devops_platform_gateway: any,
+    print_table_gateway: any,
 ):
     args = get_inputs_from_cli(sys.argv[1:])
     instance = HandleScan(
@@ -44,4 +47,9 @@ def init_engine_core(
         dict_args=args,
     )
     vulnerabilities_list, input_core = instance.process()
-    BreakBuild(vulnerabilities_list=vulnerabilities_list, input_core=input_core)
+    BreakBuild(
+        devops_platform_gateway,
+        print_table_gateway,
+        vulnerabilities_list=vulnerabilities_list,
+        input_core=input_core,
+    )
