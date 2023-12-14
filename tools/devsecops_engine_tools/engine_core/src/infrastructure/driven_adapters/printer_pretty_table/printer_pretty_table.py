@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.print_table_gateway import (
-    PrintTableGateway,
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_gateway import (
+    PrinterTableGateway,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.vulnerability import (
     Vulnerability,
@@ -10,7 +10,7 @@ from prettytable import PrettyTable, DOUBLE_BORDER
 
 
 @dataclass
-class PrintPrettyTable(PrintTableGateway):
+class PrinterPrettyTable(PrinterTableGateway):
     def print_table(self, vulnerability_list: "list[Vulnerability]"):
         vulnerability_table = PrettyTable(["Severity", "ID", "Description", "Where"])
 
