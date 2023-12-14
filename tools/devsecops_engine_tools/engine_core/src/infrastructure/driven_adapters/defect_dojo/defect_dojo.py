@@ -77,7 +77,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
             response = DefectDojo.send_import_scan(request)
             if hasattr(response, "test_url"):
-                print("Report sent to defect dojo: ", response.test_url)
+                print("Report sent to vulnerability management: ", response.test_url)
             else:
                 raise Exception(response)
 
