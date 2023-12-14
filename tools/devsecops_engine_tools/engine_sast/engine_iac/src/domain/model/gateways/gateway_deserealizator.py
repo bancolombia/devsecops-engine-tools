@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from devsecops_engine_tools.engine_core.src.domain.model.Vulnerability import Vulnerability
+from devsecops_engine_tools.engine_core.src.domain.model.vulnerability import Vulnerability
 
 
 class DeseralizatorGateway(metaclass=ABCMeta):

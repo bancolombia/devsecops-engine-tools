@@ -38,7 +38,7 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_poin
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovDeserealizator import (
     CheckovDeserealizator,
 )
-from devsecops_engine_tools.engine_core.src.domain.model.InputCore import (
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore,
 )
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.print_table_gateway import (
     PrintTableGateway,
 )
-from devsecops_engine_tools.engine_core.src.domain.model.Vulnerability import (
+from devsecops_engine_tools.engine_core.src.domain.model.vulnerability import (
     Vulnerability,
 )
 from prettytable import PrettyTable, DOUBLE_BORDER
