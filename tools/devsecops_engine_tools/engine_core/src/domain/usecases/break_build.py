@@ -8,15 +8,15 @@ from devsecops_engine_tools.engine_core.src.domain.model.vulnerability import (
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.print_table_gateway import (
-    PrintTableGateway,
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_gateway import (
+    PrinterTableGateway,
 )
 
 
 @dataclass
 class BreakBuild:
     devops_platform_gateway: DevopsPlatformGateway
-    print_table_gateway: PrintTableGateway
+    print_table_gateway: PrinterTableGateway
     vulnerabilities_list: "list[Vulnerability]"
     input_core: InputCore
 

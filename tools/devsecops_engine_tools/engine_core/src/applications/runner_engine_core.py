@@ -10,8 +10,8 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.s
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops import (
     AzureDevops,
 )
-from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.print_pretty_table.print_pretty_table import (
-    PrintPrettyTable,
+from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.printer_pretty_table.printer_pretty_table import (
+    PrinterPrettyTable,
 )
 
 
@@ -21,13 +21,13 @@ def application_core():
         vulnerability_management_gateway = DefectDojoPlatform()
         secrets_manager_gateway = SecretsManager()
         devops_platform_gateway = AzureDevops()
-        print_table_gateway = PrintPrettyTable()
+        printer_table_gateway = PrinterPrettyTable()
 
         init_engine_core(
             vulnerability_management_gateway,
             secrets_manager_gateway,
             devops_platform_gateway,
-            print_table_gateway
+            printer_table_gateway
         )
     except Exception as e:
         print(
