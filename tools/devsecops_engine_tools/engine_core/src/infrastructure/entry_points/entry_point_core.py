@@ -12,11 +12,29 @@ from devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan import (
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("--remote_config_repo", type=str, required=True, help="")
-    parser.add_argument("--tool", type=str, required=True, help="")
-    parser.add_argument("--environment", type=str, required=True, help="")
-    parser.add_argument("--use_secrets_manager", type=str, required=False, help="")
     parser.add_argument(
-        "--use_vulnerability_management", type=str, required=False, help=""
+        "--tool",
+        choices=["engine_iac", "engine_dast", "engine_secret", "engine_dependencies"],
+        type=str,
+        required=True,
+        help="",
+    )
+    parser.add_argument(
+        "--environment", choices=["dev", "qa", "pdn"], type=str, required=True, help=""
+    )
+    parser.add_argument(
+        "--use_secrets_manager",
+        choices=["True", "False"],
+        type=str,
+        required=False,
+        help="",
+    )
+    parser.add_argument(
+        "--use_vulnerability_management",
+        choices=["True", "False"],
+        type=str,
+        required=False,
+        help="",
     )
     parser.add_argument("--token_cmdb", required=False, help="")
     parser.add_argument("--token_vulnerability_management", required=False, help="")
