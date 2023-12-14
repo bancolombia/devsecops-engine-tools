@@ -16,15 +16,16 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_g
 @dataclass
 class BreakBuild:
     devops_platform_gateway: DevopsPlatformGateway
-    print_table_gateway: PrinterTableGateway
+    printer_table_gateway: PrinterTableGateway
     vulnerabilities_list: "list[Vulnerability]"
     input_core: InputCore
 
     def __post_init__(self):
         devops_platform_gateway = self.devops_platform_gateway
-        print_table_gateway = self.print_table_gateway
+        printer_table_gateway = self.printer_table_gateway
         level_compliance = self.input_core.level_compliance_defined
         exclusions = self.input_core.totalized_exclusions
+        custom_message = self.input_core.custom_message_break_build
 
         if len(self.vulnerabilities_list) != 0:
             vulnerabilities_list = self.vulnerabilities_list
@@ -87,13 +88,22 @@ class BreakBuild:
                 0,
             )
 
-            if (
+            if sum([vulnerabilities_critical, vulnerabilities_high, vulnerabilities_medium, vulnerabilities_low]) == 0:
+                print(
+                    devops_platform_gateway.logging(
+                        "succeeded", "There are no vulnerabilities"
+                    )
+                )
+                print(devops_platform_gateway.result_pipeline("succeeded"))
+            elif (
                 vulnerabilities_critical >= level_compliance.critical
                 or vulnerabilities_high >= level_compliance.high
                 or vulnerabilities_medium >= level_compliance.medium
                 or vulnerabilities_low >= level_compliance.low
             ):
-                print_table_gateway.print_table(vulnerabilities_without_exclusions_list)
+                printer_table_gateway.print_table(
+                    vulnerabilities_without_exclusions_list
+                )
                 print(
                     devops_platform_gateway.logging(
                         "error",
@@ -111,7 +121,9 @@ class BreakBuild:
                 )
                 print(devops_platform_gateway.result_pipeline("failed"))
             else:
-                print_table_gateway.print_table(vulnerabilities_without_exclusions_list)
+                printer_table_gateway.print_table(
+                    vulnerabilities_without_exclusions_list
+                )
                 print(
                     devops_platform_gateway.logging(
                         "warning",
@@ -139,6 +151,6 @@ class BreakBuild:
         print(
             devops_platform_gateway.logging(
                 "info",
-                "If you have doubts, visit https://discuss.apps.bancolombia.com/t/lanzamiento-csa-analisis-de-seguridad-en-contenedores/6199",
+                custom_message,
             )
         )

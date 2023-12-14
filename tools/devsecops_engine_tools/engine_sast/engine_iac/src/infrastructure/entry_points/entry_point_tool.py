@@ -175,6 +175,7 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
         totalized_exclusions=totalized_exclusions,
         level_compliance_defined=data_config.level_compliance,
         path_file_results=generate_file_from_tool(tool, result_scans),
-        scope_pipeline=data_config.scope_pipeline,
+        custom_message_break_build=data_config.message_info_sast_rm,
+        scope_pipeline=data_config.scope_pipeline
     )
     return vulnerabilities_list, input_core
