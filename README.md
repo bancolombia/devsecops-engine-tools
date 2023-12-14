@@ -8,12 +8,12 @@ Tool that unifies the evaluation of the different devsecops practices being agno
 
 # Componentss
 
-```bash
+```
    📦common_devsecops_lib: Utilities for DevSecOps tools
 ```
 
 
-```bash
+```
    📦tools: DevSecOps Practice Modules
 ```
 
