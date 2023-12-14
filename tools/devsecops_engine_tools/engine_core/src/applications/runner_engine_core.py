@@ -1,7 +1,7 @@
 from devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core import (
     init_engine_core,
 )
-from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.DefectDojo import (
+from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo import (
     DefectDojoPlatform,
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.secrets_manager import (

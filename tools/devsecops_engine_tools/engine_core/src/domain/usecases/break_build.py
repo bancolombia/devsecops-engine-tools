@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from functools import reduce
 
-from devsecops_engine_tools.engine_core.src.domain.model.InputCore import InputCore
-from devsecops_engine_tools.engine_core.src.domain.model.Vulnerability import (
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
+from devsecops_engine_tools.engine_core.src.domain.model.vulnerability import (
     Vulnerability,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
