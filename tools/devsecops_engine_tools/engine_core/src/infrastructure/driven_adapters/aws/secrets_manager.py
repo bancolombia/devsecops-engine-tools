@@ -5,12 +5,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.secrets_manager
 import boto3
 import json
 from botocore.exceptions import NoCredentialsError
-from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
-    SystemVariables,
-)
-from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import (
-    AzureDevopsApi,
-)
 
 
 @dataclass

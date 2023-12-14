@@ -66,12 +66,12 @@ class HandleScan:
                         )
                     )
                 except Exception as ex:
-                    self.devops_platform_gateway.logging(
+                    print(self.devops_platform_gateway.logging(
                         "warning",
                         "Error sending report to vulnerability management with the following error: {0} ".format(
                             ex
                         ),
-                    )
+                    ))
 
                 input_core.totalized_exclusions.extend(
                     self.vulnerability_management.get_findings_risk_acceptance(
