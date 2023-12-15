@@ -18,7 +18,6 @@ def config_knowns_hosts(host, ssh_key):
         else:
             with open(known_hosts_file_path, 'a') as known_hosts_file:
                 known_hosts_file.write(line_to_add)
-        print("File known_hosts configured sucessfull.")
     except Exception as e:
         print(f"An error ocurred while configuring file: {e}")
 
@@ -29,7 +28,6 @@ def create_ssh_private_file(ssh_key_file_path, ssh_key_content):
         permisos = 0o600
 
         os.chmod(ssh_key_file_path, permisos)
-        print("File create sucessfull.")
     except Exception as e:
         print(f"An error ocurred creating file: {e}")
 
@@ -58,7 +56,6 @@ def add_ssh_private_key(ssh_key_file_path, ssh_key_password):
         # Esperar a que se complete la operación
         ssh_add_process.expect(pexpect.EOF)
 
-        print("Private key add sucessfull.")
         return agent_env
     except Exception as e:
         print(f"An error ocurred adding private key: {e}")
