@@ -10,8 +10,6 @@ def decode_base64(secret_data, key_name):
 
 def config_knowns_hosts(host, ssh_key):
     try:
-        if platform.system() != "Linux":
-            raise Exception("This script is only compatible with Linux systems")
         known_hosts_file_path = os.path.expanduser("~/.ssh/known_hosts")
         line_to_add = f"{host} ssh-rsa {ssh_key}\n"
         if not os.path.exists(known_hosts_file_path):
@@ -38,9 +36,6 @@ def create_ssh_private_file(ssh_key_file_path, ssh_key_content):
 
 def add_ssh_private_key(ssh_key_file_path, ssh_key_password):
     try:
-        if platform.system() != "Linux":
-            raise Exception("This script is only compatible with Linux systems")
-
         # Iniciar un nuevo shell y evaluar el comando ssh-agent
         ssh_process = pexpect.spawn("ssh-agent -s")
         ssh_process.expect("SSH_AUTH_SOCK=(.*?);")

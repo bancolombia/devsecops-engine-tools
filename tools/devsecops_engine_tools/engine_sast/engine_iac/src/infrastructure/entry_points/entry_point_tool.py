@@ -127,7 +127,11 @@ def init_engine_sast_rm(
     )
 
     # Create configuration ssh external checks
-    if data_config.use_external_checks_git == "True" and platform.system() == "Linux":
+    agent_env = None
+    if data_config.use_external_checks_git == "True" and platform.system() in (
+        "Linux",
+        "Darwin",
+    ):
         config_knowns_hosts(
             data_config.repository_ssh_host, data_config.repository_public_key_fp
         )
@@ -153,10 +157,12 @@ def init_engine_sast_rm(
                 soft_fail=False,
                 external_checks_git=[data_config.external_checks_git]
                 if data_config.use_external_checks_git == "True"
+                and agent_env is not None
                 else [],
                 directories=folder,
                 env=agent_env
                 if data_config.use_external_checks_git == "True"
+                and agent_env is not None
                 else None,
             )
             checkov_config.create_config_dict()
