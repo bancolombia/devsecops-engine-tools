@@ -127,7 +127,7 @@ def init_engine_sast_rm(
     )
 
     # Create configuration ssh external checks
-    agent_env = None
+    agent_env = []
     if data_config.use_external_checks_git == "True" and platform.system() in (
         "Linux",
         "Darwin",
@@ -155,15 +155,12 @@ def init_engine_sast_rm(
                     if value["environment"].get(environment)
                 ],
                 soft_fail=False,
+                directories=folder,
                 external_checks_git=[data_config.external_checks_git]
                 if data_config.use_external_checks_git == "True"
-                and agent_env is not None
+                and agent_env is not None and rule == "RULES_K8S"
                 else [],
-                directories=folder,
                 env=agent_env
-                if data_config.use_external_checks_git == "True"
-                and agent_env is not None
-                else None,
             )
             checkov_config.create_config_dict()
             checkov_run = CheckovTool(checkov_config=checkov_config)
