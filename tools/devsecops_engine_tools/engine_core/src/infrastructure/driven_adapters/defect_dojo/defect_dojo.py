@@ -12,6 +12,10 @@ from devsecops_engine_utilities.defect_dojo import (
     Finding,
 )
 from devsecops_engine_utilities.utils.session_manager import SessionManager
+from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
+    ExceptionVulnerabilityManagement,
+    ExceptionFindingsRiskAcceptance
+)
 
 
 @dataclass
@@ -90,7 +94,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 else:
                     raise Exception(response)
         except Exception as ex:
-            raise Exception(
+            raise ExceptionVulnerabilityManagement(
                 "Error sending report to vulnerability management with the following error: {0} ".format(
                     ex
                 )
@@ -124,7 +128,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 for finding in findings_list
             ]
         except Exception as ex:
-            raise Exception(
+            raise ExceptionFindingsRiskAcceptance(
                 "Error getting risk acceptance findings with the following error: {0} ".format(
                     ex
                 )

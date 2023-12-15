@@ -13,6 +13,10 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform
 from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
     VulnerabilityManagement,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
+    ExceptionVulnerabilityManagement,
+    ExceptionFindingsRiskAcceptance,
+)
 
 
 MESSAGE_ENABLED = "not yet enabled"
@@ -65,7 +69,9 @@ class HandleScan:
                             self.devops_platform_gateway.get_variable("environment"),
                         )
                     )
-
+                except ExceptionVulnerabilityManagement as ex1:
+                    print(self.devops_platform_gateway.logging("warning", str(ex1)))
+                try:
                     input_core.totalized_exclusions.extend(
                         self.vulnerability_management.get_findings_risk_acceptance(
                             input_core.scope_pipeline,
@@ -74,9 +80,8 @@ class HandleScan:
                             config_tool,
                         )
                     )
-
-                except Exception as ex:
-                    print(self.devops_platform_gateway.logging("warning", ex))
+                except ExceptionFindingsRiskAcceptance as ex2:
+                    print(self.devops_platform_gateway.logging("warning", str(ex2)))
 
             return vulnerabilities_list, input_core
         elif "engine_dast" in self.dict_args["tool"]:
