@@ -156,7 +156,7 @@ def init_engine_sast_rm(
                 ],
                 soft_fail=False,
                 directories=folder,
-                external_checks_git=f"{[data_config.external_checks_git]}/kubernetes"
+                external_checks_git=[f"{data_config.external_checks_git}/kubernetes"]
                 if data_config.use_external_checks_git == "True"
                 and agent_env is not None and rule == "RULES_K8S"
                 else [],
