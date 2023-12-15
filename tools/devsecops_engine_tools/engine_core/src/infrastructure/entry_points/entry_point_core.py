@@ -24,14 +24,14 @@ def get_inputs_from_cli(args):
     )
     parser.add_argument(
         "--use_secrets_manager",
-        choices=["True", "False"],
+        choices=["true", "false"],
         type=str,
         required=False,
         help="",
     )
     parser.add_argument(
         "--use_vulnerability_management",
-        choices=["True", "False"],
+        choices=["true", "false"],
         type=str,
         required=False,
         help="",

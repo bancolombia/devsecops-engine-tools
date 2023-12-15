@@ -34,7 +34,7 @@ class HandleScan:
     def process(self):
         secret_tool = None
         config_tool = self.devops_platform_gateway.get_remote_config(self.dict_args)
-        if self.dict_args["use_secrets_manager"] == "True":
+        if self.dict_args["use_secrets_manager"] == "true":
             secret_tool = self.secrets_manager_gateway.get_secret(config_tool)
         if "engine_iac" in self.dict_args["tool"]:
             vulnerabilities_list, input_core = runner_engine_iac(
@@ -43,7 +43,7 @@ class HandleScan:
                 config_tool["ENGINE_IAC"],
                 self.dict_args["environment"],
             )
-            if self.dict_args["use_vulnerability_management"] == "True":
+            if self.dict_args["use_vulnerability_management"] == "true":
                 try:
                     self.vulnerability_management.send_vulnerability_management(
                         VulnerabilityManagement(
