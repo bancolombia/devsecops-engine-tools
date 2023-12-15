@@ -65,22 +65,18 @@ class HandleScan:
                             self.devops_platform_gateway.get_variable("environment"),
                         )
                     )
-                except Exception as ex:
-                    print(self.devops_platform_gateway.logging(
-                        "warning",
-                        "Error sending report to vulnerability management with the following error: {0} ".format(
-                            ex
-                        ),
-                    ))
 
-                input_core.totalized_exclusions.extend(
-                    self.vulnerability_management.get_findings_risk_acceptance(
-                        input_core.scope_pipeline,
-                        self.dict_args,
-                        secret_tool,
-                        config_tool,
+                    input_core.totalized_exclusions.extend(
+                        self.vulnerability_management.get_findings_risk_acceptance(
+                            input_core.scope_pipeline,
+                            self.dict_args,
+                            secret_tool,
+                            config_tool,
+                        )
                     )
-                )
+
+                except Exception as ex:
+                    print(self.devops_platform_gateway.logging("warning", ex))
 
             return vulnerabilities_list, input_core
         elif "engine_dast" in self.dict_args["tool"]:
