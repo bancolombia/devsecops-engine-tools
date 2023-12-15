@@ -21,6 +21,7 @@ class CheckovConfigEnum(Enum):
     DOCKER_IMAGE = "docker-image"
     DOCKERFILEPATH = "dockerfile-path"
     EXTERNAL_CHECKS_GIT = "external-checks-git"
+    SKIP_DOWNLOAD = "skip-download"
 
 
 class CheckovConfig(ConfigToolGateway):
@@ -96,5 +97,8 @@ class CheckovConfig(ConfigToolGateway):
 
         if self.external_checks_git is not None:
             self.dict_confg_file[CheckovConfigEnum.EXTERNAL_CHECKS_GIT.value] = self.external_checks_git
+
+        if self.skip_download is not None:
+            self.dict_confg_file[CheckovConfigEnum.SKIP_DOWNLOAD.value] = self.skip_download
 
         return self.dict_confg_file
