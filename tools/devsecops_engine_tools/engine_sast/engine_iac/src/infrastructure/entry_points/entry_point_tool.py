@@ -127,7 +127,7 @@ def init_engine_sast_rm(
     )
 
     # Create configuration ssh external checks
-    agent_env = []
+    agent_env = None
     if data_config.use_external_checks_git == "True" and platform.system() in (
         "Linux",
         "Darwin",
