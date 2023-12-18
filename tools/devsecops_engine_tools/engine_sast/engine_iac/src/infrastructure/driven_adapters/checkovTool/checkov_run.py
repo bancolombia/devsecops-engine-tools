@@ -31,6 +31,5 @@ class CheckovTool(ToolGateway):
         result = subprocess.run(command, capture_output=True, text=True, shell=True, env={**dict(os.environ), **self.checkov_config.env})
         output = result.stdout.strip()
         # error = result.stderr.strip()
-        print(result.stderr.strip())
         # TODO revisar el stderr para manejo de excepciones.
         return output
