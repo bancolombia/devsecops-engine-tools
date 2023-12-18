@@ -1,7 +1,6 @@
 import os
 import pexpect
 import base64
-import paramiko
 
 
 def decode_base64(secret_data, key_name):
@@ -37,40 +36,28 @@ def create_ssh_private_file(ssh_key_file_path, ssh_key_content):
 
 def add_ssh_private_key(ssh_key_file_path, ssh_key_password):
     try:
-        # Cargar la clave privada utilizando Paramiko
-        private_key = paramiko.RSAKey(filename=ssh_key_file_path, password=ssh_key_password)
-
-        # Establecer la conexión SSH con un agente temporal
-        agent = paramiko.Agent()
-        agent.add_key(private_key)
+        # Iniciar un nuevo shell y evaluar el comando ssh-agent
+        ssh_process = pexpect.spawn("ssh-agent -s")
+        ssh_process.expect("SSH_AUTH_SOCK=(.*?);")
+        ssh_auth_sock = ssh_process.match.group(1).decode()
+        ssh_process.expect("SSH_AGENT_PID=(.*?);")
+        ssh_agent_pid = ssh_process.match.group(1).decode()
         
+        agent_env = {"SSH_AUTH_SOCK": ssh_auth_sock, "SSH_AGENT_PID": ssh_agent_pid}
+
+        # Esperar a que se complete la inicialización de ssh-agent
+        ssh_process.expect(pexpect.EOF)
+
+        # Agregar la clave privada al ssh-agent proporcionando la contraseña
+        ssh_add_process = pexpect.spawn(f"ssh-add {ssh_key_file_path}", env=agent_env)
+
+        # Esperar la solicitud de contraseña y proporcionarla
+        ssh_add_process.expect("Enter passphrase", timeout=5)
+        ssh_add_process.sendline(ssh_key_password)
+
+        # Esperar a que se complete la operación
+        ssh_add_process.expect(pexpect.EOF)
+
+        return agent_env
     except Exception as e:
-        print(f"An error occurred adding private key: {e}")
-
-# def add_ssh_private_key(ssh_key_file_path, ssh_key_password):
-#     try:
-#         # Iniciar un nuevo shell y evaluar el comando ssh-agent
-#         ssh_process = pexpect.spawn("ssh-agent -s")
-#         ssh_process.expect("SSH_AUTH_SOCK=(.*?);")
-#         ssh_auth_sock = ssh_process.match.group(1).decode()
-#         ssh_process.expect("SSH_AGENT_PID=(.*?);")
-#         ssh_agent_pid = ssh_process.match.group(1).decode()
-        
-#         agent_env = {"SSH_AUTH_SOCK": ssh_auth_sock, "SSH_AGENT_PID": ssh_agent_pid}
-
-#         # Esperar a que se complete la inicialización de ssh-agent
-#         ssh_process.expect(pexpect.EOF)
-
-#         # Agregar la clave privada al ssh-agent proporcionando la contraseña
-#         ssh_add_process = pexpect.spawn(f"ssh-add {ssh_key_file_path}", env=agent_env)
-
-#         # Esperar la solicitud de contraseña y proporcionarla
-#         ssh_add_process.expect("Enter passphrase", timeout=5)
-#         ssh_add_process.sendline(ssh_key_password)
-
-#         # Esperar a que se complete la operación
-#         ssh_add_process.expect(pexpect.EOF)
-
-#         return agent_env
-#     except Exception as e:
-#         print(f"An error ocurred adding private key: {e}")
+        print(f"An error ocurred adding private key: {e}")
