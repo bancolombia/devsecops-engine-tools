@@ -1,5 +1,6 @@
 import yaml
 import subprocess
+import os
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import ToolGateway
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
     CheckovConfig,
@@ -27,7 +28,7 @@ class CheckovTool(ToolGateway):
             + self.checkov_config.config_file_name
             + self.CHECKOV_CONFIG_FILE
         )
-        result = subprocess.run(command, capture_output=True, text=True, shell=True, env=self.checkov_config.env)
+        result = subprocess.run(command, capture_output=True, text=True, shell=True, env={**dict(os.environ), **self.checkov_config.env})
         output = result.stdout.strip()
         # error = result.stderr.strip()
         print(result.stderr.strip())
