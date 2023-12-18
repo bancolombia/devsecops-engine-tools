@@ -2,20 +2,12 @@
 
 *Please include a summary of the change and which issue is fixed. List any dependencies that are required for this change.*
 
-Fixes # (issue)
-
-## New/Edited policies
-
-### Description
-*Include a description of what makes it a violation and any relevant external links.*
-
 ### Fix
 *How does someone fix the issue in code and/or in runtime?*
 
-
 ## Checklist:
 
-- [ ] The pull request is complete according to the guide of [contributing]() of this project
+- [ ] The pull request is complete according to the guide of [contributing](https://github.com/bancolombia/NU0429001_devsecops_engine/blob/trunk/docs/CONTRIBUTING.md) of this project
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
