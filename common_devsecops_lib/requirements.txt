@@ -10,3 +10,4 @@ python-decouple==3.8
 requests_toolbelt==1.0.0
 python-dateutil==2.8.2
 pexpect==4.9.0
+paramiko==3.3.1
