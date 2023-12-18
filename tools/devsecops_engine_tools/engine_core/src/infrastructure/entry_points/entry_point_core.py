@@ -14,7 +14,7 @@ def get_inputs_from_cli(args):
     parser.add_argument("--remote_config_repo", type=str, required=True, help="")
     parser.add_argument(
         "--tool",
-        choices=["engine_iac", "engine_dast", "engine_secret", "engine_dependencies"],
+        choices=["engine_iac", "engine_dast", "engine_secret", "engine_dependencies","engine_container"],
         type=str,
         required=True,
         help="",
