@@ -1,15 +1,21 @@
-from devsecops_engine_tools.engine_core.src.domain.model.InputCore import InputCore
 from devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_scan import (
     runner_engine_iac,
-)
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.gateway_deserealizator import (
-    DeseralizatorGateway,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_management_gateway import (
     VulnerabilityManagementGateway,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.secrets_manager_gateway import (
     SecretsManagerGateway,
+)
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway,
+)
+from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
+    VulnerabilityManagement,
+)
+from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
+    ExceptionVulnerabilityManagement,
+    ExceptionFindingsRiskAcceptance,
 )
 
 
@@ -20,48 +26,63 @@ class HandleScan:
     def __init__(
         self,
         vulnerability_management: VulnerabilityManagementGateway,
-        deseralizator_gateway: DeseralizatorGateway,
         secrets_manager_gateway: SecretsManagerGateway,
+        devops_platform_gateway: DevopsPlatformGateway,
         dict_args: any,
     ):
         self.vulnerability_management = vulnerability_management
-        self.deseralizator_gateway = deseralizator_gateway
         self.secrets_manager_gateway = secrets_manager_gateway
+        self.devops_platform_gateway = devops_platform_gateway
         self.dict_args = dict_args
 
     def process(self):
         secret_tool = None
-        if self.dict_args["use_secrets_manager"] == "True":
-            secret_tool = self.secrets_manager_gateway.get_secret(self.dict_args)
+        config_tool = self.devops_platform_gateway.get_remote_config(self.dict_args)
+        if self.dict_args["use_secrets_manager"] == "true":
+            secret_tool = self.secrets_manager_gateway.get_secret(config_tool)
         if "engine_iac" in self.dict_args["tool"]:
-            result_list_engine_iac = runner_engine_iac(
-                self.dict_args["azure_remote_config_repo"],
+            vulnerabilities_list, input_core = runner_engine_iac(
+                self.dict_args["remote_config_repo"],
                 "SAST/IAC/configTools.json",
-                "CHECKOV",
+                config_tool["ENGINE_IAC"],
                 self.dict_args["environment"],
             )
-            if self.dict_args["send_to_defectdojo"] == "True":
-                self.vulnerability_management.send_vulnerability_management(
-                    "Checkov Scan",
-                    result_list_engine_iac.results_scan_list,
-                    self.dict_args,
-                    secret_tool
-                )
-            rules_scaned = result_list_engine_iac.rules_scaned
-            totalized_exclusions = result_list_engine_iac.exclusions_all
-            if result_list_engine_iac.exclusions_scope != None:
-                totalized_exclusions.update(result_list_engine_iac.exclusions_scope)
-            level_compliance_defined = result_list_engine_iac.level_compliance
-            scope_pipeline = result_list_engine_iac.scope_pipeline
-            vulnerabilities_list = self.deseralizator_gateway.get_list_vulnerability(
-                result_list_engine_iac.results_scan_list
-            )
-            input_core = InputCore(
-                totalized_exclusions=totalized_exclusions,
-                level_compliance_defined=level_compliance_defined,
-                rules_scaned=rules_scaned,
-                scope_pipeline=scope_pipeline,
-            )
+            if self.dict_args["use_vulnerability_management"] == "true":
+                try:
+                    self.vulnerability_management.send_vulnerability_management(
+                        VulnerabilityManagement(
+                            config_tool["ENGINE_IAC"],
+                            input_core,
+                            self.dict_args,
+                            secret_tool,
+                            config_tool,
+                            self.devops_platform_gateway.get_source_code_management_uri(),
+                            self.devops_platform_gateway.get_variable("branch_name"),
+                            self.devops_platform_gateway.get_base_compact_remote_config_url(
+                                self.dict_args["remote_config_repo"]
+                            ),
+                            self.devops_platform_gateway.get_variable("access_token"),
+                            self.devops_platform_gateway.get_variable("version"),
+                            self.devops_platform_gateway.get_variable("build_id"),
+                            self.devops_platform_gateway.get_variable("branch_tag"),
+                            self.devops_platform_gateway.get_variable("commit_hash"),
+                            self.devops_platform_gateway.get_variable("environment"),
+                        )
+                    )
+                except ExceptionVulnerabilityManagement as ex1:
+                    print(self.devops_platform_gateway.logging("warning", str(ex1)))
+                try:
+                    input_core.totalized_exclusions.extend(
+                        self.vulnerability_management.get_findings_risk_acceptance(
+                            input_core.scope_pipeline,
+                            self.dict_args,
+                            secret_tool,
+                            config_tool,
+                        )
+                    )
+                except ExceptionFindingsRiskAcceptance as ex2:
+                    print(self.devops_platform_gateway.logging("warning", str(ex2)))
+
             return vulnerabilities_list, input_core
         elif "engine_dast" in self.dict_args["tool"]:
             print(MESSAGE_ENABLED)

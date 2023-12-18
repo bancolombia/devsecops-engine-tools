@@ -3,7 +3,8 @@ from dataclasses import dataclass
 
 @dataclass
 class InputCore:
-    totalized_exclusions: dict
+    totalized_exclusions: list
     level_compliance_defined: dict
-    rules_scaned: dict
+    path_file_results: str
+    custom_message_break_build: str
     scope_pipeline: str
