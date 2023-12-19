@@ -4,6 +4,7 @@ remote_config = """{
         "SEARCH_PATTERN": ["AW","NU"],
         "IGNORE_SEARCH_PATTERN" : ["_test"],
         "EXCLUSIONS_PATH" : "/SAST/IAC/Exclusions/Exclusions.json",
+        "MESSAGE_INFO_SAST_RM": "If you have doubts, visit https://discuss.apps.bancolombia.com/t/lanzamiento-csa-analisis-de-seguridad-en-contenedores/6199",
         "LEVEL_COMPLIANCE": {
             "dev": {"Critical": 0,"High": 1,"Medium": 2,"Low": 5},
             "qa": {"Critical": 0,"High": 1,"Medium": 2,"Low": 5},
