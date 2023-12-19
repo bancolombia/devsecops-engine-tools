@@ -6,6 +6,8 @@ from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline i
 )
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan import ( PrismaCloudManagerScan)
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.docker.docker_images import (DockerImages)
+from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_deserialize_output import (PrismaDeserealizator)
+
 def runner_engine_container(dict_args, token):
     try:
         # (
@@ -19,8 +21,10 @@ def runner_engine_container(dict_args, token):
         # )
         tool_run = PrismaCloudManagerScan()
         tool_images = DockerImages()
+        tool_deseralizator = PrismaDeserealizator()
         return init_engine_sca_rm(tool_run,
             tool_images,
+            tool_deseralizator,
             dict_args,
             token
         )
