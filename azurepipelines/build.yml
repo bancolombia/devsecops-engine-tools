@@ -30,6 +30,11 @@ steps:
 - script: |
     apt-get update
     apt-get install openssh-client -y
+  workingDirectory: $(System.DefaultWorkingDirectory)/$(pathComponentName)
+  displayName: 'Installation openssh-client'
+  condition: eq(variables['pathComponentName'], 'common_devsecops_lib')
+
+- script: |
     python3 -m virtualenv _venv
     source _venv/bin/activate
     python -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)

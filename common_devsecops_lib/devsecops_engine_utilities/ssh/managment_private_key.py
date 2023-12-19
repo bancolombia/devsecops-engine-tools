@@ -7,9 +7,10 @@ def decode_base64(secret_data, key_name):
     key_name_secret = secret_data[key_name]
     return base64.b64decode(key_name_secret).decode("utf-8")
 
+
 def config_knowns_hosts(host, ssh_key):
     try:
-        ssh_directory = os.path.expanduser('~/.ssh')
+        ssh_directory = os.path.expanduser("~/.ssh")
         if not os.path.exists(ssh_directory):
             os.makedirs(ssh_directory)
 
@@ -19,10 +20,11 @@ def config_knowns_hosts(host, ssh_key):
             with open(known_hosts_file_path, "w") as known_hosts_file:
                 known_hosts_file.write(line_to_add)
         else:
-            with open(known_hosts_file_path, 'a') as known_hosts_file:
+            with open(known_hosts_file_path, "a") as known_hosts_file:
                 known_hosts_file.write(line_to_add)
     except Exception as e:
         print(f"An error ocurred while configuring file: {e}")
+
 
 def create_ssh_private_file(ssh_key_file_path, ssh_key_content):
     try:
@@ -34,6 +36,7 @@ def create_ssh_private_file(ssh_key_file_path, ssh_key_content):
     except Exception as e:
         print(f"An error ocurred creating file: {e}")
 
+
 def add_ssh_private_key(ssh_key_file_path, ssh_key_password):
     try:
         # Iniciar un nuevo shell y evaluar el comando ssh-agent
@@ -42,7 +45,7 @@ def add_ssh_private_key(ssh_key_file_path, ssh_key_password):
         ssh_auth_sock = ssh_process.match.group(1).decode()
         ssh_process.expect("SSH_AGENT_PID=(.*?);")
         ssh_agent_pid = ssh_process.match.group(1).decode()
-        
+
         agent_env = {"SSH_AUTH_SOCK": ssh_auth_sock, "SSH_AGENT_PID": ssh_agent_pid}
 
         # Esperar a que se complete la inicialización de ssh-agent
