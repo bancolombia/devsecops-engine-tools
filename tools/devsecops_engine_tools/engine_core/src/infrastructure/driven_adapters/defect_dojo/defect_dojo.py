@@ -41,6 +41,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "dev": "Development",
                 "qa": "Staging",
                 "pdn": "Production",
+                None: "Production",
             }
             scan_type_mapping = {
                 "CHECKOV": "Checkov Scan",
