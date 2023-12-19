@@ -52,6 +52,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclu
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
     generate_file_from_tool,
 )
+from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
+    AzureMessageLoggingPipeline
+)
 
 ENGINESAST_ENGINEIAC = "enginesast.engineiac"
 
@@ -135,18 +138,21 @@ def init_engine_sast_rm(
 
     # Create configuration ssh external checks
     agent_env = None
-    if data_config.use_external_checks_git == "True" and platform.system() in (
-        "Linux",
-        "Darwin",
-    ):
-        config_knowns_hosts(
-            data_config.repository_ssh_host, data_config.repository_public_key_fp
-        )
-        ssh_key_content = decode_base64(secret_tool, "repository_ssh_private_key")
-        ssh_key_file_path = "/tmp/ssh_key_file"
-        create_ssh_private_file(ssh_key_file_path, ssh_key_content)
-        ssh_key_password = decode_base64(secret_tool, "repository_ssh_password")
-        agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
+    try:
+        if data_config.use_external_checks_git == "True" and platform.system() in (
+            "Linux",
+            "Darwin",
+        ):
+            config_knowns_hosts(
+                data_config.repository_ssh_host, data_config.repository_public_key_fp
+            )
+            ssh_key_content = decode_base64(secret_tool, "repository_ssh_private_key")
+            ssh_key_file_path = "/tmp/ssh_key_file"
+            create_ssh_private_file(ssh_key_file_path, ssh_key_content)
+            ssh_key_password = decode_base64(secret_tool, "repository_ssh_password")
+            agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
+    except Exception as ex:
+        print(AzureMessageLoggingPipeline.WarningLogging.get_message(f"An error ocurred configuring external checks {ex}"))
 
     output_queue = queue.Queue()
     # Crea una lista para almacenar los hilos
