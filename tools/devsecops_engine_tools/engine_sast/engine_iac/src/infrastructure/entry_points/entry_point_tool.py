@@ -1,6 +1,7 @@
 import argparse
 import configparser
 import threading
+import platform
 import queue
 import json
 import os
@@ -22,6 +23,12 @@ from devsecops_engine_utilities.utils.printers import (
 )
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
     ReleaseVariables,
+)
+from devsecops_engine_utilities.ssh.managment_private_key import (
+    create_ssh_private_file,
+    add_ssh_private_key,
+    decode_base64,
+    config_knowns_hosts,
 )
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
     AzureDevopsIntegration,
@@ -97,7 +104,9 @@ def search_folders(search_pattern, ignore_pattern):
     return matching_folders
 
 
-def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environment):
+def init_engine_sast_rm(
+    remote_config_repo, remote_config_path, tool, environment, secret_tool
+):
     Printers.print_logo_tool()
     azure_devops_integration = AzureDevopsIntegration()
     azure_devops_integration.get_azure_connection()
@@ -123,6 +132,22 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     folders_to_scan = search_folders(
         data_config.search_pattern, data_config.ignore_search_pattern
     )
+
+    # Create configuration ssh external checks
+    agent_env = None
+    if data_config.use_external_checks_git == "True" and platform.system() in (
+        "Linux",
+        "Darwin",
+    ):
+        config_knowns_hosts(
+            data_config.repository_ssh_host, data_config.repository_public_key_fp
+        )
+        ssh_key_content = decode_base64(secret_tool, "repository_ssh_private_key")
+        ssh_key_file_path = "/tmp/ssh_key_file"
+        create_ssh_private_file(ssh_key_file_path, ssh_key_content)
+        ssh_key_password = decode_base64(secret_tool, "repository_ssh_password")
+        agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
+
     output_queue = queue.Queue()
     # Crea una lista para almacenar los hilos
     threads = []
@@ -138,6 +163,11 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
                 ],
                 soft_fail=False,
                 directories=folder,
+                external_checks_git=[f"{data_config.external_checks_git}/kubernetes"]
+                if data_config.use_external_checks_git == "True"
+                and agent_env is not None and rule == "RULES_K8S"
+                else [],
+                env=agent_env
             )
             checkov_config.create_config_dict()
             checkov_run = CheckovTool(checkov_config=checkov_config)
