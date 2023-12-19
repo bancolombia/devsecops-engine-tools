@@ -93,7 +93,11 @@ class HandleScan:
             else:
                 #useflagsca
                 secret_sca=None    
-            runner_engine_container(self.dict_args, secret_sca)
+            vulnerabilities_list, input_core =runner_engine_container(self.dict_args, secret_sca)
+            try:
+                return vulnerabilities_list, input_core
+            except ExceptionFindingsRiskAcceptance as ex2:
+                print(self.devops_platform_gateway.logging("warning", str(ex2)))
         elif "engine_dast" in self.dict_args["tool"]:
             print(MESSAGE_ENABLED)
         elif "engine_secret" in self.dict_args["tool"]:
