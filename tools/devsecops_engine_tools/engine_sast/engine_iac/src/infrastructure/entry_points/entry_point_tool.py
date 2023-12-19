@@ -41,10 +41,10 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
     generate_file_from_tool,
 )
-
 
 ENGINESAST_ENGINEIAC = "enginesast.engineiac"
 
@@ -104,7 +104,7 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     data_file_tool = azure_devops_integration.get_remote_json_config(
         remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
     )
-    # data_file_tool = json.loads(remote_config) -> Esto es para pruebas locales
+    # data_file_tool = json.loads(remote_config) #-> Esto es para pruebas locales
     data_config = CheckovDeserializeConfig(
         json_data=data_file_tool, tool=tool, environment=environment
     )
@@ -113,7 +113,7 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
         remote_config_path=data_config.exclusions_path,
     )
     data_config.scope_pipeline = ReleaseVariables.Release_Definitionname.value()
-    # data_config.exclusions = json.loads(exclusion) -> Esto es para pruebas locales
+    # data_config.exclusions = json.loads(exclusion) #-> Esto es para pruebas locales
     if data_config.exclusions.get("All") is not None:
         data_config.exclusions_all = data_config.exclusions.get("All").get(tool)
     if data_config.exclusions.get(data_config.scope_pipeline) is not None:
@@ -168,13 +168,13 @@ def init_engine_sast_rm(remote_config_repo, remote_config_path, tool, environmen
     )
 
     totalized_exclusions = []
-    totalized_exclusions.extend(data_config.exclusions_all) if data_config.exclusions_all is not None else None
-    totalized_exclusions.extend(data_config.exclusions_scope) if data_config.exclusions_scope is not None else None
+    totalized_exclusions.extend(map(lambda elem: Exclusions(**elem), data_config.exclusions_all)) if data_config.exclusions_all is not None else None
+    totalized_exclusions.extend(map(lambda elem: Exclusions(**elem), data_config.exclusions_scope)) if data_config.exclusions_scope is not None else None
 
     input_core = InputCore(
         totalized_exclusions=totalized_exclusions,
         level_compliance_defined=data_config.level_compliance,
-        path_file_results=generate_file_from_tool(tool, result_scans),
+        path_file_results=generate_file_from_tool(tool, result_scans, data_config.rules_all),
         custom_message_break_build=data_config.message_info_sast_rm,
         scope_pipeline=data_config.scope_pipeline
     )
