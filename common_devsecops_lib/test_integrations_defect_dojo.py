@@ -40,7 +40,7 @@ def validate_response(response, **kwargs):
         table = [kwargs.get("end_point"), kwargs.get("scan_type"), "OK", response.test_url]
     elif kwargs.get("scan_type"):
         table = [kwargs.get("end_point"), kwargs.get("scan_type"), "Error", "None"]
-    elif kwargs.get("end_point") == "finding.close":
+    elif kwargs.get("end_point") in ["finding.close"]:
         if hasattr(response, "status_code"):
             table = [
                 kwargs.get("end_point"),
@@ -48,6 +48,13 @@ def validate_response(response, **kwargs):
                 "OK" if response.status_code == 200 else "Error",
                 "None",
             ]
+    elif kwargs.get("end_point") in ["finding.get"]:
+        table = [
+            kwargs.get("end_point"),
+            kwargs.get("description"),
+            "OK" if type(response.count) == int else "Error",
+            "None",
+        ]
     return table
 
 
@@ -76,15 +83,21 @@ if __name__ == "__main__":
             response = import_scan(scan_type="Checkov Scan", file_path=f"{path_file}/checkov.json")
             table.append(validate_response(response, scan_type="Checkov Scan", end_point="impor_scan"))
 
-            # # test SonarQuebe
+            # test SonarQuebe
             Printers.print_title("SonarQube API Import")
             response = import_scan(scan_type="SonarQube API Import")
             logger.debug(f"SonarQube Api Import: {response}")
             table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
 
-            ## test integration Finding close
-            Printers.print_title("Finding Close")
+            # test get finding
             session = SessionManager(token=settings.TOKEN_DEFECT_DOJO, host=settings.HOST_DEFECT_DOJO)
+            Printers.print_title("Get Finding")
+            response = Finding.get_finding(session=session, risk_accepted=True)
+            logger.debug(f"Finding get {response}")
+            table.append(validate_response(response, end_point="finding.get"))
+
+            # test integration Finding close
+            Printers.print_title("Finding Close")
             response = Finding.close_finding(session, unique_id_from_tool="1")
             logger.debug(f"Finding_close: {response}")
             table.append(validate_response(response, end_point="finding.close"))
@@ -92,6 +105,7 @@ if __name__ == "__main__":
             if any(item[2] == "Error" for item in table):
                 logger.warning("Warning! Errors were found in the integration")
                 logger.debug('"##vso[task.complete result=SucceededWithIssues;]DONE"')
+
         else:
             logger.warning("Test integration disable")
 

@@ -11,6 +11,7 @@ class CheckovDeserializeConfig:
         self.external_checks_git = json_data[tool]["EXTERNAL_CHECKS_GIT"]
         self.repository_ssh_host = json_data[tool]["EXTERNAL_GIT_SSH_HOST"]
         self.repository_public_key_fp = json_data[tool]["EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT"]
+        self.message_info_sast_rm = json_data[tool]["MESSAGE_INFO_SAST_RM"]
         self.level_compliance = LevelCompliance(json_data[tool]["LEVEL_COMPLIANCE"][environment])
         self.rules_data_type = json_data[tool]["RULES"]
         self.scope_pipeline = ""

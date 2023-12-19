@@ -19,27 +19,19 @@ class FindingRestConsumer:
     def get(self, request):
         url = f"{self.__host}/api/v2/findings/"
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
-        try:
-            response = self.__session.get(url, headers=headers, data={}, params=request, verify=VERIFY_CERTIFICATE)
-            if response.status_code != 200:
-                raise ApiError(response.json())
-            findings = FindingList.from_dict(response.json())
-        except Exception as e:
-            raise ApiError(e)
+        response = self.__session.get(url, headers=headers, data={}, params=request, verify=VERIFY_CERTIFICATE)
+        if response.status_code != 200:
+            raise ApiError(response.json())
+        findings = FindingList.from_dict(response.json())
         return findings
 
     def close(self, request, id):
         url = f"{self.__host}/api/v2/findings/{id}/close/"
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
-        try:
-            response = self.__session.post(url, headers=headers, data=json.dumps(request), verify=VERIFY_CERTIFICATE)
-            if response.status_code == 404:
-                raise ApiError(message=f"Finding whit id {id} not found")
-            if response.status_code != 200:
-                raise ApiError(response.json())
-            logger.debug(response)
-        except Exception as e:
-            logger.debug(response.json())
-            logger.error(e)
-            raise ApiError(e)
+        response = self.__session.post(url, headers=headers, data=json.dumps(request), verify=VERIFY_CERTIFICATE)
+        if response.status_code != 200:
+            logger.error(response.json())
+            raise ApiError(response.json())
+        logger.debug(response.json())
+        logger.debug(response)
         return response
