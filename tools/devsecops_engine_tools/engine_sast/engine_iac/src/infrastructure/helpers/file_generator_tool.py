@@ -3,7 +3,7 @@ import os
 
 
 def generate_file_from_tool(tool, result_list):
-    if tool == "Checkov Scan":
+    if tool == "CHECKOV":
         try:
             result_one: dict = {}
             result_two: dict = {}

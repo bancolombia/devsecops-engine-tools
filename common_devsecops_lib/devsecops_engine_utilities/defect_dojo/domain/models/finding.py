@@ -40,6 +40,7 @@ class Finding(FromDictMixin):
     false_p: bool = None
     duplicate: bool = None
     out_of_scope: bool = None
+    risk_status: str = ""
     risk_accepted: bool = None
     under_review: bool = None
     last_status_update: str = ""
@@ -53,7 +54,7 @@ class Finding(FromDictMixin):
     payload = None
     hash_code: str = ""
     line = None
-    file_path = None
+    file_path: str = ""
     component_name = None
     component_version = None
     static_finding: bool = None
@@ -61,7 +62,7 @@ class Finding(FromDictMixin):
     created: str = ""
     scanner_confidence = None
     unique_id_from_tool: str = ""
-    vuln_id_from_tool = None
+    vuln_id_from_tool: str = ""
     sast_source_object = None
     sast_sink_object = None
     sast_source_line = None
