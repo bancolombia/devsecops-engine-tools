@@ -28,6 +28,8 @@ steps:
   displayName: install python basics
 
 - script: |
+    apt-get update
+    apt-get install openssh-client -y
     python3 -m virtualenv _venv
     source _venv/bin/activate
     python -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
