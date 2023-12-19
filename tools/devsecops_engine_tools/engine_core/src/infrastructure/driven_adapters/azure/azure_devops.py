@@ -62,17 +62,21 @@ class AzureDevops(DevopsPlatformGateway):
         )
 
     def get_variable(self, variable):
-        if variable == "branch_name":
-            return BuildVariables.Build_SourceBranchName.value()
-        elif variable == "build_id":
-            return BuildVariables.Build_BuildNumber.value()
-        elif variable == "commit_hash":
-            return BuildVariables.Build_SourceVersion.value()
-        elif variable == "environment":
-            return ReleaseVariables.Environment.value()
-        elif variable == "version":
-            return BuildVariables.Build_BuildId.value()
-        elif variable == "branch_tag":
-            return BuildVariables.Build_SourceBranch.value()
-        elif variable == "access_token":
-            return SystemVariables.System_AccessToken.value()
+        try:
+            if variable == "branch_name":
+                return BuildVariables.Build_SourceBranchName.value()
+            elif variable == "build_id":
+                return BuildVariables.Build_BuildNumber.value()
+            elif variable == "commit_hash":
+                return BuildVariables.Build_SourceVersion.value()
+            elif variable == "environment":
+                return ReleaseVariables.Environment.value()
+            elif variable == "version":
+                return BuildVariables.Build_BuildId.value()
+            elif variable == "branch_tag":
+                return BuildVariables.Build_SourceBranch.value()
+            elif variable == "access_token":
+                return SystemVariables.System_AccessToken.value()
+        except Exception as ex:
+            print(self.logging("info", str(ex)))
+            return None
