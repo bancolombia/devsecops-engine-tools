@@ -15,3 +15,23 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
     PrismaDeserealizator
 )
 
+def runner_engine_container(dict_args, token):
+    try:
+        tool_run = TrivyScan()
+        tool_images = DockerImages()
+        tool_deseralizator = PrismaDeserealizator()
+        return init_engine_sca_rm(tool_run,
+            tool_images,
+            tool_deseralizator,
+            dict_args,
+            token
+        )
+    
+    except Exception as e:
+        print(AzureMessageResultPipeline.Succeeded.value)
+        raise Exception(f"Error SCAN : {str(e)}")
+        # Manejar el error según sea necesario
+
+
+if __name__ == "__main__":
+    runner_engine_container()
