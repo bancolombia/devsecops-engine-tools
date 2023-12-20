@@ -5,6 +5,8 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.secrets_manager
 import boto3
 import json
 from botocore.exceptions import NoCredentialsError
+import logging
+boto3.set_stream_logger(name='botocore.credentials', level=logging.WARNING)
 
 
 @dataclass
