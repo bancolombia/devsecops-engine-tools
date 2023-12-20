@@ -8,8 +8,10 @@ python -m pip install --upgrade pip -i https://artifactory.apps.bancolombia.com/
 ```bash
 python -m pip install setuptools virtualenv wheel -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
 ```
+* Create a virtual environment and activate it:
 ```bash
-source .venv/devsecops/activate
+virtualenv .venv
+source .venv/bin/activate
 ```
 ```bash
 python -m pip install -r tools/requirements.txt -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
@@ -28,9 +30,9 @@ python -m pip install -r common_devsecops_lib/requirements_test.txt -i https://a
 cd common_devsecops_lib/
 python setup.py bdist_wheel
 ```
+* Put the command bellow and press key tab after utilities word:
 ```bash
-cd ..
-pip install 'dist/devsecops_engine_utilities..whl'
+pip install 'dist/devsecops_engine_utilities<KEY-TAB>' -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
 ```
  
 3. In the root of the project create a file named ".env" and add:

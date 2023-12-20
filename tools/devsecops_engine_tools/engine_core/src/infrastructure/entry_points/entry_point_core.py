@@ -38,11 +38,13 @@ def get_inputs_from_cli(args):
     )
     parser.add_argument("--token_cmdb", required=False, help="")
     parser.add_argument("--token_vulnerability_management", required=False, help="")
+    parser.add_argument("--scanner", required=False, help="")
 
     args = parser.parse_args()
     return {
         "remote_config_repo": args.remote_config_repo,
         "tool": args.tool,
+        "scanner": args.scanner,
         "environment": args.environment,
         "use_secrets_manager": args.use_secrets_manager,
         "use_vulnerability_management": args.use_vulnerability_management,

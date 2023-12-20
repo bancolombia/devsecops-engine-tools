@@ -24,7 +24,11 @@ def runner_engine_container(dict_args, token):
         #     #remote_config_path,
         #     environment or get_inputs_from_config_file(),
         # )
-        tool_run = PrismaCloudManagerScan()
+        if dict_args['scanner'] == 'trivy':
+            tool_run = TrivyScan()
+        else:
+            tool_run = PrismaCloudManagerScan()
+            
         tool_images = DockerImages()
         tool_deseralizator = PrismaDeserealizator()
         return init_engine_sca_rm(tool_run,
