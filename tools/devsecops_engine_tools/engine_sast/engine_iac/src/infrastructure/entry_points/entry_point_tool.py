@@ -48,10 +48,13 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
     generate_file_from_tool,
 )
-
+from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
+    AzureMessageLoggingPipeline
+)
 
 ENGINESAST_ENGINEIAC = "enginesast.engineiac"
 
@@ -85,11 +88,11 @@ def async_scan(queue, iac_scan: IacScan):
 def search_folders(search_pattern, ignore_pattern):
     current_directory = os.getcwd()
     patron = (
-        "(?i)(?!.*"
+        "(?i)(?!.*(?:"
         + "|".join(ignore_pattern)
-        + ").*?("
+        + ")).*?("
         + "|".join(search_pattern)
-        + ").*"
+        + ").*$"
     )
     folders = [
         carpeta
@@ -135,18 +138,21 @@ def init_engine_sast_rm(
 
     # Create configuration ssh external checks
     agent_env = None
-    if data_config.use_external_checks_git == "True" and platform.system() in (
-        "Linux",
-        "Darwin",
-    ):
-        config_knowns_hosts(
-            data_config.repository_ssh_host, data_config.repository_public_key_fp
-        )
-        ssh_key_content = decode_base64(secret_tool, "repository_ssh_private_key")
-        ssh_key_file_path = "/tmp/ssh_key_file"
-        create_ssh_private_file(ssh_key_file_path, ssh_key_content)
-        ssh_key_password = decode_base64(secret_tool, "repository_ssh_password")
-        agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
+    try:
+        if data_config.use_external_checks_git == "True" and platform.system() in (
+            "Linux",
+            "Darwin",
+        ):
+            config_knowns_hosts(
+                data_config.repository_ssh_host, data_config.repository_public_key_fp
+            )
+            ssh_key_content = decode_base64(secret_tool, "repository_ssh_private_key")
+            ssh_key_file_path = "/tmp/ssh_key_file"
+            create_ssh_private_file(ssh_key_file_path, ssh_key_content)
+            ssh_key_password = decode_base64(secret_tool, "repository_ssh_password")
+            agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
+    except Exception as ex:
+        print(AzureMessageLoggingPipeline.WarningLogging.get_message(f"An error ocurred configuring external checks {ex}"))
 
     output_queue = queue.Queue()
     # Crea una lista para almacenar los hilos
@@ -198,13 +204,13 @@ def init_engine_sast_rm(
     )
 
     totalized_exclusions = []
-    totalized_exclusions.extend(data_config.exclusions_all) if data_config.exclusions_all is not None else None
-    totalized_exclusions.extend(data_config.exclusions_scope) if data_config.exclusions_scope is not None else None
+    totalized_exclusions.extend(map(lambda elem: Exclusions(**elem), data_config.exclusions_all)) if data_config.exclusions_all is not None else None
+    totalized_exclusions.extend(map(lambda elem: Exclusions(**elem), data_config.exclusions_scope)) if data_config.exclusions_scope is not None else None
 
     input_core = InputCore(
         totalized_exclusions=totalized_exclusions,
         level_compliance_defined=data_config.level_compliance,
-        path_file_results=generate_file_from_tool(tool, result_scans),
+        path_file_results=generate_file_from_tool(tool, result_scans, data_config.rules_all),
         custom_message_break_build=data_config.message_info_sast_rm,
         scope_pipeline=data_config.scope_pipeline
     )
