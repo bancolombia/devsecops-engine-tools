@@ -18,7 +18,7 @@ class TrivyScan(ToolGateway):
             tag = image['Tag']
             image_name = f"{repository}:{tag}"
             try:
-                result = subprocess.run("trivy --format json --quiet image " + image_name , shell=True, capture_output=True, text=True)
+                result = subprocess.run("trivy --scanners vuln --format json --quiet image " + image_name , shell=True, capture_output=True, text=True)
                 with open(image_name+'_scan_result.json', 'w') as file:
                     file.write(result.stdout)
                 images_scanned.append(image_name+"_scan_result.json")
