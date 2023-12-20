@@ -88,11 +88,11 @@ def async_scan(queue, iac_scan: IacScan):
 def search_folders(search_pattern, ignore_pattern):
     current_directory = os.getcwd()
     patron = (
-        "(?i)(?!.*"
+        "(?i)(?!.*(?:"
         + "|".join(ignore_pattern)
-        + ").*?("
+        + ")).*?("
         + "|".join(search_pattern)
-        + ").*"
+        + ").*$"
     )
     folders = [
         carpeta
