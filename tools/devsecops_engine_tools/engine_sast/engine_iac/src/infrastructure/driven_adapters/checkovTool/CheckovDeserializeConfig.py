@@ -11,6 +11,10 @@ class CheckovDeserializeConfig:
         self.external_checks_git = json_data[tool]["EXTERNAL_CHECKS_GIT"]
         self.repository_ssh_host = json_data[tool]["EXTERNAL_GIT_SSH_HOST"]
         self.repository_public_key_fp = json_data[tool]["EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT"]
+        self.use_external_checks_dir = json_data[tool]["USE_EXTERNAL_CHECKS_DIR"]
+        self.external_dir_owner = json_data[tool]["EXTERNAL_DIR_OWNER"]
+        self.external_dir_repository = json_data[tool]["EXTERNAL_DIR_REPOSITORY"]
+        self.external_asset_name = json_data[tool]["EXTERNAL_DIR_ASSET_NAME"]
         self.message_info_sast_rm = json_data[tool]["MESSAGE_INFO_SAST_RM"]
         self.level_compliance = LevelCompliance(json_data[tool]["LEVEL_COMPLIANCE"][environment])
         self.rules_data_type = json_data[tool]["RULES"]

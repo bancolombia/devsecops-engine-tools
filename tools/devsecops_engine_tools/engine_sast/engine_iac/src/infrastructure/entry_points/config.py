@@ -2,11 +2,19 @@ remote_config = """{
     "CHECKOV": {
         "VERSION": "2.3.296",
         "SEARCH_PATTERN": ["AW","NU"],
-        "IGNORE_SEARCH_PATTERN" : ["_test"],
-        "USE_EXTERNAL_CHECKS_GIT": "True",
+        "IGNORE_SEARCH_PATTERN": [
+            "test",
+            "_ACE",
+            "_ACE11"
+        ],
+        "USE_EXTERNAL_CHECKS_GIT": "False",
         "EXTERNAL_CHECKS_GIT": "git@github.com:BCSCode/DevSecOps_Checks_IaC.git//rules",
         "EXTERNAL_GIT_SSH_HOST": "github.com",
         "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=",
+        "USE_EXTERNAL_CHECKS_DIR": "False",
+        "EXTERNAL_DIR_OWNER": "BCSCode",
+        "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks_IaC",
+        "EXTERNAL_DIR_ASSET_NAME": "rules_k8s",
         "EXCLUSIONS_PATH" : "/SAST/IAC/Exclusions/Exclusions.json",
         "MESSAGE_INFO_SAST_RM": "If you have doubts, visit https://discuss.apps.bancolombia.com/t/lanzamiento-csa-analisis-de-seguridad-en-contenedores/6199",
         "LEVEL_COMPLIANCE": {
