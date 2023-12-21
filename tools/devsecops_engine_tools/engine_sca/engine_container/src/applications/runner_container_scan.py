@@ -8,6 +8,10 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.docker.docker_images import (DockerImages)
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_deserialize_output import (PrismaDeserealizator)
 
+from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.images_scanned.images_scanned import(
+    ImagesScanned
+)
+
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.trivy_tool.trivy_manager_scan import (
     TrivyScan
 )
@@ -35,12 +39,14 @@ def runner_engine_container(dict_args, token):
             tool_deseralizator = PrismaDeserealizator()
             
         tool_images = DockerImages()
+        tool_images_scanned = ImagesScanned()
         
         return init_engine_sca_rm(tool_run,
             tool_images,
             tool_deseralizator,
+            tool_images_scanned,
             dict_args,
-            token
+            token,
         )
     
     except Exception as e:
