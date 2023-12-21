@@ -97,6 +97,9 @@ class CheckovConfig(ConfigToolGateway):
 
         if self.external_checks_git is not None:
             self.dict_confg_file[CheckovConfigEnum.EXTERNAL_CHECKS_GIT.value] = self.external_checks_git
+        
+        if self.external_checks_dir is not None:
+            self.dict_confg_file[CheckovConfigEnum.EXTERNAL_CHECKS_DIR.value] = self.external_checks_dir
 
         if self.skip_download is not None:
             self.dict_confg_file[CheckovConfigEnum.SKIP_DOWNLOAD.value] = self.skip_download
