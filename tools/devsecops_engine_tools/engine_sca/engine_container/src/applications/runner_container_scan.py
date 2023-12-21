@@ -11,6 +11,9 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.trivy_tool.trivy_manager_scan import (
     TrivyScan
 )
+from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.trivy_tool.trivy_deserialize_output import (
+    TrivyDeserializator
+)
 
 
 def runner_engine_container(dict_args, token):
@@ -26,11 +29,13 @@ def runner_engine_container(dict_args, token):
         # )
         if dict_args['scanner'] == 'trivy':
             tool_run = TrivyScan()
+            tool_deseralizator = TrivyDeserializator()
         else:
             tool_run = PrismaCloudManagerScan()
+            tool_deseralizator = PrismaDeserealizator()
             
         tool_images = DockerImages()
-        tool_deseralizator = PrismaDeserealizator()
+        
         return init_engine_sca_rm(tool_run,
             tool_images,
             tool_deseralizator,
