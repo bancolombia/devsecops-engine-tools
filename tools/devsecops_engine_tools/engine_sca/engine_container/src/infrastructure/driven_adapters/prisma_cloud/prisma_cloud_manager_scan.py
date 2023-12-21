@@ -35,7 +35,7 @@ class PrismaCloudManagerScan(ToolGateway):
         except Exception as e:
             raise ValueError(f"Error downloading twistcli: {e}")
      
-         
+     
     def run_tool_container_sca(self, dict_args, prisma_secret_key, scan_image):
         try:
             token = os.environ.get("TOKEN_PRISMA", "")  # Change to secret manager token
@@ -45,35 +45,53 @@ class PrismaCloudManagerScan(ToolGateway):
             if not os.path.exists(file_path):
                 self.download_twistcli(file_path, remote_config_repo['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], token,
                                         remote_config_repo['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'])
-            images_scanned = []
-            for image in scan_image:
-                
-                pattern = remote_config_repo['PRISMA_CLOUD']['REGEX_EXPRESSION_PROJECTS']
-                #print(f"Search pattern: {pattern}")
-                if re.match(pattern, image['Repository'].upper()):
-                    repository = image['Repository']
-                    tag = image['Tag']
-                    image_name = f"{repository}:{tag}"
-                    #print(f"Image to scan: {image_name}")
-                    command = (file_path, "images", "scan", "--address", remote_config_repo['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'],
-                               "--user", remote_config_repo['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], "--password", token,
-                               image_name, "--output-file", image_name+'_scan_result.json', "--details")
-                    try:
-                        result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                                text=True)
-                        #print(result.stdout)
-                        images_scanned.append(image_name+'_scan_result.json')
-                        print(f"Image {image['Repository']} scanned")
-                    except subprocess.CalledProcessError as e:
-                        print(f"Error during image scan: {e.stderr}")
-                        # raise ValueError(f"Error during image scan: {e.stderr}")
-                else:
-                    print(f"Image {image['Repository']} is not scanned")
             
-            return images_scanned
+            # Path to the scanned images file
+            scanned_images_file = os.path.join(os.getcwd(), 'scanned_images.txt')
+
+            # Check if the file exists; if not, create it
+            if not os.path.exists(scanned_images_file):
+                open(scanned_images_file, 'w').close()
+
+            # Read previously scanned images from the file
+            with open(scanned_images_file, 'r') as file:
+                images_scanned = file.read().splitlines()
+
+            images_to_scan = []
+
+            for image in scan_image:
+                repository = image['Repository']
+                tag = image['Tag']
+                image_name = f"{repository}:{tag}"
+
+                # Check if the image has already been scanned
+                if image_name in images_scanned:
+                    print(f"The image {image_name} has already been scanned previously.")
+                else:
+                    pattern = remote_config_repo['PRISMA_CLOUD']['REGEX_EXPRESSION_PROJECTS']
+                    if re.match(pattern, repository.upper()):
+                        command = (file_path, "images", "scan", "--address", remote_config_repo['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'],
+                                   "--user", remote_config_repo['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], "--password", token,
+                                   image_name, "--output-file", image_name + '_scan_result.json', "--details")
+                        try:
+                            result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                                    text=True)
+                            images_scanned.append(image_name)
+                            print(f"Image {repository} scanned")
+                            images_to_scan.append(image_name + '_scan_result.json')
+                        except subprocess.CalledProcessError as e:
+                            print(f"Error during image scan of {repository}: {e.stderr}")
+                    else:
+                        print(f"The image {repository} is not scanned")
+
+            # Save the scanned images to the file
+            with open(scanned_images_file, 'a') as file:
+                for scanned_image in images_scanned:
+                    file.write(scanned_image + '\n')
+
+            return images_to_scan
 
         except Exception as ex:
             print(f"An overall error occurred: {ex}")
-            # raise ValueError(f"An overall error occurred: {ex}")
 
         return 0
