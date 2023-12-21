@@ -35,11 +35,11 @@ class PrismaDeserealizator(DeseralizatorGateway):
                         id=vul.get("id", ""),
                         cvss=float(vul.get("cvss", 0.0)),
                         where_vulnerability=vul.get("link", ""),
-                        description=vul.get("description", ""),
+                        description=vul.get("description", "")[:150],
                         severity=SEVERITY_MAP.get(vul.get("severity", ""), ""),
                         identification_date=datetime.strptime(vul.get("discoveredDate", ""), "%Y-%m-%dT%H:%M:%S%z"),
                         type_vulnerability="SCA",
-                        requirements=", ".join(vul.get("riskFactors", [])),
+                        requirements=vul.get("status", ""),
                         tool="PrismaCloud",
                         is_excluded=False,
                     )
@@ -48,6 +48,6 @@ class PrismaDeserealizator(DeseralizatorGateway):
 
                 # Add the Vulnerability instances to the list
                 list_open_vulnerabilities.extend(vulnerabilities)
-        print("hola mundo")
+       
         return list_open_vulnerabilities
 
