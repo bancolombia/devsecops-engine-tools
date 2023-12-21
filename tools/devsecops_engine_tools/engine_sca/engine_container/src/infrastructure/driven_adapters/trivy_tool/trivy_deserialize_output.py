@@ -13,18 +13,6 @@ class TrivyDeserializator(DeseralizatorGateway):
     
     def get_list_vulnerability(self, images_scanned: list) -> "list[Vulnerability]":
         list_open_vulnerabilities = []
-        SEVERITY_MAP = {
-        "unimportant": "low",
-        "unassigned": "low",
-        "negligible": "low",
-        "not yet assigned": "low",
-        "low": "low",
-        "medium": "medium",
-        "moderate": "medium",
-        "high": "high",
-        "important": "high",
-        "critical": "critical",            
-        }
         for image in images_scanned:
             with open(image, "rb") as file:
                 image_object = file.read()
