@@ -1,4 +1,5 @@
 import sys
+from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.azure.azure_remote_config import AzureRemoteConfig
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool import (init_engine_sca_rm, get_inputs_from_config_file
 )
 from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
@@ -39,9 +40,10 @@ def runner_engine_container(dict_args, token):
             tool_deseralizator = PrismaDeserealizator()
             
         tool_images = DockerImages()
-        tool_images_scanned = ImagesScanned()
-        
+        tool_deseralizator = PrismaDeserealizator()
+        tool_remote= AzureRemoteConfig()
         return init_engine_sca_rm(tool_run,
+            tool_remote,
             tool_images,
             tool_deseralizator,
             tool_images_scanned,

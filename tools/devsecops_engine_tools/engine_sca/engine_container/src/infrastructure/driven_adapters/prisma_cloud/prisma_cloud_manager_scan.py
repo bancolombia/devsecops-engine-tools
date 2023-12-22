@@ -36,15 +36,15 @@ class PrismaCloudManagerScan(ToolGateway):
             raise ValueError(f"Error downloading twistcli: {e}")
      
      
-    def run_tool_container_sca(self, dict_args, prisma_secret_key, scan_image):
+    def run_tool_container_sca(self, remoteconfig, prisma_secret_key, scan_image):
         try:
             token = os.environ.get("TOKEN_PRISMA", "")  # Change to secret manager token
-            remote_config_repo = AzureRemoteConfig().get_remote_config(dict_args)
-            file_path = os.path.join(os.getcwd(), remote_config_repo['PRISMA_CLOUD']['TWISTCLI_PATH'])
+            
+            file_path = os.path.join(os.getcwd(), remoteconfig['PRISMA_CLOUD']['TWISTCLI_PATH'])
 
             if not os.path.exists(file_path):
-                self.download_twistcli(file_path, remote_config_repo['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], token,
-                                        remote_config_repo['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'])
+                self.download_twistcli(file_path, remoteconfig['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], token,
+                                        remoteconfig['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'])
             
             # Path to the scanned images file
             scanned_images_file = os.path.join(os.getcwd(), 'scanned_images.txt')
@@ -68,10 +68,10 @@ class PrismaCloudManagerScan(ToolGateway):
                 if image_name in images_scanned:
                     print(f"The image {image_name} has already been scanned previously.")
                 else:
-                    pattern = remote_config_repo['PRISMA_CLOUD']['REGEX_EXPRESSION_PROJECTS']
+                    pattern = remoteconfig['PRISMA_CLOUD']['REGEX_EXPRESSION_PROJECTS']
                     if re.match(pattern, repository.upper()):
-                        command = (file_path, "images", "scan", "--address", remote_config_repo['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'],
-                                   "--user", remote_config_repo['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], "--password", token,
+                        command = (file_path, "images", "scan", "--address", remoteconfig['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'],
+                                   "--user", remoteconfig['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], "--password", token,
                                    image_name, "--output-file", image_name + '_scan_result.json', "--details")
                         try:
                             result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
