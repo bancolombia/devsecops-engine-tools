@@ -4,18 +4,20 @@ import re
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway
 )
-from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.azure.azure_remote_config import (
-    AzureRemoteConfig
+
+from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.images_scanned import (
+    ImagesScanned
 )
 
 
 class TrivyScan(ToolGateway):
 
-    def run_tool_container_sca(self, dict_args, token, scan_image, images_scanned_file_name, images_already_scanned):
+    def run_tool_container_sca(self, remoteconfig, token, scan_image):
         
         try:
-            remote_config_repo = AzureRemoteConfig().get_remote_config(dict_args)
-            pattern = remote_config_repo['PRISMA_CLOUD']['REGEX_EXPRESSION_PROJECTS']
+            pattern = remoteconfig['PRISMA_CLOUD']['REGEX_EXPRESSION_PROJECTS']
+            previosly_scanned = ImagesScanned()
+            file_name = 'scanned_images.txt'
             images_scanned = []
             for image in scan_image:
                 if re.match(pattern, image['Repository'].upper()):
@@ -23,7 +25,7 @@ class TrivyScan(ToolGateway):
                     repository = image['Repository']
                     tag = image['Tag']
                     image_name = f"{repository}:{tag}"
-                    if (image_name+'_scan_result.json') in images_already_scanned:
+                    if (image_name+'_scan_result.json') in previosly_scanned.get_images_already_scanned(file_name):
                         print(f"The image {image_name} has already been scan previously.")
                     else:
                         try:
@@ -32,7 +34,7 @@ class TrivyScan(ToolGateway):
                                 file.write(result.stdout)
                             images_scanned.append(image_name+"_scan_result.json")
                             print("Image "+repository+" scanned.")
-                            with open(images_scanned_file_name, 'a') as file:
+                            with open(file_name, 'a') as file:
                                 file.write(image_name+'_scan_result.json\n')
                         except subprocess.CalledProcessError as e:
                             print("Error scanning "+repository+" image: "+e.stderr)
