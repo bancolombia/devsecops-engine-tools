@@ -6,9 +6,7 @@ import logging
 import re
 import base64
 
-from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.azure.azure_remote_config import (
-    AzureRemoteConfig
-)
+
 
 
 class PrismaCloudManagerScan(ToolGateway):
