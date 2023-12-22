@@ -6,8 +6,10 @@ from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api impo
     AzureDevopsApi,
 )
 
+from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.config_gateway import ConfigGateway
 
-class AzureRemoteConfig:
+
+class AzureRemoteConfig(ConfigGateway):
         def get_remote_config(self,dict_args):
             base_compact_remote_config_url = (
                     f"https://{SystemVariables.System_TeamFoundationCollectionUri.value().rstrip('/').split('/')[-1].replace('.visualstudio.com','')}"
