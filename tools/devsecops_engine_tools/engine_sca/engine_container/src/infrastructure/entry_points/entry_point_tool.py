@@ -30,12 +30,12 @@ def get_inputs_from_config_file():
     )
 
 
-def init_engine_sca_rm( tool_run,tool_images,tool_deseralizator,tool_images_scanned,dict_args, token):
+def init_engine_sca_rm( tool_run,tool_remote,tool_images,tool_deseralizator,dict_args, token):
 
     Printers.print_logo_tool()
    
-    container_sca_scan = ContainerScaScan(tool_run,tool_images,tool_deseralizator,tool_images_scanned,dict_args,token)
-    #print(container_sca_scan.scanImage())
+    container_sca_scan = ContainerScaScan(tool_run,tool_remote,tool_images,tool_deseralizator,dict_args, token)
+    print(container_sca_scan.scanImage())
     
     input_core = InputCore(
         totalized_exclusions=[],
