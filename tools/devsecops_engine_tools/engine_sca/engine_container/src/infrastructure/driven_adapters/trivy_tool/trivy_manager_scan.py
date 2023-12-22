@@ -8,6 +8,7 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
     AzureRemoteConfig
 )
 
+
 class TrivyScan(ToolGateway):
 
     def run_tool_container_sca(self, dict_args, token, scan_image, images_scanned_file_name, images_already_scanned):
@@ -17,8 +18,8 @@ class TrivyScan(ToolGateway):
             pattern = remote_config_repo['PRISMA_CLOUD']['REGEX_EXPRESSION_PROJECTS']
             images_scanned = []
             for image in scan_image:
-                # if re.match(pattern, image['Repository'].upper()):
-                if True:
+                if re.match(pattern, image['Repository'].upper()):
+                # if True:
                     repository = image['Repository']
                     tag = image['Tag']
                     image_name = f"{repository}:{tag}"
