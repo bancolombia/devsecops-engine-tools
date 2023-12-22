@@ -1,17 +1,7 @@
 import os
 
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.images_scanned_gateway import ImagesScannedGateway
+class ImagesScanned:
 
-
-
-class ImagesScanned(ImagesScannedGateway):
-
-    def get_images_already_scanned_file(self):
-         """
-         Get the file name of images already been scanned.
-         """
-         return 'scanned_images.txt'
-    
     def get_images_already_scanned(self, file_name):
         """
         Create images scanned file if it does not exist and get the images that have already been scanned.

@@ -2,7 +2,6 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateway
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import ToolGateway
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.images_gateway import ImagesGateway
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.deserealizator_gateway import DeseralizatorGateway
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.images_scanned_gateway import ImagesScannedGateway
 
 
 class ContainerScaScan():
@@ -12,7 +11,6 @@ class ContainerScaScan():
         self.tool_remote = tool_remote
         self.tool_images = tool_images
         self.tool_deseralizator = tool_deseralizator
-        self.tool_images_scanned = tool_images_scanned
         self.dict_args  = dict_args
         self.token = token
 
@@ -26,8 +24,6 @@ class ContainerScaScan():
         Procesa el listado de imagenes.
         """
         return self.tool_images.list_images_docker()
-
-
     
     def process(self):
         """
