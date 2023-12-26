@@ -36,7 +36,6 @@ def runner_engine_container(dict_args, token):
             tool_deseralizator = PrismaDeserealizator()
             
         tool_images = DockerImages()
-        tool_deseralizator = PrismaDeserealizator()
         tool_remote= AzureRemoteConfig()
         return init_engine_sca_rm(tool_run,
             tool_remote,
