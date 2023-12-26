@@ -1,9 +1,10 @@
 
 import configparser
-from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
-from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.LevelCompliance import LevelCompliance
+
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.container_sca_scan import ContainerScaScan
+from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.set_input_core import SetInputCore
  
+
 from devsecops_engine_utilities.utils.printers import (
     Printers,
 )
@@ -33,24 +34,12 @@ def get_inputs_from_config_file():
 def init_engine_sca_rm( tool_run,tool_remote,tool_images,tool_deseralizator,dict_args, token):
 
     Printers.print_logo_tool()
-   
     container_sca_scan = ContainerScaScan(tool_run,tool_remote,tool_images,tool_deseralizator,dict_args, token)
-    print(container_sca_scan.scanImage())
+    input_core = SetInputCore(tool_remote,dict_args)
+    images_scanned= container_sca_scan.process()
     
-    input_core = InputCore(
-        totalized_exclusions=[],
-        level_compliance_defined=LevelCompliance({
-                "Critical": 1,
-                "High": 8,
-                "Medium": 10,
-                "Low": 15})
-            ,
-        path_file_results="terreneitor",
-        custom_message_break_build="Test",
-        scope_pipeline="data_config.scope_pipeline"
-    )
     
-    return container_sca_scan.deseralizator(), input_core
+    return container_sca_scan.deseralizator(images_scanned), input_core.setInputCore(images_scanned)
    
     
 

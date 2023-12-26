@@ -43,12 +43,12 @@ class ContainerScaScan():
         """
         return self.tool_run.run_tool_container_sca(self.getRemoteConfig(), self.token,self.scanImage())
     
-    def deseralizator(self):
+    def deseralizator(self,image_scanned):
         """
         Process the results deserializer.
 
         Returns:
             list: Deserialized list of vulnerabilities.
         """
-        return self.tool_deseralizator.get_list_vulnerability(self.process())
+        return self.tool_deseralizator.get_list_vulnerability(image_scanned)
 
