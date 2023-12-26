@@ -28,12 +28,27 @@ class TrivyDeserializator(DeseralizatorGateway):
                                 Vulnerability(
                                 id=vul.get("VulnerabilityID",""),
                                 cvss=next((v["V3Score"] for v in vul["CVSS"].values() if "V3Score" in v), None),
-                                where_vulnerability=vul.get("PrimaryURL", ""),
+                                where_vulnerability=vul.get("PkgName", ""),
                                 description=vul.get("Description", ""),
                                 severity=vul.get("Severity", "").lower(),
                                 identification_date=vul.get("PublishedDate", ""),
                                 type_vulnerability="SCA",
-                                requirements=next((v["V3Score"] for v in vul["CVSS"].values() if "V3Vector" in v), None),
+                                requirements=next((v["V3Vector"] for v in vul["CVSS"].values() if "V3Vector" in v), None),
+                                tool="Trivy",
+                                is_excluded=False,
+                                )
+                            )
+                        else:
+                            vulnerabilities.append(
+                                Vulnerability(
+                                id=vul.get("VulnerabilityID",""),
+                                cvss="",
+                                where_vulnerability=vul.get("PkgName", ""),
+                                description=vul.get("Description", ""),
+                                severity="low",
+                                identification_date=vul.get("PublishedDate", ""),
+                                type_vulnerability="SCA",
+                                requirements="",
                                 tool="Trivy",
                                 is_excluded=False,
                                 )
