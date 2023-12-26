@@ -1,12 +1,15 @@
 import requests
 import os
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import ToolGateway
 import subprocess
 import logging
 import re
 import base64
 
-
+from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.images_scanned import (
+    ImagesScanned
+)
+from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
+    ToolGateway)
 
 
 class PrismaCloudManagerScan(ToolGateway):
@@ -44,26 +47,17 @@ class PrismaCloudManagerScan(ToolGateway):
                 self.download_twistcli(file_path, remoteconfig['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], token,
                                         remoteconfig['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'])
             
-            # Path to the scanned images file
-            scanned_images_file = os.path.join(os.getcwd(), 'scanned_images.txt')
-
-            # Check if the file exists; if not, create it
-            if not os.path.exists(scanned_images_file):
-                open(scanned_images_file, 'w').close()
-
-            # Read previously scanned images from the file
-            with open(scanned_images_file, 'r') as file:
-                images_scanned = file.read().splitlines()
-
-            images_to_scan = []
-
+            previosly_scanned = ImagesScanned()
+            file_name = 'scanned_images.txt'
+            images_scanned = []
+            
             for image in scan_image:
                 repository = image['Repository']
                 tag = image['Tag']
                 image_name = f"{repository}:{tag}"
 
                 # Check if the image has already been scanned
-                if image_name in images_scanned:
+                if (image_name+'_scan_result.json') in previosly_scanned.get_images_already_scanned(file_name):
                     print(f"The image {image_name} has already been scanned previously.")
                 else:
                     pattern = remoteconfig['PRISMA_CLOUD']['REGEX_EXPRESSION_PROJECTS']
@@ -74,20 +68,17 @@ class PrismaCloudManagerScan(ToolGateway):
                         try:
                             result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                                     text=True)
-                            images_scanned.append(image_name)
+                            images_scanned.append(image_name+'_scan_result.json')
                             print(f"Image {repository} scanned")
-                            images_to_scan.append(image_name + '_scan_result.json')
+                            with open(file_name, 'a') as file:
+                                file.write(image_name+'_scan_result.json\n')
                         except subprocess.CalledProcessError as e:
                             print(f"Error during image scan of {repository}: {e.stderr}")
                     else:
                         print(f"The image {repository} is not scanned")
 
-            # Save the scanned images to the file
-            with open(scanned_images_file, 'a') as file:
-                for scanned_image in images_scanned:
-                    file.write(scanned_image + '\n')
 
-            return images_to_scan
+            return images_scanned
 
         except Exception as ex:
             print(f"An overall error occurred: {ex}")
