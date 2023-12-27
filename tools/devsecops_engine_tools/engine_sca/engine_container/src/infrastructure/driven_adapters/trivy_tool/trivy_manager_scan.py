@@ -12,9 +12,19 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpe
 
 class TrivyScan(ToolGateway):
 
-    def run_tool_container_sca(self, remoteconfig, token, scan_image):
-        
+    def install_trivy(self,version):
         try:
+            subprocess.run('which trivy', check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print("trivy está instalado.")
+        except subprocess.CalledProcessError:
+            print("Instalando trivy.")
+            subprocess.run(['wget', 'https://github.com/aquasecurity/trivy/releases/download/v'+version+'/trivy_'+version+'_Linux-64bit.deb'])
+            subprocess.run(['sudo', 'dpkg', '-i', 'trivy_'+version+'_Linux-64bit.deb'])
+
+    def run_tool_container_sca(self, remoteconfig, token, scan_image):
+        try:
+            trivy_version = '0.48.1'
+            self.install_trivy(trivy_version)
             pattern = remoteconfig['PRISMA_CLOUD']['REGEX_EXPRESSION_PROJECTS']
             previosly_scanned = ImagesScanned()
             file_name = 'scanned_images.txt'
