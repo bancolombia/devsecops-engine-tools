@@ -1,7 +1,7 @@
 from devsecops_engine_tools.engine_core.src.domain.model.level_compliance import LevelCompliance
 
 
-class CheckovDeserializeConfig:
+class ConfigTool:
     def __init__(self, json_data, tool, environment):
         self.version = json_data[tool]["VERSION"]
         self.search_pattern = json_data[tool]["SEARCH_PATTERN"]
