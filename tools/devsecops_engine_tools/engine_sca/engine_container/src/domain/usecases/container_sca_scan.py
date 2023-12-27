@@ -15,25 +15,38 @@ class ContainerScaScan():
         self.token = token
 
     def getRemoteConfig(self):
-        """_summary_
+        """
+        Get remote configuration.
+        
+        Returns:
+            dict: Remote configuration.
         """
         return self.tool_remote.get_remote_config(self.dict_args)
     
     def scanImage(self):    
         """
-        Procesa el listado de imagenes.
+        Process the list of Docker images.
+
+        Returns:
+            list: List of processed images.
         """
         return self.tool_images.list_images_docker()
     
     def process(self):
         """
-        Procesa el escaneo de SCA.
+        Process SCA scanning.
+
+        Returns:
+            dict: SCA scanning results.
         """
         return self.tool_run.run_tool_container_sca(self.getRemoteConfig(), self.token,self.scanImage())
     
-    def deseralizator(self):
+    def deseralizator(self,image_scanned):
         """
-        Procesa el deseralizador de resultados.
+        Process the results deserializer.
+
+        Returns:
+            list: Deserialized list of vulnerabilities.
         """
-        return self.tool_deseralizator.get_list_vulnerability(self.process())
+        return self.tool_deseralizator.get_list_vulnerability(image_scanned)
 
