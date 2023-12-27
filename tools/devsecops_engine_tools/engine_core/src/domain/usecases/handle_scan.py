@@ -42,10 +42,8 @@ class HandleScan:
             secret_tool = self.secrets_manager_gateway.get_secret(config_tool)
         if "engine_iac" in self.dict_args["tool"]:
             vulnerabilities_list, input_core = runner_engine_iac(
-                self.dict_args["remote_config_repo"],
-                "SAST/IAC/configTools.json",
+                self.dict_args,
                 config_tool["ENGINE_IAC"],
-                self.dict_args["environment"],
                 secret_tool
             )
             if self.dict_args["use_vulnerability_management"] == "true":
