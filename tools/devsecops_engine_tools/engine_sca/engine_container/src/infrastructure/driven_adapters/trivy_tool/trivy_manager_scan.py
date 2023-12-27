@@ -14,12 +14,16 @@ class TrivyScan(ToolGateway):
 
     def install_trivy(self,version):
         try:
-            subprocess.run('which trivy', check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(['which', 'trivy'], check=True)
             print("trivy está instalado.")
         except subprocess.CalledProcessError:
-            print("Instalando trivy.")
-            subprocess.run(['wget', 'https://github.com/aquasecurity/trivy/releases/download/v'+version+'/trivy_'+version+'_Linux-64bit.deb'])
-            subprocess.run(['sudo', 'dpkg', '-i', 'trivy_'+version+'_Linux-64bit.deb'])
+            print("Intentando instalar trivy.")
+            try:
+                subprocess.run(['wget', 'https://github.com/aquasecurity/trivy/releases/download/v'+version+'/trivy_'+version+'_Linux-64bit.deb'])
+                subprocess.run(['sudo', 'dpkg', '-i', 'trivy_'+version+'_Linux-64bit.deb'], check=True)
+                print("trivy instalado.")
+            except subprocess.CalledProcessError as error:
+                raise RuntimeError(f"Error al instalar trivy: {error}")
 
     def run_tool_container_sca(self, remoteconfig, token, scan_image):
         try:
@@ -39,7 +43,8 @@ class TrivyScan(ToolGateway):
                         print(f"The image {image_name} has already been scan previously.")
                     else:
                         try:
-                            result = subprocess.run("trivy --scanners vuln --format json --quiet image " + image_name , shell=True, capture_output=True, text=True)
+                            command = ['trivy', '--scanners', 'vuln', '--format', 'json', '--quiet', 'image', repository]
+                            result = subprocess.run(command, capture_output=True, text=True)
                             with open(image_name+'_scan_result.json', 'w') as file:
                                 file.write(result.stdout)
                             images_scanned.append(image_name+"_scan_result.json")

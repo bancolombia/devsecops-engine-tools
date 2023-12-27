@@ -36,8 +36,7 @@ def init_engine_sca_rm( tool_run,tool_remote,tool_images,tool_deseralizator,dict
     Printers.print_logo_tool()
     container_sca_scan = ContainerScaScan(tool_run,tool_remote,tool_images,tool_deseralizator,dict_args, token)
     input_core = SetInputCore(tool_remote,dict_args)
-    images_scanned= container_sca_scan.process()
-    
+    images_scanned = container_sca_scan.process()
     
     return container_sca_scan.deseralizator(images_scanned), input_core.setInputCore(images_scanned)
    
