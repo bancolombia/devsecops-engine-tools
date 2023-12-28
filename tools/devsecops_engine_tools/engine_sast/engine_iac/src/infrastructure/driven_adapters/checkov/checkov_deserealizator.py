@@ -10,7 +10,7 @@ from dataclasses import dataclass
 class CheckovDeserealizator:
     @classmethod
     def get_list_finding(
-        self, results_scan_list: list, rules
+        cls, results_scan_list: list, rules
     ) -> "list[Finding]":
         list_open_findings = []
 
