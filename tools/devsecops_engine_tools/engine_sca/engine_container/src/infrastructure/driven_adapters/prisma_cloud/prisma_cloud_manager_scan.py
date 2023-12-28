@@ -69,13 +69,13 @@ class PrismaCloudManagerScan(ToolGateway):
                             result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                                     text=True)
                             images_scanned.append(image_name+'_scan_result.json')
-                            print(f"Image {repository} scanned")
+                            #print(f"Image {repository} scanned")
                             with open(file_name, 'a') as file:
                                 file.write(image_name+'_scan_result.json\n')
                         except subprocess.CalledProcessError as e:
                             print(f"Error during image scan of {repository}: {e.stderr}")
-                    else:
-                        print(f"The image {repository} is not scanned")
+                    # else:
+                    #     print(f"The image {repository} is not scanned")
 
 
             return images_scanned
