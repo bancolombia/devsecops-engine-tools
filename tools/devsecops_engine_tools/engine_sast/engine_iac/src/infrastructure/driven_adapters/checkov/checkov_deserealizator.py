@@ -1,5 +1,6 @@
-from devsecops_engine_tools.engine_core.src.domain.model.vulnerability import (
-    Vulnerability,
+from devsecops_engine_tools.engine_core.src.domain.model.finding import (
+    Category,
+    Finding,
 )
 from datetime import datetime
 from dataclasses import dataclass
@@ -7,26 +8,26 @@ from dataclasses import dataclass
 
 @dataclass
 class CheckovDeserealizator:
-    def get_list_vulnerability(
+    def get_list_finding(
         self, results_scan_list: list, rules
-    ) -> "list[Vulnerability]":
-        list_open_vulnerabilities = []
+    ) -> "list[Finding]":
+        list_open_findings = []
 
         for result in results_scan_list:
             if "failed_checks" in str(result):
                 for scan in result["results"]["failed_checks"]:
-                    vulnerability_open = Vulnerability(
+                    finding_open = Finding(
                         id=scan.get("check_id"),
                         cvss=None,
-                        where_vulnerability=scan.get("repo_file_path"),
+                        where=scan.get("repo_file_path"),
                         description=scan.get("check_name"),
                         severity=rules[scan.get("check_id")].get("severity").lower(),
                         identification_date=datetime.now().strftime("%d%m%Y"),
-                        type_vulnerability="IaC",
+                        module="engine_iac",
+                        category=Category(rules[scan.get("check_id")].get("category").lower()),
                         requirements=scan.get("guideline"),
-                        tool="Checkov",
-                        is_excluded=False,
+                        tool="Checkov"
                     )
-                    list_open_vulnerabilities.append(vulnerability_open)
+                    list_open_findings.append(finding_open)
 
-        return list_open_vulnerabilities
+        return list_open_findings

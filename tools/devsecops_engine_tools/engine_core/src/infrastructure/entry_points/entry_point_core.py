@@ -67,10 +67,10 @@ def init_engine_core(
         devops_platform_gateway,
         dict_args=args,
     )
-    vulnerabilities_list, input_core = instance.process()
+    findings_list, input_core = instance.process()
     BreakBuild(
         devops_platform_gateway,
         print_table_gateway,
-        vulnerabilities_list=vulnerabilities_list,
+        findings_list=findings_list,
         input_core=input_core,
     )

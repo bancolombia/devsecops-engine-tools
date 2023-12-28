@@ -58,9 +58,13 @@ class CheckovTool(ToolGateway):
             if secret_tool is None:
                 print("Secrets manager is not enabled to configure external checks")
             else:
-                if config_tool.use_external_checks_git == "True" and platform.system() in (
-                    "Linux",
-                    "Darwin",
+                if (
+                    config_tool.use_external_checks_git == "True"
+                    and platform.system()
+                    in (
+                        "Linux",
+                        "Darwin",
+                    )
                 ):
                     config_knowns_hosts(
                         config_tool.repository_ssh_host,
@@ -71,7 +75,9 @@ class CheckovTool(ToolGateway):
                     )
                     ssh_key_file_path = "/tmp/ssh_key_file"
                     create_ssh_private_file(ssh_key_file_path, ssh_key_content)
-                    ssh_key_password = decode_base64(secret_tool, "repository_ssh_password")
+                    ssh_key_password = decode_base64(
+                        secret_tool, "repository_ssh_password"
+                    )
                     agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
 
                 # Create configuration dir external checks
@@ -112,12 +118,8 @@ class CheckovTool(ToolGateway):
         result.append(json.loads(output))
         queue.put(result)
 
-    def prepare_config_tool(
-        self, data_file_tool, exclusions, environment, pipeline, secret_tool
-    ):
-        config_tool = ConfigTool(
-            json_data=data_file_tool, tool=self.TOOL, environment=environment
-        )
+    def prepare_config_tool(self, data_file_tool, exclusions, pipeline, secret_tool):
+        config_tool = ConfigTool(json_data=data_file_tool, tool=self.TOOL)
 
         config_tool.exclusions = exclusions
         config_tool.scope_pipeline = pipeline
@@ -139,7 +141,9 @@ class CheckovTool(ToolGateway):
 
         return config_tool, folders_to_scan, agent_env
 
-    def scan_folders(self, folders_to_scan, config_tool: ConfigTool, agent_env, environment):
+    def scan_folders(
+        self, folders_to_scan, config_tool: ConfigTool, agent_env, environment
+    ):
         output_queue = queue.Queue()
         # Crea una lista para almacenar los hilos
         threads = []
@@ -190,7 +194,7 @@ class CheckovTool(ToolGateway):
 
     def run_tool(self, data_file_tool, exclusions, environment, pipeline, secret_tool):
         config_tool, folders_to_scan, agent_env = self.prepare_config_tool(
-            data_file_tool, exclusions, environment, pipeline, secret_tool
+            data_file_tool, exclusions, pipeline, secret_tool
         )
 
         result_scans = self.scan_folders(
@@ -198,7 +202,7 @@ class CheckovTool(ToolGateway):
         )
 
         checkov_deserealizator = CheckovDeserealizator()
-        vulnerabilities_list = checkov_deserealizator.get_list_vulnerability(
+        findings_list = checkov_deserealizator.get_list_finding(
             result_scans, config_tool.rules_all
         )
 
@@ -212,11 +216,11 @@ class CheckovTool(ToolGateway):
 
         input_core = InputCore(
             totalized_exclusions=totalized_exclusions,
-            level_compliance_defined=config_tool.level_compliance,
+            threshold_defined=config_tool.threshold,
             path_file_results=generate_file_from_tool(
                 self.TOOL, result_scans, config_tool.rules_all
             ),
             custom_message_break_build=config_tool.message_info_sast_rm,
             scope_pipeline=config_tool.scope_pipeline,
         )
-        return vulnerabilities_list, input_core
+        return findings_list, input_core
