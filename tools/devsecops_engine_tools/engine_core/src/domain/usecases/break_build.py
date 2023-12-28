@@ -34,10 +34,10 @@ class BreakBuild:
             vulnerabilities_excluded_list = list(
                 filter(
                     lambda item: any(
-                        exclusion["Id"] == item.id
+                        exclusion.id == item.id
                         and (
-                            exclusion["Where"] in item.where_vulnerability
-                            or "all" in exclusion["Where"]
+                            exclusion.where in item.where_vulnerability
+                            or "all" in exclusion.where
                         )
                         for exclusion in exclusions
                     ),

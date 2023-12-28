@@ -48,6 +48,7 @@ class HandleScan:
                 "SAST/IAC/configTools.json",
                 config_tool["ENGINE_IAC"],
                 self.dict_args["environment"],
+                secret_tool
             )
             if self.dict_args["use_vulnerability_management"] == "true":
                 try:

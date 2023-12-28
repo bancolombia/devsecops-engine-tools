@@ -2,7 +2,7 @@ import json
 import os
 
 
-def generate_file_from_tool(tool, result_list):
+def generate_file_from_tool(tool, result_list, rules_doc):
     if tool == "CHECKOV":
         try:
             result_one: dict = {}
@@ -14,10 +14,26 @@ def generate_file_from_tool(tool, result_list):
             results_data = {
                 "check_type": "Dockerfile and Kubernetes",
                 "results": {
-                    "failed_checks": result_one.get("results", {}).get(
-                        "failed_checks", []
+                    "failed_checks": list(
+                        map(
+                            lambda x: update_field(
+                                x,
+                                "severity",
+                                rules_doc[x.get("check_id")].get("severity").lower(),
+                            ),
+                            result_one.get("results", {}).get("failed_checks", []),
+                        )
                     )
-                    + result_two.get("results", {}).get("failed_checks", [])
+                    + list(
+                        map(
+                            lambda x: update_field(
+                                x,
+                                "severity",
+                                rules_doc[x.get("check_id")].get("severity").lower(),
+                            ),
+                            result_two.get("results", {}).get("failed_checks", []),
+                        )
+                    )
                 },
                 "summary": {
                     "passed": result_one.get("summary", {}).get("passed", 0)
@@ -49,3 +65,7 @@ def generate_file_from_tool(tool, result_list):
             print(f"Dict KeyError in checks integration: {e}")
         except Exception as ex:
             print(f"Error during handling checkov json integrator {ex}")
+
+
+def update_field(elem, field, new_value):
+    return {**elem, field: new_value}
