@@ -8,6 +8,7 @@ from dataclasses import dataclass
 
 @dataclass
 class CheckovDeserealizator:
+    @classmethod
     def get_list_finding(
         self, results_scan_list: list, rules
     ) -> "list[Finding]":

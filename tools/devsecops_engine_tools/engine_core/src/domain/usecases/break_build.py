@@ -59,7 +59,7 @@ class BreakBuild:
 
             comliances_without_exclusions_list = list(
                 filter(
-                    lambda v: v.category == Category.COMPLINACE,
+                    lambda v: v.category == Category.COMPLIANCE,
                     findings_without_exclusions_list,
                 )
             )
