@@ -107,7 +107,7 @@ class BreakBuild:
                 comliances_without_exclusions_list,
                 0,
             )
-
+            print()
             if (
                 sum(
                     [
@@ -193,7 +193,7 @@ class BreakBuild:
         else:
             print(devops_platform_gateway.logging("succeeded", "There are no findings"))
             print(devops_platform_gateway.result_pipeline("succeeded"))
-
+        print()
         print(
             devops_platform_gateway.logging(
                 "info",

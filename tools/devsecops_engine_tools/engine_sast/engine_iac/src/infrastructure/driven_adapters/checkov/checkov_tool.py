@@ -118,7 +118,7 @@ class CheckovTool(ToolGateway):
         result.append(json.loads(output))
         queue.put(result)
 
-    def prepare_config_tool(self, data_file_tool, exclusions, pipeline, secret_tool):
+    def complete_config_tool(self, data_file_tool, exclusions, pipeline, secret_tool):
         config_tool = ConfigTool(json_data=data_file_tool, tool=self.TOOL)
 
         config_tool.exclusions = exclusions
@@ -192,9 +192,9 @@ class CheckovTool(ToolGateway):
             result_scans.extend(result)
         return result_scans
 
-    def run_tool(self, data_file_tool, exclusions, environment, pipeline, secret_tool):
-        config_tool, folders_to_scan, agent_env = self.prepare_config_tool(
-            data_file_tool, exclusions, pipeline, secret_tool
+    def run_tool(self, init_config_tool, exclusions, environment, pipeline, secret_tool):
+        config_tool, folders_to_scan, agent_env = self.complete_config_tool(
+            init_config_tool, exclusions, pipeline, secret_tool
         )
 
         result_scans = self.scan_folders(
