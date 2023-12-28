@@ -5,6 +5,9 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.too
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
     CheckovConfig,
 )
+from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
+    AzureMessageLoggingPipeline
+)
 
 
 class CheckovTool(ToolGateway):
@@ -33,6 +36,7 @@ class CheckovTool(ToolGateway):
             env_modified = {**dict(os.environ), **self.checkov_config.env}
         result = subprocess.run(command, capture_output=True, text=True, shell=True, env=env_modified)
         output = result.stdout.strip()
-        # error = result.stderr.strip()
-        # TODO revisar el stderr para manejo de excepciones.
+        error = result.stderr.strip()
+        if error is not None and error != "":
+            print(AzureMessageLoggingPipeline.WarningLogging.get_message(f"Error running checkov.. {error}"))
         return output

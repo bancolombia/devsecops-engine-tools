@@ -40,6 +40,7 @@ def create_ssh_private_file(ssh_key_file_path, ssh_key_content):
 def add_ssh_private_key(ssh_key_file_path, ssh_key_password):
     try:
         # Iniciar un nuevo shell y evaluar el comando ssh-agent
+        pexpect.spawn("ssh-agent -k")
         ssh_process = pexpect.spawn("ssh-agent -s")
         ssh_process.expect("SSH_AUTH_SOCK=(.*?);")
         ssh_auth_sock = ssh_process.match.group(1).decode()

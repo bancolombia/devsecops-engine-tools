@@ -1,4 +1,3 @@
-import argparse
 import configparser
 import threading
 import platform
@@ -24,6 +23,7 @@ from devsecops_engine_utilities.utils.printers import (
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
     ReleaseVariables,
 )
+from devsecops_engine_utilities.github.infrastructure.github_api import GithubApi
 from devsecops_engine_utilities.ssh.managment_private_key import (
     create_ssh_private_file,
     add_ssh_private_key,
@@ -48,10 +48,13 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
     generate_file_from_tool,
 )
-
+from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
+    AzureMessageLoggingPipeline,
+)
 
 ENGINESAST_ENGINEIAC = "enginesast.engineiac"
 
@@ -85,11 +88,11 @@ def async_scan(queue, iac_scan: IacScan):
 def search_folders(search_pattern, ignore_pattern):
     current_directory = os.getcwd()
     patron = (
-        "(?i)(?!.*"
+        "(?i)(?!.*(?:"
         + "|".join(ignore_pattern)
-        + ").*?("
+        + ")).*?("
         + "|".join(search_pattern)
-        + ").*"
+        + ").*$"
     )
     folders = [
         carpeta
@@ -113,7 +116,7 @@ def init_engine_sast_rm(
     data_file_tool = azure_devops_integration.get_remote_json_config(
         remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
     )
-    # data_file_tool = json.loads(remote_config) #-> Esto es para pruebas locales
+    # data_file_tool = json.loads(remote_config)  # -> Esto es para pruebas locales
     data_config = CheckovDeserializeConfig(
         json_data=data_file_tool, tool=tool, environment=environment
     )
@@ -122,7 +125,7 @@ def init_engine_sast_rm(
         remote_config_path=data_config.exclusions_path,
     )
     data_config.scope_pipeline = ReleaseVariables.Release_Definitionname.value()
-    # data_config.exclusions = json.loads(exclusion) #-> Esto es para pruebas locales
+    # data_config.exclusions = json.loads(exclusion)  # -> Esto es para pruebas locales
     if data_config.exclusions.get("All") is not None:
         data_config.exclusions_all = data_config.exclusions.get("All").get(tool)
     if data_config.exclusions.get(data_config.scope_pipeline) is not None:
@@ -133,20 +136,37 @@ def init_engine_sast_rm(
         data_config.search_pattern, data_config.ignore_search_pattern
     )
 
-    # Create configuration ssh external checks
+    # Create configuration external checks
     agent_env = None
-    if data_config.use_external_checks_git == "True" and platform.system() in (
-        "Linux",
-        "Darwin",
-    ):
-        config_knowns_hosts(
-            data_config.repository_ssh_host, data_config.repository_public_key_fp
+    try:
+        if data_config.use_external_checks_git == "True" and platform.system() in (
+            "Linux",
+            "Darwin",
+        ):
+            config_knowns_hosts(
+                data_config.repository_ssh_host, data_config.repository_public_key_fp
+            )
+            ssh_key_content = decode_base64(secret_tool, "repository_ssh_private_key")
+            ssh_key_file_path = "/tmp/ssh_key_file"
+            create_ssh_private_file(ssh_key_file_path, ssh_key_content)
+            ssh_key_password = decode_base64(secret_tool, "repository_ssh_password")
+            agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
+
+        # Create configuration dir external checks
+        if data_config.use_external_checks_dir == "True":
+            github_api = GithubApi(secret_tool["github_token"])
+            github_api.download_latest_release_assets(
+                data_config.external_dir_owner,
+                data_config.external_dir_repository,
+                "/tmp",
+            )
+
+    except Exception as ex:
+        print(
+            AzureMessageLoggingPipeline.WarningLogging.get_message(
+                f"An error ocurred configuring external checks {ex}"
+            )
         )
-        ssh_key_content = decode_base64(secret_tool, "repository_ssh_private_key")
-        ssh_key_file_path = "/tmp/ssh_key_file"
-        create_ssh_private_file(ssh_key_file_path, ssh_key_content)
-        ssh_key_password = decode_base64(secret_tool, "repository_ssh_password")
-        agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
 
     output_queue = queue.Queue()
     # Crea una lista para almacenar los hilos
@@ -165,9 +185,13 @@ def init_engine_sast_rm(
                 directories=folder,
                 external_checks_git=[f"{data_config.external_checks_git}/kubernetes"]
                 if data_config.use_external_checks_git == "True"
-                and agent_env is not None and rule == "RULES_K8S"
+                and agent_env is not None
+                and rule == "RULES_K8S"
                 else [],
-                env=agent_env
+                env=agent_env,
+                external_checks_dir=f"/tmp/{data_config.external_asset_name}"
+                if data_config.use_external_checks_dir == "True" and rule == "RULES_K8S"
+                else [],
             )
             checkov_config.create_config_dict()
             checkov_run = CheckovTool(checkov_config=checkov_config)
@@ -198,14 +222,20 @@ def init_engine_sast_rm(
     )
 
     totalized_exclusions = []
-    totalized_exclusions.extend(data_config.exclusions_all) if data_config.exclusions_all is not None else None
-    totalized_exclusions.extend(data_config.exclusions_scope) if data_config.exclusions_scope is not None else None
+    totalized_exclusions.extend(
+        map(lambda elem: Exclusions(**elem), data_config.exclusions_all)
+    ) if data_config.exclusions_all is not None else None
+    totalized_exclusions.extend(
+        map(lambda elem: Exclusions(**elem), data_config.exclusions_scope)
+    ) if data_config.exclusions_scope is not None else None
 
     input_core = InputCore(
         totalized_exclusions=totalized_exclusions,
         level_compliance_defined=data_config.level_compliance,
-        path_file_results=generate_file_from_tool(tool, result_scans),
+        path_file_results=generate_file_from_tool(
+            tool, result_scans, data_config.rules_all
+        ),
         custom_message_break_build=data_config.message_info_sast_rm,
-        scope_pipeline=data_config.scope_pipeline
+        scope_pipeline=data_config.scope_pipeline,
     )
     return vulnerabilities_list, input_core
