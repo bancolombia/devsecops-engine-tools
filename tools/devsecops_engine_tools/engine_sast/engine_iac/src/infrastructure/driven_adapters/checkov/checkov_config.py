@@ -33,15 +33,15 @@ class CheckovConfig:
         directories,
         env,
         branch=None,
-        checks=[],
+        checks=None,
         compact=True,
         quiet=True,
         output="json",
         soft_fail=True,
         evaluate_variables=True,
-        external_checks_dir=[],
+        external_checks_dir=None,
         external_checks_git=None,
-        skip_checks=[],
+        skip_checks=None,
         skip_download=True,
     ):
         self.path_config_file = path_config_file
