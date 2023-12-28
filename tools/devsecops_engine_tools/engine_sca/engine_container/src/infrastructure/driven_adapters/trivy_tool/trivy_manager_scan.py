@@ -46,7 +46,6 @@ class TrivyScan(ToolGateway):
                             command = ['trivy', '--scanners', 'vuln', '-f', 'json', '-o', image_name+'_scan_result.json', '--quiet', 'image', image_name]
                             subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
                             images_scanned.append(image_name+"_scan_result.json")
-                            # print("Image "+image_name+" scanned.")
                             with open(file_name, 'a') as file:
                                 file.write(image_name+'_scan_result.json\n')
                         except subprocess.CalledProcessError as e:
