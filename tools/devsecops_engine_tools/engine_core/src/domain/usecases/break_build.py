@@ -180,7 +180,7 @@ class BreakBuild:
                     print(
                         devops_platform_gateway.logging(
                             "error",
-                            "Compliance issues count greater than or equal to failure criteria (critical: {0})".format(
+                            "Compliance issues count is greater than or equal to failure criteria (critical: {0})".format(
                                 1,
                             ),
                         )
