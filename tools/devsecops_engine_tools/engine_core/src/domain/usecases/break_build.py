@@ -131,7 +131,7 @@ class BreakBuild:
                 or vulnerabilities_medium >= threshold.vulnerability.medium
                 or vulnerabilities_low >= threshold.vulnerability.low
             ):
-                print(devops_platform_gateway.logging("info", "Below are all vulnerabilities detected."))
+                print("Below are all vulnerabilities detected.")
                 printer_table_gateway.print_table(
                     vulnerabilities_without_exclusions_list
                 )
@@ -174,7 +174,7 @@ class BreakBuild:
                 print(devops_platform_gateway.result_pipeline("succeeded"))
             print()
             if len(comliances_without_exclusions_list) > 0:
-                print(devops_platform_gateway.logging("info", "Below are all compliances issues detected."))
+                print("Below are all compliances issues detected.")
                 printer_table_gateway.print_table(comliances_without_exclusions_list)
                 if compliance_critical >= threshold.compliance.critical:
                     print(
