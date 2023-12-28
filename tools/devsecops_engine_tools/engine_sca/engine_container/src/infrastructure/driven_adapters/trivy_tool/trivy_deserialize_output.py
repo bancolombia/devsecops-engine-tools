@@ -19,7 +19,7 @@ class TrivyDeserializator(DeseralizatorGateway):
                       
                 json_data = json.loads(image_object)
 
-                if 'Results' in json_data:
+                if 'Vulnerabilities' in json_data['Results'][0]:
                     vulnerabilities_data = json_data["Results"][0]["Vulnerabilities"]
                     vulnerabilities = []
                     for vul in vulnerabilities_data:
@@ -38,22 +38,6 @@ class TrivyDeserializator(DeseralizatorGateway):
                                 is_excluded=False,
                                 )
                             )
-                        else:
-                            vulnerabilities.append(
-                                Vulnerability(
-                                id=vul.get("VulnerabilityID",""),
-                                cvss="",
-                                where_vulnerability=vul.get("PkgName", ""),
-                                description=vul.get("Description", ""),
-                                severity="low",
-                                identification_date=vul.get("PublishedDate", ""),
-                                type_vulnerability="SCA",
-                                requirements="",
-                                tool="Trivy",
-                                is_excluded=False,
-                                )
-                            )
                     list_open_vulnerabilities.extend(vulnerabilities)
-        print("hola mundo")
         return list_open_vulnerabilities
 
