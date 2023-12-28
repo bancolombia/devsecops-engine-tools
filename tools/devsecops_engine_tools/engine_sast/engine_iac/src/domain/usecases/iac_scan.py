@@ -14,7 +14,7 @@ class IacScan:
         self.devops_platform_gateway = devops_platform_gateway
 
     def process(self, dict_args, secret_tool):
-        config_tool = self.devops_platform_gateway.get_remote_config(
+        init_config_tool = self.devops_platform_gateway.get_remote_config(
             dict_args["remote_config_repo"], "SAST/IAC/configTools.json"
         )
 
@@ -23,7 +23,7 @@ class IacScan:
             remote_config_path="/SAST/IAC/Exclusions/Exclusions.json",
         )
         return self.tool_gateway.run_tool(
-            config_tool,
+            init_config_tool,
             exclusions,
             dict_args["environment"],
             self.devops_platform_gateway.get_variable("pipeline"),
