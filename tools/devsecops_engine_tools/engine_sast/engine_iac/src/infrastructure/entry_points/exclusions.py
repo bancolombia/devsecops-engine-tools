@@ -1,70 +1,86 @@
 exclusion = """{
 	"All": {
-        "SCA": {
-			"XRAY-521541" : {
-                    "Cve_Id": "CVE-2023-29405",
-                    "Create_Date" : "10112023",
-                    "Expired_Date": "18112023",
-                    "severity": "HIGH",
-                    "HU": "4338704"
+        "SCA": [
+			{
+				"id": "XRAY-521541",
+				"where": "all",
+				"cve_id": "CVE-2023-29405",
+				"create_date" : "10112023",
+				"expired_date": "18112023",
+				"severity": "HIGH",
+				"hu": "4338704"
             }
-        },
-        "CHECKOV": {
-			"XRAY-521541" : {
-				"Cve_Id": "CVE-2023-29405",
-				"Create_Date" : "18112023",
-				"Expired_Date": "undefined",
+        ],
+        "CHECKOV": [
+			{
+				"id": "XRAY-52154",
+                "where": "all",
+				"cve_id": "CVE-2023-29405",
+				"create_date" : "18112023",
+				"expired_date": "undefined",
 				"severity": "LOW",
-				"HU": "4338704"
+				"hu": "4338704"
 			},
-			"CKV2_AWS_123" : {
-				"Cve_Id": "N.A",
-				"Create_Date" : "18112023",
-				"Expired_Date": "18032024",
+			{
+            	"id": "CKV2_AWS_123",
+                "where": "all",
+				"cve_id": "N.A",
+				"create_date" : "18112023",
+				"expired_date": "18032024",
 				"severity": "LOW",
-				"HU": "4338704"
+				"hu": "4338704"
 			},
-            "CKV_K8S_37" : {
-				"Cve_Id": "N.A",
-				"Create_Date" : "18112023",
-				"Expired_Date": "18032024",
+            {
+				"id": "CKV_K8S_37",
+                "where": "all",
+				"cve_id": "N.A",
+				"create_date" : "18112023",
+				"expired_date": "18032024",
 				"severity": "LOW",
-				"HU": "4338704"
+				"hu": "4338704"
 			}
-        }
+        ]
 	},
 	"AW11111111_ProyectoEjemplo": {
-		"SCA": {
-			"XRAY-521541" : {
-				"Cve_Id": "CVE-2023-29405",
-				"Create_Date" : "10112023",
-				"Expired_Date": "18112023",
+		"SCA": [
+			{
+				"id": "XRAY-521541",
+                "where": "componente",
+				"cve_id": "CVE-2023-29405",
+				"create_date" : "10112023",
+				"expired_date": "18112023",
 				"severity": "HIGH",
-				"HU": "4338704"
+				"hu": "4338704"
 			}
-		},
-		"CHECKOV": {
-			"XRAY-521541" : {
-				"Cve_Id": "CVE-2023-29405",
-				"Create_Date" : "18112023",
-				"Expired_Date": "undefined",
+		],
+		"CHECKOV": [
+			{
+				"id": "XRAY-521541",
+                "where": "app.yaml",
+				"cve_id": "CVE-2023-29405",
+				"create_date" : "18112023",
+				"expired_date": "undefined",
 				"severity": "LOW",
-				"HU": "4338704"
+				"hu": "4338704"
 			},
-			"CKV2_AWS_123" : {
-				"Cve_Id": "N.A",
-				"Create_Date" : "18112023",
-				"Expired_Date": "18032024",
+			{
+				"id": "CKV2_AWS_123",
+				"where": "all",
+				"cve_id": "N.A",
+				"create_date" : "18112023",
+				"expired_date": "18032024",
 				"severity": "LOW",
-				"HU": "4338704"
+				"hu": "4338704"
 			},
-			"CKV_DOCKER_4" : {
-				"Cve_Id": "N.A",
-				"Create_Date" : "18112023",
-				"Expired_Date": "18032024",
+			{
+				"id": "CKV_DOCKER_4",
+				"where": "all",
+				"cve_id": "N.A",
+				"create_date" : "18112023",
+				"expired_date": "18032024",
 				"severity": "LOW",
-				"HU": "4338704"
+				"hu": "4338704"
 			}
-		}
+		]
 	}
 }"""
