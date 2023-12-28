@@ -152,7 +152,7 @@ class BreakBuild:
                 )
                 print(devops_platform_gateway.result_pipeline("failed"))
             else:
-                print(devops_platform_gateway.logging("info", "Below are all vulnerabilities detected."))
+                print("Below are all vulnerabilities detected.")
                 printer_table_gateway.print_table(
                     vulnerabilities_without_exclusions_list
                 )
