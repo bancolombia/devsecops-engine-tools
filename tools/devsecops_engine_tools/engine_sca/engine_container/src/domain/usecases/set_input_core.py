@@ -30,7 +30,7 @@ class SetInputCore():
         return InputCore(
             [],
             LevelCompliance(self.getRemoteConfig()['PRISMA_CLOUD']['LEVEL_COMPLIANCE'][self.dict_args['environment']]),
-            images_scanned[-1],
-            "Please refer to documentation for more information",
+            images_scanned[-1] if images_scanned else None,
+            self.getRemoteConfig()['PRISMA_CLOUD']['MESSAGE_INFO_SAST_RM'],
             os.environ.get("BUILD_DEFINITIONNAME", "")
         )
