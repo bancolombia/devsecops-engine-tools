@@ -1,38 +1,31 @@
-import sys
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.entry_point_tool import (
-    get_inputs_from_config_file,
     init_engine_sast_rm,
 )
-from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
-    AzureMessageResultPipeline,
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azure.azure_devops import (
+    AzureDevops,
+)
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_tool import (
+    CheckovTool
 )
 
 
-def runner_engine_iac(
-    remote_config_repo, remote_config_path, tool, environment, secret_tool
-):
+def runner_engine_iac(dict_args, tool, secret_tool):
     try:
-        (
-            remote_config_repo,
-            remote_config_path,
-            environment,
-        ) = (
-            remote_config_repo,
-            remote_config_path,
-            environment or get_inputs_from_config_file(),
-        )
+        # Define driven adapters for gateways
+        devops_platform_gateway = AzureDevops()
+        tool_gateway = None
+        if (tool == "CHECKOV"):
+            tool_gateway = CheckovTool()
+
         return init_engine_sast_rm(
-            remote_config_repo=remote_config_repo,
-            remote_config_path=remote_config_path,
-            tool=tool,
-            environment=environment,
-            secret_tool=secret_tool
+            devops_platform_gateway=devops_platform_gateway,
+            tool_gateway=tool_gateway,
+            dict_args=dict_args,
+            secret_tool=secret_tool,
         )
 
     except Exception as e:
-        print(AzureMessageResultPipeline.Succeeded.value)
-        raise Exception(f"Error SCAN : {str(e)}")
-        # Manejar el error según sea necesario
+        raise Exception(f"Error engine_iac : {str(e)}")
 
 
 if __name__ == "__main__":
