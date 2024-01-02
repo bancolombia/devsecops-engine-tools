@@ -57,7 +57,7 @@ class BreakBuild:
                 )
             )
 
-            comliances_without_exclusions_list = list(
+            compliances_without_exclusions_list = list(
                 filter(
                     lambda v: v.category == Category.COMPLIANCE,
                     findings_without_exclusions_list,
@@ -104,7 +104,7 @@ class BreakBuild:
                 lambda count, compliance: count + 1
                 if compliance.severity == "critical"
                 else count,
-                comliances_without_exclusions_list,
+                compliances_without_exclusions_list,
                 0,
             )
             print()
@@ -173,9 +173,9 @@ class BreakBuild:
                 )
                 print(devops_platform_gateway.result_pipeline("succeeded"))
             print()
-            if len(comliances_without_exclusions_list) > 0:
+            if len(compliances_without_exclusions_list) > 0:
                 print("Below are all compliances issues detected.")
-                printer_table_gateway.print_table(comliances_without_exclusions_list)
+                printer_table_gateway.print_table(compliances_without_exclusions_list)
                 if compliance_critical >= threshold.compliance.critical:
                     print(
                         devops_platform_gateway.logging(
