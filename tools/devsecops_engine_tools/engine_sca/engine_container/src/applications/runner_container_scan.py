@@ -17,21 +17,12 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
 )
 
 
-def runner_engine_container(dict_args, token):
+def runner_engine_container(dict_args, config_tool, token):
     try:
-        # (
-        #     #remote_config_repo,
-        #     remote_config_path,
-        #     environment,
-        # ) = (
-        #     #remote_config_repo,
-        #     #remote_config_path,
-        #     environment or get_inputs_from_config_file(),
-        # )
-        if dict_args['scanner'] == 'trivy':
+        if config_tool['ENGINE_CONTAINER'].lower() == 'trivy':
             tool_run = TrivyScan()
             tool_deseralizator = TrivyDeserializator()
-        else:
+        elif config_tool['ENGINE_CONTAINER'].lower() == 'prisma':
             tool_run = PrismaCloudManagerScan()
             tool_deseralizator = PrismaDeserealizator()
             

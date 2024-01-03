@@ -29,7 +29,7 @@ class TrivyScan(ToolGateway):
         try:
             trivy_version = remoteconfig['TRIVY']['TRIVY_VERSION']
             self.install_trivy(trivy_version)
-            pattern = remoteconfig['TRIVY']['REGEX_EXPRESSION_PROJECTS']
+            pattern = remoteconfig['REGEX_EXPRESSION_PROJECTS']
             previosly_scanned = ImagesScanned()
             file_name = 'scanned_images.txt'
             images_scanned = []

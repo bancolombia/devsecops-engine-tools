@@ -1,5 +1,5 @@
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.LevelCompliance import LevelCompliance
+from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.config_gateway import ConfigGateway
 import os
 
@@ -29,8 +29,8 @@ class SetInputCore():
         """
         return InputCore(
             [],
-            LevelCompliance(self.getRemoteConfig()['PRISMA_CLOUD']['LEVEL_COMPLIANCE'][self.dict_args['environment']]),
+            Threshold(self.getRemoteConfig()['THRESHOLD']),
             images_scanned[-1],
-            "Please refer to documentation for more information",
+            "Level compliance reached.",
             os.environ.get("BUILD_DEFINITIONNAME", "")
         )
