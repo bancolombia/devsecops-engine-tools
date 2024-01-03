@@ -16,14 +16,17 @@ class TrufflehogRun(ToolGateway):
         subprocess.run(command, shell=True, check=True) 
         
     def run_tool(self, exclude_path):
-        repository = os.environ.get('AGENT_WORKFOLDER') + "/" + os.environ.get('BUILD_REPOSITORY_NAME')
+        repository = os.environ.get('SYSTEM_DEFAULTWORKINGDIRECTORY')
         exclude_path = os.environ.get('AGENT_WORKFOLDER') + "/excludedPath.txt"
         command = (
-            f"trufflehog filesystem {repository} --json --exclude-paths {exclude_path}"
+            f"trufflehog filesystem {repository} --json --exclude-paths {exclude_path} --no-verification"
         )
         print(command)
         result = subprocess.run(command, capture_output=True, shell=True)
         output = result.stdout.strip()
-        # error = result.stderr.strip()
+        error = result.stderr.strip()
+        # print(output)
+        # print("ERROR")
+        # print(error)
         # TODO revisar el stderr para manejo de excepciones.
         return output

@@ -8,7 +8,8 @@ class TrufflehogDeserializeConfig:
         self.ignore_search_pattern = json_data[tool]["IGNORE_SEARCH_PATTERN"]
         self.exclusions_path = ""
         self.message_info_sast_rm = json_data[tool]["MESSAGE_INFO_SAST_RM"]
-        self.level_compliance = LevelCompliance(json_data[tool]["LEVEL_COMPLIANCE"])
+        # self.level_compliance = LevelCompliance(json_data[tool]["LEVEL_COMPLIANCE"])
+        self.level_compliance = LevelCompliance({"Critical": 0, "High": 0, "Medium": 0, "Low": 0})
         self.rules_data_type = ""
         self.scope_pipeline = ""
         self.exclusions = None

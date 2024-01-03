@@ -1,50 +1,27 @@
 import argparse
 import configparser
-import threading
-import queue
 import json
 import os
 import re
 
-# from devsecops_engine_tools.engine_sast.engine_iac.src.domain.usecases.iac_scan import (
-#     IacScan,
-# )
-# from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
-#     CheckovConfig,
-# )
-# from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.checkov_run import (
-#     CheckovTool,
-# )
-# from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovConfig import (
-#     CheckovConfig,
-# )
+
 from devsecops_engine_utilities.utils.printers import (
     Printers,
 )
-from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import ReleaseVariables
+from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import BuildVariables
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
-# from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
-#     ReleaseVariables,
-# )
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
     AzureDevopsIntegration,
 )
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model import LevelCompliance
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.deserialize_tool import DeserializeTool
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.install_tool import InstallTool
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.secret_scan import SecretScan
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.TrufflehogDeserealizator import TrufflehogDeserealizator
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.TrufflehogDeserializeConfig import TrufflehogDeserializeConfig
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.TrufflehogInstall import TrufflehogInstall
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.TrufflehogRun import TrufflehogRun
-# from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.ResultScanObject import (
-#     ResultScanObject,
-# )
-# from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkovTool.CheckovDeserializeConfig import (
-#     CheckovDeserializeConfig,
-# )
-# from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.config import (
-#     remote_config,
-# )
-# from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.exclusions import (
-#     exclusion,
-# )
+
 
 ENGINESAST_ENGINESECRET = "enginesast.enginesecret"
 
@@ -67,10 +44,10 @@ def get_inputs_from_config_file():
     )
 
 
-def secret_scan():
-    result = []
-    output = secret_scan.process()
-    result.append(json.loads(output))
+# def secret_scan():
+#     result = []
+#     output = secret_scan.process()
+#     result.append(json.loads(output))
 
 
 def engine_secret_scan(remote_config_repo, remote_config_path, tool):
@@ -87,31 +64,43 @@ def engine_secret_scan(remote_config_repo, remote_config_path, tool):
     data_config = TrufflehogDeserializeConfig(
         json_data=data_file_tool, tool=tool
     )
-    data_config.scope_pipeline = ReleaseVariables.Release_Definitionname.value()
+    data_config.scope_pipeline = BuildVariables.Build_DefinitionName.value()
+    print("CHECKING AND INSTALLING TRUFFLEHOG")
+    classe2 = TrufflehogInstall(tool)
+    trufflehog_tool = InstallTool(classe2)
+    trufflehog_tool.check_version()
     
+    print("TRUFFLEHOG INSTALLED")
     result = []
     classe = TrufflehogRun(tool)
     secret_scan = SecretScan(classe)
     exclude_path = secret_scan.create_exclude_file()
     output = secret_scan.process(exclude_path)
-    texto_decodificado = output.decode('utf-8')
-
-    objetos_json = texto_decodificado.strip().split('\n')
-
-    # Convertir cada objeto JSON a un diccionario Python
-    lista_de_jsons = [json.loads(objeto) for objeto in objetos_json]
-
-    # Mostrar la lista de objetos JSON resultante
-    for json_obj in lista_de_jsons:
-        result.append(json_obj)
+    decode_output = output.decode('utf-8')
     
+    if decode_output == '':
+        vulnerabilities_list = {"SourceMetadata":{"Data":{"Filesystem":{"file":"","line":0}}},"SourceID":0,"SourceType":0,"SourceName":"","DetectorType":0,"DetectorName":"","DecoderName":"","Verified":True,"Raw":"","RawV2":"","Redacted":"","ExtraData":{},"StructuredData":None}
+    else:
+        object_json = decode_output.strip().split('\n')
+        json_list = [json.loads(objeto) for objeto in object_json]
+        for json_obj in json_list:
+            result.append(json_obj)
+        
     trufflehog_deserealizator = TrufflehogDeserealizator()
-    vulnerabilities_list = trufflehog_deserealizator.get_list_vulnerability(
+    deserialize_tool = DeserializeTool(trufflehog_deserealizator)
+    vulnerabilities_list = deserialize_tool.get_list_vulnerability(
         result
     )
     
-    for vuln in vulnerabilities_list:
-        print(vuln)
+    # for vuln in vulnerabilities_list:
+    #     print(vuln)
+    
+    # file_name = "results.json"
+    # with open(file_name, "w") as json_file:
+    #             json.dump(result, json_file, indent=4)
+
+    # absolute_path = os.path.abspath(file_name)
+        
     input_core = InputCore(
         totalized_exclusions=[],
         level_compliance_defined=data_config.level_compliance,
