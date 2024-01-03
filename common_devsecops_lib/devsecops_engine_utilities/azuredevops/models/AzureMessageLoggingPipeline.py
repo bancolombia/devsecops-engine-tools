@@ -2,8 +2,9 @@ from enum import Enum
 
 """https://learn.microsoft.com/en-us/azure/devops/pipelines/scripts/logging-commands?view=azure-devops&tabs=bash """
 
+
 class BaseEnum(Enum):
-    def get_message(self, message : str):
+    def get_message(self, message: str):
         return self._value_ + message
 
 

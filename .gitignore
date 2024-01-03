@@ -8,6 +8,7 @@ _nu1234
 .pytest*
 *pycache*
 *_pycache_*
+.*DS_Store
 
 #Distribucioes de lib
 **dist**
@@ -23,6 +24,7 @@ _nu1234
 data
 
 #Archivos de Pruebas
+**/.env*
 test-output.xml
 report.html
 out_report.xml
@@ -35,4 +37,6 @@ prueba.py
 main.py
 common_devsecops_lib/sheckov_scan.json
 _core_test*
-test.py
+results.json
+RULES_DOCKERcheckov_config.yaml
+RULES_K8Scheckov_config.yaml

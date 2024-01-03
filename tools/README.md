@@ -1,26 +1,77 @@
 # Introduction
 
-DevSecOps Security Tools
-
-# Objective
+DevSecOps Practice Modules
 
 # Project layout
 
 ```
-NU0429001_devsecops_engine
-├───.github
-│   └───workflows
-│           engine_core.yaml         -> CD pipeline for the engine core.
-│           engine_sast.yaml         -> CD pipeline for the engine sast.
-│           engine_dast.yaml         -> CD pipeline for the engine dast.
-│           engine_sca.yaml         -> CD pipeline for the engine sca.
-│           engine_utilities.yaml         -> CD pipeline for the engine utilities.
-|
-├───engine_core -> Code and Docker file for the engine_core.
+devsecops_engine_tools
+├───engine_core -> Main module.
 |           test
 |           src
 |               applications
-|               deploment
+|               deployment
+|               domain
+|                   model
+|                   usecases
+|               infraestructure
+|                   driven_adapters
+|                   entry_points
+|                   utils.
+|
+├───engine_dast -> DAST Practice
+|           test
+|           src
+|               applications
+|               deployment
+|               domain
+|                   model
+|                   usecases
+|               infraestructure
+|                   driven_adapters
+|                   entry_points
+|                   utils.
+|
+├───engine_sast -> SAST Practices
+|           engine_iac -> Infrastructure as code
+|              src
+|               applications
+|               deployment
+|               domain
+|                   model
+|                   usecases
+|               infraestructure
+|                   driven_adapters
+|                   entry_points
+|                   utils.
+|           engine_secret -> Secret Scanning
+|              src
+|               applications
+|               deployment
+|               domain
+|                   model
+|                   usecases
+|               infraestructure
+|                   driven_adapters
+|                   entry_points
+|                   utils.
+|
+├───engine_sca -> SCA Practices
+|            engine_container -> Container Scanning
+|              src
+|               applications
+|               deployment
+|               domain
+|                   model
+|                   usecases
+|               infraestructure
+|                   driven_adapters
+|                   entry_points
+|                   utils.
+|            engine_dependencies -> Dependency Scanning
+|              src
+|               applications
+|               deployment
 |               domain
 |                   model
 |                   usecases
@@ -29,5 +80,3 @@ NU0429001_devsecops_engine
 |                   entry_points
 |                   utils.
 ```
-
-# How can I help?

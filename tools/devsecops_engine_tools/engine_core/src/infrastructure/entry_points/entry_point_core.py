@@ -1,35 +1,76 @@
 import argparse
+import sys
+from devsecops_engine_tools.engine_core.src.domain.usecases.break_build import (
+    BreakBuild,
+)
+from devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan import (
+    HandleScan,
+)
+from devsecops_engine_utilities.utils.printers import (
+    Printers,
+)
 
-from devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_scan import runner_engine_iac
-from devsecops_engine_tools.engine_core.src.domain.model.Exclusions import Exclusions
-from devsecops_engine_tools.engine_core.src.domain.model.InputCore import InputCore
-from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.checkov.Checkov_deserealizator import CheckovDeserealizator
-from devsecops_engine_tools.engine_core.src.domain.usecases.break_build import BreakBuild
 
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--azure_remote_config_repo", type=str, required=True, help="")
-    parser.add_argument("--azure_remote_config_path", type=str, required=True, help="")
-    parser.add_argument("--tool", type=str, required=True, help="")
-    parser.add_argument("--environment", type=str, required=True, help="")
+    parser.add_argument("--remote_config_repo", type=str, required=True, help="")
+    parser.add_argument(
+        "--tool",
+        choices=["engine_iac", "engine_dast", "engine_secret", "engine_dependencies"],
+        type=str,
+        required=True,
+        help="",
+    )
+    parser.add_argument(
+        "--environment", choices=["dev", "qa", "pdn"], type=str, required=True, help=""
+    )
+    parser.add_argument(
+        "--use_secrets_manager",
+        choices=["true", "false"],
+        type=str,
+        required=False,
+        help="",
+    )
+    parser.add_argument(
+        "--use_vulnerability_management",
+        choices=["true", "false"],
+        type=str,
+        required=False,
+        help="",
+    )
+    parser.add_argument("--token_cmdb", required=False, help="")
+    parser.add_argument("--token_vulnerability_management", required=False, help="")
 
     args = parser.parse_args()
-    return (
-        args.azure_remote_config_repo,
-        args.azure_remote_config_path,
-        args.tool,
-        args.environment,
+    return {
+        "remote_config_repo": args.remote_config_repo,
+        "tool": args.tool,
+        "environment": args.environment,
+        "use_secrets_manager": args.use_secrets_manager,
+        "use_vulnerability_management": args.use_vulnerability_management,
+        "token_cmdb": args.token_cmdb,
+        "token_vulnerability_management": args.token_vulnerability_management,
+    }
+
+
+def init_engine_core(
+    vulnerability_management_gateway: any,
+    secrets_manager_gateway: any,
+    devops_platform_gateway: any,
+    print_table_gateway: any,
+):
+    Printers.print_logo_tool()
+    args = get_inputs_from_cli(sys.argv[1:])
+    instance = HandleScan(
+        vulnerability_management_gateway,
+        secrets_manager_gateway,
+        devops_platform_gateway,
+        dict_args=args,
     )
-
-def init_engine_core():
-    result_list_engine_iac = runner_engine_iac()
-    rules_scaned = result_list_engine_iac.rules_scaned
-    totalized_exclusions = result_list_engine_iac.exclusions_all
-    if result_list_engine_iac.exclusions_scope != None: totalized_exclusions.update(result_list_engine_iac.exclusions_scope)
-    level_compliance_defined = result_list_engine_iac.level_compliance
-    scope_pipeline = result_list_engine_iac.scope_pipeline
-    checkov_deserealizator = CheckovDeserealizator(result_list_engine_iac.results_scan_list)
-    input_core = InputCore(totalized_exclusions=totalized_exclusions, level_compliance_defined=level_compliance_defined, rules_scaned=rules_scaned, scope_pipeline=scope_pipeline)
-    break_build_result = BreakBuild(deserializer_gateway=checkov_deserealizator,input_core=input_core)
-
-init_engine_core()
+    findings_list, input_core = instance.process()
+    BreakBuild(
+        devops_platform_gateway,
+        print_table_gateway,
+        findings_list=findings_list,
+        input_core=input_core,
+    )

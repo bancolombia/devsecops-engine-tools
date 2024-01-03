@@ -1,77 +1,202 @@
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from functools import reduce
-from prettytable import PrettyTable, DOUBLE_BORDER
 
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.gateway_deserealizator import DeseralizatorGateway
-from devsecops_engine_tools.engine_core.src.domain.model.InputCore import InputCore
-from devsecops_engine_tools.engine_core.src.domain.model.Vulnerability import Vulnerability
-from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import AzureMessageResultPipeline, AzureMessageLoggingPipeline
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
+from devsecops_engine_tools.engine_core.src.domain.model.finding import (
+    Finding,
+    Category
+)
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway,
+)
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_gateway import (
+    PrinterTableGateway,
+)
 
 
 @dataclass
 class BreakBuild:
-    deserializer_gateway: DeseralizatorGateway
+    devops_platform_gateway: DevopsPlatformGateway
+    printer_table_gateway: PrinterTableGateway
+    findings_list: "list[Finding]"
     input_core: InputCore
 
-    def print_table(self, vulnerabilities_without_exclusions_list: 'list[Vulnerability]'):
-        vulnerability_table = PrettyTable(["Severity", "ID", "Description", "Where"])
-
-        for vulnerability in vulnerabilities_without_exclusions_list:
-            vulnerability_table.add_row(
-                [vulnerability.severity, vulnerability.id, vulnerability.description, vulnerability.where_vulnerability])
-            
-        severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
-        sorted_table = PrettyTable()
-        sorted_table.field_names = vulnerability_table.field_names
-        sorted_table.add_rows(sorted(vulnerability_table._rows, key=lambda row: severity_order[row[0]]))
-
-        sorted_table.align["Severity"] = "l"
-        sorted_table.align["Description"] = "l"
-        sorted_table.align["ID"] = "l"
-        sorted_table.align["Where"] = "l"
-        sorted_table.set_style(DOUBLE_BORDER)
-
-        if len(sorted_table.rows) > 0:
-            print(sorted_table)
-
     def __post_init__(self):
-        vulnerabilities_list = self.deserializer_gateway.get_list_vulnerability()
-        level_compliance = self.input_core.level_compliance_defined
+        devops_platform_gateway = self.devops_platform_gateway
+        printer_table_gateway = self.printer_table_gateway
+        threshold = self.input_core.threshold_defined
         exclusions = self.input_core.totalized_exclusions
-        rules_scaned = self.input_core.rules_scaned
+        custom_message = self.input_core.custom_message_break_build
 
-        if len(vulnerabilities_list) != 0:
-            vulnerabilities_list_with_severity = list(map(lambda vulnerability: replace(
-                vulnerability, severity=rules_scaned[vulnerability.id].get("severity").lower()), vulnerabilities_list))
-            #Esta lista de excluidas no se imprimira para dejar un resultado más limpio
-            vulnerabilities_excluded_list = list(filter(lambda item: exclusions.get(
-                item.id) != None, vulnerabilities_list_with_severity))
-            vulnerabilities_without_exclusions_list = list(filter(
-                lambda item: exclusions.get(item.id) == None, vulnerabilities_list_with_severity))
+        if len(self.findings_list) != 0:
+            findings_list = self.findings_list
 
-            vulnerabilities_critical = reduce(lambda count, vulnerability: count + 1 if vulnerability.severity ==
-                                              'critical' else count, vulnerabilities_without_exclusions_list, 0)
-            vulnerabilities_high = reduce(lambda count, vulnerability: count + 1 if vulnerability.severity ==
-                                          'high' else count, vulnerabilities_without_exclusions_list, 0)
-            vulnerabilities_medium = reduce(lambda count, vulnerability: count + 1 if vulnerability.severity ==
-                                            'medium' else count, vulnerabilities_without_exclusions_list, 0)
-            vulnerabilities_low = reduce(lambda count, vulnerability: count + 1 if vulnerability.severity ==
-                                         'low' else count, vulnerabilities_without_exclusions_list, 0)
-            vulnerabilities_unknown = reduce(lambda count, vulnerability: count + 1 if vulnerability.severity ==
-                                             'unknown' else count, vulnerabilities_without_exclusions_list, 0)
+            # Esta lista de excluidas no se imprimira para dejar un resultado más limpio
+            findings_excluded_list = list(
+                filter(
+                    lambda item: any(
+                        exclusion.id == item.id
+                        and (exclusion.where in item.where or "all" in exclusion.where)
+                        for exclusion in exclusions
+                    ),
+                    findings_list,
+                )
+            )
 
-            if vulnerabilities_critical >= level_compliance.critical or vulnerabilities_high >= level_compliance.high or vulnerabilities_medium >= level_compliance.medium or vulnerabilities_low >= level_compliance.low:
-                self.print_table(vulnerabilities_without_exclusions_list)
-                print(AzureMessageLoggingPipeline.ErrorLogging.get_message('Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)'.format(
-                    vulnerabilities_critical, vulnerabilities_high, vulnerabilities_medium, vulnerabilities_low, level_compliance.critical, level_compliance.high, level_compliance.medium, level_compliance.low)))
-                print(AzureMessageResultPipeline.Failed.value)
+            findings_without_exclusions_list = list(
+                filter(
+                    lambda v: v not in findings_excluded_list,
+                    findings_list,
+                )
+            )
+
+            vulnerabilities_without_exclusions_list = list(
+                filter(
+                    lambda v: v.category == Category.VULNERABILITY,
+                    findings_without_exclusions_list,
+                )
+            )
+
+            compliances_without_exclusions_list = list(
+                filter(
+                    lambda v: v.category == Category.COMPLIANCE,
+                    findings_without_exclusions_list,
+                )
+            )
+
+            vulnerabilities_critical = reduce(
+                lambda count, vulnerability: count + 1
+                if vulnerability.severity == "critical"
+                else count,
+                vulnerabilities_without_exclusions_list,
+                0,
+            )
+            vulnerabilities_high = reduce(
+                lambda count, vulnerability: count + 1
+                if vulnerability.severity == "high"
+                else count,
+                vulnerabilities_without_exclusions_list,
+                0,
+            )
+            vulnerabilities_medium = reduce(
+                lambda count, vulnerability: count + 1
+                if vulnerability.severity == "medium"
+                else count,
+                vulnerabilities_without_exclusions_list,
+                0,
+            )
+            vulnerabilities_low = reduce(
+                lambda count, vulnerability: count + 1
+                if vulnerability.severity == "low"
+                else count,
+                vulnerabilities_without_exclusions_list,
+                0,
+            )
+            vulnerabilities_unknown = reduce(
+                lambda count, vulnerability: count + 1
+                if vulnerability.severity == "unknown"
+                else count,
+                vulnerabilities_without_exclusions_list,
+                0,
+            )
+
+            compliance_critical = reduce(
+                lambda count, compliance: count + 1
+                if compliance.severity == "critical"
+                else count,
+                compliances_without_exclusions_list,
+                0,
+            )
+            print()
+            if (
+                sum(
+                    [
+                        vulnerabilities_critical,
+                        vulnerabilities_high,
+                        vulnerabilities_medium,
+                        vulnerabilities_low,
+                    ]
+                )
+                == 0
+            ):
+                print(
+                    devops_platform_gateway.logging(
+                        "succeeded", "There are no vulnerabilities"
+                    )
+                )
+                print(devops_platform_gateway.result_pipeline("succeeded"))
+            elif (
+                vulnerabilities_critical >= threshold.vulnerability.critical
+                or vulnerabilities_high >= threshold.vulnerability.high
+                or vulnerabilities_medium >= threshold.vulnerability.medium
+                or vulnerabilities_low >= threshold.vulnerability.low
+            ):
+                print("Below are all vulnerabilities detected.")
+                printer_table_gateway.print_table(
+                    vulnerabilities_without_exclusions_list
+                )
+                print(
+                    devops_platform_gateway.logging(
+                        "error",
+                        "Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)".format(
+                            vulnerabilities_critical,
+                            vulnerabilities_high,
+                            vulnerabilities_medium,
+                            vulnerabilities_low,
+                            threshold.vulnerability.critical,
+                            threshold.vulnerability.high,
+                            threshold.vulnerability.medium,
+                            threshold.vulnerability.low,
+                        ),
+                    )
+                )
+                print(devops_platform_gateway.result_pipeline("failed"))
             else:
-                self.print_table(vulnerabilities_without_exclusions_list)
-                print(AzureMessageLoggingPipeline.WarningLogging.get_message('Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is not greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)'.format(
-                    vulnerabilities_critical, vulnerabilities_high, vulnerabilities_medium, vulnerabilities_low, level_compliance.critical, level_compliance.high, level_compliance.medium, level_compliance.low)))
-                print(AzureMessageResultPipeline.Succeeded.value)
+                print("Below are all vulnerabilities detected.")
+                printer_table_gateway.print_table(
+                    vulnerabilities_without_exclusions_list
+                )
+                print(
+                    devops_platform_gateway.logging(
+                        "warning",
+                        "Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is not greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)".format(
+                            vulnerabilities_critical,
+                            vulnerabilities_high,
+                            vulnerabilities_medium,
+                            vulnerabilities_low,
+                            threshold.vulnerability.critical,
+                            threshold.vulnerability.high,
+                            threshold.vulnerability.medium,
+                            threshold.vulnerability.low,
+                        ),
+                    )
+                )
+                print(devops_platform_gateway.result_pipeline("succeeded"))
+            print()
+            if len(compliances_without_exclusions_list) > 0:
+                print("Below are all compliances issues detected.")
+                printer_table_gateway.print_table(compliances_without_exclusions_list)
+                if compliance_critical >= threshold.compliance.critical:
+                    print(
+                        devops_platform_gateway.logging(
+                            "error",
+                            "Compliance issues count is greater than or equal to failure criteria (critical: {0})".format(
+                                1,
+                            ),
+                        )
+                    )
+                    print(devops_platform_gateway.result_pipeline("failed"))
+            else:
+                print(devops_platform_gateway.logging("succeeded", "There are no compliances issues"))
+                print(devops_platform_gateway.result_pipeline("succeeded"))
+
         else:
-            print(AzureMessageLoggingPipeline.SucceededLogging.get_message("There are no vulnerabilities"))
-            print(AzureMessageResultPipeline.Succeeded.value)
-        
-        print(AzureMessageLoggingPipeline.InfoLogging.get_message("If you have doubts, visit https://discuss.apps.bancolombia.com/t/lanzamiento-csa-analisis-de-seguridad-en-contenedores/6199"))
+            print(devops_platform_gateway.logging("succeeded", "There are no findings"))
+            print(devops_platform_gateway.result_pipeline("succeeded"))
+        print()
+        print(
+            devops_platform_gateway.logging(
+                "info",
+                custom_message,
+            )
+        )
