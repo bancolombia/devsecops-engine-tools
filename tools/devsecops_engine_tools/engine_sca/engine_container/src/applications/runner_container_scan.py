@@ -11,15 +11,6 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
 
 def runner_engine_container(dict_args, token):
     try:
-        # (
-        #     #remote_config_repo,
-        #     remote_config_path,
-        #     environment,
-        # ) = (
-        #     #remote_config_repo,
-        #     #remote_config_path,
-        #     environment or get_inputs_from_config_file(),
-        # )
         tool_run = PrismaCloudManagerScan()
         tool_images = DockerImages()
         tool_deseralizator = PrismaDeserealizator()
