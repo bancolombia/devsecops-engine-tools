@@ -1,0 +1,82 @@
+[
+    {
+        "template":"\\dns\\mx-fingerprint.yaml",
+        "template-url":"https://templates.nuclei.sh/public/mx-fingerprint",
+        "template-id":"mx-fingerprint",
+        "template-path":"C:\\Users\\rnorena\\nuclei-templates\\dns\\mx-fingerprint.yaml",
+        "info":{
+            "name":"MX Record Detection",
+            "author":[
+                "pdteam"
+            ],
+            "tags":[
+                "dns",
+                "mx"
+            ],
+            "description":"An MX record was detected. MX records direct emails to a mail exchange server.",
+            "reference":[
+                "https://www.cloudflare.com/learning/dns/dns-records/dns-mx-record/",
+                "https://mxtoolbox.com/"
+            ],
+            "severity":"info",
+            "metadata":{
+                "max-request":1
+            },
+            "classification":{
+                "cve-id":null,
+                "cwe-id":[
+                    "cwe-200"
+                ]
+            }
+        },
+        "type":"dns",
+        "host":"google-gruyere.appspot.com.",
+        "matched-at":"google-gruyere.appspot.com",
+        "extracted-results":[
+            "5 gmr-smtp-in.l.google.com.",
+            "10 alt1.gmr-smtp-in.l.google.com.",
+            "20 alt2.gmr-smtp-in.l.google.com.",
+            "30 alt3.gmr-smtp-in.l.google.com.",
+            "40 alt4.gmr-smtp-in.l.google.com."
+        ],
+        "request":";; opcode: QUERY, status: NOERROR, id: 44669\n;; flags: rd; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags:; udp: 4096\n\n;; QUESTION SECTION:\n;google-gruyere.appspot.com.\tIN\t MX\n",
+        "response":";; opcode: QUERY, status: NOERROR, id: 44669\n;; flags: qr rd; QUERY: 1, ANSWER: 5, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags:; udp: 1280\n\n;; QUESTION SECTION:\n;google-gruyere.appspot.com.\tIN\t MX\n\n;; ANSWER SECTION:\ngoogle-gruyere.appspot.com.\t235\tIN\tMX\t10 alt1.gmr-smtp-in.l.google.com.\ngoogle-gruyere.appspot.com.\t235\tIN\tMX\t20 alt2.gmr-smtp-in.l.google.com.\ngoogle-gruyere.appspot.com.\t235\tIN\tMX\t30 alt3.gmr-smtp-in.l.google.com.\ngoogle-gruyere.appspot.com.\t235\tIN\tMX\t40 alt4.gmr-smtp-in.l.google.com.\ngoogle-gruyere.appspot.com.\t235\tIN\tMX\t5 gmr-smtp-in.l.google.com.\n",
+        "timestamp":"2023-09-20T11:23:17.1697588-05:00",
+        "matcher-status":true
+    },
+    {
+        "template":"\\dns\\dns-saas-service-detection.yaml",
+        "template-url":"https://templates.nuclei.sh/public/dns-saas-service-detection",
+        "template-id":"dns-saas-service-detection",
+        "template-path":"C:\\Users\\rnorena\\nuclei-templates\\dns\\dns-saas-service-detection.yaml",
+        "info":{
+            "name":"DNS SaaS Service Detection",
+            "author":[
+                "noah @thesubtlety",
+                "pdteam"
+            ],
+            "tags":[
+                "dns",
+                "service"
+            ],
+            "description":"A CNAME DNS record was discovered",
+            "reference":[
+                "https://ns1.com/resources/cname",
+                "https://www.theregister.com/2021/02/24/dns_cname_tracking/",
+                "https://www.ionos.com/digitalguide/hosting/technical-matters/cname-record/"
+            ],
+            "severity":"info",
+            "metadata":{
+                "max-request":1
+            }
+        },
+        "matcher-name":"google-hosted",
+        "type":"dns",
+        "host":"google-gruyere.appspot.com.",
+        "matched-at":"google-gruyere.appspot.com",
+        "request":";; opcode: QUERY, status: NOERROR, id: 14796\n;; flags: rd; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags:; udp: 4096\n\n;; QUESTION SECTION:\n;google-gruyere.appspot.com.\tIN\t CNAME\n",
+        "response":";; opcode: QUERY, status: NOERROR, id: 14796\n;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags:; udp: 1280\n\n;; QUESTION SECTION:\n;google-gruyere.appspot.com.\tIN\t CNAME\n\n;; AUTHORITY SECTION:\nappspot.com.\t60\tIN\tSOA\tns1.google.com. dns-admin.google.com. 566910061 900 900 1800 60\n",
+        "timestamp":"2023-09-20T11:23:17.2341503-05:00",
+        "matcher-status":true
+    }
+]

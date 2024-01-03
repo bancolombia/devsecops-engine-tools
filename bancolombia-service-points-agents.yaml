@@ -1,0 +1,21 @@
+id: bancolombia-service-points-agents
+
+info:
+  name: bancolombia-service-points-agents
+  author: user
+  severity: info
+  description: Detecta los puntos de servicio de Bancolombia para los agentes.
+  
+http:
+- method: GET
+  path:
+  - https://api.us.apiconnect.ibmcloud.com/bancolombiabluemix-dev/testing/tec/v2/sales-service/cross-channel/service-points/agents?longitude=6.247759&latitude=-75.565575
+  headers:
+    accept: application/vnd.bancolombia.v1+json
+    Cache-Control: no-cache
+  matchers:
+  - type: word
+    words:
+    - servicePointId
+    - servicePointName
+    part: body
