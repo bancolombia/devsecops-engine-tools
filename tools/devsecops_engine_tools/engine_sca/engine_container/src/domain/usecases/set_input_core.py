@@ -31,6 +31,6 @@ class SetInputCore():
             [],
             Threshold(self.getRemoteConfig()['THRESHOLD']),
             images_scanned[-1],
-            "Level compliance reached.",
+            self.getRemoteConfig()['MESSAGE_INFO_SCA_RM'],
             os.environ.get("BUILD_DEFINITIONNAME", "")
         )

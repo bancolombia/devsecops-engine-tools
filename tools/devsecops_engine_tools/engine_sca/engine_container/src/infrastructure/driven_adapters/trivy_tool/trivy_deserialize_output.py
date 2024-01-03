@@ -29,13 +29,13 @@ class TrivyDeserializator(DeseralizatorGateway):
                                 Finding(
                                 id=vul.get("VulnerabilityID",""),
                                 cvss=next((v["V3Score"] for v in vul["CVSS"].values() if "V3Score" in v), None),
-                                where=vul.get("PkgName", ""),
+                                where=vul.get("PkgName", "")+" "+vul.get("InstalledVersion", ""),
                                 description=vul.get("Description", ""),
                                 severity=vul.get("Severity", "").lower(),
                                 identification_date=vul.get("PublishedDate", ""),
-                                module="SCA",
+                                module="CONTAINER",
                                 category=Category.VULNERABILITY,
-                                requirements=next((v["V3Vector"] for v in vul["CVSS"].values() if "V3Vector" in v), None),
+                                requirements=vul.get("FixedVersion") if vul.get("FixedVersion") else vul.get("Status", ""),
                                 tool="Trivy",
                                 )
                             )
