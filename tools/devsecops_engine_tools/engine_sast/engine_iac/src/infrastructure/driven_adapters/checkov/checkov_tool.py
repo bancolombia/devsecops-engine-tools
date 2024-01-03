@@ -11,19 +11,12 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.too
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.config_tool import (
     ConfigTool,
 )
-from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
-    InputCore,
-)
-from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_deserealizator import (
     CheckovDeserealizator,
 )
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_config import (
     CheckovConfig,
-)
-from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.commons import (
-    search_folders,
 )
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
     generate_file_from_tool,
@@ -118,28 +111,6 @@ class CheckovTool(ToolGateway):
         result.append(json.loads(output))
         queue.put(result)
 
-    def complete_config_tool(self, data_file_tool, exclusions, pipeline, secret_tool):
-        config_tool = ConfigTool(json_data=data_file_tool, tool=self.TOOL)
-
-        config_tool.exclusions = exclusions
-        config_tool.scope_pipeline = pipeline
-
-        if config_tool.exclusions.get("All") is not None:
-            config_tool.exclusions_all = config_tool.exclusions.get("All").get(
-                self.TOOL
-            )
-        if config_tool.exclusions.get(config_tool.scope_pipeline) is not None:
-            config_tool.exclusions_scope = config_tool.exclusions.get(
-                config_tool.scope_pipeline
-            ).get(self.TOOL)
-        folders_to_scan = search_folders(
-            config_tool.search_pattern, config_tool.ignore_search_pattern
-        )
-
-        # Create configuration external checks
-        agent_env = self.configurate_external_checks(config_tool, secret_tool)
-
-        return config_tool, folders_to_scan, agent_env
 
     def scan_folders(
         self, folders_to_scan, config_tool: ConfigTool, agent_env, environment
@@ -192,10 +163,10 @@ class CheckovTool(ToolGateway):
             result_scans.extend(result)
         return result_scans
 
-    def run_tool(self, init_config_tool, exclusions, environment, pipeline, secret_tool):
-        config_tool, folders_to_scan, agent_env = self.complete_config_tool(
-            init_config_tool, exclusions, pipeline, secret_tool
-        )
+    def run_tool(
+        self, config_tool: ConfigTool, folders_to_scan, environment, secret_tool
+    ):
+        agent_env = self.configurate_external_checks(config_tool, secret_tool)
 
         result_scans = self.scan_folders(
             folders_to_scan, config_tool, agent_env, environment
@@ -206,21 +177,7 @@ class CheckovTool(ToolGateway):
             result_scans, config_tool.rules_all
         )
 
-        totalized_exclusions = []
-        totalized_exclusions.extend(
-            map(lambda elem: Exclusions(**elem), config_tool.exclusions_all)
-        ) if config_tool.exclusions_all is not None else None
-        totalized_exclusions.extend(
-            map(lambda elem: Exclusions(**elem), config_tool.exclusions_scope)
-        ) if config_tool.exclusions_scope is not None else None
-
-        input_core = InputCore(
-            totalized_exclusions=totalized_exclusions,
-            threshold_defined=config_tool.threshold,
-            path_file_results=generate_file_from_tool(
-                self.TOOL, result_scans, config_tool.rules_all
-            ),
-            custom_message_break_build=config_tool.message_info_sast_rm,
-            scope_pipeline=config_tool.scope_pipeline,
+        return (
+            findings_list,
+            generate_file_from_tool(self.TOOL, result_scans, config_tool.rules_all)
         )
-        return findings_list, input_core
