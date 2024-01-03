@@ -79,7 +79,7 @@ list_scan_type = [
     "Immuniweb Scan",
     "IntSights Report",
     "JFrog Xray API Summary Artifact Scan",
-    "Jfrog Xray On Demand Binary Scan",
+    "JFrog Xray On Demand Binary Scan",
     "JFrog Xray Scan",
     "JFrog Xray Unified Scan",
     "KICS Scan",
