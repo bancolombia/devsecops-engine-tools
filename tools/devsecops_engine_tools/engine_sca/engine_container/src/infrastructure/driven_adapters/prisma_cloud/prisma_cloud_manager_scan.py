@@ -60,7 +60,7 @@ class PrismaCloudManagerScan(ToolGateway):
                 if (image_name+'_scan_result.json') in previosly_scanned.get_images_already_scanned(file_name):
                     print(f"The image {image_name} has already been scanned previously.")
                 else:
-                    pattern = remoteconfig['PRISMA_CLOUD']['REGEX_EXPRESSION_PROJECTS']
+                    pattern = remoteconfig['REGEX_EXPRESSION_PROJECTS']
                     if re.match(pattern, repository.upper()):
                         command = (file_path, "images", "scan", "--address", remoteconfig['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'],
                                    "--user", remoteconfig['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], "--password", token,
@@ -74,8 +74,6 @@ class PrismaCloudManagerScan(ToolGateway):
                                 file.write(image_name+'_scan_result.json\n')
                         except subprocess.CalledProcessError as e:
                             print(f"Error during image scan of {repository}: {e.stderr}")
-                    # else:
-                    #     print(f"The image {repository} is not scanned")
 
 
             return images_scanned

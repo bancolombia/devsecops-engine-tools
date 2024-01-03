@@ -5,9 +5,7 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.cont
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.set_input_core import SetInputCore
  
 
-from devsecops_engine_utilities.utils.printers import (
-    Printers,
-)
+
 
 ENGINESAST_ENGINEIAC = "enginesast.engineiac"
 
