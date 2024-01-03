@@ -34,11 +34,11 @@ class PrismaDeserealizator(DeseralizatorGateway):
                     Finding(
                         id=vul.get("id", ""),
                         cvss=float(vul.get("cvss", 0.0)),
-                        where=vul.get("link", ""),
+                        where=vul.get("packageName", "")+" "+vul.get("packageVersion", ""),
                         description=vul.get("description", "")[:150],
                         severity=SEVERITY_MAP.get(vul.get("severity", ""), ""),
                         identification_date=datetime.strptime(vul.get("discoveredDate", ""), "%Y-%m-%dT%H:%M:%S%z"),
-                        module="SCA",
+                        module="CONTAINER",
                         category=Category.VULNERABILITY,
                         requirements=vul.get("status", ""),
                         tool="PrismaCloud",
