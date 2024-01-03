@@ -94,7 +94,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         "Report sent to vulnerability management: ", response.test_url
                     )
                 else:
-                    raise Exception(response)
+                    raise ExceptionVulnerabilityManagement(response)
         except Exception as ex:
             raise ExceptionVulnerabilityManagement(
                 "Error sending report to vulnerability management with the following error: {0} ".format(

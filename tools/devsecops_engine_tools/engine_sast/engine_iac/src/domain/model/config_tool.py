@@ -1,8 +1,8 @@
-from devsecops_engine_tools.engine_core.src.domain.model.level_compliance import LevelCompliance
+from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 
 
-class CheckovDeserializeConfig:
-    def __init__(self, json_data, tool, environment):
+class ConfigTool:
+    def __init__(self, json_data, tool):
         self.version = json_data[tool]["VERSION"]
         self.search_pattern = json_data[tool]["SEARCH_PATTERN"]
         self.ignore_search_pattern = json_data[tool]["IGNORE_SEARCH_PATTERN"]
@@ -16,7 +16,7 @@ class CheckovDeserializeConfig:
         self.external_dir_repository = json_data[tool]["EXTERNAL_DIR_REPOSITORY"]
         self.external_asset_name = json_data[tool]["EXTERNAL_DIR_ASSET_NAME"]
         self.message_info_sast_rm = json_data[tool]["MESSAGE_INFO_SAST_RM"]
-        self.level_compliance = LevelCompliance(json_data[tool]["LEVEL_COMPLIANCE"][environment])
+        self.threshold = Threshold(json_data[tool]["THRESHOLD"])
         self.rules_data_type = json_data[tool]["RULES"]
         self.scope_pipeline = ""
         self.exclusions = None

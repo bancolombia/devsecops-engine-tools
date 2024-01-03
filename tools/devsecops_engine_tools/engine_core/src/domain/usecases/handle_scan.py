@@ -43,11 +43,9 @@ class HandleScan:
         if self.dict_args["use_secrets_manager"] == "true":
             secret_tool = self.secrets_manager_gateway.get_secret(config_tool)
         if "engine_iac" in self.dict_args["tool"]:
-            vulnerabilities_list, input_core = runner_engine_iac(
-                self.dict_args["remote_config_repo"],
-                "SAST/IAC/configTools.json",
+            findings_list, input_core = runner_engine_iac(
+                self.dict_args,
                 config_tool["ENGINE_IAC"],
-                self.dict_args["environment"],
                 secret_tool
             )
             if self.dict_args["use_vulnerability_management"] == "true":
@@ -86,7 +84,7 @@ class HandleScan:
                 except ExceptionFindingsRiskAcceptance as ex2:
                     print(self.devops_platform_gateway.logging("warning", str(ex2)))
 
-            return vulnerabilities_list, input_core
+            return findings_list, input_core
         elif "engine_container" in self.dict_args["tool"]:
             secret_sca=""
             if secret_tool is not None:

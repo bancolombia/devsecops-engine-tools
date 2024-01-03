@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
-from devsecops_engine_tools.engine_core.src.domain.model.level_compliance import LevelCompliance
+from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 
 @dataclass
 class InputCore:
     totalized_exclusions: "list[Exclusions]"
-    level_compliance_defined: LevelCompliance
+    threshold_defined: Threshold
     path_file_results: str
     custom_message_break_build: str
     scope_pipeline: str
