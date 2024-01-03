@@ -1,8 +1,17 @@
+import os
+import re
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.devops_platform_gateway import (
     DevopsPlatformGateway,
+)
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.config_tool import (
+    ConfigTool,
+)
+from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
+    InputCore
 )
 
 
@@ -13,7 +22,7 @@ class IacScan:
         self.tool_gateway = tool_gateway
         self.devops_platform_gateway = devops_platform_gateway
 
-    def process(self, dict_args, secret_tool):
+    def process(self, dict_args, secret_tool, tool):
         init_config_tool = self.devops_platform_gateway.get_remote_config(
             dict_args["remote_config_repo"], "SAST/IAC/configTools.json"
         )
@@ -22,10 +31,73 @@ class IacScan:
             remote_config_repo=dict_args["remote_config_repo"],
             remote_config_path="/SAST/IAC/Exclusions/Exclusions.json",
         )
-        return self.tool_gateway.run_tool(
-            init_config_tool,
-            exclusions,
+
+        config_tool, folders_to_scan = self.complete_config_tool(
+            init_config_tool, exclusions, tool
+        )
+
+        findings_list, path_file_results = self.tool_gateway.run_tool(
+            config_tool,
+            folders_to_scan,
             dict_args["environment"],
-            self.devops_platform_gateway.get_variable("pipeline"),
             secret_tool,
         )
+
+        totalized_exclusions = []
+        totalized_exclusions.extend(
+            map(lambda elem: Exclusions(**elem), config_tool.exclusions_all)
+        ) if config_tool.exclusions_all is not None else None
+        totalized_exclusions.extend(
+            map(lambda elem: Exclusions(**elem), config_tool.exclusions_scope)
+        ) if config_tool.exclusions_scope is not None else None
+
+        input_core = InputCore(
+            totalized_exclusions=totalized_exclusions,
+            threshold_defined=config_tool.threshold,
+            path_file_results=path_file_results,
+            custom_message_break_build=config_tool.message_info_sast_rm,
+            scope_pipeline=config_tool.scope_pipeline,
+        )
+
+        return findings_list, input_core
+
+    def complete_config_tool(self, data_file_tool, exclusions, tool):
+        config_tool = ConfigTool(json_data=data_file_tool, tool=tool)
+
+        config_tool.exclusions = exclusions
+        config_tool.scope_pipeline = self.devops_platform_gateway.get_variable(
+            "pipeline"
+        )
+
+        if config_tool.exclusions.get("All") is not None:
+            config_tool.exclusions_all = config_tool.exclusions.get("All").get(tool)
+        if config_tool.exclusions.get(config_tool.scope_pipeline) is not None:
+            config_tool.exclusions_scope = config_tool.exclusions.get(
+                config_tool.scope_pipeline
+            ).get(tool)
+        folders_to_scan = self.search_folders(
+            config_tool.search_pattern, config_tool.ignore_search_pattern
+        )
+
+        return config_tool, folders_to_scan
+
+    def search_folders(self, search_pattern, ignore_pattern):
+        current_directory = os.getcwd()
+        patron = (
+            "(?i)(?!.*(?:"
+            + "|".join(ignore_pattern)
+            + ")).*?("
+            + "|".join(search_pattern)
+            + ").*$"
+        )
+        folders = [
+            folder
+            for folder in os.listdir(current_directory)
+            if os.path.isdir(os.path.join(current_directory, folder))
+        ]
+        matching_folders = [
+            os.path.normpath(os.path.join(current_directory, folder))
+            for folder in folders
+            if re.match(patron, folder)
+        ]
+        return matching_folders
