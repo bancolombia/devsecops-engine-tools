@@ -1,5 +1,5 @@
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.deserealizator_gateway import DeseralizatorGateway
-from devsecops_engine_tools.engine_core.src.domain.model.vulnerability import Vulnerability
+from devsecops_engine_tools.engine_core.src.domain.model.finding import Finding, Category
 from datetime import datetime
 from dataclasses import dataclass
 import json
@@ -7,7 +7,7 @@ import json
 @dataclass
 class PrismaDeserealizator(DeseralizatorGateway):
     
-    def get_list_vulnerability(self, images_scanned: list) -> "list[Vulnerability]":
+    def get_list_vulnerability(self, images_scanned: list) -> "list[Finding]":
         list_open_vulnerabilities = []
         SEVERITY_MAP = {
         "unimportant": "low",
@@ -31,18 +31,18 @@ class PrismaDeserealizator(DeseralizatorGateway):
 
                 # Create a list of Vulnerability instances from the JSON data
                 vulnerabilities = [
-                    Vulnerability(
+                    Finding(
                         id=vul.get("id", ""),
                         cvss=float(vul.get("cvss", 0.0)),
-                        where_vulnerability=vul.get("link", ""),
+                        where=vul.get("link", ""),
                         description=vul.get("description", "")[:150],
                         severity=SEVERITY_MAP.get(vul.get("severity", ""), ""),
                         identification_date=datetime.strptime(vul.get("discoveredDate", ""), "%Y-%m-%dT%H:%M:%S%z"),
-                        type_vulnerability="SCA",
+                        module="SCA",
+                        category=Category.VULNERABILITY,
                         requirements=vul.get("status", ""),
                         tool="PrismaCloud",
-                        is_excluded=False,
-                    )
+                        )
                     for vul in vulnerabilities_data
                 ]
 

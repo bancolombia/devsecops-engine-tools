@@ -13,7 +13,11 @@ def get_requirements():
 
 setup(
     name="devsecops_engine_tools",
+<<<<<<< HEAD
     version="1.4.7",
+=======
+    version="1.4.3",
+>>>>>>> ec019e9a2f503fddf54a0ec03fa5ca5503f95fa1
     author="Bancolombia devsecops Team ",
     author_email="devsecops@bancolombia.com.co",
     description="tool for devsecops strategy",
