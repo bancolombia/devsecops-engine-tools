@@ -20,12 +20,19 @@ steps:
       sonar.sources=$(System.DefaultWorkingDirectory)/$(pathComponentName)
       sonar.python.coverage.reportPaths=$(System.DefaultWorkingDirectory)/$(pathComponentName)/coverage.xml
       sonar.language=py
-      sonar.exclusion=**/applications/**,**test_integrations_defect_dojo.py**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**,**/azure-pipelines.yml/**
+      sonar.exclusions=**/applications/**,**test_integrations_defect_dojo.py**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**,**/azure-pipelines.yml/**
       sonar.coverage.exclusions=**/applications/**,**test_integrations_defect_dojo.py**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
 - script:  |
     python3 -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python3 -m pip install setuptools virtualenv wheel -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
   displayName: install python basics
+
+- script: |
+    apt-get update
+    apt-get install openssh-client -y
+  workingDirectory: $(System.DefaultWorkingDirectory)/$(pathComponentName)
+  displayName: 'Installation openssh-client'
+  condition: eq(variables['pathComponentName'], 'common_devsecops_lib')
 
 - script: |
     python3 -m virtualenv _venv

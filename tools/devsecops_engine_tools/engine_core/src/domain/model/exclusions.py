@@ -3,9 +3,11 @@ from dataclasses import dataclass
 
 @dataclass
 class Exclusions:
-    check_id: str
-    cve_id: str
-    create_date: str
-    expired_date: str
-    severity: str
-    hu: str
+    def __init__(self, **kwargs):
+        self.id = kwargs.get("id", "")
+        self.where = kwargs.get("where", "")
+        self.cve_id = kwargs.get("cve_id", "")
+        self.create_date = kwargs.get("create_date", "")
+        self.expired_date = kwargs.get("expired_date", "")
+        self.severity = kwargs.get("severity", "")
+        self.hu = kwargs.get("hu", "")

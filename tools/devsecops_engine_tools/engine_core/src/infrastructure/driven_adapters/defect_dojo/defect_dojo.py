@@ -11,10 +11,11 @@ from devsecops_engine_utilities.defect_dojo import (
     Connect,
     Finding,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_utilities.utils.session_manager import SessionManager
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionVulnerabilityManagement,
-    ExceptionFindingsRiskAcceptance
+    ExceptionFindingsRiskAcceptance,
 )
 
 
@@ -40,6 +41,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "dev": "Development",
                 "qa": "Staging",
                 "pdn": "Production",
+                None: "Production",
             }
             scan_type_mapping = {
                 "CHECKOV": "Checkov Scan",
@@ -92,7 +94,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         "Report sent to vulnerability management: ", response.test_url
                     )
                 else:
-                    raise Exception(response)
+                    raise ExceptionVulnerabilityManagement(response)
         except Exception as ex:
             raise ExceptionVulnerabilityManagement(
                 "Error sending report to vulnerability management with the following error: {0} ".format(
@@ -118,15 +120,21 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             findings_list = Finding.get_finding(
                 session=session_manager, service=service, risk_accepted=True
             ).results
-            return [
-                {
-                    "Id": finding.vuln_id_from_tool,
-                    "Where": finding.file_path,
-                    "Create_Date": finding.accepted_risks[-1]["created"],
-                    "Expired_Date": finding.accepted_risks[-1]["expiration_date"],
-                }
-                for finding in findings_list
-            ]
+            return list(
+                map(
+                    lambda finding: Exclusions(
+                        **{
+                            "id": finding.vuln_id_from_tool,
+                            "where": finding.file_path,
+                            "create_date": finding.accepted_risks[-1]["created"],
+                            "expired_date": finding.accepted_risks[-1][
+                                "expiration_date"
+                            ],
+                        }
+                    ),
+                    findings_list,
+                )
+            )
         except Exception as ex:
             raise ExceptionFindingsRiskAcceptance(
                 "Error getting risk acceptance findings with the following error: {0} ".format(

@@ -2,8 +2,9 @@ from dataclasses import dataclass
 from functools import reduce
 
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
-from devsecops_engine_tools.engine_core.src.domain.model.vulnerability import (
-    Vulnerability,
+from devsecops_engine_tools.engine_core.src.domain.model.finding import (
+    Finding,
+    Category
 )
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
@@ -17,38 +18,49 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_g
 class BreakBuild:
     devops_platform_gateway: DevopsPlatformGateway
     printer_table_gateway: PrinterTableGateway
-    vulnerabilities_list: "list[Vulnerability]"
+    findings_list: "list[Finding]"
     input_core: InputCore
 
     def __post_init__(self):
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
-        level_compliance = self.input_core.level_compliance_defined
+        threshold = self.input_core.threshold_defined
         exclusions = self.input_core.totalized_exclusions
         custom_message = self.input_core.custom_message_break_build
 
-        if len(self.vulnerabilities_list) != 0:
-            vulnerabilities_list = self.vulnerabilities_list
+        if len(self.findings_list) != 0:
+            findings_list = self.findings_list
 
             # Esta lista de excluidas no se imprimira para dejar un resultado más limpio
-            vulnerabilities_excluded_list = list(
+            findings_excluded_list = list(
                 filter(
                     lambda item: any(
-                        exclusion["Id"] == item.id
-                        and (
-                            exclusion["Where"] in item.where_vulnerability
-                            or "all" in exclusion["Where"]
-                        )
+                        exclusion.id == item.id
+                        and (exclusion.where in item.where or "all" in exclusion.where)
                         for exclusion in exclusions
                     ),
-                    vulnerabilities_list,
+                    findings_list,
+                )
+            )
+
+            findings_without_exclusions_list = list(
+                filter(
+                    lambda v: v not in findings_excluded_list,
+                    findings_list,
                 )
             )
 
             vulnerabilities_without_exclusions_list = list(
                 filter(
-                    lambda v: v not in vulnerabilities_excluded_list,
-                    vulnerabilities_list,
+                    lambda v: v.category == Category.VULNERABILITY,
+                    findings_without_exclusions_list,
+                )
+            )
+
+            compliances_without_exclusions_list = list(
+                filter(
+                    lambda v: v.category == Category.COMPLIANCE,
+                    findings_without_exclusions_list,
                 )
             )
 
@@ -88,7 +100,25 @@ class BreakBuild:
                 0,
             )
 
-            if sum([vulnerabilities_critical, vulnerabilities_high, vulnerabilities_medium, vulnerabilities_low]) == 0:
+            compliance_critical = reduce(
+                lambda count, compliance: count + 1
+                if compliance.severity == "critical"
+                else count,
+                compliances_without_exclusions_list,
+                0,
+            )
+            print()
+            if (
+                sum(
+                    [
+                        vulnerabilities_critical,
+                        vulnerabilities_high,
+                        vulnerabilities_medium,
+                        vulnerabilities_low,
+                    ]
+                )
+                == 0
+            ):
                 print(
                     devops_platform_gateway.logging(
                         "succeeded", "There are no vulnerabilities"
@@ -96,11 +126,12 @@ class BreakBuild:
                 )
                 print(devops_platform_gateway.result_pipeline("succeeded"))
             elif (
-                vulnerabilities_critical >= level_compliance.critical
-                or vulnerabilities_high >= level_compliance.high
-                or vulnerabilities_medium >= level_compliance.medium
-                or vulnerabilities_low >= level_compliance.low
+                vulnerabilities_critical >= threshold.vulnerability.critical
+                or vulnerabilities_high >= threshold.vulnerability.high
+                or vulnerabilities_medium >= threshold.vulnerability.medium
+                or vulnerabilities_low >= threshold.vulnerability.low
             ):
+                print("Below are all vulnerabilities detected.")
                 printer_table_gateway.print_table(
                     vulnerabilities_without_exclusions_list
                 )
@@ -112,15 +143,16 @@ class BreakBuild:
                             vulnerabilities_high,
                             vulnerabilities_medium,
                             vulnerabilities_low,
-                            level_compliance.critical,
-                            level_compliance.high,
-                            level_compliance.medium,
-                            level_compliance.low,
+                            threshold.vulnerability.critical,
+                            threshold.vulnerability.high,
+                            threshold.vulnerability.medium,
+                            threshold.vulnerability.low,
                         ),
                     )
                 )
                 print(devops_platform_gateway.result_pipeline("failed"))
             else:
+                print("Below are all vulnerabilities detected.")
                 printer_table_gateway.print_table(
                     vulnerabilities_without_exclusions_list
                 )
@@ -132,22 +164,36 @@ class BreakBuild:
                             vulnerabilities_high,
                             vulnerabilities_medium,
                             vulnerabilities_low,
-                            level_compliance.critical,
-                            level_compliance.high,
-                            level_compliance.medium,
-                            level_compliance.low,
+                            threshold.vulnerability.critical,
+                            threshold.vulnerability.high,
+                            threshold.vulnerability.medium,
+                            threshold.vulnerability.low,
                         ),
                     )
                 )
                 print(devops_platform_gateway.result_pipeline("succeeded"))
-        else:
-            print(
-                devops_platform_gateway.logging(
-                    "succeeded", "There are no vulnerabilities"
-                )
-            )
-            print(devops_platform_gateway.result_pipeline("succeeded"))
+            print()
+            if len(compliances_without_exclusions_list) > 0:
+                print("Below are all compliances issues detected.")
+                printer_table_gateway.print_table(compliances_without_exclusions_list)
+                if compliance_critical >= threshold.compliance.critical:
+                    print(
+                        devops_platform_gateway.logging(
+                            "error",
+                            "Compliance issues count is greater than or equal to failure criteria (critical: {0})".format(
+                                1,
+                            ),
+                        )
+                    )
+                    print(devops_platform_gateway.result_pipeline("failed"))
+            else:
+                print(devops_platform_gateway.logging("succeeded", "There are no compliances issues"))
+                print(devops_platform_gateway.result_pipeline("succeeded"))
 
+        else:
+            print(devops_platform_gateway.logging("succeeded", "There are no findings"))
+            print(devops_platform_gateway.result_pipeline("succeeded"))
+        print()
         print(
             devops_platform_gateway.logging(
                 "info",
