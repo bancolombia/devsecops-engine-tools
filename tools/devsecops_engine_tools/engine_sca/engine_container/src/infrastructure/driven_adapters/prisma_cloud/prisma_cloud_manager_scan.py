@@ -30,7 +30,7 @@ class PrismaCloudManagerScan(ToolGateway):
             
             with open(file_path, "wb") as file:
                 file.write(response.content)
-            os.chmod(file_path, 0o755)
+            
             logging.info(f"twistcli downloaded and saved to: {file_path}")
             return 0
         except Exception as e:
@@ -60,7 +60,7 @@ class PrismaCloudManagerScan(ToolGateway):
                 if (image_name+'_scan_result.json') in previosly_scanned.get_images_already_scanned(file_name):
                     print(f"The image {image_name} has already been scanned previously.")
                 else:
-                    pattern = remoteconfig['PRISMA_CLOUD']['REGEX_EXPRESSION_PROJECTS']
+                    pattern = remoteconfig['REGEX_EXPRESSION_PROJECTS']
                     if re.match(pattern, repository.upper()):
                         command = (file_path, "images", "scan", "--address", remoteconfig['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'],
                                    "--user", remoteconfig['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], "--password", token,
@@ -69,13 +69,11 @@ class PrismaCloudManagerScan(ToolGateway):
                             result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                                     text=True)
                             images_scanned.append(image_name+'_scan_result.json')
-                            print(f"Image {repository} scanned")
+                            #print(f"Image {repository} scanned")
                             with open(file_name, 'a') as file:
                                 file.write(image_name+'_scan_result.json\n')
                         except subprocess.CalledProcessError as e:
                             print(f"Error during image scan of {repository}: {e.stderr}")
-                    else:
-                        print(f"The image {repository} is not scanned")
 
 
             return images_scanned
