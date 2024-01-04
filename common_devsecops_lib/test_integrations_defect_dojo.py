@@ -70,9 +70,9 @@ if __name__ == "__main__":
             logger.debug(f"response: {response}")
             table.append(validate_response(response, scan_type="AWS Security Hub", end_point="impor_scan"))
 
-            Printers.print_title("Jfrog Xray On Demand Binary Scan")
+            Printers.print_title("JFrog Xray On Demand Binary Scan")
             response = import_scan(
-                scan_type="Jfrog Xray On Demand Binary Scan",
+                scan_type="JFrog Xray On Demand Binary Scan",
                 file_path=f"{path_file}/jfrog-xray_on_demand_binary_scan.json",
             )
             logger.debug(f"response: {response}")

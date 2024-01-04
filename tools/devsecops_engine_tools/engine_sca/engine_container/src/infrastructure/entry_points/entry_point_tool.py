@@ -5,9 +5,7 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.cont
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.set_input_core import SetInputCore
  
 
-from devsecops_engine_utilities.utils.printers import (
-    Printers,
-)
+
 
 ENGINESAST_ENGINEIAC = "enginesast.engineiac"
 
@@ -32,6 +30,8 @@ def get_inputs_from_config_file():
 
 
 def init_engine_sca_rm( tool_run,tool_remote,tool_images,tool_deseralizator,dict_args, token):
+
+    
     container_sca_scan = ContainerScaScan(tool_run,tool_remote,tool_images,tool_deseralizator,dict_args, token)
     input_core = SetInputCore(tool_remote,dict_args)
     images_scanned = container_sca_scan.process()

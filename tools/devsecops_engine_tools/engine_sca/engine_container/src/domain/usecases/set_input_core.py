@@ -30,7 +30,7 @@ class SetInputCore():
         return InputCore(
             [],
             Threshold(self.getRemoteConfig()['THRESHOLD']),
-            images_scanned[-1],
+            images_scanned[-1] if images_scanned else None,
             self.getRemoteConfig()['MESSAGE_INFO_SCA_RM'],
             os.environ.get("BUILD_DEFINITIONNAME", "")
         )
