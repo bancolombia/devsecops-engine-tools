@@ -13,8 +13,6 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateway
 
 
 class PrismaCloudManagerScan(ToolGateway):
-  
-       
     def download_twistcli(self, file_path, prisma_access_key, prisma_secret_key, prisma_console_url):
         
         """
@@ -23,34 +21,25 @@ class PrismaCloudManagerScan(ToolGateway):
         url = f"{prisma_console_url}/api/v1/util/twistcli"  # path to console of the Tenant
         credentials = base64.b64encode(f"{prisma_access_key}:{prisma_secret_key}".encode()).decode()
         headers = {"Authorization": f"Basic {credentials}"}
-
         try:
             response = requests.get(url, headers=headers, verify=False)
             response.raise_for_status()
-            
             with open(file_path, "wb") as file:
                 file.write(response.content)
-            
             logging.info(f"twistcli downloaded and saved to: {file_path}")
             return 0
         except Exception as e:
             raise ValueError(f"Error downloading twistcli: {e}")
-     
-     
     def run_tool_container_sca(self, remoteconfig, prisma_secret_key, scan_image):
         try:
             token = os.environ.get("TOKEN_PRISMA", "")  # Change to secret manager token
-            
             file_path = os.path.join(os.getcwd(), remoteconfig['PRISMA_CLOUD']['TWISTCLI_PATH'])
-
             if not os.path.exists(file_path):
                 self.download_twistcli(file_path, remoteconfig['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], token,
                                         remoteconfig['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'])
-            
             previosly_scanned = ImagesScanned()
             file_name = 'scanned_images.txt'
             images_scanned = []
-            
             for image in scan_image:
                 repository = image['Repository']
                 tag = image['Tag']
