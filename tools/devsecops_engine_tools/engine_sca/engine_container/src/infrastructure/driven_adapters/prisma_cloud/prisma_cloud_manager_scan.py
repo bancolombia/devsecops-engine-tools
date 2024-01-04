@@ -4,7 +4,6 @@ import subprocess
 import logging
 import re
 import base64
-
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.images_scanned import (
     ImagesScanned
 )
@@ -13,6 +12,7 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateway
 
 
 class PrismaCloudManagerScan(ToolGateway):
+
     def download_twistcli(self, file_path, prisma_access_key, prisma_secret_key, prisma_console_url):
         
         """
@@ -22,7 +22,7 @@ class PrismaCloudManagerScan(ToolGateway):
         credentials = base64.b64encode(f"{prisma_access_key}:{prisma_secret_key}".encode()).decode()
         headers = {"Authorization": f"Basic {credentials}"}
         try:
-            response = requests.get(url, headers=headers, verify=False)
+            response = requests.get(url, headers=headers)
             response.raise_for_status()
             with open(file_path, "wb") as file:
                 file.write(response.content)
@@ -30,6 +30,7 @@ class PrismaCloudManagerScan(ToolGateway):
             return 0
         except Exception as e:
             raise ValueError(f"Error downloading twistcli: {e}")
+                     
     def run_tool_container_sca(self, remoteconfig, prisma_secret_key, scan_image):
         try:
             token = os.environ.get("TOKEN_PRISMA", "")  # Change to secret manager token
@@ -58,7 +59,6 @@ class PrismaCloudManagerScan(ToolGateway):
                             result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                                     text=True)
                             images_scanned.append(image_name+'_scan_result.json')
-                            #print(f"Image {repository} scanned")
                             with open(file_name, 'a') as file:
                                 file.write(image_name+'_scan_result.json\n')
                         except subprocess.CalledProcessError as e:
