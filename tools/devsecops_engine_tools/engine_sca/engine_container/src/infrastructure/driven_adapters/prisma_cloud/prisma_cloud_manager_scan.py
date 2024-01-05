@@ -1,3 +1,4 @@
+import stat
 import requests
 import os
 import subprocess
@@ -28,7 +29,7 @@ class PrismaCloudManagerScan(ToolGateway):
             
             with open(file_path, "wb") as file:
                 file.write(response.content)
-            os.chmod(file_path, 0o755)
+            os.chmod(file_path, stat.S_IRWXU)
             logging.info(f"twistcli downloaded and saved to: {file_path}")
             return 0
         except Exception as e:
