@@ -30,7 +30,7 @@ class TrivyDeserializator(DeseralizatorGateway):
                                 id=vul.get("VulnerabilityID",""),
                                 cvss=next((v["V3Score"] for v in vul["CVSS"].values() if "V3Score" in v), None),
                                 where=vul.get("PkgName", "")+" "+vul.get("InstalledVersion", ""),
-                                description=vul.get("Description", ""),
+                                description=vul.get("Description", "").replace("\n",""),
                                 severity=vul.get("Severity", "").lower(),
                                 identification_date=vul.get("PublishedDate", ""),
                                 module="CONTAINER",
