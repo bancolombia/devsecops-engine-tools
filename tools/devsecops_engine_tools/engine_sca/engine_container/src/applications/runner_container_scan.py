@@ -26,7 +26,7 @@ def runner_engine_container(dict_args, token):
     except Exception as e:
         print(AzureMessageResultPipeline.Succeeded.value)
         raise Exception(f"Error SCAN : {str(e)}")
-        # Manejar el error según sea necesario
+        
 
 
 if __name__ == "__main__":
