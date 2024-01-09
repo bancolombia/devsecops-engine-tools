@@ -95,7 +95,7 @@ class HandleScan:
             findings_list, input_core =runner_engine_container(self.dict_args, secret_sca)
             try:
                 return findings_list, input_core
-            except ExceptionFindingsRiskAcceptance as ex2:
+            except ExceptionVulnerabilityManagement as ex2:
                 print(self.devops_platform_gateway.logging("warning", str(ex2)))
         elif "engine_dast" in self.dict_args["tool"]:
             print(MESSAGE_ENABLED)
