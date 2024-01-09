@@ -1,10 +1,6 @@
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.trivy_tool.trivy_deserialize_output import (
     TrivyDeserializator
 )
-from devsecops_engine_tools.engine_core.src.domain.model.finding import (
-    Finding,
-    Category
-)
 
 import pytest
 from unittest.mock import mock_open, patch
