@@ -15,9 +15,9 @@ class TrivyScan(ToolGateway):
     def install_trivy(self,version):
         try:
             subprocess.run(['which', 'trivy'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            print("trivy está instalado.")
+            # print("trivy está instalado.")
         except subprocess.CalledProcessError:
-            print("Intentando instalar trivy.")
+            # print("Intentando instalar trivy.")
             try:
                 command1 = ['wget', 'https://github.com/aquasecurity/trivy/releases/download/v'+version+'/trivy_'+version+'_Linux-64bit.deb']
                 subprocess.run(command1, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -53,9 +53,9 @@ class TrivyScan(ToolGateway):
                             with open(file_name, 'a') as file:
                                 file.write(image_name+'_scan_result.json\n')
                         except subprocess.CalledProcessError as e:
-                            print("Error scanning "+image_name+" image: "+e.stderr)
+                            raise RuntimeError(f"Error scanning {image_name} image: {e.stderr}")
 
             return images_scanned
 
         except Exception as ex:
-            print(f"Could not get Azure Remote Config: {ex}")
+            raise Exception(f"Could not get Azure Remote Config: {ex}")
