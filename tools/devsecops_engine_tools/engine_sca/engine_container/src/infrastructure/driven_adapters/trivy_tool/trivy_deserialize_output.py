@@ -41,4 +41,3 @@ class TrivyDeserializator(DeseralizatorGateway):
                             )
                     list_open_vulnerabilities.extend(vulnerabilities)
         return list_open_vulnerabilities
-
