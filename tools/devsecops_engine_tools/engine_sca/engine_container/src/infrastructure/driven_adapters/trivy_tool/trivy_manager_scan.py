@@ -40,9 +40,7 @@ class TrivyScan(ToolGateway):
                     repository = image['Repository']
                     tag = image['Tag']
                     image_name = f"{repository}:{tag}"
-                    if (image_name+'_scan_result.json') in previosly_scanned.get_images_already_scanned(file_name):
-                        print(f"The image {image_name} has already been scan previously.")
-                    else:
+                    if not ((image_name+'_scan_result.json') in previosly_scanned.get_images_already_scanned(file_name)):
                         try:
                             command1 = ['trivy', 'image', '--download-db-only']
                             subprocess.run(command1, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
