@@ -6,10 +6,6 @@ from unittest.mock import patch, Mock, mock_open, call
 import pytest
 import subprocess
 
-class CustomCalledProcessError(Exception):
-    def __init__(self, cmd):
-        self.cmd = cmd
-
 @pytest.fixture
 def trivy_scan_instance():
     return TrivyScan()
