@@ -37,12 +37,11 @@ class PrismaCloudManagerScan(ToolGateway):
                      
     def run_tool_container_sca(self, remoteconfig, prisma_secret_key, scan_image):
         try:
-            token = os.environ.get("TOKEN_PRISMA", "")  # Change to secret manager token
-            
+                        
             file_path = os.path.join(os.getcwd(), remoteconfig['PRISMA_CLOUD']['TWISTCLI_PATH'])
 
             if not os.path.exists(file_path):
-                self.download_twistcli(file_path, remoteconfig['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], token,
+                self.download_twistcli(file_path, remoteconfig['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], prisma_secret_key,
                                         remoteconfig['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'])
             
             previosly_scanned = ImagesScanned()
@@ -61,7 +60,7 @@ class PrismaCloudManagerScan(ToolGateway):
                     pattern = remoteconfig['REGEX_EXPRESSION_PROJECTS']
                     if re.match(pattern, repository.upper()):
                         command = (file_path, "images", "scan", "--address", remoteconfig['PRISMA_CLOUD']['PRISMA_CONSOLE_URL'],
-                                   "--user", remoteconfig['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], "--password", token,
+                                   "--user", remoteconfig['PRISMA_CLOUD']['PRISMA_ACCESS_KEY'], "--password", prisma_secret_key,
                                    image_name, "--output-file", image_name + '_scan_result.json', "--details")
                         try:
                             result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
