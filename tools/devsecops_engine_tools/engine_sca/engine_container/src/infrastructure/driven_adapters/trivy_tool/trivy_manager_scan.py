@@ -58,4 +58,4 @@ class TrivyScan(ToolGateway):
             return images_scanned
 
         except Exception as ex:
-            raise Exception(f"Could not get Azure Remote Config: {ex}")
+            raise Exception(f"Could not get Azure Remote Config or error scanning images: {ex}")
