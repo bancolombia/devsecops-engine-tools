@@ -2,19 +2,78 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
     TrivyScan
 )
 
-from unittest.mock import patch, Mock, mock_open
+from unittest.mock import patch, Mock, mock_open, call
 import pytest
+import subprocess
+
+class CustomCalledProcessError(Exception):
+    def __init__(self, cmd):
+        self.cmd = cmd
 
 @pytest.fixture
 def trivy_scan_instance():
     return TrivyScan()
 
 def test_install_trivy_success(trivy_scan_instance):
-    with patch('subprocess.run', return_value=Mock()) as mock_subprocess_run:
-        trivy_scan_instance.install_trivy('0.48.1')
+    version = '0.48.1'
+    with patch('subprocess.run') as mock_subprocess_run:
+        # Trivy is installed case
+        mock_subprocess_run.side_effect = [
+            Mock(returncode=0) # Mock 'which' can find 'trivy'
+        ]
+        trivy_scan_instance.install_trivy(version)
+        assert mock_subprocess_run.call_count == 1, "subprocess se ejecuta una vez (Trivy instalado)"
+        mock_subprocess_run.assert_any_call(['which', 'trivy'], check=True, stdout=-1, stderr=-1)
+
+        # Trivy is not installed and instalation is successfull case
+        mock_subprocess_run.reset_mock()
+        mock_subprocess_run.side_effect = [
+            subprocess.CalledProcessError(returncode=1, cmd='which'),  # Mock 'which' can not find 'trivy'
+            Mock(returncode=0),  # Mock success running 'wget'
+            Mock(returncode=0)   # Mock success running 'dpkg'
+        ]
+        trivy_scan_instance.install_trivy(version)
+        mock_subprocess_run.assert_has_calls([
+            call(['which', 'trivy'], check=True, stdout=-1, stderr=-1),
+            call(['wget', f'https://github.com/aquasecurity/trivy/releases/download/v{version}/trivy_{version}_Linux-64bit.deb'], check=True, stdout=-1, stderr=-1),
+            call(['sudo', 'dpkg', '-i', f'trivy_{version}_Linux-64bit.deb'], check=True, stdout=-1, stderr=-1)
+        ])
+
+        # Trivy is not installed and instalation has failed case
+        mock_subprocess_run.reset_mock()
+        mock_subprocess_run.side_effect = [
+            subprocess.CalledProcessError(returncode=1, cmd='which'),  # Mock 'which' can not find 'trivy'
+            subprocess.CalledProcessError(returncode=1, cmd='wget'),  # Mock failure running 'wget'
+            Mock(side_effect=0)  # Mock success running 'dpkg'
+        ]
+
+        with pytest.raises(RuntimeError):
+            trivy_scan_instance.install_trivy(version)
+
+        mock_subprocess_run.reset_mock()
+        mock_subprocess_run.side_effect = [
+            subprocess.CalledProcessError(returncode=1, cmd='which'),  # Mock 'which' can not find 'trivy'
+            Mock(side_effect=0),  # Mock failure running 'wget'
+            subprocess.CalledProcessError(returncode=1, cmd='dpkg')  # Mock success running 'dpkg'
+        ]
+
+        with pytest.raises(RuntimeError):
+            trivy_scan_instance.install_trivy(version)
+
+        mock_subprocess_run.reset_mock()
+        # mock_subprocess_run.side_effect = [
+        #     Mock(returncode=1),  # Mock 'which' can not find 'trivy'
+        #     Mock(returncode=0),  # Mock success running 'wget'
+        #     Mock(side_effect=1)  # Mock failure running 'dpkg'
+        # ]
+
+        # with pytest.raises(RuntimeError):
+        #     trivy_scan_instance.install_trivy(version)
+
+
     
-    mock_subprocess_run.assert_called() # Make sure subprocess.run has been called correctly
-    assert mock_subprocess_run.call_count == 1, "subprocess no se ejecuta una vez (verificar)"
+    # mock_subprocess_run.assert_called() # Make sure subprocess.run has been called correctly
+    # assert mock_subprocess_run.call_count == 1, "subprocess no se ejecuta una vez (verificar)"
 
 def test_run_tool_container_sca(trivy_scan_instance):
     mock_remoteconfig = {
