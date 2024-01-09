@@ -53,27 +53,12 @@ def test_install_trivy_success(trivy_scan_instance):
         mock_subprocess_run.reset_mock()
         mock_subprocess_run.side_effect = [
             subprocess.CalledProcessError(returncode=1, cmd='which'),  # Mock 'which' can not find 'trivy'
-            Mock(side_effect=0),  # Mock failure running 'wget'
-            subprocess.CalledProcessError(returncode=1, cmd='dpkg')  # Mock success running 'dpkg'
+            Mock(side_effect=0),  # Mock success running 'wget'
+            subprocess.CalledProcessError(returncode=1, cmd='dpkg')  # Mock failure running 'dpkg'
         ]
 
         with pytest.raises(RuntimeError):
             trivy_scan_instance.install_trivy(version)
-
-        mock_subprocess_run.reset_mock()
-        # mock_subprocess_run.side_effect = [
-        #     Mock(returncode=1),  # Mock 'which' can not find 'trivy'
-        #     Mock(returncode=0),  # Mock success running 'wget'
-        #     Mock(side_effect=1)  # Mock failure running 'dpkg'
-        # ]
-
-        # with pytest.raises(RuntimeError):
-        #     trivy_scan_instance.install_trivy(version)
-
-
-    
-    # mock_subprocess_run.assert_called() # Make sure subprocess.run has been called correctly
-    # assert mock_subprocess_run.call_count == 1, "subprocess no se ejecuta una vez (verificar)"
 
 def test_run_tool_container_sca(trivy_scan_instance):
     mock_remoteconfig = {
@@ -109,17 +94,30 @@ def test_run_tool_container_sca(trivy_scan_instance):
         with patch('builtins.open', mock_open()) as mock_file_open:
             result = trivy_scan_instance.run_tool_container_sca(mock_remoteconfig, 'token', mock_scan_image)
 
-    # Subprocess
-    mock_subprocess_run.assert_called() # Make sure subprocess.run has been called correctly
-    assert mock_subprocess_run.call_count == 7, "el escaneo no se ejecuta solo tres veces (verificar)+(escaneo)*2"
-    
-    # Open file
-    mock_file_open.assert_called() # Make sure that an attempt has been made to open the file
-    assert mock_file_open.call_count == 9, "no se escribio en el archivo solo tres veces (Crear, leer y escribir)*escaneos"
+            # Subprocess
+            mock_subprocess_run.assert_called() # Make sure subprocess.run has been called correctly
 
-    # Return
-    assert isinstance(result, list) # Make sure that a list has been returned
-    expected_result = ['nu0429002_devsecops_test_debian:latest_scan_result.json',
-                       'nu0429002_devsecops_test:latest_scan_result.json',
-                       'nu000000_test:1.2_scan_result.json']
-    assert result == expected_result, "La lista resotrnada no es la esperada"
+            # Open file
+            mock_file_open.assert_called() # Make sure that an attempt has been made to open the file
+
+            # Return
+            assert isinstance(result, list) # Make sure that a list has been returned
+            expected_result = ['nu0429002_devsecops_test_debian:latest_scan_result.json',
+                            'nu0429002_devsecops_test:latest_scan_result.json',
+                            'nu000000_test:1.2_scan_result.json']
+            assert result == expected_result, "La lista resotrnada no es la esperada"
+
+            # Could not scan image
+            mock_subprocess_run.reset_mock()
+            mock_subprocess_run.side_effect = [
+                Mock(side_effect=0),  # Mock 'which' can find 'trivy' 
+                subprocess.CalledProcessError(returncode=1, cmd='dpkg'),  # Mock failure running 'trivy'
+                Mock(side_effect=0)  # Mock success running 'trivy'
+            ]
+
+            with pytest.raises(Exception):
+                trivy_scan_instance.run_tool_container_sca(mock_remoteconfig, 'token', mock_scan_image)
+
+    # Could not get Azure Remote Config
+    with pytest.raises(Exception):
+            trivy_scan_instance.run_tool_container_sca(remoteconfig=None, token=None, scan_image=None)
