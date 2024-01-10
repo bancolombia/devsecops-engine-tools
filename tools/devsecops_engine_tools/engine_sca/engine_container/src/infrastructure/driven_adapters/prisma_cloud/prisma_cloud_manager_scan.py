@@ -14,9 +14,13 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateway
 
 
 class PrismaCloudManagerScan(ToolGateway):
-    def download_twistcli(self, file_path, prisma_access_key, prisma_secret_key, prisma_console_url):
+    def download_twistcli(
+        self, file_path, prisma_access_key, prisma_secret_key, prisma_console_url
+    ):
         url = f"{prisma_console_url}/api/v1/util/twistcli"
-        credentials = base64.b64encode(f"{prisma_access_key}:{prisma_secret_key}".encode()).decode()
+        credentials = base64.b64encode(
+            f"{prisma_access_key}:{prisma_secret_key}".encode()
+        ).decode()
         headers = {"Authorization": f"Basic {credentials}"}
 
         try:
@@ -39,7 +43,9 @@ class PrismaCloudManagerScan(ToolGateway):
         file_name = "scanned_images.txt"
         images_scanned = []
 
-        if (image_name + extensions) in ImagesScanned().get_images_already_scanned(file_name):
+        if (image_name + extensions) in ImagesScanned().get_images_already_scanned(
+            file_name
+        ):
             print(f"The image {image_name} has already been scanned previously.")
         else:
             pattern = remoteconfig["REGEX_EXPRESSION_PROJECTS"]
@@ -48,11 +54,15 @@ class PrismaCloudManagerScan(ToolGateway):
                     file_path,
                     "images",
                     "scan",
-                    "--address", remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
-                    "--user", remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
-                    "--password", prisma_secret_key,
+                    "--address",
+                    remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
+                    "--user",
+                    remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
+                    "--password",
+                    prisma_secret_key,
                     image_name,
-                    "--output-file", image_name + extensions,
+                    "--output-file",
+                    image_name + extensions,
                     "--details",
                 )
                 try:
@@ -73,7 +83,9 @@ class PrismaCloudManagerScan(ToolGateway):
 
     def run_tool_container_sca(self, remoteconfig, prisma_secret_key, scan_image):
         try:
-            file_path = os.path.join(os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"])
+            file_path = os.path.join(
+                os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
+            )
 
             if not os.path.exists(file_path):
                 self.download_twistcli(
@@ -87,7 +99,11 @@ class PrismaCloudManagerScan(ToolGateway):
 
             for image in scan_image:
                 repository, tag = image["Repository"], image["Tag"]
-                images_scanned.extend(self.scan_image(file_path, repository, tag, remoteconfig, prisma_secret_key))
+                images_scanned.extend(
+                    self.scan_image(
+                        file_path, repository, tag, remoteconfig, prisma_secret_key
+                    )
+                )
 
             return images_scanned
 
