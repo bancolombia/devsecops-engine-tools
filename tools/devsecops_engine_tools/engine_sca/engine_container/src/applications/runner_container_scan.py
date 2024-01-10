@@ -1,7 +1,5 @@
-import sys
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.azure.azure_remote_config import AzureRemoteConfig
-from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool import (init_engine_sca_rm, get_inputs_from_config_file
-)
+from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool import (init_engine_sca_rm)
 from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
     AzureMessageResultPipeline,
 )
@@ -25,7 +23,6 @@ def runner_engine_container(dict_args, config_tool, token):
         elif config_tool['ENGINE_CONTAINER'].lower() == 'prisma':
             tool_run = PrismaCloudManagerScan()
             tool_deseralizator = PrismaDeserealizator()
-            
         tool_images = DockerImages()
         tool_remote= AzureRemoteConfig()
         return init_engine_sca_rm(tool_run,
@@ -35,12 +32,10 @@ def runner_engine_container(dict_args, config_tool, token):
             dict_args,
             token,
         )
-    
     except Exception as e:
         print(AzureMessageResultPipeline.Succeeded.value)
         raise Exception(f"Error SCAN : {str(e)}")
         # Manejar el error según sea necesario
-
 
 if __name__ == "__main__":
     runner_engine_container()
