@@ -105,8 +105,6 @@ Note that for the tools_configurations parameter, the library takes the default 
     response = DefectDojo.send_import_scan(request)
 
 
-https://dev.azure.com/{organization}/{project}/_git/{repository}
-
 ## Integration Tests
 
 In this module, you will find the integration tests of the methods implemented in the library, which can also serve as documentation.
