@@ -43,7 +43,7 @@ class PrismaCloudManagerScan(ToolGateway):
         file_name = "scanned_images.txt"
         images_scanned = []
 
-        if (image_name + extensions) in ImagesScanned().get_images_already_scanned(
+        if (image_name + extensions) in ImagesScanned.get_images_already_scanned(
             file_name
         ):
             print(f"The image {image_name} has already been scanned previously.")
