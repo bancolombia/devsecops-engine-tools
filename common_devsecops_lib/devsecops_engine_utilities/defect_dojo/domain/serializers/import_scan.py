@@ -185,7 +185,10 @@ class ImportScanSerializer(Schema):
     close_old_findings = fields.Str(required=False, load_default=True)
     close_old_findings_product_scope = fields.Str(required=False)
     push_to_jira = fields.Str(required=False)
-    environment = fields.Str(required=False)
+    environment = fields.Str(
+        required=False,
+        validate=validate.OneOf(["Development", "Production", "Default", "Staging", "Test", "Pre-prod", "Lab"]),
+    )
     version = fields.Str(required=False)
     build_id = fields.Str(required=False)
     branch_tag = fields.Str(required=False)
