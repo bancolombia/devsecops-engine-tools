@@ -25,7 +25,7 @@ def get_inputs_from_cli(args):
         "--environment", choices=["dev", "qa", "pdn"], type=str, required=True, help=""
     )
     parser.add_argument(
-        "--platform", choices=["eks", "openshift"], type=str, required=True, help=""
+        "--platform", choices=["eks", "openshift"], type=str, required=False, help=""
     )
     parser.add_argument(
         "--use_secrets_manager",
