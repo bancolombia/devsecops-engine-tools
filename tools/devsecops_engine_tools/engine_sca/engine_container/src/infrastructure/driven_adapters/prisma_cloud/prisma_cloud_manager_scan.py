@@ -40,7 +40,6 @@ class PrismaCloudManagerScan(ToolGateway):
 
     def run_tool_container_sca(self, remoteconfig, prisma_secret_key, scan_image):
         try:
-            
             file_path = os.path.join(
                 os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
             )
@@ -55,6 +54,7 @@ class PrismaCloudManagerScan(ToolGateway):
 
             previosly_scanned = ImagesScanned()
             file_name = "scanned_images.txt"
+            extensions ="_scan_result.json"
             images_scanned = []
 
             for image in scan_image:
@@ -64,7 +64,7 @@ class PrismaCloudManagerScan(ToolGateway):
 
                 # Check if the image has already been scanned
                 if (
-                    image_name + "_scan_result.json"
+                    image_name + extensions
                 ) in previosly_scanned.get_images_already_scanned(file_name):
                     print(
                         f"The image {image_name} has already been scanned previously."
@@ -84,20 +84,20 @@ class PrismaCloudManagerScan(ToolGateway):
                             prisma_secret_key,
                             image_name,
                             "--output-file",
-                            image_name + "_scan_result.json",
+                            image_name + extensions,
                             "--details",
                         )
                         try:
-                            result = subprocess.run(
+                            subprocess.run(
                                 command,
                                 check=True,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 text=True,
                             )
-                            images_scanned.append(image_name + "_scan_result.json")
+                            images_scanned.append(image_name + extensions)
                             with open(file_name, "a") as file:
-                                file.write(image_name + "_scan_result.json\n")
+                                file.write(image_name + extensions + "\n")
                         except subprocess.CalledProcessError as e:
                             print(
                                 f"Error during image scan of {repository}: {e.stderr}"

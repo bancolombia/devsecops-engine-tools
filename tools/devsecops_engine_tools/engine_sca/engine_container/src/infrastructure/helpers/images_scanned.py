@@ -2,6 +2,7 @@ import os
 
 
 class ImagesScanned:
+    @classmethod
     def get_images_already_scanned(self, file_name):
         """
         Create images scanned file if it does not exist and get the images that have already been scanned.
