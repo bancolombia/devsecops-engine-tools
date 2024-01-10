@@ -1,19 +1,23 @@
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.container_sca_scan import ContainerScaScan
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.set_input_core import SetInputCore
- 
+from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.container_sca_scan import (
+    ContainerScaScan,
+)
+from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.set_input_core import (
+    SetInputCore,
+)
 
 
 ENGINESAST_ENGINEIAC = "enginesast.engineiac"
 
-def init_engine_sca_rm( tool_run,tool_remote,tool_images,tool_deseralizator,dict_args, token):
-    
-    container_sca_scan = ContainerScaScan(tool_run,tool_remote,tool_images,tool_deseralizator,dict_args, token)
-    input_core = SetInputCore(tool_remote,dict_args)
-    images_scanned= container_sca_scan.process()    
-    
-    return container_sca_scan.deseralizator(images_scanned), input_core.setInputCore(images_scanned)
-   
-    
 
+def init_engine_sca_rm(
+    tool_run, tool_remote, tool_images, tool_deseralizator, dict_args, token
+):
+    container_sca_scan = ContainerScaScan(
+        tool_run, tool_remote, tool_images, tool_deseralizator, dict_args, token
+    )
+    input_core = SetInputCore(tool_remote, dict_args)
+    images_scanned = container_sca_scan.process()
 
-
+    return container_sca_scan.deseralizator(images_scanned), input_core.setInputCore(
+        images_scanned
+    )
