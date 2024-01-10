@@ -1,10 +1,7 @@
-
 from abc import ABCMeta, abstractmethod
 
 
 class ImagesGateway(metaclass=ABCMeta):
-
     @abstractmethod
-    def list_images_docker  (self) -> str:
+    def list_images(self) -> str:
         "list images docker"
-    

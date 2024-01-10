@@ -90,12 +90,11 @@ class HandleScan:
             if secret_tool is not None:
                 secret_sca=secret_tool["token_prisma_cloud"]
             else:
-                #useflagsca
-                secret_sca=None    
-            findings_list, input_core =runner_engine_container(self.dict_args, config_tool, secret_sca)
+                secret_sca=self.dict_args["token_engine_container"]
+            findings_list, input_core =runner_engine_container(self.dict_args, secret_sca)
             try:
                 return findings_list, input_core
-            except ExceptionFindingsRiskAcceptance as ex2:
+            except ExceptionVulnerabilityManagement as ex2:
                 print(self.devops_platform_gateway.logging("warning", str(ex2)))
         elif "engine_dast" in self.dict_args["tool"]:
             print(MESSAGE_ENABLED)
