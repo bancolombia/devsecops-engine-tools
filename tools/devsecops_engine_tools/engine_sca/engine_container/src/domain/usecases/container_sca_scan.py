@@ -30,7 +30,7 @@ class ContainerScaScan():
         Returns:
             list: List of processed images.
         """
-        return self.tool_images.list_images_docker()
+        return self.tool_images.list_images()
 
 
     
@@ -48,7 +48,7 @@ class ContainerScaScan():
         Process the results deserializer.
 
         Returns:
-            list: Deserialized list of vulnerabilities.
+            list: Deserialized list of findings.
         """
-        return self.tool_deseralizator.get_list_vulnerability(image_scanned)
+        return self.tool_deseralizator.get_list_findings(image_scanned)
 

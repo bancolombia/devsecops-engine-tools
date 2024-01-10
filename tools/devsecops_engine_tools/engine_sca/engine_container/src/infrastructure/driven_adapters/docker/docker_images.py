@@ -5,7 +5,7 @@ import json
 class DockerImages(ImagesGateway):
     
 
-    def list_images_docker(self):
+    def list_images(self):
         """
         Lista las imagenes de Docker en formato json
         """
