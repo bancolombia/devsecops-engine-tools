@@ -49,7 +49,7 @@ def get_inputs_from_cli(args):
         "remote_config_repo": args.remote_config_repo,
         "tool": args.tool,
         "environment": args.environment,
-        "platform_not_apply": args.platform,
+        "platform": args.platform,
         "use_secrets_manager": args.use_secrets_manager,
         "use_vulnerability_management": args.use_vulnerability_management,
         "token_cmdb": args.token_cmdb,
