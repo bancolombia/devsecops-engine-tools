@@ -87,7 +87,7 @@ In the following example, take into account the tools_configurations parameter, 
 
 Note that for the tools_configurations parameter, the library takes the default value of 1.
 
-   request: ImportScanRequest = Connect.cmdb(
+    request: ImportScanRequest = Connect.cmdb(
         compact_remote_config_url=https://grupotest.visualstudio.com//_git/project?path=/directory/file.json,
         cmdb_mapping={"product_type_name": "","product_name": "nombreapp","tag_product": "nombreentorno","product_description": "","codigo_app": ""}
         personal_access_token="aidfjajia3249ajfdiadjfijtest",
