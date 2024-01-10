@@ -26,7 +26,7 @@ class IacScan:
             init_config_tool,
             exclusions,
             dict_args["environment"],
-            dict_args["platform"],
+            dict_args["platform_not_apply"],
             self.devops_platform_gateway.get_variable("pipeline"),
             secret_tool,
         )

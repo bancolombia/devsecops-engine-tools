@@ -150,8 +150,8 @@ class CheckovTool(ToolGateway):
         #Funcion para validar la plataforma (eks o openshift)
         ########################################################################
         def ifPlatform(value,container_platform):
-            if value.get("platform"):
-                if value.get("platform") == container_platform:
+            if value.get("platform_not_apply"):
+                if value.get("platform_not_apply") != container_platform:
                     return True
                 else:
                     return False
