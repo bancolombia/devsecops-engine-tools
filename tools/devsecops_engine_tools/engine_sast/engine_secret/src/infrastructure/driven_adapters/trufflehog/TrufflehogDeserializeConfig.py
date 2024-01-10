@@ -1,15 +1,13 @@
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.LevelCompliance import LevelCompliance
-
+from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 
 class TrufflehogDeserializeConfig:
     def __init__(self, json_data, tool):
         self.version = json_data[tool]["VERSION"]
-        self.search_pattern = json_data[tool]["SEARCH_PATTERN"]
+        self.search_pattern = ""
         self.ignore_search_pattern = json_data[tool]["IGNORE_SEARCH_PATTERN"]
         self.exclusions_path = ""
         self.message_info_sast_rm = json_data[tool]["MESSAGE_INFO_SAST_RM"]
-        # self.level_compliance = LevelCompliance(json_data[tool]["LEVEL_COMPLIANCE"])
-        self.level_compliance = LevelCompliance({"Critical": 0, "High": 0, "Medium": 0, "Low": 0})
+        self.level_compliance = Threshold(json_data[tool]['THRESHOLD'])
         self.rules_data_type = ""
         self.scope_pipeline = ""
         self.exclusions = None

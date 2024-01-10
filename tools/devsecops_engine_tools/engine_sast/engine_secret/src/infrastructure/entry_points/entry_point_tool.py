@@ -10,8 +10,8 @@ from devsecops_engine_utilities.utils.printers import (
 )
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import BuildVariables
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
-from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azureDevops.azure_devops_config import (
-    AzureDevopsIntegration,
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azure.azure_devops import (
+    AzureDevops,
 )
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model import LevelCompliance
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.deserialize_tool import DeserializeTool
@@ -55,10 +55,10 @@ def engine_secret_scan(remote_config_repo, remote_config_path, tool):
     # y hacen su magia. Quien llama los driven adapters es el gateway.
 
     # desde el entry point se llaman los usecases, que son los que llaman a los gateways.
-    Printers.print_logo_tool()
-    azure_devops_integration = AzureDevopsIntegration()
-    azure_devops_integration.get_azure_connection()
-    data_file_tool = azure_devops_integration.get_remote_json_config(
+    # Printers.print_logo_tool()
+    azure_devops_integration = AzureDevops()
+    
+    data_file_tool = azure_devops_integration.get_remote_config(
         remote_config_repo=remote_config_repo, remote_config_path=remote_config_path
     )
     data_config = TrufflehogDeserializeConfig(
@@ -74,8 +74,8 @@ def engine_secret_scan(remote_config_repo, remote_config_path, tool):
     result = []
     classe = TrufflehogRun(tool)
     secret_scan = SecretScan(classe)
-    exclude_path = secret_scan.create_exclude_file()
-    output = secret_scan.process(exclude_path)
+    # exclude_path = secret_scan.create_exclude_file()
+    output = secret_scan.process()
     decode_output = output.decode('utf-8')
     
     if decode_output == '':
@@ -103,7 +103,7 @@ def engine_secret_scan(remote_config_repo, remote_config_path, tool):
         
     input_core = InputCore(
         totalized_exclusions=[],
-        level_compliance_defined=data_config.level_compliance,
+        threshold_defined=data_config.level_compliance,
         path_file_results=vulnerabilities_list,
         custom_message_break_build=data_config.message_info_sast_rm,
         scope_pipeline=data_config.scope_pipeline
