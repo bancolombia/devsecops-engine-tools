@@ -90,8 +90,7 @@ class HandleScan:
             if secret_tool is not None:
                 secret_sca=secret_tool["token_prisma_cloud"]
             else:
-                #useflagsca
-                secret_sca=None
+                secret_sca=self.dict_args["token_engine_container"]   
             findings_list, input_core =runner_engine_container(self.dict_args, secret_sca)
             try:
                 return findings_list, input_core

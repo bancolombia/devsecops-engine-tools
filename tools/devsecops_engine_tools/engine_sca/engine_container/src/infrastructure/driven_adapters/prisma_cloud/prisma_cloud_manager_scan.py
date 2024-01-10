@@ -40,6 +40,7 @@ class PrismaCloudManagerScan(ToolGateway):
 
     def run_tool_container_sca(self, remoteconfig, prisma_secret_key, scan_image):
         try:
+            
             file_path = os.path.join(
                 os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
             )

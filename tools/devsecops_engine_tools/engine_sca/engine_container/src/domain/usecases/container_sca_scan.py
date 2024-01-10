@@ -29,7 +29,7 @@ class ContainerScaScan:
         self.dict_args = dict_args
         self.token = token
 
-    def getRemoteConfig(self):
+    def get_remote_config(self):
         """
         Get remote configuration.
 
@@ -38,7 +38,7 @@ class ContainerScaScan:
         """
         return self.tool_remote.get_remote_config(self.dict_args)
 
-    def scanImage(self):
+    def scan_image(self):
         """
         Process the list of Docker images.
 
@@ -55,7 +55,7 @@ class ContainerScaScan:
             dict: SCA scanning results.
         """
         return self.tool_run.run_tool_container_sca(
-            self.getRemoteConfig(), self.token, self.scanImage()
+            self.get_remote_config(), self.token, self.scan_image()
         )
 
     def deseralizator(self, image_scanned):
