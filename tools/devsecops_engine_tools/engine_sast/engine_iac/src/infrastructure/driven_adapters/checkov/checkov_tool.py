@@ -140,24 +140,21 @@ class CheckovTool(ToolGateway):
         agent_env = self.configurate_external_checks(config_tool, secret_tool)
 
         return config_tool, folders_to_scan, agent_env
-
+    
+    def if_platform(self,value,container_platform):
+        if value.get("platform_not_apply"):
+            if value.get("platform_not_apply") != container_platform:
+                return True
+            else:
+                return False
+        else:
+            return True
     def scan_folders(
         self, folders_to_scan, config_tool: ConfigTool, agent_env, environment, container_platform
     ):
         output_queue = queue.Queue()
         # Crea una lista para almacenar los hilos
-        threads = []
-        #Funcion para validar la plataforma (eks o openshift)
-        ########################################################################
-        def ifPlatform(value,container_platform):
-            if value.get("platform_not_apply"):
-                if value.get("platform_not_apply") != container_platform:
-                    return True
-                else:
-                    return False
-            else:
-                return True
-        ########################################################################   
+        threads = []  
         for folder in folders_to_scan:
             for rule in config_tool.rules_data_type:
                 checkov_config = CheckovConfig(
@@ -166,7 +163,7 @@ class CheckovTool(ToolGateway):
                     checks=[
                         key
                         for key, value in config_tool.rules_data_type[rule].items()
-                        if value["environment"].get(environment) and ifPlatform(value,container_platform)
+                        if value["environment"].get(environment) and self.if_platform(value,container_platform)
                     ],
                     soft_fail=False,
                     directories=folder,
