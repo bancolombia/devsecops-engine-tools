@@ -21,11 +21,8 @@ from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.utils.session_manager import SessionManager
 
 
-def import_scan_request_instance(
-    par_scan_type,
-    product_name="test product name",
-    file=f"{DEVSECOPS_ENGINE_UTILITIES_PATH}/defect_dojo/test/files/xray_scan.json",
-) -> ImportScanRequest:
+def import_scan_request_instance(par_scan_type, product_name="test product name", file_name=None) -> ImportScanRequest:
+    file = f"{DEVSECOPS_ENGINE_UTILITIES_PATH}/defect_dojo/test/files/request_file/{file_name}"
     request = ImportScanRequest(
         product_name=product_name,
         token_cmdb="123456789",
@@ -41,7 +38,7 @@ def import_scan_request_instance(
 
 
 def test_user_case_creation():
-    request = import_scan_request_instance("Xray scan")
+    request = import_scan_request_instance(par_scan_type="Xray scan", file_name="jfrog-xray_on_demand_binary_scan.json")
     assert isinstance(request, ImportScanRequest)
     rest_import_scan = ImportScanRestConsumer(request, SessionManager())
     rest_product_type = ProductTypeRestConsumer(request, SessionManager())
@@ -60,10 +57,12 @@ def test_user_case_creation():
     assert hasattr(uc, "execute")
 
 
-def mock_rest_import_scan(file_path):
+def mock_rest_import_scan(file_path, scan_type=None):
     mock_import_scan = MagicMock()
     with open(f"{DEVSECOPS_ENGINE_UTILITIES_PATH}/defect_dojo/test/files/{file_path}", "r") as fp:
         data = json.load(fp)
+        if scan_type:
+            data["scan_type"] = scan_type
         import_scan_object = ImportScanRequest.from_dict(data)
         assert import_scan_object.scan_type == data["scan_type"]
         assert import_scan_object.product_type_name == data["product_type_name"]
@@ -136,35 +135,43 @@ def mock_rest_scan_configuration():
     mock_rest_engagement""",
     [
         (
-            mock_rest_import_scan("import_scan.json"),
+            mock_rest_import_scan(file_path="import_scan.json"),
             mock_rest_product_type(),
             mock_rest_product(),
             mock_rest_scan_configuration(),
-            import_scan_request_instance("Xray Scan"),
+            import_scan_request_instance(par_scan_type="Xray Scan", file_name="jfrog-xray_on_demand_binary_scan.json"),
             mock_rest_engagement(),
         ),
         (
-            mock_rest_import_scan("sonar_qube.json"),
+            mock_rest_import_scan(file_path="import_scan.json", scan_type="Twistlock Scan"),
             mock_rest_product_type(),
             mock_rest_product(),
             mock_rest_scan_configuration(),
-            import_scan_request_instance("SonarQube API Import"),
+            import_scan_request_instance(par_scan_type="Twistlock Scan", file_name="twistlock.csv"),
             mock_rest_engagement(),
         ),
         (
-            mock_rest_import_scan("sonar_qube.json"),
+            mock_rest_import_scan(file_path="sonar_qube.json"),
+            mock_rest_product_type(),
+            mock_rest_product(),
+            mock_rest_scan_configuration(),
+            import_scan_request_instance(par_scan_type="SonarQube API Import"),
+            mock_rest_engagement(),
+        ),
+        (
+            mock_rest_import_scan(file_path="sonar_qube.json"),
             mock_rest_product_type(product_type_empty=True),
             mock_rest_product(),
             mock_rest_scan_configuration(),
-            import_scan_request_instance("SonarQube API Import"),
+            import_scan_request_instance(par_scan_type="SonarQube API Import"),
             mock_rest_engagement(),
         ),
         (
-            mock_rest_import_scan("sonar_qube.json"),
+            mock_rest_import_scan(file_path="sonar_qube.json"),
             mock_rest_product_type(),
             mock_rest_product(result_list_empty=True),
             mock_rest_scan_configuration(),
-            import_scan_request_instance("SonarQube API Import"),
+            import_scan_request_instance(par_scan_type="SonarQube API Import"),
             mock_rest_engagement(),
         ),
     ],
@@ -205,7 +212,7 @@ def test_execute_sucessfull(
             mock_rest_product_type(),
             mock_rest_product(),
             mock_rest_scan_configuration(),
-            import_scan_request_instance("Xray Scan", ""),
+            import_scan_request_instance(par_scan_type="Xray Scan", file_name=""),
             mock_rest_engagement(),
         ),
         (
@@ -213,7 +220,7 @@ def test_execute_sucessfull(
             mock_rest_product_type(),
             mock_rest_product(),
             mock_rest_scan_configuration(),
-            import_scan_request_instance("Xray Scan", None),
+            import_scan_request_instance(par_scan_type="Xray Scan", file_name=None),
             mock_rest_engagement(),
         ),
         (
@@ -221,7 +228,7 @@ def test_execute_sucessfull(
             mock_rest_product_type(),
             mock_rest_product(),
             mock_rest_scan_configuration(),
-            import_scan_request_instance("Xray Scan", file="incorrect url"),
+            import_scan_request_instance(par_scan_type="Xray Scan", file_name="incorrect url"),
             mock_rest_engagement(),
         ),
     ],
