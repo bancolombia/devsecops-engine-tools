@@ -3,7 +3,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.threshold import Thresh
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.config_gateway import (
     ConfigGateway,
 )
-import os
 
 
 class SetInputCore:
@@ -11,7 +10,7 @@ class SetInputCore:
         self.tool_remote = tool_remote
         self.dict_args = dict_args
 
-    def getRemoteConfig(self):
+    def get_remote_config(self):
         """
         Get remote configuration.
 
@@ -20,7 +19,16 @@ class SetInputCore:
         """
         return self.tool_remote.get_remote_config(self.dict_args)
 
-    def setInputCore(self, images_scanned):
+    def get_variable(self, variable):
+        """
+        Get variable.
+
+        Returns:
+            dict: Remote variable.
+        """
+        return self.tool_remote.get_variable(variable)
+
+    def set_input_core(self, images_scanned):
         """
         Set the input core.
 
@@ -29,8 +37,8 @@ class SetInputCore:
         """
         return InputCore(
             [],
-            Threshold(self.getRemoteConfig()["THRESHOLD"]),
+            Threshold(self.get_remote_config()["THRESHOLD"]),
             images_scanned[-1] if images_scanned else None,
-            self.getRemoteConfig()["MESSAGE_INFO_SCA_RM"],
-            os.environ.get("BUILD_DEFINITIONNAME", ""),
+            self.get_remote_config()["MESSAGE_INFO_SCA_RM"],
+            self.get_variable("release_name"),
         )

@@ -1,5 +1,6 @@
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
     SystemVariables,
+    ReleaseVariables,
 )
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import (
     AzureDevopsApi,
@@ -23,3 +24,11 @@ class AzureRemoteConfig(ConfigGateway):
         )
         connection = utils_azure.get_azure_connection()
         return utils_azure.get_remote_json_config(connection=connection)
+
+    def get_variable(self, variable):
+        try:
+            if variable == "release_name":
+                return ReleaseVariables.Release_Definitionname.value()
+        except Exception as ex:
+            print(self.logging("info", str(ex)))
+            return None
