@@ -29,7 +29,10 @@ from devsecops_engine_utilities.ssh.managment_private_key import (
     decode_base64,
     config_knowns_hosts,
 )
+from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities import settings
 
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class CheckovTool(ToolGateway):
     CHECKOV_CONFIG_FILE = "checkov_config.yaml"
@@ -49,7 +52,7 @@ class CheckovTool(ToolGateway):
         agent_env = None
         try:
             if secret_tool is None:
-                print("Secrets manager is not enabled to configure external checks")
+                logger.warning("Secrets manager is not enabled to configure external checks")
             else:
                 if (
                     config_tool.use_external_checks_git == "True"
@@ -83,7 +86,7 @@ class CheckovTool(ToolGateway):
                     )
 
         except Exception as ex:
-            print(f"An error ocurred configuring external checks {ex}")
+            logger.warning(f"An error ocurred configuring external checks {ex}")
         return agent_env
 
     def execute(self, checkov_config: CheckovConfig):
@@ -102,7 +105,7 @@ class CheckovTool(ToolGateway):
         output = result.stdout.strip()
         error = result.stderr.strip()
         if error is not None and error != "":
-            print(f"Error running checkov.. {error}")
+            logger.warning(f"Error running checkov.. {error}")
         return output
 
     def async_scan(self, queue, checkov_config: CheckovConfig):

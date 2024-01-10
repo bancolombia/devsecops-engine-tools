@@ -40,3 +40,4 @@ _core_test*
 results.json
 RULES_DOCKERcheckov_config.yaml
 RULES_K8Scheckov_config.yaml
+log/
