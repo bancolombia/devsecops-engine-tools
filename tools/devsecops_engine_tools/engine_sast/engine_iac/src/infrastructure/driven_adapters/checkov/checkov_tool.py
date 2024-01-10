@@ -142,11 +142,22 @@ class CheckovTool(ToolGateway):
         return config_tool, folders_to_scan, agent_env
 
     def scan_folders(
-        self, folders_to_scan, config_tool: ConfigTool, agent_env, environment
+        self, folders_to_scan, config_tool: ConfigTool, agent_env, environment, platform
     ):
         output_queue = queue.Queue()
         # Crea una lista para almacenar los hilos
         threads = []
+        #Funcion para validar la plataforma (eks o openshift)
+        ########################################################################
+        def ifPlatform(value,platform):
+            if value.get("platform"):
+                if value.get("platform") == platform:
+                    return True
+                else:
+                    return False
+            else:
+                return True
+        ########################################################################   
         for folder in folders_to_scan:
             for rule in config_tool.rules_data_type:
                 checkov_config = CheckovConfig(
@@ -155,7 +166,7 @@ class CheckovTool(ToolGateway):
                     checks=[
                         key
                         for key, value in config_tool.rules_data_type[rule].items()
-                        if value["environment"].get(environment)
+                        if value["environment"].get(environment) and ifPlatform(value,platform)
                     ],
                     soft_fail=False,
                     directories=folder,
@@ -192,13 +203,13 @@ class CheckovTool(ToolGateway):
             result_scans.extend(result)
         return result_scans
 
-    def run_tool(self, init_config_tool, exclusions, environment, pipeline, secret_tool):
+    def run_tool(self, init_config_tool, exclusions, environment, platform, pipeline, secret_tool):
         config_tool, folders_to_scan, agent_env = self.complete_config_tool(
             init_config_tool, exclusions, pipeline, secret_tool
         )
 
         result_scans = self.scan_folders(
-            folders_to_scan, config_tool, agent_env, environment
+            folders_to_scan, config_tool, agent_env, environment, platform
         )
 
         checkov_deserealizator = CheckovDeserealizator()
