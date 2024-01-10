@@ -5,7 +5,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
     Finding,
     Category
     )
-# from datetime import datetime
 from dataclasses import dataclass
 import json
 
