@@ -1,7 +1,6 @@
-import sys
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.azure.azure_remote_config import AzureRemoteConfig
-from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool import (init_engine_sca_rm, get_inputs_from_config_file
-)
+from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool import (
+    init_engine_sca_rm)
 from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
     AzureMessageResultPipeline,
 )

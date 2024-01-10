@@ -7,7 +7,7 @@ import json
 @dataclass
 class PrismaDeserealizator(DeseralizatorGateway):
     
-    def get_list_vulnerability(self, images_scanned: list) -> "list[Finding]":
+    def get_list_findings(self, images_scanned: list) -> "list[Finding]":
         list_open_vulnerabilities = []
         SEVERITY_MAP = {
         "unimportant": "low",
@@ -29,7 +29,7 @@ class PrismaDeserealizator(DeseralizatorGateway):
 
                 vulnerabilities_data = json_data["results"][0]["vulnerabilities"]
 
-                # Create a list of Vulnerability instances from the JSON data
+                # Create a list of findings instances from the JSON data
                 vulnerabilities = [
                     Finding(
                         id=vul.get("id", ""),
