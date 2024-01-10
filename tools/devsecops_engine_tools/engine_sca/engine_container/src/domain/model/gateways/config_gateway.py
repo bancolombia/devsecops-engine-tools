@@ -1,11 +1,11 @@
 from abc import ABCMeta, abstractmethod
 
 
-
-
-class ConfigGateway (metaclass=ABCMeta):
+class ConfigGateway(metaclass=ABCMeta):
+    @abstractmethod
+    def get_remote_config(self, dict_args) -> str:
+        "get remote config"
 
     @abstractmethod
-    def get_remote_config (self) -> str:
-        "get remote config"
-    
+    def get_variable(self, variable) -> str:
+        "get variable pipeline"
