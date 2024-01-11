@@ -4,7 +4,7 @@ from functools import reduce
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.finding import (
     Finding,
-    Category
+    Category,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
@@ -16,20 +16,25 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_g
 
 @dataclass
 class BreakBuild:
-    devops_platform_gateway: DevopsPlatformGateway
-    printer_table_gateway: PrinterTableGateway
-    findings_list: "list[Finding]"
-    input_core: InputCore
+    def __init__(
+        self,
+        devops_platform_gateway: DevopsPlatformGateway,
+        printer_table_gateway: PrinterTableGateway
+    ):
+        self.devops_platform_gateway = devops_platform_gateway
+        self.printer_table_gateway = printer_table_gateway
+    
+    def process(self, findings_list: "list[Finding]", input_core: InputCore):
 
-    def __post_init__(self):
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
-        threshold = self.input_core.threshold_defined
-        exclusions = self.input_core.totalized_exclusions
-        custom_message = self.input_core.custom_message_break_build
+        threshold = input_core.threshold_defined
+        exclusions = input_core.totalized_exclusions
+        custom_message = input_core.custom_message_break_build
 
-        if len(self.findings_list) != 0:
-            findings_list = self.findings_list
+        if len(findings_list) != 0:
+
+            scan_result = {"vulnerabilities": {}, "compliances": {}}
 
             # Esta lista de excluidas no se imprimira para dejar un resultado más limpio
             findings_excluded_list = list(
@@ -120,7 +125,7 @@ class BreakBuild:
                 == 0
             ):
                 print(
-                    devops_platform_gateway.logging(
+                    devops_platform_gateway.message(
                         "succeeded", "There are no vulnerabilities"
                     )
                 )
@@ -136,7 +141,7 @@ class BreakBuild:
                     vulnerabilities_without_exclusions_list
                 )
                 print(
-                    devops_platform_gateway.logging(
+                    devops_platform_gateway.message(
                         "error",
                         "Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)".format(
                             vulnerabilities_critical,
@@ -151,13 +156,32 @@ class BreakBuild:
                     )
                 )
                 print(devops_platform_gateway.result_pipeline("failed"))
+
+                scan_result["vulnerabilities"] = {
+                    "threshold": {
+                        "critical": vulnerabilities_critical,
+                        "high": vulnerabilities_high,
+                        "medium": vulnerabilities_medium,
+                        "low": vulnerabilities_low
+                    },
+                    "status": "failed",
+                    "found": list(
+                        map(
+                            lambda item: {
+                                "id": item.id,
+                                "severity": item.severity,
+                            },
+                            vulnerabilities_without_exclusions_list,
+                        )
+                    ),
+                }
             else:
                 print("Below are all vulnerabilities detected.")
                 printer_table_gateway.print_table(
                     vulnerabilities_without_exclusions_list
                 )
                 print(
-                    devops_platform_gateway.logging(
+                    devops_platform_gateway.message(
                         "warning",
                         "Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is not greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)".format(
                             vulnerabilities_critical,
@@ -172,13 +196,33 @@ class BreakBuild:
                     )
                 )
                 print(devops_platform_gateway.result_pipeline("succeeded"))
+
+                scan_result["vulnerabilities"] = {
+                    "threshold": {
+                        "critical": vulnerabilities_critical,
+                        "high": vulnerabilities_high,
+                        "medium": vulnerabilities_medium,
+                        "low": vulnerabilities_low
+                    },
+                    "status": "succeeded",
+                    "found": list(
+                        map(
+                            lambda item: {
+                                "id": item.id,
+                                "severity": item.severity,
+                            },
+                            vulnerabilities_without_exclusions_list,
+                        )
+                    ),
+                }
             print()
             if len(compliances_without_exclusions_list) > 0:
                 print("Below are all compliances issues detected.")
                 printer_table_gateway.print_table(compliances_without_exclusions_list)
+                status = "succeeded"
                 if compliance_critical >= threshold.compliance.critical:
                     print(
-                        devops_platform_gateway.logging(
+                        devops_platform_gateway.message(
                             "error",
                             "Compliance issues count is greater than or equal to failure criteria (critical: {0})".format(
                                 1,
@@ -186,17 +230,38 @@ class BreakBuild:
                         )
                     )
                     print(devops_platform_gateway.result_pipeline("failed"))
+                    status = "failed"
+                scan_result["compliances"] = {
+                        "threshold": {
+                            "critical": compliance_critical
+                        },
+                        "status": status,
+                        "found": list(
+                            map(
+                                lambda item: {
+                                    "id": item.id,
+                                    "severity": item.severity,
+                                },
+                                compliances_without_exclusions_list,
+                            )
+                        ),
+                    }
             else:
-                print(devops_platform_gateway.logging("succeeded", "There are no compliances issues"))
+                print(
+                    devops_platform_gateway.message(
+                        "succeeded", "There are no compliances issues"
+                    )
+                )
                 print(devops_platform_gateway.result_pipeline("succeeded"))
 
         else:
-            print(devops_platform_gateway.logging("succeeded", "There are no findings"))
+            print(devops_platform_gateway.message("succeeded", "There are no findings"))
             print(devops_platform_gateway.result_pipeline("succeeded"))
         print()
         print(
-            devops_platform_gateway.logging(
+            devops_platform_gateway.message(
                 "info",
                 custom_message,
             )
         )
+        return scan_result

@@ -14,15 +14,18 @@ from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline i
     AzureMessageLoggingPipeline,
     AzureMessageResultPipeline,
 )
+from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities import settings
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 @dataclass
 class AzureDevops(DevopsPlatformGateway):
-    def get_remote_config(self, dict_args):
+    def get_remote_config(self, repository, path):
         base_compact_remote_config_url = (
             f"https://{SystemVariables.System_TeamFoundationCollectionUri.value().rstrip('/').split('/')[-1].replace('.visualstudio.com','')}"
             f".visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/"
-            f"{dict_args['remote_config_repo']}?path=/resources/ConfigTool.json"
+            f"{repository}?path={path}"
         )
         utils_azure = AzureDevopsApi(
             personal_access_token=SystemVariables.System_AccessToken.value(),
@@ -31,7 +34,7 @@ class AzureDevops(DevopsPlatformGateway):
         connection = utils_azure.get_azure_connection()
         return utils_azure.get_remote_json_config(connection=connection)
 
-    def logging(self, type, message):
+    def message(self, type, message):
         if type == "succeeded":
             return AzureMessageLoggingPipeline.SucceededLogging.get_message(message)
         elif type == "info":
@@ -78,5 +81,5 @@ class AzureDevops(DevopsPlatformGateway):
             elif variable == "access_token":
                 return SystemVariables.System_AccessToken.value()
         except Exception as ex:
-            print(self.logging("info", str(ex)))
+            logger.warning(f"Error getting variable {str(ex)}")
             return None
