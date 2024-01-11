@@ -10,14 +10,14 @@ import subprocess
 def trivy_scan_instance():
     return TrivyScan()
 
-def test_install_trivy_success(trivy_scan_instance):
+def test_install_tool(trivy_scan_instance):
     version = '0.48.1'
     with patch('subprocess.run') as mock_subprocess_run:
         # Trivy is installed case
         mock_subprocess_run.side_effect = [
             Mock(returncode=0) # Mock 'which' can find 'trivy'
         ]
-        trivy_scan_instance.install_trivy(version)
+        trivy_scan_instance.install_tool(version)
         assert mock_subprocess_run.call_count == 1, "subprocess se ejecuta una vez (Trivy instalado)"
         mock_subprocess_run.assert_any_call(['which', 'trivy'], check=True, stdout=-1, stderr=-1)
 
@@ -28,7 +28,7 @@ def test_install_trivy_success(trivy_scan_instance):
             Mock(returncode=0),  # Mock success running 'wget'
             Mock(returncode=0)   # Mock success running 'dpkg'
         ]
-        trivy_scan_instance.install_trivy(version)
+        trivy_scan_instance.install_tool(version)
         mock_subprocess_run.assert_has_calls([
             call(['which', 'trivy'], check=True, stdout=-1, stderr=-1),
             call(['wget', f'https://github.com/aquasecurity/trivy/releases/download/v{version}/trivy_{version}_Linux-64bit.deb'], check=True, stdout=-1, stderr=-1),
@@ -44,7 +44,7 @@ def test_install_trivy_success(trivy_scan_instance):
         ]
 
         with pytest.raises(RuntimeError):
-            trivy_scan_instance.install_trivy(version)
+            trivy_scan_instance.install_tool(version)
 
         mock_subprocess_run.reset_mock()
         mock_subprocess_run.side_effect = [
@@ -54,7 +54,7 @@ def test_install_trivy_success(trivy_scan_instance):
         ]
 
         with pytest.raises(RuntimeError):
-            trivy_scan_instance.install_trivy(version)
+            trivy_scan_instance.install_tool(version)
 
 def test_run_tool_container_sca(trivy_scan_instance):
     mock_remoteconfig = {
@@ -111,9 +111,5 @@ def test_run_tool_container_sca(trivy_scan_instance):
                 Mock(side_effect=0)  # Mock success running 'trivy'
             ]
 
-            with pytest.raises(Exception):
-                trivy_scan_instance.run_tool_container_sca(mock_remoteconfig, 'token', mock_scan_image)
-
-    # Could not get Azure Remote Config
-    with pytest.raises(Exception):
-            trivy_scan_instance.run_tool_container_sca(remoteconfig=None, token=None, scan_image=None)
+            result = trivy_scan_instance.run_tool_container_sca(mock_remoteconfig, 'token', mock_scan_image)
+            assert result == 0

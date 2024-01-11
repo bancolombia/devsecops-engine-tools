@@ -10,7 +10,7 @@ import json
 def deserializator():
     return TrivyDeserializator()
 
-def test_get_list_vulnerability(deserializator):
+def test_get_list_findings(deserializator):
         images_scanned = ['nu0429002_devsecops_test_debian:latest_scan_result']
         fake_vulnerabilities = [
             {
@@ -37,5 +37,5 @@ def test_get_list_vulnerability(deserializator):
             "Results": [{"Vulnerabilities": fake_vulnerabilities}]
         }
         with patch('builtins.open', new_callable=mock_open, read_data=json.dumps(fake_json_data)):
-            result = deserializator.get_list_vulnerability(images_scanned)
+            result = deserializator.get_list_findings(images_scanned)
             assert len(result) == 1
