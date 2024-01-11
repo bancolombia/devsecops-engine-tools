@@ -18,7 +18,11 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
     ExceptionFindingsRiskAcceptance,
 )
 from devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan import (
-    runner_engine_container)
+    runner_engine_container,
+)
+from devsecops_engine_tools.engine_sca.engine_dependencies.src.applications.runner_dependencies_scan import (
+    runner_engine_dependencies,
+)
 
 
 MESSAGE_ENABLED = "not yet enabled"
@@ -98,4 +102,5 @@ class HandleScan:
         elif "engine_secret" in self.dict_args["tool"]:
             print(MESSAGE_ENABLED)
         elif "engine_dependencies" in self.dict_args["tool"]:
+            findings_list, input_core = runner_engine_dependencies(self.dict_args)
             print(MESSAGE_ENABLED)
