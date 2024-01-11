@@ -20,6 +20,4 @@ devsecops_engine_utilities
 
 ## Utils
 
-[FromDictMixin](common_devsecops_lib/devsecops_engine_utilities/utils/README.md)
-
-[Logger](common_devsecops_lib/devsecops_engine_utilities/utils/README.md)
+[Domain Language Transformation And Use of Logger](devsecops_engine_utilities/utils/README.md)
