@@ -2,6 +2,14 @@
 
 DevSecOps Security Tools
 
+# Defect Dojo
+
+[Architecture And Usage Example](defect_dojo/README.md)
+
+# Utils
+
+[Domain Language Transformation And Use of Logger](utils/README.md)
+
 # Objective
 
 # Project layout

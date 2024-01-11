@@ -79,7 +79,7 @@ list_scan_type = [
     "Immuniweb Scan",
     "IntSights Report",
     "JFrog Xray API Summary Artifact Scan",
-    "Jfrog Xray On Demand Binary Scan",
+    "JFrog Xray On Demand Binary Scan",
     "JFrog Xray Scan",
     "JFrog Xray Unified Scan",
     "KICS Scan",
@@ -185,7 +185,10 @@ class ImportScanSerializer(Schema):
     close_old_findings = fields.Str(required=False, load_default=True)
     close_old_findings_product_scope = fields.Str(required=False)
     push_to_jira = fields.Str(required=False)
-    environment = fields.Str(required=False)
+    environment = fields.Str(
+        required=False,
+        validate=validate.OneOf(["Development", "Production", "Default", "Staging", "Test", "Pre-prod", "Lab"]),
+    )
     version = fields.Str(required=False)
     build_id = fields.Str(required=False)
     branch_tag = fields.Str(required=False)
@@ -196,7 +199,7 @@ class ImportScanSerializer(Schema):
     test_title = fields.Str(required=False)
     description_product = fields.Str(required=False)
     create_finding_groups_for_all_findings = fields.Str(required=False)
-    tools_configuration = fields.Int(required=False)
+    tools_configuration = fields.Int(required=False, load_default=1)
     code_app = fields.Str(required=False)
     # defect-dojo credential
     token_cmdb = fields.Str(required=True)
