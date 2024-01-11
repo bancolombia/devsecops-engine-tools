@@ -11,12 +11,15 @@ DEVSECOPS_ENGINE_UTILITIES_RUNNER_PYTHON_VERSION = platform.python_version()
 DEVSECOPS_ENGINE_UTILITIES_RUNNER_PYTHON_COMPILER = platform.python_compiler()
 DEVSECOPS_ENGINE_UTILITIES_VERSION = "0.0.3"
 
-# defect-dojo settings
+# logging settings
+DEBUG_DEVSECOPS = config("DEBUG_DEVSECOPS", default=False, cast=bool)
+LOG_CONSOLE_DEVSECOPS = config("LOG_CONSOLE_DEVSECOPS", default=False, cast=bool)
 FILE_DEBUG_DEVSECOPS = config("FILE_DEBUG_DEVSECOPS", default=False, cast=bool)
 FILE_FORMAT_DEBUG_DEVSECOPS = config("FILE_FORMAT_DEBUG_DEVSECOPS", default="log", cast=str)
-DEBUG = config("DEBUG", default=False, cast=bool)
+SETTING_LOGGER = {"debug": DEBUG_DEVSECOPS, "log_console": LOG_CONSOLE_DEVSECOPS, "log_file": FILE_DEBUG_DEVSECOPS, "log_file_format": FILE_FORMAT_DEBUG_DEVSECOPS}
+
+# defect-dojo settings
 INTEGRATION_TEST = config("INTEGRATION_TEST", default=False, cast=bool)
-SETTING_LOGGER = {"debug": DEBUG, "log_file": FILE_DEBUG_DEVSECOPS, "log_file_format": FILE_FORMAT_DEBUG_DEVSECOPS}
 ORGANIZATION_URL = config("ORGANIZATION_URL", default="")
 PERSONAL_ACCESS_TOKEN = config("PERSONAL_ACCESS_TOKEN", default="", cast=str)
 REPOSITORY_ID = config("REPOSITORY_ID", default="", cast=str)

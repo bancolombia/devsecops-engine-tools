@@ -89,11 +89,11 @@ class MyLogger(metaclass=SingletonType):
                 file_handler = ListHandler()
                 file_handler.setFormatter(JsonFormatter())
                 self._logger.addHandler(file_handler)
-
-        # log whit console
-        stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(CustomFormatter())
-        self._logger.addHandler(stream_handler)
+        if kwargs["log_console"]:
+            # log whit console
+            stream_handler = logging.StreamHandler()
+            stream_handler.setFormatter(CustomFormatter())
+            self._logger.addHandler(stream_handler)
 
     def get_logger(self):
         return self._logger
