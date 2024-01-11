@@ -11,7 +11,7 @@ import json
 
 @dataclass
 class TrivyDeserializator(DeseralizatorGateway):
-    def get_list_vulnerability(self, images_scanned: list) -> "list[Finding]":
+    def get_list_findings(self, images_scanned: list) -> "list[Finding]":
         list_open_vulnerabilities = []
         for image in images_scanned:
             with open(image, "rb") as file:
