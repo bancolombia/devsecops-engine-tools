@@ -11,7 +11,7 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpe
 
 
 class TrivyScan(ToolGateway):
-    def install_trivy(self, version):
+    def install_tool(self, version):
         try:
             subprocess.run(
                 ["which", "trivy"],
@@ -47,59 +47,64 @@ class TrivyScan(ToolGateway):
             except subprocess.CalledProcessError as error:
                 raise RuntimeError(f"Error al instalar trivy: {error}")
 
+    def scan_image(self, repository, tag, remoteconfig):
+        image_name = f"{repository}:{tag}"
+        extensions = "_scan_result.json"
+        file_name = "scanned_images.txt"
+        images_scanned = []
+
+        if not (
+            (image_name + extensions)
+            in ImagesScanned.get_images_already_scanned(file_name)
+        ):
+            pattern = remoteconfig["REGEX_EXPRESSION_PROJECTS"]
+            if re.match(pattern, repository.upper()):
+                command1 = ["trivy", "image", "--download-db-only"]
+                command2 = [
+                    "trivy",
+                    "--scanners",
+                    "vuln",
+                    "-f",
+                    "json",
+                    "-o",
+                    image_name + "_scan_result.json",
+                ]
+                command2.extend(["--quiet", "image", image_name])
+                try:
+                    subprocess.run(
+                        command1,
+                        check=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                    )
+                    subprocess.run(
+                        command2,
+                        check=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                    )
+                    images_scanned.append(image_name + extensions)
+                    with open(file_name, "a") as file:
+                        file.write(image_name + extensions + "\n")
+                except subprocess.CalledProcessError as e:
+                    print(f"Error during image scan of {repository}: {e.stderr}")
+
+        return images_scanned
+
     def run_tool_container_sca(self, remoteconfig, token, scan_image):
         try:
             trivy_version = remoteconfig["TRIVY"]["TRIVY_VERSION"]
-            self.install_trivy(trivy_version)
-            pattern = remoteconfig["REGEX_EXPRESSION_PROJECTS"]
-            previosly_scanned = ImagesScanned()
-            file_name = "scanned_images.txt"
+            self.install_tool(trivy_version)
             images_scanned = []
+
             for image in scan_image:
-                if re.match(pattern, image["Repository"].upper()):
-                    repository = image["Repository"]
-                    tag = image["Tag"]
-                    image_name = f"{repository}:{tag}"
-                    if not (
-                        (image_name + "_scan_result.json")
-                        in previosly_scanned.get_images_already_scanned(file_name)
-                    ):
-                        try:
-                            command1 = ["trivy", "image", "--download-db-only"]
-                            subprocess.run(
-                                command1,
-                                check=True,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                            )
-                            command2 = [
-                                "trivy",
-                                "--scanners",
-                                "vuln",
-                                "-f",
-                                "json",
-                                "-o",
-                                image_name + "_scan_result.json",
-                            ]
-                            command2.extend(["--quiet", "image", image_name])
-                            subprocess.run(
-                                command2,
-                                check=True,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                text=True,
-                            )
-                            images_scanned.append(image_name + "_scan_result.json")
-                            with open(file_name, "a") as file:
-                                file.write(image_name + "_scan_result.json\n")
-                        except subprocess.CalledProcessError as e:
-                            raise RuntimeError(
-                                f"Error scanning {image_name} image: {e.stderr}"
-                            )
+                repository, tag = image["Repository"], image["Tag"]
+                images_scanned.extend(self.scan_image(repository, tag, remoteconfig))
 
             return images_scanned
 
         except Exception as ex:
-            raise Exception(
-                f"Could not get Azure Remote Config or error scanning images: {ex}"
-            )
+            print(f"An overall error occurred: {ex}")
+
+        return 0

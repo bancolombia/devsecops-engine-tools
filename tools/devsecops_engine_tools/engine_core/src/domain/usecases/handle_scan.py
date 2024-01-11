@@ -91,7 +91,7 @@ class HandleScan:
                 secret_sca=secret_tool["token_prisma_cloud"]
             else:
                 secret_sca=self.dict_args["token_engine_container"]
-            findings_list, input_core =runner_engine_container(self.dict_args, secret_sca)
+            findings_list, input_core =runner_engine_container(self.dict_args, config_tool, secret_sca)
             try:
                 return findings_list, input_core
             except ExceptionVulnerabilityManagement as ex2:
