@@ -11,11 +11,18 @@ Tool that unifies the evaluation of the different devsecops practices being agno
 ```
    📦common_devsecops_lib: Utilities for DevSecOps tools
 ```
-
-
 ```
    📦tools: DevSecOps Practice Modules
 ```
+## Defect_dojo
+
+[defect_dojo_utilities](common_devsecops_lib/devsecops_engine_utilities/defect_dojo/README.md)
+
+## Utils
+
+[FromDictMixin](common_devsecops_lib/devsecops_engine_utilities/utils/README.md)
+
+[Logger](common_devsecops_lib/devsecops_engine_utilities/utils/README.md)
 
 # How can I help?
 

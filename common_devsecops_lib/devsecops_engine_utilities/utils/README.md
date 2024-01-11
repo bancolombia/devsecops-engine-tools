@@ -65,7 +65,7 @@ This example is the response from an endpoint to query *product_types* from *Def
         members: List[int] = dataclasses.field(default_factory=list)
         authorization_groups: List[None] = dataclasses.field(default_factory=list)
 
-If, for example, this *ProductType* class were within a Product, it would be necessary to create a Product class. It is important to clarify that it is not necessary to implement all the attributes; you can include only those you consider necessary.
+If, for example, this *ProductType* class were within a Product, it would be necessary to create a Product class. It is important to clarify that it is not necessary to implement all the attributes, you can include only those you consider necessary.
 
 With this, we are ready to make the transformation into the domain language
 
@@ -95,7 +95,6 @@ A simple example of using this module is as follows:
 
     logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 
-    logger.info("debug message")
     logger.info("info message")
     logger.warning("warning message")
     logger.error("error message")
@@ -111,7 +110,7 @@ The variable *SETTINGS_LOGGER* has the following structure:
         "log_file": False
     }
 
-If the debug variable is active, the log messages will be displayed; otherwise, they will be deactivated.
+If the debug variable is active, the log messages will be displayed, otherwise, they will be deactivated.
 
 If the log_file variable is active, a hidden ./log folder will be created, where logs will be recorded daily, separated by folders. Each folder will be named after the current date. In other words, a folder will be created daily, and within it, a log file will be created.
 
