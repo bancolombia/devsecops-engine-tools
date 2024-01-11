@@ -40,7 +40,6 @@ class ImportScanUserCase:
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
         product_type_id = None
         product_id = None
-        tools_configurations = 1
         if (request.product_name or request.product_type_name) == "":
             log = f"Name product {request.product_name} not found"
             logger.error(log)
@@ -87,7 +86,7 @@ class ImportScanUserCase:
             scan_configuration_list = self.__rest_scan_configurations.get_api_scan_configuration(request)
             if scan_configuration_list.results == []:
                 scan_configuration = self.__rest_scan_configurations.post_api_scan_configuration(
-                    request, product_id, tools_configurations
+                    request, product_id, request.tools_configuration
                 )
                 request.api_scan_configuration = scan_configuration.id
                 logger.debug(f"Scan configuration create service_key_1 : {scan_configuration.service_key_1}")
