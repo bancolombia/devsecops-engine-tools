@@ -83,7 +83,7 @@ This library supports the integration of Defect-Dojo via Sonar through API. In t
 
 In the following example, take into account the tools_configurations parameter, which is the object that allows the connection of Defect-Dojo with SonarQube. The expected value is an integer corresponding to the ID of the object in the database.
 
-*IMPORTANTE*
+*IMPORTANT*
 
 Note that for the tools_configurations parameter, the library takes the default value of 1.
 
