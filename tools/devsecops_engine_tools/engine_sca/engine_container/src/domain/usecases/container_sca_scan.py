@@ -40,7 +40,7 @@ class ContainerScaScan:
 
     def scan_image(self):
         """
-        Process the list of Docker images.
+        Process the list of images.
 
         Returns:
             list: List of processed images.

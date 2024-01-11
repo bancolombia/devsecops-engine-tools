@@ -6,16 +6,13 @@ DevSecOps Security Tools
 
 Tool that unifies the evaluation of the different devsecops practices being agnostic to the devops platform, using both open source and market tools.
 
-# Componentss
-
-```
-   📦common_devsecops_lib: Utilities for DevSecOps tools
-```
+# Components
 
 
-```
-   📦tools: DevSecOps Practice Modules
-```
+[📦common_devsecops_lib: Utilities for DevSecOps tools](common_devsecops_lib/README.md)
+
+📦tools: DevSecOps Practice Modules
+
 
 # How can I help?
 
