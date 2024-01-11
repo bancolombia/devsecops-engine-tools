@@ -17,9 +17,11 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
     ExceptionVulnerabilityManagement,
     ExceptionFindingsRiskAcceptance,
 )
+from devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan import (
+    runner_engine_container)
+
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities import settings
-
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
@@ -84,6 +86,14 @@ class HandleScan:
                 except ExceptionFindingsRiskAcceptance as ex2:
                     logger.warning(str(ex2))
 
+            return findings_list, input_core
+        elif "engine_container" in dict_args["tool"]:
+            secret_sca=""
+            if secret_tool is not None:
+                secret_sca=secret_tool["token_prisma_cloud"]
+            else:
+                secret_sca=dict_args["token_engine_container"]
+            findings_list, input_core =runner_engine_container(dict_args, secret_sca)
             return findings_list, input_core
         elif "engine_dast" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
