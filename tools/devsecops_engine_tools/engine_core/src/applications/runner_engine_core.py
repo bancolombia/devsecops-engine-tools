@@ -22,6 +22,7 @@ from devsecops_engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
+
 def application_core():
     try:
         # Define driven adapters for gateways
@@ -36,10 +37,15 @@ def application_core():
             secrets_manager_gateway,
             devops_platform_gateway,
             printer_table_gateway,
-            metrics_manager_gateway
+            metrics_manager_gateway,
         )
     except Exception as e:
         logger.error("Error SCAN: {0} ".format(str(e)))
+        print(
+            devops_platform_gateway.message(
+                "error", "Error SCAN: {0} ".format(str(e))
+            )
+        )
         print(devops_platform_gateway.result_pipeline("failed"))
 
 

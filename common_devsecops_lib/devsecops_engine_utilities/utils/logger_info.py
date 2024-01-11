@@ -67,7 +67,7 @@ class MyLogger(metaclass=SingletonType):
         if kwargs["debug"]:
             self._logger.setLevel(logging.DEBUG)
         else:
-            self._logger.setLevel(logging.CRITICAL)
+            self._logger.setLevel(logging.WARNING)
 
         if kwargs["log_file"]:
             now = datetime.datetime.now()
