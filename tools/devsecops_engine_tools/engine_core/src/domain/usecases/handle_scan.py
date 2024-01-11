@@ -17,6 +17,8 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
     ExceptionVulnerabilityManagement,
     ExceptionFindingsRiskAcceptance,
 )
+from devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan import (
+    runner_engine_container)
 
 
 MESSAGE_ENABLED = "not yet enabled"
@@ -82,6 +84,14 @@ class HandleScan:
                 except ExceptionFindingsRiskAcceptance as ex2:
                     print(self.devops_platform_gateway.logging("warning", str(ex2)))
 
+            return findings_list, input_core
+        elif "engine_container" in self.dict_args["tool"]:
+            secret_sca=""
+            if secret_tool is not None:
+                secret_sca=secret_tool["token_prisma_cloud"]
+            else:
+                secret_sca=self.dict_args["token_engine_container"]
+            findings_list, input_core =runner_engine_container(self.dict_args, secret_sca)
             return findings_list, input_core
         elif "engine_dast" in self.dict_args["tool"]:
             print(MESSAGE_ENABLED)
