@@ -6,23 +6,13 @@ DevSecOps Security Tools
 
 Tool that unifies the evaluation of the different devsecops practices being agnostic to the devops platform, using both open source and market tools.
 
-# Componentss
+# Components
 
-```
-   📦common_devsecops_lib: Utilities for DevSecOps tools
-```
-```
-   📦tools: DevSecOps Practice Modules
-```
-## Defect_dojo
 
-[defect_dojo_utilities](common_devsecops_lib/devsecops_engine_utilities/defect_dojo/README.md)
+[📦common_devsecops_lib: Utilities for DevSecOps tools](common_devsecops_lib/README.md)
 
-## Utils
+📦tools: DevSecOps Practice Modules
 
-[FromDictMixin](common_devsecops_lib/devsecops_engine_utilities/utils/README.md)
-
-[Logger](common_devsecops_lib/devsecops_engine_utilities/utils/README.md)
 
 # How can I help?
 
