@@ -6,9 +6,6 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.set_
 )
 
 
-ENGINESAST_ENGINEIAC = "enginesast.engineiac"
-
-
 def init_engine_sca_rm(
     tool_run, tool_remote, tool_images, tool_deseralizator, dict_args, token
 ):
