@@ -44,6 +44,7 @@ steps:
       python setup.py bdist_wheel
       python -m pip install dist/*.whl
       cd ../tools
+    fi
     python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python -m pip install -r requirements_test.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python -m pytest -x --cov=$(System.DefaultWorkingDirectory)/$(pathComponentName) --cov-config=.coveragerc
