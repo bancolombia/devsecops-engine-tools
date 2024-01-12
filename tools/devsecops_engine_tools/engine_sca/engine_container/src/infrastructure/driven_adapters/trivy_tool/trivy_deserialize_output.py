@@ -35,7 +35,7 @@ class TrivyDeserializator(DeseralizatorGateway):
                         description=vul.get("Description", "").replace("\n", ""),
                         severity=vul.get("Severity", "").lower(),
                         identification_date=vul.get("PublishedDate", ""),
-                        module="CONTAINER",
+                        module="engine_container",
                         category=Category.VULNERABILITY,
                         requirements=vul.get("FixedVersion") or vul.get("Status", ""),
                         tool="Trivy",
