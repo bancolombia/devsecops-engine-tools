@@ -32,9 +32,10 @@ class BreakBuild:
         exclusions = input_core.totalized_exclusions
         custom_message = input_core.custom_message_break_build
 
+        scan_result = {"vulnerabilities": {}, "compliances": {}}
+
         if len(findings_list) != 0:
 
-            scan_result = {"vulnerabilities": {}, "compliances": {}}
 
             # Esta lista de excluidas no se imprimira para dejar un resultado más limpio
             findings_excluded_list = list(
