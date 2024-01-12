@@ -41,4 +41,5 @@ class SetInputCore:
             images_scanned[-1] if images_scanned else None,
             self.get_remote_config()["MESSAGE_INFO_SCA_RM"],
             self.get_variable("release_name"),
+            "Release"
         )
