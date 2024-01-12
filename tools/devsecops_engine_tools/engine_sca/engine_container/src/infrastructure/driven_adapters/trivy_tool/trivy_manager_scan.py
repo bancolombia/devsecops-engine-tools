@@ -9,6 +9,11 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpe
     ImagesScanned,
 )
 
+from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities import settings
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
+
 
 class TrivyScan(ToolGateway):
     def install_tool(self, version):
@@ -83,7 +88,7 @@ class TrivyScan(ToolGateway):
                     with open(file_name, "a") as file:
                         file.write(image_name + extensions + "\n")
                 except subprocess.CalledProcessError as e:
-                    print(f"Error during image scan of {repository}: {e.stderr}")
+                    logger.error(f"Error during image scan of {repository}: {e.stderr}")
 
         return images_scanned
 
@@ -100,6 +105,6 @@ class TrivyScan(ToolGateway):
             return images_scanned
 
         except Exception as ex:
-            print(f"An overall error occurred: {ex}")
+            logger.error(f"An overall error occurred: {ex}")
 
         return 0
