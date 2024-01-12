@@ -22,7 +22,6 @@ class PrismaCloudManagerScan(ToolGateway):
             f"{prisma_access_key}:{prisma_secret_key}".encode()
         ).decode()
         headers = {"Authorization": f"Basic {credentials}"}
-
         try:
             response = requests.get(url, headers=headers)
             response.raise_for_status()
