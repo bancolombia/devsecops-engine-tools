@@ -12,16 +12,12 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpe
 
 class TrivyScan(ToolGateway):
     def install_tool(self, version):
-        try:
-            subprocess.run(
-                ["which", "trivy"],
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            # print("trivy está instalado.")
-        except subprocess.CalledProcessError:
-            # print("Intentando instalar trivy.")
+        installed = subprocess.run(
+            ["which", "trivy"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if installed.returncode == 1:
             try:
                 command1 = [
                     "wget",
@@ -43,7 +39,6 @@ class TrivyScan(ToolGateway):
                 subprocess.run(
                     command2, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
-                # print("trivy instalado.")
             except subprocess.CalledProcessError as error:
                 raise RuntimeError(f"Error al instalar trivy: {error}")
 
