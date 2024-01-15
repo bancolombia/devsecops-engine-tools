@@ -100,23 +100,23 @@ class HandleScan:
             return findings_list, input_core
         elif "engine_dast" in dict_args["tool"]:
             findings_list, input_core = runner_engine_dast(
-                self.dict_args,
-                config_tool["ENGINE_DAST"] if "ENGINE_DAST" in config_tool else "NUCLEI", #BORRAR
+                dict_args,
+                config_tool["ENGINE_DAST"],
                 secret_tool
             )
-            if self.dict_args["use_vulnerability_management"] == "true":
+            if dict_args["use_vulnerability_management"] == "true":
                 try:
                     self.vulnerability_management.send_vulnerability_management(
                         VulnerabilityManagement(
                             config_tool["ENGINE_DAST"],
                             input_core,
-                            self.dict_args,
+                            dict_args,
                             secret_tool,
                             config_tool,
                             self.devops_platform_gateway.get_source_code_management_uri(),
                             self.devops_platform_gateway.get_variable("branch_name"),
                             self.devops_platform_gateway.get_base_compact_remote_config_url(
-                                self.dict_args["remote_config_repo"]
+                                dict_args["remote_config_repo"]
                             ),
                             self.devops_platform_gateway.get_variable("access_token"),
                             self.devops_platform_gateway.get_variable("version"),
@@ -132,7 +132,7 @@ class HandleScan:
                     input_core.totalized_exclusions.extend(
                         self.vulnerability_management.get_findings_risk_acceptance(
                             input_core.scope_pipeline,
-                            self.dict_args,
+                            dict_args,
                             secret_tool,
                             config_tool,
                         )

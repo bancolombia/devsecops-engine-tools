@@ -44,3 +44,11 @@ RULES_K8Scheckov_config.yaml
 log/
 twistcli
 *_scan_result.json
+#DAST TEST
+Master-reference-engine-security.json
+Master-reference-engine-security-replaced.json
+read_yaml.py
+result.json
+test.py
+folder1/
+folder2/

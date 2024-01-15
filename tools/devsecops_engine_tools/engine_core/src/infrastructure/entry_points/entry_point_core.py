@@ -50,6 +50,7 @@ def get_inputs_from_cli(args):
     parser.add_argument("--token_cmdb", required=False, help="")
     parser.add_argument("--token_vulnerability_management", required=False, help="")
     parser.add_argument("--token_engine_container", required=False, help="")
+    parser.add_argument("--dast_file_path", required=False, type=str, help="")
     args = parser.parse_args()
     return {
         "remote_config_repo": args.remote_config_repo,
@@ -60,6 +61,7 @@ def get_inputs_from_cli(args):
         "token_cmdb": args.token_cmdb,
         "token_vulnerability_management": args.token_vulnerability_management,
         "token_engine_container": args.token_engine_container,
+        "dast_file_path": args.dast_file_path,
     }
 
 

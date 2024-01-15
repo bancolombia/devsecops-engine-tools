@@ -22,7 +22,6 @@ class AzureDevops(DevopsPlatformGateway):
             f".visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/"
             f"{remote_config_repo}?path={remote_config_path}"
         )
-        print(base_compact_remote_config_url)
         utils_azure = AzureDevopsApi(
             personal_access_token=SystemVariables.System_AccessToken.value(),
             compact_remote_config_url=base_compact_remote_config_url,
