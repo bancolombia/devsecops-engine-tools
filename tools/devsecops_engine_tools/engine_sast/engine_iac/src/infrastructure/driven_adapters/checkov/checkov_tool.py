@@ -16,7 +16,7 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
     CheckovDeserealizator,
 )
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_config import (
-    CheckovConfig,
+    CheckovConfig
 )
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
     generate_file_from_tool,
@@ -37,6 +37,8 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 class CheckovTool(ToolGateway):
     CHECKOV_CONFIG_FILE = "checkov_config.yaml"
     TOOL = "CHECKOV"
+    framework_mapping = {"RULES_DOCKER": "dockerfile", "RULES_K8S": "kubernetes"}
+
 
     def create_config_file(self, checkov_config: CheckovConfig):
         with open(
@@ -126,6 +128,7 @@ class CheckovTool(ToolGateway):
                 checkov_config = CheckovConfig(
                     path_config_file="",
                     config_file_name=rule,
+                    framework=self.framework_mapping[rule],
                     checks=[
                         key
                         for key, value in config_tool.rules_data_type[rule].items()
