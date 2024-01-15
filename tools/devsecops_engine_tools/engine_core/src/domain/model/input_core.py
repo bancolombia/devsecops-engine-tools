@@ -9,3 +9,4 @@ class InputCore:
     path_file_results: str
     custom_message_break_build: str
     scope_pipeline: str
+    stage_pipeline: str
