@@ -8,6 +8,7 @@ MESSAGE_NIL = "no puede ser nulo"
 class CheckovConfigEnum(Enum):
     "https://www.checkov.io/2.Basics/CLI%20Command%20Reference.html"
     BRANCH = "branch"
+    FRAMEWORK = "framework"
     CHECKS = "check"
     COMPACT = "compact"
     DIRECTORIES = "directory"
@@ -33,6 +34,7 @@ class CheckovConfig:
         directories,
         env,
         branch=None,
+        framework=None,
         checks=None,
         compact=True,
         quiet=True,
@@ -48,6 +50,7 @@ class CheckovConfig:
         self.config_file_name = config_file_name
         self.branch = branch
         self.checks = checks
+        self.framework = framework
         self.compact = compact
         self.directories = directories
         self.quiet = quiet
@@ -61,6 +64,12 @@ class CheckovConfig:
         self.env = env
 
     def create_config_dict(self):
+        if self.framework is not None:
+            self.dict_confg_file[CheckovConfigEnum.FRAMEWORK.value] = self.framework
+        else:
+            raise ValueError(
+                MESSAGE_VALUE + CheckovConfigEnum.FRAMEWORK.value + MESSAGE_NIL
+            )
         if self.compact is not None:
             self.dict_confg_file[CheckovConfigEnum.COMPACT.value] = self.compact
         else:
