@@ -47,7 +47,7 @@ class PrismaDeserealizator(DeseralizatorGateway):
                         identification_date=datetime.strptime(
                             vul.get("discoveredDate", ""), "%Y-%m-%dT%H:%M:%S%z"
                         ),
-                        module="CONTAINER",
+                        module="engine_container",
                         category=Category.VULNERABILITY,
                         requirements=vul.get("status", ""),
                         tool="PrismaCloud",
