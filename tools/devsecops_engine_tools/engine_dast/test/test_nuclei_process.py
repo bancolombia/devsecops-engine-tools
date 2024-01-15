@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from tools.devsecops_engine_tools.engine_dast.src.domain.usecases.nuclei_process import (
+from tools.devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nuclei.nuclei_deserealizer import (
     NucleiProcess,
 )
 

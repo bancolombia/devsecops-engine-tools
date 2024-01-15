@@ -1,4 +1,3 @@
-
 class Authenticator:
     def __init__(self, target_config, data_config_cli):
         self.target_config = target_config
