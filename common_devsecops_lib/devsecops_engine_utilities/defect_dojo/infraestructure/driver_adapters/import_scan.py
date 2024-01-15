@@ -74,7 +74,7 @@ class ImportScanRestConsumer:
             "verified": request.verified,
             "scan_type": request.scan_type,
             "endpoint_to_add": request.endpoint_to_add,
-            "file": request.file,
+            "file": files,
             "product_type_name": request.product_type_name,
             "product_name": request.product_name,
             "engagement_name": request.engagement_name,

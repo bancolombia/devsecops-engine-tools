@@ -3,12 +3,12 @@ from abc import ABCMeta, abstractmethod
 
 class DevopsPlatformGateway(metaclass=ABCMeta):
     @abstractmethod
-    def get_remote_config(self, dict_args):
+    def get_remote_config(self, repository, path):
         "get_remote_config"
 
     @abstractmethod
-    def logging(self, type, message):
-        "logging"
+    def message(self, type, message):
+        "message"
 
     @abstractmethod
     def result_pipeline(self, type):
