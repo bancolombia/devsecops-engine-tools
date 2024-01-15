@@ -66,9 +66,9 @@ def engine_secret_scan(remote_config_repo, remote_config_path, tool):
     )
     data_config.scope_pipeline = BuildVariables.Build_DefinitionName.value()
     print("CHECKING AND INSTALLING TRUFFLEHOG")
-    classe2 = TrufflehogInstall(tool)
-    trufflehog_tool = InstallTool(classe2)
-    trufflehog_tool.check_version()
+    tool_install = TrufflehogInstall(tool)
+    trufflehog_tool = InstallTool(tool_install)
+    trufflehog_tool.check_version_tool()
     
     print("TRUFFLEHOG INSTALLED")
     result = []

@@ -1,3 +1,4 @@
+import re
 import subprocess
 import os
 
@@ -9,6 +10,13 @@ class TrufflehogRun(ToolGateway):
         self.trufflehog_path = trufflehog_path
         
     def run_tool(self):
+        operative_system = os.environ.get('AGENT_OS')
+        reg_exp_os = r'Windows'
+        check_os = re.search(reg_exp_os, operative_system)
+        if check_os:
+            trufflehog_command = "C:/Trufflehog/bin/trufflehog.exe"
+        else:
+            trufflehog_command = "trufflehog"
         path = os.environ.get('AGENT_WORKFOLDER')
         command = (
             f'echo .git >> {path}/excludedPath.txt'
@@ -18,7 +26,7 @@ class TrufflehogRun(ToolGateway):
         repository = os.environ.get('SYSTEM_DEFAULTWORKINGDIRECTORY')
         exclude_path = os.environ.get('AGENT_WORKFOLDER') + "/excludedPath.txt"
         command = (
-            f"trufflehog filesystem {repository} --json --exclude-paths {exclude_path}"
+            f"{trufflehog_command} filesystem {repository} --json --exclude-paths {exclude_path}"
         )
         print(command)
         result = subprocess.run(command, capture_output=True, shell=True)

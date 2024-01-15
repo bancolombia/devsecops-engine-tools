@@ -6,8 +6,5 @@ class InstallTool:
     def __init__(self, tool_run: ToolInstallGateway):
         self.tool_run = tool_run
     
-    def check_version(self):
+    def check_version_tool(self):
         return self.tool_run.check_tool()
-    
-    def process_install(self):
-        return self.tool_run.run_install()
