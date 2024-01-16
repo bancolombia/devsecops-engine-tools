@@ -22,6 +22,7 @@ def runner_engine_iac(dict_args, tool, secret_tool):
             tool_gateway=tool_gateway,
             dict_args=dict_args,
             secret_tool=secret_tool,
+            tool=tool
         )
 
     except Exception as e:
