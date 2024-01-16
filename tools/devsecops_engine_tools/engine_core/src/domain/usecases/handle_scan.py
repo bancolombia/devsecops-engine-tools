@@ -17,6 +17,13 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
     ExceptionVulnerabilityManagement,
     ExceptionFindingsRiskAcceptance,
 )
+from devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan import (
+    runner_engine_container)
+
+from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities import settings
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 MESSAGE_ENABLED = "not yet enabled"
@@ -27,38 +34,35 @@ class HandleScan:
         self,
         vulnerability_management: VulnerabilityManagementGateway,
         secrets_manager_gateway: SecretsManagerGateway,
-        devops_platform_gateway: DevopsPlatformGateway,
-        dict_args: any,
+        devops_platform_gateway: DevopsPlatformGateway
     ):
         self.vulnerability_management = vulnerability_management
         self.secrets_manager_gateway = secrets_manager_gateway
         self.devops_platform_gateway = devops_platform_gateway
-        self.dict_args = dict_args
 
-    def process(self):
+    def process(self, dict_args: any, config_tool: any):
         secret_tool = None
-        config_tool = self.devops_platform_gateway.get_remote_config(self.dict_args)
-        if self.dict_args["use_secrets_manager"] == "true":
+        if dict_args["use_secrets_manager"] == "true":
             secret_tool = self.secrets_manager_gateway.get_secret(config_tool)
-        if "engine_iac" in self.dict_args["tool"]:
+        if "engine_iac" in dict_args["tool"]:
             findings_list, input_core = runner_engine_iac(
-                self.dict_args,
+                dict_args,
                 config_tool["ENGINE_IAC"],
                 secret_tool
             )
-            if self.dict_args["use_vulnerability_management"] == "true":
+            if dict_args["use_vulnerability_management"] == "true":
                 try:
                     self.vulnerability_management.send_vulnerability_management(
                         VulnerabilityManagement(
                             config_tool["ENGINE_IAC"],
                             input_core,
-                            self.dict_args,
+                            dict_args,
                             secret_tool,
                             config_tool,
                             self.devops_platform_gateway.get_source_code_management_uri(),
                             self.devops_platform_gateway.get_variable("branch_name"),
                             self.devops_platform_gateway.get_base_compact_remote_config_url(
-                                self.dict_args["remote_config_repo"]
+                                dict_args["remote_config_repo"]
                             ),
                             self.devops_platform_gateway.get_variable("access_token"),
                             self.devops_platform_gateway.get_variable("version"),
@@ -69,23 +73,31 @@ class HandleScan:
                         )
                     )
                 except ExceptionVulnerabilityManagement as ex1:
-                    print(self.devops_platform_gateway.logging("warning", str(ex1)))
+                    logger.warning(str(ex1))
                 try:
                     input_core.totalized_exclusions.extend(
                         self.vulnerability_management.get_findings_risk_acceptance(
                             input_core.scope_pipeline,
-                            self.dict_args,
+                            dict_args,
                             secret_tool,
                             config_tool,
                         )
                     )
                 except ExceptionFindingsRiskAcceptance as ex2:
-                    print(self.devops_platform_gateway.logging("warning", str(ex2)))
+                    logger.warning(str(ex2))
 
             return findings_list, input_core
-        elif "engine_dast" in self.dict_args["tool"]:
+        elif "engine_container" in dict_args["tool"]:
+            secret_sca=""
+            if secret_tool is not None:
+                secret_sca=secret_tool["token_prisma_cloud"]
+            else:
+                secret_sca=dict_args["token_engine_container"]
+            findings_list, input_core =runner_engine_container(dict_args, config_tool, secret_sca)
+            return findings_list, input_core
+        elif "engine_dast" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
-        elif "engine_secret" in self.dict_args["tool"]:
+        elif "engine_secret" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
-        elif "engine_dependencies" in self.dict_args["tool"]:
+        elif "engine_dependencies" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
