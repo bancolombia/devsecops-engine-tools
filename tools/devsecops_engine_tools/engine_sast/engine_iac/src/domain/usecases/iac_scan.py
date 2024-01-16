@@ -40,6 +40,7 @@ class IacScan:
             config_tool,
             folders_to_scan,
             dict_args["environment"],
+            dict_args["platform"],
             secret_tool,
         )
 
