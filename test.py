@@ -1,25 +1,50 @@
-import os
-import yaml
 
-def modificar_yaml(archivo_origen, archivo_destino, clave, valor):
-    with open(archivo_origen, 'r') as f:
-        doc = yaml.safe_load(f)
+from ruamel.yaml import YAML
+yaml=YAML()
 
-    doc[clave] = valor
-
-    with open(archivo_destino, 'w') as f:
-        yaml.safe_dump(doc, f)
-
-def procesar_carpeta(carpeta_origen, carpeta_destino, clave, valor):
-    if not os.path.exists(carpeta_destino):
-        os.makedirs(carpeta_destino)
-
-    for nombre_archivo in os.listdir(carpeta_origen):
-        if nombre_archivo.endswith('.yaml'):
-            archivo_origen = os.path.join(carpeta_origen, nombre_archivo)
-            archivo_destino = os.path.join(carpeta_destino, nombre_archivo)
-            modificar_yaml(archivo_origen, archivo_destino, clave, valor)
+data = {
+    'id': 'strict-transport-security-header',
+    'info': {
+        'name': 'Strict Transport Security Headers',
+        'author': 'devsecops',
+        'severity': 'low',
+        'description': 'The server lacks the HTTP Strict-Transport-Security header. Alternatively, the max-age value of it is too small.',
+        'metadata': {
+            'max-request': 1
+        },
+        'tags': 'misconfig,headers,generic',
+        'classification': {
+            'cvss-metrics': 'CVSS:3.1/AV:A/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N/E:P/RL:O/RC:C',
+            'cvss-score': 3.2
+        }
+    },
+    'http': [
+        {
+            'method': 'GET',
+            'path': ['{{BaseURL}}testing/sufi/v2/operations-execution/product-specific/loans-sufi-catalogs/master-reference/MasterCatalogs/profesiones?businessLine=consumo'],
+            'headers': {
+                'Client-Id': '9a8f346ce3cb89780d04dddf182f3bea',
+                'Client-secret': '47928ac67e9481feb2d41b507db8074b',
+                'Ip-Client': '10.10.10.10',
+                'Consumer-Id': '0'
+            },
+            'host-redirects': True,
+            'max-redirects': 3,
+            'matchers-condition': 'or',
+            'matchers': [
+                {
+                    'type': 'dsl',
+                    'name': 'missing-header',
+                    'dsl': [
+                        "!regex('(?i)strict-transport-security', header)",
+                        "status_code != 301 && status_code != 302"
+                    ],
+                    'condition': 'and'
+                }
+            ]
+        }
+    ]
+}
 if __name__ == "__main__":
-    # Uso de la función
-    procesar_carpeta('folder1/', 'folder2/', 'id', 'nuevo-id')
-    print("{{BaseUrl}}")
+    with open('file.yaml', 'w') as file:
+        yaml.dump(data, file)

@@ -43,6 +43,7 @@ class NucleiTool(ToolGateway):
         self.target_config = target_config
         self.data_config_cli = data_config_cli
         self.TOOL = "NUCLEI"
+        self.debug = os.environ.get("DEBUG", "false")
 
     def match_target_scan_type(self, target_data):
         if "operations" in target_data:
@@ -95,7 +96,7 @@ class NucleiTool(ToolGateway):
 
         except Exception as ex:
             print(f"An error ocurred configuring external checks {ex}")
-        return agent_env
+        return "tmp/nuclei-templates" #BORRAR
 
     def complete_config_tool(
         self, 
@@ -126,8 +127,7 @@ class NucleiTool(ToolGateway):
         data_target_config = self.read_target_config(target_file_path) #configuration for the current target
         target_config = TargetConfig(data_target_config) #create a nuclei config object
         templates_directory = self.configurate_external_checks(config_tool, secret_tool)
-        templates_directory = target_config.customize_templates(templates_directory) # update templates directory if needed
-        target_config_completed = self.process_target_config(data_target_config) #complete the target configuration
+        target_config.customize_templates(templates_directory) # update templates directory if needed
         # Create configuration external checks
         
 
@@ -142,12 +142,12 @@ class NucleiTool(ToolGateway):
             + "-duc "  # disable automatic update check
             + "-u "  # target URLs/hosts to scan
             + target_config.url
-            + "-ud "  # custom directory to install / update nuclei-templates
+            + " -ud "  # custom directory to install / update nuclei-templates
             + target_config.custom_templates_dir
-            + "-ni "  # disable interactsh server
+            + " -ni "  # disable interactsh server
             + "-dc "  # disable clustering of requests
             + "-je "  # file to export results in JSON format
-            + target_config.output_file
+            + str(target_config.output_file)
         )
 
         if command is not None:
@@ -156,8 +156,9 @@ class NucleiTool(ToolGateway):
                 shell=True,
                 capture_output=True,
             )
-            error = result.stderr.strip()
-            if error is not None and error != "":
+            error = result.stderr
+            if (error is not None and error != "") and self.debug == "true":
+                error = error.strip()
                 print(f"Error executing nuclei: {error}")
 
         with open(target_config.output_file, "r") as f:
@@ -198,5 +199,6 @@ class NucleiTool(ToolGateway):
             ),
             custom_message_break_build=config_tool.message_info_dast,
             scope_pipeline=config_tool.scope_pipeline,
+            stage_pipeline="Release",
         )
         return findings_list, input_core
