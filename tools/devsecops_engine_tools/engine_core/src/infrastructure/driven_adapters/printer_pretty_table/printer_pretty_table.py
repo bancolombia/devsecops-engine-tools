@@ -21,7 +21,7 @@ class PrinterPrettyTable(PrinterTableGateway):
                 finding.description,
                 finding.where,
             ]
-            if finding.module == "CONTAINER":
+            if finding.module == "engine_container":
                 row_data.append(finding.requirements)
 
             table.add_row(row_data)
