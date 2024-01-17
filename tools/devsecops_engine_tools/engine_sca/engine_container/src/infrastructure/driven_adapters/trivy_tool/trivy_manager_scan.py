@@ -54,10 +54,7 @@ class TrivyScan(ToolGateway):
         result_file = f"{repo}:{tag}" + "_scan_result.json"
         images_scanned = []
 
-        if not (
-            (result_file)
-            in ImagesScanned.get_images_already_scanned(file_name)
-        ):
+        if not ((result_file) in ImagesScanned.get_images_already_scanned(file_name)):
             pattern = remoteconfig["REGEX_EXPRESSION_PROJECTS"]
             match = re.match(pattern, repo.upper())
             if match:
@@ -91,7 +88,9 @@ class TrivyScan(ToolGateway):
                         with open(file_name, "a") as file:
                             file.write(result_file + "\n")
                     except subprocess.CalledProcessError as e:
-                        logger.error(f"Error during image scan of {repository}: {e.stderr}")
+                        logger.error(
+                            f"Error during image scan of {repository}: {e.stderr}"
+                        )
 
         return images_scanned
 
@@ -103,7 +102,9 @@ class TrivyScan(ToolGateway):
 
             for image in scan_image:
                 repository, tag = image["Repository"], image["Tag"]
-                images_scanned.extend(self.scan_image(repository, tag, remoteconfig, release))
+                images_scanned.extend(
+                    self.scan_image(repository, tag, remoteconfig, release)
+                )
 
             return images_scanned
 

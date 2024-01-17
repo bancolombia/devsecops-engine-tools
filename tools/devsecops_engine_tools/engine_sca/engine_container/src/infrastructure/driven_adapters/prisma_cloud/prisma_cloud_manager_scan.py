@@ -36,16 +36,16 @@ class PrismaCloudManagerScan(ToolGateway):
         except Exception as e:
             raise ValueError(f"Error downloading twistcli: {e}")
 
-    def scan_image(self, file_path, repository, tag, remoteconfig, prisma_secret_key, release):
+    def scan_image(
+        self, file_path, repository, tag, remoteconfig, prisma_secret_key, release
+    ):
         file_name = "scanned_images.txt"
         repo = repository.split("/")[1] if len(repository.split("/")) >= 2 else ""
         image_name = f"{repository}:{tag}"
         result_file = f"{repo}:{tag}" + "_scan_result.json"
         images_scanned = []
 
-        if (result_file) in ImagesScanned.get_images_already_scanned(
-            file_name
-        ):
+        if (result_file) in ImagesScanned.get_images_already_scanned(file_name):
             print(f"The image {image_name} has already been scanned previously.")
         else:
             pattern = remoteconfig["REGEX_EXPRESSION_PROJECTS"]
@@ -83,7 +83,9 @@ class PrismaCloudManagerScan(ToolGateway):
 
         return images_scanned
 
-    def run_tool_container_sca(self, remoteconfig, prisma_secret_key, scan_image, release):
+    def run_tool_container_sca(
+        self, remoteconfig, prisma_secret_key, scan_image, release
+    ):
         try:
             file_path = os.path.join(
                 os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
@@ -103,7 +105,12 @@ class PrismaCloudManagerScan(ToolGateway):
                 repository, tag = image["Repository"], image["Tag"]
                 images_scanned.extend(
                     self.scan_image(
-                        file_path, repository, tag, remoteconfig, prisma_secret_key, release
+                        file_path,
+                        repository,
+                        tag,
+                        remoteconfig,
+                        prisma_secret_key,
+                        release,
                     )
                 )
 
