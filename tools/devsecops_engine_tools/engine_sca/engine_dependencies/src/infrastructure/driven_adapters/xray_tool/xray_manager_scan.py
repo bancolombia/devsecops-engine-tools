@@ -5,7 +5,6 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gate
 import subprocess
 import platform
 import requests
-import re
 
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities import settings
