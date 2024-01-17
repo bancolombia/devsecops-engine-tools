@@ -203,4 +203,4 @@ class TestCheckovTool(unittest.TestCase):
         )
 
         self.assertEqual(findings_list, [])
-        assert "/Users/sagavir/Documents/Repositorios" in file_from_tool
+        assert "results.json" in file_from_tool
