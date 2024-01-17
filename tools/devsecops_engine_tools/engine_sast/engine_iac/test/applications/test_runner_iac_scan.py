@@ -1,3 +1,4 @@
+import unittest
 from unittest import mock
 from devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_scan import (
     runner_engine_iac,
@@ -33,3 +34,20 @@ def test_runner_engine_iac(mock_entry_point_tool):
 
     # Assert the expected behavior
     assert input_output == input_core
+
+@mock.patch('devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_scan.init_engine_sast_rm')
+def test_runner_engine_iac_exception(mock_entry_point_tool):
+        # Arrange
+        dict_args = {'arg1': 'value1', 'arg2': 'value2'}
+        tool = 'CHECKOV'
+        secret_tool = 'my_secret'
+
+        # Mock the necessary methods or properties to simulate an exception
+        mock_entry_point_tool.side_effect = Exception("Simulated error")
+
+        # Act and Assert
+        with unittest.TestCase().assertRaises(Exception) as context:
+            runner_engine_iac(dict_args, tool, secret_tool)
+
+        # Optionally, you can check the exception message or other details
+        assert str(context.exception) == "Error engine_iac : Simulated error"
