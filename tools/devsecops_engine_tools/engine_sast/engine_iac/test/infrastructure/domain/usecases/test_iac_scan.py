@@ -3,8 +3,6 @@ from unittest.mock import MagicMock
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.usecases.iac_scan import (
     IacScan,
 )
-import os
-import re
 
 
 class TestIacScan(unittest.TestCase):
