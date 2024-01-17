@@ -20,34 +20,34 @@ class TestIacScan(unittest.TestCase):
 
         # Mock the return values of the dependencies
         self.devops_platform_gateway.get_remote_config.return_value = {
-                "CHECKOV": {
-                    "VERSION": "2.3.296",
-                    "SEARCH_PATTERN": ["AW", "NU"],
-                    "IGNORE_SEARCH_PATTERN": [
-                        "test",
-                    ],
-                    "USE_EXTERNAL_CHECKS_GIT": "True",
-                    "EXTERNAL_CHECKS_GIT": "rules",
-                    "EXTERNAL_GIT_SSH_HOST": "github",
-                    "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "fingerprint",
-                    "USE_EXTERNAL_CHECKS_DIR": "False",
-                    "EXTERNAL_DIR_OWNER": "test",
-                    "EXTERNAL_DIR_REPOSITORY": "repository",
-                    "EXTERNAL_DIR_ASSET_NAME": "rules",
-                    "EXCLUSIONS_PATH": "Exclusions.json",
-                    "MESSAGE_INFO_SAST_RM": "message test",
-                    "THRESHOLD": {
-                        "VULNERABILITY": {
-                            "Critical": 10,
-                            "High": 3,
-                            "Medium": 20,
-                            "Low": 30,
-                        },
-                        "COMPLIANCE": {"Critical": 4},
+            "CHECKOV": {
+                "VERSION": "2.3.296",
+                "SEARCH_PATTERN": ["AW", "NU"],
+                "IGNORE_SEARCH_PATTERN": [
+                    "test",
+                ],
+                "USE_EXTERNAL_CHECKS_GIT": "True",
+                "EXTERNAL_CHECKS_GIT": "rules",
+                "EXTERNAL_GIT_SSH_HOST": "github",
+                "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "fingerprint",
+                "USE_EXTERNAL_CHECKS_DIR": "False",
+                "EXTERNAL_DIR_OWNER": "test",
+                "EXTERNAL_DIR_REPOSITORY": "repository",
+                "EXTERNAL_DIR_ASSET_NAME": "rules",
+                "EXCLUSIONS_PATH": "Exclusions.json",
+                "MESSAGE_INFO_SAST_RM": "message test",
+                "THRESHOLD": {
+                    "VULNERABILITY": {
+                        "Critical": 10,
+                        "High": 3,
+                        "Medium": 20,
+                        "Low": 30,
                     },
-                    "RULES": "",
-                }
+                    "COMPLIANCE": {"Critical": 4},
+                },
+                "RULES": "",
             }
+        }
 
         self.devops_platform_gateway.get_variable.return_value = "example_pipeline"
 
@@ -66,65 +66,6 @@ class TestIacScan(unittest.TestCase):
         self.assertEqual(input_core.custom_message_break_build, "message test")
         self.assertEqual(input_core.scope_pipeline, "example_pipeline")
         self.assertEqual(input_core.stage_pipeline, "Release")
-
-    # def test_complete_config_tool(self):
-    #     data_file_tool = {
-    #         "exclusions": {
-    #             "All": {
-    #                 "example_tool": ["exclusion1", "exclusion2"]
-    #             },
-    #             "example_pipeline": {
-    #                 "example_tool": ["exclusion3", "exclusion4"]
-    #             }
-    #         },
-    #         "search_pattern": ["pattern1", "pattern2"],
-    #         "ignore_search_pattern": ["ignore1", "ignore2"]
-    #     }
-    #     exclusions = {
-    #         "All": {
-    #             "example_tool": ["exclusion1", "exclusion2"]
-    #         },
-    #         "example_pipeline": {
-    #             "example_tool": ["exclusion3", "exclusion4"]
-    #         }
-    #     }
-    #     tool = "example_tool"
-
-    #     config_tool, folders_to_scan = self.iac_scan.complete_config_tool(data_file_tool, exclusions, tool)
-
-    #     # Assert the expected values of the config_tool object
-    #     self.assertEqual(config_tool.exclusions, exclusions)
-    #     self.assertEqual(config_tool.exclusions_all, ["exclusion1", "exclusion2"])
-    #     self.assertEqual(config_tool.exclusions_scope, ["exclusion3", "exclusion4"])
-    #     self.assertEqual(config_tool.search_pattern, ["pattern1", "pattern2"])
-    #     self.assertEqual(config_tool.ignore_search_pattern, ["ignore1", "ignore2"])
-
-    #     # Assert the expected value of folders_to_scan
-    #     self.assertEqual(folders_to_scan, [])
-
-    # def test_search_folders(self):
-    #     search_pattern = ["pattern1", "pattern2"]
-    #     ignore_pattern = ["ignore1", "ignore2"]
-
-    #     # Mock the return value of os.getcwd()
-    #     os.getcwd = MagicMock(return_value="/path/to/current_directory")
-
-    #     # Mock the return value of os.listdir()
-    #     os.listdir = MagicMock(return_value=["folder1", "folder2", "file1.txt"])
-
-    #     # Mock the return value of os.path.isdir()
-    #     os.path.isdir = MagicMock(side_effect=[True, True, False])
-
-    #     # Mock the return value of re.match()
-    #     re.match = MagicMock(side_effect=[True, False, True])
-
-    #     matching_folders = self.iac_scan.search_folders(search_pattern, ignore_pattern)
-
-    #     # Assert the expected matching folders
-    #     self.assertEqual(matching_folders, [
-    #         "/path/to/current_directory/folder1",
-    #         "/path/to/current_directory/folder2"
-    #     ])
 
 
 if __name__ == "__main__":
