@@ -26,13 +26,13 @@ class TestAzureDevops(unittest.TestCase):
 
         assert result == {"key": "value"}
 
-    def test_logging(self):
+    def test_message(self):
         azure_devops = AzureDevops()
 
-        assert azure_devops.logging("succeeded", "message") == "##[section]message"
-        assert azure_devops.logging("info", "message") == "##[command]message"
-        assert azure_devops.logging("warning", "message") == "##[warning]message"
-        assert azure_devops.logging("error", "message") == "##[error]message"
+        assert azure_devops.message("succeeded", "message") == "##[section]message"
+        assert azure_devops.message("info", "message") == "##[command]message"
+        assert azure_devops.message("warning", "message") == "##[warning]message"
+        assert azure_devops.message("error", "message") == "##[error]message"
 
     @mock.patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azure.azure_devops.ReleaseVariables', autospec=True)
     def test_get_variable(self, mock_release_variables):

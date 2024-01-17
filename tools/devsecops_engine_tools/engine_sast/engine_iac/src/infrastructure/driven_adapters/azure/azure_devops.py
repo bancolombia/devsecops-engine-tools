@@ -31,7 +31,7 @@ class AzureDevops(DevopsPlatformGateway):
         connection = utils_azure.get_azure_connection()
         return utils_azure.get_remote_json_config(connection=connection)
 
-    def logging(self, type, message):
+    def message(self, type, message):
         if type == "succeeded":
             return AzureMessageLoggingPipeline.SucceededLogging.get_message(message)
         elif type == "info":
