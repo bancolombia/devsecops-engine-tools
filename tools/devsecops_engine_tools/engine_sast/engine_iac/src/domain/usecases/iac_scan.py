@@ -40,6 +40,7 @@ class IacScan:
             config_tool,
             folders_to_scan,
             dict_args["environment"],
+            dict_args["platform"],
             secret_tool,
         )
 
@@ -57,6 +58,7 @@ class IacScan:
             path_file_results=path_file_results,
             custom_message_break_build=config_tool.message_info_sast_rm,
             scope_pipeline=config_tool.scope_pipeline,
+            stage_pipeline="Release",
         )
 
         return findings_list, input_core

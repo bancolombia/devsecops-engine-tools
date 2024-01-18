@@ -70,10 +70,14 @@ class AzureDevops(DevopsPlatformGateway):
                 return BuildVariables.Build_SourceBranchName.value()
             elif variable == "build_id":
                 return BuildVariables.Build_BuildNumber.value()
+            elif variable == "build_execution_id":
+                return BuildVariables.Build_BuildId.value()
             elif variable == "commit_hash":
                 return BuildVariables.Build_SourceVersion.value()
             elif variable == "environment":
                 return ReleaseVariables.Environment.value()
+            elif variable == "release_id":
+                return ReleaseVariables.Release_Releaseid.value()
             elif variable == "version":
                 return BuildVariables.Build_BuildId.value()
             elif variable == "branch_tag":

@@ -22,7 +22,6 @@ class PrismaCloudManagerScan(ToolGateway):
             f"{prisma_access_key}:{prisma_secret_key}".encode()
         ).decode()
         headers = {"Authorization": f"Basic {credentials}"}
-
         try:
             response = requests.get(url, headers=headers)
             response.raise_for_status()
@@ -37,51 +36,56 @@ class PrismaCloudManagerScan(ToolGateway):
         except Exception as e:
             raise ValueError(f"Error downloading twistcli: {e}")
 
-    def scan_image(self, file_path, repository, tag, remoteconfig, prisma_secret_key):
-        image_name = f"{repository}:{tag}"
-        extensions = "_scan_result.json"
+    def scan_image(
+        self, file_path, repository, tag, remoteconfig, prisma_secret_key, release
+    ):
         file_name = "scanned_images.txt"
+        repo = repository.split("/")[1] if len(repository.split("/")) >= 2 else ""
+        image_name = f"{repository}:{tag}"
+        result_file = f"{repo}:{tag}" + "_scan_result.json"
         images_scanned = []
 
-        if (image_name + extensions) in ImagesScanned.get_images_already_scanned(
-            file_name
-        ):
+        if (result_file) in ImagesScanned.get_images_already_scanned(file_name):
             print(f"The image {image_name} has already been scanned previously.")
         else:
             pattern = remoteconfig["REGEX_EXPRESSION_PROJECTS"]
-            if re.match(pattern, repository.upper()):
-                command = (
-                    file_path,
-                    "images",
-                    "scan",
-                    "--address",
-                    remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
-                    "--user",
-                    remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
-                    "--password",
-                    prisma_secret_key,
-                    image_name,
-                    "--output-file",
-                    image_name + extensions,
-                    "--details",
-                )
-                try:
-                    subprocess.run(
-                        command,
-                        check=True,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        text=True,
+            match = re.match(pattern, repo.upper())
+            if match:
+                if match.group() in release.upper():
+                    command = (
+                        file_path,
+                        "images",
+                        "scan",
+                        "--address",
+                        remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
+                        "--user",
+                        remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
+                        "--password",
+                        prisma_secret_key,
+                        image_name,
+                        "--output-file",
+                        result_file,
+                        "--details",
                     )
-                    images_scanned.append(image_name + extensions)
-                    with open(file_name, "a") as file:
-                        file.write(image_name + extensions + "\n")
-                except subprocess.CalledProcessError as e:
-                    print(f"Error during image scan of {repository}: {e.stderr}")
+                    try:
+                        subprocess.run(
+                            command,
+                            check=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True,
+                        )
+                        images_scanned.append(result_file)
+                        with open(file_name, "a") as file:
+                            file.write(result_file + "\n")
+                    except subprocess.CalledProcessError as e:
+                        print(f"Error during image scan of {repository}: {e.stderr}")
 
         return images_scanned
 
-    def run_tool_container_sca(self, remoteconfig, prisma_secret_key, scan_image):
+    def run_tool_container_sca(
+        self, remoteconfig, prisma_secret_key, scan_image, release
+    ):
         try:
             file_path = os.path.join(
                 os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
@@ -101,7 +105,12 @@ class PrismaCloudManagerScan(ToolGateway):
                 repository, tag = image["Repository"], image["Tag"]
                 images_scanned.extend(
                     self.scan_image(
-                        file_path, repository, tag, remoteconfig, prisma_secret_key
+                        file_path,
+                        repository,
+                        tag,
+                        remoteconfig,
+                        prisma_secret_key,
+                        release,
                     )
                 )
 

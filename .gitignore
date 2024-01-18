@@ -4,6 +4,7 @@ _nu1234
 
 # Virtual Enviroment python
 .venv
+.venv_win
 *.vscode*
 .pytest*
 *pycache*
@@ -43,3 +44,5 @@ RULES_K8Scheckov_config.yaml
 log/
 twistcli
 *_scan_result.json
+jf
+jf.exe

@@ -15,11 +15,23 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
 )
 
 
-def runner_engine_container(dict_args, token):
+from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.trivy_tool.trivy_manager_scan import (
+    TrivyScan
+)
+from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.trivy_tool.trivy_deserialize_output import (
+    TrivyDeserializator
+)
+
+
+def runner_engine_container(dict_args, config_tool, token):
     try:
-        tool_run = PrismaCloudManagerScan()
+        if config_tool['ENGINE_CONTAINER'].lower() == 'trivy':
+            tool_run = TrivyScan()
+            tool_deseralizator = TrivyDeserializator()
+        elif config_tool['ENGINE_CONTAINER'].lower() == 'prisma':
+            tool_run = PrismaCloudManagerScan()
+            tool_deseralizator = PrismaDeserealizator()
         tool_images = DockerImages()
-        tool_deseralizator = PrismaDeserealizator()
         tool_remote = AzureRemoteConfig()
         return init_engine_sca_rm(
             tool_run, tool_remote, tool_images, tool_deseralizator, dict_args, token
@@ -27,7 +39,6 @@ def runner_engine_container(dict_args, token):
 
     except Exception as e:
         raise Exception(f"Error SCAN engine container : {str(e)}")
-
 
 if __name__ == "__main__":
     runner_engine_container()
