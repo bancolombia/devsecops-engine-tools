@@ -23,10 +23,10 @@ class MetricsManager:
     def process(
         self, config_tool: any, input_core: InputCore, dict_args: any, scan_result: any
     ):
-        build_id = self.devops_platform_gateway.get_variable("build_id")
+        execution_id = self.devops_platform_gateway.get_variable("release_id") if input_core.stage_pipeline == "Release" else self.devops_platform_gateway.get_variable("build_execution_id")
         scope_pipeline = input_core.scope_pipeline
         base_directory = os.path.expanduser("/tmp/log_engine_tools")
-        file_path = f"{base_directory}/{datetime.datetime.now()}_{scope_pipeline}_{build_id}.json"
+        file_path = f"{base_directory}/{datetime.datetime.now()}_{scope_pipeline}_{execution_id}.json"
         base_directory_path = os.path.expanduser(base_directory)
         if not os.path.exists(base_directory_path):
             os.makedirs(base_directory_path)
@@ -35,13 +35,14 @@ class MetricsManager:
             "x",
         ) as file:
             body = {
-                "id": build_id,
+                "id": execution_id,
                 "date": datetime.datetime.now().strftime("%Y-%m-%d"),
                 "component": scope_pipeline,
+                "stage": input_core.stage_pipeline,
                 "check_type": dict_args["tool"],
                 "environment": dict_args["environment"],
                 "events": log_records,
-                "scan_result": scan_result,
+                "scan_result": scan_result
             }
             json.dump(body, file, indent=2)
         self.metrics_manager_gateway.send_metrics(
