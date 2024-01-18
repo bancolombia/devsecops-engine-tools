@@ -115,14 +115,22 @@ class CheckovTool(ToolGateway):
         output = self.execute(checkov_config)
         result.append(json.loads(output))
         queue.put(result)
-
-
+    
+    def if_platform(self,value,container_platform):
+        if value.get("platform_not_apply"):
+            if value.get("platform_not_apply") != container_platform:
+                return True
+            else:
+                return False
+        else:
+            return True
+        
     def scan_folders(
-        self, folders_to_scan, config_tool: ConfigTool, agent_env, environment
+        self, folders_to_scan, config_tool: ConfigTool, agent_env, environment, container_platform
     ):
         output_queue = queue.Queue()
         # Crea una lista para almacenar los hilos
-        threads = []
+        threads = []  
         for folder in folders_to_scan:
             for rule in config_tool.rules_data_type:
                 checkov_config = CheckovConfig(
@@ -132,7 +140,7 @@ class CheckovTool(ToolGateway):
                     checks=[
                         key
                         for key, value in config_tool.rules_data_type[rule].items()
-                        if value["environment"].get(environment)
+                        if value["environment"].get(environment) and self.if_platform(value,container_platform)
                     ],
                     soft_fail=False,
                     directories=folder,
@@ -170,12 +178,12 @@ class CheckovTool(ToolGateway):
         return result_scans
 
     def run_tool(
-        self, config_tool: ConfigTool, folders_to_scan, environment, secret_tool
+        self, config_tool: ConfigTool, folders_to_scan, environment, container_platform, secret_tool
     ):
         agent_env = self.configurate_external_checks(config_tool, secret_tool)
 
         result_scans = self.scan_folders(
-            folders_to_scan, config_tool, agent_env, environment
+            folders_to_scan, config_tool, agent_env, environment, container_platform
         )
 
         checkov_deserealizator = CheckovDeserealizator()
