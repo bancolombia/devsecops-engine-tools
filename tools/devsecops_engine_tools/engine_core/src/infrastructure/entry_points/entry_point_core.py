@@ -34,6 +34,9 @@ def get_inputs_from_cli(args):
         "--environment", choices=["dev", "qa", "pdn"], type=str, required=True, help=""
     )
     parser.add_argument(
+        "--platform", choices=["eks", "openshift"], type=str, required=False, help=""
+    )
+    parser.add_argument(
         "--use_secrets_manager",
         choices=["true", "false"],
         type=str,
@@ -55,6 +58,7 @@ def get_inputs_from_cli(args):
         "remote_config_repo": args.remote_config_repo,
         "tool": args.tool,
         "environment": args.environment,
+        "platform": args.platform,
         "use_secrets_manager": args.use_secrets_manager,
         "use_vulnerability_management": args.use_vulnerability_management,
         "token_cmdb": args.token_cmdb,
