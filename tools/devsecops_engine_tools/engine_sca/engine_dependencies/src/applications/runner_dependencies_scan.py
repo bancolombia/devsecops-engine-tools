@@ -12,13 +12,13 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.en
 )
 
 
-def runner_engine_dependencies(dict_args):
+def runner_engine_dependencies(dict_args, config_tool, token):
     try:
         tool_run = XrayScan()
         tool_deserializator = XrayDeserializator()
         tool_remote = AzureRemoteConfig()
         return init_engine_sca_rm(
-            tool_run, tool_remote, tool_deserializator, dict_args
+            tool_run, tool_remote, tool_deserializator, dict_args, token
         )
 
     except Exception as e:
