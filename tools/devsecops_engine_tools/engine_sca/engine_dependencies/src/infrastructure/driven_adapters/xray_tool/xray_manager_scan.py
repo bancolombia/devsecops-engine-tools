@@ -5,6 +5,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gate
 import subprocess
 import platform
 import requests
+import re
 
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities import settings
@@ -56,10 +57,38 @@ class XrayScan(ToolGateway):
             except subprocess.CalledProcessError as error:
                 raise RuntimeError(f"Error al instalar Jfrog Cli en Windows: {error}")
 
-    def scan_dependencies(self, prefix):
+    def config_server(self, prefix, token):
+        command = [
+            prefix,
+            "c",
+            "im",
+            token
+        ]
+        result = subprocess.run(
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
+        if result.returncode == 0:
+            server_id = re.search(r"'(.*?)'", result.stderr).group(1)
+
+            print(result.stderr)
+        else:
+            raise RuntimeError(f"Error al importar artifactory server: {result.stderr}")
         return 0
 
-    def run_tool_dependencies_sca(self, remote_config):
+    def scan_dependencies(self, prefix):
+        try:
+            command = [
+                prefix,
+                "scan",
+            ]
+            result = subprocess.run(
+                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+        except:
+            return 0
+        return 0
+
+    def run_tool_dependencies_sca(self, remote_config, token):
         cli_version = remote_config["JFROG"]["CLI_VERSION"]
         os_platform = platform.system()
         if os_platform == "Linux":
@@ -68,5 +97,5 @@ class XrayScan(ToolGateway):
         elif os_platform == "Windows":
             self.install_tool_windows(cli_version)
             command_prefix = "./jf.exe"
-        result_file = self.scan_dependencies(command_prefix)
-        return result_file
+        self.config_server(command_prefix, token)
+        return 0
