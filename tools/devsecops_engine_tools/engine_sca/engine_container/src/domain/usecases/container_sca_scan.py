@@ -46,6 +46,15 @@ class ContainerScaScan:
             list: List of processed images.
         """
         return self.tool_images.list_images()
+    
+    def get_variable(self, variable):
+        """
+        Get variable.
+
+        Returns:
+            dict: Remote variable.
+        """
+        return self.tool_remote.get_variable(variable)
 
     def process(self):
         """
@@ -55,7 +64,7 @@ class ContainerScaScan:
             dict: SCA scanning results.
         """
         return self.tool_run.run_tool_container_sca(
-            self.get_remote_config(), self.token, self.scan_image()
+            self.get_remote_config(), self.token, self.scan_image(), self.get_variable("release_name")
         )
 
     def deseralizator(self, image_scanned):

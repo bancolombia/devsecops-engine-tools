@@ -47,52 +47,54 @@ class TrivyScan(ToolGateway):
             except subprocess.CalledProcessError as error:
                 raise RuntimeError(f"Error al instalar trivy: {error}")
 
-    def scan_image(self, repository, tag, remoteconfig):
-        image_name = f"{repository}:{tag}"
-        extensions = "_scan_result.json"
+    def scan_image(self, repository, tag, remoteconfig, release):
         file_name = "scanned_images.txt"
+        repo = repository.split("/")[1] if len(repository.split("/")) >= 2 else ""
+        image_name = f"{repository}:{tag}"
+        result_file = f"{repo}:{tag}" + "_scan_result.json"
         images_scanned = []
 
-        if not (
-            (image_name + extensions)
-            in ImagesScanned.get_images_already_scanned(file_name)
-        ):
+        if not ((result_file) in ImagesScanned.get_images_already_scanned(file_name)):
             pattern = remoteconfig["REGEX_EXPRESSION_PROJECTS"]
-            if re.match(pattern, repository.upper()):
-                command1 = ["trivy", "image", "--download-db-only"]
-                command2 = [
-                    "trivy",
-                    "--scanners",
-                    "vuln",
-                    "-f",
-                    "json",
-                    "-o",
-                    image_name + "_scan_result.json",
-                ]
-                command2.extend(["--quiet", "image", image_name])
-                try:
-                    subprocess.run(
-                        command1,
-                        check=True,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                    )
-                    subprocess.run(
-                        command2,
-                        check=True,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        text=True,
-                    )
-                    images_scanned.append(image_name + extensions)
-                    with open(file_name, "a") as file:
-                        file.write(image_name + extensions + "\n")
-                except subprocess.CalledProcessError as e:
-                    logger.error(f"Error during image scan of {repository}: {e.stderr}")
+            match = re.match(pattern, repo.upper())
+            if match:
+                if match.group() in release.upper():
+                    command1 = ["trivy", "image", "--download-db-only"]
+                    command2 = [
+                        "trivy",
+                        "--scanners",
+                        "vuln",
+                        "-f",
+                        "json",
+                        "-o",
+                        result_file,
+                    ]
+                    command2.extend(["--quiet", "image", image_name])
+                    try:
+                        subprocess.run(
+                            command1,
+                            check=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                        )
+                        subprocess.run(
+                            command2,
+                            check=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True,
+                        )
+                        images_scanned.append(result_file)
+                        with open(file_name, "a") as file:
+                            file.write(result_file + "\n")
+                    except subprocess.CalledProcessError as e:
+                        logger.error(
+                            f"Error during image scan of {repository}: {e.stderr}"
+                        )
 
         return images_scanned
 
-    def run_tool_container_sca(self, remoteconfig, token, scan_image):
+    def run_tool_container_sca(self, remoteconfig, token, scan_image, release):
         try:
             trivy_version = remoteconfig["TRIVY"]["TRIVY_VERSION"]
             self.install_tool(trivy_version)
@@ -100,7 +102,9 @@ class TrivyScan(ToolGateway):
 
             for image in scan_image:
                 repository, tag = image["Repository"], image["Tag"]
-                images_scanned.extend(self.scan_image(repository, tag, remoteconfig))
+                images_scanned.extend(
+                    self.scan_image(repository, tag, remoteconfig, release)
+                )
 
             return images_scanned
 

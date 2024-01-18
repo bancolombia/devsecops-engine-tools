@@ -44,3 +44,5 @@ RULES_K8Scheckov_config.yaml
 log/
 twistcli
 *_scan_result.json
+jf
+jf.exe
