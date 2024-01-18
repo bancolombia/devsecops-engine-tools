@@ -122,7 +122,7 @@ class ImportScanUserCase:
                     raise ApiError("File format not allowed")
 
                 with open(request.file, "rb") as file:
-                    logger.info("read CSV file successful !!!")
+                    logger.info(f"read {file_type} file successful !!!")
                     files = [("file", (request.file, file, file_type))]
                     response = self.__rest_import_scan.import_scan(request, files)
                     response.test_url = f"{request.host_defect_dojo}/test/{str(response.test_id)}"
