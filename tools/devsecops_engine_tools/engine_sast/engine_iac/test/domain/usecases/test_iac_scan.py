@@ -12,7 +12,7 @@ class TestIacScan(unittest.TestCase):
         self.iac_scan = IacScan(self.tool_gateway, self.devops_platform_gateway)
 
     def test_process(self):
-        dict_args = {"remote_config_repo": "example_repo", "environment": "test"}
+        dict_args = {"remote_config_repo": "example_repo", "environment": "test", "platform": "eks"}
         secret_tool = "example_secret"
         tool = "CHECKOV"
 
@@ -64,7 +64,3 @@ class TestIacScan(unittest.TestCase):
         self.assertEqual(input_core.custom_message_break_build, "message test")
         self.assertEqual(input_core.scope_pipeline, "example_pipeline")
         self.assertEqual(input_core.stage_pipeline, "Release")
-
-
-if __name__ == "__main__":
-    unittest.main()
