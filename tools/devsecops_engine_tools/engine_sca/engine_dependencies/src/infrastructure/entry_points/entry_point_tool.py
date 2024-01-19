@@ -13,7 +13,8 @@ def init_engine_sca_rm(
     )
     input_core = SetInputCore(tool_remote, dict_args)
     dependencies_scanned = dependencies_sca_scan.process()
+    deserialized = dependencies_sca_scan.deserializator(dependencies_scanned)
 
-    return dependencies_sca_scan.deseralizator(dependencies_scanned), input_core.set_input_core(
+    return dependencies_sca_scan.deserializator(dependencies_scanned), input_core.set_input_core(
         dependencies_scanned
     )

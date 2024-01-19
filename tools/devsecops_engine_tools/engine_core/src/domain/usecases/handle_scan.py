@@ -109,6 +109,7 @@ class HandleScan:
         elif "engine_secret" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
         elif "engine_dependencies" in dict_args["tool"]:
+            secret_sca=""
             if secret_tool is not None:
                 secret_sca=""
             else:
