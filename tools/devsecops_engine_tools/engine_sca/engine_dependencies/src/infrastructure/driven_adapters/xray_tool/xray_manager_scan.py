@@ -8,6 +8,7 @@ import requests
 import re
 import os
 import json
+import shutil
 
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities import settings
@@ -83,20 +84,31 @@ class XrayScan(ToolGateway):
         except subprocess.CalledProcessError as error:
             logger.error(f"Error al configurar xray server: {error}")
 
-    def scan_dependencies(self, prefix):
-        if os.path.isdir("build"):
-            directory_name = "./build/"
-        elif os.path.isdir("target"):
-            directory_name = "./target/"
-        else:
-            logger.error(f"Error al escanear dependencias: No existe el directorio build o target en la ruta {os.getcwd()}")
-            return None
+    def find_artifacts(self, pattern, target_dir_name):
+        finded_files = []
+        extension_pattern = re.compile(pattern, re.IGNORECASE)
+        working_dir = os.getcwd()
+        for root, dirs, files in os.walk(working_dir):
+            for file in files:
+                if extension_pattern.search(file):
+                    ruta_completa = os.path.join(root, file)
+                    finded_files.append(ruta_completa)
+
+        target_dir = os.path.join(working_dir, target_dir_name)
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+
+        for file in finded_files:
+            target = os.path.join(target_dir, os.path.basename(file))
+            shutil.copy2(file, target)
+
+    def scan_dependencies(self, prefix, target_dir_name):
         try:
             command = [
                 prefix,
                 "scan",
                 "--format=simple-json",
-                directory_name
+                f"./{target_dir_name}/"
             ]
             result = subprocess.run(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
@@ -112,12 +124,24 @@ class XrayScan(ToolGateway):
     def run_tool_dependencies_sca(self, remote_config, token):
         cli_version = remote_config["JFROG"]["CLI_VERSION"]
         os_platform = platform.system()
+
         if os_platform == "Linux":
             self.install_tool_linux(cli_version)
             command_prefix = "./jf"
         elif os_platform == "Windows":
             self.install_tool_windows(cli_version)
             command_prefix = "./jf.exe"
+
         self.config_server(command_prefix, token)
-        file_result = self.scan_dependencies(command_prefix)
-        return 0
+
+        pattern = remote_config["REGEX_EXPRESSION_EXTENSIONS"]
+        dir_to_scan = 'artifacts_to_scan'
+
+        if os.path.isdir("node_modules"):
+            return 0
+        else:
+            self.find_artifacts(pattern, dir_to_scan)
+
+        result_scan_file = self.scan_dependencies(command_prefix, dir_to_scan)
+
+        return result_scan_file

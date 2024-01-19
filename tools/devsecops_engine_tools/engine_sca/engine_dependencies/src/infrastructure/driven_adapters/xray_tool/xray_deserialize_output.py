@@ -11,4 +11,10 @@ import json
 @dataclass
 class XrayDeserializator(DeserializatorGateway):
     def get_list_findings(self, dependencies_scanned: list) -> "list[Finding]":
+        list_open_vulnerabilities = []
+        for dependency in dependencies_scanned:
+            with open(dependency, "rb") as file:
+                json_data = json.loads(file.read())
+                vulnerabilities_data = json_data['vulnerabilities']
+                
         return 0
