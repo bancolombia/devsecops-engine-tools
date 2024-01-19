@@ -181,7 +181,7 @@ class TestCheckovTool(unittest.TestCase):
             self.checkov_tool, "async_scan", side_effect=output_queue.put
         ):
             result_scans = self.checkov_tool.scan_folders(
-                folders_to_scan, config_tool, agent_env, environment
+                folders_to_scan, config_tool, agent_env, environment, "eks"
             )
 
         self.assertEqual(result_scans, [])
@@ -190,6 +190,7 @@ class TestCheckovTool(unittest.TestCase):
         config_tool = MagicMock()
         folders_to_scan = ["/path/to/folder"]
         environment = "dev"
+        platform = "eks"
         secret_tool = MagicMock()
 
         self.checkov_tool.configurate_external_checks = MagicMock(
@@ -199,7 +200,7 @@ class TestCheckovTool(unittest.TestCase):
         self.checkov_tool.TOOL = "CHECKOV"
 
         findings_list, file_from_tool = self.checkov_tool.run_tool(
-            config_tool, folders_to_scan, environment, secret_tool
+            config_tool, folders_to_scan, environment, platform ,secret_tool
         )
 
         self.assertEqual(findings_list, [])

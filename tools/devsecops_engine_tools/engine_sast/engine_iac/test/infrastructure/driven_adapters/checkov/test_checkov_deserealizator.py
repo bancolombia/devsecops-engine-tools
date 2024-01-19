@@ -5,7 +5,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
     Finding,
     Category,
 )
-
+from datetime import datetime
 
 def test_get_list_finding():
     results_scan_list = [
@@ -103,7 +103,7 @@ def test_get_list_finding():
             where="/_AW1234/Dockerfile",
             description="Ensure that a user for the container has been created",
             severity="high",
-            identification_date="17012024",
+            identification_date=datetime.now().strftime("%d%m%Y"),
             module="engine_iac",
             category=Category.VULNERABILITY,
             requirements=None,
@@ -118,7 +118,7 @@ def test_get_list_finding():
             where="/_AW1234/app.yaml",
             description='Minimize the admission of containers with capabilities assigned',
             severity="high",
-            identification_date="17012024",
+            identification_date=datetime.now().strftime("%d%m%Y"),
             module="engine_iac",
             category=Category.COMPLIANCE,
             requirements=None,
