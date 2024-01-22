@@ -115,4 +115,4 @@ class HandleScan:
             else:
                 secret_sca = dict_args["token_engine_dependencies"]
             findings_list, input_core = runner_engine_dependencies(dict_args, config_tool, secret_sca)
-            print(MESSAGE_ENABLED)
+            return findings_list, input_core

@@ -9,6 +9,7 @@ import re
 import os
 import json
 import shutil
+import tarfile
 
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities import settings
@@ -84,23 +85,34 @@ class XrayScan(ToolGateway):
         except subprocess.CalledProcessError as error:
             logger.error(f"Error al configurar xray server: {error}")
 
-    def find_artifacts(self, pattern, target_dir_name):
+    def compress_and_mv(self, npm_modules, target_dir):
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+
+        try:
+            with tarfile.open(os.path.join(target_dir, "node_modules.tar"), "w") as tar:
+                tar.add(npm_modules, arcname=os.path.basename(npm_modules),
+                    filter=lambda x: None if '/.bin/' in x.name else x)
+
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error al comprimir npm_modules: {e}")
+
+    def find_artifacts(self, pattern, working_dir, target_dir):
         finded_files = []
         extension_pattern = re.compile(pattern, re.IGNORECASE)
-        working_dir = os.getcwd()
         for root, dirs, files in os.walk(working_dir):
             for file in files:
                 if extension_pattern.search(file):
                     ruta_completa = os.path.join(root, file)
                     finded_files.append(ruta_completa)
 
-        target_dir = os.path.join(working_dir, target_dir_name)
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
 
         for file in finded_files:
             target = os.path.join(target_dir, os.path.basename(file))
-            shutil.copy2(file, target)
+            if not os.path.exists(target):
+                shutil.copy2(file, target)
 
     def scan_dependencies(self, prefix, target_dir_name):
         try:
@@ -134,14 +146,16 @@ class XrayScan(ToolGateway):
 
         self.config_server(command_prefix, token)
 
+        working_dir = os.getcwd()
         pattern = remote_config["REGEX_EXPRESSION_EXTENSIONS"]
-        dir_to_scan = 'artifacts_to_scan'
+        dir_to_scan = "dependencies_to_scan"
+        dir_to_scan_path = os.path.join(working_dir, dir_to_scan)
+        npm_modules_path = os.path.join(working_dir, "node_modules")
 
-        if os.path.isdir("node_modules"):
-            return 0
+        if os.path.exists(npm_modules_path):
+            self.compress_and_mv(npm_modules_path, dir_to_scan_path)
         else:
-            self.find_artifacts(pattern, dir_to_scan)
+            self.find_artifacts(pattern, working_dir, dir_to_scan_path)
+        results_file = self.scan_dependencies(command_prefix, dir_to_scan)
 
-        result_scan_file = self.scan_dependencies(command_prefix, dir_to_scan)
-
-        return result_scan_file
+        return results_file
