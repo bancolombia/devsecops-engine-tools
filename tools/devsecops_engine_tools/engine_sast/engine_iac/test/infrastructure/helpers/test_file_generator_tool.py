@@ -20,7 +20,7 @@ def test_generate_file_from_tool():
                         },
                         "code_block": None,
                         "file_path": "/Dockerfile",
-                        "file_abs_path": "/Users/sagavir/Documents/Repositorios/Github/NU0429001_devsecops_engine/_AW1234/Dockerfile",
+                        "file_abs_path": "./_AW1234/Dockerfile",
                         "repo_file_path": "/_AW1234/Dockerfile",
                     }
                 ]
@@ -47,7 +47,7 @@ def test_generate_file_from_tool():
                         },
                         "code_block": None,
                         "file_path": "/app.yaml",
-                        "file_abs_path": "/Users/sagavir/Documents/Repositorios/Github/NU0429001_devsecops_engine/_AW1234/app.yaml",
+                        "file_abs_path": "./_AW1234/app.yaml",
                         "repo_file_path": "/_AW1234/app.yaml",
                         "file_line_range": [21, 83],
                         "resource": "Deployment.devsecops-engine-dev.ms-async-provider-deployment",
@@ -71,14 +71,14 @@ def test_generate_file_from_tool():
     rules_doc = {
         "CKV_DOCKER_3": {
             "checkID": "IAC-CKV-DOCKER-3 Ensure that a user for the container has been created",
-            "guideline": "https://bancolombia.sharepoint.com/:x:/r/teams/SeguridaddeTI-DevSecOps/Documentos%20compartidos/General/Pr%C3%A1cticas%20automatizadas%20de%20seguridad/MegaEngine/analisis%20estatico/Analisis%20est%C3%A1tico%20de%20Infraestructura%20(engine-iac)/Docker_k8s_Rules.xlsx?d=w65b6553bc4574805b31e57f4326d2dc7&csf=1&web=1&e=k0nmNU",
+            "guideline": "guideline",
             "severity": "High",
             "cvss": "",
             "category": "Vulnerability",
         },
         "CKV_K8S_13": {
             "checkID": "IAC-CKV_K8S_13 Ensure memory limits are set",
-            "guideline": "https://bancolombia.sharepoint.com/:x:/r/teams/SeguridaddeTI-DevSecOps/Documentos%20compartidos/General/Pr%C3%A1cticas%20automatizadas%20de%20seguridad/MegaEngine/analisis%20estatico/Analisis%20est%C3%A1tico%20de%20Infraestructura%20(engine-iac)/Docker_k8s_Rules.xlsx?d=w65b6553bc4574805b31e57f4326d2dc7&csf=1&web=1&e=k0nmNU",
+            "guideline": "guideline",
             "severity": "High",
             "cvss": "",
             "category": "Compliance",
