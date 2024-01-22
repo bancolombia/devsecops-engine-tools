@@ -65,7 +65,7 @@ class HandleScan:
                                 dict_args["remote_config_repo"]
                             ),
                             self.devops_platform_gateway.get_variable("access_token"),
-                            self.devops_platform_gateway.get_variable("version"),
+                            self.devops_platform_gateway.get_variable("build_execution_id"),
                             self.devops_platform_gateway.get_variable("build_id"),
                             self.devops_platform_gateway.get_variable("branch_tag"),
                             self.devops_platform_gateway.get_variable("commit_hash"),
