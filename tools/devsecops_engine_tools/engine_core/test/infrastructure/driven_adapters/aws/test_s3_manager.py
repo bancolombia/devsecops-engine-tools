@@ -26,7 +26,7 @@ class S3ManagerTests(unittest.TestCase):
         config_tool = {
             "METRICS_MANAGER": {
                 "AWS": {
-                    "EXECUTION_DIFFERENT_ACCOUNT": "Release-cloud",
+                    "EXECUTION_DIFFERENT_ACCOUNT": "Agent",
                     "ROLE_ARN": "arn:aws:iam::123456789012:role/MyRole",
                     "REGION_NAME": "us-west-2",
                     "BUCKET": "my-bucket",
