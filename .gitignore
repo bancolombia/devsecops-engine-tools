@@ -47,4 +47,5 @@ twistcli
 jf
 jf.exe
 target
-artifacts_to_scan
+dependencies_to_scan
+node_modules
