@@ -31,16 +31,6 @@ class AzureDevops(DevopsPlatformGateway):
         connection = utils_azure.get_azure_connection()
         return utils_azure.get_remote_json_config(connection=connection)
 
-    def logging(self, type, message):
-        if type == "succeeded":
-            return AzureMessageLoggingPipeline.SucceededLogging.get_message(message)
-        elif type == "info":
-            return AzureMessageLoggingPipeline.InfoLogging.get_message(message)
-        elif type == "warning":
-            return AzureMessageLoggingPipeline.WarningLogging.get_message(message)
-        elif type == "error":
-            return AzureMessageLoggingPipeline.ErrorLogging.get_message(message)
-
     def get_variable(self, variable):
         try:
             if variable == "pipeline":
