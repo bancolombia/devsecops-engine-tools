@@ -11,6 +11,10 @@ import json
 import shutil
 import tarfile
 
+THRESHOLD_ENTRIES = 10000
+THRESHOLD_SIZE = 1000000000
+THRESHOLD_RATIO = 10
+
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities import settings
 
@@ -90,6 +94,9 @@ class XrayScan(ToolGateway):
             os.makedirs(target_dir)
 
         try:
+            tar_path = os.path.join(target_dir, "node_modules.tar")
+            if os.path.exists(tar_path):
+                os.remove(tar_path)
             with tarfile.open(os.path.join(target_dir, "node_modules.tar"), "w") as tar:
                 tar.add(npm_modules, arcname=os.path.basename(npm_modules),
                     filter=lambda x: None if '/.bin/' in x.name else x)

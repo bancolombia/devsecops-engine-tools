@@ -21,7 +21,9 @@ class PrinterPrettyTable(PrinterTableGateway):
                 finding.description,
                 finding.where,
             ]
-            if ((finding.module == "engine_container") or (finding.module == "engine_dependencies")):
+            if (finding.module == "engine_container") or (
+                finding.module == "engine_dependencies"
+            ):
                 row_data.append(finding.requirements)
 
             table.add_row(row_data)
@@ -40,7 +42,11 @@ class PrinterPrettyTable(PrinterTableGateway):
         return sorted_table
 
     def print_table(self, finding_list: "list[Finding]"):
-        if finding_list and (finding_list[0].module != "engine_container") and (finding_list[0].module != "engine_dependencies"):
+        if (
+            finding_list
+            and (finding_list[0].module != "engine_container")
+            and (finding_list[0].module != "engine_dependencies")
+        ):
             headers = ["Severity", "ID", "Description", "Where"]
         else:
             headers = ["Severity", "ID", "Description", "Where", "Fixed in"]
