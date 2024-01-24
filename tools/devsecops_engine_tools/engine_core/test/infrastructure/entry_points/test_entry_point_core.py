@@ -72,7 +72,10 @@ class TestEntryPointCore(unittest.TestCase):
             "token_engine_container": None,
         }
 
-        mock_config_tool = {"METRICS_MANAGER": {"ENABLED": "true"}}
+        mock_config_tool = {
+            "METRICS_MANAGER": {"ENABLED": "true"},
+            "ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}
+        }
         mock_findings_list = []
         mock_input_core = {}
         mock_scan_result = {}

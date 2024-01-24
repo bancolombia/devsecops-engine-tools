@@ -47,14 +47,14 @@ class HandleScan:
         if "engine_iac" in dict_args["tool"]:
             findings_list, input_core = runner_engine_iac(
                 dict_args,
-                config_tool["ENGINE_IAC"],
+                config_tool["ENGINE_IAC"]["TOOL"],
                 secret_tool
             )
             if dict_args["use_vulnerability_management"] == "true":
                 try:
                     self.vulnerability_management.send_vulnerability_management(
                         VulnerabilityManagement(
-                            config_tool["ENGINE_IAC"],
+                            config_tool["ENGINE_IAC"]["TOOL"],
                             input_core,
                             dict_args,
                             secret_tool,
@@ -73,7 +73,7 @@ class HandleScan:
                         )
                     )
                 except ExceptionVulnerabilityManagement as ex1:
-                    logger.warning(str(ex1))
+                    logger.error(str(ex1))
                 try:
                     input_core.totalized_exclusions.extend(
                         self.vulnerability_management.get_findings_risk_acceptance(
@@ -84,7 +84,7 @@ class HandleScan:
                         )
                     )
                 except ExceptionFindingsRiskAcceptance as ex2:
-                    logger.warning(str(ex2))
+                    logger.error(str(ex2))
 
             return findings_list, input_core
         elif "engine_container" in dict_args["tool"]:
