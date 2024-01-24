@@ -1,15 +1,15 @@
 import json
 from azure.devops.connection import Connection
 from msrest.authentication import BasicTokenAuthentication
-from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.remote_config_gateway import (
-    RemoteConfigGateway,
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.devops_platform_gateway import (
+    DevopsPlatformGateway
 )
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
     SystemVariables,
 )
 
 
-class AzureDevopsIntegration(RemoteConfigGateway):
+class AzureDevopsIntegration(DevopsPlatformGateway):
     def get_azure_connection(self):
         try:
             system_access_token = SystemVariables.System_AccessToken.value()
