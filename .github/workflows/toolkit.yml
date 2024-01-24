@@ -21,4 +21,4 @@ jobs:
           GH_TOKEN: ${{ steps.generate_token.outputs.token }}
           TYPE_REPOSITORY: 'opensource'
           USERS_REVIEWERS: '@glhl86'
-          TEMPLATE_LANGUAGE: 'ES'
+          TEMPLATE_LANGUAGE: 'EN'
