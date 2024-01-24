@@ -109,9 +109,9 @@ class HandleScan:
         elif "engine_secret" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
         elif "engine_dependencies" in dict_args["tool"]:
-            secret_sca="test"
+            secret_sca=""
             if secret_tool is not None:
-                secret_sca="test"
+                secret_sca=secret_tool["token_xray"]
             else:
                 secret_sca = dict_args["token_engine_dependencies"]
             findings_list, input_core = runner_engine_dependencies(dict_args, config_tool, secret_sca)
