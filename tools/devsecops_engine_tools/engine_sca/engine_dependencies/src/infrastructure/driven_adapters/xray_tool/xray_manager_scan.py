@@ -20,6 +20,7 @@ from devsecops_engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
+
 class XrayScan(ToolGateway):
     def install_tool_linux(self, version):
         installed = subprocess.run(
@@ -30,23 +31,18 @@ class XrayScan(ToolGateway):
         if installed.returncode == 1:
             command1 = [
                 "wget",
-                f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-linux-amd64/jf"
+                f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-linux-amd64/jf",
             ]
-            command2 = [
-                "chmod",
-                "+x",
-                "./jf"
-            ]
+            command2 = ["chmod", "+x", "./jf"]
             try:
                 subprocess.run(
-                        command1, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-                    )
+                    command1, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
                 subprocess.run(
-                        command2, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-                    )
+                    command2, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
             except subprocess.CalledProcessError as error:
                 logger.error(f"Error al instalar Jfrog Cli en Linux: {error}")
-        
 
     def install_tool_windows(self, version):
         try:
@@ -57,34 +53,32 @@ class XrayScan(ToolGateway):
             )
         except:
             try:
-                url = f'https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-windows-amd64/jf.exe'
-                exe_file = './jf.exe'
+                url = f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-windows-amd64/jf.exe"
+                exe_file = "./jf.exe"
                 response = requests.get(url, allow_redirects=True)
-                with open(exe_file, 'wb') as archivo:
+                with open(exe_file, "wb") as archivo:
                     archivo.write(response.content)
             except subprocess.CalledProcessError as error:
                 logger.error(f"Error al instalar Jfrog Cli en Windows: {error}")
 
     def config_server(self, prefix, token):
         try:
-            c_import = [
-                prefix,
-                "c",
-                "im",
-                token
-            ]
+            c_import = [prefix, "c", "im", token]
             result = subprocess.run(
-                c_import, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                c_import,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
             )
             server_id = re.search(r"'(.*?)'", result.stderr).group(1)
-            c_set_server = [
-                prefix,
-                "c",
-                "use",
-                server_id
-            ]
+            c_set_server = [prefix, "c", "use", server_id]
             subprocess.run(
-                c_set_server, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                c_set_server,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
             )
         except subprocess.CalledProcessError as error:
             logger.error(f"Error al configurar xray server: {error}")
@@ -99,8 +93,11 @@ class XrayScan(ToolGateway):
             if os.path.exists(tar_path):
                 os.remove(tar_path)
             with tarfile.open(os.path.join(target_dir, "node_modules.tar"), "w") as tar:
-                tar.add(npm_modules, arcname=os.path.basename(npm_modules),
-                    filter=lambda x: None if '/.bin/' in x.name else x)
+                tar.add(
+                    npm_modules,
+                    arcname=os.path.basename(npm_modules),
+                    filter=lambda x: None if "/.bin/" in x.name else x,
+                )
 
         except subprocess.CalledProcessError as e:
             logger.error(f"Error al comprimir npm_modules: {e}")
@@ -124,24 +121,21 @@ class XrayScan(ToolGateway):
 
     def scan_dependencies(self, prefix, target_dir_name):
         try:
-            command = [
-                prefix,
-                "scan",
-                "--format=simple-json",
-                f"./{target_dir_name}/"
-            ]
+            command = [prefix, "scan", "--format=simple-json", f"./{target_dir_name}/"]
             result = subprocess.run(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
             scan_result = json.loads(result.stdout)
-            file_result = 'scan_result.json'
-            with open(file_result, 'w') as file:
+            file_result = "scan_result.json"
+            with open(file_result, "w") as file:
                 json.dump(scan_result, file, indent=4)
             return file_result
         except subprocess.CalledProcessError as error:
             logger.error(f"Error al escanear dependencias: {error}")
 
-    def run_tool_dependencies_sca(self, remote_config, pipeline_name, exclusions, token):
+    def run_tool_dependencies_sca(
+        self, remote_config, pipeline_name, exclusions, token
+    ):
         cli_version = remote_config["XRAY"]["CLI_VERSION"]
         os_platform = platform.system()
 
@@ -157,14 +151,18 @@ class XrayScan(ToolGateway):
         working_dir = os.getcwd()
         pattern = remote_config["REGEX_EXPRESSION_EXTENSIONS"]
 
-        #Excluded files
+        # Excluded files
         if pipeline_name in exclusions:
             for exclusion in exclusions[pipeline_name]["XRAY"]:
                 if exclusion.get("files", 0):
                     excluded_file_types = exclusion["files"]
                     pattern2 = pattern
                     for ext in excluded_file_types:
-                        pattern2 = pattern2.replace("|" + ext, "").replace(ext + "|", "").replace(ext, "")
+                        pattern2 = (
+                            pattern2.replace("|" + ext, "")
+                            .replace(ext + "|", "")
+                            .replace(ext, "")
+                        )
                     pattern = pattern2
 
         dir_to_scan = "dependencies_to_scan"

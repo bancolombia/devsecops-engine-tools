@@ -2,10 +2,10 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.dr
     AzureRemoteConfig,
 )
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan import (
-    XrayScan
+    XrayScan,
 )
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_deserialize_output import (
-    XrayDeserializator
+    XrayDeserializator,
 )
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool import (
     init_engine_sca_rm,

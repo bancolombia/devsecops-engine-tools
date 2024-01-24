@@ -5,9 +5,8 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.s
     SetInputCore,
 )
 
-def init_engine_sca_rm(
-    tool_run, tool_remote, tool_deserializator, dict_args, token
-):
+
+def init_engine_sca_rm(tool_run, tool_remote, tool_deserializator, dict_args, token):
     dependencies_sca_scan = DependenciesScan(
         tool_run, tool_remote, tool_deserializator, dict_args, token
     )

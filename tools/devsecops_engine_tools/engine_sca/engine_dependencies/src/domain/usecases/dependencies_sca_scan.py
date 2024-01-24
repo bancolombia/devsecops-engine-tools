@@ -8,6 +8,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gate
     DeserializatorGateway,
 )
 
+
 class DependenciesScan:
     def __init__(
         self,
@@ -45,7 +46,12 @@ class DependenciesScan:
 
         Return: dict: SCA scanning results.
         """
-        return self.tool_run.run_tool_dependencies_sca(self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json"), self.get_variable("pipeline_name"), self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"), self.token)
+        return self.tool_run.run_tool_dependencies_sca(
+            self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json"),
+            self.get_variable("pipeline_name"),
+            self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"),
+            self.token,
+        )
 
     def deserializator(self, dependencies_scanned):
         """
