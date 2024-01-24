@@ -100,7 +100,12 @@ class HandleScan:
             return findings_list, input_core
         elif "engine_dast" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
-        elif "engine_secret" in self.dict_args["tool"]:
-            print(MESSAGE_ENABLED)
-        elif "engine_dependencies" in self.dict_args["tool"]:
+        elif "engine_secret" in dict_args["tool"]:
+            findings_list, input_core = runner_secret_scan(
+                dict_args["remote_config_repo"],
+                "SAST/Secret_Scan/configTools.json",
+                "trufflehog"
+            )
+            return findings_list, input_core
+        elif "engine_dependencies" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
