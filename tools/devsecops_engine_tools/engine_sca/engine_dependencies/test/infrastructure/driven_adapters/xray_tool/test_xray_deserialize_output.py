@@ -6,9 +6,11 @@ import pytest
 from unittest.mock import mock_open, patch
 import json
 
+
 @pytest.fixture
 def deserializator():
     return XrayDeserializator()
+
 
 def test_get_list_findings(deserializator):
     mock_json_data = {
@@ -18,16 +20,8 @@ def test_get_list_findings(deserializator):
                 "impactedPackageName": "com.alibaba:fastjson",
                 "impactedPackageVersion": "1.2.24",
                 "summary": "Alibaba fastjson autoType Restrictions Bypass Object Deserialization Remote Code Execution",
-                "fixedVersions": [
-                    "[1.2.48]"
-                ],
-                "cves": [
-                    {
-                        "id": "",
-                        "cvssV2": "10.0",
-                        "cvssV3": "9.8"
-                    }
-                ],
+                "fixedVersions": ["[1.2.48]"],
+                "cves": [{"id": "", "cvssV2": "10.0", "cvssV3": "9.8"}],
                 "issueId": "XRAY-93075",
             }
         ]

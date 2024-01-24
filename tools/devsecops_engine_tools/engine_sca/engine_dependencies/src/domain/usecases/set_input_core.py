@@ -37,9 +37,13 @@ class SetInputCore:
         """
         return InputCore(
             [],
-            Threshold(self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")["THRESHOLD"]),
+            Threshold(
+                self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")["THRESHOLD"]
+            ),
             dependencies_scanned,
-            self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")["MESSAGE_INFO_SCA_RM"],
+            self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")[
+                "MESSAGE_INFO_SCA_RM"
+            ],
             self.get_variable("release_name"),
-            "Release"
+            "Release",
         )
