@@ -75,7 +75,8 @@ def engine_secret_scan(remote_config_repo, remote_config_path, tool):
         threshold_defined=data_config.level_compliance,
         path_file_results=vulnerabilities_list,
         custom_message_break_build=data_config.message_info_sast_rm,
-        scope_pipeline=data_config.scope_pipeline
+        scope_pipeline=data_config.scope_pipeline,
+        stage_pipeline="Release"
     )
     
     return vulnerabilities_list, input_core
