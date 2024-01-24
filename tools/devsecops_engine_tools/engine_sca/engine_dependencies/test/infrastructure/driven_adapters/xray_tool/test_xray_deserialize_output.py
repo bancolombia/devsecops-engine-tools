@@ -28,6 +28,7 @@ def test_get_list_findings(deserializator):
                         "cvssV3": "9.8"
                     }
                 ],
+                "issueId": "XRAY-93075",
             }
         ]
     }

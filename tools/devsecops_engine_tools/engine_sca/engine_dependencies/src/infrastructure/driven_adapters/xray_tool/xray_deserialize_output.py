@@ -19,7 +19,7 @@ class XrayDeserializator(DeserializatorGateway):
             if vulnerabilities_data is not None:
                 vulnerabilities = [
                     Finding(
-                        id=vul["cves"][0]["id"] if vul.get("cves", 1) else "",
+                        id=vul["issueId"] if vul.get("issueId", 1) else "",
                         cvss=vul["cves"][0]["id"] if vul.get("cves", 1) else "",
                         where=(vul["impactedPackageName"] if vul.get("impactedPackageName", 1) else "")
                         + ":"

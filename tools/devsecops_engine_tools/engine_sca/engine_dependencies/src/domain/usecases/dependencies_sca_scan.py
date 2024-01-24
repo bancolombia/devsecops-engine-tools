@@ -30,13 +30,22 @@ class DependenciesScan:
         """
         return self.tool_remote.get_remote_config(self.dict_args)
 
+    def get_variable(self, variable):
+        """
+        Get variable.
+
+        Returns:
+            dict: Remote variable.
+        """
+        return self.tool_remote.get_variable(variable)
+
     def process(self):
         """
         Process SCA dependencies scan.
 
         Return: dict: SCA scanning results.
         """
-        return self.tool_run.run_tool_dependencies_sca(self.get_remote_config(), self.token)
+        return self.tool_run.run_tool_dependencies_sca(self.get_remote_config(), self.get_variable("release_name"), self.token)
 
     def deserializator(self, dependencies_scanned):
         """

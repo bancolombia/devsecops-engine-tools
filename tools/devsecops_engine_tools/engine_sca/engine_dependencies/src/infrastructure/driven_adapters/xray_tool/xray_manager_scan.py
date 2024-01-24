@@ -90,9 +90,10 @@ class XrayScan(ToolGateway):
             logger.error(f"Error al configurar xray server: {error}")
 
     def compress_and_mv(self, npm_modules, target_dir):
-        if not os.path.exists(target_dir):
-            os.makedirs(target_dir)
+        if os.path.exists(target_dir):
+            shutil.rmtree(target_dir)
 
+        os.makedirs(target_dir)
         try:
             tar_path = os.path.join(target_dir, "node_modules.tar")
             if os.path.exists(tar_path):
@@ -113,13 +114,13 @@ class XrayScan(ToolGateway):
                     ruta_completa = os.path.join(root, file)
                     finded_files.append(ruta_completa)
 
-        if not os.path.exists(target_dir):
-            os.makedirs(target_dir)
+        if os.path.exists(target_dir):
+            shutil.rmtree(target_dir)
 
+        os.makedirs(target_dir)
         for file in finded_files:
             target = os.path.join(target_dir, os.path.basename(file))
-            if not os.path.exists(target):
-                shutil.copy2(file, target)
+            shutil.copy2(file, target)
 
     def scan_dependencies(self, prefix, target_dir_name):
         try:
@@ -140,7 +141,7 @@ class XrayScan(ToolGateway):
         except subprocess.CalledProcessError as error:
             logger.error(f"Error al escanear dependencias: {error}")
 
-    def run_tool_dependencies_sca(self, remote_config, token):
+    def run_tool_dependencies_sca(self, remote_config, variable, token):
         cli_version = remote_config["JFROG"]["CLI_VERSION"]
         os_platform = platform.system()
 
@@ -155,6 +156,16 @@ class XrayScan(ToolGateway):
 
         working_dir = os.getcwd()
         pattern = remote_config["REGEX_EXPRESSION_EXTENSIONS"]
+
+        #Excluded files
+        excluded_files = remote_config["ExcludedFiles"]
+        if variable in excluded_files:
+            excluded_file_types = excluded_files[variable]["Files"]
+            pattern2 = pattern
+            for ext in excluded_file_types:
+                pattern2 = pattern2.replace("|" + ext, "").replace(ext + "|", "").replace(ext, "")
+            pattern = pattern2
+
         dir_to_scan = "dependencies_to_scan"
         dir_to_scan_path = os.path.join(working_dir, dir_to_scan)
         npm_modules_path = os.path.join(working_dir, "node_modules")
