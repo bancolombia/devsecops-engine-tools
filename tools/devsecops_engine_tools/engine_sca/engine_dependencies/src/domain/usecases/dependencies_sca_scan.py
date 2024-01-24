@@ -23,12 +23,12 @@ class DependenciesScan:
         self.dict_args = dict_args
         self.token = token
 
-    def get_remote_config(self):
+    def get_remote_config(self, file_path):
         """
         Get remote configuration
         Return: dict: Remote configuration
         """
-        return self.tool_remote.get_remote_config(self.dict_args)
+        return self.tool_remote.get_remote_config(self.dict_args, file_path)
 
     def get_variable(self, variable):
         """
@@ -45,7 +45,7 @@ class DependenciesScan:
 
         Return: dict: SCA scanning results.
         """
-        return self.tool_run.run_tool_dependencies_sca(self.get_remote_config(), self.get_variable("release_name"), self.token)
+        return self.tool_run.run_tool_dependencies_sca(self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json"), self.get_variable("pipeline_name"), self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"), self.token)
 
     def deserializator(self, dependencies_scanned):
         """

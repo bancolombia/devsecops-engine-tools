@@ -10,14 +10,14 @@ class SetInputCore:
         self.tool_remote = tool_remote
         self.dict_args = dict_args
 
-    def get_remote_config(self):
+    def get_remote_config(self, file_path):
         """
         Get remote configuration.
 
         Returns:
             dict: Remote configuration.
         """
-        return self.tool_remote.get_remote_config(self.dict_args)
+        return self.tool_remote.get_remote_config(self.dict_args, file_path)
 
     def get_variable(self, variable):
         """
@@ -37,9 +37,9 @@ class SetInputCore:
         """
         return InputCore(
             [],
-            Threshold(self.get_remote_config()["THRESHOLD"]),
+            Threshold(self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")["THRESHOLD"]),
             dependencies_scanned,
-            self.get_remote_config()["MESSAGE_INFO_SCA_RM"],
+            self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")["MESSAGE_INFO_SCA_RM"],
             self.get_variable("release_name"),
             "Release"
         )

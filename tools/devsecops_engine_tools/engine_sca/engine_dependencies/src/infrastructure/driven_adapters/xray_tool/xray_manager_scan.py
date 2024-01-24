@@ -141,8 +141,8 @@ class XrayScan(ToolGateway):
         except subprocess.CalledProcessError as error:
             logger.error(f"Error al escanear dependencias: {error}")
 
-    def run_tool_dependencies_sca(self, remote_config, variable, token):
-        cli_version = remote_config["JFROG"]["CLI_VERSION"]
+    def run_tool_dependencies_sca(self, remote_config, pipeline_name, exclusions, token):
+        cli_version = remote_config["XRAY"]["CLI_VERSION"]
         os_platform = platform.system()
 
         if os_platform == "Linux":
@@ -158,13 +158,14 @@ class XrayScan(ToolGateway):
         pattern = remote_config["REGEX_EXPRESSION_EXTENSIONS"]
 
         #Excluded files
-        excluded_files = remote_config["ExcludedFiles"]
-        if variable in excluded_files:
-            excluded_file_types = excluded_files[variable]["Files"]
-            pattern2 = pattern
-            for ext in excluded_file_types:
-                pattern2 = pattern2.replace("|" + ext, "").replace(ext + "|", "").replace(ext, "")
-            pattern = pattern2
+        if pipeline_name in exclusions:
+            for exclusion in exclusions[pipeline_name]["XRAY"]:
+                if exclusion.get("files", 0):
+                    excluded_file_types = exclusion["files"]
+                    pattern2 = pattern
+                    for ext in excluded_file_types:
+                        pattern2 = pattern2.replace("|" + ext, "").replace(ext + "|", "").replace(ext, "")
+                    pattern = pattern2
 
         dir_to_scan = "dependencies_to_scan"
         dir_to_scan_path = os.path.join(working_dir, dir_to_scan)
