@@ -62,7 +62,7 @@ if __name__ == "__main__":
     table = []
     try:
         if settings.INTEGRATION_TEST:
-            # test integration Aws security Finding
+            """test integration Aws security Finding"""
             Printers.print_title("AWS Security Finding Format (ASFF) Scan")
             response = import_scan(
                 scan_type="AWS Security Finding Format (ASFF) Scan", file_path=f"{path_file}/aws_security_finding.json"
@@ -83,23 +83,39 @@ if __name__ == "__main__":
             response = import_scan(scan_type="Checkov Scan", file_path=f"{path_file}/checkov.json")
             table.append(validate_response(response, scan_type="Checkov Scan", end_point="impor_scan"))
 
-            # test SonarQuebe
+            """ test integration Twistlock Image Scan Json """
+            Printers.print_title("Twistlock Image Scan JSON")
+            response = import_scan(scan_type="Twistlock Image Scan", file_path=f"{path_file}/twistlock.json")
+            table.append(validate_response(response, scan_type="Twistlock Image Scan", end_point="impor_scan json"))
+
+            """ test integration Twistlock Image Scan Csv"""
+            Printers.print_title("Twistlock Image Scan CSV")
+            response = import_scan(scan_type="Twistlock Image Scan", file_path=f"{path_file}/twistlock.csv")
+            table.append(validate_response(response, scan_type="Twistlock Image Scan", end_point="impor_scan csv"))
+
+            """test integrations Sarif Scan"""
+            Printers.print_title("Sarif Scan")
+            response = import_scan(scan_type="SARIF", file_path=f"{path_file}/sarif_scan.sarif")
+            table.append(validate_response(response, scan_type="Sarif Scan", end_point="impor_scan sarif"))
+
+            """test SonarQuebe"""
             Printers.print_title("SonarQube API Import")
             response = import_scan(scan_type="SonarQube API Import")
             logger.debug(f"SonarQube Api Import: {response}")
             table.append(validate_response(response, scan_type="SonarQube", end_point="impor_scan"))
 
-            # test get finding
+            """test get finding"""
             session = SessionManager(token=settings.TOKEN_DEFECT_DOJO, host=settings.HOST_DEFECT_DOJO)
             Printers.print_title("Get Finding")
             response = Finding.get_finding(session=session, risk_accepted=True)
             logger.debug(f"Finding get {response}")
             table.append(validate_response(response, end_point="finding.get"))
 
-            # test integration Finding close
+            """test integration Finding close"""
             Printers.print_title("Finding Close")
             response = Finding.close_finding(session, unique_id_from_tool="1")
             logger.debug(f"Finding_close: {response}")
+
             table.append(validate_response(response, end_point="finding.close"))
             print(tabulate(table, headers=["End_point", "Description", "Status", "Result"]))
             if any(item[2] == "Error" for item in table):

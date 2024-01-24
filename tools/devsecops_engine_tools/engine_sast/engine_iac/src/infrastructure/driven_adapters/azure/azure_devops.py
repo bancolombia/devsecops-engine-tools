@@ -12,7 +12,9 @@ from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline i
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import (
     AzureDevopsApi,
 )
-
+from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities import settings
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 @dataclass
 class AzureDevops(DevopsPlatformGateway):
@@ -29,20 +31,10 @@ class AzureDevops(DevopsPlatformGateway):
         connection = utils_azure.get_azure_connection()
         return utils_azure.get_remote_json_config(connection=connection)
 
-    def logging(self, type, message):
-        if type == "succeeded":
-            return AzureMessageLoggingPipeline.SucceededLogging.get_message(message)
-        elif type == "info":
-            return AzureMessageLoggingPipeline.InfoLogging.get_message(message)
-        elif type == "warning":
-            return AzureMessageLoggingPipeline.WarningLogging.get_message(message)
-        elif type == "error":
-            return AzureMessageLoggingPipeline.ErrorLogging.get_message(message)
-
     def get_variable(self, variable):
         try:
             if variable == "pipeline":
                 return ReleaseVariables.Release_Definitionname.value()
         except Exception as ex:
-            print(self.logging("info", str(ex)))
+            logger.warning(f"Error getting variable {str(ex)}")
             return None

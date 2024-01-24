@@ -3,6 +3,8 @@ import logging
 import os
 import datetime
 
+log_records = []
+
 
 class CustomFormatter(logging.Formatter):
     grey = "\x1b[38;20m"
@@ -26,6 +28,25 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        log_data = {
+            "timestamp": self.formatTime(record),
+            "level": record.levelname,
+            "message": record.getMessage(),
+            "module": record.module,
+            "funcName": record.funcName,
+            "lineno": record.lineno
+        }
+        return log_data
+
+
+class ListHandler(logging.Handler):
+    def emit(self, record):
+        log_record = self.format(record)
+        log_records.append(log_record)
+
+
 class SingletonType(type):
     _instances = {}
 
@@ -46,24 +67,33 @@ class MyLogger(metaclass=SingletonType):
         if kwargs["debug"]:
             self._logger.setLevel(logging.DEBUG)
         else:
-            self._logger.setLevel(logging.CRITICAL)
-        formatter = logging.Formatter(
-            "%(asctime)s [%(levelname)s | %(filename)s | %(funcName)s | %(lineno)d] > %(message)s"
-        )
+            self._logger.setLevel(logging.WARNING)
 
         if kwargs["log_file"]:
-            # log with file log
             now = datetime.datetime.now()
             dirname = "./log"
             if not os.path.isdir(dirname):
                 os.mkdir(dirname)
-            file_handler = logging.FileHandler(dirname + "/log_" + now.strftime("%Y-%m-%d") + ".log")
-            file_handler.setFormatter(formatter)
-            self._logger.addHandler(file_handler)
-        # log whit console
-        stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(CustomFormatter())
-        self._logger.addHandler(stream_handler)
+            if kwargs["log_file_format"] == "log":
+                # log with file log
+                file_handler = logging.FileHandler(
+                    dirname + "/log_" + now.strftime("%Y-%m-%d") + ".log"
+                )
+                formatter = logging.Formatter(
+                    "%(asctime)s [%(levelname)s | %(filename)s | %(funcName)s | %(lineno)d] > %(message)s"
+                )
+                file_handler.setFormatter(formatter)
+                self._logger.addHandler(file_handler)
+            elif kwargs["log_file_format"] == "json":
+                # log with file json
+                file_handler = ListHandler()
+                file_handler.setFormatter(JsonFormatter())
+                self._logger.addHandler(file_handler)
+        if kwargs["log_console"]:
+            # log whit console
+            stream_handler = logging.StreamHandler()
+            stream_handler.setFormatter(CustomFormatter())
+            self._logger.addHandler(stream_handler)
 
     def get_logger(self):
         return self._logger
