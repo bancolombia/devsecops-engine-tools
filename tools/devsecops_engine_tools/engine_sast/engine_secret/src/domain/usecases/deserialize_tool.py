@@ -8,3 +8,6 @@ class DeserializeTool:
     
     def get_list_vulnerability(self, results_scan_list: list):
         return self.tool_run.get_list_vulnerability(results_scan_list)
+    
+    def get_where_correctly(self, results_scan_list: any):
+        return self.tool_run.get_where_correctly(results_scan_list)

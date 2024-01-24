@@ -6,3 +6,7 @@ class DeseralizatorGateway(metaclass=ABCMeta):
     @abstractmethod
     def get_list_vulnerability(self, results_scan_list: list, rules) -> "list[Finding]":
         "Deseralizator"
+    
+    @abstractmethod
+    def get_where_correctly(self, results_scan_list: any):
+        "Where"
