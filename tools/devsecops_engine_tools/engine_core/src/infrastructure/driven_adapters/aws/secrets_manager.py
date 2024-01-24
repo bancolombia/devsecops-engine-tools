@@ -2,18 +2,31 @@ from dataclasses import dataclass
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.secrets_manager_gateway import (
     SecretsManagerGateway,
 )
+from devsecops_engine_tools.engine_core.src.infrastructure.helpers.aws import (
+    assume_role,
+    validate_execution_account,
+)
 import boto3
 import json
 from botocore.exceptions import NoCredentialsError
 import logging
-boto3.set_stream_logger(name='botocore.credentials', level=logging.WARNING)
+from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities import settings
+
+boto3.set_stream_logger(name="botocore.credentials", level=logging.WARNING)
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 @dataclass
 class SecretsManager(SecretsManagerGateway):
     def get_secret(self, config_tool):
-        temp_credentials = self.assume_role(
-            config_tool["SECRET_MANAGER"]["AWS"]["ROLE_ARN"]
+        execution_different_account = config_tool["SECRET_MANAGER"]["AWS"][
+            "EXECUTION_DIFFERENT_ACCOUNT"
+        ]
+        temp_credentials = assume_role(
+            config_tool["SECRET_MANAGER"]["AWS"]["ROLE_ARN_DIFFERENT_ACCOUNT"]
+            if validate_execution_account(execution_different_account)
+            else config_tool["SECRET_MANAGER"]["AWS"]["ROLE_ARN"]
         )
         session = boto3.session.Session()
         client = session.client(
@@ -25,23 +38,15 @@ class SecretsManager(SecretsManagerGateway):
         )
 
         try:
-            get_secret_value_response = client.get_secret_value(
-                SecretId=config_tool["SECRET_MANAGER"]["AWS"]["SECRET_NAME"]
+            secret_name = (
+                config_tool["SECRET_MANAGER"]["AWS"]["SECRET_NAME_DIFFERENT_ACCOUNT"]
+                if validate_execution_account(execution_different_account)
+                else config_tool["SECRET_MANAGER"]["AWS"]["SECRET_NAME"]
             )
+            get_secret_value_response = client.get_secret_value(SecretId=secret_name)
             secret = get_secret_value_response["SecretString"]
             secret_dict = json.loads(secret)
             return secret_dict
         except NoCredentialsError as e:
-            print(f"Error: {e}")
+            logger.error("Error getting secret: {e}")
             return None
-
-    def assume_role(self, role_arn):
-        sts_client = boto3.client("sts")
-
-        response = sts_client.assume_role(
-            RoleArn=role_arn, RoleSessionName="DevSecOpsTools"
-        )
-
-        temporal_credentials = response["Credentials"]
-
-        return temporal_credentials
