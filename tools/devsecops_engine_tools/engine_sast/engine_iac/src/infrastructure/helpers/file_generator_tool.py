@@ -64,8 +64,6 @@ def generate_file_from_tool(tool, result_list, rules_doc):
 
             absolute_path = os.path.abspath(file_name)
             return absolute_path
-        except KeyError as e:
-            logger.error(f"Dict KeyError in checks integration: {e}")
         except Exception as ex:
             logger.error(f"Error during handling checkov json integrator {ex}")
 
