@@ -121,8 +121,6 @@ class XrayScan(ToolGateway):
             result = subprocess.run(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
-            if result.returncode == 1:
-                raise ValueError(f"Error al ejecutar jf scan (Posible credenciales malas o sin alcance al servidor de artifactory)")
             scan_result = json.loads(result.stdout)
             file_result = "scan_result.json"
             with open(file_result, "w") as file:
