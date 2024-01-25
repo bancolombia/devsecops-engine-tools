@@ -10,10 +10,7 @@ import os
 import json
 import shutil
 import tarfile
-
-THRESHOLD_ENTRIES = 10000
-THRESHOLD_SIZE = 1000000000
-THRESHOLD_RATIO = 10
+import time
 
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities import settings
@@ -29,17 +26,15 @@ class XrayScan(ToolGateway):
             stderr=subprocess.PIPE,
         )
         if installed.returncode == 1:
-            command1 = [
-                "wget",
-                f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-linux-amd64/jf",
-            ]
-            command2 = ["chmod", "+x", "./jf"]
+            command = ["chmod", "+x", "./jf"]
             try:
+                url = f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-linux-amd64/jf"
+                file = "./jf"
+                response = requests.get(url, allow_redirects=True)
+                with open(file, "wb") as archivo:
+                    archivo.write(response.content)
                 subprocess.run(
-                    command1, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-                )
-                subprocess.run(
-                    command2, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                    command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
             except subprocess.CalledProcessError as error:
                 logger.error(f"Error al instalar Jfrog Cli en Linux: {error}")
@@ -103,6 +98,11 @@ class XrayScan(ToolGateway):
             logger.error(f"Error al comprimir npm_modules: {e}")
 
     def find_artifacts(self, pattern, working_dir, target_dir):
+        if os.path.exists(target_dir):
+            shutil.rmtree(target_dir)
+ 
+        os.makedirs(target_dir)
+        
         finded_files = []
         extension_pattern = re.compile(pattern, re.IGNORECASE)
         for root, dirs, files in os.walk(working_dir):
@@ -111,10 +111,6 @@ class XrayScan(ToolGateway):
                     ruta_completa = os.path.join(root, file)
                     finded_files.append(ruta_completa)
 
-        if os.path.exists(target_dir):
-            shutil.rmtree(target_dir)
-
-        os.makedirs(target_dir)
         for file in finded_files:
             target = os.path.join(target_dir, os.path.basename(file))
             shutil.copy2(file, target)
@@ -125,13 +121,15 @@ class XrayScan(ToolGateway):
             result = subprocess.run(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
+            if result.returncode == 1:
+                raise ValueError(f"Error al ejecutar jf scan (Posible credenciales malas o sin alcance al servidor de artifactory)")
             scan_result = json.loads(result.stdout)
             file_result = "scan_result.json"
             with open(file_result, "w") as file:
                 json.dump(scan_result, file, indent=4)
             return file_result
         except subprocess.CalledProcessError as error:
-            logger.error(f"Error al escanear dependencias: {error}")
+            logger.error(f"Error al ejecutar jf scan: {error}")
 
     def run_tool_dependencies_sca(
         self, remote_config, pipeline_name, exclusions, token
