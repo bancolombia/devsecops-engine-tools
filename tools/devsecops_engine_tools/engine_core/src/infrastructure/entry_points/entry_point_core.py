@@ -80,17 +80,25 @@ def init_engine_core(
         args["remote_config_repo"], "/resources/ConfigTool.json"
     )
 
-    findings_list, input_core = HandleScan(
-        vulnerability_management_gateway,
-        secrets_manager_gateway,
-        devops_platform_gateway,
-    ).process(args, config_tool)
+    if config_tool[args["tool"].upper()]["ENABLED"] == "true":
+        findings_list, input_core = HandleScan(
+            vulnerability_management_gateway,
+            secrets_manager_gateway,
+            devops_platform_gateway,
+        ).process(args, config_tool)
 
-    scan_result = BreakBuild(devops_platform_gateway, print_table_gateway).process(
-        findings_list,
-        input_core,
-    )
-    if config_tool["METRICS_MANAGER"]["ENABLED"] == "true":
-        MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(
-            config_tool, input_core, args, scan_result
+        scan_result = BreakBuild(devops_platform_gateway, print_table_gateway).process(
+            findings_list,
+            input_core,
+        )
+        if config_tool["METRICS_MANAGER"]["ENABLED"] == "true":
+            MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(
+                config_tool, input_core, args, scan_result
+            )
+    else:
+        print(
+            devops_platform_gateway.message(
+                "warning",
+                "DevSecOps Engine Tool - {0} in maintenance...".format(args["tool"]),
+            )
         )

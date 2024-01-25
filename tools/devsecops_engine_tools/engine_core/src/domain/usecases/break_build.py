@@ -19,24 +19,25 @@ class BreakBuild:
     def __init__(
         self,
         devops_platform_gateway: DevopsPlatformGateway,
-        printer_table_gateway: PrinterTableGateway
+        printer_table_gateway: PrinterTableGateway,
     ):
         self.devops_platform_gateway = devops_platform_gateway
         self.printer_table_gateway = printer_table_gateway
-    
-    def process(self, findings_list: "list[Finding]", input_core: InputCore):
 
+    def process(self, findings_list: "list[Finding]", input_core: InputCore):
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
         threshold = input_core.threshold_defined
         exclusions = input_core.totalized_exclusions
         custom_message = input_core.custom_message_break_build
 
-        scan_result = {"vulnerabilities": {}, "compliances": {}}
+        scan_result = {
+            "findings_excluded": [],
+            "vulnerabilities": {},
+            "compliances": {},
+        }
 
         if len(findings_list) != 0:
-
-
             # Esta lista de excluidas no se imprimira para dejar un resultado más limpio
             findings_excluded_list = list(
                 filter(
@@ -46,6 +47,17 @@ class BreakBuild:
                         for exclusion in exclusions
                     ),
                     findings_list,
+                )
+            )
+
+            scan_result["findings_excluded"] = list(
+                map(
+                    lambda item: {
+                        "id": item.id,
+                        "severity": item.severity,
+                        "category": item.category.value,
+                    },
+                    findings_excluded_list,
                 )
             )
 
@@ -163,7 +175,7 @@ class BreakBuild:
                         "critical": vulnerabilities_critical,
                         "high": vulnerabilities_high,
                         "medium": vulnerabilities_medium,
-                        "low": vulnerabilities_low
+                        "low": vulnerabilities_low,
                     },
                     "status": "failed",
                     "found": list(
@@ -203,7 +215,7 @@ class BreakBuild:
                         "critical": vulnerabilities_critical,
                         "high": vulnerabilities_high,
                         "medium": vulnerabilities_medium,
-                        "low": vulnerabilities_low
+                        "low": vulnerabilities_low,
                     },
                     "status": "succeeded",
                     "found": list(
@@ -226,28 +238,25 @@ class BreakBuild:
                         devops_platform_gateway.message(
                             "error",
                             "Compliance issues count (critical: {0}) is greater than or equal to failure criteria (critical: {1})".format(
-                                compliance_critical,
-                                threshold.compliance.critical
+                                compliance_critical, threshold.compliance.critical
                             ),
                         )
                     )
                     print(devops_platform_gateway.result_pipeline("failed"))
                     status = "failed"
                 scan_result["compliances"] = {
-                        "threshold": {
-                            "critical": compliance_critical
-                        },
-                        "status": status,
-                        "found": list(
-                            map(
-                                lambda item: {
-                                    "id": item.id,
-                                    "severity": item.severity,
-                                },
-                                compliances_without_exclusions_list,
-                            )
-                        ),
-                    }
+                    "threshold": {"critical": compliance_critical},
+                    "status": status,
+                    "found": list(
+                        map(
+                            lambda item: {
+                                "id": item.id,
+                                "severity": item.severity,
+                            },
+                            compliances_without_exclusions_list,
+                        )
+                    ),
+                }
             else:
                 print(
                     devops_platform_gateway.message(

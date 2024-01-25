@@ -1,6 +1,9 @@
 import json
 import os
+from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities import settings
 
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 def generate_file_from_tool(tool, result_list, rules_doc):
     if tool == "CHECKOV":
@@ -61,10 +64,8 @@ def generate_file_from_tool(tool, result_list, rules_doc):
 
             absolute_path = os.path.abspath(file_name)
             return absolute_path
-        except KeyError as e:
-            print(f"Dict KeyError in checks integration: {e}")
         except Exception as ex:
-            print(f"Error during handling checkov json integrator {ex}")
+            logger.error(f"Error during handling checkov json integrator {ex}")
 
 
 def update_field(elem, field, new_value):
