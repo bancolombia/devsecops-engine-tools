@@ -11,7 +11,10 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpe
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
+from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities import settings
 
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class PrismaCloudManagerScan(ToolGateway):
     def download_twistcli(
@@ -79,7 +82,7 @@ class PrismaCloudManagerScan(ToolGateway):
                         with open(file_name, "a") as file:
                             file.write(result_file + "\n")
                     except subprocess.CalledProcessError as e:
-                        print(f"Error during image scan of {repository}: {e.stderr}")
+                        logger.error(f"Error during image scan of {repository}: {e.stderr}")
 
         return images_scanned
 
@@ -117,6 +120,6 @@ class PrismaCloudManagerScan(ToolGateway):
             return images_scanned
 
         except Exception as ex:
-            print(f"An overall error occurred: {ex}")
+            logger.error(f"An overall error occurred: {ex}")
 
         return 0
