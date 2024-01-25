@@ -9,7 +9,10 @@ from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api impo
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.config_gateway import (
     ConfigGateway,
 )
+from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities import settings
 
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class AzureRemoteConfig(ConfigGateway):
     def get_remote_config(self, dict_args):
@@ -30,5 +33,5 @@ class AzureRemoteConfig(ConfigGateway):
             if variable == "release_name":
                 return ReleaseVariables.Release_Definitionname.value()
         except Exception as ex:
-            print(self.logging("info", str(ex)))
+            logger.warning(f"Error getting variable {str(ex)}")
             return None

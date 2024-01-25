@@ -127,6 +127,67 @@ class TestCheckovTool(unittest.TestCase):
         # Verificar que el resultado es el esperado
         self.assertIsNone(result)
 
+    def test_configurate_external_checks_secret_tool_None(self):
+        # Llamar al método que se está probando
+        result = self.checkov_tool.configurate_external_checks(
+            None, None
+        )
+
+        # Verificar que el resultado es el esperado
+        self.assertIsNone(result)
+
+    @mock.patch(
+        "devsecops_engine_utilities.github.infrastructure.github_api.GithubApi.download_latest_release_assets",
+        autospec=True,
+    )
+    def test_configurate_external_checks_error(self, mock_github_api):
+        # Configurar valores simulados
+        json_data = {
+            "CHECKOV": {
+                "VERSION": "2.3.296",
+                "SEARCH_PATTERN": ["AW", "NU"],
+                "IGNORE_SEARCH_PATTERN": [
+                    "test",
+                ],
+                "USE_EXTERNAL_CHECKS_GIT": "False",
+                "EXTERNAL_CHECKS_GIT": "rules",
+                "EXTERNAL_GIT_SSH_HOST": "github",
+                "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "fingerprint",
+                "USE_EXTERNAL_CHECKS_DIR": "True",
+                "EXTERNAL_DIR_OWNER": "test",
+                "EXTERNAL_DIR_REPOSITORY": "repository",
+                "EXTERNAL_DIR_ASSET_NAME": "rules",
+                "EXCLUSIONS_PATH": "Exclusions.json",
+                "MESSAGE_INFO_SAST_RM": "message test",
+                "THRESHOLD": {
+                    "VULNERABILITY": {
+                        "Critical": 10,
+                        "High": 3,
+                        "Medium": 20,
+                        "Low": 30,
+                    },
+                    "COMPLIANCE": {"Critical": 4},
+                },
+                "RULES": "",
+            }
+        }
+        mock_config_tool = ConfigTool(json_data, "CHECKOV")
+        mock_secret_tool = {
+            "github_token": "mock_github_token",
+            "repository_ssh_host": "repository_ssh_host",
+        }
+
+        # Configurar el valor simulado de retorno para ciertos métodos
+        mock_github_api.side_effect = Exception("Simulated error")
+
+        # Llamar al método que se está probando
+        result = self.checkov_tool.configurate_external_checks(
+            mock_config_tool, mock_secret_tool
+        )
+
+        # Verificar que el resultado es el esperado
+        self.assertIsNone(result)
+
     def test_execute(self):
         checkov_config = MagicMock()
         checkov_config.path_config_file = "/path/to/config/"

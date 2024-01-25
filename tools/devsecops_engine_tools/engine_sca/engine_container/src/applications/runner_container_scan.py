@@ -25,10 +25,10 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
 
 def runner_engine_container(dict_args, config_tool, token):
     try:
-        if config_tool['ENGINE_CONTAINER'].lower() == 'trivy':
+        if config_tool['ENGINE_CONTAINER']["TOOL"].lower() == 'trivy':
             tool_run = TrivyScan()
             tool_deseralizator = TrivyDeserializator()
-        elif config_tool['ENGINE_CONTAINER'].lower() == 'prisma':
+        elif config_tool['ENGINE_CONTAINER']["TOOL"].lower() == 'prisma':
             tool_run = PrismaCloudManagerScan()
             tool_deseralizator = PrismaDeserealizator()
         tool_images = DockerImages()
