@@ -21,9 +21,8 @@ def test_application_core(mock_entry_point_tool):
 @mock.patch(
     "devsecops_engine_tools.engine_core.src.applications.runner_engine_core.init_engine_core"
 )
-@mock.patch("devsecops_engine_tools.engine_core.src.applications.runner_engine_core.MyLogger.get_logger")
 @mock.patch("builtins.print")
-def test_application_core_exception(mock_print, mock_logger ,mock_entry_point_tool):
+def test_application_core_exception(mock_print, mock_entry_point_tool):
     # Mock the necessary methods or properties to simulate an exception
     mock_entry_point_tool.side_effect = Exception("Simulated error")
 

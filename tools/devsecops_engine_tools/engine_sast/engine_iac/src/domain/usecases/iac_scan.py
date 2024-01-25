@@ -32,17 +32,19 @@ class IacScan:
             remote_config_path="/SAST/IAC/Exclusions/Exclusions.json",
         )
 
-        config_tool, folders_to_scan = self.complete_config_tool(
+        config_tool, folders_to_scan, skip_tool = self.complete_config_tool(
             init_config_tool, exclusions, tool
         )
 
-        findings_list, path_file_results = self.tool_gateway.run_tool(
-            config_tool,
-            folders_to_scan,
-            dict_args["environment"],
-            dict_args["platform"],
-            secret_tool,
-        )
+        findings_list, path_file_results = [], None
+        if skip_tool == "false":
+            findings_list, path_file_results = self.tool_gateway.run_tool(
+                config_tool,
+                folders_to_scan,
+                dict_args["environment"],
+                dict_args["platform"],
+                secret_tool,
+            )
 
         totalized_exclusions = []
         totalized_exclusions.extend(
@@ -65,6 +67,7 @@ class IacScan:
 
     def complete_config_tool(self, data_file_tool, exclusions, tool):
         config_tool = ConfigTool(json_data=data_file_tool, tool=tool)
+        skip_tool = "false"
 
         config_tool.exclusions = exclusions
         config_tool.scope_pipeline = self.devops_platform_gateway.get_variable(
@@ -77,11 +80,13 @@ class IacScan:
             config_tool.exclusions_scope = config_tool.exclusions.get(
                 config_tool.scope_pipeline
             ).get(tool)
+            skip_tool = "true" if config_tool.exclusions.get(config_tool.scope_pipeline).get("SKIP_TOOL") else "false"
+
         folders_to_scan = self.search_folders(
             config_tool.search_pattern, config_tool.ignore_search_pattern
         )
 
-        return config_tool, folders_to_scan
+        return config_tool, folders_to_scan, skip_tool
 
     def search_folders(self, search_pattern, ignore_pattern):
         current_directory = os.getcwd()
