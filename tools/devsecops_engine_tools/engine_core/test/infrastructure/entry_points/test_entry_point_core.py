@@ -72,14 +72,16 @@ class TestEntryPointCore(unittest.TestCase):
             "token_engine_container": None,
         }
 
-        mock_config_tool = {"METRICS_MANAGER": {"ENABLED": "true"}}
+        mock_config_tool = {
+            "METRICS_MANAGER": {"ENABLED": "true"},
+            "ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}
+        }
         mock_findings_list = []
         mock_input_core = {}
         mock_scan_result = {}
 
         mock_get_inputs_from_cli.return_value = mock_args
         mock_devops_platform_gateway = mock.Mock()
-        print_table_gateway = mock.Mock()
 
         mock_devops_platform_gateway.get_remote_config.return_value = mock_config_tool
 
@@ -112,3 +114,42 @@ class TestEntryPointCore(unittest.TestCase):
         mock_metrics_manager.return_value.process.assert_called_once_with(
             mock_config_tool, mock_input_core, mock_args, mock_scan_result
         )
+
+    @mock.patch("builtins.print")
+    @mock.patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core.get_inputs_from_cli"
+    )
+    def test_init_engine_core_disabled(self, mock_get_inputs_from_cli ,mock_print):
+        # Set up mock arguments
+        mock_args = {
+            "remote_config_repo": "https://github.com/example/repo",
+            "tool": "engine_iac",
+            "environment": "dev",
+            "platform": "eks",
+            "use_secrets_manager": "false",
+            "use_vulnerability_management": "false"
+        }
+
+        mock_get_inputs_from_cli.return_value = mock_args
+
+        mock_config_tool = {
+            "METRICS_MANAGER": {"ENABLED": "true"},
+            "ENGINE_IAC": {"ENABLED": "false", "TOOL": "tool"}
+        }
+        mock_devops_platform_gateway = mock.Mock()
+
+        mock_devops_platform_gateway.get_remote_config.return_value = mock_config_tool
+
+        # Call the function
+        init_engine_core(
+            vulnerability_management_gateway=mock.Mock(),
+            secrets_manager_gateway=mock.Mock(),
+            devops_platform_gateway=mock_devops_platform_gateway,
+            print_table_gateway=mock.Mock(),
+            metrics_manager_gateway=mock.Mock(),
+        )
+
+        # Assert
+        assert mock_print.called
+
+
