@@ -30,6 +30,7 @@ def get_inputs_from_cli(args):
         required=True,
         help="",
     )
+    parser.add_argument("--folder_path", type=str, required=False, help="")
     parser.add_argument(
         "--environment", choices=["dev", "qa", "pdn"], type=str, required=True, help=""
     )
@@ -57,6 +58,7 @@ def get_inputs_from_cli(args):
     return {
         "remote_config_repo": args.remote_config_repo,
         "tool": args.tool,
+        "folder_path": args.folder_path,
         "environment": args.environment,
         "platform": args.platform,
         "use_secrets_manager": args.use_secrets_manager,
