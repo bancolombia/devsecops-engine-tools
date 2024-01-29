@@ -1,5 +1,6 @@
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
+from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gateways.config_gateway import (
     ConfigGateway,
 )
@@ -28,6 +29,25 @@ class SetInputCore:
         """
         return self.tool_remote.get_variable(variable)
 
+    def get_exclusions(self, exclusions_data, pipeline_name):
+        list_exclusions = []
+        for key, value in exclusions_data.items():
+            if (key == "All") or (key == pipeline_name):
+                exclusions = [
+                    Exclusions(
+                        id=item.get("id", ""),
+                        where=item.get("where", ""),
+                        cve_id=item.get("cve_id", ""),
+                        create_date=item.get("create_date", ""),
+                        expired_date=item.get("expired_date", ""),
+                        severity=item.get("severity", ""),
+                        hu=item.get("hu", ""),
+                    )
+                    for item in value["XRAY"]
+                ]
+                list_exclusions.extend(exclusions)
+        return list_exclusions
+
     def set_input_core(self, dependencies_scanned):
         """
         Set the input core.
@@ -36,7 +56,10 @@ class SetInputCore:
             dict: Input core.
         """
         return InputCore(
-            [],
+            self.get_exclusions(
+                self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"),
+                self.get_variable("pipeline_name"),
+            ),
             Threshold(
                 self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")["THRESHOLD"]
             ),
@@ -44,6 +67,6 @@ class SetInputCore:
             self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")[
                 "MESSAGE_INFO_SCA_RM"
             ],
-            self.get_variable("release_name"),
-            "Release",
+            self.get_variable("pipeline_name"),
+            "Build",
         )
