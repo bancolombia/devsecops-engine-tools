@@ -37,7 +37,7 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 class CheckovTool(ToolGateway):
     CHECKOV_CONFIG_FILE = "checkov_config.yaml"
     TOOL = "CHECKOV"
-    framework_mapping = {"RULES_DOCKER": "dockerfile", "RULES_K8S": "kubernetes"}
+    framework_mapping = {"RULES_DOCKER": "dockerfile", "RULES_K8S": "kubernetes", "RULES_CLOUDFORMATION": "cloudformation"}
 
 
     def create_config_file(self, checkov_config: CheckovConfig):

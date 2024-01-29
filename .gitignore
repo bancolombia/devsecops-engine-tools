@@ -41,6 +41,7 @@ _core_test*
 results.json
 RULES_DOCKERcheckov_config.yaml
 RULES_K8Scheckov_config.yaml
+RULES_CLOUDFORMATIONcheckov_config.yaml
 log/
 twistcli
 *_scan_result.json
