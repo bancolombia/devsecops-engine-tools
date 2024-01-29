@@ -100,9 +100,9 @@ class XrayScan(ToolGateway):
     def find_artifacts(self, pattern, working_dir, target_dir):
         if os.path.exists(target_dir):
             shutil.rmtree(target_dir)
- 
+
         os.makedirs(target_dir)
-        
+
         finded_files = []
         extension_pattern = re.compile(pattern, re.IGNORECASE)
         for root, dirs, files in os.walk(working_dir):

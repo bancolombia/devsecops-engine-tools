@@ -115,4 +115,41 @@ class HandleScan:
             else:
                 secret_sca = dict_args["token_engine_dependencies"]
             findings_list, input_core = runner_engine_dependencies(dict_args, config_tool, secret_sca)
+
+            if dict_args["use_vulnerability_management"] == "true":
+                try:
+                    self.vulnerability_management.send_vulnerability_management(
+                        VulnerabilityManagement(
+                            config_tool["ENGINE_DEPENDENCIES"]["TOOL"],
+                            input_core,
+                            dict_args,
+                            secret_tool,
+                            config_tool,
+                            self.devops_platform_gateway.get_source_code_management_uri(),
+                            self.devops_platform_gateway.get_variable("branch_name"),
+                            self.devops_platform_gateway.get_base_compact_remote_config_url(
+                                dict_args["remote_config_repo"]
+                            ),
+                            self.devops_platform_gateway.get_variable("access_token"),
+                            self.devops_platform_gateway.get_variable("build_execution_id"),
+                            self.devops_platform_gateway.get_variable("build_id"),
+                            self.devops_platform_gateway.get_variable("branch_tag"),
+                            self.devops_platform_gateway.get_variable("commit_hash"),
+                            self.devops_platform_gateway.get_variable("environment"),
+                        )
+                    )
+                except ExceptionVulnerabilityManagement as ex1:
+                    logger.error(str(ex1))
+                try:
+                    input_core.totalized_exclusions.extend(
+                        self.vulnerability_management.get_findings_risk_acceptance(
+                            input_core.scope_pipeline,
+                            dict_args,
+                            secret_tool,
+                            config_tool,
+                        )
+                    )
+                except ExceptionFindingsRiskAcceptance as ex2:
+                    logger.error(str(ex2))
+
             return findings_list, input_core
