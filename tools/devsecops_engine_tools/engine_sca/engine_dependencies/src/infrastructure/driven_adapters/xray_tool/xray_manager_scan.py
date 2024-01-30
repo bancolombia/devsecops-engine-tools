@@ -114,10 +114,11 @@ class XrayScan(ToolGateway):
         for file in finded_files:
             target = os.path.join(target_dir, os.path.basename(file))
             shutil.copy2(file, target)
+            print(f"File to scan: {file}")
 
     def scan_dependencies(self, prefix, target_dir_name):
         try:
-            command = [prefix, "scan", "--format=simple-json", f"./{target_dir_name}/"]
+            command = [prefix, "scan", "--format=json", f"./{target_dir_name}/"]
             result = subprocess.run(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
