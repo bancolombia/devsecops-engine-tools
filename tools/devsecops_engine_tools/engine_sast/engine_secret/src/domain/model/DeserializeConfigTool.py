@@ -1,6 +1,7 @@
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
+from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import BuildVariables
 
-class TrufflehogDeserializeConfig:
+class DeserializeConfigTool:
     def __init__(self, json_data, tool):
         self.version = json_data[tool]["VERSION"]
         self.search_pattern = ""
@@ -10,6 +11,7 @@ class TrufflehogDeserializeConfig:
         self.level_compliance = Threshold(json_data[tool]['THRESHOLD'])
         self.rules_data_type = ""
         self.scope_pipeline = ""
+        # BuildVariables.Build_DefinitionName.value()
         self.exclusions = None
         self.exclusions_all = None
         self.exclusions_scope = None

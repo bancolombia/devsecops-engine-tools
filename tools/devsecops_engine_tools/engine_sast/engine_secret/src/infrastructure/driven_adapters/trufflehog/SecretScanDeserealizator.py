@@ -7,13 +7,11 @@ from dataclasses import dataclass
 
 
 @dataclass
-class TrufflehogDeserealizator(DeseralizatorGateway):
+class SecretScanDeserealizator(DeseralizatorGateway):
 
     def get_list_vulnerability(self, results_scan_list: list) -> "list[Finding]":
         list_open_vulnerbailities = []
-        # TODO OCVELEZ: Mirar si es posible hacer uso de la librería https://pypi.org/project/attrdict/ para mejorar
-        # la forma de mapear de json a objetos
-        
+       
         for result in results_scan_list:            
             where_text, line = self.get_where_correctly(result)
             vulnerability_open = Finding(
