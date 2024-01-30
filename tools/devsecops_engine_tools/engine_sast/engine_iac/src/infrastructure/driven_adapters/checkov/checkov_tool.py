@@ -145,16 +145,16 @@ class CheckovTool(ToolGateway):
                     soft_fail=False,
                     directories=folder,
                     external_checks_git=[
-                        f"{config_tool.external_checks_git}/kubernetes"
+                        f"{config_tool.external_checks_git}/{self.framework_mapping[rule]}"
                     ]
                     if config_tool.use_external_checks_git == "True"
                     and agent_env is not None
-                    and rule == "RULES_K8S"
+                    and rule in ["RULES_K8S", "RULES_CLOUDFORMATION"]
                     else [],
                     env=agent_env,
                     external_checks_dir=f"/tmp/{config_tool.external_asset_name}"
                     if config_tool.use_external_checks_dir == "True"
-                    and rule == "RULES_K8S"
+                    and rule in ["RULES_K8S", "RULES_CLOUDFORMATION"]
                     else [],
                 )
 
