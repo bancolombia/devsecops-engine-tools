@@ -9,4 +9,4 @@ class DeseralizatorGateway(metaclass=ABCMeta):
     
     @abstractmethod
     def get_where_correctly(self, results_scan_list: any):
-        "Where"
+        "Transform Where"

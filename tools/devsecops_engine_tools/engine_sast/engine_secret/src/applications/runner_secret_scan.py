@@ -1,23 +1,22 @@
 from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import AzureMessageLoggingPipeline
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway import ToolGateway
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.entry_points.entry_point_tool import engine_secret_scan
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure.azure_devops_config import AzureDevops
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.TrufflehogRun import TrufflehogRun
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.SecretScanDeserealizator import SecretScanDeserealizator
 
-def runner_secret_scan(remote_config_repo, remote_config_path, tool):
+def runner_secret_scan(dict_args, tool):
     try:
-        (
-            remote_config_repo,
-            remote_config_path,
-            tool,
-        ) = (
-            remote_config_repo,
-            remote_config_path,
-            tool
-        )
-
+        devops_platform_gateway = AzureDevops()
+        tool_deserealizator = SecretScanDeserealizator()
+        tool_gateway = None
+        if (tool == "TRUFFLEHOG"):
+            tool_gateway = TrufflehogRun()
         return engine_secret_scan(
-            remote_config_repo=remote_config_repo,
-            remote_config_path=remote_config_path,
+            devops_platform_gateway = devops_platform_gateway,
+            tool_gateway = tool_gateway,
+            dict_args = dict_args,
             tool=tool,
+            tool_deserealizator = tool_deserealizator,
         )
     except Exception as e:
         print(
