@@ -103,10 +103,7 @@ class HandleScan:
         elif "engine_secret" in dict_args["tool"]:
             findings_list, input_core = runner_secret_scan(
                 dict_args,
-                # dict_args["remote_config_repo"],
-                # "SAST/Secret_Scan/configTools.json",
                 config_tool,
-                # "trufflehog"
             )
             return findings_list, input_core
         elif "engine_dependencies" in dict_args["tool"]:

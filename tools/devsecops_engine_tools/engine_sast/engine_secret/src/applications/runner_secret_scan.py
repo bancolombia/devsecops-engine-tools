@@ -1,8 +1,7 @@
-from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import AzureMessageLoggingPipeline
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.entry_points.entry_point_tool import engine_secret_scan
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure.azure_devops_config import AzureDevops
-from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.TrufflehogRun import TrufflehogRun
-from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.SecretScanDeserealizator import SecretScanDeserealizator
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run import TrufflehogRun
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_deserealizator import SecretScanDeserealizator
 
 def runner_secret_scan(dict_args, tool):
     try:
@@ -19,12 +18,7 @@ def runner_secret_scan(dict_args, tool):
             tool_deserealizator = tool_deserealizator,
         )
     except Exception as e:
-        print(
-            AzureMessageLoggingPipeline.WarningLogging.get_message(
-                "Error SCAN: {0} ".format(str(e))
-            )
-        )
-
+        raise Exception(f"Error engine_secret : {str(e)}")
 
 if __name__ == "__main__":
     runner_secret_scan()
