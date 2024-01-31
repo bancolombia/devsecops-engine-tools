@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 from unittest import mock
-from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure.azure_devops_config import (
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure.azure_devops import (
     AzureDevops,
 )
 
