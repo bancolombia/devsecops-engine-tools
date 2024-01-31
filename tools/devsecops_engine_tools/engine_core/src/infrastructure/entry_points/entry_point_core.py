@@ -80,9 +80,9 @@ def init_engine_core(
         args["remote_config_repo"], "/resources/ConfigTool.json"
     )
 
-    # if config_tool[args["tool"].upper()]["ENABLED"] == "true":
-    if True:
-        config_tool = "TRUFFLEHOG"
+    if config_tool[args["tool"].upper()]["ENABLED"] == "true":
+    # if True:
+    #     config_tool = "TRUFFLEHOG"
         findings_list, input_core = HandleScan(
             vulnerability_management_gateway,
             secrets_manager_gateway,
