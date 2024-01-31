@@ -1,5 +1,5 @@
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.entry_points.entry_point_tool import engine_secret_scan
-from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure.azure_devops_config import AzureDevops
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure.azure_devops import AzureDevops
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run import TrufflehogRun
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_deserealizator import SecretScanDeserealizator
 
