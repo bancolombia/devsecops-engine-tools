@@ -109,8 +109,6 @@ class ImportScanRestConsumer:
                 raise ApiError(response.json())
             logger.info(f"Sucessfull {response}")
             response = ImportScanRequest.from_dict(response.json())
-        except response.exceptions.Timeout:
-            logger.error("The request has exceeded the maximum allowed time.")
         except Exception as e:
             logger.error(f"from dict import Scan: {response.json()}")
             raise ApiError(e)
