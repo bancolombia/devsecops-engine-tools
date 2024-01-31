@@ -8,11 +8,11 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_
 
 class TestAzureDevops(unittest.TestCase):
     @mock.patch(
-        "devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azure.azure_devops.AzureDevopsApi",
+        "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure.azure_devops.AzureDevopsApi",
         autospec=True,
     )
     @mock.patch(
-        "devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azure.azure_devops.SystemVariables",
+        "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure.azure_devops.SystemVariables",
         autospec=True,
     )
     def test_get_remote_config(self, mock_system_variables, mock_azure_devops_api):
@@ -40,7 +40,7 @@ class TestAzureDevops(unittest.TestCase):
         assert result == {"key": "value"}
 
     @mock.patch(
-        "devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azure.azure_devops.ReleaseVariables",
+        "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure.azure_devops.ReleaseVariables",
         autospec=True,
     )
     def test_get_variable(self, mock_release_variables):
