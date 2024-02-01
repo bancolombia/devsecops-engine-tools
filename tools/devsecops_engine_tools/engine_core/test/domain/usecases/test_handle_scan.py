@@ -158,15 +158,38 @@ class TestHandleScan(unittest.TestCase):
         self.handle_scan.process(dict_args, config_tool)
         mock_print.assert_called_once_with("not yet enabled")
 
-    @mock.patch("builtins.print")
-    def test_process_with_engine_secret(self, mock_print):
+    @mock.patch("devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_secret_scan")
+    def test_process_with_engine_secret(self, mock_runner_secret_scan):
         dict_args = {
             "use_secrets_manager": "false",
             "tool": "engine_secret",
+            "remote_config_repo": "test_repo",
         }
         config_tool = {"ENGINE_SECRET": "some_config"}
-        self.handle_scan.process(dict_args, config_tool)
-        mock_print.assert_called_once_with("not yet enabled")
+
+        # Mock the runner_engine_iac function and its return values
+        findings_list = ["finding1", "finding2"]
+        input_core = InputCore(
+            totalized_exclusions=[],
+            threshold_defined=Threshold,
+            path_file_results="test/file",
+            custom_message_break_build="message",
+            scope_pipeline="pipeline",
+            stage_pipeline="Release",
+        )
+        mock_runner_secret_scan.return_value = findings_list, input_core
+
+        # Call the process method
+        result_findings_list, result_input_core = self.handle_scan.process(
+            dict_args, config_tool
+        )
+
+        # Assert the expected values
+        self.assertEqual(result_findings_list, findings_list)
+        self.assertEqual(result_input_core, input_core)
+        mock_runner_secret_scan.assert_called_once_with(
+            dict_args, config_tool
+        )
 
     @mock.patch("builtins.print")
     def test_process_with_engine_dependencies(self, mock_print):
