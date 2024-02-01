@@ -43,13 +43,44 @@ class TestAzureDevops(unittest.TestCase):
         "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.ReleaseVariables",
         autospec=True,
     )
-    def test_get_variable(self, mock_release_variables):
+    def test_get_variable_BUILD_REPOSITORY_NAME(self, mock_release_variables):
         azure_devops = AzureDevops()
 
         # Mock the ReleaseVariables class
         mock_release_variables.Release_Definitionname.value.return_value = (
-            "Release_Definitionname"
+            "BUILD_REPOSITORY_NAME"
         )
 
-        result = azure_devops.get_variable("pipeline")
-        assert result == "Release_Definitionname"
+        result = azure_devops.get_variable("BUILD_REPOSITORY_NAME")
+        assert result == "BUILD_REPOSITORY_NAME"
+        
+    @mock.patch(
+    "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.ReleaseVariables",
+    autospec=True,
+    )
+    def test_get_variable_SYSTEM_DEFAULTWORKINGDIRECTORYE(self, mock_release_variables):
+        azure_devops = AzureDevops()
+
+        # Mock the ReleaseVariables class
+        mock_release_variables.Release_Definitionname.value.return_value = (
+            "SYSTEM_DEFAULTWORKINGDIRECTORY"
+        )
+
+        result = azure_devops.get_variable("SYSTEM_DEFAULTWORKINGDIRECTORY")
+        assert result == "SYSTEM_DEFAULTWORKINGDIRECTORY"
+
+    @mock.patch("devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.BuildVariables", autospec=True)
+    def test_get_variable_exception(self, mock_build_variables):
+        azure_devops = AzureDevops()
+
+        # Simular una excepción al intentar obtener la variable
+        mock_build_variables.Build_Repository_Name.value.side_effect = Exception("Simulated exception")
+
+        with self.assertLogs(level="WARNING") as log:
+            result = azure_devops.get_variable("BUILD_REPOSITORY_NAME")
+
+        # Verificar que la excepción fue registrada en los logs
+        self.assertIn("Error getting variable Simulated exception", log.output)
+
+        # Verificar que el resultado es None
+        self.assertIsNone(result)
