@@ -88,39 +88,6 @@ class TestSecretScan(unittest.TestCase):
                     }
                 }
             },
-            # Resultado para el segundo llamado (exclusions)
-            {
-                "All": {
-                    "CHECKOV": [
-                        {
-                            "id": "CKV_K8S_8",
-                            "where": "all",
-                            "create_date": "18112023",
-                            "expired_date": "18032024",
-                            "severity": "HIGH",
-                            "hu": "4338704",
-                        }
-                    ]
-                },
-                "example_pipeline": {
-                    "SKIP_TOOL": {
-                        "create_date": "24012024",
-                        "expired_date": "30012024",
-                        "hu": "3423213",
-                    },
-                    "CHECKOV": [
-                        {
-                            "id": "CKV_K8S_8",
-                            "where": "deployment-configmap.yaml",
-                            "create_date": "18112023",
-                            "expired_date": "18032024",
-                            "severity": "HIGH",
-                            "hu": "4338704",
-                            "pipeline": "true",
-                        }
-                    ],
-                },
-            },
         ]
 
         self.devops_platform_gateway.get_variable.return_value = "example_pipeline"

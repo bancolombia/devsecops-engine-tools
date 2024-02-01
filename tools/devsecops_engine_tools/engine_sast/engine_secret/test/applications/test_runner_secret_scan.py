@@ -37,7 +37,7 @@ def test_runner_secret_scan(mock_entry_point_tool):
 def test_runner_secret_scan_exception(mock_entry_point_tool):
         # Arrange
         dict_args = {'arg1': 'value1', 'arg2': 'value2'}
-        tool = 'CHECKOV'
+        tool = 'TRUFFLEHOG'
         
         # Mock the necessary methods or properties to simulate an exception
         mock_entry_point_tool.side_effect = Exception("Simulated error")
@@ -47,4 +47,4 @@ def test_runner_secret_scan_exception(mock_entry_point_tool):
             runner_secret_scan(dict_args, tool)
 
         # Optionally, you can check the exception message or other details
-        assert str(context.exception) == "Error engine_iac : Simulated error"
+        assert str(context.exception) == "Error engine_secret : Simulated error"
