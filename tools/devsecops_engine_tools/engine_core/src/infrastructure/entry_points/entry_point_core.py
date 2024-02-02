@@ -81,8 +81,6 @@ def init_engine_core(
     )
 
     if config_tool[args["tool"].upper()]["ENABLED"] == "true":
-    # if True:
-    #     config_tool = "TRUFFLEHOG"
         findings_list, input_core = HandleScan(
             vulnerability_management_gateway,
             secrets_manager_gateway,
