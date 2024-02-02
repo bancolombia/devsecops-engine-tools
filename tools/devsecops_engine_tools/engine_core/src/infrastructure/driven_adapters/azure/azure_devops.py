@@ -53,7 +53,7 @@ class AzureDevops(DevopsPlatformGateway):
     def get_source_code_management_uri(self):
         source_code_management_uri = (
             f"{SystemVariables.System_TeamFoundationCollectionUri.value()}"
-            f"{BuildVariables.Build_Project_Name.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
+            f"{SystemVariables.System_TeamProject.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
         )
         return source_code_management_uri.replace(" ", "%20")
 
