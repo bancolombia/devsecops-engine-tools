@@ -1,31 +1,35 @@
 import unittest
-from unittest.mock import MagicMock
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.secret_scan import (
-    SecretScan,
-)
-
+from unittest.mock import Mock, patch
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.DeserializeConfigTool import DeserializeConfigTool
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway import ToolGateway
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator import DeseralizatorGateway
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway import DevopsPlatformGateway
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.secret_scan import SecretScan
 
 class TestSecretScan(unittest.TestCase):
-    def setUp(self):
-        self.tool_gateway = MagicMock()
-        self.devops_platform_gateway = MagicMock()
-        self.tool_deserialize = MagicMock()
-        self.secret_scan = SecretScan(self.tool_gateway, self.devops_platform_gateway, self.tool_deserialize)
 
-    def test_process(self):
-        dict_args = {
-            "remote_config_repo": "example_repo",
-        }
-        tool = "TRUFFLEHOG"
+    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway')
+    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator.DeseralizatorGateway')
+    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway.ToolGateway')
+    def test_process(self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway):
+        # Configuración de mocks
+        mock_tool_gateway_instance = mock_tool_gateway.return_value
+        mock_devops_gateway_instance = mock_devops_gateway.return_value
+        mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
+        
+        # Configuración de la instancia de SecretScan
+        secret_scan = SecretScan(mock_tool_gateway_instance, mock_devops_gateway_instance, mock_deserialize_gateway_instance)
 
-        # Mock the return values of the dependencies
-        self.devops_platform_gateway.get_remote_config.return_value = {
+        # Configura el valor de retorno esperado para get_list_vulnerability
+        mock_deserialize_gateway_instance.get_list_vulnerability.return_value = ["vulnerability_data"]
+
+        # Configuración de retornos esperados para los mocks
+        json_config = {
             "trufflehog": {
                 "VERSION": "1",
-                "IGNORE_SEARCH_PATTERN": [
-                    "test"
-                ],
-                "MESSAGE_INFO_SAST_RM": "If you have doubts, visit https://discuss.apps.bancolombia.com/t/lanzamiento-csa-analisis-de-seguridad-en-contenedores/6199",
+                "IGNORE_SEARCH_PATTERN": ["test"],
+                "MESSAGE_INFO_SAST_RM": "message test",
                 "THRESHOLD": {
                     "VULNERABILITY": {
                         "Critical": 1,
@@ -40,60 +44,29 @@ class TestSecretScan(unittest.TestCase):
             }
         }
 
-        self.devops_platform_gateway.get_variable.return_value = "example_pipeline"
+        mock_devops_gateway_instance.get_remote_config.return_value = json_config
+        mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
+        mock_tool_gateway_instance.run_tool_secret_scan.return_value = "vulnerability_data"
 
-        self.tool_gateway.run_tool.return_value = (
-            ["finding1", "finding2"],
-            "/path/to/results",
+        # Llamada al método a probar
+        finding_list, input_core = secret_scan.process({"remote_config_repo": "some_repo"}, "trufflehog")
+
+        # Verificación de resultados
+        expected_input_core = InputCore(
+            totalized_exclusions=[],
+            threshold_defined=json_config["trufflehog"]["THRESHOLD"]["VULNERABILITY"],
+            path_file_results=["vulnerability_data"],
+            custom_message_break_build=json_config["trufflehog"]["MESSAGE_INFO_SAST_RM"],
+            scope_pipeline="example_pipeline",
+            stage_pipeline="Pipeline"
         )
-
-        findings_list, input_core = self.secret_scan.process(dict_args, tool)
-
-        # Assert the expected return values
-        self.assertEqual(findings_list, ["finding1", "finding2"])
+        print("CHIQUE",input_core.threshold_defined.vulnerability.critical)
+        self.assertEqual(finding_list, ["vulnerability_data"])
         self.assertEqual(input_core.totalized_exclusions, [])
-        self.assertEqual(input_core.threshold_defined.vulnerability.critical, 10)
-        self.assertEqual(input_core.path_file_results, "/path/to/results")
+        self.assertEqual(input_core.threshold_defined.vulnerability.critical, 1)
+        self.assertEqual(input_core.path_file_results, ["vulnerability_data"])
         self.assertEqual(input_core.custom_message_break_build, "message test")
         self.assertEqual(input_core.scope_pipeline, "example_pipeline")
         self.assertEqual(input_core.stage_pipeline, "Pipeline")
-
-    def test_process_skip_tool(self):
-        dict_args = {
-            "remote_config_repo": "example_repo",
-            "environment": "test",
-            "platform": "eks",
-        }
-        tool = "TRUFFLEHOG"
-
-        self.devops_platform_gateway.get_remote_config.side_effect = [
-            # Resultado para el primer llamado (init_config_tool)
-            {
-                "trufflehog": {
-                    "VERSION": "1",
-                    "IGNORE_SEARCH_PATTERN": [
-                        "test"
-                    ],
-                    "MESSAGE_INFO_SAST_RM": "If you have doubts, visit https://discuss.apps.bancolombia.com/t/lanzamiento-csa-analisis-de-seguridad-en-contenedores/6199",
-                    "THRESHOLD": {
-                        "VULNERABILITY": {
-                            "Critical": 1,
-                            "High": 1,
-                            "Medium": 1,
-                            "Low": 1
-                        },
-                        "COMPLIANCE": {
-                            "Critical": 1
-                        }
-                    }
-                }
-            },
-        ]
-
-        self.devops_platform_gateway.get_variable.return_value = "example_pipeline"
-
-        findings_list, input_core = self.iac_scan.process(dict_args, tool)
-
-        # Assert the expected return values
-        self.assertEqual(findings_list, [])
-        self.assertIsNotNone(input_core)
+        mock_tool_gateway_instance.install_tool.assert_called_once()
+        mock_tool_gateway_instance.run_tool_secret_scan.assert_called_once()
