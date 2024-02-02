@@ -5,6 +5,7 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.dev
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
     SystemVariables,
     ReleaseVariables,
+    BuildVariables
 )
 from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
     AzureMessageLoggingPipeline,
@@ -43,4 +44,4 @@ class AzureDevops(DevopsPlatformGateway):
         try:
             return ReleaseVariables.Release_Definitionname.value()
         except Exception:
-            return SystemVariables.System_TeamProject.value()
+            return BuildVariables.Build_Project_Name.value()
