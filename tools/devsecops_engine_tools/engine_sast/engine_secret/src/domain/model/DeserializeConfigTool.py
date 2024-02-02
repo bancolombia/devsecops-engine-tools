@@ -11,7 +11,6 @@ class DeserializeConfigTool:
         self.level_compliance = Threshold(json_data[tool]['THRESHOLD'])
         self.rules_data_type = ""
         self.scope_pipeline = ""
-        # BuildVariables.Build_DefinitionName.value()
         self.exclusions = None
         self.exclusions_all = None
         self.exclusions_scope = None

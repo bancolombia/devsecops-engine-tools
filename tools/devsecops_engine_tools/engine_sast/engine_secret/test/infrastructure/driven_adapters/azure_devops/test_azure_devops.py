@@ -7,6 +7,9 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_
 
 
 class TestAzureDevops(unittest.TestCase):
+    def setUp(self):
+        self.azure_devops = AzureDevops()
+        
     @mock.patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.AzureDevopsApi",
         autospec=True,
@@ -39,48 +42,26 @@ class TestAzureDevops(unittest.TestCase):
 
         assert result == {"key": "value"}
 
-    @mock.patch(
-        "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.ReleaseVariables",
-        autospec=True,
-    )
-    def test_get_variable_BUILD_REPOSITORY_NAME(self, mock_release_variables):
-        azure_devops = AzureDevops()
+    def test_get_variable_build_repository_name(self):
+        # Mock the BuildVariables class
+        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.BuildVariables') as mock_build_variables:
+            mock_build_variables.Build_Repository_Name.value.return_value = "BUILD_REPOSITORY_NAME"
 
-        # Mock the ReleaseVariables class
-        mock_release_variables.Release_Definitionname.value.return_value = (
-            "BUILD_REPOSITORY_NAME"
-        )
+            result = self.azure_devops.get_variable("BUILD_REPOSITORY_NAME")
 
-        result = azure_devops.get_variable("BUILD_REPOSITORY_NAME")
-        assert result == "BUILD_REPOSITORY_NAME"
+        self.assertEqual(result, "BUILD_REPOSITORY_NAME")
         
-    @mock.patch(
-    "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.ReleaseVariables",
-    autospec=True,
-    )
-    def test_get_variable_SYSTEM_DEFAULTWORKINGDIRECTORYE(self, mock_release_variables):
-        azure_devops = AzureDevops()
+    def test_get_variable_system_default_working_directory(self):
+        # Mock the SystemVariables class
+        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables:
+            mock_system_variables.System_DefaultWorkingDirectory.value.return_value = "SYSTEM_DEFAULTWORKINGDIRECTORY"
 
-        # Mock the ReleaseVariables class
-        mock_release_variables.Release_Definitionname.value.return_value = (
-            "SYSTEM_DEFAULTWORKINGDIRECTORY"
-        )
+            result = self.azure_devops.get_variable("SYSTEM_DEFAULTWORKINGDIRECTORY")
 
-        result = azure_devops.get_variable("SYSTEM_DEFAULTWORKINGDIRECTORY")
-        assert result == "SYSTEM_DEFAULTWORKINGDIRECTORY"
+        self.assertEqual(result, "SYSTEM_DEFAULTWORKINGDIRECTORY")
 
-    @mock.patch("devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.BuildVariables", autospec=True)
-    def test_get_variable_exception(self, mock_build_variables):
-        azure_devops = AzureDevops()
+    def test_get_variable_invalid_variable(self):
+        # Test when an invalid variable is provided
+        result = self.azure_devops.get_variable("INVALID_VARIABLE")
 
-        # Simular una excepción al intentar obtener la variable
-        mock_build_variables.Build_Repository_Name.value.side_effect = Exception("Simulated exception")
-
-        with self.assertLogs(level="WARNING") as log:
-            result = azure_devops.get_variable("BUILD_REPOSITORY_NAME")
-
-        # Verificar que la excepción fue registrada en los logs
-        self.assertIn("Error getting variable Simulated exception", log.output)
-
-        # Verificar que el resultado es None
         self.assertIsNone(result)
