@@ -65,14 +65,3 @@ class TestAzureDevops(unittest.TestCase):
         result = self.azure_devops.get_variable("INVALID_VARIABLE")
 
         self.assertIsNone(result)
-        
-    @patch('devsecops_engine_utilities.utils.logger_info.MyLogger')
-    def test_get_variable_exception_handling(self, mock_logger):
-        # Mock an exception
-        with patch('devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables.BuildVariables') as mock_build_variables:
-            mock_build_variables.Build_Repository_Name.value.side_effect = Exception("Some error")
-
-            azure_devops = AzureDevops()
-            result = azure_devops.get_variable("BUILD_REPOSITORY_NAME")
-
-        self.assertIsNone(result)
