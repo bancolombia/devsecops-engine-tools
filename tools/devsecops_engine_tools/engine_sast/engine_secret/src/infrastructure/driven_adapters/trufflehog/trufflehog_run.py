@@ -21,24 +21,18 @@ class TrufflehogRun(ToolGateway):
             output = result.stderr.strip()
             reg_exp = r'not found'
             check_tool = re.search(reg_exp, output.decode('utf-8'))
-        
             if check_tool:
-                output = self.run_install()
-    
+                self.run_install()
     def run_install(self):
         command = (
             f"curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin"
         )
         subprocess.run(command, capture_output=True, shell=True)
-        
     def run_install_win(self):
         temp = os.environ.get('AGENT_TEMPDIRECTORY')
-        
-        commandComplete = f"powershell -Command [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; [Net.ServicePointManager]::SecurityProtocol; New-Item -Path {temp} -ItemType Directory -Force; Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh' -OutFile {temp}\install_trufflehog.sh; bash {temp}\install_trufflehog.sh -b C:/Trufflehog/bin; $env:Path += ';C:/Trufflehog/bin'; C:/Trufflehog/bin/trufflehog.exe --version"
-
-        process = subprocess.Popen(commandComplete, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        command_complete = f"powershell -Command [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; [Net.ServicePointManager]::SecurityProtocol; New-Item -Path {temp} -ItemType Directory -Force; Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh' -OutFile {temp}\install_trufflehog.sh; bash {temp}\install_trufflehog.sh -b C:/Trufflehog/bin; $env:Path += ';C:/Trufflehog/bin'; C:/Trufflehog/bin/trufflehog.exe --version"
+        process = subprocess.Popen(command_complete, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         process.communicate()
-        
     def run_tool_secret_scan(self, system_working_dir):
         operative_system = os.environ.get('AGENT_OS')
         reg_exp_os = r'Windows'
@@ -61,7 +55,6 @@ class TrufflehogRun(ToolGateway):
         output = result.stdout.decode("utf-8")
         result = self.decode_output(output)
         return result
-    
     def decode_output(self, decode_output):
         result = []
         if decode_output != '':

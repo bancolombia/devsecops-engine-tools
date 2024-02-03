@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import patch, MagicMock
 from unittest import mock
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops import (
     AzureDevops,
@@ -63,5 +63,16 @@ class TestAzureDevops(unittest.TestCase):
     def test_get_variable_invalid_variable(self):
         # Test when an invalid variable is provided
         result = self.azure_devops.get_variable("INVALID_VARIABLE")
+
+        self.assertIsNone(result)
+        
+    @patch('devsecops_engine_utilities.utils.logger_info.MyLogger')
+    def test_get_variable_exception_handling(self, mock_logger):
+        # Mock an exception
+        with patch('devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables.BuildVariables') as mock_build_variables:
+            mock_build_variables.Build_Repository_Name.value.side_effect = Exception("Some error")
+
+            azure_devops = AzureDevops()
+            result = azure_devops.get_variable("BUILD_REPOSITORY_NAME")
 
         self.assertIsNone(result)
