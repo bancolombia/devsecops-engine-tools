@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.devops_platform_gateway import (
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
