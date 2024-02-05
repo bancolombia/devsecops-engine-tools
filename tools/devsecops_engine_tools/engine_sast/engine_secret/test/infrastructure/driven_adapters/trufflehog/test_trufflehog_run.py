@@ -1,268 +1,72 @@
 import unittest
-from unittest.mock import MagicMock
-from unittest import mock
-from queue import Queue
-from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_tool import (
-    CheckovTool,
-)
-from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.config_tool import (
-    ConfigTool,
-)
-from devsecops_engine_utilities.github.infrastructure.github_api import GithubApi
-import os
+from unittest.mock import patch, MagicMock
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run import TrufflehogRun
 
+class TestTrufflehogRun(unittest.TestCase):
 
-class TestCheckovTool(unittest.TestCase):
-    def setUp(self):
-        self.checkov_tool = CheckovTool()
+    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run.subprocess.run')
+    def test_install_tool_unix(self, mock_subprocess_run):
+        os_patch = patch.dict('os.environ', {'AGENT_OS': 'Linux'})
+        os_patch.start()
+        self.addCleanup(os_patch.stop)
+        # Configuramos un valor de retorno para el subprocess.run
+        mock_subprocess_run.return_value.stdout = b'Trufflehog version 1.0.0'
+        mock_subprocess_run.return_value.stderr = b''
 
-    def test_create_config_file(self):
-        checkov_config = MagicMock()
-        checkov_config.path_config_file = "/path/to/config/"
-        checkov_config.config_file_name = "docker"
-        checkov_config.dict_confg_file = {"key": "value"}
+        trufflehog_run = TrufflehogRun()
+        trufflehog_run.install_tool()
+        # Aseguramos que subprocess.run fue llamado con el comando esperado
+        mock_subprocess_run.assert_called_once_with("trufflehog --version", capture_output=True, shell=True)
 
-        with mock.patch("builtins.open", create=True) as mock_open:
-            self.checkov_tool.create_config_file(checkov_config)
+    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run.os.environ')
+    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run.subprocess.Popen')
+    def test_run_install_win(self, mock_popen, mock_environ):
+        # Configuramos el valor de retorno para os.environ
+        mock_environ.get.return_value = 'C:/temp'
+        
+        trufflehog_run = TrufflehogRun()
+        trufflehog_run.run_install_win()
 
-            mock_open.assert_called_once_with(
-                "/path/to/config/dockercheckov_config.yaml", "w"
-            )
-
-    def test_configurate_external_checks_git(self):
-        # Configurar valores simulados
-        json_data = {
-            "CHECKOV": {
-                "VERSION": "2.3.296",
-                "SEARCH_PATTERN": ["AW", "NU"],
-                "IGNORE_SEARCH_PATTERN": [
-                    "test",
-                ],
-                "USE_EXTERNAL_CHECKS_GIT": "True",
-                "EXTERNAL_CHECKS_GIT": "rules",
-                "EXTERNAL_GIT_SSH_HOST": "github",
-                "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "fingerprint",
-                "USE_EXTERNAL_CHECKS_DIR": "False",
-                "EXTERNAL_DIR_OWNER": "test",
-                "EXTERNAL_DIR_REPOSITORY": "repository",
-                "EXTERNAL_DIR_ASSET_NAME": "rules",
-                "EXCLUSIONS_PATH": "Exclusions.json",
-                "MESSAGE_INFO_SAST_RM": "message test",
-                "THRESHOLD": {
-                    "VULNERABILITY": {
-                        "Critical": 10,
-                        "High": 3,
-                        "Medium": 20,
-                        "Low": 30,
-                    },
-                    "COMPLIANCE": {"Critical": 4},
-                },
-                "RULES": "",
-            }
-        }
-        mock_config_tool = ConfigTool(json_data, "CHECKOV")
-        mock_secret_tool = {
-            "repository_ssh_private_key": "cmVwb3NpdG9yeV9zc2hfcHJpdmF0ZV9rZXkK",
-            "repository_ssh_password": "cmVwb3NpdG9yeV9zc2hfcGFzc3dvcmQK",
-        }
-
-        # Llamar al método que se está probando
-        result = self.checkov_tool.configurate_external_checks(
-            mock_config_tool, mock_secret_tool
+        # Aseguramos que subprocess.Popen fue llamado con el comando esperado
+        expected_command = (
+            "powershell -Command "
+            "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; [Net.ServicePointManager]::SecurityProtocol; " +
+            "New-Item -Path C:/temp -ItemType Directory -Force; " +
+            "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh' -OutFile C:/temp\\install_trufflehog.sh; " +
+            "bash C:/temp\\install_trufflehog.sh -b C:/Trufflehog/bin; " +
+            "$env:Path += ';C:/Trufflehog/bin'; C:/Trufflehog/bin/trufflehog.exe --version"
         )
+        mock_popen.assert_called_once_with(expected_command, stdout=-1, stderr=-1, shell=True)
+        
+#     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run.subprocess.run')
+#     def test_run_tool_secret_scan_unix(self, mock_subprocess_run):
+#         # Configuramos un valor de retorno para el subprocess.run
+#         mock_subprocess_run.return_value.stdout = b'{"vulnerability_data": []}'
+#         mock_subprocess_run.return_value.stderr = b''
 
-        # Verificar que el resultado es el esperado
-        self.assertIsNone(result)
+#         trufflehog_run = TrufflehogRun()
+#         trufflehog_run.run_tool_secret_scan('/path/to/repo')
 
-    @mock.patch(
-        "devsecops_engine_utilities.github.infrastructure.github_api.GithubApi.download_latest_release_assets",
-        autospec=True,
-    )
-    def test_configurate_external_checks_dir(self, mock_github_api):
-        # Configurar valores simulados
-        json_data = {
-            "CHECKOV": {
-                "VERSION": "2.3.296",
-                "SEARCH_PATTERN": ["AW", "NU"],
-                "IGNORE_SEARCH_PATTERN": [
-                    "test",
-                ],
-                "USE_EXTERNAL_CHECKS_GIT": "False",
-                "EXTERNAL_CHECKS_GIT": "rules",
-                "EXTERNAL_GIT_SSH_HOST": "github",
-                "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "fingerprint",
-                "USE_EXTERNAL_CHECKS_DIR": "True",
-                "EXTERNAL_DIR_OWNER": "test",
-                "EXTERNAL_DIR_REPOSITORY": "repository",
-                "EXTERNAL_DIR_ASSET_NAME": "rules",
-                "EXCLUSIONS_PATH": "Exclusions.json",
-                "MESSAGE_INFO_SAST_RM": "message test",
-                "THRESHOLD": {
-                    "VULNERABILITY": {
-                        "Critical": 10,
-                        "High": 3,
-                        "Medium": 20,
-                        "Low": 30,
-                    },
-                    "COMPLIANCE": {"Critical": 4},
-                },
-                "RULES": "",
-            }
-        }
-        mock_config_tool = ConfigTool(json_data, "CHECKOV")
-        mock_secret_tool = {
-            "github_token": "mock_github_token",
-            "repository_ssh_host": "repository_ssh_host",
-        }
+#         # Aseguramos que subprocess.run fue llamado con el comando esperado
+#         expected_command = "trufflehog filesystem /path/to/repo --json --exclude-paths /path/to/excludedPath.txt --no-verification"
+#         mock_subprocess_run.assert_called_once_with(expected_command, capture_output=True, shell=True)
 
-        # Configurar el valor simulado de retorno para ciertos métodos
-        mock_github_api_instance = MagicMock()
-        mock_github_api.return_value = mock_github_api_instance
+#     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run.subprocess.run')
+#     def test_run_tool_secret_scan_windows(self, mock_subprocess_run):
+#         os_patch = patch.dict('os.environ', {'AGENT_OS': 'Windows'})
+#         os_patch.start()
+#         self.addCleanup(os_patch.stop)
 
-        # Llamar al método que se está probando
-        result = self.checkov_tool.configurate_external_checks(
-            mock_config_tool, mock_secret_tool
-        )
+#         # Configuramos un valor de retorno para el subprocess.run
+#         mock_subprocess_run.return_value.stdout = b'{"vulnerability_data": []}'
+#         mock_subprocess_run.return_value.stderr = b''
 
-        # Verificar que el resultado es el esperado
-        self.assertIsNone(result)
+#         trufflehog_run = TrufflehogRun()
+#         trufflehog_run.run_tool_secret_scan('C:\\path\\to\\repo')
 
-    def test_configurate_external_checks_secret_tool_None(self):
-        # Llamar al método que se está probando
-        result = self.checkov_tool.configurate_external_checks(
-            None, None
-        )
+#         # Aseguramos que subprocess.run fue llamado con el comando esperado
+#         expected_command = "C:/Trufflehog/bin/trufflehog.exe filesystem C:\\path\\to\\repo --json --exclude-paths C:\\path\\to\\excludedPath.txt --no-verification"
+#         mock_subprocess_run.assert_called_once_with(expected_command, capture_output=True, shell=True)
 
-        # Verificar que el resultado es el esperado
-        self.assertIsNone(result)
-
-    @mock.patch(
-        "devsecops_engine_utilities.github.infrastructure.github_api.GithubApi.download_latest_release_assets",
-        autospec=True,
-    )
-    def test_configurate_external_checks_error(self, mock_github_api):
-        # Configurar valores simulados
-        json_data = {
-            "CHECKOV": {
-                "VERSION": "2.3.296",
-                "SEARCH_PATTERN": ["AW", "NU"],
-                "IGNORE_SEARCH_PATTERN": [
-                    "test",
-                ],
-                "USE_EXTERNAL_CHECKS_GIT": "False",
-                "EXTERNAL_CHECKS_GIT": "rules",
-                "EXTERNAL_GIT_SSH_HOST": "github",
-                "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "fingerprint",
-                "USE_EXTERNAL_CHECKS_DIR": "True",
-                "EXTERNAL_DIR_OWNER": "test",
-                "EXTERNAL_DIR_REPOSITORY": "repository",
-                "EXTERNAL_DIR_ASSET_NAME": "rules",
-                "EXCLUSIONS_PATH": "Exclusions.json",
-                "MESSAGE_INFO_SAST_RM": "message test",
-                "THRESHOLD": {
-                    "VULNERABILITY": {
-                        "Critical": 10,
-                        "High": 3,
-                        "Medium": 20,
-                        "Low": 30,
-                    },
-                    "COMPLIANCE": {"Critical": 4},
-                },
-                "RULES": "",
-            }
-        }
-        mock_config_tool = ConfigTool(json_data, "CHECKOV")
-        mock_secret_tool = {
-            "github_token": "mock_github_token",
-            "repository_ssh_host": "repository_ssh_host",
-        }
-
-        # Configurar el valor simulado de retorno para ciertos métodos
-        mock_github_api.side_effect = Exception("Simulated error")
-
-        # Llamar al método que se está probando
-        result = self.checkov_tool.configurate_external_checks(
-            mock_config_tool, mock_secret_tool
-        )
-
-        # Verificar que el resultado es el esperado
-        self.assertIsNone(result)
-
-    def test_execute(self):
-        checkov_config = MagicMock()
-        checkov_config.path_config_file = "/path/to/config/"
-        checkov_config.config_file_name = "checkov_config"
-
-        subprocess_mock = MagicMock()
-        subprocess_mock.run.return_value.stdout = "Output"
-        subprocess_mock.run.return_value.stderr = "Error"
-
-        with mock.patch("subprocess.run", return_value=subprocess_mock) as mock_run:
-            self.checkov_tool.execute(checkov_config)
-
-            mock_run.assert_called_once_with(
-                "checkov --config-file /path/to/config/checkov_configcheckov_config.yaml",
-                capture_output=True,
-                text=True,
-                shell=True,
-                env=dict(os.environ),
-            )
-
-    @mock.patch(
-        "devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_tool.CheckovTool.execute",
-        autospec=True,
-    )
-    def test_async_scan(self, mock_checkov_tool):
-        checkov_config = MagicMock()
-        checkov_config.path_config_file = "/path/to/config/"
-        checkov_config.config_file_name = "checkov_config"
-
-        output_queue = Queue()
-
-        mock_checkov_tool.return_value = '{"key": "value"}'
-
-        self.checkov_tool.async_scan(output_queue, checkov_config)
-
-        self.assertEqual(output_queue.get(), [{"key": "value"}])
-
-    def test_scan_folders(self):
-        folders_to_scan = ["/path/to/folder"]
-        config_tool = MagicMock()
-        config_tool.rules_data_type = {
-            "RULES_DOCKER": {"rule1": {"environment": {"dev": True}}},
-            "RULES_K8S": {"rule2": {"environment": {"prod": True}}},
-        }
-        agent_env = MagicMock()
-        environment = "dev"
-
-        output_queue = Queue()
-        output_queue.put([{"key": "value"}])
-
-        with mock.patch.object(
-            self.checkov_tool, "async_scan", side_effect=output_queue.put
-        ):
-            result_scans = self.checkov_tool.scan_folders(
-                folders_to_scan, config_tool, agent_env, environment, "eks"
-            )
-
-        self.assertEqual(result_scans, [])
-
-    def test_run_tool(self):
-        config_tool = MagicMock()
-        folders_to_scan = ["/path/to/folder"]
-        environment = "dev"
-        platform = "eks"
-        secret_tool = MagicMock()
-
-        self.checkov_tool.configurate_external_checks = MagicMock(
-            return_value="agent_env"
-        )
-        self.checkov_tool.scan_folders = MagicMock(return_value=[{"key": "value"}])
-        self.checkov_tool.TOOL = "CHECKOV"
-
-        findings_list, file_from_tool = self.checkov_tool.run_tool(
-            config_tool, folders_to_scan, environment, platform ,secret_tool
-        )
-
-        self.assertEqual(findings_list, [])
-        assert "results.json" in file_from_tool
+# if __name__ == '__main__':
+#     unittest.main()
