@@ -2,7 +2,6 @@ import stat
 import requests
 import os
 import subprocess
-import logging
 import re
 import base64
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.images_scanned import (
@@ -33,7 +32,7 @@ class PrismaCloudManagerScan(ToolGateway):
                 file.write(response.content)
 
             os.chmod(file_path, stat.S_IRWXU)
-            logging.info(f"twistcli downloaded and saved to: {file_path}")
+            logger.info(f"twistcli downloaded and saved to: {file_path}")
             return 0
 
         except Exception as e:
@@ -116,8 +115,10 @@ class PrismaCloudManagerScan(ToolGateway):
                         release,
                     )
                 )
-
-            return images_scanned
+            if not images_scanned:
+                raise ValueError("No images found for scanning in the provided list, please validate the image name.")
+            else:
+                return images_scanned
 
         except Exception as ex:
             logger.error(f"An overall error occurred: {ex}")
