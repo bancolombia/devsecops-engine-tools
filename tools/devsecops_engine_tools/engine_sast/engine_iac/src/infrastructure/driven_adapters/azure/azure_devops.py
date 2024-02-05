@@ -44,4 +44,4 @@ class AzureDevops(DevopsPlatformGateway):
         try:
             return ReleaseVariables.Release_Definitionname.value()
         except Exception:
-            return BuildVariables.Build_Project_Name.value()
+            return BuildVariables.Build_DefinitionName.value()
