@@ -87,12 +87,13 @@ class XrayScan(ToolGateway):
             tar_path = os.path.join(target_dir, "node_modules.tar")
             if os.path.exists(tar_path):
                 os.remove(tar_path)
-            with tarfile.open(os.path.join(target_dir, "node_modules.tar"), "w") as tar:
+            with tarfile.open(tar_path, "w") as tar:
                 tar.add(
                     npm_modules,
                     arcname=os.path.basename(npm_modules),
                     filter=lambda x: None if "/.bin/" in x.name else x,
                 )
+                print(f"File to scan: {tar_path}")
 
         except subprocess.CalledProcessError as e:
             logger.error(f"Error al comprimir npm_modules: {e}")
