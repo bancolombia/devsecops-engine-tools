@@ -46,9 +46,11 @@ class PrismaCloudManagerScan(ToolGateway):
         image_name = f"{repository}:{tag}"
         result_file = f"{repo}:{tag}" + "_scan_result.json"
         images_scanned = []
+        already_scanned=[]
 
         if (result_file) in ImagesScanned.get_images_already_scanned(file_name):
             print(f"The image {image_name} has already been scanned previously.")
+            already_scanned.append(result_file)
         else:
             pattern = remoteconfig["REGEX_EXPRESSION_PROJECTS"]
             match = re.match(pattern, repo.upper())
@@ -78,12 +80,14 @@ class PrismaCloudManagerScan(ToolGateway):
                             text=True,
                         )
                         images_scanned.append(result_file)
+                        
+                        print(f"The image {image_name} was scanned")
                         with open(file_name, "a") as file:
                             file.write(result_file + "\n")
                     except subprocess.CalledProcessError as e:
                         logger.error(f"Error during image scan of {repository}: {e.stderr}")
 
-        return images_scanned
+        return images_scanned,already_scanned
 
     def run_tool_container_sca(
         self, remoteconfig, prisma_secret_key, scan_image, release
@@ -102,11 +106,10 @@ class PrismaCloudManagerScan(ToolGateway):
                 )
 
             images_scanned = []
-
+            already_scanned =[]
             for image in scan_image:
                 repository, tag = image["Repository"], image["Tag"]
-                images_scanned.extend(
-                    self.scan_image(
+                images_scan, already_scan=self.scan_image(
                         file_path,
                         repository,
                         tag,
@@ -114,10 +117,12 @@ class PrismaCloudManagerScan(ToolGateway):
                         prisma_secret_key,
                         release,
                     )
-                )
-            if not images_scanned:
+                images_scanned.extend(images_scan)
+                already_scanned.extend(already_scan)
+                
+            if not images_scanned and not already_scanned:
                 raise ValueError("No images found for scanning in the provided list, please validate the image name.")
-            else:
+            else:    
                 return images_scanned
 
         except Exception as ex:
