@@ -44,18 +44,14 @@ class SecretScan:
             totalized_exclusions=[],
             threshold_defined=config_tool.level_compliance,
             path_file_results=finding_list,
-            custom_message_break_build=config_tool.message_info_sast_rm,
+            custom_message_break_build=config_tool.message_info_sast_build,
             scope_pipeline=config_tool.scope_pipeline,
             stage_pipeline="Pipeline"
         )
         return finding_list, input_core
     def complete_config_tool(self, data_file_tool, tool):
-        config_tool = DeserializeConfigTool(json_data=data_file_tool, tool=tool)
+        config_tool = DeserializeConfigTool(json_data=data_file_tool, tool=tool, devops_platform_gateway=self.devops_platform_gateway)
         skip_tool = "false"
-        
-        config_tool.scope_pipeline = self.devops_platform_gateway.get_variable(
-            "BUILD_REPOSITORY_NAME"
-        )
         if config_tool.scope_pipeline in config_tool.ignore_search_pattern:
             skip_tool = "true"
         return config_tool, skip_tool
