@@ -1,17 +1,12 @@
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
-from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import BuildVariables
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway
+)
 
 class DeserializeConfigTool:
-    def __init__(self, json_data, tool):
+    def __init__(self, json_data, tool, devops_platform_gateway: DevopsPlatformGateway):
         self.version = json_data[tool]["VERSION"]
-        self.search_pattern = ""
         self.ignore_search_pattern = json_data[tool]["IGNORE_SEARCH_PATTERN"]
-        self.exclusions_path = ""
-        self.message_info_sast_rm = json_data[tool]["MESSAGE_INFO_SAST_RM"]
+        self.message_info_sast_build = json_data[tool]["MESSAGE_INFO_SAST_BUILD"]
         self.level_compliance = Threshold(json_data[tool]['THRESHOLD'])
-        self.rules_data_type = ""
-        self.scope_pipeline = ""
-        self.exclusions = None
-        self.exclusions_all = None
-        self.exclusions_scope = None
-        self.rules_all = {}
+        self.scope_pipeline = devops_platform_gateway.get_variable("BUILD_REPOSITORY_NAME")
