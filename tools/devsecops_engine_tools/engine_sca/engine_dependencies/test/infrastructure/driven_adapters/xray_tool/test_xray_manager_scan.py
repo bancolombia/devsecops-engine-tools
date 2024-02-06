@@ -153,3 +153,77 @@ def test_scan_dependencies_failure(xray_scan_instance):
         xray_scan_instance.scan_dependencies(prefix, target_dir_name)
 
         mock_logger_error.assert_called_with("Error al ejecutar jf scan: Command 'xray scan' returned non-zero exit status 1.")
+
+def test_run_tool_dependencies_sca_linux(xray_scan_instance):
+    remote_config = {
+        "XRAY": {"CLI_VERSION": "1.0"},
+        "REGEX_EXPRESSION_EXTENSIONS": "\\.(jar|ear|war)$"
+    }
+    pipeline_name = "pipeline1",
+    exclusions = {
+        "pipeline1": {
+            "XRAY": [{"files": ["war"]}]
+        }
+    }
+    token = "token123"
+
+    with patch("platform.system") as mock_system, \
+        patch("os.getcwd") as mock_getcwd, \
+        patch("os.path.join") as mock_join, \
+        patch("os.path.exists") as mock_exists, \
+        patch("os.makedirs") as mock_makedirs, \
+        patch("shutil.rmtree") as mock_rmtree, \
+        patch("devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_linux") as mock_install_tool_linux, \
+        patch("devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_windows") as mock_install_tool_windows, \
+        patch("devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.config_server") as mock_config_server, \
+        patch("devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.compress_and_mv") as mock_compress_and_mv, \
+        patch("devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.find_artifacts") as mock_find_artifacts, \
+        patch("devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.scan_dependencies") as mock_scan_dependencies:
+        mock_system.return_value = "Linux"
+        mock_getcwd.return_value = "/path/to/working_dir"
+        mock_join.side_effect = lambda *args: "/".join(args)
+        mock_exists.return_value = False
+        result = xray_scan_instance.run_tool_dependencies_sca(remote_config, pipeline_name, exclusions, token)
+
+        mock_install_tool_linux.assert_called_with("1.0")
+        mock_config_server.assert_called_with("./jf", token)
+        mock_find_artifacts.assert_called_with("\\.(jar|ear|war)$", "/path/to/working_dir", "/path/to/working_dir/dependencies_to_scan")
+        mock_scan_dependencies.assert_called_with("./jf", "dependencies_to_scan")
+        assert(result, "scan_result.json")
+
+def test_run_tool_dependencies_sca_windows(xray_scan_instance):
+    remote_config = {
+        "XRAY": {"CLI_VERSION": "1.0"},
+        "REGEX_EXPRESSION_EXTENSIONS": "\\.(jar|ear|war)$"
+    }
+    pipeline_name = "pipeline1",
+    exclusions = {
+        "pipeline1": {
+            "XRAY": [{"files": ["war"]}]
+        }
+    }
+    token = "token123"
+
+    with patch("platform.system") as mock_system, \
+        patch("os.getcwd") as mock_getcwd, \
+        patch("os.path.join") as mock_join, \
+        patch("os.path.exists") as mock_exists, \
+        patch("os.makedirs") as mock_makedirs, \
+        patch("shutil.rmtree") as mock_rmtree, \
+        patch("devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_linux") as mock_install_tool_linux, \
+        patch("devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_windows") as mock_install_tool_windows, \
+        patch("devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.config_server") as mock_config_server, \
+        patch("devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.compress_and_mv") as mock_compress_and_mv, \
+        patch("devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.find_artifacts") as mock_find_artifacts, \
+        patch("devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.scan_dependencies") as mock_scan_dependencies:
+        mock_system.return_value = "Windows"
+        mock_getcwd.return_value = "/path/to/working_dir"
+        mock_join.side_effect = lambda *args: "/".join(args)
+        mock_exists.return_value = True
+        result = xray_scan_instance.run_tool_dependencies_sca(remote_config, pipeline_name, exclusions, token)
+
+        mock_install_tool_windows.assert_called_with("1.0")
+        mock_config_server.assert_called_with("./jf.exe", token)
+        mock_compress_and_mv.assert_called_with("/path/to/working_dir/node_modules", "/path/to/working_dir/dependencies_to_scan")
+        mock_scan_dependencies.assert_called_with("./jf.exe", "dependencies_to_scan")
+        assert(result, "scan_result.json")
