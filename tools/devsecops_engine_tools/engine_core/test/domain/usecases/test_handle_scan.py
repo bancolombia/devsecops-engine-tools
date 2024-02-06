@@ -165,7 +165,7 @@ class TestHandleScan(unittest.TestCase):
             "tool": "engine_secret",
             "remote_config_repo": "test_repo",
         }
-        config_tool = {"ENGINE_SECRET": "some_config"}
+        config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
 
         # Mock the runner_engine_iac function and its return values
         findings_list = ["finding1", "finding2"]
@@ -188,7 +188,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_findings_list, findings_list)
         self.assertEqual(result_input_core, input_core)
         mock_runner_secret_scan.assert_called_once_with(
-            dict_args, config_tool
+            dict_args, config_tool["ENGINE_SECRET"]["TOOL"]
         )
 
     @mock.patch("builtins.print")
