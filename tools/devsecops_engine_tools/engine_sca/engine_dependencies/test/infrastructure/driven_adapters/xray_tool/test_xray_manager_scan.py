@@ -11,7 +11,6 @@ import pytest
 from unittest.mock import mock_open, patch, Mock
 
 import subprocess
-import requests
 import os
 
 @pytest.fixture
@@ -103,3 +102,54 @@ def test_compress_and_mv_success(xray_scan_instance):
         mock_makedirs.assert_called_with(target_dir)
         mock_remove.assert_called_with(os.path.join(target_dir, "node_modules.tar"))
         mock_tarfile_open.assert_called_with(os.path.join(target_dir, "node_modules.tar"), "w")
+
+def test_compress_and_mv_failure(xray_scan_instance):
+    with patch("shutil.rmtree") as mock_rmtree, patch("os.makedirs") as mock_makedirs, patch("os.path.exists") as mock_exists, patch("os.remove") as mock_remove, patch("tarfile.open") as mock_tarfile_open, patch("os.path.basename") as mock_basename, patch("devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.logger.error") as mock_logger_error:
+        npm_modules = "/path/to/npm_modules"
+        target_dir = "/path/to/target_dir"
+        mock_exists.return_value = True
+        mock_tarfile_open.side_effect = subprocess.CalledProcessError(returncode=1, cmd="opentar")
+        xray_scan_instance.compress_and_mv(npm_modules, target_dir)
+
+        mock_logger_error.assert_called_with("Error al comprimir npm_modules: Command 'opentar' returned non-zero exit status 1.")
+
+def test_find_artifacts(xray_scan_instance):
+    with patch("shutil.rmtree") as mock_rmtree, patch("os.makedirs") as mock_makedirs, patch("os.path.exists") as mock_exists, patch("shutil.copy2") as mock_copy2, patch("os.walk") as mock_walk:
+        pattern = "\\.(jar|ear|war)$"
+        working_dir = "/path/to/working_dir"
+        target_dir = "/path/to/target_dir"
+        mock_exists.return_value = True
+        mock_walk.return_value = [
+            ("/path/to/working_dir", ["dir1", "dir2"], ["file1.txt", "file2.json"]),
+            ("/path/to/working_dir/dir1", [], ["file3.ear"]),
+            ("/path/to/working_dir/dir2", [], ["file4.war"]),
+        ]
+        xray_scan_instance.find_artifacts(pattern, working_dir, target_dir)
+
+        mock_exists.assert_called_with(target_dir)
+        mock_rmtree.assert_called_with(target_dir)
+        mock_makedirs.assert_called_with(target_dir)
+
+        mock_copy2.assert_any_call
+
+def test_scan_dependencies_success(xray_scan_instance):
+    with patch("subprocess.run") as mock_subprocess_run, patch("json.dump") as mock_json_dump, patch("json.loads") as mock_json_loads, patch("builtins.open") as mock_open:
+        prefix = "jf"
+        target_dir_name = "target_dir"
+        mock_subprocess_run.side_effect = Mock(returncode=0)
+        result = xray_scan_instance.scan_dependencies(prefix, target_dir_name)
+
+        mock_subprocess_run.assert_called_with([prefix, "scan", "--format=json", f"./{target_dir_name}/"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        mock_json_loads.assert_any_call
+        mock_open.assert_called_with("scan_result.json", "w")
+        mock_json_dump.assert_any_call
+        assert(result == "scan_result.json")
+
+def test_scan_dependencies_failure(xray_scan_instance):
+    with patch("subprocess.run") as mock_subprocess_run, patch("devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.logger.error") as mock_logger_error:
+        prefix = "jf"
+        target_dir_name = "target_dir"
+        mock_subprocess_run.side_effect = subprocess.CalledProcessError(returncode=1, cmd="xray scan")
+        xray_scan_instance.scan_dependencies(prefix, target_dir_name)
+
+        mock_logger_error.assert_called_with("Error al ejecutar jf scan: Command 'xray scan' returned non-zero exit status 1.")
