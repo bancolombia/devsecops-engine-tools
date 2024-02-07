@@ -39,6 +39,7 @@ class ImportScanUserCase:
         self.__rest_engagement = rest_engagement
 
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
+        response = None
         product_type_id = None
         product_id = None
         if (request.product_name or request.product_type_name) == "":
@@ -112,9 +113,7 @@ class ImportScanUserCase:
 
         if api_scan_bool:
             response = self.__rest_import_scan.import_scan_api(request)
-            response.test_url = f"{request.host_defect_dojo}/test/{str(response.test_id)}"
             logger.info(f"End process Succesfull!!!: {response}")
-            return response
         else:
             try:
                 file_type = self.get_file_type(request.file)
@@ -125,11 +124,12 @@ class ImportScanUserCase:
                     logger.info(f"read {file_type} file successful !!!")
                     files = [("file", (request.file, file, file_type))]
                     response = self.__rest_import_scan.import_scan(request, files)
-                    response.test_url = f"{request.host_defect_dojo}/test/{str(response.test_id)}"
-                    return response
 
             except Exception as e:
                 raise ApiError(e)
+
+        response.url = f"{request.host_defect_dojo}/engagement/{str(response.engagement_id)}/finding/open"
+        return response
 
     def get_file_type(self, path_file):
         __, extension = os.path.splitext(path_file)
