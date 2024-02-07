@@ -17,6 +17,16 @@ class TestTrufflehogRun(unittest.TestCase):
         trufflehog_run.install_tool()
         # Aseguramos que subprocess.run fue llamado con el comando esperado
         mock_subprocess_run.assert_called_once_with("trufflehog --version", capture_output=True, shell=True)
+    
+    @patch('subprocess.run')
+    def test_run_install(self, mock_subprocess_run):
+        trufflehog_run = TrufflehogRun()
+        trufflehog_run.run_install()
+        mock_subprocess_run.assert_called_once_with(
+            "curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin",
+            capture_output=True,
+            shell=True
+        )
 
     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run.os.environ')
     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run.subprocess.Popen')
