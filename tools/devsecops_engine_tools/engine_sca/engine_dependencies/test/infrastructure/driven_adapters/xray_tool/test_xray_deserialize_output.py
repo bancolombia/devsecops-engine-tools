@@ -11,6 +11,7 @@ import json
 def deserializator():
     return XrayDeserializator()
 
+
 @pytest.fixture
 def json_data():
     return [
@@ -21,24 +22,23 @@ def json_data():
                     "cves": [{"cvss_v3_score": "7.5"}],
                     "components": {
                         "gav://commons-codec:commons-codec:1.9": {
-                            "fixed_versions": [
-                                "[1.13]"
-                            ],
+                            "fixed_versions": ["[1.13]"],
                             "impact_paths": [
                                 [
                                     {
                                         "component_id": "gav://commons-codec:commons-codec:1.9"
                                     }
                                 ]
-                            ]
+                            ],
                         }
                     },
                     "summary": "Example vulnerability",
-                    "severity": "High"
+                    "severity": "High",
                 },
             ]
         }
     ]
+
 
 def test_get_list_findings_valid(deserializator, json_data):
     with patch("builtins.open", mock_open(read_data=json.dumps(json_data))):

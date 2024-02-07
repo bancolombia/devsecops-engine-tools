@@ -175,10 +175,12 @@ class TestHandleScan(unittest.TestCase):
         dict_args = {
             "use_secrets_manager": "true",
             "tool": "engine_dependencies",
-            "remote_config_repo": "test_repo"
+            "remote_config_repo": "test_repo",
+            "use_vulnerability_management": "true"
         }
         config_tool = {
-            "ENGINE_DEPENDENCIES": "some_config"
+            "ENGINE_DEPENDENCIES": "some_config",
+            "ENGINE_DEPENDENCIES": {"TOOL": "some_tool"}
         }
         secret_tool = {"token_xray": "test"}
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
