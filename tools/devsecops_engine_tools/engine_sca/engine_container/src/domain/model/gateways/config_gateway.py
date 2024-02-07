@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 class ConfigGateway(metaclass=ABCMeta):
     @abstractmethod
-    def get_remote_config(self, dict_args) -> str:
+    def get_remote_config(self, dict_args, file_path) -> str:
         "get remote config"
 
     @abstractmethod

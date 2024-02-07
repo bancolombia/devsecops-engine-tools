@@ -16,6 +16,7 @@ from devsecops_engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
+
 class PrismaCloudManagerScan(ToolGateway):
     def download_twistcli(
         self, file_path, prisma_access_key, prisma_secret_key, prisma_console_url
@@ -82,7 +83,9 @@ class PrismaCloudManagerScan(ToolGateway):
                         with open(file_name, "a") as file:
                             file.write(result_file + "\n")
                     except subprocess.CalledProcessError as e:
-                        logger.error(f"Error during image scan of {repository}: {e.stderr}")
+                        logger.error(
+                            f"Error during image scan of {repository}: {e.stderr}"
+                        )
 
         return images_scanned
 

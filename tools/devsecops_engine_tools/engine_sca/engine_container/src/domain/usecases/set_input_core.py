@@ -3,21 +3,23 @@ from devsecops_engine_tools.engine_core.src.domain.model.threshold import Thresh
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.config_gateway import (
     ConfigGateway,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 
 
 class SetInputCore:
-    def __init__(self, tool_remote: ConfigGateway, dict_args):
+    def __init__(self, tool_remote: ConfigGateway, dict_args, config_tool):
         self.tool_remote = tool_remote
         self.dict_args = dict_args
+        self.config_tool = config_tool
 
-    def get_remote_config(self):
+    def get_remote_config(self, file_path):
         """
         Get remote configuration.
 
         Returns:
             dict: Remote configuration.
         """
-        return self.tool_remote.get_remote_config(self.dict_args)
+        return self.tool_remote.get_remote_config(self.dict_args, file_path)
 
     def get_variable(self, variable):
         """
@@ -28,6 +30,25 @@ class SetInputCore:
         """
         return self.tool_remote.get_variable(variable)
 
+    def get_exclusions(self, exclusions_data, pipeline_name, config_tool):
+        list_exclusions = []
+        for key, value in exclusions_data.items():
+            if (key == "All") or (key == pipeline_name):
+                exclusions = [
+                    Exclusions(
+                        id=item.get("id", ""),
+                        where=item.get("where", ""),
+                        cve_id=item.get("cve_id", ""),
+                        create_date=item.get("create_date", ""),
+                        expired_date=item.get("expired_date", ""),
+                        severity=item.get("severity", ""),
+                        hu=item.get("hu", ""),
+                    )
+                    for item in value[config_tool["ENGINE_CONTAINER"]["TOOL"]]
+                ]
+                list_exclusions.extend(exclusions)
+        return list_exclusions
+
     def set_input_core(self, images_scanned):
         """
         Set the input core.
@@ -36,10 +57,18 @@ class SetInputCore:
             dict: Input core.
         """
         return InputCore(
-            [],
-            Threshold(self.get_remote_config()["THRESHOLD"]),
+            self.get_exclusions(
+                self.get_remote_config("SCA/CONTAINER/Exclusions/Exclusions.json"),
+                self.get_variable("release_name"),
+                self.config_tool,
+            ),
+            Threshold(
+                self.get_remote_config("SCA/CONTAINER/ConfigTool.json")["THRESHOLD"]
+            ),
             images_scanned[-1] if images_scanned else None,
-            self.get_remote_config()["MESSAGE_INFO_SCA_RM"],
+            self.get_remote_config("SCA/CONTAINER/ConfigTool.json")[
+                "MESSAGE_INFO_SCA_RM"
+            ],
             self.get_variable("release_name"),
-            "Release"
+            "Release",
         )
