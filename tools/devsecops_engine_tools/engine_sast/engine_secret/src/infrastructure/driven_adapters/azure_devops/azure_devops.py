@@ -4,18 +4,11 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.d
 )
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
     SystemVariables,
-    ReleaseVariables,
     BuildVariables,
-)
-from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
-    AzureMessageLoggingPipeline,
 )
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import (
     AzureDevopsApi,
 )
-from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities import settings
-logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 @dataclass
 class AzureDevops(DevopsPlatformGateway):
@@ -38,6 +31,6 @@ class AzureDevops(DevopsPlatformGateway):
                 return BuildVariables.Build_Repository_Name.value()
             elif variable == "SYSTEM_DEFAULTWORKINGDIRECTORY":
                 return SystemVariables.System_DefaultWorkingDirectory.value()
-        except Exception as ex:
-            logger.warning(f"Error getting variable {str(ex)}")
+        except Exception as e:
+            print(e)
             return None
