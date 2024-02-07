@@ -2,11 +2,6 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.dr
     XrayScan,
 )
 
-from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities import settings
-
-logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
-
 import pytest
 from unittest.mock import mock_open, patch, Mock
 
@@ -231,7 +226,6 @@ def test_scan_dependencies_success(xray_scan_instance):
         mock_json_dump.assert_any_call
         assert result == "scan_result.json"
 
-
 def test_scan_dependencies_failure(xray_scan_instance):
     with patch("subprocess.run") as mock_subprocess_run, patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.logger.error"
@@ -294,7 +288,6 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
             "/path/to/working_dir/dependencies_to_scan",
         )
         mock_scan_dependencies.assert_called_with("./jf", "dependencies_to_scan")
-        assert (result, "scan_result.json")
 
 
 def test_run_tool_dependencies_sca_windows(xray_scan_instance):
@@ -342,4 +335,3 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
             "/path/to/working_dir/dependencies_to_scan",
         )
         mock_scan_dependencies.assert_called_with("./jf.exe", "dependencies_to_scan")
-        assert (result, "scan_result.json")
