@@ -29,7 +29,7 @@ class SecretScanDeserealizator(DeseralizatorGateway):
             list_open_vulnerabilities.append(vulnerability_open)
         return list_open_vulnerabilities
     
-    def get_where_correctly(self, result: dict) -> tuple[str, str]:
+    def get_where_correctly(self, result: dict):
         line = str(result.get("SourceMetadata").get("Data").get("Filesystem").get("line") or "Multiline")
         original_where = str(result.get("SourceMetadata").get("Data").get("Filesystem").get("file"))
         operative_system = os.environ.get('AGENT_OS')
