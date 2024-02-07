@@ -35,9 +35,9 @@ def import_scan(scan_type, file_path=""):
 
 def validate_response(response, **kwargs):
     table = None
-    if hasattr(response, "test_url"):
+    if hasattr(response, "url"):
         # end_point, description, status, result,
-        table = [kwargs.get("end_point"), kwargs.get("scan_type"), "OK", response.test_url]
+        table = [kwargs.get("end_point"), kwargs.get("scan_type"), "OK", response.url]
     elif kwargs.get("scan_type"):
         table = [kwargs.get("end_point"), kwargs.get("scan_type"), "Error", "None"]
     elif kwargs.get("end_point") in ["finding.close"]:
