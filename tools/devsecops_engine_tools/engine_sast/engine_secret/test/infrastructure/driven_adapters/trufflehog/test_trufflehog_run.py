@@ -37,36 +37,45 @@ class TestTrufflehogRun(unittest.TestCase):
             "$env:Path += ';C:/Trufflehog/bin'; C:/Trufflehog/bin/trufflehog.exe --version"
         )
         mock_popen.assert_called_once_with(expected_command, stdout=-1, stderr=-1, shell=True)
+
+    @patch('os.environ.get')
+    @patch('subprocess.run')
+    def test_run_tool_secret_scan_windows(self, mock_subprocess_run, mock_os_get):
+        mock_os_get.return_value = 'Windows'
+        mock_subprocess_run.return_value.stdout = b'{"some": "json"}\n{"another": "json"}'
+        trufflehog_run = TrufflehogRun()
+        result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir")
+        expected_result = [{"some": "json"}, {"another": "json"}]
+        self.assertEqual(result, expected_result)
         
-#     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run.subprocess.run')
-#     def test_run_tool_secret_scan_unix(self, mock_subprocess_run):
-#         # Configuramos un valor de retorno para el subprocess.run
-#         mock_subprocess_run.return_value.stdout = b'{"vulnerability_data": []}'
-#         mock_subprocess_run.return_value.stderr = b''
-
-#         trufflehog_run = TrufflehogRun()
-#         trufflehog_run.run_tool_secret_scan('/path/to/repo')
-
-#         # Aseguramos que subprocess.run fue llamado con el comando esperado
-#         expected_command = "trufflehog filesystem /path/to/repo --json --exclude-paths /path/to/excludedPath.txt --no-verification"
-#         mock_subprocess_run.assert_called_once_with(expected_command, capture_output=True, shell=True)
-
-#     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run.subprocess.run')
-#     def test_run_tool_secret_scan_windows(self, mock_subprocess_run):
-#         os_patch = patch.dict('os.environ', {'AGENT_OS': 'Windows'})
-#         os_patch.start()
-#         self.addCleanup(os_patch.stop)
-
-#         # Configuramos un valor de retorno para el subprocess.run
-#         mock_subprocess_run.return_value.stdout = b'{"vulnerability_data": []}'
-#         mock_subprocess_run.return_value.stderr = b''
-
-#         trufflehog_run = TrufflehogRun()
-#         trufflehog_run.run_tool_secret_scan('C:\\path\\to\\repo')
-
-#         # Aseguramos que subprocess.run fue llamado con el comando esperado
-#         expected_command = "C:/Trufflehog/bin/trufflehog.exe filesystem C:\\path\\to\\repo --json --exclude-paths C:\\path\\to\\excludedPath.txt --no-verification"
-#         mock_subprocess_run.assert_called_once_with(expected_command, capture_output=True, shell=True)
-
-# if __name__ == '__main__':
-#     unittest.main()
+    @patch('os.environ.get')
+    @patch('subprocess.run')
+    def test_run_tool_secret_scan_linux(self, mock_subprocess_run, mock_os_get):
+        mock_os_get.return_value = 'Linux'
+        mock_subprocess_run.return_value.stdout = b'{"some": "json"}\n{"another": "json"}'
+        trufflehog_run = TrufflehogRun()
+        result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir")
+        expected_result = [{"some": "json"}, {"another": "json"}]
+        self.assertEqual(result, expected_result)
+    
+    @patch('os.environ.get')
+    @patch('subprocess.run')
+    def test_run_tool_secret_scan_empty_output(self, mock_subprocess_run, mock_os_get):
+        mock_os_get.return_value = 'Linux'
+        mock_subprocess_run.return_value.stdout = b''
+        trufflehog_run = TrufflehogRun()
+        result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir")
+        self.assertEqual(result, [])
+    
+    def test_decode_output(self):
+        trufflehog_run = TrufflehogRun()
+        output = '{"some": "json"}\n{"another": "json"}'
+        result = trufflehog_run.decode_output(output)
+        expected_result = [{"some": "json"}, {"another": "json"}]
+        self.assertEqual(result, expected_result)
+    
+    def test_decode_output_empty(self):
+        trufflehog_run = TrufflehogRun()
+        output = ''
+        result = trufflehog_run.decode_output(output)
+        self.assertEqual(result, [])

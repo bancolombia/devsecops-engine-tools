@@ -1,129 +1,63 @@
-from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_deserealizator import (
-    CheckovDeserealizator,
-)
-from devsecops_engine_tools.engine_core.src.domain.model.finding import (
-    Finding,
-    Category,
-)
+import unittest
 from datetime import datetime
+from unittest.mock import patch
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_deserealizator import SecretScanDeserealizator, Finding, Category
 
-def test_get_list_finding():
-    results_scan_list = [
-        {
-            "check_type": "dockerfile",
-            "results": {
-                "failed_checks": [
-                    {
-                        "check_id": "CKV_DOCKER_3",
-                        "bc_check_id": None,
-                        "check_name": "Ensure that a user for the container has been created",
-                        "check_result": {
-                            "result": "FAILED",
-                            "results_configuration": None,
-                        },
-                        "code_block": None,
-                        "file_path": "/Dockerfile",
-                        "file_abs_path": "./_AW1234/Dockerfile",
-                        "repo_file_path": "/_AW1234/Dockerfile",
-                    }
-                ]
-            },
-            "summary": {
-                "passed": 1,
-                "failed": 1,
-                "skipped": 0,
-                "parsing_errors": 0,
-                "resource_count": 1,
-                "checkov_version": "2.3.296",
-            },
-        },
-        {
-            "check_type": "kubernetes",
-            "results": {
-                "failed_checks": [
-                    {
-                        "check_id": "CKV_K8S_13",
-                        "bc_check_id": None,
-                        "check_name": "Minimize the admission of containers with capabilities assigned",
-                        "check_result": {
-                            "result": "FAILED",
-                            "evaluated_keys": [...],
-                        },
-                        "code_block": None,
-                        "file_path": "/app.yaml",
-                        "file_abs_path": "./_AW1234/app.yaml",
-                        "repo_file_path": "/_AW1234/app.yaml",
-                        "file_line_range": [21, 83],
-                        "resource": "Deployment.devsecops-engine-dev.ms-async-provider-deployment",
-                        "evaluations": {},
-                        "check_class": "checkov.kubernetes.checks.resource.k8s.MinimizeCapabilities",
-                        "fixed_definition": None,
-                        "entity_tags": None,
-                    }
-                ]
-            },
-            "summary": {
-                "passed": 15,
-                "failed": 9,
-                "skipped": 0,
-                "parsing_errors": 0,
-                "resource_count": 7,
-                "checkov_version": "2.3.296",
-            },
-        },
-    ]
-    config_rules = {
-        "CKV_DOCKER_3": {
-            "checkID": "IAC-CKV-DOCKER-3 Ensure that a user for the container has been created",
-            "environment": {...},
-            "guideline": "guideline",
-            "severity": "High",
-            "cvss": "",
-            "category": "Vulnerability",
-        },
-        "CKV_K8S_13": {
-            "checkID": "IAC-CKV_K8S_13 Ensure memory limits are set",
-            "environment": {...},
-            "guideline": "guideline",
-            "severity": "High",
-            "cvss": "",
-            "category": "Compliance",
-        },
-    }
+class TestSecretScanDeserealizator(unittest.TestCase):
 
-    list_findings = CheckovDeserealizator.get_list_finding(
-        results_scan_list, config_rules
-    )
+    def setUp(self):
+        self.deserealizator = SecretScanDeserealizator()
 
-    list_findings_compare: list[Finding] = []
-    list_findings_compare.append(
-        Finding(
-            id="CKV_DOCKER_3",
-            cvss=None,
-            where="/_AW1234/Dockerfile",
-            description="Ensure that a user for the container has been created",
-            severity="high",
-            identification_date=datetime.now().strftime("%d%m%Y"),
-            module="engine_iac",
-            category=Category.VULNERABILITY,
-            requirements=None,
-            tool="Checkov",
-        )
-    )
+    def test_get_list_vulnerability(self):
+        results_scan_list = [
+            {"SourceMetadata": {"Data": {"Filesystem": {"line": 10, "file": "/path/to/file.txt"}}},
+             "DetectorName": "SensitiveDataDetector"},
+            {"SourceMetadata": {"Data": {"Filesystem": {"line": None, "file": "/path/to/another_file.txt"}}},
+             "DetectorName": "SecretFinder"}
+        ]
+        os_patch = patch.dict('os.environ', {'AGENT_OS': 'Linux'})
+        os_patch.start()
+        self.addCleanup(os_patch.stop)
+        expected_findings = [
+            Finding(
+                id="SECRET_SCANNING",
+                cvss=None,
+                where="/path/to/file.txt, Line: 10",
+                description="Sensitive information in source code",
+                severity="critical",
+                identification_date=datetime.now().strftime("%d%m%Y"),
+                module="Sast-secrets manager",
+                category=Category.VULNERABILITY,
+                requirements="SensitiveDataDetector",
+                tool="Trufflehog"
+            ),
+            Finding(
+                id="SECRET_SCANNING",
+                cvss=None,
+                where="/path/to/another_file.txt, Line: Multiline",
+                description="Sensitive information in source code",
+                severity="critical",
+                identification_date=datetime.now().strftime("%d%m%Y"),
+                module="Sast-secrets manager",
+                category=Category.VULNERABILITY,
+                requirements="SecretFinder",
+                tool="Trufflehog"
+            )
+        ]
+        self.assertEqual(self.deserealizator.get_list_vulnerability(results_scan_list), expected_findings)
 
-    list_findings_compare.append(
-        Finding(
-            id="CKV_K8S_13",
-            cvss=None,
-            where="/_AW1234/app.yaml",
-            description='Minimize the admission of containers with capabilities assigned',
-            severity="high",
-            identification_date=datetime.now().strftime("%d%m%Y"),
-            module="engine_iac",
-            category=Category.COMPLIANCE,
-            requirements=None,
-            tool="Checkov",
-        )
-    )
+    def test_get_where_correctly(self):
+        result = {"SourceMetadata": {"Data": {"Filesystem": {"line": 10, "file": "/path/to/file.txt"}}}}
+        os_patch = patch.dict('os.environ', {'AGENT_OS': 'Windows'})
+        os_patch.start()
+        self.addCleanup(os_patch.stop)
+        expected_result = ("/path/to/file.txt", "10")
+        self.assertEqual(self.deserealizator.get_where_correctly(result), expected_result)
 
-    assert list_findings == list_findings_compare
+    def test_get_where_correctly_linux(self):
+        result = {"SourceMetadata": {"Data": {"Filesystem": {"line": 10, "file": r"\path\to\file.txt"}}}}
+        os_patch = patch.dict('os.environ', {'AGENT_OS': 'Linux'})
+        os_patch.start()
+        self.addCleanup(os_patch.stop)
+        expected_result = ("/path/to/file.txt", "10")
+        self.assertEqual(self.deserealizator.get_where_correctly(result), expected_result)
