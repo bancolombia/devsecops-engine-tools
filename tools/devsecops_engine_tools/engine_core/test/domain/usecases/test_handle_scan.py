@@ -167,7 +167,7 @@ class TestHandleScan(unittest.TestCase):
         }
         config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
 
-        # Mock the runner_engine_iac function and its return values
+        # Mock the runner_engine_secret function and its return values
         findings_list = ["finding1", "finding2"]
         input_core = InputCore(
             totalized_exclusions=[],

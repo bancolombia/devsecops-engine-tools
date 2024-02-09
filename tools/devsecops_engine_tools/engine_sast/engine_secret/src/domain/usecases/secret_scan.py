@@ -33,12 +33,13 @@ class SecretScan:
         if skip_tool == "false":
             self.tool_gateway.install_tool()
             system_working_dir = self.devops_platform_gateway.get_variable(
-            "SYSTEM_DEFAULTWORKINGDIRECTORY"
+            "PATH_DIRECTORY"
             )
             finding_list = self.tool_deserialize.get_list_vulnerability(
                 self.tool_gateway.run_tool_secret_scan(
                     system_working_dir
-                    )
+                    ),
+                self.devops_platform_gateway
                 )
         input_core = InputCore(
             totalized_exclusions=[],
@@ -46,11 +47,12 @@ class SecretScan:
             path_file_results=finding_list,
             custom_message_break_build=config_tool.message_info_sast_build,
             scope_pipeline=config_tool.scope_pipeline,
-            stage_pipeline="Pipeline"
+            stage_pipeline="Build"
         )
         return finding_list, input_core
     def complete_config_tool(self, data_file_tool, tool):
-        config_tool = DeserializeConfigTool(json_data=data_file_tool, tool=tool, devops_platform_gateway=self.devops_platform_gateway)
+        config_tool = DeserializeConfigTool(json_data=data_file_tool, tool=tool)
+        config_tool.scope_pipeline = self.devops_platform_gateway.get_variable("REPOSITORY")
         skip_tool = "false"
         if config_tool.scope_pipeline in config_tool.ignore_search_pattern:
             skip_tool = "true"
