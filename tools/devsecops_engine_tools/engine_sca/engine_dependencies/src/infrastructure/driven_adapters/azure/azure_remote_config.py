@@ -27,8 +27,6 @@ class AzureRemoteConfig(ConfigGateway):
 
     def get_variable(self, variable):
         try:
-            if variable == "release_name":
-                return ReleaseVariables.Release_Definitionname.value()
             if variable == "pipeline_name":
                 return BuildVariables.Build_DefinitionName.value()
         except Exception as ex:

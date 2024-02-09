@@ -7,9 +7,10 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gate
 
 
 class SetInputCore:
-    def __init__(self, tool_remote: ConfigGateway, dict_args):
+    def __init__(self, tool_remote: ConfigGateway, dict_args, tool):
         self.tool_remote = tool_remote
         self.dict_args = dict_args
+        self.tool = tool
 
     def get_remote_config(self, file_path):
         """
@@ -29,7 +30,7 @@ class SetInputCore:
         """
         return self.tool_remote.get_variable(variable)
 
-    def get_exclusions(self, exclusions_data, pipeline_name):
+    def get_exclusions(self, exclusions_data, pipeline_name, tool):
         list_exclusions = []
         for key, value in exclusions_data.items():
             if (key == "All") or (key == pipeline_name):
@@ -43,7 +44,7 @@ class SetInputCore:
                         severity=item.get("severity", ""),
                         hu=item.get("hu", ""),
                     )
-                    for item in value["XRAY"]
+                    for item in value[tool]
                 ]
                 list_exclusions.extend(exclusions)
         return list_exclusions
@@ -59,13 +60,14 @@ class SetInputCore:
             self.get_exclusions(
                 self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"),
                 self.get_variable("pipeline_name"),
+                self.tool,
             ),
             Threshold(
                 self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")["THRESHOLD"]
             ),
             dependencies_scanned,
             self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")[
-                "MESSAGE_INFO_SCA_RM"
+                "MESSAGE_INFO_SCA"
             ],
             self.get_variable("pipeline_name"),
             "Build",

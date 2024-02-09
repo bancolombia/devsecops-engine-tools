@@ -185,7 +185,7 @@ class TestHandleScan(unittest.TestCase):
         secret_tool = {"token_xray": "test"}
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
 
-        # Mock the runner_engine_iac function and its return values
+        # Mock the runner_engine_dependencies function and its return values
         findings_list = ["finding1", "finding2"]
         input_core = InputCore(
             totalized_exclusions=[],
