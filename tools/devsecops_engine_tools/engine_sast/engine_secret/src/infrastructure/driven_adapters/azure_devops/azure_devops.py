@@ -27,9 +27,9 @@ class AzureDevops(DevopsPlatformGateway):
 
     def get_variable(self, variable):
         try:
-            if variable == "BUILD_REPOSITORY_NAME":
+            if variable == "REPOSITORY":
                 return BuildVariables.Build_Repository_Name.value()
-            elif variable == "SYSTEM_DEFAULTWORKINGDIRECTORY":
+            elif variable == "PATH_DIRECTORY":
                 return SystemVariables.System_DefaultWorkingDirectory.value()
         except Exception as e:
             print(e)
