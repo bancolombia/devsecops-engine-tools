@@ -7,6 +7,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
 )
 from dataclasses import dataclass
 import json
+from datetime import datetime
 
 
 @dataclass
@@ -23,8 +24,16 @@ class XrayDeserializator(DeserializatorGateway):
                             Finding(
                                 id=vul.get("issue_id", ""),
                                 cvss=(
-                                    vul["cves"][0].get("cvss_v3_score", "")
+                                    vul["cves"][0].get("cvss_v3_score")
                                     if vul.get("cves", 0)
+                                    and vul["cves"][0].get("cvss_v3_score", 0)
+                                    else ""
+                                )
+                                + (
+                                    vul["cves"][0].get("cvss_v2_score")
+                                    if vul.get("cves", 0)
+                                    and not (vul["cves"][0].get("cvss_v3_score", 0))
+                                    and vul["cves"][0].get("cvss_v2_score", 0)
                                     else ""
                                 ),
                                 where=(
@@ -34,16 +43,22 @@ class XrayDeserializator(DeserializatorGateway):
                                     if vul.get("components", 0)
                                     else ""
                                 ),
-                                description=vul.get("summary", "").replace("\n", ""),
+                                description=(
+                                    vul["cves"][0].get("cve", "")
+                                    if vul.get("cves", 0)
+                                    else ""
+                                ),
                                 severity=vul.get("severity", "").lower(),
-                                identification_date="No date",
+                                identification_date=datetime.now().strftime(
+                                    "%d-%m-%Y %H:%M:%S"
+                                ),
                                 module="engine_dependencies",
                                 category=Category.VULNERABILITY,
                                 requirements=(
                                     "".join(
                                         list(vul["components"].values())[0].get(
                                             "fixed_versions", [""]
-                                        )[0]
+                                        )
                                     )
                                     if vul.get("components", 0)
                                     else ""

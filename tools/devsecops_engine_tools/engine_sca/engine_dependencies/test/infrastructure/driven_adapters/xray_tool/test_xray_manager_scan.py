@@ -226,6 +226,7 @@ def test_scan_dependencies_success(xray_scan_instance):
         mock_json_dump.assert_any_call
         assert result == "scan_result.json"
 
+
 def test_scan_dependencies_failure(xray_scan_instance):
     with patch("subprocess.run") as mock_subprocess_run, patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.logger.error"

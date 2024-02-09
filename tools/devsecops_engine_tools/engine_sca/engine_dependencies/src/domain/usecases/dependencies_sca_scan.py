@@ -31,16 +31,7 @@ class DependenciesScan:
         """
         return self.tool_remote.get_remote_config(self.dict_args, file_path)
 
-    def get_variable(self, variable):
-        """
-        Get variable.
-
-        Returns:
-            dict: Remote variable.
-        """
-        return self.tool_remote.get_variable(variable)
-
-    def process(self):
+    def process(self, pattern):
         """
         Process SCA dependencies scan.
 
@@ -48,8 +39,7 @@ class DependenciesScan:
         """
         return self.tool_run.run_tool_dependencies_sca(
             self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json"),
-            self.get_variable("pipeline_name"),
-            self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"),
+            pattern,
             self.token,
         )
 

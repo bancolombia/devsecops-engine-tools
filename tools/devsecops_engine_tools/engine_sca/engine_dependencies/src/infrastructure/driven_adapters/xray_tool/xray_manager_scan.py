@@ -37,7 +37,7 @@ class XrayScan(ToolGateway):
                     command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
             except subprocess.CalledProcessError as error:
-                logger.error(f"Error al instalar Jfrog Cli en Linux: {error}")
+                logger.error(f"Error during Jfrog Cli installation on Linux: {error}")
 
     def install_tool_windows(self, version):
         try:
@@ -54,7 +54,7 @@ class XrayScan(ToolGateway):
                 with open(exe_file, "wb") as archivo:
                     archivo.write(response.content)
             except subprocess.CalledProcessError as error:
-                logger.error(f"Error al instalar Jfrog Cli en Windows: {error}")
+                logger.error(f"Error while Jfrog Cli installation on Windows: {error}")
 
     def config_server(self, prefix, token):
         try:
@@ -76,7 +76,7 @@ class XrayScan(ToolGateway):
                 text=True,
             )
         except subprocess.CalledProcessError as error:
-            logger.error(f"Error al configurar xray server: {error}")
+            logger.error(f"Error during Xray Server configuration: {error}")
 
     def compress_and_mv(self, npm_modules, target_dir):
         if os.path.exists(target_dir):
@@ -93,10 +93,10 @@ class XrayScan(ToolGateway):
                     arcname=os.path.basename(npm_modules),
                     filter=lambda x: None if "/.bin/" in x.name else x,
                 )
-                print(f"File to scan: {tar_path}")
+                logger.debug(f"File to scan: {tar_path}")
 
         except subprocess.CalledProcessError as e:
-            logger.error(f"Error al comprimir npm_modules: {e}")
+            logger.error(f"Error during npm_modules compression: {e}")
 
     def find_artifacts(self, pattern, working_dir, target_dir):
         if os.path.exists(target_dir):
@@ -115,6 +115,7 @@ class XrayScan(ToolGateway):
         for file in finded_files:
             target = os.path.join(target_dir, os.path.basename(file))
             shutil.copy2(file, target)
+            logger.debug(f"File to scan: {file}")
 
     def scan_dependencies(self, prefix, target_dir_name):
         try:
@@ -128,11 +129,9 @@ class XrayScan(ToolGateway):
                 json.dump(scan_result, file, indent=4)
             return file_result
         except subprocess.CalledProcessError as error:
-            logger.error(f"Error al ejecutar jf scan: {error}")
+            logger.error(f"Error executing jf scan: {error}")
 
-    def run_tool_dependencies_sca(
-        self, remote_config, pipeline_name, exclusions, token
-    ):
+    def run_tool_dependencies_sca(self, remote_config, pattern, token):
         cli_version = remote_config["XRAY"]["CLI_VERSION"]
         os_platform = platform.system()
 
@@ -146,21 +145,6 @@ class XrayScan(ToolGateway):
         self.config_server(command_prefix, token)
 
         working_dir = os.getcwd()
-        pattern = remote_config["REGEX_EXPRESSION_EXTENSIONS"]
-
-        # Excluded files
-        if pipeline_name in exclusions:
-            for exclusion in exclusions[pipeline_name]["XRAY"]:
-                if exclusion.get("files", 0):
-                    excluded_file_types = exclusion["files"]
-                    pattern2 = pattern
-                    for ext in excluded_file_types:
-                        pattern2 = (
-                            pattern2.replace("|" + ext, "")
-                            .replace(ext + "|", "")
-                            .replace(ext, "")
-                        )
-                    pattern = pattern2
 
         dir_to_scan = "dependencies_to_scan"
         dir_to_scan_path = os.path.join(working_dir, dir_to_scan)
