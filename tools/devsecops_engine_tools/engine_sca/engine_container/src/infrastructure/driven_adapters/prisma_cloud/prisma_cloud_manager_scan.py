@@ -80,6 +80,7 @@ class PrismaCloudManagerScan(ToolGateway):
                             text=True,
                         )
                         images_scanned.append(result_file)
+                        print(f"The image {image_name} was scanned")
                         with open(file_name, "a") as file:
                             file.write(result_file + "\n")
                     except subprocess.CalledProcessError as e:
