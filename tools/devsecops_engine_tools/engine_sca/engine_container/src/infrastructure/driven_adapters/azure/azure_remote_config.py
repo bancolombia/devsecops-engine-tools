@@ -24,7 +24,7 @@ class AzureRemoteConfig(ConfigGateway):
         )
         utils_azure = AzureDevopsApi(
             personal_access_token=SystemVariables.System_AccessToken.value(),
-            compact_remote_config_url=f"{base_compact_remote_config_url}" + file_path,
+            compact_remote_config_url=f"{base_compact_remote_config_url}{file_path}",
         )
         connection = utils_azure.get_azure_connection()
         return utils_azure.get_remote_json_config(connection=connection)
