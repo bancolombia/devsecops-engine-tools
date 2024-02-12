@@ -10,9 +10,11 @@ def generate_file_from_tool(tool, result_list, rules_doc):
         try:
             result_one: dict = {}
             result_two: dict = {}
+            result_three: dict = {}
             if len(result_list) > 1:
                 result_one = result_list[0]
                 result_two = result_list[1]
+                result_three = result_list[2]
             file_name = "results.json"
             results_data = {
                 "check_type": "Dockerfile and Kubernetes",
@@ -35,6 +37,18 @@ def generate_file_from_tool(tool, result_list, rules_doc):
                                 rules_doc[x.get("check_id")].get("severity").lower(),
                             ),
                             result_two.get("results", {}).get("failed_checks", []),
+                        )
+                    )
+                    + list(
+                        map(
+                            lambda x:
+                            update_field(
+                            {**x, "custom_vuln_id": rules_doc[x.get("check_id")].get("customID")},
+                            "severity",
+                            rules_doc[x.get("check_id")].get("severity").lower(),
+                            )
+                            ,
+                            result_three.get("results", {}).get("failed_checks", []),
                         )
                     )
                 },
