@@ -4,6 +4,7 @@ from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables impo
     SystemVariables,
     BuildVariables,
     ReleaseVariables,
+    AgentVariables,
 )
 
 
@@ -21,6 +22,7 @@ from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables impo
         (BuildVariables.Build_Repository_Name, "BUILD_REPOSITORY_NAME", "RepositoryNameValue"),
         (BuildVariables.Build_SourceBranch, "BUILD_SOURCEBRANCH", "SourceBranchValue"),
         (ReleaseVariables.Artifact_Path, "ARTIFACT_PATH", "ArtifactPathValue"),
+        (AgentVariables.Agent_WorkFolder, "AGENT_WORKFOLDER", "AgentWorkFolder"),
     ],
 )
 def test_enum_env_name(monkeypatch, enum_class, expected_env_name, expected_value):
