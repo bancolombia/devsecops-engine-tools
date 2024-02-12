@@ -1,15 +1,12 @@
-config_tool = """{
+config_tool_local = {
     "NUCLEI": {
         "VERSION": "2.3.296",
-        "SEARCH_PATTERN": [
-            "AW",
-            "NU"
-        ],
+        "SEARCH_PATTERN": ["AW", "NU"],
         "IGNORE_SEARCH_PATTERN": [
             "test",
             "_ACE",
             "_ACE11",
-            "NU0212001_Security_Services_MR"
+            "NU0212001_Security_Services_MR",
         ],
         "USE_EXTERNAL_CHECKS_GIT": "False",
         "EXTERNAL_CHECKS_GIT": "git@github.com:BCSCode/DevSecOps_Checks_IaC.git//rules",
@@ -22,43 +19,28 @@ config_tool = """{
         "EXCLUSIONS_PATH": "/SAST/IAC/Exclusions/Exclusions.json",
         "MESSAGE_INFO_DAST": "If you have doubts, visit https://discuss.apps.bancolombia.com/t/lanzamiento-csa-analisis-de-seguridad-en-contenedores/6199",
         "THRESHOLD": {
-            "VULNERABILITY": {
-                "Critical": 1,
-                "High": 8,
-                "Medium": 10,
-                "Low": 15
-            },
-            "COMPLIANCE": {
-                "Critical": 1
-            }
+            "VULNERABILITY": {"Critical": 1, "High": 8, "Medium": 10, "Low": 15},
+            "COMPLIANCE": {"Critical": 1},
         },
         "RULES": {
             "RULES_DOCKER": {
                 "CKV_DOCKER_1": {
                     "checkID": "IAC-CKV-DOCKER-1 Ensure port 22 is not exposed",
-                    "environment": {
-                        "dev": true,
-                        "pdn": true,
-                        "qa": true
-                    },
+                    "environment": {"dev": True, "pdn": True, "qa": True},
                     "guideline": "https://bancolombia.sharepoint.com/:x:/r/teams/SeguridaddeTI-DevSecOps/Documentos%20compartidos/General/Pr%C3%A1cticas%20automatizadas%20de%20seguridad/MegaEngine/analisis%20estatico/Analisis%20est%C3%A1tico%20de%20Infraestructura%20(engine-iac)/Docker_k8s_Rules.xlsx?d=w65b6553bc4574805b31e57f4326d2dc7&csf=1&web=1&e=k0nmNU",
                     "severity": "Critical",
                     "cvss": "",
-                    "category": "Vulnerability"
+                    "category": "Vulnerability",
                 },
                 "CKV_DOCKER_3": {
                     "checkID": "IAC-CKV-DOCKER-3 Ensure that a user for the container has been created",
-                    "environment": {
-                        "dev": true,
-                        "pdn": true,
-                        "qa": true
-                    },
+                    "environment": {"dev": True, "pdn": True, "qa": True},
                     "guideline": "https://bancolombia.sharepoint.com/:x:/r/teams/SeguridaddeTI-DevSecOps/Documentos%20compartidos/General/Pr%C3%A1cticas%20automatizadas%20de%20seguridad/MegaEngine/analisis%20estatico/Analisis%20est%C3%A1tico%20de%20Infraestructura%20(engine-iac)/Docker_k8s_Rules.xlsx?d=w65b6553bc4574805b31e57f4326d2dc7&csf=1&web=1&e=k0nmNU",
                     "severity": "High",
                     "cvss": "",
-                    "category": "Vulnerability"
-                }
+                    "category": "Vulnerability",
+                },
             }
-        }
+        },
     }
-}"""
+}

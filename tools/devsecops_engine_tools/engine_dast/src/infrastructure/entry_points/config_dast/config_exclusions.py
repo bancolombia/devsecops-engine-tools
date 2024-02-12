@@ -1,11 +1,6 @@
-config_exclusions = """{
-    "authorizedDefinitionIds": [
-        "33694"
-    ],
-    "committer": [
-        "svchca04@bancolombia.com.co",
-        "Usuario Devops 04"
-    ],
+config_exclusions = {
+    "authorizedDefinitionIds": ["33694"],
+    "committer": ["svchca04@bancolombia.com.co", "Usuario Devops 04"],
     "All": {
         "SCA": [
             {
@@ -15,7 +10,7 @@ config_exclusions = """{
                 "create_date": "10112023",
                 "expired_date": "18112023",
                 "severity": "HIGH",
-                "hu": "4338704"
+                "hu": "4338704",
             }
         ],
         "CHECKOV": [
@@ -26,9 +21,9 @@ config_exclusions = """{
                 "create_date": "18112023",
                 "expired_date": "18032024",
                 "severity": "LOW",
-                "hu": "4338704"
+                "hu": "4338704",
             }
-        ]
+        ],
     },
     "AW11111111_ProyectoEjemplo": {
         "SCA": [
@@ -39,7 +34,7 @@ config_exclusions = """{
                 "create_date": "10112023",
                 "expired_date": "18112023",
                 "severity": "HIGH",
-                "hu": "4338704"
+                "hu": "4338704",
             }
         ],
         "CHECKOV": [
@@ -50,8 +45,8 @@ config_exclusions = """{
                 "create_date": "18112023",
                 "expired_date": "18032024",
                 "severity": "LOW",
-                "hu": "4338704"
+                "hu": "4338704",
             }
-        ]
-    }    
-}"""
+        ],
+    },
+}

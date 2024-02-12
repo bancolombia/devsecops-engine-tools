@@ -101,7 +101,7 @@ class HandleScan:
         elif "engine_dast" in dict_args["tool"]:
             findings_list, input_core = runner_engine_dast(
                 dict_args,
-                config_tool["ENGINE_DAST"],
+                config_tool["ENGINE_DAST"] if config_tool["ENGINE_DAST"] is not None else "NUCLEI",
                 secret_tool
             )
             if dict_args["use_vulnerability_management"] == "true":

@@ -12,7 +12,7 @@ from devsecops_engine_tools.engine_core.src.domain.usecases.metrics_manager impo
 from devsecops_engine_utilities.utils.printers import (
     Printers,
 )
-
+from devsecops_engine_tools.engine_dast.src.infrastructure.entry_points.config_dast.config_tools import configtools
 
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
@@ -78,10 +78,11 @@ def init_engine_core(
 ):
     Printers.print_logo_tool()
     args = get_inputs_from_cli(sys.argv[1:])
-    config_tool = devops_platform_gateway.get_remote_config(
-        args["remote_config_repo"], "/resources/ConfigTool.json"
-    )
+    #config_tool = devops_platform_gateway.get_remote_config(   #DATA PDN
+    #    args["remote_config_repo"], "/resources/ConfigTool.json"
+    #)
 
+    config_tool = configtools #DATA DEV LOCAL BORRAR
     findings_list, input_core = HandleScan(
         vulnerability_management_gateway,
         secrets_manager_gateway,

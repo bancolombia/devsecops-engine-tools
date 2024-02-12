@@ -5,3 +5,4 @@ checkov==2.3.296
 pyfiglet==0.7
 prettytable==3.8.0
 azure-devops==7.1.0b3
+ruamel.yaml==0.18.5
