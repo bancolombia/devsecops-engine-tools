@@ -6,9 +6,6 @@ class ToolGateway(metaclass=ABCMeta):
     def install_tool(self) -> any:
         "install tool"
     @abstractmethod
-    def run_tool_secret_scan(self, system_working_dir: str) -> str:
+    def run_tool_secret_scan(self, system_working_dir: str, exclude_path: dict) -> str:
         "run tool secret scan"
-    @abstractmethod
-    def decode_output(self) -> str:
-        "decode output secret scan"
 
