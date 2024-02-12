@@ -30,7 +30,7 @@ class SetInputCore:
         """
         return self.tool_remote.get_variable(variable)
     
-    @staticmethod
+    
     def get_exclusions(self, exclusions_data, pipeline_name, config_tool):
         list_exclusions = []
         for key, value in exclusions_data.items():
