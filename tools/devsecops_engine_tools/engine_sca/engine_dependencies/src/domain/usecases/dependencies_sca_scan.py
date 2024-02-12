@@ -1,5 +1,5 @@
-from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gateways.config_gateway import (
-    ConfigGateway,
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway,
 )
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
@@ -13,9 +13,11 @@ class DependenciesScan:
     def __init__(
         self,
         tool_run: ToolGateway,
-        tool_remote: ConfigGateway,
+        tool_remote: DevopsPlatformGateway,
         tool_deserializator: DeserializatorGateway,
         dict_args,
+        scan_bool,
+        scan_limits_bool,
         pattern,
         token,
     ):
@@ -23,6 +25,8 @@ class DependenciesScan:
         self.tool_remote = tool_remote
         self.tool_deserializator = tool_deserializator
         self.dict_args = dict_args
+        self.scan_bool = scan_bool
+        self.scan_limits_bool = scan_limits_bool
         self.pattern = pattern
         self.token = token
 
@@ -31,7 +35,7 @@ class DependenciesScan:
         Get remote configuration
         Return: dict: Remote configuration
         """
-        return self.tool_remote.get_remote_config(self.dict_args, file_path)
+        return self.tool_remote.get_remote_config(self.dict_args['remote_config_repo'], file_path)
 
     def process(self):
         """
@@ -41,6 +45,8 @@ class DependenciesScan:
         """
         return self.tool_run.run_tool_dependencies_sca(
             self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json"),
+            self.scan_bool,
+            self.scan_limits_bool,
             self.pattern,
             self.token,
         )

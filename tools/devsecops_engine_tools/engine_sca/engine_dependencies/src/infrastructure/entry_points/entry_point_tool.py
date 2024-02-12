@@ -4,21 +4,23 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.d
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.set_input_core import (
     SetInputCore,
 )
-from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.handle_excluded_files import (
-    HandleExcludedFiles,
+from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.handle_remote_config_patterns import (
+    HandleRemoteConfigPatterns,
 )
 
 
 def init_engine_dependencies(
     tool_run, tool_remote, tool_deserializator, dict_args, token, tool
 ):
-    handle_excluded_files = HandleExcludedFiles(tool_remote, dict_args)
+    handle_remote_config_patterns = HandleRemoteConfigPatterns(tool_remote, dict_args)
     dependencies_sca_scan = DependenciesScan(
         tool_run,
         tool_remote,
         tool_deserializator,
         dict_args,
-        handle_excluded_files.process(),
+        handle_remote_config_patterns.process_handle_analysis_pattern(),
+        handle_remote_config_patterns.process_handle_bypass_expression(),
+        handle_remote_config_patterns.process_handle_excluded_files(),
         token,
     )
     input_core = SetInputCore(tool_remote, dict_args, tool)
