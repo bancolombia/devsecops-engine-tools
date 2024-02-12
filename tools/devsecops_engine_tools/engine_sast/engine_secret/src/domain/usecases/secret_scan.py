@@ -31,15 +31,26 @@ class SecretScan:
         )
         finding_list = []
         if skip_tool == "false":
-            self.tool_gateway.install_tool()
+            agent_temp_dir = self.devops_platform_gateway.get_variable(
+            "TEMP_DIRECTORY"
+            )
             system_working_dir = self.devops_platform_gateway.get_variable(
             "PATH_DIRECTORY"
             )
             exclude_path = config_tool.exclude_path
+            agent_os = self.devops_platform_gateway.get_variable(
+            "OS"
+            )
+            agent_work_folder = self.devops_platform_gateway.get_variable(
+            "WORK_FOLDER"
+            )
+            self.tool_gateway.install_tool(agent_os, agent_temp_dir)
             finding_list = self.tool_deserialize.get_list_vulnerability(
                 self.tool_gateway.run_tool_secret_scan(
                     system_working_dir,
                     exclude_path,
+                    agent_os,
+                    agent_work_folder,
                     ),
                 self.devops_platform_gateway
                 )
