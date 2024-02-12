@@ -16,12 +16,14 @@ class DependenciesScan:
         tool_remote: ConfigGateway,
         tool_deserializator: DeserializatorGateway,
         dict_args,
+        pattern,
         token,
     ):
         self.tool_run = tool_run
         self.tool_remote = tool_remote
         self.tool_deserializator = tool_deserializator
         self.dict_args = dict_args
+        self.pattern = pattern
         self.token = token
 
     def get_remote_config(self, file_path):
@@ -31,7 +33,7 @@ class DependenciesScan:
         """
         return self.tool_remote.get_remote_config(self.dict_args, file_path)
 
-    def process(self, pattern):
+    def process(self):
         """
         Process SCA dependencies scan.
 
@@ -39,7 +41,7 @@ class DependenciesScan:
         """
         return self.tool_run.run_tool_dependencies_sca(
             self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json"),
-            pattern,
+            self.pattern,
             self.token,
         )
 

@@ -37,9 +37,7 @@ class XrayDeserializator(DeserializatorGateway):
                                     else ""
                                 ),
                                 where=(
-                                    list(vul["components"].values())[0]
-                                    .get("impact_paths", [[{"": ""}]])[0][0]
-                                    .get("component_id", "")
+                                    list(vul["components"].keys())[0]
                                     if vul.get("components", 0)
                                     else ""
                                 ),
