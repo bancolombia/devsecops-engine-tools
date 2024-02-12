@@ -35,9 +35,11 @@ class SecretScan:
             system_working_dir = self.devops_platform_gateway.get_variable(
             "PATH_DIRECTORY"
             )
+            exclude_path = config_tool.exclude_path
             finding_list = self.tool_deserialize.get_list_vulnerability(
                 self.tool_gateway.run_tool_secret_scan(
-                    system_working_dir
+                    system_working_dir,
+                    exclude_path,
                     ),
                 self.devops_platform_gateway
                 )

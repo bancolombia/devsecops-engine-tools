@@ -33,7 +33,7 @@ class TrufflehogRun(ToolGateway):
         command_complete = f"powershell -Command [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; [Net.ServicePointManager]::SecurityProtocol; New-Item -Path {temp} -ItemType Directory -Force; Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh' -OutFile {temp}\install_trufflehog.sh; bash {temp}\install_trufflehog.sh -b C:/Trufflehog/bin; $env:Path += ';C:/Trufflehog/bin'; C:/Trufflehog/bin/trufflehog.exe --version"
         process = subprocess.Popen(command_complete, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         process.communicate()
-    def run_tool_secret_scan(self, system_working_dir):
+    def run_tool_secret_scan(self, system_working_dir, exclude_path):
         operative_system = os.environ.get('AGENT_OS')
         reg_exp_os = r'Windows'
         check_os = re.search(reg_exp_os, operative_system)
@@ -42,10 +42,12 @@ class TrufflehogRun(ToolGateway):
         else:
             trufflehog_command = "trufflehog"
         path = os.environ.get('AGENT_WORKFOLDER')
-        command = (
-            f'echo .git >> {path}/excludedPath.txt'
-        )
-        subprocess.run(command, shell=True, check=True) 
+        for i in exclude_path:
+            command = (
+                f'echo {i} >> {path}/excludedPath.txt'
+            )
+            print(command)
+            subprocess.run(command, shell=True, check=True) 
         repository = system_working_dir
         exclude_path = os.environ.get('AGENT_WORKFOLDER') + "/excludedPath.txt"
         command = (
