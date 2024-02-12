@@ -29,14 +29,14 @@ class ContainerScaScan:
         self.dict_args = dict_args
         self.token = token
 
-    def get_remote_config(self):
+    def get_remote_config(self, file_path):
         """
         Get remote configuration.
 
         Returns:
             dict: Remote configuration.
         """
-        return self.tool_remote.get_remote_config(self.dict_args)
+        return self.tool_remote.get_remote_config(self.dict_args, file_path)
 
     def scan_image(self):
         """
@@ -46,7 +46,7 @@ class ContainerScaScan:
             list: List of processed images.
         """
         return self.tool_images.list_images()
-    
+
     def get_variable(self, variable):
         """
         Get variable.
@@ -64,7 +64,10 @@ class ContainerScaScan:
             dict: SCA scanning results.
         """
         return self.tool_run.run_tool_container_sca(
-            self.get_remote_config(), self.token, self.scan_image(), self.get_variable("release_name")
+            self.get_remote_config("SCA/CONTAINER/ConfigTool.json"),
+            self.token,
+            self.scan_image(),
+            self.get_variable("release_name"),
         )
 
     def deseralizator(self, image_scanned):
