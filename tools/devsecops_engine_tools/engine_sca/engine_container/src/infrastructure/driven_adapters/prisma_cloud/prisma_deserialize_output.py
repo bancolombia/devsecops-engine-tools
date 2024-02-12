@@ -40,7 +40,7 @@ class PrismaDeserealizator(DeseralizatorGateway):
                         id=vul.get("id", ""),
                         cvss=float(vul.get("cvss", 0.0)),
                         where=vul.get("packageName", "")
-                        + " "
+                        + ":"
                         + vul.get("packageVersion", ""),
                         description=vul.get("description", "")[:150],
                         severity=SEVERITY_MAP.get(vul.get("severity", ""), ""),

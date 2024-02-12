@@ -88,7 +88,7 @@ class CheckovTool(ToolGateway):
                     )
 
         except Exception as ex:
-            logger.warning(f"An error ocurred configuring external checks {ex}")
+            logger.error(f"An error ocurred configuring external checks {ex}")
         return agent_env
 
     def execute(self, checkov_config: CheckovConfig):
@@ -107,7 +107,7 @@ class CheckovTool(ToolGateway):
         output = result.stdout.strip()
         error = result.stderr.strip()
         if error is not None and error != "":
-            logger.warning(f"Error running checkov.. {error}")
+            logger.error(f"Error running checkov.. {error}")
         return output
 
     def async_scan(self, queue, checkov_config: CheckovConfig):

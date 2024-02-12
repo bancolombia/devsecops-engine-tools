@@ -78,8 +78,6 @@ class AzureDevops(DevopsPlatformGateway):
                 return ReleaseVariables.Environment.value()
             elif variable == "release_id":
                 return ReleaseVariables.Release_Releaseid.value()
-            elif variable == "version":
-                return BuildVariables.Build_BuildId.value()
             elif variable == "branch_tag":
                 return BuildVariables.Build_SourceBranch.value()
             elif variable == "access_token":

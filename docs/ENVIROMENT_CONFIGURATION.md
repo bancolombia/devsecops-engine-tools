@@ -61,9 +61,9 @@ PYTHONPATH=tools/
                 "--environment",
                 "dev",
                 "--use_secrets_manager",
-                "False",
+                "false",
                 "--use_vulnerability_management",
-                "False"
+                "false"
             ],
             "env": {
                 "BUILD_BUILDID": "2688",

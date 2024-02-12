@@ -1,4 +1,5 @@
 import re
+import os
 import csv
 from devsecops_engine_utilities.utils.api_error import ApiError
 from devsecops_engine_utilities.settings import SETTING_LOGGER
@@ -38,6 +39,7 @@ class ImportScanUserCase:
         self.__rest_engagement = rest_engagement
 
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
+        response = None
         product_type_id = None
         product_id = None
         if (request.product_name or request.product_type_name) == "":
@@ -111,24 +113,31 @@ class ImportScanUserCase:
 
         if api_scan_bool:
             response = self.__rest_import_scan.import_scan_api(request)
-            response.test_url = f"{request.host_defect_dojo}/test/{str(response.test_id)}"
             logger.info(f"End process Succesfull!!!: {response}")
-            return response
         else:
             try:
-                file_type = ""
-                if request.file.lower().endswith(".json"):
-                    file_type = "application/json"
-                elif request.file.lower().endswith(".csv"):
-                    file_type = "text/csv"
-                if file_type:
-                    with open(request.file, "rb") as file:
-                        logger.info("read CSV file successful !!!")
-                        files = [("file", (request.file, file, file_type))]
-                        response = self.__rest_import_scan.import_scan(request, files)
-                        response.test_url = f"{request.host_defect_dojo}/test/{str(response.test_id)}"
-                        return response
-                raise ApiError("file format not allowed")
+                file_type = self.get_file_type(request.file)
+                if file_type is None:
+                    raise ApiError("File format not allowed")
+
+                with open(request.file, "rb") as file:
+                    logger.info(f"read {file_type} file successful !!!")
+                    files = [("file", (request.file, file, file_type))]
+                    response = self.__rest_import_scan.import_scan(request, files)
 
             except Exception as e:
                 raise ApiError(e)
+
+        response.url = f"{request.host_defect_dojo}/engagement/{str(response.engagement_id)}/finding/open"
+        return response
+
+    def get_file_type(self, path_file):
+        __, extension = os.path.splitext(path_file)
+        dict_rule_type_file = {
+            ".csv": "text/csv",
+            ".json": "apllication/json",
+            ".xml": "aplication/xml",
+            ".sarif": "aplication/json",
+        }
+        file_type = dict_rule_type_file.get(extension)
+        return file_type

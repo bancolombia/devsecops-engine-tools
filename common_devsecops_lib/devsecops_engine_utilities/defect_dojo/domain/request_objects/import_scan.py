@@ -16,6 +16,7 @@ class ImportScanRequest:
     engagement_end_date: str = ""
     source_code_management_uri: str = ""
     engagement: int = 0
+    engagement_id: int = 0
     auto_create_context: str = ""
     deduplication_on_engagement: str = ""
     lead: str = ""
@@ -53,7 +54,7 @@ class ImportScanRequest:
     # ** Expression
     expression: str = ""
     # ** Test url
-    test_url: str = ""
+    url: str = ""
 
     @classmethod
     def from_dict(cls, obj):
@@ -71,6 +72,7 @@ class ImportScanRequest:
             engagement_end_date=obj.get("engagement_end_date"),
             source_code_management_uri=obj.get("source_code_management_uri"),
             engagement=obj.get("engagement"),
+            engagement_id=obj.get("engagement_id"),
             auto_create_context=obj.get("auto_create_context"),
             deduplication_on_engagement=obj.get("deduplication_on_engagement"),
             lead=obj.get("lead"),

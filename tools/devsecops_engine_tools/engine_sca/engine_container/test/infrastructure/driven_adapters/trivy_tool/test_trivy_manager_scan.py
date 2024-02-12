@@ -88,17 +88,17 @@ def test_run_tool_container_sca(trivy_scan_instance):
         "REGEX_EXPRESSION_PROJECTS": "((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS[A-Z]{3})\\d+)",
     }
     mock_scan_image = [
-        {"Repository": "nu0429002_devsecops_test_debian", "Tag": "latest"},
-        {"Repository": "nu0429002_devsecops_test", "Tag": "latest"},
+        {"Repository": "registry/nu0429002_devsecops_test_debian", "Tag": "latest"},
+        {"Repository": "registry/nu0429002_devsecops_test", "Tag": "latest"},
         {"Repository": "Ubuntu", "Tag": "latest"},
         {"Repository": "Debian", "Tag": "latest"},
-        {"Repository": "nu000000_test", "Tag": "1.2"},
+        {"Repository": "registry/nu0429002_test", "Tag": "1.2"},
     ]
 
     with patch("subprocess.run", return_value=Mock()) as mock_subprocess_run:
         with patch("builtins.open", mock_open()) as mock_file_open:
             result = trivy_scan_instance.run_tool_container_sca(
-                mock_remoteconfig, "token", mock_scan_image
+                mock_remoteconfig, "token", mock_scan_image, "nu0429002_devsecops_test"
             )
 
             # Subprocess
@@ -112,7 +112,7 @@ def test_run_tool_container_sca(trivy_scan_instance):
             expected_result = [
                 "nu0429002_devsecops_test_debian:latest_scan_result.json",
                 "nu0429002_devsecops_test:latest_scan_result.json",
-                "nu000000_test:1.2_scan_result.json",
+                "nu0429002_test:1.2_scan_result.json",
             ]
             assert result == expected_result, "La lista resotrnada no es la esperada"
 
@@ -127,6 +127,6 @@ def test_run_tool_container_sca(trivy_scan_instance):
             ]
 
             result = trivy_scan_instance.run_tool_container_sca(
-                mock_remoteconfig, "token", mock_scan_image
+                mock_remoteconfig, "token", mock_scan_image, "test"
             )
-            assert result == 0
+            assert len(result) == 0

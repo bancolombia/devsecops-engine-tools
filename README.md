@@ -16,6 +16,14 @@ Tool that unifies the evaluation of the different devsecops practices being agno
 
 📦 [tools](https://github.com/bancolombia/NU0429001_devsecops_engine/tree/trunk/tools): DevSecOps Practice Modules
 
+# Communications channel
+
+Here are the channels we use to communicate about the project:
+
+**1. Mailing list:** You can join our mailing list to always be informed at the following link: [CommunityDevsecopsEngine](https://groups.google.com/g/CommunityDevsecopsEngine)
+
+**2. Email:** You can write to us by email:  MaintainersDevsecopsEngine@googlegroups.com
+
 # Getting started
 
 ### Requirements
@@ -85,3 +93,8 @@ Below are all compliances issues detected.
 # How can I help?
 
 Review the issues, we hear new ideas. Read more [Contributing](https://github.com/bancolombia/NU0429001_devsecops_engine/blob/trunk/docs/CONTRIBUTING.md)
+
+
+
+
+

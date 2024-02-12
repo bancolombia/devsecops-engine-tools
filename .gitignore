@@ -44,13 +44,5 @@ RULES_K8Scheckov_config.yaml
 log/
 twistcli
 *_scan_result.json
-#DAST TEST
-read_yaml.py
-result.json
-test.py
-folder1/
-folder2/
-azp/
-customized-templates/
-venvwsl/
-result_dast_scan.json
+jf
+jf.exe

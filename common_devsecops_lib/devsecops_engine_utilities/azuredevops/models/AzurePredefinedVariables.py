@@ -51,3 +51,15 @@ class ReleaseVariables(BaseEnum):
     Release_Releaseid = "Release.ReleaseId"
     Artifact_Path = "ARTIFACT_PATH"
     Environment = "ENV"
+
+
+class AgentVariables(BaseEnum):
+    Agent_WorkFolder = "Agent.WorkFolder"
+    Agent_TempDirectory = "Agent.TempDirectory"
+    Agent_OS = "Agent.OS"
+
+
+class AgentVariables(BaseEnum):
+    Agent_WorkFolder = "Agent.WorkFolder"
+    Agent_TempDirectory = "Agent.TempDirectory"
+    Agent_OS = "Agent.OS"

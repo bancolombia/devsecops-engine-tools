@@ -1,9 +1,6 @@
 from devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_scan import (
     runner_engine_iac,
 )
-from devsecops_engine_tools.engine_dast.src.applications.runner_dast_scan import (
-    runner_engine_dast,
-)
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_management_gateway import (
     VulnerabilityManagementGateway,
 )
@@ -50,14 +47,14 @@ class HandleScan:
         if "engine_iac" in dict_args["tool"]:
             findings_list, input_core = runner_engine_iac(
                 dict_args,
-                config_tool["ENGINE_IAC"],
+                config_tool["ENGINE_IAC"]["TOOL"],
                 secret_tool
             )
             if dict_args["use_vulnerability_management"] == "true":
                 try:
                     self.vulnerability_management.send_vulnerability_management(
                         VulnerabilityManagement(
-                            config_tool["ENGINE_IAC"],
+                            config_tool["ENGINE_IAC"]["TOOL"],
                             input_core,
                             dict_args,
                             secret_tool,
@@ -68,7 +65,7 @@ class HandleScan:
                                 dict_args["remote_config_repo"]
                             ),
                             self.devops_platform_gateway.get_variable("access_token"),
-                            self.devops_platform_gateway.get_variable("version"),
+                            self.devops_platform_gateway.get_variable("build_execution_id"),
                             self.devops_platform_gateway.get_variable("build_id"),
                             self.devops_platform_gateway.get_variable("branch_tag"),
                             self.devops_platform_gateway.get_variable("commit_hash"),
@@ -76,7 +73,7 @@ class HandleScan:
                         )
                     )
                 except ExceptionVulnerabilityManagement as ex1:
-                    logger.warning(str(ex1))
+                    logger.error(str(ex1))
                 try:
                     input_core.totalized_exclusions.extend(
                         self.vulnerability_management.get_findings_risk_acceptance(
@@ -87,7 +84,7 @@ class HandleScan:
                         )
                     )
                 except ExceptionFindingsRiskAcceptance as ex2:
-                    logger.warning(str(ex2))
+                    logger.error(str(ex2))
 
             return findings_list, input_core
         elif "engine_container" in dict_args["tool"]:
@@ -99,47 +96,7 @@ class HandleScan:
             findings_list, input_core =runner_engine_container(dict_args, config_tool, secret_sca)
             return findings_list, input_core
         elif "engine_dast" in dict_args["tool"]:
-            findings_list, input_core = runner_engine_dast(
-                dict_args,
-                config_tool["ENGINE_DAST"] if config_tool["ENGINE_DAST"] is not None else "NUCLEI",
-                secret_tool
-            )
-            if dict_args["use_vulnerability_management"] == "true":
-                try:
-                    self.vulnerability_management.send_vulnerability_management(
-                        VulnerabilityManagement(
-                            config_tool["ENGINE_DAST"],
-                            input_core,
-                            dict_args,
-                            secret_tool,
-                            config_tool,
-                            self.devops_platform_gateway.get_source_code_management_uri(),
-                            self.devops_platform_gateway.get_variable("branch_name"),
-                            self.devops_platform_gateway.get_base_compact_remote_config_url(
-                                dict_args["remote_config_repo"]
-                            ),
-                            self.devops_platform_gateway.get_variable("access_token"),
-                            self.devops_platform_gateway.get_variable("version"),
-                            self.devops_platform_gateway.get_variable("build_id"),
-                            self.devops_platform_gateway.get_variable("branch_tag"),
-                            self.devops_platform_gateway.get_variable("commit_hash"),
-                            self.devops_platform_gateway.get_variable("environment"),
-                        )
-                    )
-                except ExceptionVulnerabilityManagement as ex1:
-                    print(self.devops_platform_gateway.logging("warning", str(ex1)))
-                try:
-                    input_core.totalized_exclusions.extend(
-                        self.vulnerability_management.get_findings_risk_acceptance(
-                            input_core.scope_pipeline,
-                            dict_args,
-                            secret_tool,
-                            config_tool,
-                        )
-                    )
-                except ExceptionFindingsRiskAcceptance as ex2:
-                    print(self.devops_platform_gateway.logging("warning", str(ex2)))
-            return findings_list, input_core
+            print(MESSAGE_ENABLED)
         elif "engine_secret" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
         elif "engine_dependencies" in dict_args["tool"]:
