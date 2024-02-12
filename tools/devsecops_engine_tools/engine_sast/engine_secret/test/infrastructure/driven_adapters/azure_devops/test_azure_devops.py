@@ -47,7 +47,7 @@ class TestAzureDevops(unittest.TestCase):
         with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.BuildVariables') as mock_build_variables:
             mock_build_variables.Build_Repository_Name.value.return_value = "BUILD_REPOSITORY_NAME"
 
-            result = self.azure_devops.get_variable("BUILD_REPOSITORY_NAME")
+            result = self.azure_devops.get_variable("REPOSITORY")
 
         self.assertEqual(result, "BUILD_REPOSITORY_NAME")
         
@@ -56,7 +56,7 @@ class TestAzureDevops(unittest.TestCase):
         with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables:
             mock_system_variables.System_DefaultWorkingDirectory.value.return_value = "SYSTEM_DEFAULTWORKINGDIRECTORY"
 
-            result = self.azure_devops.get_variable("SYSTEM_DEFAULTWORKINGDIRECTORY")
+            result = self.azure_devops.get_variable("PATH_DIRECTORY")
 
         self.assertEqual(result, "SYSTEM_DEFAULTWORKINGDIRECTORY")
 

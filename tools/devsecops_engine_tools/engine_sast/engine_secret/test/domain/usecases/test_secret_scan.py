@@ -58,7 +58,7 @@ class TestSecretScan(unittest.TestCase):
             path_file_results=["vulnerability_data"],
             custom_message_break_build=json_config["trufflehog"]["MESSAGE_INFO_SAST_BUILD"],
             scope_pipeline="example_pipeline",
-            stage_pipeline="Pipeline"
+            stage_pipeline="Build"
         )
         self.assertEqual(finding_list, ["vulnerability_data"])
         self.assertEqual(input_core.totalized_exclusions, [])
@@ -66,7 +66,7 @@ class TestSecretScan(unittest.TestCase):
         self.assertEqual(input_core.path_file_results, ["vulnerability_data"])
         self.assertEqual(input_core.custom_message_break_build, "message test")
         self.assertEqual(input_core.scope_pipeline, "example_pipeline")
-        self.assertEqual(input_core.stage_pipeline, "Pipeline")
+        self.assertEqual(input_core.stage_pipeline, "Build")
         mock_tool_gateway_instance.install_tool.assert_called_once()
         mock_tool_gateway_instance.run_tool_secret_scan.assert_called_once()
 
@@ -119,7 +119,7 @@ class TestSecretScan(unittest.TestCase):
             path_file_results=[],
             custom_message_break_build=json_config["trufflehog"]["MESSAGE_INFO_SAST_BUILD"],
             scope_pipeline="example_pipeline",
-            stage_pipeline="Pipeline"
+            stage_pipeline="Build"
         )
         self.assertEqual(finding_list, [])
         self.assertEqual(input_core.totalized_exclusions, [])
@@ -127,6 +127,6 @@ class TestSecretScan(unittest.TestCase):
         self.assertEqual(input_core.path_file_results, [])
         self.assertEqual(input_core.custom_message_break_build, "message test")
         self.assertEqual(input_core.scope_pipeline, "example_pipeline")
-        self.assertEqual(input_core.stage_pipeline, "Pipeline")
+        self.assertEqual(input_core.stage_pipeline, "Build")
         mock_tool_gateway_instance.install_tool.assert_called_once()
         mock_tool_gateway_instance.run_tool_secret_scan.assert_called_once()
