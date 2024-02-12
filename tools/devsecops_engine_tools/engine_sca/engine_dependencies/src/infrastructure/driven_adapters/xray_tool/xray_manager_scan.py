@@ -79,10 +79,6 @@ class XrayScan(ToolGateway):
             logger.error(f"Error during Xray Server configuration: {error}")
 
     def compress_and_mv(self, npm_modules, target_dir):
-        if os.path.exists(target_dir):
-            shutil.rmtree(target_dir)
-
-        os.makedirs(target_dir)
         try:
             tar_path = os.path.join(target_dir, "node_modules.tar")
             if os.path.exists(tar_path):
@@ -98,19 +94,22 @@ class XrayScan(ToolGateway):
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during npm_modules compression: {e}")
 
-    def find_artifacts(self, pattern, working_dir, target_dir):
-        if os.path.exists(target_dir):
-            shutil.rmtree(target_dir)
+    def find_node_modules(self, working_dir):
+        for root, dirs, files in os.walk(working_dir):
+            if "node_modules" in dirs:
+                return os.path.join(root, "node_modules")
+        return None
 
-        os.makedirs(target_dir)
-
+    def find_artifacts(self, pattern, working_dir, target_dir, excluded_dir):
         finded_files = []
         extension_pattern = re.compile(pattern, re.IGNORECASE)
+
         for root, dirs, files in os.walk(working_dir):
-            for file in files:
-                if extension_pattern.search(file):
-                    ruta_completa = os.path.join(root, file)
-                    finded_files.append(ruta_completa)
+            if not (excluded_dir in root):
+                for file in files:
+                    if extension_pattern.search(file):
+                        ruta_completa = os.path.join(root, file)
+                        finded_files.append(ruta_completa)
 
         for file in finded_files:
             target = os.path.join(target_dir, os.path.basename(file))
@@ -148,12 +147,18 @@ class XrayScan(ToolGateway):
 
         dir_to_scan = "dependencies_to_scan"
         dir_to_scan_path = os.path.join(working_dir, dir_to_scan)
-        npm_modules_path = os.path.join(working_dir, "node_modules")
+        if os.path.exists(dir_to_scan_path):
+            shutil.rmtree(dir_to_scan_path)
+        os.makedirs(dir_to_scan_path)
 
-        if os.path.exists(npm_modules_path):
+        npm_modules_path = self.find_node_modules(working_dir)
+        if npm_modules_path:
             self.compress_and_mv(npm_modules_path, dir_to_scan_path)
+            excluded_dir = npm_modules_path
         else:
-            self.find_artifacts(pattern, working_dir, dir_to_scan_path)
+            excluded_dir = ""
+        self.find_artifacts(pattern, working_dir, dir_to_scan_path, excluded_dir)
+
         results_file = self.scan_dependencies(command_prefix, dir_to_scan)
 
         return results_file

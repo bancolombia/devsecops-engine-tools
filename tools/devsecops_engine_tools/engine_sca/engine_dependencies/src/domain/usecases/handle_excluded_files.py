@@ -38,17 +38,17 @@ class HandleExcludedFiles:
         if (pipeline_name in exclusions) and (
             exclusions[pipeline_name].get("SKIP_FILES", 0)
         ):
-            for exclusion in exclusions[pipeline_name]["SKIP_FILES"]:
-                if exclusion.get("files", 0):
-                    excluded_file_types = exclusion["files"]
-                    pattern2 = pattern
-                    for ext in excluded_file_types:
-                        pattern2 = (
-                            pattern2.replace("|" + ext, "")
-                            .replace(ext + "|", "")
-                            .replace(ext, "")
-                        )
-                    pattern = pattern2
+            exclusion = exclusions[pipeline_name]["SKIP_FILES"]
+            if exclusion.get("files", 0):
+                excluded_file_types = exclusion["files"]
+                pattern2 = pattern
+                for ext in excluded_file_types:
+                    pattern2 = (
+                        pattern2.replace("|" + ext, "")
+                        .replace(ext + "|", "")
+                        .replace(ext, "")
+                    )
+                pattern = pattern2
 
         return pattern
 
