@@ -1,18 +1,16 @@
 import json
 import re
 import subprocess
-import os
 
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway import ToolGateway
 
 
 class TrufflehogRun(ToolGateway):
-    def install_tool(self) -> any:
-        operative_system = os.environ.get('AGENT_OS')
+    def install_tool(self, agent_os, agent_temp_dir) -> any:
         reg_exp_os = r'Windows'
-        check_os = re.search(reg_exp_os, operative_system)
+        check_os = re.search(reg_exp_os, agent_os)
         if check_os:
-            self.run_install_win()
+            self.run_install_win(agent_temp_dir)
         else:
             command = (
                 f"trufflehog --version"
@@ -28,30 +26,25 @@ class TrufflehogRun(ToolGateway):
             f"curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin"
         )
         subprocess.run(command, capture_output=True, shell=True)
-    def run_install_win(self):
-        temp = os.environ.get('AGENT_TEMPDIRECTORY')
-        command_complete = f"powershell -Command [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; [Net.ServicePointManager]::SecurityProtocol; New-Item -Path {temp} -ItemType Directory -Force; Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh' -OutFile {temp}\install_trufflehog.sh; bash {temp}\install_trufflehog.sh -b C:/Trufflehog/bin; $env:Path += ';C:/Trufflehog/bin'; C:/Trufflehog/bin/trufflehog.exe --version"
+    def run_install_win(self, agent_temp_dir):
+        command_complete = f"powershell -Command [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; [Net.ServicePointManager]::SecurityProtocol; New-Item -Path {agent_temp_dir} -ItemType Directory -Force; Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh' -OutFile {agent_temp_dir}\install_trufflehog.sh; bash {agent_temp_dir}\install_trufflehog.sh -b C:/Trufflehog/bin; $env:Path += ';C:/Trufflehog/bin'; C:/Trufflehog/bin/trufflehog.exe --version"
         process = subprocess.Popen(command_complete, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         process.communicate()
-    def run_tool_secret_scan(self, system_working_dir, exclude_path):
-        operative_system = os.environ.get('AGENT_OS')
+    def run_tool_secret_scan(self, system_working_dir, exclude_path, agent_os, agent_work_folder):
         reg_exp_os = r'Windows'
-        check_os = re.search(reg_exp_os, operative_system)
+        check_os = re.search(reg_exp_os, agent_os)
         if check_os:
             trufflehog_command = "C:/Trufflehog/bin/trufflehog.exe"
         else:
             trufflehog_command = "trufflehog"
-        path = os.environ.get('AGENT_WORKFOLDER')
         for i in exclude_path:
             command = (
-                f'echo {i} >> {path}/excludedPath.txt'
+                f'echo {i} >> {agent_work_folder}/excludedPath.txt'
             )
-            print(command)
-            subprocess.run(command, shell=True, check=True) 
-        repository = system_working_dir
-        exclude_path = os.environ.get('AGENT_WORKFOLDER') + "/excludedPath.txt"
+            subprocess.run(command, shell=True, check=True)
+        exclude_path = agent_work_folder + "/excludedPath.txt"
         command = (
-            f"{trufflehog_command} filesystem {repository} --json --exclude-paths {exclude_path} --no-verification"
+            f"{trufflehog_command} filesystem {system_working_dir} --json --exclude-paths {exclude_path} --no-verification"
         )
         result = subprocess.run(command, capture_output=True, shell=True)
         output = result.stdout.decode("utf-8")

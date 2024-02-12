@@ -27,7 +27,6 @@ class TestSecretScan(unittest.TestCase):
         # Configuración de retornos esperados para los mocks
         json_config = {
             "trufflehog": {
-                "VERSION": "1",
                 "IGNORE_SEARCH_PATTERN": ["test"],
                 "MESSAGE_INFO_SAST_BUILD": "message test",
                 "THRESHOLD": {
@@ -40,7 +39,8 @@ class TestSecretScan(unittest.TestCase):
                     "COMPLIANCE": {
                         "Critical": 1
                     }
-                }
+                },
+                "EXCLUDE_PATH": [".git"]
             }
         }
 
@@ -88,7 +88,6 @@ class TestSecretScan(unittest.TestCase):
         # Configuración de retornos esperados para los mocks
         json_config = {
             "trufflehog": {
-                "VERSION": "1",
                 "IGNORE_SEARCH_PATTERN": ["test"],
                 "MESSAGE_INFO_SAST_BUILD": "message test",
                 "THRESHOLD": {
@@ -101,7 +100,8 @@ class TestSecretScan(unittest.TestCase):
                     "COMPLIANCE": {
                         "Critical": 1
                     }
-                }
+                },
+                "EXCLUDE_PATH": [".git"]
             }
         }
 

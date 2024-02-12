@@ -59,6 +59,33 @@ class TestAzureDevops(unittest.TestCase):
             result = self.azure_devops.get_variable("PATH_DIRECTORY")
 
         self.assertEqual(result, "SYSTEM_DEFAULTWORKINGDIRECTORY")
+        
+    def test_get_variable_agent_os(self):
+        # Mock the SystemVariables class
+        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.AgentVariables') as mock_agent_variables:
+            mock_agent_variables.Agent_OS.value.return_value = "Linux"
+
+            result = self.azure_devops.get_variable("OS")
+
+        self.assertEqual(result, "Linux")
+    
+    def test_get_variable_agent_work_folder(self):
+        # Mock the SystemVariables class
+        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.AgentVariables') as mock_agent_variables:
+            mock_agent_variables.Agent_WorkFolder.value.return_value = "/azp/work"
+
+            result = self.azure_devops.get_variable("WORK_FOLDER")
+
+        self.assertEqual(result, "/azp/work")
+    
+    def test_get_variable_agent_temp_directory(self):
+        # Mock the SystemVariables class
+        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.AgentVariables') as mock_agent_variables:
+            mock_agent_variables.Agent_TempDirectory.value.return_value = "/tmp"
+
+            result = self.azure_devops.get_variable("TEMP_DIRECTORY")
+
+        self.assertEqual(result, "/tmp")
 
     def test_get_variable_invalid_variable(self):
         # Test when an invalid variable is provided

@@ -3,6 +3,7 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.d
     DevopsPlatformGateway,
 )
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
+    AgentVariables,
     SystemVariables,
     BuildVariables,
 )
@@ -31,6 +32,12 @@ class AzureDevops(DevopsPlatformGateway):
                 return BuildVariables.Build_Repository_Name.value()
             elif variable == "PATH_DIRECTORY":
                 return SystemVariables.System_DefaultWorkingDirectory.value()
+            elif variable == "OS":
+                return AgentVariables.Agent_OS.value()
+            elif variable == "WORK_FOLDER":
+                return AgentVariables.Agent_WorkFolder.value()
+            elif variable == "TEMP_DIRECTORY":
+                return AgentVariables.Agent_TempDirectory.value()
         except Exception as e:
             print(e)
             return None
