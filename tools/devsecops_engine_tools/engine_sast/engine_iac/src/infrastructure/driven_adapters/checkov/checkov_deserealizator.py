@@ -18,7 +18,7 @@ class CheckovDeserealizator:
             if "failed_checks" in str(result):
                 for scan in result["results"]["failed_checks"]:
                     finding_open = Finding(
-                        id=scan.get("check_id"),
+                        id=rules[scan.get("check_id")].get("customID", scan.get("check_id")),
                         cvss=None,
                         where=scan.get("repo_file_path"),
                         description=scan.get("check_name"),
