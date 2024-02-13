@@ -1,6 +1,9 @@
 from devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_scan import (
     runner_engine_iac,
 )
+from devsecops_engine_tools.engine_sast.engine_secret.src.applications.runner_secret_scan import (
+    runner_secret_scan
+)
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_management_gateway import (
     VulnerabilityManagementGateway,
 )
@@ -98,6 +101,10 @@ class HandleScan:
         elif "engine_dast" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
         elif "engine_secret" in dict_args["tool"]:
-            print(MESSAGE_ENABLED)
+            findings_list, input_core = runner_secret_scan(
+                dict_args,
+                config_tool["ENGINE_SECRET"]["TOOL"],
+            )
+            return findings_list, input_core
         elif "engine_dependencies" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
