@@ -18,6 +18,8 @@ def init_engine_dependencies(
         tool_remote,
         tool_deserializator,
         dict_args,
+        handle_remote_config_patterns.process_handle_working_directory(),
+        handle_remote_config_patterns.process_handle_skip_tool(),
         handle_remote_config_patterns.process_handle_analysis_pattern(),
         handle_remote_config_patterns.process_handle_bypass_expression(),
         handle_remote_config_patterns.process_handle_excluded_files(),

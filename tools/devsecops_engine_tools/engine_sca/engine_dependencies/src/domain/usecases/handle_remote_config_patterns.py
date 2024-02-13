@@ -3,6 +3,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform
 )
 
 import re
+import os
 
 class HandleRemoteConfigPatterns:
     def __init__(
@@ -60,7 +61,7 @@ class HandleRemoteConfigPatterns:
         Return: string: new regex expresion.
         """
         return self.handle_excluded_files(
-            self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")[
+            self.get_remote_config("SCA/DEPENDENCIES/configTools.json")[
                 "REGEX_EXPRESSION_EXTENSIONS"
             ],
             self.get_variable("pipeline_name"),
@@ -71,7 +72,7 @@ class HandleRemoteConfigPatterns:
         """
         Handle analysis pattern.
 
-        Return: string: new regex expresion.
+        Return: bool: False -> not scan, True -> scan.
         """
         if re.match(ignore, pipeline_name):
             return False
@@ -85,7 +86,7 @@ class HandleRemoteConfigPatterns:
         Return: bool: False -> not scan, True -> scan.
         """
         return self.handle_analysis_pattern(
-            self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")[
+            self.get_remote_config("SCA/DEPENDENCIES/configTools.json")[
                 "IGNORE_ANALYSIS_PATTERN"
             ],
             self.get_variable("pipeline_name"),
@@ -109,8 +110,54 @@ class HandleRemoteConfigPatterns:
         Return: bool: True -> Bypass archive limits, False -> Without bypass archive limits.
         """
         return self.handle_bypass_expression(
-            self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")[
+            self.get_remote_config("SCA/DEPENDENCIES/configTools.json")[
                 "BYPASS_ARCHIVE_LIMITS"
             ],
             self.get_variable("pipeline_name"),
+        )
+    
+    def handle_skip_tool(self, exclusions, pipeline_name, enabled):
+        """
+        Handle skip tool.
+
+        Return: bool: True -> skip tool, False -> not skip tool.
+        """
+        if ((pipeline_name in exclusions) and (exclusions[pipeline_name].get("SKIP_TOOL", 0))) or (enabled.lower() != "true"):
+            return True
+        else:
+            return False
+    
+    def process_handle_skip_tool(self):
+        """
+        Process handle skip tool.
+
+        Return: bool: True -> skip tool, False -> not skip tool.
+        """
+        return self.handle_skip_tool(
+            self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"),
+            self.get_variable("pipeline_name"),
+            self.get_remote_config("resources/ConfigTool.json")["ENGINE_DEPENDENCIES"]["ENABLED"]
+        )
+
+    def handle_working_directory(self, work_dir_different_flag, agent_directory):
+        """
+        Handle working directory.
+
+        Return: String: Working directory.
+        """
+        if agent_directory:
+            for root, dirs, files in os.walk(agent_directory):
+                if work_dir_different_flag in dirs:
+                    return agent_directory
+        return os.getcwd()
+
+    def process_handle_working_directory(self):
+        """
+        Process handle working directory.
+
+        Return: String: Working directory.
+        """
+        return self.handle_working_directory(
+            self.get_remote_config("SCA/DEPENDENCIES/configTools.json")["WORK_DIR_DIFFERENT_FLAG"],
+            self.get_variable("agent_directory")
         )

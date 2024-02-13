@@ -10,7 +10,6 @@ import os
 import json
 import shutil
 import tarfile
-import time
 
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities import settings
@@ -105,7 +104,7 @@ class XrayScan(ToolGateway):
         extension_pattern = re.compile(pattern, re.IGNORECASE)
 
         for root, dirs, files in os.walk(working_dir):
-            if not (excluded_dir in root):
+            if not(excluded_dir in root) or excluded_dir=="":
                 for file in files:
                     if extension_pattern.search(file):
                         ruta_completa = os.path.join(root, file)
@@ -116,24 +115,24 @@ class XrayScan(ToolGateway):
             shutil.copy2(file, target)
             logger.debug(f"File to scan: {file}")
 
-    def scan_dependencies(self, prefix, target_dir_name, scan_limits_flag):
+    def scan_dependencies(self, prefix, target_dir_name, working_dir, bypass_limits_flag):
         try:
-            if scan_limits_flag:
+            if bypass_limits_flag:
                 command = [prefix, "scan", "--format=json", "--bypass-archive-limits", f"./{target_dir_name}/"]
             else:
-                command = [prefix, "scan", "--format=json", f"./{target_dir_name}/"]
+                command = [prefix, "scan", "--format=json", f"{target_dir_name}/"]
             result = subprocess.run(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
             scan_result = json.loads(result.stdout)
-            file_result = "scan_result.json"
+            file_result = os.path.join(working_dir, "scan_result.json")
             with open(file_result, "w") as file:
                 json.dump(scan_result, file, indent=4)
             return file_result
         except subprocess.CalledProcessError as error:
             logger.error(f"Error executing jf scan: {error}")
 
-    def run_tool_dependencies_sca(self, remote_config, scan_flag, scan_limits_flag, pattern, token):
+    def run_tool_dependencies_sca(self, remote_config, working_dir, skip_flag, scan_flag, bypass_limits_flag, pattern, token):
         cli_version = remote_config["XRAY"]["CLI_VERSION"]
         os_platform = platform.system()
 
@@ -146,15 +145,12 @@ class XrayScan(ToolGateway):
 
         self.config_server(command_prefix, token)
 
-        working_dir = os.getcwd()
-
-        dir_to_scan = "dependencies_to_scan"
-        dir_to_scan_path = os.path.join(working_dir, dir_to_scan)
+        dir_to_scan_path = os.path.join(working_dir, "dependencies_to_scan")
         if os.path.exists(dir_to_scan_path):
             shutil.rmtree(dir_to_scan_path)
         os.makedirs(dir_to_scan_path)
 
-        if scan_flag:
+        if scan_flag and not(skip_flag):
             npm_modules_path = self.find_node_modules(working_dir)
             if npm_modules_path:
                 self.compress_and_mv(npm_modules_path, dir_to_scan_path)
@@ -163,6 +159,6 @@ class XrayScan(ToolGateway):
                 excluded_dir = ""
             self.find_artifacts(pattern, working_dir, dir_to_scan_path, excluded_dir)
 
-        results_file = self.scan_dependencies(command_prefix, dir_to_scan, scan_limits_flag)
+        results_file = self.scan_dependencies(command_prefix, dir_to_scan_path, working_dir, bypass_limits_flag)
 
         return results_file
