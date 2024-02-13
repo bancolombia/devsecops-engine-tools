@@ -26,7 +26,7 @@ class MetricsManager:
         execution_id = self.devops_platform_gateway.get_variable("release_id") if input_core.stage_pipeline == "Release" else self.devops_platform_gateway.get_variable("build_execution_id")
         scope_pipeline = input_core.scope_pipeline
         base_directory = os.path.expanduser("/tmp/log_engine_tools")
-        file_path = f"{base_directory}/{datetime.datetime.now()}_{scope_pipeline}_{execution_id}.json"
+        file_path = f"{base_directory}/{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}_{scope_pipeline}_{execution_id}.json"
         base_directory_path = os.path.expanduser(base_directory)
         if not os.path.exists(base_directory_path):
             os.makedirs(base_directory_path)

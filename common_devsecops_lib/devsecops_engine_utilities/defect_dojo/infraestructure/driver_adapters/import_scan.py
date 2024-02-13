@@ -1,4 +1,3 @@
-import datetime
 from devsecops_engine_utilities.utils.api_error import ApiError
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
