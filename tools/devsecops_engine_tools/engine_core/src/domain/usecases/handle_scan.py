@@ -43,7 +43,7 @@ class HandleScan:
         self,
         vulnerability_management: VulnerabilityManagementGateway,
         secrets_manager_gateway: SecretsManagerGateway,
-        devops_platform_gateway: DevopsPlatformGateway
+        devops_platform_gateway: DevopsPlatformGateway,
     ):
         self.vulnerability_management = vulnerability_management
         self.secrets_manager_gateway = secrets_manager_gateway
@@ -55,9 +55,7 @@ class HandleScan:
             secret_tool = self.secrets_manager_gateway.get_secret(config_tool)
         if "engine_iac" in dict_args["tool"]:
             findings_list, input_core = runner_engine_iac(
-                dict_args,
-                config_tool["ENGINE_IAC"]["TOOL"],
-                secret_tool
+                dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool
             )
             if dict_args["use_vulnerability_management"] == "true":
                 try:
@@ -74,7 +72,9 @@ class HandleScan:
                                 dict_args["remote_config_repo"]
                             ),
                             self.devops_platform_gateway.get_variable("access_token"),
-                            self.devops_platform_gateway.get_variable("build_execution_id"),
+                            self.devops_platform_gateway.get_variable(
+                                "build_execution_id"
+                            ),
                             self.devops_platform_gateway.get_variable("build_id"),
                             self.devops_platform_gateway.get_variable("branch_tag"),
                             self.devops_platform_gateway.get_variable("commit_hash"),
@@ -97,24 +97,27 @@ class HandleScan:
 
             return findings_list, input_core
         elif "engine_container" in dict_args["tool"]:
-            secret_sca=""
+            secret_sca = ""
             if secret_tool is not None:
-                secret_sca=secret_tool["token_prisma_cloud"]
+                secret_sca = secret_tool["token_prisma_cloud"]
             else:
-                secret_sca=dict_args["token_engine_container"]
-            findings_list, input_core =runner_engine_container(dict_args, config_tool, secret_sca)
+                secret_sca = dict_args["token_engine_container"]
+            findings_list, input_core = runner_engine_container(
+                dict_args, config_tool, secret_sca
+            )
             return findings_list, input_core
         elif "engine_dast" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
         elif "engine_secret" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
         elif "engine_dependencies" in dict_args["tool"]:
-            secret_sca=""
             if secret_tool is not None:
-                secret_sca=secret_tool["token_xray"]
+                secret_sca = secret_tool["token_xray"]
             else:
                 secret_sca = dict_args["token_engine_dependencies"]
-            findings_list, input_core = runner_engine_dependencies(dict_args, config_tool, secret_sca)
+            findings_list, input_core = runner_engine_dependencies(
+                dict_args, config_tool, secret_sca
+            )
 
             if dict_args["use_vulnerability_management"] == "true":
                 try:
@@ -131,11 +134,26 @@ class HandleScan:
                                 dict_args["remote_config_repo"]
                             ),
                             self.devops_platform_gateway.get_variable("access_token"),
-                            self.devops_platform_gateway.get_variable("build_execution_id"),
+                            self.devops_platform_gateway.get_variable(
+                                "build_execution_id"
+                            ),
                             self.devops_platform_gateway.get_variable("build_id"),
                             self.devops_platform_gateway.get_variable("branch_tag"),
                             self.devops_platform_gateway.get_variable("commit_hash"),
-                            self.devops_platform_gateway.get_variable("environment"),
+                            (
+                                "pdn"
+                                if (
+                                    self.devops_platform_gateway.get_variable(
+                                        "branch_name"
+                                    )
+                                    == "master"
+                                    or self.devops_platform_gateway.get_variable(
+                                        "branch_name"
+                                    )
+                                    == "trunk"
+                                )
+                                else "dev"
+                            ),
                         )
                     )
                 except ExceptionVulnerabilityManagement as ex1:

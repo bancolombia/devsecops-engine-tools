@@ -63,10 +63,10 @@ class SetInputCore:
                 self.tool,
             ),
             Threshold(
-                self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")["THRESHOLD"]
+                self.get_remote_config("SCA/DEPENDENCIES/configTools.json")["THRESHOLD"]
             ),
             dependencies_scanned,
-            self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json")[
+            self.get_remote_config("SCA/DEPENDENCIES/configTools.json")[
                 "MESSAGE_INFO_SCA"
             ],
             self.get_variable("pipeline_name"),

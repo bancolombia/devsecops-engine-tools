@@ -16,8 +16,10 @@ class DependenciesScan:
         tool_remote: DevopsPlatformGateway,
         tool_deserializator: DeserializatorGateway,
         dict_args,
-        scan_bool,
-        scan_limits_bool,
+        working_dir,
+        skip_flag,
+        scan_flag,
+        bypass_limits_flag,
         pattern,
         token,
     ):
@@ -25,8 +27,10 @@ class DependenciesScan:
         self.tool_remote = tool_remote
         self.tool_deserializator = tool_deserializator
         self.dict_args = dict_args
-        self.scan_bool = scan_bool
-        self.scan_limits_bool = scan_limits_bool
+        self.working_dir = working_dir
+        self.skip_flag = skip_flag
+        self.scan_flag = scan_flag
+        self.bypass_limits_flag = bypass_limits_flag
         self.pattern = pattern
         self.token = token
 
@@ -44,9 +48,11 @@ class DependenciesScan:
         Return: dict: SCA scanning results.
         """
         return self.tool_run.run_tool_dependencies_sca(
-            self.get_remote_config("SCA/DEPENDENCIES/ConfigTool.json"),
-            self.scan_bool,
-            self.scan_limits_bool,
+            self.get_remote_config("SCA/DEPENDENCIES/configTools.json"),
+            self.working_dir,
+            self.skip_flag,
+            self.scan_flag,
+            self.bypass_limits_flag,
             self.pattern,
             self.token,
         )

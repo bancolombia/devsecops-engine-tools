@@ -6,6 +6,7 @@ from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables impo
     BuildVariables,
     SystemVariables,
     ReleaseVariables,
+    AgentVariables,
 )
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import (
     AzureDevopsApi,
@@ -84,6 +85,9 @@ class AzureDevops(DevopsPlatformGateway):
                 return SystemVariables.System_AccessToken.value()
             elif variable == "pipeline_name":
                 return BuildVariables.Build_DefinitionName.value()
+            elif variable == "agent_directory":
+                return AgentVariables.Agent_BuildDirectory.value()
+
         except Exception as ex:
             logger.warning(f"Error getting variable {str(ex)}")
             return None
