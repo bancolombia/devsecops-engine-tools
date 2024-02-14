@@ -8,13 +8,10 @@ class S3ManagerTests(unittest.TestCase):
         self.s3_manager = S3Manager()
 
     @patch("boto3.session.Session.client")
-    @patch("devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.s3_manager.validate_execution_account")
     @patch("devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.s3_manager.assume_role")
-    def test_send_metrics(self, mock_assume_role , mock_validate_execution_account , mock_client):
+    def test_send_metrics(self, mock_assume_role , mock_client):
         # Mock the necessary dependencies
         mock_client.return_value = MagicMock()
-
-        mock_validate_execution_account.return_value = False
 
         mock_assume_role.return_value.return_value = {
             "AccessKeyId": "test",
@@ -26,7 +23,6 @@ class S3ManagerTests(unittest.TestCase):
         config_tool = {
             "METRICS_MANAGER": {
                 "AWS": {
-                    "EXECUTION_DIFFERENT_ACCOUNT": "Agent",
                     "ROLE_ARN": "arn:aws:iam::123456789012:role/MyRole",
                     "REGION_NAME": "us-west-2",
                     "BUCKET": "my-bucket",
