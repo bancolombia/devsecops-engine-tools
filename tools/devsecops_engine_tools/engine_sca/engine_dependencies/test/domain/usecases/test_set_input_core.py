@@ -3,15 +3,16 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.s
 )
 
 import pytest
-from unittest.mock import mock_open, patch, Mock, MagicMock
+from unittest.mock import mock_open, patch, Mock
 
 
 def test_init():
     with patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gateways.config_gateway.ConfigGateway"
+        "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     ) as mock_tool_remote:
         dict_args = {"key1": "value1", "key2": "value2"}
-        set_input_core_instance = SetInputCore(mock_tool_remote, dict_args)
+        tool = "XRAY"
+        set_input_core_instance = SetInputCore(mock_tool_remote, dict_args, tool)
 
         assert set_input_core_instance.tool_remote == mock_tool_remote
         assert set_input_core_instance.dict_args == dict_args
@@ -19,30 +20,35 @@ def test_init():
 
 def test_get_remote_config():
     with patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gateways.config_gateway.ConfigGateway"
+        "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     ) as mock_tool_remote:
         mock_tool_remote.get_remote_config.return_value = {
             "remote_config_key": "remote_config_value"
         }
-        dict_args = {"dict_args_key": "dict_args_value"}
+        dict_args = {
+            "dict_args_key": "dict_args_value",
+            "remote_config_repo": "remote_config_repo_value"
+        }
         file_path = "/path/to/file.txt"
-        set_input_core_instance = SetInputCore(mock_tool_remote, dict_args)
+        tool = "XRAY"
+        set_input_core_instance = SetInputCore(mock_tool_remote, dict_args,  tool)
         result = set_input_core_instance.get_remote_config(file_path)
 
-        mock_tool_remote.get_remote_config.assert_called_once_with(dict_args, file_path)
+        mock_tool_remote.get_remote_config.assert_called_once_with(dict_args["remote_config_repo"], file_path)
         assert result == {"remote_config_key": "remote_config_value"}
 
 
 def test_get_variable():
     with patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gateways.config_gateway.ConfigGateway"
+        "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     ) as mock_tool_remote:
         mock_tool_remote.get_remote_config.return_value = {
             "remote_config_key": "remote_config_value"
         }
         dict_args = {"dict_args_key": "dict_args_value"}
         variable = "test_variable"
-        set_input_core_instance = SetInputCore(mock_tool_remote, dict_args)
+        tool = "XRAY"
+        set_input_core_instance = SetInputCore(mock_tool_remote, dict_args, tool)
         result = set_input_core_instance.get_variable(variable)
 
         mock_tool_remote.get_variable.assert_called_once_with(variable)
@@ -96,15 +102,16 @@ def test_get_exclusions():
         },
     }
     pipeline_name = "Pipeline1"
-    set_input_core_instance = SetInputCore(Mock(), Mock())
-    result = set_input_core_instance.get_exclusions(exclusions_data, pipeline_name)
+    tool = "XRAY"
+    set_input_core_instance = SetInputCore(Mock(), Mock(), tool)
+    result = set_input_core_instance.get_exclusions(exclusions_data, pipeline_name, tool)
 
     assert len(result) == 4
 
 
 def test_set_input_core():
     with patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gateways.config_gateway.ConfigGateway"
+        "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     ) as mock_tool_remote, patch(
         "devsecops_engine_tools.engine_core.src.domain.model.input_core.InputCore"
     ) as mock_inputcore, patch(
@@ -122,12 +129,16 @@ def test_set_input_core():
                 },
                 "COMPLIANCE": {"Critical": 1},
             },
-            "MESSAGE_INFO_SCA_RM": "Test",
+            "MESSAGE_INFO_SCA": "Test",
         }
 
-        dict_args = {"dict_args_key": "dict_args_value"}
+        dict_args = {
+            "dict_args_key": "dict_args_value",
+            "remote_config_repo": "remote_config_repo_value"
+        }
         dependencies_scanned = "tests_file"
-        set_input_core_instance = SetInputCore(mock_tool_remote, dict_args)
+        tool = "XRAY"
+        set_input_core_instance = SetInputCore(mock_tool_remote, dict_args, tool)
         result = set_input_core_instance.set_input_core(dependencies_scanned)
 
         mock_inputcore.assert_any_call
