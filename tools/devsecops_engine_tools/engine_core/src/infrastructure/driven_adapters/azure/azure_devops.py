@@ -82,6 +82,8 @@ class AzureDevops(DevopsPlatformGateway):
                 return BuildVariables.Build_SourceBranch.value()
             elif variable == "access_token":
                 return SystemVariables.System_AccessToken.value()
+            elif variable == "pipeline":
+                return ReleaseVariables.Release_Definitionname.value()
         except Exception as ex:
             logger.warning(f"Error getting variable {str(ex)}")
             return None
