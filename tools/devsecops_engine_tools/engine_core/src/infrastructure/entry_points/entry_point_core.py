@@ -22,7 +22,7 @@ def init_engine_core(
 ):
     Printers.print_logo_tool()
     config_tool = devops_platform_gateway.get_remote_config(
-        args["remote_config_repo"], "/resources/ConfigTool.json"
+        args["remote_config_repo"], "/engine_core/ConfigTool.json"
     )
 
     if config_tool[args["tool"].upper()]["ENABLED"] == "true":

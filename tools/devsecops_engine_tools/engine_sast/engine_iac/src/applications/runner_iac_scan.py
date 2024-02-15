@@ -1,18 +1,14 @@
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_points.entry_point_tool import (
     init_engine_sast_rm,
 )
-from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azure.azure_devops import (
-    AzureDevops,
-)
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_tool import (
     CheckovTool
 )
 
 
-def runner_engine_iac(dict_args, tool, secret_tool):
+def runner_engine_iac(dict_args, tool, secret_tool, devops_platform_gateway):
     try:
         # Define driven adapters for gateways
-        devops_platform_gateway = AzureDevops()
         tool_gateway = None
         if (tool == "CHECKOV"):
             tool_gateway = CheckovTool()

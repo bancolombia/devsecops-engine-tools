@@ -3,16 +3,14 @@ import re
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
-from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.devops_platform_gateway import (
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.config_tool import (
     ConfigTool,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
-from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
-    InputCore
-)
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 
 
 class IacScan:
@@ -24,12 +22,11 @@ class IacScan:
 
     def process(self, dict_args, secret_tool, tool):
         init_config_tool = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "SAST/IAC/configTools.json"
+            dict_args["remote_config_repo"], "engine_sast/engine_iac/ConfigTool.json"
         )
 
         exclusions = self.devops_platform_gateway.get_remote_config(
-            remote_config_repo=dict_args["remote_config_repo"],
-            remote_config_path="/SAST/IAC/Exclusions/Exclusions.json",
+            dict_args["remote_config_repo"], "engine_sast/engine_iac/Exclusions.json"
         )
 
         config_tool, folders_to_scan, skip_tool = self.complete_config_tool(
@@ -47,12 +44,20 @@ class IacScan:
             )
 
         totalized_exclusions = []
-        totalized_exclusions.extend(
-            map(lambda elem: Exclusions(**elem), config_tool.exclusions_all)
-        ) if config_tool.exclusions_all is not None else None
-        totalized_exclusions.extend(
-            map(lambda elem: Exclusions(**elem), config_tool.exclusions_scope)
-        ) if config_tool.exclusions_scope is not None else None
+        (
+            totalized_exclusions.extend(
+                map(lambda elem: Exclusions(**elem), config_tool.exclusions_all)
+            )
+            if config_tool.exclusions_all is not None
+            else None
+        )
+        (
+            totalized_exclusions.extend(
+                map(lambda elem: Exclusions(**elem), config_tool.exclusions_scope)
+            )
+            if config_tool.exclusions_scope is not None
+            else None
+        )
 
         input_core = InputCore(
             totalized_exclusions=totalized_exclusions,
@@ -80,7 +85,13 @@ class IacScan:
             config_tool.exclusions_scope = config_tool.exclusions.get(
                 config_tool.scope_pipeline
             ).get(tool)
-            skip_tool = "true" if config_tool.exclusions.get(config_tool.scope_pipeline).get("SKIP_TOOL") else "false"
+            skip_tool = (
+                "true"
+                if config_tool.exclusions.get(config_tool.scope_pipeline).get(
+                    "SKIP_TOOL"
+                )
+                else "false"
+            )
 
         folders_to_scan = self.search_folders(
             config_tool.search_pattern, config_tool.ignore_search_pattern
