@@ -86,6 +86,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
     def test_get_findings_risk_acceptance(self, mock_finding, mock_session_manager):
         service = "test"
         dict_args = {
+            "tool": "engine_iac",
             "token_vulnerability_management": "token1"
         }
         secret_tool = {
@@ -114,6 +115,43 @@ class TestDefectDojoPlatform(unittest.TestCase):
         expected_result = [
             Exclusions(id="id1", where="path1", create_date="date1", expired_date="date2"),
             Exclusions(id="id2", where="path2", create_date="date3", expired_date="date4")
+        ]
+        self.assertEqual(result, expected_result)
+
+    @patch("devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.SessionManager")
+    @patch("devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Finding.get_finding")
+    def test_get_findings_risk_acceptance_sca(self, mock_finding, mock_session_manager):
+        service = "test"
+        dict_args = {
+            "tool": "engine_dependencies",
+            "token_vulnerability_management": "token1"
+        }
+        secret_tool = {
+            "token_defect_dojo": "token2"
+        }
+        config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo"
+                }
+            }
+        }
+
+        mock_session_manager.return_value = MagicMock()
+        findings_list = [
+            MagicMock(vuln_id_from_tool="id1", component_name="comp1", component_version="version1", accepted_risks=[{"created": "date1", "expiration_date": "date2"}]),
+            MagicMock(vuln_id_from_tool="id2", component_name="comp2", component_version="version2", accepted_risks=[{"created": "date3", "expiration_date": "date4"}])
+        ]
+        mock_finding.return_value.results = findings_list
+
+        result = self.defect_dojo.get_findings_risk_acceptance(service, dict_args, secret_tool, config_tool)
+
+        mock_session_manager.assert_called_with("token1", "host_defect_dojo")
+        mock_finding.assert_called_with(session=mock_session_manager.return_value, service=service, risk_accepted=True)
+
+        expected_result = [
+            Exclusions(id="id1", where="comp1:version1", create_date="date1", expired_date="date2"),
+            Exclusions(id="id2", where="comp2:version2", create_date="date3", expired_date="date4")
         ]
         self.assertEqual(result, expected_result)
 

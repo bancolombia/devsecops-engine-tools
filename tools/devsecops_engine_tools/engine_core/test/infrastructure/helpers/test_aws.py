@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.aws import (
-    assume_role, validate_execution_account
+    assume_role
 )
 import os
 
@@ -35,17 +35,3 @@ class TestAssumeRole(unittest.TestCase):
             "Expiration": "2022-01-01T00:00:00Z",
         }
         self.assertEqual(result, expected_result)
-
-    def test_validate_execution_account(self):
-        different_account = ["account1", "account2", "account3"]
-        os.environ["AZP_POOL"] = "account2"
-
-        result = validate_execution_account(different_account)
-
-        self.assertTrue(result)
-
-        os.environ["AZP_POOL"] = "account4"
-
-        result = validate_execution_account(different_account)
-
-        self.assertFalse(result)
