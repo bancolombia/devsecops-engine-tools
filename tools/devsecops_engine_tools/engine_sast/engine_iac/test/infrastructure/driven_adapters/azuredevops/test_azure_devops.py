@@ -45,7 +45,7 @@ class TestAzureDevops(unittest.TestCase):
     )
     @mock.patch(
         "devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azure.azure_devops.SystemVariables",
-        autospec=True
+        autospec=True,
     )
     def test_get_variable(self, mock_system_variable, mock_release_variables):
         azure_devops = AzureDevops()
