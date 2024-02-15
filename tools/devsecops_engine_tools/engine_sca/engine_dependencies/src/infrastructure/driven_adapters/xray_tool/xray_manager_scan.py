@@ -118,7 +118,7 @@ class XrayScan(ToolGateway):
     def scan_dependencies(self, prefix, target_dir_name, working_dir, bypass_limits_flag):
         try:
             if bypass_limits_flag:
-                command = [prefix, "scan", "--format=json", "--bypass-archive-limits", f"./{target_dir_name}/"]
+                command = [prefix, "scan", "--format=json", "--bypass-archive-limits", f"{target_dir_name}/"]
             else:
                 command = [prefix, "scan", "--format=json", f"{target_dir_name}/"]
             result = subprocess.run(
