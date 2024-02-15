@@ -35,13 +35,11 @@ class AzureDevops(DevopsPlatformGateway):
     def get_variable(self, variable):
         try:
             if variable == "pipeline":
-                return self.handle_variable()
+                if SystemVariables.System_HostType.value() == "build":
+                    return BuildVariables.Build_DefinitionName.value()
+                return ReleaseVariables.Release_DefinitionName.value()
+            elif variable == "environment":
+                return SystemVariables.System_HostType.value()
         except Exception as ex:
             logger.warning(f"Error getting variable {str(ex)}")
             return None
-
-    def handle_variable(self):
-        try:
-            return ReleaseVariables.Release_Definitionname.value()
-        except Exception:
-            return BuildVariables.Build_DefinitionName.value()

@@ -13,7 +13,7 @@ class TestEntryPointCore(unittest.TestCase):
         mock_args = mock.Mock(
             remote_config_repo="https://github.com/example/repo",
             tool="engine_iac",
-            folder_path="/home/test/repos/devsecops/NU0429001_devsecops_engine/_AW1234",
+            folder_path="/home/test/repos/devsecops/NU123_Test/_AW1234",
             environment="dev",
             platform="eks",
             use_secrets_manager="true",
@@ -31,7 +31,7 @@ class TestEntryPointCore(unittest.TestCase):
         expected_result = {
             "remote_config_repo": "https://github.com/example/repo",
             "tool": "engine_iac",
-            "folder_path": "/home/test/repos/devsecops/NU0429001_devsecops_engine/_AW1234",
+            "folder_path": "/home/test/repos/devsecops/NU123_Test/_AW1234",
             "environment": "dev",
             "platform": "eks",
             "use_secrets_manager": "true",
