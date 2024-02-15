@@ -11,6 +11,12 @@ class TestIacScan(unittest.TestCase):
         self.devops_platform_gateway = MagicMock()
         self.iac_scan = IacScan(self.tool_gateway, self.devops_platform_gateway)
 
+    def side_effect(self, arg):
+        if arg == "environment":
+            return "Release"
+        else:
+            return "example_pipeline"
+
     def test_process(self):
         dict_args = {
             "remote_config_repo": "example_repo",
@@ -52,7 +58,8 @@ class TestIacScan(unittest.TestCase):
             }
         }
 
-        self.devops_platform_gateway.get_variable.return_value = "example_pipeline"
+        # self.devops_platform_gateway.get_variable.return_value = "example_pipeline"
+        self.devops_platform_gateway.get_variable.side_effect = self.side_effect
 
         self.tool_gateway.run_tool.return_value = (
             ["finding1", "finding2"],

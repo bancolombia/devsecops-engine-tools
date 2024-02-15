@@ -73,14 +73,14 @@ class TestAzureDevops(unittest.TestCase):
         mock_build_variables.Build_BuildId.value.return_value = "Build_BuildId"
         mock_build_variables.Build_SourceVersion.value.return_value = "Build_SourceVersion"
         mock_build_variables.Build_SourceBranch.value.return_value = "Build_SourceBranch"
-        
+
         # Mock the ReleaseVariables class
         mock_release_variables.Environment.value.return_value = "Environment"
         mock_release_variables.Release_Releaseid.value.return_value = "Release_ReleaseId"
 
         # Mock the SystemVariables class
         mock_system_variables.System_AccessToken.value.return_value = "System_AccessToken"
-         
+
         result = azure_devops.get_variable("branch_name")
         assert result == "Build_SourceBranchName"
 
