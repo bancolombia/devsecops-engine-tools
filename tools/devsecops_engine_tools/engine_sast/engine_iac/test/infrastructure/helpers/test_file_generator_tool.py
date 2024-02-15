@@ -80,21 +80,14 @@ def test_generate_file_from_tool():
                         },
                         "code_block": None,
                         "file_path": "/template-cloudfront.yaml",
-                        "file_abs_path": "/home/felipe/repos/devsecops/NU0429001_devsecops_engine/_AW1234/template-cloudfront.yaml",
+                        "file_abs_path": "/test_path/_AW1234/template-cloudfront.yaml",
                         "repo_file_path": "/_AW1234/template-cloudfront.yaml",
                         "file_line_range": [308, 339],
                         "resource": "AWS::S3::Bucket.S3BucketCaptchaEdin",
                         "evaluations": {},
                         "check_class": "checkov.cloudformation.checks.resource.aws.S3PublicACLRead",
                         "fixed_definition": None,
-                        "entity_tags": {
-                            "bancolombia:clasificacion-confidencialidad": "interna",
-                            "bancolombia:clasificacion-integridad": "sin impacto",
-                            "bancolombia:clasificacion-disponibilidad": "sin impacto",
-                            "bancolombia:dominio-informacion": "no",
-                            "bancolombia:datos-personales": "no",
-                            "bancolombia:cumplimiento": "no"
-                        },
+                        "entity_tags": {},
                     }
                 ]
             },
@@ -217,21 +210,14 @@ def test_generate_file_from_tool_Exception():
                         },
                         "code_block": None,
                         "file_path": "/template-cloudfront.yaml",
-                        "file_abs_path": "/home/felipe/repos/devsecops/NU0429001_devsecops_engine/_AW1234/template-cloudfront.yaml",
+                        "file_abs_path": "/test_path/_AW1234/template-cloudfront.yaml",
                         "repo_file_path": "/_AW1234/template-cloudfront.yaml",
                         "file_line_range": [308, 339],
                         "resource": "AWS::S3::Bucket.S3BucketCaptchaEdin",
                         "evaluations": {},
                         "check_class": "checkov.cloudformation.checks.resource.aws.S3PublicACLRead",
                         "fixed_definition": None,
-                        "entity_tags": {
-                            "bancolombia:clasificacion-confidencialidad": "interna",
-                            "bancolombia:clasificacion-integridad": "sin impacto",
-                            "bancolombia:clasificacion-disponibilidad": "sin impacto",
-                            "bancolombia:dominio-informacion": "no",
-                            "bancolombia:datos-personales": "no",
-                            "bancolombia:cumplimiento": "no"
-                        },
+                        "entity_tags": {},
                     }
                 ]
             },

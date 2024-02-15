@@ -17,7 +17,7 @@ def generate_file_from_tool(tool, result_list, rules_doc):
                 result_three = result_list[2]
             file_name = "results.json"
             results_data = {
-                "check_type": "Dockerfile and Kubernetes",
+                "check_type": "Dockerfile, Kubernetes and CloudFormation",
                 "results": {
                     "failed_checks": list(
                         map(

@@ -70,7 +70,7 @@ class TestIacScan(unittest.TestCase):
         self.assertEqual(input_core.scope_pipeline, "example_pipeline")
         self.assertEqual(input_core.stage_pipeline, "Release")
 
-    def test_process_skip_tool(self):
+    def test_process_skip_search_folder(self):
         dict_args = {
             "remote_config_repo": "example_repo",
             "folder_path": "example_folder",
