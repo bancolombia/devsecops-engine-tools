@@ -18,8 +18,11 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
     ExceptionFindingsRiskAcceptance,
 )
 from devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan import (
-    runner_engine_container)
-
+    runner_engine_container
+)
+from devsecops_engine_tools.engine_dast.src.applications.runner_dast_scan import (
+    runner_engine_dast
+)
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities import settings
 
@@ -96,8 +99,15 @@ class HandleScan:
             findings_list, input_core =runner_engine_container(dict_args, config_tool, secret_sca)
             return findings_list, input_core
         elif "engine_dast" in dict_args["tool"]:
-            print(MESSAGE_ENABLED)
+            findings_list, input_core = runner_engine_dast(
+                dict_args,
+                config_tool["ENGINE_DAST"]["TOOL"],
+                secret_tool
+            )
+            return findings_list, input_core
         elif "engine_secret" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
         elif "engine_dependencies" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
+
+

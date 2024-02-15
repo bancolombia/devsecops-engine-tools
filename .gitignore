@@ -10,6 +10,7 @@ _nu1234
 *pycache*
 *_pycache_*
 .*DS_Store
+venvwsl/
 
 #Distribucioes de lib
 **dist**

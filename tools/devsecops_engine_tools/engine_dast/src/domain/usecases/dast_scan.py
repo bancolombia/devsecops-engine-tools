@@ -1,3 +1,4 @@
+from typing import List
 import json
 from devsecops_engine_tools.engine_dast.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
@@ -32,11 +33,11 @@ class DastScan:
     def __init__(
         self, tool_gateway: ToolGateway, 
         devops_platform_gateway: DevopsPlatformGateway,
-        authentication_gateway: AuthenticationGateway
+        authentication_gateway_list: List[AuthenticationGateway]
     ):
         self.tool_gateway = tool_gateway
         self.devops_platform_gateway = devops_platform_gateway
-        self.authentication_gateway = authentication_gateway
+        self.authentication_gateway = authentication_gateway_list
 
     def process_target_data(self, target_file_path):
         with open(target_file_path, "r") as f:

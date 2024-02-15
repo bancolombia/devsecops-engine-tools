@@ -1,10 +1,9 @@
-from dpath import get
 import requests
 import argparse
 import sys
 
 
-class Oauthauthenticator:
+class OauthObject:
     def __init__(self, target_config: dict, data_config_cli: dict):
         self.target_config = target_config
         self.data_config_cli = data_config_cli

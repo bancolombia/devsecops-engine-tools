@@ -14,7 +14,7 @@ def init_engine_dast(
     dict_args, 
     secret_tool, 
     tool,
-    authentication_gateway
+    authentication_gateway_list
 ):
-    dast_scan = DastScan(tool_gateway, devops_platform_gateway, authentication_gateway)
+    dast_scan = DastScan(tool_gateway, devops_platform_gateway, authentication_gateway_list)
     return dast_scan.process(dict_args, secret_tool, tool)

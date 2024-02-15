@@ -3,7 +3,7 @@ from devsecops_engine_tools.engine_dast.src.domain.model.gateways.authentication
     AuthenticationGateway
 )
 
-class GnericOauth(AuthenticationGateway):
+class GenericOauth(AuthenticationGateway):
     def __init__(self, data):
         self.data: dict = data
 

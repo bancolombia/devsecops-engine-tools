@@ -1,1 +1,9 @@
-configtools = {"ENGINE_DAST": "NUCLEI", "METRICS_MANAGER": {"ENABLED": "false"}}
+configtools = {
+    "ENGINE_DAST": {
+        "ENABLED": "true",
+        "TOOL": "NUCLEI"
+    }, 
+    "METRICS_MANAGER": {
+        "ENABLED": "false"
+    }
+}
