@@ -64,7 +64,8 @@ class TestAzureDevops(unittest.TestCase):
     @mock.patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops.SystemVariables', autospec=True)
     @mock.patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops.BuildVariables', autospec=True)
     @mock.patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops.ReleaseVariables', autospec=True)
-    def test_get_variable(self, mock_release_variables, mock_build_variables, mock_system_variables):
+    @mock.patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops.AgentVariables', autospec=True)
+    def test_get_variable(self, mock_agent_variables, mock_release_variables, mock_build_variables, mock_system_variables):
         azure_devops = AzureDevops()
 
         # Mock the BuildVariables class
@@ -73,6 +74,7 @@ class TestAzureDevops(unittest.TestCase):
         mock_build_variables.Build_BuildId.value.return_value = "Build_BuildId"
         mock_build_variables.Build_SourceVersion.value.return_value = "Build_SourceVersion"
         mock_build_variables.Build_SourceBranch.value.return_value = "Build_SourceBranch"
+        mock_build_variables.Build_DefinitionName.value.return_value = "Build_DefinitionName"
         
         # Mock the ReleaseVariables class
         mock_release_variables.Environment.value.return_value = "Environment"
@@ -80,6 +82,9 @@ class TestAzureDevops(unittest.TestCase):
 
         # Mock the SystemVariables class
         mock_system_variables.System_AccessToken.value.return_value = "System_AccessToken"
+
+        #Mock the AgentVariables class
+        mock_agent_variables.Agent_BuildDirectory.value.return_value = "Agent_BuildDirectory"
          
         result = azure_devops.get_variable("branch_name")
         assert result == "Build_SourceBranchName"
@@ -104,3 +109,9 @@ class TestAzureDevops(unittest.TestCase):
 
         result = azure_devops.get_variable("access_token")
         assert result == "System_AccessToken"
+
+        result = azure_devops.get_variable("pipeline_name")
+        assert result == "Build_DefinitionName"
+
+        result = azure_devops.get_variable("agent_directory")
+        assert result == "Agent_BuildDirectory"
