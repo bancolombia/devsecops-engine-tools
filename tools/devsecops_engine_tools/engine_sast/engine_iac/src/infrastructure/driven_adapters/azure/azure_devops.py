@@ -38,7 +38,7 @@ class AzureDevops(DevopsPlatformGateway):
                 if SystemVariables.System_HostType.value() == "build":
                     return BuildVariables.Build_DefinitionName.value()
                 return ReleaseVariables.Release_DefinitionName.value()
-            elif variable == "environment":
+            elif variable == "stage":
                 return SystemVariables.System_HostType.value()
         except Exception as ex:
             logger.warning(f"Error getting variable {str(ex)}")

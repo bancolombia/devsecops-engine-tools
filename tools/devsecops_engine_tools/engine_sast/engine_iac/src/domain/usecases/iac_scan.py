@@ -65,7 +65,7 @@ class IacScan:
             path_file_results=path_file_results,
             custom_message_break_build=config_tool.message_info_sast_rm,
             scope_pipeline=config_tool.scope_pipeline,
-            stage_pipeline=self.devops_platform_gateway.get_variable("environment").capitalize(),
+            stage_pipeline=self.devops_platform_gateway.get_variable("stage").capitalize(),
         )
 
         return findings_list, input_core

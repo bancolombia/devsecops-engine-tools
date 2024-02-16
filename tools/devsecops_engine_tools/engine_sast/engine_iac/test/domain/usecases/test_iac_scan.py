@@ -12,7 +12,7 @@ class TestIacScan(unittest.TestCase):
         self.iac_scan = IacScan(self.tool_gateway, self.devops_platform_gateway)
 
     def side_effect(self, arg):
-        if arg == "environment":
+        if arg == "stage":
             return "Release"
         else:
             return "example_pipeline"
