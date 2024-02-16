@@ -118,8 +118,9 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_container",
             "remote_config_repo": "test_repo",
+            "use_vulnerability_management":"true",
         }
-        config_tool = {"ENGINE_CONTAINER": "some_config"}
+        config_tool = {"ENGINE_CONTAINER": {"ENABLED": "true", "TOOL": "tool"}}
         secret_tool = {"token_prisma_cloud": "test"}
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
 
