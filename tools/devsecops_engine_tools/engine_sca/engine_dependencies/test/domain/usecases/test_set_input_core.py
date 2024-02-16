@@ -27,14 +27,16 @@ def test_get_remote_config():
         }
         dict_args = {
             "dict_args_key": "dict_args_value",
-            "remote_config_repo": "remote_config_repo_value"
+            "remote_config_repo": "remote_config_repo_value",
         }
         file_path = "/path/to/file.txt"
         tool = "XRAY"
-        set_input_core_instance = SetInputCore(mock_tool_remote, dict_args,  tool)
+        set_input_core_instance = SetInputCore(mock_tool_remote, dict_args, tool)
         result = set_input_core_instance.get_remote_config(file_path)
 
-        mock_tool_remote.get_remote_config.assert_called_once_with(dict_args["remote_config_repo"], file_path)
+        mock_tool_remote.get_remote_config.assert_called_once_with(
+            dict_args["remote_config_repo"], file_path
+        )
         assert result == {"remote_config_key": "remote_config_value"}
 
 
@@ -104,7 +106,9 @@ def test_get_exclusions():
     pipeline_name = "Pipeline1"
     tool = "XRAY"
     set_input_core_instance = SetInputCore(Mock(), Mock(), tool)
-    result = set_input_core_instance.get_exclusions(exclusions_data, pipeline_name, tool)
+    result = set_input_core_instance.get_exclusions(
+        exclusions_data, pipeline_name, tool
+    )
 
     assert len(result) == 4
 
@@ -134,7 +138,7 @@ def test_set_input_core():
 
         dict_args = {
             "dict_args_key": "dict_args_value",
-            "remote_config_repo": "remote_config_repo_value"
+            "remote_config_repo": "remote_config_repo_value",
         }
         dependencies_scanned = "tests_file"
         tool = "XRAY"

@@ -1,9 +1,10 @@
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.applications.runner_dependencies_scan import (
-    runner_engine_dependencies
+    runner_engine_dependencies,
 )
 
 import pytest
 from unittest.mock import mock_open, patch
+
 
 def test_init_engine_dependencies():
     with patch(
@@ -22,7 +23,5 @@ def test_init_engine_dependencies():
         }
 
         result = runner_engine_dependencies(dict_args, config_tool, token)
-        
 
         mock_init_engine_dependencies.assert_any_call
-

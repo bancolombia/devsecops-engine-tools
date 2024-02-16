@@ -1,5 +1,5 @@
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops import (
-    AzureDevops
+    AzureDevops,
 )
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan import (
     XrayScan,
@@ -10,6 +10,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.dr
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool import (
     init_engine_dependencies,
 )
+
 
 def runner_engine_dependencies(dict_args, config_tool, token):
     try:

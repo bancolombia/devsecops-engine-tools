@@ -1,9 +1,10 @@
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool import (
-    init_engine_dependencies
+    init_engine_dependencies,
 )
 
 import pytest
 from unittest.mock import mock_open, patch, Mock
+
 
 def test_init_engine_dependencies():
     with patch(
@@ -23,9 +24,7 @@ def test_init_engine_dependencies():
         token = "token"
         tool = "tool"
         mock_tool_remote.get_remote_config.return_value = {
-            "XRAY": {
-                "CLI_VERSION": "2.52.8"
-            },
+            "XRAY": {"CLI_VERSION": "2.52.8"},
             "IGNORE_ANALYSIS_PATTERN": "(.*_test|Template_.*|NU0024001_IngSW_Base_Images_MR_.*(admin|common|reports)|Deprecated.*|JUBILADO_.*|.*Borrar|.*eliminar.*|.*No_usar|NU0007001_Curiosity_Operations.*|sandbox.*|.*_deprecated)",
             "BYPASS_ARCHIVE_LIMITS": "(EUC00045_Valko_Front|AW9999001_skill_hacking_lab_front)",
             "WORK_DIR_DIFFERENT_FLAG": "SCRIPTS_WEB_MR",
@@ -36,54 +35,65 @@ def test_init_engine_dependencies():
                     "Critical": 999,
                     "High": 999,
                     "Medium": 999,
-                    "Low": 999
+                    "Low": 999,
                 },
-                "COMPLIANCE": {
-                    "Critical": 1
-                }
+                "COMPLIANCE": {"Critical": 1},
             },
             "ENGINE_DEPENDENCIES": {"ENABLED": "true"},
             "NU0000002_DevSecOps_Test": {
                 "XRAY": [
-                {
-                    "id": "XRAY-129823",
-                    "cve_id": "",
-                    "expired_date": "21092022",
-                    "create_date": "24012023",
-                    "hu": ""
-                },
-                {
-                    "id": "XRAY-75464",
-                    "cve_id": "",
-                    "expired_date": "21092022",
-                    "create_date": "24012023",
-                    "hu": ""
-                }
+                    {
+                        "id": "XRAY-129823",
+                        "cve_id": "",
+                        "expired_date": "21092022",
+                        "create_date": "24012023",
+                        "hu": "",
+                    },
+                    {
+                        "id": "XRAY-75464",
+                        "cve_id": "",
+                        "expired_date": "21092022",
+                        "create_date": "24012023",
+                        "hu": "",
+                    },
                 ],
                 "SKIP_FILES": {
-                "files": [
-                    "war"
-                ],
-                "create_date": "24012023",
-                "expired_date": "21092022",
-                "hu": ""
+                    "files": ["war"],
+                    "create_date": "24012023",
+                    "expired_date": "21092022",
+                    "hu": "",
                 },
                 "SKIP_TOOL": {
-                "create_date": "24012023",
-                "expired_date": "21092024",
-                "hu": ""
-                }
-            }
+                    "create_date": "24012023",
+                    "expired_date": "21092024",
+                    "hu": "",
+                },
+            },
         }
         mock_tool_remote.get_variable.return_value = "variable"
-        mock_handle_remote_config_patterns.process_handle_working_directory.return_value = "working_dir"
+        mock_handle_remote_config_patterns.process_handle_working_directory.return_value = (
+            "working_dir"
+        )
         mock_handle_remote_config_patterns.process_handle_skip_tool.return_value = True
-        mock_handle_remote_config_patterns.process_handle_analysis_pattern.return_value = True
-        mock_handle_remote_config_patterns.process_handle_bypass_expression.return_value = True
-        mock_handle_remote_config_patterns.process_handle_excluded_files.return_value = "pattern"
+        mock_handle_remote_config_patterns.process_handle_analysis_pattern.return_value = (
+            True
+        )
+        mock_handle_remote_config_patterns.process_handle_bypass_expression.return_value = (
+            True
+        )
+        mock_handle_remote_config_patterns.process_handle_excluded_files.return_value = (
+            "pattern"
+        )
         mock_dependencies_scan.process.return_value = "scan_result.json"
         mock_dependencies_scan.deserializator.return_value = "deserialized"
         mock_set_input_core.set_input_core.return_value = "input_core"
-        init_engine_dependencies_instance = init_engine_dependencies(mock_tool_run, mock_tool_remote, mock_tool_deserializator, dict_args, token, tool)
+        init_engine_dependencies_instance = init_engine_dependencies(
+            mock_tool_run,
+            mock_tool_remote,
+            mock_tool_deserializator,
+            dict_args,
+            token,
+            tool,
+        )
 
         mock_set_input_core.set_input_core.assert_any_call

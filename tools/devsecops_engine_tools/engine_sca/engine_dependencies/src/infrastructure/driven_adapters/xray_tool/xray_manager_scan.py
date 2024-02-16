@@ -104,7 +104,7 @@ class XrayScan(ToolGateway):
         extension_pattern = re.compile(pattern, re.IGNORECASE)
 
         for root, dirs, files in os.walk(working_dir):
-            if not(excluded_dir in root) or excluded_dir=="":
+            if not (excluded_dir in root) or excluded_dir == "":
                 for file in files:
                     if extension_pattern.search(file):
                         ruta_completa = os.path.join(root, file)
@@ -115,10 +115,18 @@ class XrayScan(ToolGateway):
             shutil.copy2(file, target)
             logger.debug(f"File to scan: {file}")
 
-    def scan_dependencies(self, prefix, target_dir_name, working_dir, bypass_limits_flag):
+    def scan_dependencies(
+        self, prefix, target_dir_name, working_dir, bypass_limits_flag
+    ):
         try:
             if bypass_limits_flag:
-                command = [prefix, "scan", "--format=json", "--bypass-archive-limits", f"{target_dir_name}/"]
+                command = [
+                    prefix,
+                    "scan",
+                    "--format=json",
+                    "--bypass-archive-limits",
+                    f"{target_dir_name}/",
+                ]
             else:
                 command = [prefix, "scan", "--format=json", f"{target_dir_name}/"]
             result = subprocess.run(
@@ -132,7 +140,16 @@ class XrayScan(ToolGateway):
         except subprocess.CalledProcessError as error:
             logger.error(f"Error executing jf scan: {error}")
 
-    def run_tool_dependencies_sca(self, remote_config, working_dir, skip_flag, scan_flag, bypass_limits_flag, pattern, token):
+    def run_tool_dependencies_sca(
+        self,
+        remote_config,
+        working_dir,
+        skip_flag,
+        scan_flag,
+        bypass_limits_flag,
+        pattern,
+        token,
+    ):
         cli_version = remote_config["XRAY"]["CLI_VERSION"]
         os_platform = platform.system()
 
@@ -150,7 +167,7 @@ class XrayScan(ToolGateway):
             shutil.rmtree(dir_to_scan_path)
         os.makedirs(dir_to_scan_path)
 
-        if scan_flag and not(skip_flag):
+        if scan_flag and not (skip_flag):
             npm_modules_path = self.find_node_modules(working_dir)
             if npm_modules_path:
                 self.compress_and_mv(npm_modules_path, dir_to_scan_path)
@@ -159,6 +176,8 @@ class XrayScan(ToolGateway):
                 excluded_dir = ""
             self.find_artifacts(pattern, working_dir, dir_to_scan_path, excluded_dir)
 
-        results_file = self.scan_dependencies(command_prefix, dir_to_scan_path, working_dir, bypass_limits_flag)
+        results_file = self.scan_dependencies(
+            command_prefix, dir_to_scan_path, working_dir, bypass_limits_flag
+        )
 
         return results_file
