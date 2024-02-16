@@ -13,6 +13,10 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclu
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore
 )
+from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities import settings
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class IacScan:
@@ -85,6 +89,12 @@ class IacScan:
         folders_to_scan = self.search_folders(
             config_tool.search_pattern, config_tool.ignore_search_pattern
         )
+
+        if len(folders_to_scan) == 0:
+            logger.warning(
+                "No folders found with the search pattern: %s",
+                config_tool.search_pattern,
+            )
 
         return config_tool, folders_to_scan, skip_tool
 
