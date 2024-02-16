@@ -8,6 +8,3 @@ def assume_role(role_arn):
     )
     temporal_credentials = response["Credentials"]
     return temporal_credentials
-
-def validate_execution_account(different_account):
-    return os.environ["AZP_POOL"] in different_account

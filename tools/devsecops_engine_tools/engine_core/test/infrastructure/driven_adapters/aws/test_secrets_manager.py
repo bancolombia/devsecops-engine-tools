@@ -11,27 +11,22 @@ class SecretsManagerTests(unittest.TestCase):
 
     @patch("boto3.session.Session.client")
     @patch(
-        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.secrets_manager.validate_execution_account"
-    )
-    @patch(
         "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.secrets_manager.assume_role"
     )
     def test_get_secret_with_execution_different_account(
-        self, mock_assume_role, mock_validate_execution_account, mock_client
+        self, mock_assume_role, mock_client
     ):
         mock_client.return_value = MagicMock()
 
         config_tool = {
             "SECRET_MANAGER": {
                 "AWS": {
-                    "EXECUTION_DIFFERENT_ACCOUNT": True,
-                    "ROLE_ARN_DIFFERENT_ACCOUNT": "arn:aws:iam::123456789012:role/MyRole",
+                    "ROLE_ARN": "arn:aws:iam::123456789012:role/MyRole",
                     "REGION_NAME": "us-west-2",
-                    "SECRET_NAME_DIFFERENT_ACCOUNT": "my-secret-different-account",
+                    "SECRET_NAME": "my-secret-different-account",
                 }
             }
         }
-        mock_validate_execution_account.return_value = True
         mock_assume_role.return_value = {
             "AccessKeyId": "access_key_id",
             "SecretAccessKey": "secret_access_key",
