@@ -119,7 +119,7 @@ class HandleRemoteConfigPatterns:
             self.get_variable("pipeline_name"),
         )
 
-    def handle_skip_tool(self, exclusions, pipeline_name, enabled):
+    def handle_skip_tool(self, exclusions, pipeline_name):
         """
         Handle skip tool.
 
@@ -128,7 +128,7 @@ class HandleRemoteConfigPatterns:
         if (
             (pipeline_name in exclusions)
             and (exclusions[pipeline_name].get("SKIP_TOOL", 0))
-        ) or (enabled.lower() != "true"):
+        ):
             return True
         else:
             return False
@@ -142,9 +142,6 @@ class HandleRemoteConfigPatterns:
         return self.handle_skip_tool(
             self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"),
             self.get_variable("pipeline_name"),
-            self.get_remote_config("resources/ConfigTool.json")["ENGINE_DEPENDENCIES"][
-                "ENABLED"
-            ],
         )
 
     def handle_working_directory(self, work_dir_different_flag, agent_directory):

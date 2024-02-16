@@ -25,8 +25,8 @@ def test_init_engine_dependencies():
         tool = "tool"
         mock_tool_remote.get_remote_config.return_value = {
             "XRAY": {"CLI_VERSION": "2.52.8"},
-            "IGNORE_ANALYSIS_PATTERN": "(.*_test|Template_.*|NU0024001_IngSW_Base_Images_MR_.*(admin|common|reports)|Deprecated.*|JUBILADO_.*|.*Borrar|.*eliminar.*|.*No_usar|NU0007001_Curiosity_Operations.*|sandbox.*|.*_deprecated)",
-            "BYPASS_ARCHIVE_LIMITS": "(EUC00045_Valko_Front|AW9999001_skill_hacking_lab_front)",
+            "IGNORE_ANALYSIS_PATTERN": "(.*_test|Template_.*)",
+            "BYPASS_ARCHIVE_LIMITS": "(pipeline_test1|pipeline_test2)",
             "WORK_DIR_DIFFERENT_FLAG": "SCRIPTS_WEB_MR",
             "REGEX_EXPRESSION_EXTENSIONS": "\\.(jar|ear|war)$",
             "MESSAGE_INFO_SCA": "If you have doubts, visit 'Análisis de composición del software (SCA)' in Azure DevOps Wiki.",
