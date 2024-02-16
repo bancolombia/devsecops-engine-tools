@@ -85,7 +85,7 @@ class TestAzureDevops(unittest.TestCase):
 
         #Mock the AgentVariables class
         mock_agent_variables.Agent_BuildDirectory.value.return_value = "Agent_BuildDirectory"
-         
+
         result = azure_devops.get_variable("branch_name")
         assert result == "Build_SourceBranchName"
 
