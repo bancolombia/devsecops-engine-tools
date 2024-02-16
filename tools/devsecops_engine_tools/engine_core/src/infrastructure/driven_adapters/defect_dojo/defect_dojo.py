@@ -42,6 +42,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             }
             scan_type_mapping = {
                 "CHECKOV": "Checkov Scan",
+                "PRISMA": "Twistlock Image Scan",
             }
 
             if str(vulnerability_management.branch_name) in [
