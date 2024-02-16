@@ -250,13 +250,12 @@ def test_handle_skip_tool_skip():
             "remote_config_repo": "remote_config_repo_value",
         }
         exclusions = {"pipeline1": {"SKIP_TOOL": {"hu": ""}}}
-        enabled = "true"
         pipeline_name = "pipeline1"
         handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
             mock_tool_remote, dict_args
         )
         result = handle_remote_config_patterns_instance.handle_skip_tool(
-            exclusions, pipeline_name, enabled
+            exclusions, pipeline_name
         )
 
         assert result == True
@@ -274,13 +273,12 @@ def test_handle_skip_tool_not_skip():
             "remote_config_repo": "remote_config_repo_value",
         }
         exclusions = {"pipeline1": {"SKIP_TOOL": {"hu": ""}}}
-        enabled = "true"
         pipeline_name = "pipeline"
         handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
             mock_tool_remote, dict_args
         )
         result = handle_remote_config_patterns_instance.handle_skip_tool(
-            exclusions, pipeline_name, enabled
+            exclusions, pipeline_name
         )
 
         assert result == False
@@ -292,7 +290,6 @@ def test_process_handle_skip_tool():
     ) as mock_tool_remote:
         mock_tool_remote.get_remote_config.return_value = {
             "remote_config_key": "remote_config_value",
-            "ENGINE_DEPENDENCIES": {"ENABLED": "true"},
         }
         mock_tool_remote.get_variable.return_value = "pipeline_name"
         dict_args = {

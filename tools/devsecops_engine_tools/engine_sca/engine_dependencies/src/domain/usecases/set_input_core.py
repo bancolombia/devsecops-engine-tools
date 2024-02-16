@@ -36,19 +36,20 @@ class SetInputCore:
         list_exclusions = []
         for key, value in exclusions_data.items():
             if (key == "All") or (key == pipeline_name):
-                exclusions = [
-                    Exclusions(
-                        id=item.get("id", ""),
-                        where=item.get("where", ""),
-                        cve_id=item.get("cve_id", ""),
-                        create_date=item.get("create_date", ""),
-                        expired_date=item.get("expired_date", ""),
-                        severity=item.get("severity", ""),
-                        hu=item.get("hu", ""),
-                    )
-                    for item in value[tool]
-                ]
-                list_exclusions.extend(exclusions)
+                if value.get(tool, 0):
+                    exclusions = [
+                        Exclusions(
+                            id=item.get("id", ""),
+                            where=item.get("where", ""),
+                            cve_id=item.get("cve_id", ""),
+                            create_date=item.get("create_date", ""),
+                            expired_date=item.get("expired_date", ""),
+                            severity=item.get("severity", ""),
+                            hu=item.get("hu", ""),
+                        )
+                        for item in value[tool]
+                    ]
+                    list_exclusions.extend(exclusions)
         return list_exclusions
 
     def set_input_core(self, dependencies_scanned):
