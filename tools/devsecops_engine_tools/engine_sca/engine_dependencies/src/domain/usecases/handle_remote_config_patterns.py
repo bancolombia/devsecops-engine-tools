@@ -5,6 +5,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform
 import re
 import os
 
+
 class HandleRemoteConfigPatterns:
     def __init__(
         self,
@@ -19,7 +20,9 @@ class HandleRemoteConfigPatterns:
         Get remote configuration
         Return: dict: Remote configuration
         """
-        return self.tool_remote.get_remote_config(self.dict_args['remote_config_repo'], file_path)
+        return self.tool_remote.get_remote_config(
+            self.dict_args["remote_config_repo"], file_path
+        )
 
     def get_variable(self, variable):
         """
@@ -102,7 +105,7 @@ class HandleRemoteConfigPatterns:
             return True
         else:
             return False
-        
+
     def process_handle_bypass_expression(self):
         """
         Process handle bypass archive limits.
@@ -115,18 +118,21 @@ class HandleRemoteConfigPatterns:
             ],
             self.get_variable("pipeline_name"),
         )
-    
+
     def handle_skip_tool(self, exclusions, pipeline_name, enabled):
         """
         Handle skip tool.
 
         Return: bool: True -> skip tool, False -> not skip tool.
         """
-        if ((pipeline_name in exclusions) and (exclusions[pipeline_name].get("SKIP_TOOL", 0))) or (enabled.lower() != "true"):
+        if (
+            (pipeline_name in exclusions)
+            and (exclusions[pipeline_name].get("SKIP_TOOL", 0))
+        ) or (enabled.lower() != "true"):
             return True
         else:
             return False
-    
+
     def process_handle_skip_tool(self):
         """
         Process handle skip tool.
@@ -136,7 +142,9 @@ class HandleRemoteConfigPatterns:
         return self.handle_skip_tool(
             self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"),
             self.get_variable("pipeline_name"),
-            self.get_remote_config("resources/ConfigTool.json")["ENGINE_DEPENDENCIES"]["ENABLED"]
+            self.get_remote_config("resources/ConfigTool.json")["ENGINE_DEPENDENCIES"][
+                "ENABLED"
+            ],
         )
 
     def handle_working_directory(self, work_dir_different_flag, agent_directory):
@@ -158,6 +166,8 @@ class HandleRemoteConfigPatterns:
         Return: String: Working directory.
         """
         return self.handle_working_directory(
-            self.get_remote_config("SCA/DEPENDENCIES/configTools.json")["WORK_DIR_DIFFERENT_FLAG"],
-            self.get_variable("agent_directory")
+            self.get_remote_config("SCA/DEPENDENCIES/configTools.json")[
+                "WORK_DIR_DIFFERENT_FLAG"
+            ],
+            self.get_variable("agent_directory"),
         )

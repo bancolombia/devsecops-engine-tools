@@ -19,7 +19,7 @@ def test_get_remote_config():
         }
         dict_args = {
             "dict_args_key": "dict_args_value",
-            "remote_config_repo": "remote_config_repo_value"
+            "remote_config_repo": "remote_config_repo_value",
         }
         file_path = "/path/to/file.txt"
         working_dir = "/path/to/working/dir"
@@ -28,10 +28,23 @@ def test_get_remote_config():
         bypass_limits_flag = True
         pattern = "pattern"
         token = "token"
-        dependencies_scan_instance = DependenciesScan(mock_tool_gateway, mock_tool_remote, mock_deserializator_gateway, dict_args, working_dir, skip_flag, scan_flag, bypass_limits_flag, pattern, token)
+        dependencies_scan_instance = DependenciesScan(
+            mock_tool_gateway,
+            mock_tool_remote,
+            mock_deserializator_gateway,
+            dict_args,
+            working_dir,
+            skip_flag,
+            scan_flag,
+            bypass_limits_flag,
+            pattern,
+            token,
+        )
         result = dependencies_scan_instance.get_remote_config(file_path)
 
-        mock_tool_remote.get_remote_config.assert_called_once_with(dict_args["remote_config_repo"], file_path)
+        mock_tool_remote.get_remote_config.assert_called_once_with(
+            dict_args["remote_config_repo"], file_path
+        )
         assert result == {"remote_config_key": "remote_config_value"}
 
 
@@ -48,7 +61,7 @@ def test_process():
         }
         dict_args = {
             "dict_args_key": "dict_args_value",
-            "remote_config_repo": "remote_config_repo_value"
+            "remote_config_repo": "remote_config_repo_value",
         }
         file_path = "SCA/DEPENDENCIES/configTools.json"
         working_dir = "/path/to/working/dir"
@@ -57,10 +70,23 @@ def test_process():
         bypass_limits_flag = True
         pattern = "pattern"
         token = "token"
-        dependencies_scan_instance = DependenciesScan(mock_tool_gateway, mock_tool_remote, mock_deserializator_gateway, dict_args, working_dir, skip_flag, scan_flag, bypass_limits_flag, pattern, token)
+        dependencies_scan_instance = DependenciesScan(
+            mock_tool_gateway,
+            mock_tool_remote,
+            mock_deserializator_gateway,
+            dict_args,
+            working_dir,
+            skip_flag,
+            scan_flag,
+            bypass_limits_flag,
+            pattern,
+            token,
+        )
         dependencies_scan_instance.process()
 
-        mock_tool_remote.get_remote_config.assert_called_once_with(dict_args["remote_config_repo"],file_path)
+        mock_tool_remote.get_remote_config.assert_called_once_with(
+            dict_args["remote_config_repo"], file_path
+        )
 
 
 def test_deserializator():
@@ -76,7 +102,7 @@ def test_deserializator():
         }
         dict_args = {
             "dict_args_key": "dict_args_value",
-            "remote_config_repo": "remote_config_repo_value"
+            "remote_config_repo": "remote_config_repo_value",
         }
         dependencies_scanned = "scanned.json"
         working_dir = "/path/to/working/dir"
@@ -85,7 +111,20 @@ def test_deserializator():
         bypass_limits_flag = True
         pattern = "pattern"
         token = "token"
-        dependencies_scan_instance = DependenciesScan(mock_tool_gateway, mock_tool_remote, mock_deserializator_gateway, dict_args, working_dir, skip_flag, scan_flag, bypass_limits_flag, pattern, token)
+        dependencies_scan_instance = DependenciesScan(
+            mock_tool_gateway,
+            mock_tool_remote,
+            mock_deserializator_gateway,
+            dict_args,
+            working_dir,
+            skip_flag,
+            scan_flag,
+            bypass_limits_flag,
+            pattern,
+            token,
+        )
         result = dependencies_scan_instance.deserializator(dependencies_scanned)
 
-        mock_deserializator_gateway.get_list_findings.assert_called_once_with(dependencies_scanned)
+        mock_deserializator_gateway.get_list_findings.assert_called_once_with(
+            dependencies_scanned
+        )
