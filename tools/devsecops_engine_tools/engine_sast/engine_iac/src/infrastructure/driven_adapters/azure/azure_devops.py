@@ -5,6 +5,7 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.dev
 from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
     SystemVariables,
     ReleaseVariables,
+    BuildVariables
 )
 from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
     AzureMessageLoggingPipeline,
@@ -34,7 +35,11 @@ class AzureDevops(DevopsPlatformGateway):
     def get_variable(self, variable):
         try:
             if variable == "pipeline":
-                return ReleaseVariables.Release_Definitionname.value()
+                if SystemVariables.System_HostType.value() == "build":
+                    return BuildVariables.Build_DefinitionName.value()
+                return ReleaseVariables.Release_DefinitionName.value()
+            elif variable == "stage":
+                return SystemVariables.System_HostType.value()
         except Exception as ex:
             logger.warning(f"Error getting variable {str(ex)}")
             return None
