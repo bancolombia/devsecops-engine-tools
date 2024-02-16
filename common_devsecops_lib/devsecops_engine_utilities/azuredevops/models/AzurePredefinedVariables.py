@@ -38,7 +38,7 @@ class SystemVariables(BaseEnum):
 class BuildVariables(BaseEnum):
     Build_BuildId = "Build.BuildId"
     Build_BuildNumber = "Build.BuildNumber"
-    Build_Definitionname = "Build.DefinitionName"
+    Build_DefinitionName = "Build.DefinitionName"
     Build_Project_Name = "Build.ProjectName"
     Build_Repository_Name = "Build.Repository.Name"
     Build_SourceBranch = "Build.SourceBranch"
@@ -48,7 +48,7 @@ class BuildVariables(BaseEnum):
 
 
 class ReleaseVariables(BaseEnum):
-    Release_DefinitionName = "Release.DefinitionName"
+    Release_Definitionname = "Release.DefinitionName"
     Release_Releaseid = "Release.ReleaseId"
     Artifact_Path = "ARTIFACT_PATH"
     Environment = "ENV"
