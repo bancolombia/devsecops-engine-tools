@@ -111,7 +111,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     lambda finding: Exclusions(
                         **{
                             "id": finding.vuln_id_from_tool,
-                            "where": finding.file_path,
+                            "where": self._get_where(finding, dict_args),
                             "create_date": finding.accepted_risks[-1]["created"],
                             "expired_date": finding.accepted_risks[-1]["expiration_date"],
                         }
@@ -123,3 +123,11 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             raise ExceptionFindingsRiskAcceptance(
                 "Error getting risk acceptance findings with the following error: {0} ".format(ex)
             )
+    
+    def _get_where(self, finding, dict_args):
+        if dict_args["tool"] in ["engine_iac", "engine_secret"]:
+            return finding.file_path
+        elif dict_args["tool"] in ["engine_container", "engine_dependencies"]:
+            return finding.component_name + ":" + finding.component_version
+        elif dict_args["tool"] == "engine_dast":
+            return finding.endpoints
