@@ -44,6 +44,9 @@ RULES_K8Scheckov_config.yaml
 RULES_CLOUDFORMATIONcheckov_config.yaml
 log/
 twistcli
-*_scan_result.json
+*scan_result.json
 jf
 jf.exe
+target
+dependencies_to_scan
+node_modules

@@ -21,6 +21,7 @@ class TestEntryPointCore(unittest.TestCase):
             token_cmdb="abc123",
             token_vulnerability_management=None,
             token_engine_container=None,
+            token_engine_dependencies=None,
         )
         mock_parse_args.return_value = mock_args
 
@@ -39,6 +40,7 @@ class TestEntryPointCore(unittest.TestCase):
             "token_cmdb": "abc123",
             "token_vulnerability_management": None,
             "token_engine_container": None,
+            "token_engine_dependencies": None,
         }
         self.assertEqual(result, expected_result)
 
@@ -72,6 +74,7 @@ class TestEntryPointCore(unittest.TestCase):
             "token_cmdb": "abc123",
             "token_vulnerability_management": None,
             "token_engine_container": None,
+            "token_engine_dependencies": None
         }
 
         mock_config_tool = {
