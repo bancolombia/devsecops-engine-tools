@@ -3,8 +3,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.secrets_manager
     SecretsManagerGateway,
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.aws import (
-    assume_role,
-    validate_execution_account,
+    assume_role
 )
 import boto3
 import json
@@ -20,14 +19,7 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 @dataclass
 class SecretsManager(SecretsManagerGateway):
     def get_secret(self, config_tool):
-        execution_different_account = config_tool["SECRET_MANAGER"]["AWS"][
-            "EXECUTION_DIFFERENT_ACCOUNT"
-        ]
-        temp_credentials = assume_role(
-            config_tool["SECRET_MANAGER"]["AWS"]["ROLE_ARN_DIFFERENT_ACCOUNT"]
-            if validate_execution_account(execution_different_account)
-            else config_tool["SECRET_MANAGER"]["AWS"]["ROLE_ARN"]
-        )
+        temp_credentials = assume_role(config_tool["SECRET_MANAGER"]["AWS"]["ROLE_ARN"])
         session = boto3.session.Session()
         client = session.client(
             service_name="secretsmanager",
@@ -38,11 +30,7 @@ class SecretsManager(SecretsManagerGateway):
         )
 
         try:
-            secret_name = (
-                config_tool["SECRET_MANAGER"]["AWS"]["SECRET_NAME_DIFFERENT_ACCOUNT"]
-                if validate_execution_account(execution_different_account)
-                else config_tool["SECRET_MANAGER"]["AWS"]["SECRET_NAME"]
-            )
+            secret_name = config_tool["SECRET_MANAGER"]["AWS"]["SECRET_NAME"]
             get_secret_value_response = client.get_secret_value(SecretId=secret_name)
             secret = get_secret_value_response["SecretString"]
             secret_dict = json.loads(secret)

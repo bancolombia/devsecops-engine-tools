@@ -5,15 +5,18 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform
 import json
 import os
 
+
 @dataclass
 class RuntimeLocal(DevopsPlatformGateway):
 
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    ICON_FAIL = "\u2718"
+    ICON_SUCCESS = "\u2714"
+
 
     def get_remote_config(self, repository, path):
         with open(f"{repository}/{path}") as f:
@@ -29,35 +32,42 @@ class RuntimeLocal(DevopsPlatformGateway):
         elif type == "error":
             return f"{self.FAIL}{message}{self.ENDC}"
 
-
     def result_pipeline(self, type):
         if type == "failed":
-            return f"{self.FAIL}Failed{self.ENDC}"
+            return f"{self.FAIL}{self.ICON_FAIL}Failed{self.ENDC}"
         elif type == "succeeded":
-            return f"{self.OKGREEN}Succeeded{self.ENDC}"
+            return f"{self.OKGREEN}{self.ICON_SUCCESS}Succeeded{self.ENDC}"
 
     def get_source_code_management_uri(self):
-        return "file:///"
+        return os.environ.get("DET_SOURCE_CODE_MANAGEMENT_URI")
 
     def get_base_compact_remote_config_url(self, remote_config_repo):
-        return f"file:///{remote_config_repo}"
-    
-    def get_variable(self, variable_name):
-        if variable_name == "pipeline":
+        return os.environ.get("DET_BASE_COMPACT_REMOTE_CONFIG_URL")
+
+    def get_variable(self, variable):
+        if variable == "pipeline":
             return os.environ.get("DET_PIPELINE_NAME")
-        elif variable_name == "branch_name":
+        elif variable == "branch_name":
             return os.environ.get("DET_BRANCH_NAME")
-        elif variable_name == "build_id":
+        elif variable == "build_id":
             return os.environ.get("DET_BUILD_ID")
-        elif variable_name == "build_execution_id":
+        elif variable == "build_execution_id":
             return os.environ.get("DET_BUILD_EXECUTION_ID")
-        elif variable_name == "commit_hash":
+        elif variable == "commit_hash":
             return os.environ.get("DET_COMMIT_HASH")
-        elif variable_name == "environment":
+        elif variable == "environment":
             return os.environ.get("DET_ENVIRONMENT")
-        elif variable_name == "release_id":
+        elif variable == "release_id":
             return os.environ.get("DET_RELEASE_ID")
-        elif variable_name == "branch_tag":
+        elif variable == "branch_tag":
             return os.environ.get("DET_BRANCH_TAG")
-        elif variable_name == "access_token":
+        elif variable == "access_token":
             return os.environ.get("DET_ACCESS_TOKEN")
+        elif variable == "path_directory":
+            return os.environ.get("DET_PATH_DIRECTORY")
+        elif variable == "os":
+            return os.environ.get("DET_OS")
+        elif variable == "work_folder":
+            return os.environ.get("DET_WORK_FOLDER")
+        elif variable == "temp_directory":
+            return os.environ.get("DET_TEMP_DIRECTORY")
