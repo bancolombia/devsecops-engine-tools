@@ -40,16 +40,25 @@ class TestAzureDevops(unittest.TestCase):
         assert result == {"key": "value"}
 
     @mock.patch(
+        "devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azure.azure_devops.SystemVariables",
+        autospec=True
+    )
+    @mock.patch(
         "devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.azure.azure_devops.ReleaseVariables",
         autospec=True,
     )
-    def test_get_variable(self, mock_release_variables):
+    def test_get_variable(self, mock_release_variables, mock_system_variables):
         azure_devops = AzureDevops()
 
         # Mock the ReleaseVariables class
-        mock_release_variables.Release_Definitionname.value.return_value = (
-            "Release_Definitionname"
+        mock_release_variables.Release_DefinitionName.value.return_value = (
+            "Release_DefinitionName"
         )
 
+        mock_system_variables.System_HostType.value.return_value = (
+            "release"
+        )
+        print(dir)
+
         result = azure_devops.get_variable("pipeline")
-        assert result == None
+        assert result == "Release_DefinitionName"
