@@ -10,7 +10,13 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.config_tool 
     ConfigTool,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
-from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
+    InputCore
+)
+from devsecops_engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_utilities import settings
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class IacScan:
@@ -63,7 +69,7 @@ class IacScan:
             totalized_exclusions=totalized_exclusions,
             threshold_defined=config_tool.threshold,
             path_file_results=path_file_results,
-            custom_message_break_build=config_tool.message_info_sast_rm,
+            custom_message_break_build=config_tool.message_info_engine_iac,
             scope_pipeline=config_tool.scope_pipeline,
             stage_pipeline="Release",
         )
@@ -96,6 +102,12 @@ class IacScan:
         folders_to_scan = self.search_folders(
             config_tool.search_pattern, config_tool.ignore_search_pattern
         )
+
+        if len(folders_to_scan) == 0:
+            logger.warning(
+                "No folders found with the search pattern: %s",
+                config_tool.search_pattern,
+            )
 
         return config_tool, folders_to_scan, skip_tool
 

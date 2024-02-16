@@ -97,7 +97,7 @@ class HandleScan:
                 secret_sca=secret_tool["token_prisma_cloud"]
             else:
                 secret_sca=dict_args["token_engine_container"]
-            findings_list, input_core =runner_engine_container(dict_args, config_tool, secret_sca)
+            findings_list, input_core =runner_engine_container(dict_args, config_tool, secret_sca, self.devops_platform_gateway)
             return findings_list, input_core
         elif "engine_dast" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
@@ -105,6 +105,7 @@ class HandleScan:
             findings_list, input_core = runner_secret_scan(
                 dict_args,
                 config_tool["ENGINE_SECRET"]["TOOL"],
+                self.devops_platform_gateway
             )
             return findings_list, input_core
         elif "engine_dependencies" in dict_args["tool"]:

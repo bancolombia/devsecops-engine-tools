@@ -6,6 +6,7 @@ from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables impo
     BuildVariables,
     SystemVariables,
     ReleaseVariables,
+    AgentVariables
 )
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import (
     AzureDevopsApi,
@@ -84,6 +85,14 @@ class AzureDevops(DevopsPlatformGateway):
                 return SystemVariables.System_AccessToken.value()
             elif variable == "pipeline":
                 return ReleaseVariables.Release_Definitionname.value()
+            elif variable == "path_directory":
+                return SystemVariables.System_DefaultWorkingDirectory.value()
+            elif variable == "os":
+                return AgentVariables.Agent_OS.value()
+            elif variable == "work_folder":
+                return AgentVariables.Agent_WorkFolder.value()
+            elif variable == "temp_directory":
+                return AgentVariables.Agent_TempDirectory.value()
         except Exception as ex:
             logger.warning(f"Error getting variable {str(ex)}")
             return None

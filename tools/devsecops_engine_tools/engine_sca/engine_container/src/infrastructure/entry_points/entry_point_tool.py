@@ -20,7 +20,6 @@ def init_engine_sca_rm(
     )
     input_core = SetInputCore(tool_remote, dict_args, config_tool)
     images_scanned = container_sca_scan.process()
-
     return container_sca_scan.deseralizator(images_scanned), input_core.set_input_core(
         images_scanned
     )

@@ -1,5 +1,5 @@
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.config_gateway import (
-    ConfigGateway,
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway,
 )
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
@@ -16,7 +16,7 @@ class ContainerScaScan:
     def __init__(
         self,
         tool_run: ToolGateway,
-        tool_remote: ConfigGateway,
+        tool_remote: DevopsPlatformGateway,
         tool_images: ImagesGateway,
         tool_deseralizator: DeseralizatorGateway,
         dict_args,
@@ -36,7 +36,7 @@ class ContainerScaScan:
         Returns:
             dict: Remote configuration.
         """
-        return self.tool_remote.get_remote_config(self.dict_args, file_path)
+        return self.tool_remote.get_remote_config(self.dict_args["remote_config_repo"], file_path)
 
     def scan_image(self):
         """
@@ -64,10 +64,10 @@ class ContainerScaScan:
             dict: SCA scanning results.
         """
         return self.tool_run.run_tool_container_sca(
-            self.get_remote_config("SCA/CONTAINER/ConfigTool.json"),
+            self.get_remote_config("engine_sca/engine_container/ConfigTool.json"),
             self.token,
             self.scan_image(),
-            self.get_variable("release_name"),
+            self.get_variable("pipeline"),
         )
 
     def deseralizator(self, image_scanned):
