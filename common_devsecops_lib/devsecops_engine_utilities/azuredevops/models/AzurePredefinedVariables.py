@@ -38,7 +38,7 @@ class SystemVariables(BaseEnum):
 class BuildVariables(BaseEnum):
     Build_BuildId = "Build.BuildId"
     Build_BuildNumber = "Build.BuildNumber"
-    Build_DefinitionName = "Build.DefinitionName"
+    Build_Definitionname = "Build.DefinitionName"
     Build_Project_Name = "Build.ProjectName"
     Build_Repository_Name = "Build.Repository.Name"
     Build_SourceBranch = "Build.SourceBranch"
