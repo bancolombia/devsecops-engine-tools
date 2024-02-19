@@ -48,7 +48,7 @@ class BuildVariables(BaseEnum):
 
 
 class ReleaseVariables(BaseEnum):
-    Release_DefinitionName = "Release.DefinitionName"
+    Release_Definitionname = "Release.DefinitionName"
     Release_Releaseid = "Release.ReleaseId"
     Artifact_Path = "ARTIFACT_PATH"
     Environment = "ENV"

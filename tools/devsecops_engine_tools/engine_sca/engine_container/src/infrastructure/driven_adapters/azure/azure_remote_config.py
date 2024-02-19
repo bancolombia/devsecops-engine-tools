@@ -32,7 +32,7 @@ class AzureRemoteConfig(ConfigGateway):
     def get_variable(self, variable):
         try:
             if variable == "release_name":
-                return ReleaseVariables.Release_DefinitionName.value()
+                return ReleaseVariables.Release_Definitionname.value()
         except Exception as ex:
             logger.warning(f"Error getting variable {str(ex)}")
             return None
