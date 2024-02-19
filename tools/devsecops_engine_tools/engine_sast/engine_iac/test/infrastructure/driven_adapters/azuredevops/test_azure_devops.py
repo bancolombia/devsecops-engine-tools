@@ -51,8 +51,8 @@ class TestAzureDevops(unittest.TestCase):
         azure_devops = AzureDevops()
 
         # Mock the ReleaseVariables class
-        mock_release_variables.Release_DefinitionName.value.return_value = (
-            "Release_DefinitionName"
+        mock_release_variables.Release_Definitionname.value.return_value = (
+            "Release_Definitionname"
         )
 
         mock_system_variables.System_HostType.value.return_value = (
@@ -61,4 +61,4 @@ class TestAzureDevops(unittest.TestCase):
         print(dir)
 
         result = azure_devops.get_variable("pipeline")
-        assert result == "Release_DefinitionName"
+        assert result == "Release_Definitionname"
