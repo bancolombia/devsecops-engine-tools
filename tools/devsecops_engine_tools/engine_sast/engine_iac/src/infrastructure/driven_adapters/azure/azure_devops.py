@@ -37,7 +37,7 @@ class AzureDevops(DevopsPlatformGateway):
             if variable == "pipeline":
                 if SystemVariables.System_HostType.value() == "build":
                     return BuildVariables.Build_DefinitionName.value()
-                return ReleaseVariables.Release_DefinitionName.value()
+                return ReleaseVariables.Release_Definitionname.value()
             elif variable == "stage":
                 return SystemVariables.System_HostType.value()
         except Exception as ex:
