@@ -97,7 +97,7 @@ class HandleScan:
             else:
                 secret_sca=dict_args["token_engine_container"]
             findings_list, input_core =runner_engine_container(dict_args, config_tool, secret_sca)
-            if dict_args["use_vulnerability_management"] == "true":
+            if (dict_args["use_vulnerability_management"] == "true") and input_core.path_file_results:
                 try:
                     self.vulnerability_management.send_vulnerability_management(
                         VulnerabilityManagement(
