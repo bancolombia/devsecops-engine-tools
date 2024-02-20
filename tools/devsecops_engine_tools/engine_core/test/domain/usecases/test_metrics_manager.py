@@ -44,7 +44,8 @@ class TestMetricsManager(unittest.TestCase):
         os.makedirs = MagicMock()
 
         # Act
-        with patch("builtins.open", create=True) as mock_open:
+        with patch("builtins.open", create=True) as mock_open, patch("os.path.exists") as mock_exists:
+            mock_exists.return_value = False
             self.metrics_manager.process(None, input_core, dict_args, scan_result)
 
         # Assert

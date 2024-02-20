@@ -11,9 +11,16 @@ class TestIacScan(unittest.TestCase):
         self.devops_platform_gateway = MagicMock()
         self.iac_scan = IacScan(self.tool_gateway, self.devops_platform_gateway)
 
+    def side_effect(self, arg):
+        if arg == "stage":
+            return "Release"
+        else:
+            return "example_pipeline"
+
     def test_process(self):
         dict_args = {
             "remote_config_repo": "example_repo",
+            "folder_path": "example_folder",
             "environment": "test",
             "platform": "eks",
         }
@@ -51,7 +58,8 @@ class TestIacScan(unittest.TestCase):
             }
         }
 
-        self.devops_platform_gateway.get_variable.return_value = "example_pipeline"
+        # self.devops_platform_gateway.get_variable.return_value = "example_pipeline"
+        self.devops_platform_gateway.get_variable.side_effect = self.side_effect
 
         self.tool_gateway.run_tool.return_value = (
             ["finding1", "finding2"],
@@ -69,9 +77,10 @@ class TestIacScan(unittest.TestCase):
         self.assertEqual(input_core.scope_pipeline, "example_pipeline")
         self.assertEqual(input_core.stage_pipeline, "Release")
 
-    def test_process_skip_tool(self):
+    def test_process_skip_search_folder(self):
         dict_args = {
             "remote_config_repo": "example_repo",
+            "folder_path": "example_folder",
             "environment": "test",
             "platform": "eks",
         }

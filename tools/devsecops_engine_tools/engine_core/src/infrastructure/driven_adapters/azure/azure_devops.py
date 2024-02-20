@@ -6,6 +6,7 @@ from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables impo
     BuildVariables,
     SystemVariables,
     ReleaseVariables,
+    AgentVariables,
 )
 from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import (
     AzureDevopsApi,
@@ -53,7 +54,7 @@ class AzureDevops(DevopsPlatformGateway):
     def get_source_code_management_uri(self):
         source_code_management_uri = (
             f"{SystemVariables.System_TeamFoundationCollectionUri.value()}"
-            f"{BuildVariables.Build_Project_Name.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
+            f"{SystemVariables.System_TeamProject.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
         )
         return source_code_management_uri.replace(" ", "%20")
 
@@ -82,6 +83,11 @@ class AzureDevops(DevopsPlatformGateway):
                 return BuildVariables.Build_SourceBranch.value()
             elif variable == "access_token":
                 return SystemVariables.System_AccessToken.value()
+            elif variable == "pipeline_name":
+                return BuildVariables.Build_DefinitionName.value()
+            elif variable == "agent_directory":
+                return AgentVariables.Agent_BuildDirectory.value()
+
         except Exception as ex:
             logger.warning(f"Error getting variable {str(ex)}")
             return None

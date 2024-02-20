@@ -37,7 +37,7 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 class CheckovTool(ToolGateway):
     CHECKOV_CONFIG_FILE = "checkov_config.yaml"
     TOOL = "CHECKOV"
-    framework_mapping = {"RULES_DOCKER": "dockerfile", "RULES_K8S": "kubernetes"}
+    framework_mapping = {"RULES_DOCKER": "dockerfile", "RULES_K8S": "kubernetes", "RULES_CLOUDFORMATION": "cloudformation"}
 
 
     def create_config_file(self, checkov_config: CheckovConfig):
@@ -145,16 +145,16 @@ class CheckovTool(ToolGateway):
                     soft_fail=False,
                     directories=folder,
                     external_checks_git=[
-                        f"{config_tool.external_checks_git}/kubernetes"
+                        f"{config_tool.external_checks_git}/{self.framework_mapping[rule]}"
                     ]
                     if config_tool.use_external_checks_git == "True"
                     and agent_env is not None
-                    and rule == "RULES_K8S"
+                    and rule in ["RULES_K8S", "RULES_CLOUDFORMATION"]
                     else [],
                     env=agent_env,
-                    external_checks_dir=f"/tmp/{config_tool.external_asset_name}"
+                    external_checks_dir=f"/tmp/rules/{self.framework_mapping[rule]}"
                     if config_tool.use_external_checks_dir == "True"
-                    and rule == "RULES_K8S"
+                    and rule in ["RULES_K8S", "RULES_CLOUDFORMATION"]
                     else [],
                 )
 
