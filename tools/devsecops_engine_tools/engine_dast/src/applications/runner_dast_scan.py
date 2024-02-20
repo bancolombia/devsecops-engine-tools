@@ -14,7 +14,9 @@ from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.jwt.j
 from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.oauth.generic_oauth import (
     GenericOauth,
 )
-
+from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.http.client.auth_client import (
+    AuthClientCredential,
+)
 
 def runner_engine_dast(dict_args, tool, secret_tool):
     try:
@@ -29,11 +31,11 @@ def runner_engine_dast(dict_args, tool, secret_tool):
             data = json.load(dast_file)
             for elem in data["operations"]:
                 if elem["operation"]["security_auth"]["type"] == "jwt":
-                    authentication_list.append(JwtObject())
+                    authentication_list.append(JwtObject(elem.get("operation").get("security_auth")))
                 elif elem["operation"]["security_auth"]["type"] == "oauth":
-                    authentication_list.append(GenericOauth())
+                    authentication_list.append(GenericOauth(elem.get("operation").get("security_auth")))
                 elif elem["operation"]["security_auth"]["type"] == "client_secret":
-                    authentication_list.append()
+                    authentication_list.append(AuthClientCredential(elem.get("operation").get("security_auth")))
 
 
         if tool == "NUCLEI":

@@ -121,6 +121,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         except Exception as ex:
             raise ExceptionFindingsRiskAcceptance(
                 "Error getting risk acceptance findings with the following error: {0} ".format(ex)
+            )
     
     def _get_where(self, finding, dict_args):
         if dict_args["tool"] in ["engine_iac", "engine_secret"]:
