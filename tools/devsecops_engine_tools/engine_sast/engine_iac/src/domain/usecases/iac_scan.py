@@ -36,8 +36,9 @@ class IacScan:
         )
 
         config_tool, folders_to_scan, skip_tool = self.complete_config_tool(
-            init_config_tool, exclusions, tool
+            init_config_tool, exclusions, tool, dict_args
         )
+
 
         findings_list, path_file_results = [], None
         if skip_tool == "false":
@@ -71,18 +72,18 @@ class IacScan:
             path_file_results=path_file_results,
             custom_message_break_build=config_tool.message_info_engine_iac,
             scope_pipeline=config_tool.scope_pipeline,
-            stage_pipeline="Release",
+            stage_pipeline=self.devops_platform_gateway.get_variable("stage").capitalize(),
         )
 
         return findings_list, input_core
 
-    def complete_config_tool(self, data_file_tool, exclusions, tool):
+    def complete_config_tool(self, data_file_tool, exclusions, tool, dict_args):
         config_tool = ConfigTool(json_data=data_file_tool, tool=tool)
         skip_tool = "false"
 
         config_tool.exclusions = exclusions
         config_tool.scope_pipeline = self.devops_platform_gateway.get_variable(
-            "pipeline"
+            "pipeline_name"
         )
 
         if config_tool.exclusions.get("All") is not None:
@@ -91,17 +92,13 @@ class IacScan:
             config_tool.exclusions_scope = config_tool.exclusions.get(
                 config_tool.scope_pipeline
             ).get(tool)
-            skip_tool = (
-                "true"
-                if config_tool.exclusions.get(config_tool.scope_pipeline).get(
-                    "SKIP_TOOL"
-                )
-                else "false"
+            skip_tool = "true" if config_tool.exclusions.get(config_tool.scope_pipeline).get("SKIP_TOOL") else "false"
+        if(dict_args["folder_path"]):
+            folders_to_scan = [dict_args["folder_path"]]
+        else:
+            folders_to_scan = self.search_folders(
+                config_tool.search_pattern, config_tool.ignore_search_pattern
             )
-
-        folders_to_scan = self.search_folders(
-            config_tool.search_pattern, config_tool.ignore_search_pattern
-        )
 
         if len(folders_to_scan) == 0:
             logger.warning(

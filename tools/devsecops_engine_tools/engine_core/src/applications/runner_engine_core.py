@@ -44,6 +44,7 @@ def get_inputs_from_cli(args):
         required=True,
         help="",
     )
+    parser.add_argument("--folder_path", type=str, required=False, help="")
     parser.add_argument(
         "--environment", choices=["dev", "qa", "pdn"], type=str, required=True, help=""
     )
@@ -67,11 +68,13 @@ def get_inputs_from_cli(args):
     parser.add_argument("--token_cmdb", required=False, help="")
     parser.add_argument("--token_vulnerability_management", required=False, help="")
     parser.add_argument("--token_engine_container", required=False, help="")
+    parser.add_argument("--token_engine_dependencies", required=False, help="")
     args = parser.parse_args()
     return {
         "platform_devops": args.platform_devops,
         "remote_config_repo": args.remote_config_repo,
         "tool": args.tool,
+        "folder_path": args.folder_path,
         "environment": args.environment,
         "platform": args.platform,
         "use_secrets_manager": args.use_secrets_manager,
@@ -79,6 +82,7 @@ def get_inputs_from_cli(args):
         "token_cmdb": args.token_cmdb,
         "token_vulnerability_management": args.token_vulnerability_management,
         "token_engine_container": args.token_engine_container,
+        "token_engine_dependencies": args.token_engine_dependencies,
     }
 
 def application_core():

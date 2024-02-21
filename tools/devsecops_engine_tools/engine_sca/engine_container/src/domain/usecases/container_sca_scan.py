@@ -67,7 +67,7 @@ class ContainerScaScan:
             self.get_remote_config("engine_sca/engine_container/ConfigTool.json"),
             self.token,
             self.scan_image(),
-            self.get_variable("pipeline"),
+            self.get_variable("pipeline_name"),
         )
 
     def deseralizator(self, image_scanned):

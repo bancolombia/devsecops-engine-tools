@@ -45,9 +45,7 @@ class RuntimeLocal(DevopsPlatformGateway):
         return os.environ.get("DET_BASE_COMPACT_REMOTE_CONFIG_URL")
 
     def get_variable(self, variable):
-        if variable == "pipeline":
-            return os.environ.get("DET_PIPELINE_NAME")
-        elif variable == "branch_name":
+        if variable == "branch_name":
             return os.environ.get("DET_BRANCH_NAME")
         elif variable == "build_id":
             return os.environ.get("DET_BUILD_ID")
@@ -63,6 +61,10 @@ class RuntimeLocal(DevopsPlatformGateway):
             return os.environ.get("DET_BRANCH_TAG")
         elif variable == "access_token":
             return os.environ.get("DET_ACCESS_TOKEN")
+        elif variable == "pipeline_name":
+            return os.environ.get("DET_PIPELINE_NAME")
+        elif variable == "stage":
+            return os.environ.get("DET_STAGE")
         elif variable == "path_directory":
             return os.environ.get("DET_PATH_DIRECTORY")
         elif variable == "os":
@@ -71,3 +73,5 @@ class RuntimeLocal(DevopsPlatformGateway):
             return os.environ.get("DET_WORK_FOLDER")
         elif variable == "temp_directory":
             return os.environ.get("DET_TEMP_DIRECTORY")
+        elif variable == "agent_directory":
+            return os.environ.get("DET_AGENT_DIRECTORY")

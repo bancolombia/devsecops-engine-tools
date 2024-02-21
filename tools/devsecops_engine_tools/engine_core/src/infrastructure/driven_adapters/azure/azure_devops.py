@@ -54,7 +54,7 @@ class AzureDevops(DevopsPlatformGateway):
     def get_source_code_management_uri(self):
         source_code_management_uri = (
             f"{SystemVariables.System_TeamFoundationCollectionUri.value()}"
-            f"{BuildVariables.Build_Project_Name.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
+            f"{SystemVariables.System_TeamProject.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
         )
         return source_code_management_uri.replace(" ", "%20")
 
@@ -83,8 +83,12 @@ class AzureDevops(DevopsPlatformGateway):
                 return BuildVariables.Build_SourceBranch.value()
             elif variable == "access_token":
                 return SystemVariables.System_AccessToken.value()
-            elif variable == "pipeline":
+            elif variable == "pipeline_name":
+                if SystemVariables.System_HostType.value() == "build":
+                    return BuildVariables.Build_DefinitionName.value()
                 return ReleaseVariables.Release_Definitionname.value()
+            elif variable == "stage":
+                return SystemVariables.System_HostType.value()
             elif variable == "path_directory":
                 return SystemVariables.System_DefaultWorkingDirectory.value()
             elif variable == "os":
@@ -93,6 +97,9 @@ class AzureDevops(DevopsPlatformGateway):
                 return AgentVariables.Agent_WorkFolder.value()
             elif variable == "temp_directory":
                 return AgentVariables.Agent_TempDirectory.value()
+            elif variable == "agent_directory":
+                return AgentVariables.Agent_BuildDirectory.value()
+
         except Exception as ex:
             logger.warning(f"Error getting variable {str(ex)}")
             return None
