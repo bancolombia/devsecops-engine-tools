@@ -67,6 +67,39 @@ def test_generate_file_from_tool():
                 "checkov_version": "2.3.296",
             },
         },
+        {
+            "check_type": "cloudformation",
+            "results": {
+                "failed_checks": [
+                    {
+                        "check_id": "CKV_AWS_20",
+                        "bc_check_id": None,
+                        "check_name": "Ensure the S3 bucket does not allow READ permissions to everyone",
+                        "check_result": {
+                            "result": "FAILED"
+                        },
+                        "code_block": None,
+                        "file_path": "/template-cloudfront.yaml",
+                        "file_abs_path": "/test_path/_AW1234/template-cloudfront.yaml",
+                        "repo_file_path": "/_AW1234/template-cloudfront.yaml",
+                        "file_line_range": [308, 339],
+                        "resource": "AWS::S3::Bucket.S3BucketCaptchaEdin",
+                        "evaluations": {},
+                        "check_class": "checkov.cloudformation.checks.resource.aws.S3PublicACLRead",
+                        "fixed_definition": None,
+                        "entity_tags": {},
+                    }
+                ]
+            },
+            "summary": {
+                "passed": 15,
+                "failed": 9,
+                "skipped": 0,
+                "parsing_errors": 0,
+                "resource_count": 7,
+                "checkov_version": "2.3.296",
+            },
+        }
     ]
     rules_doc = {
         "CKV_DOCKER_3": {
@@ -77,6 +110,14 @@ def test_generate_file_from_tool():
             "category": "Vulnerability",
         },
         "CKV_K8S_13": {
+            "checkID": "IAC-CKV_K8S_13 Ensure memory limits are set",
+            "guideline": "guideline",
+            "severity": "High",
+            "cvss": "",
+            "category": "Compliance",
+        },
+        "CKV_AWS_20": {
+            "customID": "C-S3-005",
             "checkID": "IAC-CKV_K8S_13 Ensure memory limits are set",
             "guideline": "guideline",
             "severity": "High",
@@ -156,6 +197,39 @@ def test_generate_file_from_tool_Exception():
                 "checkov_version": "2.3.296",
             },
         },
+        {
+            "check_type": "cloudformation",
+            "results": {
+                "failed_checks": [
+                    {
+                        "check_id": "CKV_AWS_20",
+                        "bc_check_id": None,
+                        "check_name": "Ensure the S3 bucket does not allow READ permissions to everyone",
+                        "check_result": {
+                            "result": "FAILED"
+                        },
+                        "code_block": None,
+                        "file_path": "/template-cloudfront.yaml",
+                        "file_abs_path": "/test_path/_AW1234/template-cloudfront.yaml",
+                        "repo_file_path": "/_AW1234/template-cloudfront.yaml",
+                        "file_line_range": [308, 339],
+                        "resource": "AWS::S3::Bucket.S3BucketCaptchaEdin",
+                        "evaluations": {},
+                        "check_class": "checkov.cloudformation.checks.resource.aws.S3PublicACLRead",
+                        "fixed_definition": None,
+                        "entity_tags": {},
+                    }
+                ]
+            },
+            "summary": {
+                "passed": 15,
+                "failed": 9,
+                "skipped": 0,
+                "parsing_errors": 0,
+                "resource_count": 7,
+                "checkov_version": "2.3.296",
+            },
+        }
     ]
 
     absolute_path = generate_file_from_tool("CHECKOV", results_scan_list, None)

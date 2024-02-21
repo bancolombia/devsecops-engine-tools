@@ -29,6 +29,7 @@ class SystemVariables(BaseEnum):
     System_CollectionId = "System.CollectionId"
     System_DefaultWorkingDirectory = "System.DefaultWorkingDirectory"
     System_StageName = "System.StageName"
+    System_HostType = "System.HostType"
     System_TeamFoundationCollectionUri = "System.TeamFoundationCollectionUri"
     System_TeamProject = "System.TeamProject"
     System_TeamProjectId = "System.TeamProject"
