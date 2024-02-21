@@ -55,6 +55,7 @@ class ReleaseVariables(BaseEnum):
 
 
 class AgentVariables(BaseEnum):
+    Agent_BuildDirectory = "Agent.BuildDirectory"
     Agent_WorkFolder = "Agent.WorkFolder"
     Agent_TempDirectory = "Agent.TempDirectory"
     Agent_OS = "Agent.OS"
