@@ -9,3 +9,4 @@ class Threshold:
     def __init__(self, data):
         self.vulnerability = LevelVulnerability(data.get("VULNERABILITY"))
         self.compliance = LevelCompliance(data.get("COMPLIANCE"))
+        self.cve = data.get("CVE",[])
