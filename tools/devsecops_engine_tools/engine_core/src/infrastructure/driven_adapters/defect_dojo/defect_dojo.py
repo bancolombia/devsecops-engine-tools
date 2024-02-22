@@ -17,6 +17,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
     ExceptionVulnerabilityManagement,
     ExceptionFindingsRiskAcceptance,
 )
+from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
+    format_date
+)
 
 
 @dataclass
@@ -113,8 +116,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         **{
                             "id": finding.vuln_id_from_tool,
                             "where": self._get_where(finding, dict_args),
-                            "create_date": finding.accepted_risks[-1]["created"],
-                            "expired_date": finding.accepted_risks[-1]["expiration_date"],
+                            "create_date": format_date(finding.accepted_risks[-1]["created"], "%Y-%m-%dT%H:%M:%SZ", "%d%m%Y"),
+                            "expired_date": format_date(finding.accepted_risks[-1]["expiration_date"], "%Y-%m-%dT%H:%M:%SZ", "%d%m%Y"),
                         }
                     ),
                     findings_list,

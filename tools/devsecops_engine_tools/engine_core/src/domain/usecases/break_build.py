@@ -150,7 +150,7 @@ class BreakBuild:
                 or vulnerabilities_low >= threshold.vulnerability.low
             ):
                 print("Below are all vulnerabilities detected.")
-                printer_table_gateway.print_table(
+                printer_table_gateway.print_table_findings(
                     vulnerabilities_without_exclusions_list
                 )
                 print(
@@ -190,7 +190,7 @@ class BreakBuild:
                 }
             else:
                 print("Below are all vulnerabilities detected.")
-                printer_table_gateway.print_table(
+                printer_table_gateway.print_table_findings(
                     vulnerabilities_without_exclusions_list
                 )
                 print(
@@ -228,10 +228,23 @@ class BreakBuild:
                         )
                     ),
                 }
+
+            ids_vulnerabilitites = list(map(lambda x: x.id, vulnerabilities_without_exclusions_list))
+            ids_match = list(filter(lambda x: x in ids_vulnerabilitites, threshold.cve))
+            if len(ids_match) > 0 :
+                print(
+                    devops_platform_gateway.message(
+                        "error",
+                        "Scan Failed due to vulnerability policy violations: CVEs Vulnerabilities: {0}".format(
+                            ",".join(ids_match)
+                        ),
+                    )
+                )
+
             print()
             if len(compliances_without_exclusions_list) > 0:
                 print("Below are all compliances issues detected.")
-                printer_table_gateway.print_table(compliances_without_exclusions_list)
+                printer_table_gateway.print_table_findings(compliances_without_exclusions_list)
                 status = "succeeded"
                 if compliance_critical >= threshold.compliance.critical:
                     print(
@@ -264,7 +277,25 @@ class BreakBuild:
                     )
                 )
                 print(devops_platform_gateway.result_pipeline("succeeded"))
-
+            print()
+            if len(findings_excluded_list) > 0:
+                exclusions_list = list(
+                    map(
+                        lambda item: {
+                            "id": item.id,
+                            "where": item.where,
+                            "create_date": next((elem.create_date for elem in exclusions if elem.id == item.id), None),
+                            "expired_date": next((elem.expired_date for elem in exclusions if elem.id == item.id), None)
+                        },
+                        findings_excluded_list,
+                    )
+            )
+                print(
+                    devops_platform_gateway.message(
+                        "warning",
+                        "Bellow are all the findings that were accepted.")
+                )
+                printer_table_gateway.print_table_exclusions(exclusions_list)
         else:
             print(devops_platform_gateway.message("succeeded", "There are no findings"))
             print(devops_platform_gateway.result_pipeline("succeeded"))
