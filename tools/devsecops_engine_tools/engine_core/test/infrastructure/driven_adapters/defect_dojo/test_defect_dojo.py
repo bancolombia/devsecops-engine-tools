@@ -102,8 +102,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
         mock_session_manager.return_value = MagicMock()
         findings_list = [
-            MagicMock(vuln_id_from_tool="id1", file_path="path1", accepted_risks=[{"created": "date1", "expiration_date": "date2"}]),
-            MagicMock(vuln_id_from_tool="id2", file_path="path2", accepted_risks=[{"created": "date3", "expiration_date": "date4"}])
+            MagicMock(vuln_id_from_tool="id1", file_path="path1", accepted_risks=[{"created": "2024-01-10T00:00:00Z", "expiration_date": "2024-04-10T00:00:00Z"}]),
+            MagicMock(vuln_id_from_tool="id2", file_path="path2", accepted_risks=[{"created": "2024-01-15T00:00:00Z", "expiration_date": "2024-06-10T00:00:00Z"}])
         ]
         mock_finding.return_value.results = findings_list
 
@@ -113,8 +113,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
         mock_finding.assert_called_with(session=mock_session_manager.return_value, service=service, risk_accepted=True)
 
         expected_result = [
-            Exclusions(id="id1", where="path1", create_date="date1", expired_date="date2"),
-            Exclusions(id="id2", where="path2", create_date="date3", expired_date="date4")
+            Exclusions(id="id1", where="path1", create_date="10012024", expired_date="10042024"),
+            Exclusions(id="id2", where="path2", create_date="15012024", expired_date="10062024")
         ]
         self.assertEqual(result, expected_result)
 
@@ -139,8 +139,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
         mock_session_manager.return_value = MagicMock()
         findings_list = [
-            MagicMock(vuln_id_from_tool="id1", component_name="comp1", component_version="version1", accepted_risks=[{"created": "date1", "expiration_date": "date2"}]),
-            MagicMock(vuln_id_from_tool="id2", component_name="comp2", component_version="version2", accepted_risks=[{"created": "date3", "expiration_date": "date4"}])
+            MagicMock(vuln_id_from_tool="id1", component_name="comp1", component_version="version1", accepted_risks=[{"created": "2024-02-21T00:00:00Z", "expiration_date": "2024-02-29T00:00:00Z"}]),
+            MagicMock(vuln_id_from_tool="id2", component_name="comp2", component_version="version2", accepted_risks=[{"created": "2024-02-21T00:00:00Z", "expiration_date": "2024-03-30T00:00:00Z"}])
         ]
         mock_finding.return_value.results = findings_list
 
@@ -150,8 +150,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
         mock_finding.assert_called_with(session=mock_session_manager.return_value, service=service, risk_accepted=True)
 
         expected_result = [
-            Exclusions(id="id1", where="comp1:version1", create_date="date1", expired_date="date2"),
-            Exclusions(id="id2", where="comp2:version2", create_date="date3", expired_date="date4")
+            Exclusions(id="id1", where="comp1:version1", create_date="21022024", expired_date="29022024"),
+            Exclusions(id="id2", where="comp2:version2", create_date="21022024", expired_date="03302024")
         ]
         self.assertEqual(result, expected_result)
 
