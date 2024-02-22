@@ -46,7 +46,7 @@ class TestAzureDevops(unittest.TestCase):
         azure_devops = AzureDevops()
 
         mock_system_variables.System_TeamFoundationCollectionUri.value.return_value = "System_TeamFoundationCollectionUri"
-        mock_build_variables.Build_Project_Name.value.return_value = "Build_Project_Name"
+        mock_system_variables.System_TeamProject.value.return_value = "Build_Project_Name"
         mock_build_variables.Build_Repository_Name.value.return_value = "Build_Repository_Name"
 
         assert azure_devops.get_source_code_management_uri() == "System_TeamFoundationCollectionUriBuild_Project_Name/_git/Build_Repository_Name"
@@ -73,14 +73,14 @@ class TestAzureDevops(unittest.TestCase):
         mock_build_variables.Build_BuildId.value.return_value = "Build_BuildId"
         mock_build_variables.Build_SourceVersion.value.return_value = "Build_SourceVersion"
         mock_build_variables.Build_SourceBranch.value.return_value = "Build_SourceBranch"
-        
+
         # Mock the ReleaseVariables class
         mock_release_variables.Environment.value.return_value = "Environment"
         mock_release_variables.Release_Releaseid.value.return_value = "Release_ReleaseId"
 
         # Mock the SystemVariables class
         mock_system_variables.System_AccessToken.value.return_value = "System_AccessToken"
-         
+
         result = azure_devops.get_variable("branch_name")
         assert result == "Build_SourceBranchName"
 

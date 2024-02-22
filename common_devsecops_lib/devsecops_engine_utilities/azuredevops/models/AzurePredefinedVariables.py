@@ -29,6 +29,7 @@ class SystemVariables(BaseEnum):
     System_CollectionId = "System.CollectionId"
     System_DefaultWorkingDirectory = "System.DefaultWorkingDirectory"
     System_StageName = "System.StageName"
+    System_HostType = "System.HostType"
     System_TeamFoundationCollectionUri = "System.TeamFoundationCollectionUri"
     System_TeamProject = "System.TeamProject"
     System_TeamProjectId = "System.TeamProject"
@@ -54,6 +55,7 @@ class ReleaseVariables(BaseEnum):
 
 
 class AgentVariables(BaseEnum):
+    Agent_BuildDirectory = "Agent.BuildDirectory"
     Agent_WorkFolder = "Agent.WorkFolder"
     Agent_TempDirectory = "Agent.TempDirectory"
     Agent_OS = "Agent.OS"

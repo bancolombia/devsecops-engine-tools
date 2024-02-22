@@ -13,6 +13,7 @@ class TestEntryPointCore(unittest.TestCase):
         mock_args = mock.Mock(
             remote_config_repo="https://github.com/example/repo",
             tool="engine_iac",
+            folder_path="/home/test/repos/devsecops/NU123_Test/_AW1234",
             environment="dev",
             platform="eks",
             use_secrets_manager="true",
@@ -20,6 +21,7 @@ class TestEntryPointCore(unittest.TestCase):
             token_cmdb="abc123",
             token_vulnerability_management=None,
             token_engine_container=None,
+            token_engine_dependencies=None,
         )
         mock_parse_args.return_value = mock_args
 
@@ -30,6 +32,7 @@ class TestEntryPointCore(unittest.TestCase):
         expected_result = {
             "remote_config_repo": "https://github.com/example/repo",
             "tool": "engine_iac",
+            "folder_path": "/home/test/repos/devsecops/NU123_Test/_AW1234",
             "environment": "dev",
             "platform": "eks",
             "use_secrets_manager": "true",
@@ -37,6 +40,7 @@ class TestEntryPointCore(unittest.TestCase):
             "token_cmdb": "abc123",
             "token_vulnerability_management": None,
             "token_engine_container": None,
+            "token_engine_dependencies": None,
         }
         self.assertEqual(result, expected_result)
 
@@ -70,6 +74,7 @@ class TestEntryPointCore(unittest.TestCase):
             "token_cmdb": "abc123",
             "token_vulnerability_management": None,
             "token_engine_container": None,
+            "token_engine_dependencies": None
         }
 
         mock_config_tool = {
