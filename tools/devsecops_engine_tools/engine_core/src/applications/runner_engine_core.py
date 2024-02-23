@@ -65,6 +65,13 @@ def get_inputs_from_cli(args):
         required=False,
         help="",
     )
+    parser.add_argument(
+        "--send_metrics",
+        choices=["true", "false"],
+        type=str,
+        required=False,
+        help="",
+    )
     parser.add_argument("--token_cmdb", required=False, help="")
     parser.add_argument("--token_vulnerability_management", required=False, help="")
     parser.add_argument("--token_engine_container", required=False, help="")
@@ -79,6 +86,7 @@ def get_inputs_from_cli(args):
         "platform": args.platform,
         "use_secrets_manager": args.use_secrets_manager,
         "use_vulnerability_management": args.use_vulnerability_management,
+        "send_metrics": args.send_metrics,
         "token_cmdb": args.token_cmdb,
         "token_vulnerability_management": args.token_vulnerability_management,
         "token_engine_container": args.token_engine_container,

@@ -26,7 +26,7 @@ class TestPrinterPrettyTable:
         printer = PrinterPrettyTable()
 
         # Act
-        printer.print_table(finding_list)
+        printer.print_table_findings(finding_list)
 
         # Assert
         assert mock_print.called
@@ -76,7 +76,7 @@ class TestPrinterPrettyTable:
         printer = PrinterPrettyTable()
 
         # Act
-        printer.print_table(finding_list)
+        printer.print_table_findings(finding_list)
 
         # Assert
         assert mock_print.called
@@ -89,8 +89,21 @@ class TestPrinterPrettyTable:
         printer = PrinterPrettyTable()
 
         # Act
-        printer.print_table(finding_list)
+        printer.print_table_findings(finding_list)
 
         # Assert
         assert not mock_print.called
         # Add more assertions if needed
+
+    @patch("builtins.print")
+    def test_print_table_exclusions(self, mock_print):
+        # Arrange
+        exclusions = [{"id": "id", "where": "path", "create_date": "01042023", "expired_date": "04032023"}]
+        printer = PrinterPrettyTable()
+
+        # Act
+        printer.print_table_exclusions(exclusions)
+
+        # Assert
+        assert mock_print.called
+        # Add more assertions to validate the output
