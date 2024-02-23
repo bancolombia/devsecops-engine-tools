@@ -51,6 +51,13 @@ def get_inputs_from_cli(args):
         required=False,
         help="",
     )
+    parser.add_argument(
+        "--send_metrics",
+        choices=["true", "false"],
+        type=str,
+        required=False,
+        help="",
+    )
     parser.add_argument("--token_cmdb", required=False, help="")
     parser.add_argument("--token_vulnerability_management", required=False, help="")
     parser.add_argument("--token_engine_container", required=False, help="")
@@ -64,6 +71,7 @@ def get_inputs_from_cli(args):
         "platform": args.platform,
         "use_secrets_manager": args.use_secrets_manager,
         "use_vulnerability_management": args.use_vulnerability_management,
+        "send_metrics": args.send_metrics,
         "token_cmdb": args.token_cmdb,
         "token_vulnerability_management": args.token_vulnerability_management,
         "token_engine_container": args.token_engine_container,
@@ -95,7 +103,7 @@ def init_engine_core(
             findings_list,
             input_core,
         )
-        if config_tool["METRICS_MANAGER"]["ENABLED"] == "true":
+        if args["send_metrics"] == "true":
             MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(
                 config_tool, input_core, args, scan_result
             )
