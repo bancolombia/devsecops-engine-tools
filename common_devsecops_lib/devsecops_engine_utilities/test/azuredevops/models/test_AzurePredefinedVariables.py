@@ -23,6 +23,7 @@ from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables impo
         (BuildVariables.Build_SourceBranch, "BUILD_SOURCEBRANCH", "SourceBranchValue"),
         (ReleaseVariables.Artifact_Path, "ARTIFACT_PATH", "ArtifactPathValue"),
         (AgentVariables.Agent_WorkFolder, "AGENT_WORKFOLDER", "AgentWorkFolder"),
+        (AgentVariables.Agent_BuildDirectory, "AGENT_BUILDDIRECTORY", "AgentBuildDirectory"),
     ],
 )
 def test_enum_env_name(monkeypatch, enum_class, expected_env_name, expected_value):

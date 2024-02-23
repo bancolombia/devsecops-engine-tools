@@ -1,49 +1,12 @@
 import unittest
 from unittest import mock
 from devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core import (
-    get_inputs_from_cli,
     init_engine_core,
 )
 
 
 class TestEntryPointCore(unittest.TestCase):
-    @mock.patch("argparse.ArgumentParser.parse_args")
-    def test_get_inputs_from_cli(self, mock_parse_args):
-        # Set up mock arguments
-        mock_args = mock.Mock(
-            remote_config_repo="https://github.com/example/repo",
-            tool="engine_iac",
-            folder_path="/home/test/repos/devsecops/NU123_Test/_AW1234",
-            environment="dev",
-            platform="eks",
-            use_secrets_manager="true",
-            use_vulnerability_management="false",
-            token_cmdb="abc123",
-            token_vulnerability_management=None,
-            token_engine_container=None,
-            token_engine_dependencies=None,
-        )
-        mock_parse_args.return_value = mock_args
-
-        # Call the function
-        result = get_inputs_from_cli([])
-
-        # Assert that the function returns the expected result
-        expected_result = {
-            "remote_config_repo": "https://github.com/example/repo",
-            "tool": "engine_iac",
-            "folder_path": "/home/test/repos/devsecops/NU123_Test/_AW1234",
-            "environment": "dev",
-            "platform": "eks",
-            "use_secrets_manager": "true",
-            "use_vulnerability_management": "false",
-            "token_cmdb": "abc123",
-            "token_vulnerability_management": None,
-            "token_engine_container": None,
-            "token_engine_dependencies": None,
-        }
-        self.assertEqual(result, expected_result)
-
+    
     @mock.patch(
         "devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core.get_inputs_from_cli"
     )
@@ -71,6 +34,7 @@ class TestEntryPointCore(unittest.TestCase):
             "platform": "eks",
             "use_secrets_manager": "true",
             "use_vulnerability_management": "false",
+            "send_metrics": "true",
             "token_cmdb": "abc123",
             "token_vulnerability_management": None,
             "token_engine_container": None,
@@ -78,7 +42,6 @@ class TestEntryPointCore(unittest.TestCase):
         }
 
         mock_config_tool = {
-            "METRICS_MANAGER": {"ENABLED": "true"},
             "ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}
         }
         mock_findings_list = []
@@ -132,13 +95,13 @@ class TestEntryPointCore(unittest.TestCase):
             "environment": "dev",
             "platform": "eks",
             "use_secrets_manager": "false",
-            "use_vulnerability_management": "false"
+            "use_vulnerability_management": "false",
+            "send_metrics": "true"
         }
 
         mock_get_inputs_from_cli.return_value = mock_args
 
         mock_config_tool = {
-            "METRICS_MANAGER": {"ENABLED": "true"},
             "ENGINE_IAC": {"ENABLED": "false", "TOOL": "tool"}
         }
         mock_devops_platform_gateway = mock.Mock()

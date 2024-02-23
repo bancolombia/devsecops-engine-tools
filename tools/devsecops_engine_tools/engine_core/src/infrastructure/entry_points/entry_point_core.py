@@ -36,7 +36,7 @@ def init_engine_core(
             findings_list,
             input_core,
         )
-        if config_tool["METRICS_MANAGER"]["ENABLED"] == "true":
+        if args["send_metrics"] == "true":
             MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(
                 config_tool, input_core, args, scan_result
             )
