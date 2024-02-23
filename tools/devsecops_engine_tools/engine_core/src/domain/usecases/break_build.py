@@ -240,6 +240,7 @@ class BreakBuild:
                         ),
                     )
                 )
+                print(devops_platform_gateway.result_pipeline("failed"))
 
             print()
             if len(compliances_without_exclusions_list) > 0:
