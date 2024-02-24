@@ -29,7 +29,7 @@ def test_init_engine_dependencies():
             "BYPASS_ARCHIVE_LIMITS": "(pipeline_test1|pipeline_test2)",
             "WORK_DIR_DIFFERENT_FLAG": "SCRIPTS_WEB_MR",
             "REGEX_EXPRESSION_EXTENSIONS": "\\.(jar|ear|war)$",
-            "MESSAGE_INFO_SCA": "If you have doubts, visit 'Análisis de composición del software (SCA)' in Azure DevOps Wiki.",
+            "MESSAGE_INFO_ENGINE_DEPENDENCIES": "If you have doubts, visit 'Análisis de composición del software (SCA)' in Azure DevOps Wiki.",
             "THRESHOLD": {
                 "VULNERABILITY": {
                     "Critical": 999,

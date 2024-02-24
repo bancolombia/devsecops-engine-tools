@@ -32,12 +32,23 @@ class TestCheckovTool(unittest.TestCase):
     def test_configurate_external_checks_git(self):
         # Configurar valores simulados
         json_data = {
+            "SEARCH_PATTERN": ["AW", "NU"],
+            "IGNORE_SEARCH_PATTERN": [
+                "test",
+            ],
+            "MESSAGE_INFO_ENGINE_IAC": "message test",
+            "EXCLUSIONS_PATH": "Exclusions.json",
+            "THRESHOLD": {
+                "VULNERABILITY": {
+                    "Critical": 10,
+                    "High": 3,
+                    "Medium": 20,
+                    "Low": 30,
+                },
+                "COMPLIANCE": {"Critical": 4},
+            },
             "CHECKOV": {
                 "VERSION": "2.3.296",
-                "SEARCH_PATTERN": ["AW", "NU"],
-                "IGNORE_SEARCH_PATTERN": [
-                    "test",
-                ],
                 "USE_EXTERNAL_CHECKS_GIT": "True",
                 "EXTERNAL_CHECKS_GIT": "rules",
                 "EXTERNAL_GIT_SSH_HOST": "github",
@@ -46,19 +57,8 @@ class TestCheckovTool(unittest.TestCase):
                 "EXTERNAL_DIR_OWNER": "test",
                 "EXTERNAL_DIR_REPOSITORY": "repository",
                 "EXTERNAL_DIR_ASSET_NAME": "rules",
-                "EXCLUSIONS_PATH": "Exclusions.json",
-                "MESSAGE_INFO_SAST_RM": "message test",
-                "THRESHOLD": {
-                    "VULNERABILITY": {
-                        "Critical": 10,
-                        "High": 3,
-                        "Medium": 20,
-                        "Low": 30,
-                    },
-                    "COMPLIANCE": {"Critical": 4},
-                },
                 "RULES": "",
-            }
+            },
         }
         mock_config_tool = ConfigTool(json_data, "CHECKOV")
         mock_secret_tool = {
@@ -81,12 +81,23 @@ class TestCheckovTool(unittest.TestCase):
     def test_configurate_external_checks_dir(self, mock_github_api):
         # Configurar valores simulados
         json_data = {
+            "SEARCH_PATTERN": ["AW", "NU"],
+            "IGNORE_SEARCH_PATTERN": [
+                "test",
+            ],
+            "MESSAGE_INFO_ENGINE_IAC": "message test",
+            "EXCLUSIONS_PATH": "Exclusions.json",
+            "THRESHOLD": {
+                "VULNERABILITY": {
+                    "Critical": 10,
+                    "High": 3,
+                    "Medium": 20,
+                    "Low": 30,
+                },
+                "COMPLIANCE": {"Critical": 4},
+            },
             "CHECKOV": {
                 "VERSION": "2.3.296",
-                "SEARCH_PATTERN": ["AW", "NU"],
-                "IGNORE_SEARCH_PATTERN": [
-                    "test",
-                ],
                 "USE_EXTERNAL_CHECKS_GIT": "False",
                 "EXTERNAL_CHECKS_GIT": "rules",
                 "EXTERNAL_GIT_SSH_HOST": "github",
@@ -95,17 +106,6 @@ class TestCheckovTool(unittest.TestCase):
                 "EXTERNAL_DIR_OWNER": "test",
                 "EXTERNAL_DIR_REPOSITORY": "repository",
                 "EXTERNAL_DIR_ASSET_NAME": "rules",
-                "EXCLUSIONS_PATH": "Exclusions.json",
-                "MESSAGE_INFO_SAST_RM": "message test",
-                "THRESHOLD": {
-                    "VULNERABILITY": {
-                        "Critical": 10,
-                        "High": 3,
-                        "Medium": 20,
-                        "Low": 30,
-                    },
-                    "COMPLIANCE": {"Critical": 4},
-                },
                 "RULES": "",
             }
         }
@@ -129,9 +129,7 @@ class TestCheckovTool(unittest.TestCase):
 
     def test_configurate_external_checks_secret_tool_None(self):
         # Llamar al método que se está probando
-        result = self.checkov_tool.configurate_external_checks(
-            None, None
-        )
+        result = self.checkov_tool.configurate_external_checks(None, None)
 
         # Verificar que el resultado es el esperado
         self.assertIsNone(result)
@@ -143,12 +141,23 @@ class TestCheckovTool(unittest.TestCase):
     def test_configurate_external_checks_error(self, mock_github_api):
         # Configurar valores simulados
         json_data = {
+            "SEARCH_PATTERN": ["AW", "NU"],
+            "IGNORE_SEARCH_PATTERN": [
+                "test",
+            ],
+            "MESSAGE_INFO_ENGINE_IAC": "message test",
+            "EXCLUSIONS_PATH": "Exclusions.json",
+            "THRESHOLD": {
+                "VULNERABILITY": {
+                    "Critical": 10,
+                    "High": 3,
+                    "Medium": 20,
+                    "Low": 30,
+                },
+                "COMPLIANCE": {"Critical": 4},
+            },
             "CHECKOV": {
                 "VERSION": "2.3.296",
-                "SEARCH_PATTERN": ["AW", "NU"],
-                "IGNORE_SEARCH_PATTERN": [
-                    "test",
-                ],
                 "USE_EXTERNAL_CHECKS_GIT": "False",
                 "EXTERNAL_CHECKS_GIT": "rules",
                 "EXTERNAL_GIT_SSH_HOST": "github",
@@ -156,18 +165,6 @@ class TestCheckovTool(unittest.TestCase):
                 "USE_EXTERNAL_CHECKS_DIR": "True",
                 "EXTERNAL_DIR_OWNER": "test",
                 "EXTERNAL_DIR_REPOSITORY": "repository",
-                "EXTERNAL_DIR_ASSET_NAME": "rules",
-                "EXCLUSIONS_PATH": "Exclusions.json",
-                "MESSAGE_INFO_SAST_RM": "message test",
-                "THRESHOLD": {
-                    "VULNERABILITY": {
-                        "Critical": 10,
-                        "High": 3,
-                        "Medium": 20,
-                        "Low": 30,
-                    },
-                    "COMPLIANCE": {"Critical": 4},
-                },
                 "RULES": "",
             }
         }
@@ -261,7 +258,7 @@ class TestCheckovTool(unittest.TestCase):
         self.checkov_tool.TOOL = "CHECKOV"
 
         findings_list, file_from_tool = self.checkov_tool.run_tool(
-            config_tool, folders_to_scan, environment, platform ,secret_tool
+            config_tool, folders_to_scan, environment, platform, secret_tool
         )
 
         self.assertEqual(findings_list, [])

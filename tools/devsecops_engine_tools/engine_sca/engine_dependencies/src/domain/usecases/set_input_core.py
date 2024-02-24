@@ -70,7 +70,7 @@ class SetInputCore:
             ),
             dependencies_scanned,
             self.get_remote_config("engine_sca/engine_dependencies/ConfigTool.json")[
-                "MESSAGE_INFO_SCA"
+                "MESSAGE_INFO_ENGINE_DEPENDENCIES"
             ],
             self.get_variable("pipeline_name"),
             "Build",

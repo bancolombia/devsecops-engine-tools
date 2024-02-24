@@ -1,0 +1,22 @@
+{
+    "XRAY": {
+        "CLI_VERSION": "2.52.8"
+    },
+    "IGNORE_ANALYSIS_PATTERN": "(.*_test)",
+    "BYPASS_ARCHIVE_LIMITS": "(repository)",
+    "WORK_DIR_DIFFERENT_FLAG": "workdir",
+    "REGEX_EXPRESSION_EXTENSIONS": "\\.(jar|ear|war)$",
+    "MESSAGE_INFO_ENGINE_DEPENDENCIES": "message custom",
+    "THRESHOLD": {
+        "VULNERABILITY": {
+            "Critical": 3,
+            "High": 5,
+            "Medium": 10,
+            "Low": 15
+        },
+        "COMPLIANCE": {
+            "Critical": 1
+        },
+        "CVE": ["CVE-123123"]
+    }
+}
