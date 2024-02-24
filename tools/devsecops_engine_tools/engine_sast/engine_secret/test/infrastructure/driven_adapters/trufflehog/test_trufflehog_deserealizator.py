@@ -1,16 +1,13 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from datetime import datetime
 from devsecops_engine_tools.engine_core.src.domain.model.finding import Finding, Category
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator import DeseralizatorGateway
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway import DevopsPlatformGateway
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_deserealizator import SecretScanDeserealizator
 
 class TestSecretScanDeserealizator(unittest.TestCase):
 
     def setUp(self):
         self.deserealizator = SecretScanDeserealizator()
-        self.mock_devops_gateway = MagicMock(spec=DevopsPlatformGateway)
 
     def test_get_list_vulnerability(self):
         with patch.dict('os.environ', {'AGENT_OS': 'Linux'}):
@@ -28,11 +25,8 @@ class TestSecretScanDeserealizator(unittest.TestCase):
                 }
             ]
             
-            # Mocking the return value of get_variable method
-            self.mock_devops_gateway.get_variable.return_value = "/path/to"
-            
             # Testing the method
-            vulnerabilities = self.deserealizator.get_list_vulnerability(results_scan_list, self.mock_devops_gateway)
+            vulnerabilities = self.deserealizator.get_list_vulnerability(results_scan_list, "/path/to", "Linux")
 
             # Assertions
             self.assertEqual(len(vulnerabilities), 1)
@@ -61,9 +55,8 @@ class TestSecretScanDeserealizator(unittest.TestCase):
                     }
                 }
             }
-            self.mock_devops_gateway.get_variable.return_value = "/path/to"
             self.assertEqual(
-                self.deserealizator.get_where_correctly(result, self.mock_devops_gateway),
+                self.deserealizator.get_where_correctly(result, "/path/to", "linux"),
                 ("/file.py", "10")
             )
 
@@ -80,8 +73,7 @@ class TestSecretScanDeserealizator(unittest.TestCase):
                 }
             }
             
-            self.mock_devops_gateway.get_variable.return_value = "C:\\path\\to"
             self.assertEqual(
-                self.deserealizator.get_where_correctly(result, self.mock_devops_gateway),
+                self.deserealizator.get_where_correctly(result,  "C:\\path\\to", "Win"),
                 ("\\file.py", "10")
             )

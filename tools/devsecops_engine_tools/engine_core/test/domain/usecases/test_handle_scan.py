@@ -63,7 +63,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
         mock_runner_engine_iac.assert_called_once_with(
-            dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool
+            dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool, self.devops_platform_gateway
         )
         self.vulnerability_management.send_vulnerability_management.assert_called_once()
         self.vulnerability_management.get_findings_risk_acceptance.assert_called_once()
@@ -145,7 +145,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
         mock_runner_engine_container.assert_called_once_with(
-            dict_args, config_tool, secret_tool["token_prisma_cloud"]
+            dict_args, config_tool, secret_tool["token_prisma_cloud"], self.devops_platform_gateway
         )
 
     @mock.patch("builtins.print")
@@ -188,7 +188,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_findings_list, findings_list)
         self.assertEqual(result_input_core, input_core)
         mock_runner_secret_scan.assert_called_once_with(
-            dict_args, config_tool["ENGINE_SECRET"]["TOOL"]
+            dict_args, config_tool["ENGINE_SECRET"]["TOOL"], self.devops_platform_gateway
         )
 
     @mock.patch(
@@ -230,7 +230,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
         mock_runner_engine_dependencies.assert_called_once_with(
-            dict_args, config_tool, secret_tool["token_xray"]
+            dict_args, config_tool, secret_tool["token_xray"], self.devops_platform_gateway
         )
 
         

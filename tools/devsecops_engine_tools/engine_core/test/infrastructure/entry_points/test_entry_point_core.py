@@ -6,10 +6,7 @@ from devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_po
 
 
 class TestEntryPointCore(unittest.TestCase):
-    
-    @mock.patch(
-        "devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core.get_inputs_from_cli"
-    )
+
     @mock.patch(
         "devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core.HandleScan"
     )
@@ -20,35 +17,15 @@ class TestEntryPointCore(unittest.TestCase):
         "devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core.MetricsManager"
     )
     def test_init_engine_core(
-        self,
-        mock_metrics_manager,
-        mock_break_build,
-        mock_handle_scan,
-        mock_get_inputs_from_cli,
+        self, mock_metrics_manager, mock_break_build, mock_handle_scan
     ):
         # Set up mock arguments
-        mock_args = {
-            "remote_config_repo": "https://github.com/example/repo",
-            "tool": "engine_iac",
-            "environment": "dev",
-            "platform": "eks",
-            "use_secrets_manager": "true",
-            "use_vulnerability_management": "false",
-            "send_metrics": "true",
-            "token_cmdb": "abc123",
-            "token_vulnerability_management": None,
-            "token_engine_container": None,
-            "token_engine_dependencies": None
-        }
 
-        mock_config_tool = {
-            "ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}
-        }
+        mock_config_tool = {"ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
         mock_findings_list = []
         mock_input_core = {}
         mock_scan_result = {}
 
-        mock_get_inputs_from_cli.return_value = mock_args
         mock_devops_platform_gateway = mock.Mock()
 
         mock_devops_platform_gateway.get_remote_config.return_value = mock_config_tool
@@ -67,42 +44,45 @@ class TestEntryPointCore(unittest.TestCase):
             devops_platform_gateway=mock_devops_platform_gateway,
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
+            args={
+                "remote_config_repo": "https://github.com/example/repo",
+                "tool": "engine_iac",
+                "send_metrics": "true",
+            },
         )
 
         # Assert that the function calls were made with the expected arguments
         mock_devops_platform_gateway.get_remote_config.assert_called_once_with(
-            "https://github.com/example/repo", "/resources/ConfigTool.json"
+            "https://github.com/example/repo", "/engine_core/ConfigTool.json"
         )
         mock_handle_scan.return_value.process.assert_called_once_with(
-            mock_args, mock_config_tool
+            {
+                "remote_config_repo": "https://github.com/example/repo",
+                "tool": "engine_iac",
+                "send_metrics": "true",
+            },
+            mock_config_tool,
         )
         mock_break_build.return_value.process.assert_called_once_with(
             mock_findings_list, mock_input_core
         )
         mock_metrics_manager.return_value.process.assert_called_once_with(
-            mock_config_tool, mock_input_core, mock_args, mock_scan_result
+            mock_config_tool,
+            mock_input_core,
+            {
+                "remote_config_repo": "https://github.com/example/repo",
+                "tool": "engine_iac",
+                "send_metrics": "true",
+            },
+            mock_scan_result,
         )
 
     @mock.patch("builtins.print")
-    @mock.patch(
-        "devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core.get_inputs_from_cli"
-    )
-    def test_init_engine_core_disabled(self, mock_get_inputs_from_cli ,mock_print):
+    def test_init_engine_core_disabled(self, mock_print):
         # Set up mock arguments
-        mock_args = {
-            "remote_config_repo": "https://github.com/example/repo",
-            "tool": "engine_iac",
-            "environment": "dev",
-            "platform": "eks",
-            "use_secrets_manager": "false",
-            "use_vulnerability_management": "false",
-            "send_metrics": "true"
-        }
-
-        mock_get_inputs_from_cli.return_value = mock_args
 
         mock_config_tool = {
-            "ENGINE_IAC": {"ENABLED": "false", "TOOL": "tool"}
+            "ENGINE_IAC": {"ENABLED": "false", "TOOL": "tool", "send_metrics": "false"}
         }
         mock_devops_platform_gateway = mock.Mock()
 
@@ -115,9 +95,8 @@ class TestEntryPointCore(unittest.TestCase):
             devops_platform_gateway=mock_devops_platform_gateway,
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
+            args={"remote_config_repo": "test", "tool": "engine_iac"},
         )
 
         # Assert
         assert mock_print.called
-
-
