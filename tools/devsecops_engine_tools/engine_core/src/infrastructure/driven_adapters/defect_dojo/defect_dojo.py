@@ -45,6 +45,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             }
             scan_type_mapping = {
                 "CHECKOV": "Checkov Scan",
+                "PRISMA": "Twistlock Image Scan",
                 "XRAY": "JFrog Xray On Demand Binary Scan"
             }
 
