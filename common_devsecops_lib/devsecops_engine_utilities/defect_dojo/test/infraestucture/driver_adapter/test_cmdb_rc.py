@@ -8,7 +8,7 @@ from devsecops_engine_utilities.utils.api_error import ApiError
 
 def test_get_product_info_success():
     session_mock = session_manager_post(
-        status_code=200, mock_response=[{"name_cmdb": "NU0429001_Test", "product_type_name_cmdb": "software"}]
+        status_code=200, mock_response=[{"name_cmdb": "NU12345_Test", "product_type_name_cmdb": "software"}]
     )
     # Crear una instancia de CmdbRestConsumer con los mocks
     consumer = CmdbRestConsumer(
@@ -23,7 +23,7 @@ def test_get_product_info_success():
 
     # Verificar el resultado
     assert isinstance(cmdb_object, Cmdb)
-    assert cmdb_object.product_name == "NU0429001_Test"
+    assert cmdb_object.product_name == "NU12345_Test"
     assert cmdb_object.product_type_name == "software"
 
 

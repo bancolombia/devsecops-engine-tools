@@ -55,7 +55,7 @@ PYTHONPATH=tools/
             "console": "integratedTerminal",
             "args": [
                 "--remote_config_repo",
-                "NU0429001_DevSecOps_Remote_Config",
+                "DevSecOps_Remote_Config",
                 "--tool",
                 "engine_iac",
                 "--environment",

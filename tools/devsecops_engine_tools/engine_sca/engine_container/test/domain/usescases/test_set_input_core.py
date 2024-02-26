@@ -24,7 +24,7 @@ def test_get_exclusions(mock_tool_remote):
       }
     ]
   },
-  "ISSTI0002_STI_automations_extension": {
+  "repository_test": {
     "PRISMA": [
       {
         "id": "XRAY-N94",
@@ -34,7 +34,7 @@ def test_get_exclusions(mock_tool_remote):
       }
     ]
   },
-  "nu0429001_ProyectoEjemplo_RM": {
+  "12345_ProyectoEjemplo_RM": {
     "PRISMA": [
       {
         "id": "CVE-2023-6237",
