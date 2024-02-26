@@ -36,12 +36,12 @@ def get_cmdb_instance():
         product_name="product name test",
         tag_product="tag product test",
         product_description="description test",
-        codigo_app="nu0429001",
+        codigo_app="NU12345",
     )
     return mock_rest_consumer_cmdb
 
 
-@pytest.mark.parametrize("engagement_name", [("NU0429001_Acceptance Tests"), ("NU0429001_Acceptance Tests23")])
+@pytest.mark.parametrize("engagement_name", [("NU12345_Acceptance Tests"), ("NU12345_Acceptance Tests23")])
 def test_execute(engagement_name):
     mock_rest_consumer_cmdb = get_cmdb_instance()
     request = {
@@ -95,7 +95,7 @@ def test_execute(engagement_name):
 
     response = uc.execute(request)
     assert response.scan_type == "JFrog Xray Scan"
-    assert response.code_app == "nu0429001"
+    assert response.code_app == "nu12345"
 
 
 @pytest.mark.parametrize("engagement_name", [("error"), ("nu12212error")])

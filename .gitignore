@@ -34,7 +34,7 @@ htmlcov
 .coverage
 coverage.xml
 Pipfile
-Pipfile-lock
+Pipfile.lock
 prueba.py
 main.py
 common_devsecops_lib/sheckov_scan.json
