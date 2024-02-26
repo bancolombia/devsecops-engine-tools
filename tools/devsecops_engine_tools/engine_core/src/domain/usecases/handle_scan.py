@@ -141,7 +141,6 @@ class HandleScan:
                     )
                 except ExceptionFindingsRiskAcceptance as ex2:
                     logger.error(str(ex2))
-            
             return findings_list, input_core
         elif "engine_dast" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
