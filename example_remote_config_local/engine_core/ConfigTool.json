@@ -15,7 +15,6 @@
         }
     },
     "METRICS_MANAGER": {
-        "ENABLED": "false",
         "AWS": {
             "BUCKET": "",
             "ROLE_ARN": "",

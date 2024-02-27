@@ -1,7 +1,0 @@
-requests==2.31.0
-multipledispatch==0.6.0
-PyYAML==6.0
-checkov==2.3.296
-pyfiglet==0.7
-prettytable==3.8.0
-azure-devops==7.1.0b3
