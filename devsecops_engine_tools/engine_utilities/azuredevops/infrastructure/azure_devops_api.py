@@ -5,6 +5,7 @@ from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities.settings import SETTING_LOGGER
+from azure.devops.v7_1.git.models import GitVersionDescriptor
 
 logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 
@@ -51,10 +52,12 @@ class AzureDevopsApi:
     def get_remote_json_config(self, connection: Connection):
         try:
             git_client = connection.clients.get_git_client()
+            git_version_descriptor = GitVersionDescriptor(version_type="branch", version="feature/migration_open")
             file_content = git_client.get_item_text(
                 repository_id=self.__repository_id,
                 path=self.__remote_config_path,
                 project=self.__project_remote_config,
+                version_descriptor=git_version_descriptor
             )
             data = json.loads(b"".join(file_content).decode("utf-8"))
             return data
