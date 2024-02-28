@@ -98,7 +98,7 @@ class TestPrinterPrettyTable:
     @patch("builtins.print")
     def test_print_table_exclusions(self, mock_print):
         # Arrange
-        exclusions = [{"id": "id", "where": "path", "create_date": "01042023", "expired_date": "04032023"}]
+        exclusions = [{"severity": "severity" ,"id": "id", "where": "path", "create_date": "01042023", "expired_date": "04032023"}]
         printer = PrinterPrettyTable()
 
         # Act

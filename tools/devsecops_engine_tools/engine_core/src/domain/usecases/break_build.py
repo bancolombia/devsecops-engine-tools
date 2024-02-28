@@ -283,6 +283,7 @@ class BreakBuild:
                 exclusions_list = list(
                     map(
                         lambda item: {
+                            "severity": item.severity,
                             "id": item.id,
                             "where": item.where,
                             "create_date": next((elem.create_date for elem in exclusions if elem.id == item.id), None),

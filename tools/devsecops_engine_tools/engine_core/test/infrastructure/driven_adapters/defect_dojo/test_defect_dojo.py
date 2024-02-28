@@ -110,7 +110,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         result = self.defect_dojo.get_findings_risk_acceptance(service, dict_args, secret_tool, config_tool)
 
         mock_session_manager.assert_called_with("token1", "host_defect_dojo")
-        mock_finding.assert_called_with(session=mock_session_manager.return_value, service=service, risk_accepted=True)
+        mock_finding.assert_called_with(session=mock_session_manager.return_value, service=service, risk_accepted=True, tags='engine_iac')
 
         expected_result = [
             Exclusions(id="id1", where="path1", create_date="10012024", expired_date="10042024"),
@@ -147,7 +147,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         result = self.defect_dojo.get_findings_risk_acceptance(service, dict_args, secret_tool, config_tool)
 
         mock_session_manager.assert_called_with("token1", "host_defect_dojo")
-        mock_finding.assert_called_with(session=mock_session_manager.return_value, service=service, risk_accepted=True)
+        mock_finding.assert_called_with(session=mock_session_manager.return_value, service=service, risk_accepted=True, tags='engine_dependencies')
 
         expected_result = [
             Exclusions(id="id1", where="comp1:version1", create_date="21022024", expired_date="29022024"),
