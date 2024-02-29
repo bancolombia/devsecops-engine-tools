@@ -167,6 +167,7 @@ class XrayScan(ToolGateway):
             shutil.rmtree(dir_to_scan_path)
         os.makedirs(dir_to_scan_path)
 
+        results_file = None
         if scan_flag and not (skip_flag):
             npm_modules_path = self.find_node_modules(working_dir)
             if npm_modules_path:
@@ -176,8 +177,8 @@ class XrayScan(ToolGateway):
                 excluded_dir = ""
             self.find_artifacts(pattern, working_dir, dir_to_scan_path, excluded_dir)
 
-        results_file = self.scan_dependencies(
-            command_prefix, dir_to_scan_path, working_dir, bypass_limits_flag
-        )
+            results_file = self.scan_dependencies(
+                command_prefix, dir_to_scan_path, working_dir, bypass_limits_flag
+            )
 
         return results_file
