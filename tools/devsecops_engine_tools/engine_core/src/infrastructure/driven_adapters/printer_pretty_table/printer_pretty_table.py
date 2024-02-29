@@ -31,7 +31,7 @@ class PrinterPrettyTable(PrinterTableGateway):
 
             table.add_row(row_data)
 
-        severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+        severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3, "unknown": 4}
         sorted_table = PrettyTable()
         sorted_table.field_names = table.field_names
         sorted_table.add_rows(
