@@ -159,7 +159,7 @@ class HandleScan:
                 dict_args, config_tool, secret_sca
             )
 
-            if dict_args["use_vulnerability_management"] == "true":
+            if dict_args["use_vulnerability_management"] == "true" and not(findings_list==[]):
                 try:
                     self.vulnerability_management.send_vulnerability_management(
                         VulnerabilityManagement(
