@@ -77,7 +77,7 @@ class HandleRemoteConfigPatterns:
 
         Return: bool: False -> not scan, True -> scan.
         """
-        if re.match(ignore, pipeline_name):
+        if re.match(ignore, pipeline_name, re.IGNORECASE):
             return False
         else:
             return True
