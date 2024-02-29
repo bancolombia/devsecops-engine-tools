@@ -55,8 +55,8 @@ class Finding(FromDictMixin):
     hash_code: str = ""
     line = None
     file_path: str = ""
-    component_name = None
-    component_version = None
+    component_name: str = ""
+    component_version: str = ""
     static_finding: bool = None
     dynamic_finding: bool = None
     created: str = ""

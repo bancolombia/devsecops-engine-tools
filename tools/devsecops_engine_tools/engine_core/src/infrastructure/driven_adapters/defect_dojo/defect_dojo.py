@@ -109,15 +109,15 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"],
             )
 
-            findings_list = Finding.get_finding(session=session_manager, service=service, risk_accepted=True).results
+            findings_list = Finding.get_finding(session=session_manager, service=service, risk_accepted=True, tags=dict_args["tool"]).results
             return list(
                 map(
                     lambda finding: Exclusions(
                         **{
                             "id": finding.vuln_id_from_tool,
                             "where": self._get_where(finding, dict_args),
-                            "create_date": format_date(finding.accepted_risks[-1]["created"], "%Y-%m-%dT%H:%M:%SZ", "%d%m%Y"),
-                            "expired_date": format_date(finding.accepted_risks[-1]["expiration_date"], "%Y-%m-%dT%H:%M:%SZ", "%d%m%Y"),
+                            "create_date": format_date(finding.accepted_risks[-1]["created"].split("T")[0], "%Y-%m-%d", "%d%m%Y"),
+                            "expired_date": format_date(finding.accepted_risks[-1]["expiration_date"].split("T")[0], "%Y-%m-%d", "%d%m%Y"),
                         }
                     ),
                     findings_list,
