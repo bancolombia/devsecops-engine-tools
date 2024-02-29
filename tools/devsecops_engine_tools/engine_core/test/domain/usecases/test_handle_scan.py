@@ -290,7 +290,7 @@ class TestHandleScan(unittest.TestCase):
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
 
         # Mock the runner_engine_dependencies function and its return values
-        findings_list = ["finding1", "finding2"]
+        findings_list = []
         input_core = InputCore(
             totalized_exclusions=[],
             threshold_defined=Threshold,
