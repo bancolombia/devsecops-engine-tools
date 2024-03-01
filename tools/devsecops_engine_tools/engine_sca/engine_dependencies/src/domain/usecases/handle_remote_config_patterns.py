@@ -125,9 +125,8 @@ class HandleRemoteConfigPatterns:
 
         Return: bool: True -> skip tool, False -> not skip tool.
         """
-        if (
-            (pipeline_name in exclusions)
-            and (exclusions[pipeline_name].get("SKIP_TOOL", 0))
+        if (pipeline_name in exclusions) and (
+            exclusions[pipeline_name].get("SKIP_TOOL", 0)
         ):
             return True
         else:

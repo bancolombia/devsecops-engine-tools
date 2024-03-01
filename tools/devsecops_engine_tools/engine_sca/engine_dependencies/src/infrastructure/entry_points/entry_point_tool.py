@@ -27,7 +27,10 @@ def init_engine_dependencies(
     )
     input_core = SetInputCore(tool_remote, dict_args, tool)
     dependencies_scanned = dependencies_sca_scan.process()
-    deserialized = dependencies_sca_scan.deserializator(dependencies_scanned)
+    if dependencies_scanned:
+        deserialized = dependencies_sca_scan.deserializator(dependencies_scanned)
+    else:
+        deserialized = []
     core_input = input_core.set_input_core(dependencies_scanned)
 
     return deserialized, core_input
