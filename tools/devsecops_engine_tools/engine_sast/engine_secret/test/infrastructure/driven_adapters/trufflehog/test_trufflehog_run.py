@@ -79,4 +79,4 @@ class TestTrufflehogRun(unittest.TestCase):
         trufflehog_run = TrufflehogRun()
         output = ''
         result = trufflehog_run.decode_output(output)
-        self.assertEqual(result, [])
+        self.assertEqual(result, [{'some': 'json'}, {'another': 'json'}])
