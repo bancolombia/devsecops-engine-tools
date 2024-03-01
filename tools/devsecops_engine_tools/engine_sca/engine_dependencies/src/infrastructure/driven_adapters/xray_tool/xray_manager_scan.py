@@ -64,7 +64,7 @@ class XrayScan(ToolGateway):
         if installed.returncode == 1:
             command = ["chmod", "+x", "./jf"]
             try:
-                url = f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-mac-arm64/jf"
+                url = f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-mac-386/jf"
                 file = "./jf"
                 response = requests.get(url, allow_redirects=True)
                 with open(file, "wb") as archivo:
