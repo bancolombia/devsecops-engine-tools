@@ -96,7 +96,7 @@ class TestAzureDevops(unittest.TestCase):
     def test_get_variable_system_access_token(self):
         # Mock the SystemVariables class
         with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables:
-            mock_system_variables.System_DefaultWorkingDirectory.value.return_value = "SYSTEM_ACCESSTOKEN"
+            mock_system_variables.System_AccessToken.value.return_value = "SYSTEM_ACCESSTOKEN"
 
             result = self.azure_devops.get_variable("ACCESS_TOKEN")
 
@@ -105,7 +105,7 @@ class TestAzureDevops(unittest.TestCase):
     def test_get_variable_system_team_foundation_collection_uri(self):
         # Mock the SystemVariables class
         with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables:
-            mock_system_variables.System_DefaultWorkingDirectory.value.return_value = "https://ORGANIZATION"
+            mock_system_variables.System_TeamFoundationCollectionUri.value.return_value = "https://ORGANIZATION"
 
             result = self.azure_devops.get_variable("ORGANIZATION")
 
@@ -114,7 +114,7 @@ class TestAzureDevops(unittest.TestCase):
     def test_get_variable_system_team_project_id(self):
         # Mock the SystemVariables class
         with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables:
-            mock_system_variables.System_DefaultWorkingDirectory.value.return_value = "SYSTEM_TEAM_PROJECT_ID"
+            mock_system_variables.System_TeamProjectId.value.return_value = "SYSTEM_TEAM_PROJECT_ID"
 
             result = self.azure_devops.get_variable("PROJECT_ID")
 
@@ -123,7 +123,7 @@ class TestAzureDevops(unittest.TestCase):
     def test_get_variable_system_pull_request_id(self):
         # Mock the SystemVariables class
         with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables:
-            mock_system_variables.System_DefaultWorkingDirectory.value.return_value = "SYSTEM_PULLREQUEST_ID"
+            mock_system_variables.System_PullRequestId.value.return_value = "SYSTEM_PULLREQUEST_ID"
 
             result = self.azure_devops.get_variable("PR_ID")
 
