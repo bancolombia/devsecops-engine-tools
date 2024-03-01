@@ -92,3 +92,39 @@ class TestAzureDevops(unittest.TestCase):
         result = self.azure_devops.get_variable("INVALID_VARIABLE")
 
         self.assertIsNone(result)
+        
+    def test_get_variable_system_access_token(self):
+        # Mock the SystemVariables class
+        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables:
+            mock_system_variables.System_DefaultWorkingDirectory.value.return_value = "SYSTEM_ACCESSTOKEN"
+
+            result = self.azure_devops.get_variable("ACCESS_TOKEN")
+
+        self.assertEqual(result, "SYSTEM_ACCESSTOKEN")
+    
+    def test_get_variable_system_team_foundation_collection_uri(self):
+        # Mock the SystemVariables class
+        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables:
+            mock_system_variables.System_DefaultWorkingDirectory.value.return_value = "https://ORGANIZATION"
+
+            result = self.azure_devops.get_variable("ORGANIZATION")
+
+        self.assertEqual(result, "https://ORGANIZATION")
+    
+    def test_get_variable_system_team_project_id(self):
+        # Mock the SystemVariables class
+        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables:
+            mock_system_variables.System_DefaultWorkingDirectory.value.return_value = "SYSTEM_TEAM_PROJECT_ID"
+
+            result = self.azure_devops.get_variable("PROJECT_ID")
+
+        self.assertEqual(result, "SYSTEM_TEAM_PROJECT_ID")
+    
+    def test_get_variable_system_pull_request_id(self):
+        # Mock the SystemVariables class
+        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables:
+            mock_system_variables.System_DefaultWorkingDirectory.value.return_value = "SYSTEM_PULLREQUEST_ID"
+
+            result = self.azure_devops.get_variable("PR_ID")
+
+        self.assertEqual(result, "SYSTEM_PULLREQUEST_ID")
