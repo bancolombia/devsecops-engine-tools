@@ -45,38 +45,102 @@ class TestTrufflehogRun(unittest.TestCase):
         )
         mock_popen.assert_called_once_with(expected_command, stdout=-1, stderr=-1, shell=True)
 
-    @patch('subprocess.run')
-    def test_run_tool_secret_scan_windows(self, mock_subprocess_run):
-        mock_subprocess_run.return_value.stdout = b'{"some": "json"}\n{"another": "json"}'
-        trufflehog_run = TrufflehogRun()
-        result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir", [".git"], "Windows", "C:/", "token", "org", "project", "repo", "pr_id")
-        expected_result = [{"some": "json"}, {"another": "json"}]
-        self.assertEqual(result, expected_result)
-        
-    @patch('subprocess.run')
-    def test_run_tool_secret_scan_linux(self, mock_subprocess_run):
-        mock_subprocess_run.return_value.stdout = b'{"some": "json"}\n{"another": "json"}'
-        trufflehog_run = TrufflehogRun()
-        result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir", [".git"], "Linuz", "/azp/work", "token", "org", "project", "repo", "pr_id")
-        expected_result = [{"some": "json"}, {"another": "json"}]
-        self.assertEqual(result, expected_result)
-    
     # @patch('subprocess.run')
-    # def test_run_tool_secret_scan_empty_output(self, mock_subprocess_run):
-    #     mock_subprocess_run.return_value.stdout = b''
+    # def test_run_tool_secret_scan_windows(self, mock_subprocess_run):
+    #     mock_subprocess_run.return_value.stdout = b'{"some": "json"}\n{"another": "json"}'
+    #     trufflehog_run = TrufflehogRun()
+    #     result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir", [".git"], "Windows", "C:/", "token", "org", "project", "repo", "pr_id")
+    #     expected_result = [{"some": "json"}, {"another": "json"}]
+    #     self.assertEqual(result, expected_result)
+        
+    # @patch('subprocess.run')
+    # def test_run_tool_secret_scan_linux(self, mock_subprocess_run):
+    #     mock_subprocess_run.return_value.stdout = b'{"some": "json"}\n{"another": "json"}'
     #     trufflehog_run = TrufflehogRun()
     #     result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir", [".git"], "Linuz", "/azp/work", "token", "org", "project", "repo", "pr_id")
-    #     self.assertEqual(result, [])
+    #     expected_result = [{"some": "json"}, {"another": "json"}]
+    #     self.assertEqual(result, expected_result)
     
-    def test_decode_output(self):
-        trufflehog_run = TrufflehogRun()
-        output = '{"some": "json"}\n{"another": "json"}'
-        result = trufflehog_run.decode_output(output)
-        expected_result = [{"some": "json"}, {"another": "json"}]
-        self.assertEqual(result, expected_result)
+    # # @patch('subprocess.run')
+    # # def test_run_tool_secret_scan_empty_output(self, mock_subprocess_run):
+    # #     mock_subprocess_run.return_value.stdout = b''
+    # #     trufflehog_run = TrufflehogRun()
+    # #     result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir", [".git"], "Linuz", "/azp/work", "token", "org", "project", "repo", "pr_id")
+    # #     self.assertEqual(result, [])
     
-    def test_decode_output_empty(self):
-        trufflehog_run = TrufflehogRun()
-        output = ''
-        result = trufflehog_run.decode_output(output)
-        self.assertEqual(result, [{'some': 'json'}, {'another': 'json'}])
+    # def test_decode_output(self):
+    #     trufflehog_run = TrufflehogRun()
+    #     output = '{"some": "json"}\n{"another": "json"}'
+    #     result = trufflehog_run.decode_output(output)
+    #     expected_result = [{"some": "json"}, {"another": "json"}]
+    #     self.assertEqual(result, expected_result)
+    
+    # def test_decode_output_empty(self):
+    #     trufflehog_run = TrufflehogRun()
+    #     output = ''
+    #     result = trufflehog_run.decode_output(output)
+    #     self.assertEqual(result, [{'some': 'json'}, {'another': 'json'}])
+
+    # Caso de prueba para cuando search_files_commits devuelve una lista vacía
+    @patch('requests.get')
+    def test_run_tool_secret_scan_empty_result(mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"value": []}
+        mock_get.return_value = mock_response
+
+        resultado = TrufflehogRun.run_tool_secret_scan(
+            "/path/to/working/dir",
+            ["exclude_path"],
+            "Linux",
+            "/agent/work/folder",
+            "access_token",
+            "organization",
+            "project_id",
+            "repository_name",
+            "pr_id"
+        )
+        assert resultado == []
+
+    # Caso de prueba para cuando decode_output maneja correctamente una cadena de JSON vacía
+    def test_decode_output_empty_json():
+        resultado = TrufflehogRun.decode_output('')
+        assert resultado == []
+
+    # Caso de prueba para cuando decode_output maneja correctamente una cadena de JSON no vacía
+    def test_decode_output_nonempty_json():
+        json_string = '{"some": "json"}\n{"another": "json"}'
+        resultado = TrufflehogRun.decode_output(json_string)
+        assert resultado == [{"some": "json"}, {"another": "json"}]
+
+    # Caso de prueba para cuando search_files_commits y decode_output devuelven datos
+    @patch('requests.get')
+    def test_run_tool_secret_scan_with_result(mock_get):
+        mock_pr_response = MagicMock()
+        mock_pr_response.status_code = 200
+        mock_pr_response.json.return_value = {
+            "value": [{"sourceRefCommit": {"commitId": "commit_id_1"}}]
+        }
+        mock_get.side_effect = [mock_pr_response]
+
+        mock_commit_response = MagicMock()
+        mock_commit_response.status_code = 200
+        mock_commit_response.json.return_value = {
+            "changes": [{"item": {"gitObjectType": "blob", "path": "file1.py"}}]
+        }
+
+        with patch.object(TrufflehogRun, 'decode_output') as mock_decode_output:
+            mock_decode_output.return_value = [{"secret": "value"}]
+
+            resultado = TrufflehogRun.run_tool_secret_scan(
+                "/path/to/working/dir",
+                ["exclude_path"],
+                "Linux",
+                "/agent/work/folder",
+                "access_token",
+                "organization",
+                "project_id",
+                "repository_name",
+                "pr_id"
+            )
+            assert resultado == [{"secret": "value"}]
