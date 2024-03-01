@@ -30,7 +30,7 @@ def init_engine_dependencies(
     if dependencies_scanned:
         deserialized = dependencies_sca_scan.deserializator(dependencies_scanned)
     else:
-        deserialized =[]
+        deserialized = []
     core_input = input_core.set_input_core(dependencies_scanned)
 
     return deserialized, core_input

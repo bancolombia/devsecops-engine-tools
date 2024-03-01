@@ -54,7 +54,7 @@ class XrayScan(ToolGateway):
                     archivo.write(response.content)
             except subprocess.CalledProcessError as error:
                 logger.error(f"Error while Jfrog Cli installation on Windows: {error}")
-    
+
     def install_tool_darwin(self, version):
         installed = subprocess.run(
             ["which", "./jf"],

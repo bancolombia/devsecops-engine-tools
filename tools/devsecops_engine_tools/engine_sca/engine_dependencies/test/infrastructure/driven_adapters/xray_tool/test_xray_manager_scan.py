@@ -87,6 +87,7 @@ def test_install_tool_windows_failure(xray_scan_instance):
             "Error while Jfrog Cli installation on Windows: Command 'chmod' returned non-zero exit status 1."
         )
 
+
 def test_install_tool_darwin_success(xray_scan_instance):
     version = "2.52.8"
     with patch("subprocess.run") as mock_subprocess, patch(
@@ -103,6 +104,7 @@ def test_install_tool_darwin_success(xray_scan_instance):
             f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-mac-386/jf",
             allow_redirects=True,
         )
+
 
 def test_install_tool_darwin_failure(xray_scan_instance):
     version = "2.52.8"
