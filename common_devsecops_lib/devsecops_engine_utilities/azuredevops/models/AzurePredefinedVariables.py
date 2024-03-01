@@ -33,6 +33,7 @@ class SystemVariables(BaseEnum):
     System_TeamFoundationCollectionUri = "System.TeamFoundationCollectionUri"
     System_TeamProject = "System.TeamProject"
     System_TeamProjectId = "System.TeamProject"
+    System_PullRequestId = "System.PullRequest.PullRequestId"
 
 
 class BuildVariables(BaseEnum):
