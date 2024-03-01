@@ -10,6 +10,10 @@ class ToolGateway(metaclass=ABCMeta):
                             system_working_dir: str,
                             exclude_path: dict,
                             agent_os: str,
-                            agent_work_folder: str) -> str:
+                            agent_work_folder: str,
+                            access: str,
+                            organization: str,
+                            project_id: str,
+                            repository_name: str,
+                            pr_id: str) -> str:
         "run tool secret scan"
-

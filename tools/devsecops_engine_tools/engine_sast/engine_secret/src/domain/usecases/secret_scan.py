@@ -9,6 +9,7 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.g
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway
 )
+from datetime import datetime
 
 class SecretScan:
     def __init__(
@@ -22,6 +23,7 @@ class SecretScan:
         self.tool_deserialize = tool_deserialize
 
     def process(self, dict_args, tool):
+        tiempo_actual = datetime.now()
         tool = str(tool).lower()
         init_config_tool = self.devops_platform_gateway.get_remote_config(
             dict_args["remote_config_repo"], "SAST/Secret_Scan/configTools.json"
@@ -51,6 +53,11 @@ class SecretScan:
                     exclude_path,
                     agent_os,
                     agent_work_folder,
+                    self.devops_platform_gateway.get_variable("ACCESS_TOKEN"),
+                    self.devops_platform_gateway.get_variable("ORGANIZATION"),
+                    self.devops_platform_gateway.get_variable("PROJECT_ID"),
+                    self.devops_platform_gateway.get_variable("REPOSITORY"),
+                    self.devops_platform_gateway.get_variable("PR_ID")
                     ),
                 self.devops_platform_gateway
                 )
@@ -62,6 +69,10 @@ class SecretScan:
             scope_pipeline=config_tool.scope_pipeline,
             stage_pipeline="Build"
         )
+        tiempo_final = datetime.now()
+
+        tiempo_transcurrido = tiempo_final - tiempo_actual
+        print("Tiempo transcurrido:", tiempo_transcurrido.total_seconds(), "segundos")
         return finding_list, input_core
     def complete_config_tool(self, data_file_tool, tool):
         config_tool = DeserializeConfigTool(json_data=data_file_tool, tool=tool)

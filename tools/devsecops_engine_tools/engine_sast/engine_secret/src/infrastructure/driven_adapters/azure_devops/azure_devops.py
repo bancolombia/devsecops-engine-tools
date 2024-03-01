@@ -32,6 +32,14 @@ class AzureDevops(DevopsPlatformGateway):
                 return BuildVariables.Build_Repository_Name.value()
             elif variable == "PATH_DIRECTORY":
                 return SystemVariables.System_DefaultWorkingDirectory.value()
+            elif variable == "ACCESS_TOKEN":
+                return SystemVariables.System_AccessToken.value()
+            elif variable == "ORGANIZATION":
+                return SystemVariables.System_TeamFoundationCollectionUri.value()
+            elif variable == "PROJECT_ID":
+                return SystemVariables.System_TeamProjectId.value()
+            elif variable == "PR_ID":
+                return SystemVariables.System_PullRequestId.value()
             elif variable == "OS":
                 return AgentVariables.Agent_OS.value()
             elif variable == "WORK_FOLDER":
