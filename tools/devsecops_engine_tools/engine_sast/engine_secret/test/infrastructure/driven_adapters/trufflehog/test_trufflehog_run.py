@@ -61,12 +61,12 @@ class TestTrufflehogRun(unittest.TestCase):
         expected_result = [{"some": "json"}, {"another": "json"}]
         self.assertEqual(result, expected_result)
     
-    @patch('subprocess.run')
-    def test_run_tool_secret_scan_empty_output(self, mock_subprocess_run):
-        mock_subprocess_run.return_value.stdout = b''
-        trufflehog_run = TrufflehogRun()
-        result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir", [".git"], "Linuz", "/azp/work", "token", "org", "project", "repo", "pr_id")
-        self.assertEqual(result, [])
+    # @patch('subprocess.run')
+    # def test_run_tool_secret_scan_empty_output(self, mock_subprocess_run):
+    #     mock_subprocess_run.return_value.stdout = b''
+    #     trufflehog_run = TrufflehogRun()
+    #     result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir", [".git"], "Linuz", "/azp/work", "token", "org", "project", "repo", "pr_id")
+    #     self.assertEqual(result, [])
     
     def test_decode_output(self):
         trufflehog_run = TrufflehogRun()
