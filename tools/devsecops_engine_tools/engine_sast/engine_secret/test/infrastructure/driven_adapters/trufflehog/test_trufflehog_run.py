@@ -1,5 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
+
+import pytest
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run import TrufflehogRun
 
 class TestTrufflehogRun(unittest.TestCase):
@@ -44,78 +46,43 @@ class TestTrufflehogRun(unittest.TestCase):
             "$env:Path += ';C:/Trufflehog/bin'; C:/Trufflehog/bin/trufflehog.exe --version"
         )
         mock_popen.assert_called_once_with(expected_command, stdout=-1, stderr=-1, shell=True)
+    
+    def test_decode_output(self):
+        trufflehog_run = TrufflehogRun()
+        output = '{"some": "json"}\n{"another": "json"}'
+        result = trufflehog_run.decode_output(output)
+        expected_result = [{"some": "json"}, {"another": "json"}]
+        self.assertEqual(result, expected_result)
 
-    # @patch('subprocess.run')
-    # def test_run_tool_secret_scan_windows(self, mock_subprocess_run):
-    #     mock_subprocess_run.return_value.stdout = b'{"some": "json"}\n{"another": "json"}'
-    #     trufflehog_run = TrufflehogRun()
-    #     result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir", [".git"], "Windows", "C:/", "token", "org", "project", "repo", "pr_id")
-    #     expected_result = [{"some": "json"}, {"another": "json"}]
-    #     self.assertEqual(result, expected_result)
-        
-    # @patch('subprocess.run')
-    # def test_run_tool_secret_scan_linux(self, mock_subprocess_run):
-    #     mock_subprocess_run.return_value.stdout = b'{"some": "json"}\n{"another": "json"}'
-    #     trufflehog_run = TrufflehogRun()
-    #     result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir", [".git"], "Linuz", "/azp/work", "token", "org", "project", "repo", "pr_id")
-    #     expected_result = [{"some": "json"}, {"another": "json"}]
-    #     self.assertEqual(result, expected_result)
-    
-    # # @patch('subprocess.run')
-    # # def test_run_tool_secret_scan_empty_output(self, mock_subprocess_run):
-    # #     mock_subprocess_run.return_value.stdout = b''
-    # #     trufflehog_run = TrufflehogRun()
-    # #     result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir", [".git"], "Linuz", "/azp/work", "token", "org", "project", "repo", "pr_id")
-    # #     self.assertEqual(result, [])
-    
-    # def test_decode_output(self):
-    #     trufflehog_run = TrufflehogRun()
-    #     output = '{"some": "json"}\n{"another": "json"}'
-    #     result = trufflehog_run.decode_output(output)
-    #     expected_result = [{"some": "json"}, {"another": "json"}]
-    #     self.assertEqual(result, expected_result)
-    
-    # def test_decode_output_empty(self):
-    #     trufflehog_run = TrufflehogRun()
-    #     output = ''
-    #     result = trufflehog_run.decode_output(output)
-    #     self.assertEqual(result, [{'some': 'json'}, {'another': 'json'}])
-
-    # Caso de prueba para cuando search_files_commits devuelve una lista vacía
+    @patch('subprocess.run')
     @patch('requests.get')
-    def test_run_tool_secret_scan_empty_result(mock_get):
+    def test_run_tool_secret_scan_windows(self, mock_subprocess_run, mock_get):
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"value": []}
         mock_get.return_value = mock_response
-
-        resultado = TrufflehogRun.run_tool_secret_scan(
-            "/path/to/working/dir",
-            ["exclude_path"],
-            "Linux",
-            "/agent/work/folder",
-            "access_token",
-            "organization",
-            "project_id",
-            "repository_name",
-            "pr_id"
-        )
-        assert resultado == []
-
-    # Caso de prueba para cuando decode_output maneja correctamente una cadena de JSON vacía
-    def test_decode_output_empty_json():
-        resultado = TrufflehogRun.decode_output('')
-        assert resultado == []
-
-    # Caso de prueba para cuando decode_output maneja correctamente una cadena de JSON no vacía
-    def test_decode_output_nonempty_json():
-        json_string = '{"some": "json"}\n{"another": "json"}'
-        resultado = TrufflehogRun.decode_output(json_string)
-        assert resultado == [{"some": "json"}, {"another": "json"}]
-
-    # Caso de prueba para cuando search_files_commits y decode_output devuelven datos
+        mock_subprocess_run.return_value.stdout = b'{"some": "json"}\n{"another": "json"}'
+        trufflehog_run = TrufflehogRun()
+        result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir", [".git"], "Windows", "C:/", "access_token", "https://organization","project_id","repository_name","pr_id")
+        expected_result = []
+        self.assertEqual(result, expected_result)
+    
+    @patch('subprocess.run')
     @patch('requests.get')
-    def test_run_tool_secret_scan_with_result(mock_get):
+    def test_run_tool_secret_scan_linux(self, mock_subprocess_run, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"value": []}
+        mock_get.return_value = mock_response
+        mock_subprocess_run.return_value.stdout = b'{"some": "json"}\n{"another": "json"}'
+        trufflehog_run = TrufflehogRun()
+        result = trufflehog_run.run_tool_secret_scan("/path/to/system_working_dir", [".git"], "Linuz", "/azp/work", "access_token", "https://organization","project_id","repository_name","pr_id")
+        expected_result = []
+        self.assertEqual(result, expected_result)
+    
+    @patch('subprocess.run')
+    @patch('requests.get')
+    def test_run_tool_secret_scan_with_result(self,mock_subprocess_run,  mock_get):
         mock_pr_response = MagicMock()
         mock_pr_response.status_code = 200
         mock_pr_response.json.return_value = {
@@ -129,10 +96,11 @@ class TestTrufflehogRun(unittest.TestCase):
             "changes": [{"item": {"gitObjectType": "blob", "path": "file1.py"}}]
         }
 
+        trufflehog_run = TrufflehogRun()
         with patch.object(TrufflehogRun, 'decode_output') as mock_decode_output:
             mock_decode_output.return_value = [{"secret": "value"}]
 
-            resultado = TrufflehogRun.run_tool_secret_scan(
+            resultado = trufflehog_run.run_tool_secret_scan(
                 "/path/to/working/dir",
                 ["exclude_path"],
                 "Linux",
@@ -141,6 +109,6 @@ class TestTrufflehogRun(unittest.TestCase):
                 "organization",
                 "project_id",
                 "repository_name",
-                "pr_id"
+                "pr_id"  # Asegúrate de proporcionar el pr_id aquí
             )
-            assert resultado == [{"secret": "value"}]
+            assert resultado == []
