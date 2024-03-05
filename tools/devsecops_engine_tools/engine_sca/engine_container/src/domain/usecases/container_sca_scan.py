@@ -1,5 +1,5 @@
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.config_gateway import (
-    ConfigGateway,
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway,
 )
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
@@ -16,7 +16,7 @@ class ContainerScaScan:
     def __init__(
         self,
         tool_run: ToolGateway,
-        tool_remote: ConfigGateway,
+        tool_remote: DevopsPlatformGateway,
         tool_images: ImagesGateway,
         tool_deseralizator: DeseralizatorGateway,
         dict_args,
