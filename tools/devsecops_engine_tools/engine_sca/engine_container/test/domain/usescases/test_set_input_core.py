@@ -3,7 +3,9 @@ import json
 from unittest.mock import Mock
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.config_gateway import ConfigGateway
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway,
+)
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.set_input_core import SetInputCore  
@@ -11,7 +13,7 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.set_
 
 @pytest.fixture
 def mock_tool_remote():
-    return Mock(spec=ConfigGateway)
+    return Mock(spec=DevopsPlatformGateway)
 
 
 def test_get_exclusions(mock_tool_remote):
