@@ -88,6 +88,42 @@ def test_install_tool_windows_failure(xray_scan_instance):
         )
 
 
+def test_install_tool_darwin_success(xray_scan_instance):
+    version = "2.52.8"
+    with patch("subprocess.run") as mock_subprocess, patch(
+        "requests.get"
+    ) as mock_requests:
+        mock_subprocess.return_value.returncode = 1
+        mock_requests.return_value.content = b"fake_binary_data"
+        xray_scan_instance.install_tool_darwin(version)
+
+        mock_subprocess.assert_called_with(
+            ["chmod", "+x", "./jf"], check=True, stdout=-1, stderr=-1
+        )
+        mock_requests.assert_called_with(
+            f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-mac-386/jf",
+            allow_redirects=True,
+        )
+
+
+def test_install_tool_darwin_failure(xray_scan_instance):
+    version = "2.52.8"
+    with patch("subprocess.run") as mock_subprocess, patch(
+        "requests.get"
+    ) as mock_requests, patch(
+        "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.logger.error"
+    ) as mock_logger_error:
+        mock_subprocess.side_effect = [
+            Mock(returncode=1),
+            subprocess.CalledProcessError(returncode=1, cmd="chmod"),
+        ]
+        mock_requests.return_value.content = b"fake_binary_data"
+        xray_scan_instance.install_tool_darwin(version)
+        mock_logger_error.assert_called_with(
+            "Error during Jfrog Cli installation on Darwin: Command 'chmod' returned non-zero exit status 1."
+        )
+
+
 def test_config_server_success(xray_scan_instance):
     prefix = "prefix_test"
     token = "toke_test"
@@ -398,6 +434,72 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
         )
         mock_scan_dependencies.assert_called_with(
             "./jf.exe",
+            working_dir + "/dependencies_to_scan",
+            working_dir,
+            bypass_limits_flag,
+        )
+
+
+def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
+    remote_config = {
+        "XRAY": {"CLI_VERSION": "1.0"},
+    }
+    token = "token123"
+    working_dir = "/path/to/working_dir"
+    skip_flag = False
+    scan_flag = True
+    bypass_limits_flag = False
+    pattern = "\\.(jar|ear|war)$"
+
+    with patch("platform.system") as mock_system, patch(
+        "os.path.join"
+    ) as mock_join, patch("os.path.exists") as mock_exists, patch(
+        "os.makedirs"
+    ) as mock_makedirs, patch(
+        "shutil.rmtree"
+    ) as mock_rmtree, patch(
+        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_darwin"
+    ) as mock_install_tool_darwin, patch(
+        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_windows"
+    ) as mock_install_tool_windows, patch(
+        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.config_server"
+    ) as mock_config_server, patch(
+        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.compress_and_mv"
+    ) as mock_compress_and_mv, patch(
+        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.find_artifacts"
+    ) as mock_find_artifacts, patch(
+        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.scan_dependencies"
+    ) as mock_scan_dependencies, patch(
+        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.find_node_modules"
+    ) as mock_find_node_modules:
+        mock_system.return_value = "Darwin"
+        mock_join.side_effect = lambda *args: "/".join(args)
+        mock_exists.return_value = True
+        mock_find_node_modules.return_value = "/path/to/node_modules"
+        result = xray_scan_instance.run_tool_dependencies_sca(
+            remote_config,
+            working_dir,
+            skip_flag,
+            scan_flag,
+            bypass_limits_flag,
+            pattern,
+            token,
+        )
+
+        mock_install_tool_darwin.assert_called_with("1.0")
+        mock_config_server.assert_called_with("./jf", token)
+        mock_rmtree.assert_any_call
+        mock_makedirs.assert_any_call
+        mock_find_node_modules.assert_called_with(working_dir)
+        mock_compress_and_mv.assert_any_call
+        mock_find_artifacts.assert_called_with(
+            pattern,
+            working_dir,
+            working_dir + "/dependencies_to_scan",
+            "/path/to/node_modules",
+        )
+        mock_scan_dependencies.assert_called_with(
+            "./jf",
             working_dir + "/dependencies_to_scan",
             working_dir,
             bypass_limits_flag,
