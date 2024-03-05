@@ -13,6 +13,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.f
 
 import os
 
+
 def init_engine_dependencies(
     tool_run, tool_remote, tool_deserializator, dict_args, token, tool
 ):

@@ -5,6 +5,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform
 import re
 import os
 
+
 class FindMonoRepos:
     def __init__(
         self,
