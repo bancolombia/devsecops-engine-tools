@@ -112,3 +112,34 @@ class TestTrufflehogRun(unittest.TestCase):
                 "pr_id"  # Asegúrate de proporcionar el pr_id aquí
             )
             assert resultado == []
+            
+    def test_extract_blob_paths(self):
+        blob_paths = []
+        commit_data_list = [{"item": {"gitObjectType": "blob", "path": "file1.py"}}]
+        system_working_dir = '/path/to/working/dir/'
+        trufflehog_run = TrufflehogRun()
+        trufflehog_run.extract_blob_paths(blob_paths, commit_data_list, system_working_dir)
+        
+        assert blob_paths == ['/path/to/working/dir/file1.py']
+        
+    @patch('requests.get')
+    @patch('requests.get')
+    def test_process_pull_request(self, mock_requests_get, mock_requests_get2):
+        mock_pr_response = MagicMock()
+        mock_pr_response.status_code = 200
+        mock_pr_response.json.return_value = {"value": [{"sourceRefCommit": {"commitId": "commit_id_1"}}]}
+        mock_requests_get.return_value = mock_pr_response
+
+        trufflehog_run = TrufflehogRun()
+        trufflehog_run.extract_blob_paths = MagicMock(return_value=['/path/to/working/dir/file1.py'])
+
+        system_working_dir = '/path/to/working/dir'
+        access = 'access_token'
+        organization = 'organization'
+        project_id = 'project_id'
+        repository_name = 'repository_name'
+        pr_id = 'pr_id'
+
+        result = trufflehog_run.process_pull_request(system_working_dir, access, organization, project_id, repository_name, pr_id)
+        
+        assert result == []
