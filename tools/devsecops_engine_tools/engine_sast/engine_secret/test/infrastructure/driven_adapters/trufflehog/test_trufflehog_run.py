@@ -143,3 +143,55 @@ class TestTrufflehogRun(unittest.TestCase):
         result = trufflehog_run.process_pull_request(system_working_dir, access, organization, project_id, repository_name, pr_id)
         
         assert result == []
+        
+    def test_run_tool_secret_scan_windows2(self):
+        trufflehog_run = TrufflehogRun()
+        trufflehog_run.process_pull_request = MagicMock(return_value=['file1.txt', 'file2.txt'])
+
+        system_working_dir = '/path/to/working/dir'
+        exclude_path = ['exclude_path']
+        agent_os = 'Windows'
+        agent_work_folder = '/agent/work/folder'
+        access = 'access_token'
+        organization = 'organization'
+        project_id = 'project_id'
+        repository_name = 'repository_name'
+        pr_id = 'pr_id'
+
+        expected_command = 'C:/Trufflehog/bin/trufflehog.exe filesystem /path/to/working/dir/file1.txt --json --exclude-paths /agent/work/folder/excludedPath.txt --no-verification && ' \
+                        'C:/Trufflehog/bin/trufflehog.exe filesystem /path/to/working/dir/file2.txt --json --exclude-paths /agent/work/folder/excludedPath.txt --no-verification'
+
+        with patch('subprocess.run') as mock_subprocess_run:
+            mock_subprocess_run.return_value.stdout.decode.return_value = '["secret1", "secret2"]'
+
+            response = trufflehog_run.run_tool_secret_scan(system_working_dir, exclude_path, agent_os, agent_work_folder, access, organization, project_id, repository_name, pr_id)
+
+            trufflehog_run.process_pull_request.assert_called_once_with(system_working_dir, access, organization, project_id, repository_name, pr_id)
+            mock_subprocess_run.assert_called_with(expected_command, capture_output=True, shell=True)
+
+            assert response == ['secret1', 'secret2']
+
+    def test_run_tool_secret_scan_linux2(self):
+        trufflehog_run = TrufflehogRun()
+        trufflehog_run.process_pull_request = MagicMock(return_value=['file1.txt', 'file2.txt'])
+
+        system_working_dir = '/path/to/working/dir'
+        exclude_path = ['exclude_path']
+        agent_os = 'Linux'
+        agent_work_folder = '/agent/work/folder'
+        access = 'access_token'
+        organization = 'organization'
+        project_id = 'project_id'
+        repository_name = 'repository_name'
+        pr_id = 'pr_id'
+
+        with patch('subprocess.run') as mock_subprocess_run:
+            mock_subprocess_run.return_value.stdout.decode.return_value = '["secret1", "secret2"]'
+
+            response = trufflehog_run.run_tool_secret_scan(system_working_dir, exclude_path, agent_os, agent_work_folder, access, organization, project_id, repository_name, pr_id)
+
+            trufflehog_run.process_pull_request.assert_called_once_with(system_working_dir, access, organization, project_id, repository_name, pr_id)
+            assert mock_subprocess_run.call_count == 3 
+
+            print(response)
+            assert response == [{'some': 'json'}, {'another': 'json'}, ['secret1', 'secret2'], ['secret1', 'secret2']]
