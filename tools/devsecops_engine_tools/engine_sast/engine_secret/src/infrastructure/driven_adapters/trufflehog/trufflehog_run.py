@@ -53,9 +53,8 @@ class TrufflehogRun(ToolGateway):
             )
             subprocess.run(command, shell=True, check=True)
         exclude_path = agent_work_folder + "/excludedPath.txt"
-        print(system_working_dir)
         files_commits = []
-        files_commits = self.search_files_commits(system_working_dir, 
+        files_commits = self.process_pull_request(system_working_dir,
                             access,
                             organization,
                             project_id,
@@ -78,15 +77,8 @@ class TrufflehogRun(ToolGateway):
             for json_obj in json_list:
                 result.append(json_obj)
         return result
-   
-    def search_files_commits(self, system_working_dir,
-                            access,
-                            organization,
-                            project_id,
-                            repository_name,
-                            pr_id):
+    def process_pull_request(self, system_working_dir, access, organization, project_id, repository_name, pr_id):
         authorization = f":{access}"
-        print("PR_ID", pr_id)
         pr_url = f"{organization}{project_id}/_apis/git/repositories/{repository_name}/pullRequests/{pr_id}/iterations?api-version=6.0"
         auth_coded = base64.b64encode(authorization.encode('utf-8')).decode('utf-8')
         headers = {
@@ -103,10 +95,12 @@ class TrufflehogRun(ToolGateway):
                 pr_response_commit = requests.get(pr_url_commit, headers=headers)
                 commit_data = pr_response_commit.json()
                 commit_data_list = commit_data["changes"]
-                for change in commit_data_list:
-                    if change["item"]["gitObjectType"] == "blob":
-                        path_changed = system_working_dir + change["item"]["path"]
-                        if not path_changed in results:
-                            results.append(path_changed)
-            print(results)
+                self.extract_blob_paths(results, commit_data_list, system_working_dir)
         return results
+    def extract_blob_paths(self, blob_paths, commit_data_list, system_working_dir):
+        for change in commit_data_list:
+            if change["item"]["gitObjectType"] == "blob":
+                path_changed = system_working_dir + change["item"]["path"]
+                if not path_changed in blob_paths:
+                    blob_paths.append(path_changed)
+        return blob_paths
