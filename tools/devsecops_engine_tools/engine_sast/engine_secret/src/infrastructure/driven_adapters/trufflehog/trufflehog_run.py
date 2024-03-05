@@ -54,20 +54,21 @@ class TrufflehogRun(ToolGateway):
             subprocess.run(command, shell=True, check=True)
         exclude_path = agent_work_folder + "/excludedPath.txt"
         print(system_working_dir)
-        resultados = self.search_files_commits(system_working_dir, 
+        files_commits = []
+        files_commits = self.search_files_commits(system_working_dir, 
                             access,
                             organization,
                             project_id,
                             repository_name,
                             pr_id)
         response = []
-        if len(resultados) != 0:
-            for resultado in resultados:
+        if len(files_commits) != 0:
+            for resultado in files_commits:
                 command = (
                     f"{trufflehog_command} filesystem {resultado} --json --exclude-paths {exclude_path} --no-verification"
                 )
-                response = subprocess.run(command, capture_output=True, shell=True)
-                output = response.stdout.decode("utf-8")
+                res = subprocess.run(command, capture_output=True, shell=True)
+                output = res.stdout.decode("utf-8")
                 response = self.decode_output(output)
         return response
     def decode_output(self, decode_output):
@@ -92,10 +93,10 @@ class TrufflehogRun(ToolGateway):
             'Authorization': f"Basic {auth_coded}"
         }
         pr_response = requests.get(pr_url, headers=headers)
+        results = []
         if pr_response.status_code == 200:
             pr_data = pr_response.json()
             number_commits = pr_data["value"]
-            resultados = []
             for commit in number_commits:
                 num_commit = commit["sourceRefCommit"]["commitId"]
                 pr_url_commit = f"{organization}{project_id}/_apis/git/repositories/{repository_name}/commits/{num_commit}/changes?api-version=6.0"
@@ -105,7 +106,7 @@ class TrufflehogRun(ToolGateway):
                 for change in commit_data_list:
                     if change["item"]["gitObjectType"] == "blob":
                         path_changed = system_working_dir + change["item"]["path"]
-                        if not path_changed in resultados:
-                            resultados.append(path_changed)
-            print(resultados)
-            return resultados
+                        if not path_changed in results:
+                            results.append(path_changed)
+            print(results)
+        return results
