@@ -7,18 +7,32 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.s
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.handle_remote_config_patterns import (
     HandleRemoteConfigPatterns,
 )
+from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.find_mono_repos import (
+    FindMonoRepos,
+)
 
+import os
 
 def init_engine_dependencies(
     tool_run, tool_remote, tool_deserializator, dict_args, token, tool
 ):
     handle_remote_config_patterns = HandleRemoteConfigPatterns(tool_remote, dict_args)
+    find_mono_repo = FindMonoRepos(tool_remote)
+
+    current_path = os.getcwd()
+    mr_path = find_mono_repo.process_find_mono_repo()
+    agent_path = handle_remote_config_patterns.process_handle_working_directory()
+    if agent_path != current_path:
+        current_path = agent_path
+    elif mr_path != current_path:
+        current_path = mr_path
+
     dependencies_sca_scan = DependenciesScan(
         tool_run,
         tool_remote,
         tool_deserializator,
         dict_args,
-        handle_remote_config_patterns.process_handle_working_directory(),
+        current_path,
         handle_remote_config_patterns.process_handle_skip_tool(),
         handle_remote_config_patterns.process_handle_analysis_pattern(),
         handle_remote_config_patterns.process_handle_bypass_expression(),
