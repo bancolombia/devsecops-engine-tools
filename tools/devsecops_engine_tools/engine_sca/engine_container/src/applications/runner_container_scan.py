@@ -1,5 +1,5 @@
-from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.azure.azure_remote_config import (
-    AzureRemoteConfig,
+from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops import (
+    AzureDevops,
 )
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool import (
     init_engine_sca_rm,
@@ -32,7 +32,7 @@ def runner_engine_container(dict_args, config_tool, token):
             tool_run = PrismaCloudManagerScan()
             tool_deseralizator = PrismaDeserealizator()
         tool_images = DockerImages()
-        tool_remote = AzureRemoteConfig()
+        tool_remote = AzureDevops()
         return init_engine_sca_rm(
             tool_run,
             tool_remote,
