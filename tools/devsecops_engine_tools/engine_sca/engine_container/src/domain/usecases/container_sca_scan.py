@@ -21,6 +21,7 @@ class ContainerScaScan:
         tool_deseralizator: DeseralizatorGateway,
         dict_args,
         token,
+        skip_flag
     ):
         self.tool_run = tool_run
         self.tool_remote = tool_remote
@@ -28,6 +29,7 @@ class ContainerScaScan:
         self.tool_deseralizator = tool_deseralizator
         self.dict_args = dict_args
         self.token = token
+        self.skip_flag = skip_flag
 
     def get_remote_config(self, file_path):
         """
@@ -36,7 +38,7 @@ class ContainerScaScan:
         Returns:
             dict: Remote configuration.
         """
-        return self.tool_remote.get_remote_config(self.dict_args, file_path)
+        return self.tool_remote.get_remote_config(self.dict_args["remote_config_repo"], file_path)
 
     def scan_image(self):
         """
@@ -68,6 +70,7 @@ class ContainerScaScan:
             self.token,
             self.scan_image(),
             self.get_variable("release_name"),
+            self.skip_flag
         )
 
     def deseralizator(self, image_scanned):
