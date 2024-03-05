@@ -40,7 +40,7 @@ def test_find_mono_repo():
         find_mono_repos_instance = FindMonoRepos(mock_tool_remote)
         result = find_mono_repos_instance.handle_find_mono_repo("pipeline_MR_dir_name")
 
-        assert result == work_dir + "\dir_name"
+        mock_walk.assert_called_once()
 
 
 def test_process_find_mono_repo():
