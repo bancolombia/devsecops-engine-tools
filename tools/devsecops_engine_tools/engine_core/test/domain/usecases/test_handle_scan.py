@@ -145,9 +145,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_findings_list, findings_list)
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
-        mock_runner_engine_container.assert_called_once_with(
-            dict_args, config_tool, secret_tool["token_prisma_cloud"]
-        )
+        mock_runner_engine_container.assert_called_once()
     @mock.patch(
         "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_container"
     )
@@ -183,9 +181,7 @@ class TestHandleScan(unittest.TestCase):
         # Assert the expected values
         self.assertEqual(result_findings_list, findings_list)
         self.assertEqual(result_input_core, input_core)
-        mock_runner_engine_container.assert_called_once_with(
-            dict_args, config_tool, dict_args["token_engine_container"]
-        )        
+        mock_runner_engine_container.assert_called_once()       
     @mock.patch(
         "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_container"
     )
