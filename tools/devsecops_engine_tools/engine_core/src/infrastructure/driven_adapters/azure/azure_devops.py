@@ -87,6 +87,8 @@ class AzureDevops(DevopsPlatformGateway):
                 return BuildVariables.Build_DefinitionName.value()
             elif variable == "agent_directory":
                 return AgentVariables.Agent_BuildDirectory.value()
+            elif variable  == "release_name":
+                return ReleaseVariables.Release_Definitionname.value()
 
         except Exception as ex:
             logger.warning(f"Error getting variable {str(ex)}")
