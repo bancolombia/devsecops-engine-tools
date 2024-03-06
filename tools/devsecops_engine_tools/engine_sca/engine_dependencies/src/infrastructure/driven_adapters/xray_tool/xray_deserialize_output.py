@@ -19,46 +19,45 @@ class XrayDeserializator(DeserializatorGateway):
             vulnerabilities = []
             if json_data:
                 for data in json_data:
-                    if data.get("vulnerabilities", 0):
-                        for vul in data.get("vulnerabilities"):
-                            vulnerabilities = [
-                                Finding(
-                                    id=vul.get("issue_id", ""),
-                                    cvss=(
-                                        vul["cves"][0].get("cvss_v3_score")
-                                        if vul.get("cves", 0)
-                                        and vul["cves"][0].get("cvss_v3_score", 0)
-                                        else ""
-                                    )
-                                    + (
-                                        vul["cves"][0].get("cvss_v2_score")
-                                        if vul.get("cves", 0)
-                                        and not (vul["cves"][0].get("cvss_v3_score", 0))
-                                        and vul["cves"][0].get("cvss_v2_score", 0)
-                                        else ""
-                                    ),
-                                    where=(component),
-                                    description=(
-                                        vul["cves"][0].get("cve", "")
-                                        if vul.get("cves", 0)
-                                        else ""
-                                    ),
-                                    severity=vul.get("severity", "").lower(),
-                                    identification_date=datetime.now().strftime(
-                                        "%d-%m-%Y %H:%M:%S"
-                                    ),
-                                    module="engine_dependencies",
-                                    category=Category.VULNERABILITY,
-                                    requirements=(
-                                        "".join(
-                                            vul["components"][component].get(
-                                                "fixed_versions", [""]
-                                            )
-                                        )
-                                    ),
-                                    tool="XRAY",
+                    for vul in data.get("vulnerabilities", []):
+                        vulnerabilities = [
+                            Finding(
+                                id=vul.get("issue_id", ""),
+                                cvss=(
+                                    vul["cves"][0].get("cvss_v3_score")
+                                    if vul.get("cves", 0)
+                                    and vul["cves"][0].get("cvss_v3_score", 0)
+                                    else ""
                                 )
-                                for component in vul.get("components", [])
-                            ]
-                            list_open_vulnerabilities.extend(vulnerabilities)
+                                + (
+                                    vul["cves"][0].get("cvss_v2_score")
+                                    if vul.get("cves", 0)
+                                    and not (vul["cves"][0].get("cvss_v3_score", 0))
+                                    and vul["cves"][0].get("cvss_v2_score", 0)
+                                    else ""
+                                ),
+                                where=(component),
+                                description=(
+                                    vul["cves"][0].get("cve", "")
+                                    if vul.get("cves", 0)
+                                    else ""
+                                ),
+                                severity=vul.get("severity", "").lower(),
+                                identification_date=datetime.now().strftime(
+                                    "%d-%m-%Y %H:%M:%S"
+                                ),
+                                module="engine_dependencies",
+                                category=Category.VULNERABILITY,
+                                requirements=(
+                                    "".join(
+                                        vul["components"][component].get(
+                                            "fixed_versions", [""]
+                                        )
+                                    )
+                                ),
+                                tool="XRAY",
+                            )
+                            for component in vul.get("components", [])
+                        ]
+                        list_open_vulnerabilities.extend(vulnerabilities)
         return list_open_vulnerabilities
