@@ -105,7 +105,7 @@ class HandleScan:
                 secret_sca = secret_tool["token_prisma_cloud"]
             else:
                 secret_sca=dict_args["token_engine_container"]
-            findings_list, input_core =runner_engine_container(dict_args, config_tool, secret_sca)
+            findings_list, input_core =runner_engine_container(dict_args, config_tool, secret_sca,self.devops_platform_gateway)
             if (dict_args["use_vulnerability_management"] == "true") and input_core.path_file_results:
                 try:
                     self.vulnerability_management.send_vulnerability_management(
