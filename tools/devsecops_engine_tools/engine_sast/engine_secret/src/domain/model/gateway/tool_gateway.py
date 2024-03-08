@@ -6,14 +6,9 @@ class ToolGateway(metaclass=ABCMeta):
     def install_tool(self, agent_os: str, agent_temp_dir:str) -> any:
         "install tool"
     @abstractmethod
-    def run_tool_secret_scan(self, 
-                            system_working_dir: str,
+    def run_tool_secret_scan(self,
+                            files_pullrequest: dict,
                             exclude_path: dict,
                             agent_os: str,
-                            agent_work_folder: str,
-                            access: str,
-                            organization: str,
-                            project_id: str,
-                            repository_name: str,
-                            pr_id: str) -> str:
+                            agent_work_folder: str) -> str:
         "run tool secret scan"
