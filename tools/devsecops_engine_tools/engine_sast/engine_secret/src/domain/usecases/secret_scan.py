@@ -9,7 +9,6 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.g
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway
 )
-from datetime import datetime
 
 class SecretScan:
     def __init__(
@@ -23,7 +22,6 @@ class SecretScan:
         self.tool_deserialize = tool_deserialize
 
     def process(self, dict_args, tool):
-        tiempo_actual = datetime.now()
         tool = str(tool).lower()
         init_config_tool = self.devops_platform_gateway.get_remote_config(
             dict_args["remote_config_repo"], "SAST/Secret_Scan/configTools.json"
@@ -31,33 +29,19 @@ class SecretScan:
         config_tool, skip_tool = self.complete_config_tool(
             init_config_tool, tool
         )
+        files_pullrequest = self.devops_platform_gateway.get_pullrequest_iterations(
+            self.devops_platform_gateway.get_variable("REPOSITORY"),
+            self.devops_platform_gateway.get_variable("PR_ID")
+        )
         finding_list = []
         if skip_tool == "false":
-            agent_temp_dir = self.devops_platform_gateway.get_variable(
-            "TEMP_DIRECTORY"
-            )
-            system_working_dir = self.devops_platform_gateway.get_variable(
-            "PATH_DIRECTORY"
-            )
-            exclude_path = config_tool.exclude_path
-            agent_os = self.devops_platform_gateway.get_variable(
-            "OS"
-            )
-            agent_work_folder = self.devops_platform_gateway.get_variable(
-            "WORK_FOLDER"
-            )
-            self.tool_gateway.install_tool(agent_os, agent_temp_dir)
+            self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("OS"), self.devops_platform_gateway.get_variable("TEMP_DIRECTORY"))
             finding_list = self.tool_deserialize.get_list_vulnerability(
                 self.tool_gateway.run_tool_secret_scan(
-                    system_working_dir,
-                    exclude_path,
-                    agent_os,
-                    agent_work_folder,
-                    self.devops_platform_gateway.get_variable("ACCESS_TOKEN"),
-                    self.devops_platform_gateway.get_variable("ORGANIZATION"),
-                    self.devops_platform_gateway.get_variable("PROJECT_ID"),
-                    self.devops_platform_gateway.get_variable("REPOSITORY"),
-                    self.devops_platform_gateway.get_variable("PR_ID")
+                    files_pullrequest,
+                    config_tool.exclude_path,
+                    self.devops_platform_gateway.get_variable("OS"),
+                    self.devops_platform_gateway.get_variable("WORK_FOLDER"),
                     ),
                 self.devops_platform_gateway
                 )
@@ -69,10 +53,6 @@ class SecretScan:
             scope_pipeline=config_tool.scope_pipeline,
             stage_pipeline="Build"
         )
-        tiempo_final = datetime.now()
-
-        tiempo_transcurrido = tiempo_final - tiempo_actual
-        print("Tiempo transcurrido:", tiempo_transcurrido.total_seconds(), "segundos")
         return finding_list, input_core
     def complete_config_tool(self, data_file_tool, tool):
         config_tool = DeserializeConfigTool(json_data=data_file_tool, tool=tool)
