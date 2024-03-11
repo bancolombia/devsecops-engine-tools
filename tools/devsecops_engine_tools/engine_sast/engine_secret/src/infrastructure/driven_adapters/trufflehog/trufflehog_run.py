@@ -4,7 +4,6 @@ import subprocess
 
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway import ToolGateway
 
-result = []
 class TrufflehogRun(ToolGateway):
     def install_tool(self, agent_os, agent_temp_dir) -> any:
         reg_exp_os = r'Windows'
@@ -42,6 +41,7 @@ class TrufflehogRun(ToolGateway):
             )
             subprocess.run(command, shell=True, check=True)
         exclude_path = agent_work_folder + "/excludedPath.txt"
+        result = []
         response = []
         if len(files_commits) != 0:
             for file_commit in files_commits:
@@ -50,9 +50,9 @@ class TrufflehogRun(ToolGateway):
                 )
                 response_command = subprocess.run(command, capture_output=True, shell=True)
                 output = response_command.stdout.decode("utf-8")
-                response = self.decode_output(output)
+                response = self.decode_output(output, result)
         return response
-    def decode_output(self, decode_output):
+    def decode_output(self, decode_output, result):
         if decode_output != '':
             object_json = decode_output.strip().split('\n')
             json_list = [json.loads(object) for object in object_json]
