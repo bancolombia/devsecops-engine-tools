@@ -184,3 +184,11 @@ class TestAzureDevops(unittest.TestCase):
         azure_devops_instance.get_commits_files([{"sourceRefCommit": {"commitId": "commit_id_1"}}], results, "repository_name", {})
 
         assert results == []
+    
+    def test_message(self):
+        azure_devops = AzureDevops()
+
+        assert azure_devops.message("succeeded", "message") == "##[section]message"
+        assert azure_devops.message("info", "message") == "##[command]message"
+        assert azure_devops.message("warning", "message") == "##[warning]message"
+        assert azure_devops.message("error", "message") == "##[error]message"
