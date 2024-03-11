@@ -1,7 +1,5 @@
-import base64
 from dataclasses import dataclass
 
-import requests
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
@@ -18,6 +16,9 @@ from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline i
 )
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities import settings
+
+import requests
+import base64
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
@@ -51,10 +52,9 @@ class AzureDevops(DevopsPlatformGateway):
             results = []
             pr_response = requests.get(base_compact_pull_request_url, headers=headers)
             pr_response.raise_for_status()
-            if pr_response.status_code == 200:
-                pr_data = pr_response.json()
-                commits = pr_data["value"]
-                self.get_commits_files(commits, results, repository_name, headers)
+            pr_data = pr_response.json()
+            commits = pr_data["value"]
+            self.get_commits_files(commits, results, repository_name, headers)
             return results
         except requests.RequestException as e:
             e = format(str(e)).replace('apis/', '').replace('/repositories', '').replace('pullRequests', 'pullRequest').replace('/iterations?api-version=6.0', '')
