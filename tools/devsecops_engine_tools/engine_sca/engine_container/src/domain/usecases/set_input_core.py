@@ -1,13 +1,13 @@
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.config_gateway import (
-    ConfigGateway,
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 
 
 class SetInputCore:
-    def __init__(self, tool_remote: ConfigGateway, dict_args, config_tool):
+    def __init__(self, tool_remote: DevopsPlatformGateway, dict_args, config_tool):
         self.tool_remote = tool_remote
         self.dict_args = dict_args
         self.config_tool = config_tool
@@ -19,7 +19,7 @@ class SetInputCore:
         Returns:
             dict: Remote configuration.
         """
-        return self.tool_remote.get_remote_config(self.dict_args, file_path)
+        return self.tool_remote.get_remote_config(self.dict_args["remote_config_repo"], file_path)
 
     def get_variable(self, variable):
         """
