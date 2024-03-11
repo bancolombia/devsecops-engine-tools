@@ -1,7 +1,6 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-import pytest
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run import TrufflehogRun
 
 class TestTrufflehogRun(unittest.TestCase):
@@ -47,9 +46,28 @@ class TestTrufflehogRun(unittest.TestCase):
         )
         mock_popen.assert_called_once_with(expected_command, stdout=-1, stderr=-1, shell=True)
     
+    @patch('subprocess.run')
+    def test_run_tool_secret_scan_windows(self, mock_subprocess_run):
+        # Configuración del mock para sistema Linux
+        mock_subprocess_run.return_value.stdout.decode.return_value = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"C:\\\\file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
+        
+        # Crear instancia de la clase para probar
+        trufflehog_run = TrufflehogRun()
+        
+        # Llamar a la función que estamos probando
+        files_commits = ["file1"]
+        exclude_path = [".git"]
+        agent_os = "Windows"
+        agent_work_folder = "work_folder"
+        response = trufflehog_run.run_tool_secret_scan(files_commits, exclude_path, agent_os, agent_work_folder)
+        
+        # Verificar el resultado
+        assert response == [{"SourceMetadata":{"Data":{"Filesystem":{"file":"C:\\file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":False,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":None,"StructuredData":None}]
+        mock_subprocess_run.reset_mock()
+        
     def test_decode_output(self):
         trufflehog_run = TrufflehogRun()
-        output = '{"some": "json"}\n{"another": "json"}'
+        output = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"C:\\\\file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}\n{"SourceMetadata":{"Data":{"Filesystem":{"file":"C:\\\\file2.txt"}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":15,"DetectorName":"PrivateKey","DecoderName":"PLAIN","Verified":false,"Raw":"-----BEGIN OPENSSH PRIVATE KEY----------END OPENSSH PRIVATE KEY-----","RawV2":"","Redacted":"-----BEGIN OPENSSH PRIVATE KEY-----","ExtraData":{"cracked_encryption_passphrase":"true","encrypted":"true"},"StructuredData":null}\n'
         result = trufflehog_run.decode_output(output)
-        expected_result = [{"some": "json"}, {"another": "json"}]
+        expected_result = [{"SourceMetadata":{"Data":{"Filesystem":{"file":"C:\\file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":False,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":None,"StructuredData":None},{"SourceMetadata":{"Data":{"Filesystem":{"file":"C:\\file2.txt"}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":15,"DetectorName":"PrivateKey","DecoderName":"PLAIN","Verified":False,"Raw":"-----BEGIN OPENSSH PRIVATE KEY----------END OPENSSH PRIVATE KEY-----","RawV2":"","Redacted":"-----BEGIN OPENSSH PRIVATE KEY-----","ExtraData":{"cracked_encryption_passphrase":"true","encrypted":"true"},"StructuredData":None}]
         self.assertEqual(result, expected_result)
