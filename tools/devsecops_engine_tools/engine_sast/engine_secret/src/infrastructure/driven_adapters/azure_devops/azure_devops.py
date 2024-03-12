@@ -62,12 +62,6 @@ class AzureDevops(DevopsPlatformGateway):
                 "Error trying to get response from pullrequest: %s",
                 e
             )
-            print(
-                self.message(
-                    "warning",
-                    f'Error trying to get response from pullrequest: {format(str(e))}',
-                )
-            )
             return results
     def get_commits_files(self, commits, results, repository_name, headers):
         try:
@@ -92,12 +86,6 @@ class AzureDevops(DevopsPlatformGateway):
             logger.warning(
                 "Error trying to get response from commit: %s",
                 e
-            )
-            print(
-                self.message(
-                    "warning",
-                    f'Error trying to get response from commit: {format(str(e))}',
-                )
             )
     def get_variable(self, variable):
         try:
