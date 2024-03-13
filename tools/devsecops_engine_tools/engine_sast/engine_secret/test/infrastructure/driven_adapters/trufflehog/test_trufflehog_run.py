@@ -55,7 +55,7 @@ class TestTrufflehogRun(unittest.TestCase):
         trufflehog_run = TrufflehogRun()
         
         # Llamar a la función que estamos probando
-        files_commits = ["file1"]
+        files_commits = ["file1.txt"]
         exclude_path = [".git"]
         agent_os = "Windows"
         agent_work_folder = "work_folder"
@@ -65,6 +65,24 @@ class TestTrufflehogRun(unittest.TestCase):
         assert response == [{"SourceMetadata":{"Data":{"Filesystem":{"file":"C:\\file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":False,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":None,"StructuredData":None}]
         mock_subprocess_run.reset_mock()
         
+    @patch('subprocess.run')
+    def test_run_tool_secret_scan_Linux(self, mock_subprocess_run):
+        # Configuración del mock
+        mock_subprocess_run.return_value.stdout.decode.return_value = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
+        
+        # Crear instancia de la clase para probar
+        trufflehog_run = TrufflehogRun()
+        
+        # Llamar a la función que estamos probando
+        files_commits = ["file1.txt"]
+        exclude_path = [".git"]
+        agent_os = "Linux"
+        agent_work_folder = "work_folder"
+        response = trufflehog_run.run_tool_secret_scan(files_commits, exclude_path, agent_os, agent_work_folder)
+        
+        # Verificar el resultado
+        assert response == [{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":False,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":None,"StructuredData":None}]
+        mock_subprocess_run.reset_mock()
     def test_decode_output(self):
         trufflehog_run = TrufflehogRun()
         result = []

@@ -108,8 +108,8 @@ class AzureDevops(DevopsPlatformGateway):
             elif variable == "TEMP_DIRECTORY":
                 return AgentVariables.Agent_TempDirectory.value()
         except Exception as e:
-            print(e)
-            return None
+            logger.warning(f"Error getting variable {str(e)}")
+            
     def message(self, type, message):
         if type == "succeeded":
             return AzureMessageLoggingPipeline.SucceededLogging.get_message(message)
