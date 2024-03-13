@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from unittest import mock
+import pytest
 
 import requests
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops import (
@@ -131,22 +132,51 @@ class TestAzureDevops(unittest.TestCase):
 
         self.assertEqual(result, "SYSTEM_PULLREQUEST_ID")
 
-    @patch('requests.get')
-    @mock.patch(
+    @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables",
         autospec=True,
     )
+    @patch('requests.get')
+    def test_get_pull_request_success(self, mock_get, mock_system_variables):
+        mock_system_variables.return_value.System_TeamFoundationCollectionUri.value.return_value = "System_TeamFoundationCollectionUri"
+        mock_get.side_effect = [
+        MagicMock(json=lambda: {
+            "value": [
+                {
+                    "id": 1,
+                    "description": "Added keys_test.txt to /",
+                    "author": {"displayName": "Name"},
+                    "sourceRefCommit": {"commitId": "e6c3acf12218202069e5bfcce75f9541f8ecfe8c"},
+                }
+            ]
+        }),
+        MagicMock(json=lambda: {
+            "changes": [{"item": {"gitObjectType": "blob", "path": "/file1.py"}}]
+        })
+        ]
+
+        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables2:
+            mock_system_variables2.System_DefaultWorkingDirectory.value.return_value = "/path/to/working/dir"
+            
+            azure_devops = AzureDevops()
+            results = []
+            results = azure_devops.get_pullrequest_iterations("repository_name", "12345")
+
+            assert results == ["/path/to/working/dir/file1.py"]
+    @patch(
+        "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables",
+        autospec=True,
+    )
+    @patch('requests.get')
     def test_get_pullrequest_iterations_request_error(self, mock_get, mock_system_variables):
         mock_system_variables.System_TeamFoundationCollectionUri.value.return_value = (
             "System_TeamFoundationCollectionUri"
         )
         azure_devops = AzureDevops()
         mock_get.side_effect = requests.RequestException("Error")
-
         results = azure_devops.get_pullrequest_iterations("repository_name", "pr_id")
-
         assert results == []
-
+        
     @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables",
         autospec=True,
@@ -160,31 +190,34 @@ class TestAzureDevops(unittest.TestCase):
         mock_pr_response.json.return_value = {
             "changes": [{"item": {"gitObjectType": "blob", "path": "/file1.py"}}]
         }
-        # mock_get.side_effect = [mock_pr_response]
         mock_get.return_value = mock_pr_response
 
         with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables2:
             mock_system_variables2.System_DefaultWorkingDirectory.value.return_value = "/path/to/working/dir"
 
-            # Ejecutar el método bajo prueba
             azure_devops = AzureDevops()
             commits = [{"sourceRefCommit": {"commitId": "e6c3acf12218202069e5bfcce75f9541f8ecfe8c"}}]
             headers = {}
             results = []
             azure_devops.get_commits_files(commits, results, "repository_name", headers)
 
-            # Verificar resultados
             assert results == ["/path/to/working/dir/file1.py"]
 
+    @patch(
+        "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables",
+        autospec=True,
+    )
     @patch('requests.get')
-    def test_get_commits_files_request_error(mock_get, azure_devops_instance):
-        mock_get.side_effect = requests.RequestException("Error")
+    def test_get_commits_files_request_error(self, mock_get, mock_system_variables):
+        mock_system_variables.return_value.System_TeamFoundationCollectionUri.value.return_value = "System_TeamFoundationCollectionUri"
+        mock_get.side_effect = requests.RequestException("Error trying to get response from commit: 400 Client Error: Bad Request for url: https://grupobancolombia.visualstudio.com/Vicepresidencia%20Servicios%20de%20Tecnolog%C3%ADa/_git/NU0429001_DevSecOps_toolchain/commit/commit_id_1")
 
+        azure_devops = AzureDevops()
         results = []
-        azure_devops_instance.get_commits_files([{"sourceRefCommit": {"commitId": "commit_id_1"}}], results, "repository_name", {})
+        azure_devops.get_commits_files([{"sourceRefCommit": {"commitId": "commit_id_1"}}], results, "repository_name", {})
 
         assert results == []
-    
+
     def test_message(self):
         azure_devops = AzureDevops()
 
@@ -192,3 +225,4 @@ class TestAzureDevops(unittest.TestCase):
         assert azure_devops.message("info", "message") == "##[command]message"
         assert azure_devops.message("warning", "message") == "##[warning]message"
         assert azure_devops.message("error", "message") == "##[error]message"
+        
