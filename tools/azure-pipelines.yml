@@ -8,6 +8,15 @@ variables:
   - name: packageName
     value: "devsecops_engine_tools"
 
+trigger:
+  branches:
+    include:
+      - trunk
+      - feature/*
+  paths:
+    include:
+      - "tools/*"
+
 resources:
   - repo: self
     clean: true
