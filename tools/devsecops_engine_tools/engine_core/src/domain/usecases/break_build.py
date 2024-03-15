@@ -296,7 +296,7 @@ class BreakBuild:
                 print(
                     devops_platform_gateway.message(
                         "warning",
-                        "Bellow are all the findings that were accepted.")
+                        "Bellow are all findings that were accepted.")
                 )
                 printer_table_gateway.print_table_exclusions(exclusions_list)
                 print("Risk acceptance findings count: {0}".format(len(findings_excluded_list)))
