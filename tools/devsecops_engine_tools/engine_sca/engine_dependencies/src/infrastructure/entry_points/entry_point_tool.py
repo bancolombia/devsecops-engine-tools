@@ -14,10 +14,11 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.f
 import os
 import sys
 
+
 def init_engine_dependencies(
     tool_run, tool_remote, tool_deserializator, dict_args, token, tool
 ):
-    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stdout.reconfigure(encoding="utf-8")
 
     handle_remote_config_patterns = HandleRemoteConfigPatterns(tool_remote, dict_args)
     find_mono_repo = FindMonoRepos(tool_remote)

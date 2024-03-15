@@ -205,8 +205,11 @@ class XrayScan(ToolGateway):
                 excluded_dir = ""
             self.find_artifacts(pattern, working_dir, dir_to_scan_path, excluded_dir)
 
-            results_file = self.scan_dependencies(
-                command_prefix, dir_to_scan_path, working_dir, bypass_limits_flag
-            )
+            if len(os.listdir(dir_to_scan_path)) == 0:
+                logger.warning("No artifacts found")
+            else:
+                results_file = self.scan_dependencies(
+                    command_prefix, dir_to_scan_path, working_dir, bypass_limits_flag
+                )
 
         return results_file
