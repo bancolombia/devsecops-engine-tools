@@ -324,6 +324,8 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
     ) as mock_join, patch("os.path.exists") as mock_exists, patch(
         "os.makedirs"
     ) as mock_makedirs, patch(
+        "os.listdir"
+    ) as mock_listdir, patch(
         "shutil.rmtree"
     ) as mock_rmtree, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_linux"
@@ -343,6 +345,7 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
         mock_system.return_value = "Linux"
         mock_join.side_effect = lambda *args: "/".join(args)
         mock_exists.return_value = True
+        mock_listdir.return_value = ["test_artifact"]
         mock_find_node_modules.return_value = "/path/to/node_modules"
         result = xray_scan_instance.run_tool_dependencies_sca(
             remote_config,
@@ -358,6 +361,7 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
         mock_config_server.assert_called_with("./jf", token)
         mock_rmtree.assert_any_call
         mock_makedirs.assert_any_call
+        mock_listdir.assert_any_call
         mock_find_node_modules.assert_called_with(working_dir)
         mock_compress_and_mv.assert_any_call
         mock_find_artifacts.assert_called_with(
@@ -390,6 +394,8 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
     ) as mock_join, patch("os.path.exists") as mock_exists, patch(
         "os.makedirs"
     ) as mock_makedirs, patch(
+        "os.listdir"
+    ) as mock_listdir, patch(
         "shutil.rmtree"
     ) as mock_rmtree, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_linux"
@@ -409,6 +415,7 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
         mock_system.return_value = "Windows"
         mock_join.side_effect = lambda *args: "/".join(args)
         mock_exists.return_value = True
+        mock_listdir.return_value = ["test_artifact"]
         mock_find_node_modules.return_value = "/path/to/node_modules"
         result = xray_scan_instance.run_tool_dependencies_sca(
             remote_config,
@@ -424,6 +431,7 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
         mock_config_server.assert_called_with("./jf.exe", token)
         mock_rmtree.assert_any_call
         mock_makedirs.assert_any_call
+        mock_listdir.assert_any_call
         mock_find_node_modules.assert_called_with(working_dir)
         mock_compress_and_mv.assert_any_call
         mock_find_artifacts.assert_called_with(
@@ -456,6 +464,8 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
     ) as mock_join, patch("os.path.exists") as mock_exists, patch(
         "os.makedirs"
     ) as mock_makedirs, patch(
+        "os.listdir"
+    ) as mock_listdir, patch(
         "shutil.rmtree"
     ) as mock_rmtree, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_darwin"
@@ -475,6 +485,7 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
         mock_system.return_value = "Darwin"
         mock_join.side_effect = lambda *args: "/".join(args)
         mock_exists.return_value = True
+        mock_listdir.return_value = ["test_artifact"]
         mock_find_node_modules.return_value = "/path/to/node_modules"
         result = xray_scan_instance.run_tool_dependencies_sca(
             remote_config,
@@ -490,6 +501,7 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
         mock_config_server.assert_called_with("./jf", token)
         mock_rmtree.assert_any_call
         mock_makedirs.assert_any_call
+        mock_listdir.assert_any_call
         mock_find_node_modules.assert_called_with(working_dir)
         mock_compress_and_mv.assert_any_call
         mock_find_artifacts.assert_called_with(
