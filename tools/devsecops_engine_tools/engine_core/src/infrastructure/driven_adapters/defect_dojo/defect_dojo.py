@@ -52,12 +52,10 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "XRAY": "JFrog Xray On Demand Binary Scan",
             }
 
-            if str(vulnerability_management.branch_name) in [
-                "trunk",
-                "develop",
-                "release",
-                "master",
-            ]:
+            if any(
+                branch in str(vulnerability_management.branch_tag)
+                for branch in vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["BRANCH_FILTER"].split(",")
+            ):
                 request: ImportScanRequest = Connect.cmdb(
                     cmdb_mapping={
                         "product_type_name": "nombreevc",
@@ -89,14 +87,16 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     branch_tag=vulnerability_management.branch_tag,
                     commit_hash=vulnerability_management.commit_hash,
                     environment=enviroment_mapping[
-                        vulnerability_management.environment
+                        vulnerability_management.environment.lower()
                     ],
                     tags="evc",
                 )
 
                 response = DefectDojo.send_import_scan(request)
                 if hasattr(response, "url"):
-                    print("Report sent to vulnerability management: ", response.url)
+                    url_parts = response.url.split("/")
+                    test_string = "/".join(url_parts[:3]) + "/" + "/".join(url_parts[3:7])
+                    print("Report sent to vulnerability management: ", test_string)
                 else:
                     raise ExceptionVulnerabilityManagement(response)
         except Exception as ex:

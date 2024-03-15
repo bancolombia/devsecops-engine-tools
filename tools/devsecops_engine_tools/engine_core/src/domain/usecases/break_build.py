@@ -287,7 +287,8 @@ class BreakBuild:
                             "id": item.id,
                             "where": item.where,
                             "create_date": next((elem.create_date for elem in exclusions if elem.id == item.id), None),
-                            "expired_date": next((elem.expired_date for elem in exclusions if elem.id == item.id), None)
+                            "expired_date": next((elem.expired_date for elem in exclusions if elem.id == item.id), None),
+                            "reason": "Risk acceptance",
                         },
                         findings_excluded_list,
                     )
@@ -295,9 +296,10 @@ class BreakBuild:
                 print(
                     devops_platform_gateway.message(
                         "warning",
-                        "Bellow are all the findings that were accepted.")
+                        "Bellow are all findings that were accepted.")
                 )
                 printer_table_gateway.print_table_exclusions(exclusions_list)
+                print("Risk acceptance findings count: {0}".format(len(findings_excluded_list)))
         else:
             print(devops_platform_gateway.message("succeeded", "There are no findings"))
             print(devops_platform_gateway.result_pipeline("succeeded"))
