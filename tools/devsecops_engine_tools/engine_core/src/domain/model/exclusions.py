@@ -11,3 +11,4 @@ class Exclusions:
         self.expired_date = kwargs.get("expired_date", "")
         self.severity = kwargs.get("severity", "")
         self.hu = kwargs.get("hu", "")
+        self.treatment = kwargs.get("treatment", "Risk acceptance")
