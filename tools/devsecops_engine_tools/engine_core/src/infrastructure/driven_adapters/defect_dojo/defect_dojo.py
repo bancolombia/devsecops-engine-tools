@@ -44,7 +44,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "dev": "Development",
                 "qa": "Staging",
                 "pdn": "Production",
-                None: "Production",
+                "default": "Production",
             }
             scan_type_mapping = {
                 "CHECKOV": "Checkov Scan",
@@ -54,7 +54,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
             if any(
                 branch in str(vulnerability_management.branch_tag)
-                for branch in vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["BRANCH_FILTER"].split(",")
+                for branch in vulnerability_management.config_tool[
+                    "VULNERABILITY_MANAGER"
+                ]["BRANCH_FILTER"].split(",")
             ):
                 request: ImportScanRequest = Connect.cmdb(
                     cmdb_mapping={
@@ -86,16 +88,20 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     source_code_management_uri=vulnerability_management.source_code_management_uri,
                     branch_tag=vulnerability_management.branch_tag,
                     commit_hash=vulnerability_management.commit_hash,
-                    environment=enviroment_mapping[
-                        vulnerability_management.environment.lower()
-                    ],
+                    environment=(
+                        enviroment_mapping[vulnerability_management.environment.lower()]
+                        if vulnerability_management.environment is not None and vulnerability_management.environment.lower() in enviroment_mapping
+                        else enviroment_mapping["default"]
+                    ),
                     tags="evc",
                 )
 
                 response = DefectDojo.send_import_scan(request)
                 if hasattr(response, "url"):
                     url_parts = response.url.split("/")
-                    test_string = "/".join(url_parts[:3]) + "/" + "/".join(url_parts[3:7])
+                    test_string = (
+                        "/".join(url_parts[:3]) + "/" + "/".join(url_parts[3:7])
+                    )
                     print("Report sent to vulnerability management: ", test_string)
                 else:
                     raise ExceptionVulnerabilityManagement(response)
