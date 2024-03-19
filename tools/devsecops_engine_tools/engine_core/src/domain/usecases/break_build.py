@@ -12,6 +12,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_gateway import (
     PrinterTableGateway,
 )
+from collections import Counter
 
 
 @dataclass
@@ -287,7 +288,8 @@ class BreakBuild:
                             "id": item.id,
                             "where": item.where,
                             "create_date": next((elem.create_date for elem in exclusions if elem.id == item.id), None),
-                            "expired_date": next((elem.expired_date for elem in exclusions if elem.id == item.id), None)
+                            "expired_date": next((elem.expired_date for elem in exclusions if elem.id == item.id), None),
+                            "reason": next((elem.treatment for elem in exclusions if elem.id == item.id), None),
                         },
                         findings_excluded_list,
                     )
@@ -295,9 +297,11 @@ class BreakBuild:
                 print(
                     devops_platform_gateway.message(
                         "warning",
-                        "Bellow are all the findings that were accepted.")
+                        "Bellow are all findings that were accepted.")
                 )
                 printer_table_gateway.print_table_exclusions(exclusions_list)
+                for reason, total in Counter(map(lambda x: x['reason'], exclusions_list)).items():
+                    print("{0} findings count: {1}".format(reason, total))
         else:
             print(devops_platform_gateway.message("succeeded", "There are no findings"))
             print(devops_platform_gateway.result_pipeline("succeeded"))
