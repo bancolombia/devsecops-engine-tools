@@ -141,14 +141,21 @@ class TestAzureDevops(unittest.TestCase):
         mock_system_variables.return_value.System_TeamFoundationCollectionUri.value.return_value = "System_TeamFoundationCollectionUri"
         mock_get.side_effect = [
         MagicMock(json=lambda: {
-            "value": [
-                {
-                    "id": 1,
-                    "description": "Added keys_test.txt to /",
-                    "author": {"displayName": "Name"},
-                    "sourceRefCommit": {"commitId": "e6c3acf12218202069e5bfcce75f9541f8ecfe8c"},
+            "repository": {
+                "id": "repo_id_1",
+                "name": "repositoryName",
+                "url": "https://visualstudio.com/91083943100d/_apis/git/repositories/212d7ebcfc6d",
+                "project": {
+                    "id": "id_1",
+                    "name": "project name",
+                    "description": "Description",
+                    "url": "https://visualstudio.com/_apis/projects/91083943100d",
                 }
-            ]
+            },
+            "pullRequestId": 871904,
+            "lastMergeCommit": {
+                "commitId": "3accc80cd6bb8b40836e638b94fc797f2c813f7a",
+		    }
         }),
         MagicMock(json=lambda: {
             "changes": [{"item": {"gitObjectType": "blob", "path": "/file1.py"}}]
