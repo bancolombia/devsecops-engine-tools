@@ -21,6 +21,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.base_compact_remote_config_url = "http://example.com/"
         self.vulnerability_management.config_tool = {
             "VULNERABILITY_MANAGER": {
+                "BRANCH_FILTER": "trunk,master,release,develop",
                 "DEFECT_DOJO": {
                     "CMDB_MAPPING_PATH": "mapping_path",
                     "HOST_CMDB": "cmdb_host",
@@ -37,7 +38,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.version = "1.0"
         self.vulnerability_management.build_id = "build_id"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
-        self.vulnerability_management.branch_tag = "branch_tag"
+        self.vulnerability_management.branch_tag = "trunk"
         self.vulnerability_management.commit_hash = "commit_hash"
         self.vulnerability_management.environment = "dev"
 
@@ -67,15 +68,19 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 version="1.0",
                 build_id="build_id",
                 source_code_management_uri="source_code_uri",
-                branch_tag="branch_tag",
+                branch_tag="trunk",
                 commit_hash="commit_hash",
                 environment="Development",
                 tags="evc"
             )
 
     def test_send_vulnerability_management_exception(self):
-
-        self.vulnerability_management.branch_name = "trunk"
+        self.vulnerability_management.config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "BRANCH_FILTER": "trunk,master,release,develop",
+            }
+        }
+        self.vulnerability_management.branch_tag = "trunk"
 
         with unittest.TestCase().assertRaises(Exception) as context:
             self.defect_dojo.send_vulnerability_management(self.vulnerability_management)

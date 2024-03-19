@@ -61,7 +61,7 @@ class PrinterPrettyTable(PrinterTableGateway):
     
     def print_table_exclusions(self, exclusions):
         if (exclusions):
-            headers = ["Severity", "ID", "Where", "Create Date", "Expired Date"]
+            headers = ["Severity", "ID", "Where", "Create Date", "Expired Date", "Reason"]
 
         table = PrettyTable(headers)
 
@@ -72,6 +72,7 @@ class PrinterPrettyTable(PrinterTableGateway):
                 exclusion["where"],
                 format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
                 format_date(exclusion["expired_date"], "%d%m%Y", "%d/%m/%Y"),
+                exclusion["reason"],
             ]
             table.add_row(row_data)
 

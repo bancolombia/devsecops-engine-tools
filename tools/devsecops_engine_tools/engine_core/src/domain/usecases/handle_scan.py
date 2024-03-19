@@ -2,7 +2,7 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_s
     runner_engine_iac,
 )
 from devsecops_engine_tools.engine_sast.engine_secret.src.applications.runner_secret_scan import (
-    runner_secret_scan
+    runner_secret_scan,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_management_gateway import (
     VulnerabilityManagementGateway,
@@ -52,6 +52,52 @@ class HandleScan:
         self.secrets_manager_gateway = secrets_manager_gateway
         self.devops_platform_gateway = devops_platform_gateway
 
+    def _define_envvm(self):
+        (
+            "pdn"
+            if self.devops_platform_gateway.get_variable("branch_name")
+            in ["trunk,master"]
+            else "qa" if self.devops_platform_gateway.get_variable("branch_name") in 
+            "release" else "dev"
+        )
+
+    def _use_vulnerability_management(
+        self, config_tool, input_core, dict_args, secret_tool, env
+    ):
+        try:
+            self.vulnerability_management.send_vulnerability_management(
+                VulnerabilityManagement(
+                    config_tool[dict_args["tool"].upper()]["TOOL"],
+                    input_core,
+                    dict_args,
+                    secret_tool,
+                    config_tool,
+                    self.devops_platform_gateway.get_source_code_management_uri(),
+                    self.devops_platform_gateway.get_base_compact_remote_config_url(
+                        dict_args["remote_config_repo"]
+                    ),
+                    self.devops_platform_gateway.get_variable("access_token"),
+                    self.devops_platform_gateway.get_variable("build_execution_id"),
+                    self.devops_platform_gateway.get_variable("build_id"),
+                    self.devops_platform_gateway.get_variable("branch_tag"),
+                    self.devops_platform_gateway.get_variable("commit_hash"),
+                    env
+                )
+            )
+        except ExceptionVulnerabilityManagement as ex1:
+            logger.error(str(ex1))
+        try:
+            input_core.totalized_exclusions.extend(
+                self.vulnerability_management.get_findings_risk_acceptance(
+                    input_core.scope_pipeline,
+                    dict_args,
+                    secret_tool,
+                    config_tool,
+                )
+            )
+        except ExceptionFindingsRiskAcceptance as ex2:
+            logger.error(str(ex2))
+
     def process(self, dict_args: any, config_tool: any):
         secret_tool = None
         if dict_args["use_secrets_manager"] == "true":
@@ -61,86 +107,26 @@ class HandleScan:
                 dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool
             )
             if dict_args["use_vulnerability_management"] == "true":
-                try:
-                    self.vulnerability_management.send_vulnerability_management(
-                        VulnerabilityManagement(
-                            config_tool["ENGINE_IAC"]["TOOL"],
-                            input_core,
-                            dict_args,
-                            secret_tool,
-                            config_tool,
-                            self.devops_platform_gateway.get_source_code_management_uri(),
-                            self.devops_platform_gateway.get_variable("branch_name"),
-                            self.devops_platform_gateway.get_base_compact_remote_config_url(
-                                dict_args["remote_config_repo"]
-                            ),
-                            self.devops_platform_gateway.get_variable("access_token"),
-                            self.devops_platform_gateway.get_variable(
-                                "build_execution_id"
-                            ),
-                            self.devops_platform_gateway.get_variable("build_id"),
-                            self.devops_platform_gateway.get_variable("branch_tag"),
-                            self.devops_platform_gateway.get_variable("commit_hash"),
-                            self.devops_platform_gateway.get_variable("environment"),
-                        )
-                    )
-                except ExceptionVulnerabilityManagement as ex1:
-                    logger.error(str(ex1))
-                try:
-                    input_core.totalized_exclusions.extend(
-                        self.vulnerability_management.get_findings_risk_acceptance(
-                            input_core.scope_pipeline,
-                            dict_args,
-                            secret_tool,
-                            config_tool,
-                        )
-                    )
-                except ExceptionFindingsRiskAcceptance as ex2:
-                    logger.error(str(ex2))
-
+                self._use_vulnerability_management(
+                    config_tool, input_core, dict_args, secret_tool, self.devops_platform_gateway.get_variable("environment")
+                )
             return findings_list, input_core
         elif "engine_container" in dict_args["tool"]:
             secret_sca = ""
             if secret_tool is not None:
                 secret_sca = secret_tool["token_prisma_cloud"]
             else:
-                secret_sca=dict_args["token_engine_container"]
-            findings_list, input_core =runner_engine_container(dict_args, config_tool, secret_sca,self.devops_platform_gateway)
-            if (dict_args["use_vulnerability_management"] == "true") and input_core.path_file_results:
-                try:
-                    self.vulnerability_management.send_vulnerability_management(
-                        VulnerabilityManagement(
-                            config_tool["ENGINE_CONTAINER"]["TOOL"],
-                            input_core,
-                            dict_args,
-                            secret_tool,
-                            config_tool,
-                            self.devops_platform_gateway.get_source_code_management_uri(),
-                            self.devops_platform_gateway.get_variable("branch_name"),
-                            self.devops_platform_gateway.get_base_compact_remote_config_url(
-                                dict_args["remote_config_repo"]
-                            ),
-                            self.devops_platform_gateway.get_variable("access_token"),
-                            self.devops_platform_gateway.get_variable("build_execution_id"),
-                            self.devops_platform_gateway.get_variable("build_id"),
-                            self.devops_platform_gateway.get_variable("branch_tag"),
-                            self.devops_platform_gateway.get_variable("commit_hash"),
-                            self.devops_platform_gateway.get_variable("environment"),
-                        )
-                    )
-                except ExceptionVulnerabilityManagement as ex1:
-                    logger.error(str(ex1))
-                try:
-                    input_core.totalized_exclusions.extend(
-                        self.vulnerability_management.get_findings_risk_acceptance(
-                            input_core.scope_pipeline,
-                            dict_args,
-                            secret_tool,
-                            config_tool,
-                        )
-                    )
-                except ExceptionFindingsRiskAcceptance as ex2:
-                    logger.error(str(ex2))
+                secret_sca = dict_args["token_engine_container"]
+            findings_list, input_core = runner_engine_container(
+                dict_args, config_tool, secret_sca, self.devops_platform_gateway
+            )
+            if (
+                dict_args["use_vulnerability_management"] == "true"
+                and input_core.path_file_results
+            ):
+                self._use_vulnerability_management(
+                    config_tool, input_core, dict_args, secret_tool, self.devops_platform_gateway.get_variable("environment")
+                )
             return findings_list, input_core
         elif "engine_dast" in dict_args["tool"]:
             print(MESSAGE_ENABLED)
@@ -159,55 +145,11 @@ class HandleScan:
                 dict_args, config_tool, secret_sca
             )
 
-            if dict_args["use_vulnerability_management"] == "true" and input_core.path_file_results:
-                try:
-                    self.vulnerability_management.send_vulnerability_management(
-                        VulnerabilityManagement(
-                            config_tool["ENGINE_DEPENDENCIES"]["TOOL"],
-                            input_core,
-                            dict_args,
-                            secret_tool,
-                            config_tool,
-                            self.devops_platform_gateway.get_source_code_management_uri(),
-                            self.devops_platform_gateway.get_variable("branch_name"),
-                            self.devops_platform_gateway.get_base_compact_remote_config_url(
-                                dict_args["remote_config_repo"]
-                            ),
-                            self.devops_platform_gateway.get_variable("access_token"),
-                            self.devops_platform_gateway.get_variable(
-                                "build_execution_id"
-                            ),
-                            self.devops_platform_gateway.get_variable("build_id"),
-                            self.devops_platform_gateway.get_variable("branch_tag"),
-                            self.devops_platform_gateway.get_variable("commit_hash"),
-                            (
-                                "pdn"
-                                if (
-                                    self.devops_platform_gateway.get_variable(
-                                        "branch_name"
-                                    )
-                                    == "master"
-                                    or self.devops_platform_gateway.get_variable(
-                                        "branch_name"
-                                    )
-                                    == "trunk"
-                                )
-                                else "dev"
-                            ),
-                        )
-                    )
-                except ExceptionVulnerabilityManagement as ex1:
-                    logger.error(str(ex1))
-                try:
-                    input_core.totalized_exclusions.extend(
-                        self.vulnerability_management.get_findings_risk_acceptance(
-                            input_core.scope_pipeline,
-                            dict_args,
-                            secret_tool,
-                            config_tool,
-                        )
-                    )
-                except ExceptionFindingsRiskAcceptance as ex2:
-                    logger.error(str(ex2))
-
+            if (
+                dict_args["use_vulnerability_management"] == "true"
+                and input_core.path_file_results
+            ):
+                self._use_vulnerability_management(
+                    config_tool, input_core, dict_args, secret_tool, self._define_envvm()
+                )
             return findings_list, input_core
