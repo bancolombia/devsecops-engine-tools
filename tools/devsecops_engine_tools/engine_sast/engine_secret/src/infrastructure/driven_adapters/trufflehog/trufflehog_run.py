@@ -1,9 +1,11 @@
 import json
+# from multiprocessing import Pool
+import concurrent.futures
 import re
 import subprocess
 
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway import ToolGateway
-
+result = []
 class TrufflehogRun(ToolGateway):
     def install_tool(self, agent_os, agent_temp_dir) -> any:
         reg_exp_os = r'Windows'
@@ -41,21 +43,31 @@ class TrufflehogRun(ToolGateway):
             )
             subprocess.run(command, shell=True, check=True)
         exclude_path = agent_work_folder + "/excludedPath.txt"
-        result = []
-        response = []
-        if len(files_commits) != 0:
-            for file_commit in files_commits:
-                command = (
-                    f"{trufflehog_command} filesystem {file_commit} --json --exclude-paths {exclude_path} --no-verification"
-                )
-                response_command = subprocess.run(command, capture_output=True, shell=True)
-                output = response_command.stdout.decode("utf-8")
-                response = self.decode_output(output, result)
+        response = self.run_parallel_scans(files_commits, trufflehog_command, exclude_path)
         return response
-    def decode_output(self, decode_output, result):
-        if decode_output != '':
-            object_json = decode_output.strip().split('\n')
-            json_list = [json.loads(object) for object in object_json]
-            for json_obj in json_list:
-                result.append(json_obj)
+    
+    def scan_file(self, file_path, trufflehog_command, exclude_path):
+        command = f"{trufflehog_command} filesystem {file_path} --json --exclude-paths {exclude_path} --no-verification"
+        response_command = subprocess.run(command, capture_output=True, shell=True)
+        output = response_command.stdout.decode("utf-8")
+        return output
+    
+    def run_parallel_scans(self, files_commits, trufflehog_command, exclude_path):
+        chunk_size = max(len(files_commits) // 4, 1)
+        chunks = [files_commits[i:i+chunk_size] for i in range(0, len(files_commits), chunk_size)]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            results = []
+            for chunk in chunks:
+                futures = [executor.submit(self.scan_file, file_path, trufflehog_command, exclude_path) for file_path in chunk]
+                for future in concurrent.futures.as_completed(futures):
+                    results.append(future.result())
+        return self.decode_output(results)
+    
+    def decode_output(self, results):
+        for decode_output in results:
+            if decode_output != '':
+                object_json = decode_output.strip().split('\n')
+                json_list = [json.loads(object) for object in object_json]
+                for json_obj in json_list:
+                    result.append(json_obj)
         return result

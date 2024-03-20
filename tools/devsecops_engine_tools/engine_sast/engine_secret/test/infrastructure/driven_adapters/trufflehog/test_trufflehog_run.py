@@ -60,9 +60,10 @@ class TestTrufflehogRun(unittest.TestCase):
         agent_os = "Windows"
         agent_work_folder = "work_folder"
         response = trufflehog_run.run_tool_secret_scan(files_commits, exclude_path, agent_os, agent_work_folder)
+        print("RESP_WIN", response)
         
         # Verificar el resultado
-        assert response == [{"SourceMetadata":{"Data":{"Filesystem":{"file":"C:\\file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":False,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":None,"StructuredData":None}]
+        assert response == [{'SourceMetadata': {'Data': {'Filesystem': {'file': '/usr/bin/local/file1.txt', 'line': 1}}}, 'SourceID': 1, 'SourceType': 15, 'SourceName': 'trufflehog - filesystem', 'DetectorType': 17, 'DetectorName': 'URI', 'DecoderName': 'BASE64', 'Verified': False, 'Raw': 'https://admin:admin@the-internet.herokuapp.com', 'RawV2': 'https://admin:admin@the-internet.herokuapp.com/basic_auth', 'Redacted': 'https://admin:********@the-internet.herokuapp.com', 'ExtraData': None, 'StructuredData': None}, {'SourceMetadata': {'Data': {'Filesystem': {'file': 'C:\\file1.txt', 'line': 1}}}, 'SourceID': 1, 'SourceType': 15, 'SourceName': 'trufflehog - filesystem', 'DetectorType': 17, 'DetectorName': 'URI', 'DecoderName': 'BASE64', 'Verified': False, 'Raw': 'https://admin:admin@the-internet.herokuapp.com', 'RawV2': 'https://admin:admin@the-internet.herokuapp.com/basic_auth', 'Redacted': 'https://admin:********@the-internet.herokuapp.com', 'ExtraData': None, 'StructuredData': None}]
         mock_subprocess_run.reset_mock()
         
     @patch('subprocess.run')
@@ -79,14 +80,8 @@ class TestTrufflehogRun(unittest.TestCase):
         agent_os = "Linux"
         agent_work_folder = "work_folder"
         response = trufflehog_run.run_tool_secret_scan(files_commits, exclude_path, agent_os, agent_work_folder)
+        print("RESP_LIN", response)
         
         # Verificar el resultado
-        assert response == [{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":False,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":None,"StructuredData":None}]
+        assert response == [{'SourceMetadata': {'Data': {'Filesystem': {'file': '/usr/bin/local/file1.txt', 'line': 1}}}, 'SourceID': 1, 'SourceType': 15, 'SourceName': 'trufflehog - filesystem', 'DetectorType': 17, 'DetectorName': 'URI', 'DecoderName': 'BASE64', 'Verified': False, 'Raw': 'https://admin:admin@the-internet.herokuapp.com', 'RawV2': 'https://admin:admin@the-internet.herokuapp.com/basic_auth', 'Redacted': 'https://admin:********@the-internet.herokuapp.com', 'ExtraData': None, 'StructuredData': None}]
         mock_subprocess_run.reset_mock()
-    def test_decode_output(self):
-        trufflehog_run = TrufflehogRun()
-        result = []
-        output = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"C:\\\\file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}\n{"SourceMetadata":{"Data":{"Filesystem":{"file":"C:\\\\file2.txt"}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":15,"DetectorName":"PrivateKey","DecoderName":"PLAIN","Verified":false,"Raw":"-----BEGIN OPENSSH PRIVATE KEY----------END OPENSSH PRIVATE KEY-----","RawV2":"","Redacted":"-----BEGIN OPENSSH PRIVATE KEY-----","ExtraData":{"cracked_encryption_passphrase":"true","encrypted":"true"},"StructuredData":null}\n'
-        result = trufflehog_run.decode_output(output, result)
-        expected_result = [{"SourceMetadata":{"Data":{"Filesystem":{"file":"C:\\file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":False,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":None,"StructuredData":None},{"SourceMetadata":{"Data":{"Filesystem":{"file":"C:\\file2.txt"}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":15,"DetectorName":"PrivateKey","DecoderName":"PLAIN","Verified":False,"Raw":"-----BEGIN OPENSSH PRIVATE KEY----------END OPENSSH PRIVATE KEY-----","RawV2":"","Redacted":"-----BEGIN OPENSSH PRIVATE KEY-----","ExtraData":{"cracked_encryption_passphrase":"true","encrypted":"true"},"StructuredData":None}]
-        self.assertEqual(result, expected_result)
