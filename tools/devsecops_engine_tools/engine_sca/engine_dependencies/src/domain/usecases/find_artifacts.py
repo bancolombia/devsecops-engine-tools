@@ -64,12 +64,14 @@ class FindArtifacts:
         os.makedirs(dir_to_scan_path)
 
         npm_modules_path = self.find_node_modules(self.working_dir)
+
+        excluded_dir = ""
         if npm_modules_path:
             self.compress_and_mv(npm_modules_path, dir_to_scan_path)
             excluded_dir = npm_modules_path
-        else:
-            excluded_dir = ""
+
         self.find_by_extension(
             self.pattern, self.working_dir, dir_to_scan_path, excluded_dir
         )
+
         return dir_to_scan_path

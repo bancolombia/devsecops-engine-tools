@@ -166,93 +166,6 @@ def test_config_server_failure(xray_scan_instance):
         )
 
 
-def test_compress_and_mv_success(xray_scan_instance):
-    with patch("os.path.exists") as mock_exists, patch(
-        "os.remove"
-    ) as mock_remove, patch("tarfile.open") as mock_tarfile_open:
-        npm_modules = "/path/to/npm_modules"
-        target_dir = "/path/to/target_dir"
-        mock_exists.return_value = True
-        xray_scan_instance.compress_and_mv(npm_modules, target_dir)
-
-        mock_remove.assert_called_with(os.path.join(target_dir, "node_modules.tar"))
-        mock_tarfile_open.assert_called_with(
-            os.path.join(target_dir, "node_modules.tar"), "w"
-        )
-
-
-def test_compress_and_mv_failure(xray_scan_instance):
-    with patch("shutil.rmtree") as mock_rmtree, patch(
-        "os.makedirs"
-    ) as mock_makedirs, patch("os.path.exists") as mock_exists, patch(
-        "os.remove"
-    ) as mock_remove, patch(
-        "tarfile.open"
-    ) as mock_tarfile_open, patch(
-        "os.path.basename"
-    ) as mock_basename, patch(
-        "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.logger.error"
-    ) as mock_logger_error:
-        npm_modules = "/path/to/npm_modules"
-        target_dir = "/path/to/target_dir"
-        mock_exists.return_value = True
-        mock_tarfile_open.side_effect = subprocess.CalledProcessError(
-            returncode=1, cmd="opentar"
-        )
-        xray_scan_instance.compress_and_mv(npm_modules, target_dir)
-
-        mock_logger_error.assert_called_with(
-            "Error during npm_modules compression: Command 'opentar' returned non-zero exit status 1."
-        )
-
-
-def test_find_node_modules_finded(xray_scan_instance):
-    with patch("os.walk") as mock_walk, patch("os.path.join") as mock_path_join:
-        working_dir = "/path/to/working_dir"
-        mock_walk.return_value = [
-            (working_dir, ["dir1", "dir2"], ["file1.txt", "file2.json"]),
-            (working_dir + "/dir1", [], ["file3.ear"]),
-            (working_dir + "/node_modules", [], ["file4.war"]),
-        ]
-        xray_scan_instance.find_node_modules(working_dir)
-
-        mock_path_join.assert_any_call
-
-
-def test_find_node_modules_not_finded(xray_scan_instance):
-    with patch("os.walk") as mock_walk, patch("os.path.join") as mock_path_join:
-        working_dir = "/path/to/working_dir"
-        mock_walk.return_value = [
-            (working_dir, ["dir1", "dir2"], ["file1.txt", "file2.json"]),
-            (working_dir + "/dir1", [], ["file3.ear"]),
-            (working_dir + "/dir2", [], ["file4.war"]),
-        ]
-        xray_scan_instance.find_node_modules(working_dir)
-
-        mock_path_join.assert_not_called
-
-
-def test_find_artifacts(xray_scan_instance):
-    with patch("shutil.copy2") as mock_copy2, patch("os.walk") as mock_walk, patch(
-        "os.path.join"
-    ) as mock_path_join:
-        pattern = "\\.(jar|ear|war)$"
-        working_dir = "/path/to/working_dir"
-        target_dir = "/path/to/target_dir"
-        excluded_dir = ""
-        mock_walk.return_value = [
-            ("/path/to/working_dir", ["dir1", "dir2"], ["file1.txt", "file2.json"]),
-            ("/path/to/working_dir/dir1", [], ["file3.ear"]),
-            ("/path/to/working_dir/dir2", [], ["file4.war"]),
-        ]
-        xray_scan_instance.find_artifacts(
-            pattern, working_dir, target_dir, excluded_dir
-        )
-
-        mock_path_join.assert_any_call
-        mock_copy2.assert_any_call
-
-
 def test_scan_dependencies_success(xray_scan_instance):
     with patch("subprocess.run") as mock_subprocess_run, patch(
         "json.dump"
@@ -263,11 +176,11 @@ def test_scan_dependencies_success(xray_scan_instance):
     ) as mock_path_join:
         prefix = "jf"
         target_dir_name = "target_dir"
-        working_dir = "/path/to/working_dir"
         bypass_limits_flag = True
         mock_subprocess_run.side_effect = Mock(returncode=0)
-        result = xray_scan_instance.scan_dependencies(
-            prefix, target_dir_name, working_dir, bypass_limits_flag
+
+        xray_scan_instance.scan_dependencies(
+            prefix, target_dir_name, bypass_limits_flag
         )
 
         mock_subprocess_run.assert_called_with(
@@ -283,7 +196,7 @@ def test_scan_dependencies_success(xray_scan_instance):
             text=True,
         )
         mock_json_loads.assert_any_call
-        mock_path_join.assert_called_with(working_dir, "scan_result.json")
+        mock_path_join.assert_called_with(target_dir_name, "scan_result.json")
         mock_open.assert_any_call
         mock_json_dump.assert_any_call
 
@@ -294,13 +207,13 @@ def test_scan_dependencies_failure(xray_scan_instance):
     ) as mock_logger_error:
         prefix = "jf"
         target_dir_name = "target_dir"
-        working_dir = "/path/to/working_dir"
         bypass_limits_flag = False
         mock_subprocess_run.side_effect = subprocess.CalledProcessError(
             returncode=1, cmd="xray scan"
         )
+
         xray_scan_instance.scan_dependencies(
-            prefix, target_dir_name, working_dir, bypass_limits_flag
+            prefix, target_dir_name, bypass_limits_flag
         )
 
         mock_logger_error.assert_called_with(
@@ -309,210 +222,108 @@ def test_scan_dependencies_failure(xray_scan_instance):
 
 
 def test_run_tool_dependencies_sca_linux(xray_scan_instance):
-    remote_config = {
-        "XRAY": {"CLI_VERSION": "1.0"},
-    }
-    token = "token123"
-    working_dir = "/path/to/working_dir"
-    skip_flag = False
-    scan_flag = True
-    bypass_limits_flag = False
-    pattern = "\\.(jar|ear|war)$"
-
     with patch("platform.system") as mock_system, patch(
-        "os.path.join"
-    ) as mock_join, patch("os.path.exists") as mock_exists, patch(
-        "os.makedirs"
-    ) as mock_makedirs, patch(
         "os.listdir"
     ) as mock_listdir, patch(
-        "shutil.rmtree"
-    ) as mock_rmtree, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_linux"
-    ) as mock_install_tool_linux, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_windows"
-    ) as mock_install_tool_windows, patch(
+    ) as mock_install_tool, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.config_server"
     ) as mock_config_server, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.compress_and_mv"
-    ) as mock_compress_and_mv, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.find_artifacts"
-    ) as mock_find_artifacts, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.scan_dependencies"
-    ) as mock_scan_dependencies, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.find_node_modules"
-    ) as mock_find_node_modules:
+    ) as mock_scan_dependencies:
         mock_system.return_value = "Linux"
-        mock_join.side_effect = lambda *args: "/".join(args)
-        mock_exists.return_value = True
         mock_listdir.return_value = ["test_artifact"]
-        mock_find_node_modules.return_value = "/path/to/node_modules"
-        result = xray_scan_instance.run_tool_dependencies_sca(
+        remote_config = {
+            "XRAY": {"CLI_VERSION": "1.0"},
+        }
+        token = "token123"
+        dir_to_scan_path = "/path/to/working_dir"
+        bypass_limits_flag = False
+
+        xray_scan_instance.run_tool_dependencies_sca(
             remote_config,
-            working_dir,
-            skip_flag,
-            scan_flag,
+            dir_to_scan_path,
             bypass_limits_flag,
-            pattern,
             token,
         )
 
-        mock_install_tool_linux.assert_called_with("1.0")
+        mock_install_tool.assert_called_with("1.0")
         mock_config_server.assert_called_with("./jf", token)
-        mock_rmtree.assert_any_call
-        mock_makedirs.assert_any_call
         mock_listdir.assert_any_call
-        mock_find_node_modules.assert_called_with(working_dir)
-        mock_compress_and_mv.assert_any_call
-        mock_find_artifacts.assert_called_with(
-            pattern,
-            working_dir,
-            working_dir + "/dependencies_to_scan",
-            "/path/to/node_modules",
-        )
         mock_scan_dependencies.assert_called_with(
             "./jf",
-            working_dir + "/dependencies_to_scan",
-            working_dir,
+            dir_to_scan_path,
             bypass_limits_flag,
         )
 
 
 def test_run_tool_dependencies_sca_windows(xray_scan_instance):
-    remote_config = {
-        "XRAY": {"CLI_VERSION": "1.0"},
-    }
-    token = "token123"
-    working_dir = "/path/to/working_dir"
-    skip_flag = False
-    scan_flag = True
-    bypass_limits_flag = False
-    pattern = "\\.(jar|ear|war)$"
-
     with patch("platform.system") as mock_system, patch(
-        "os.path.join"
-    ) as mock_join, patch("os.path.exists") as mock_exists, patch(
-        "os.makedirs"
-    ) as mock_makedirs, patch(
         "os.listdir"
     ) as mock_listdir, patch(
-        "shutil.rmtree"
-    ) as mock_rmtree, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_linux"
-    ) as mock_install_tool_linux, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_windows"
-    ) as mock_install_tool_windows, patch(
+    ) as mock_install_tool, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.config_server"
     ) as mock_config_server, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.compress_and_mv"
-    ) as mock_compress_and_mv, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.find_artifacts"
-    ) as mock_find_artifacts, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.scan_dependencies"
-    ) as mock_scan_dependencies, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.find_node_modules"
-    ) as mock_find_node_modules:
+    ) as mock_scan_dependencies:
         mock_system.return_value = "Windows"
-        mock_join.side_effect = lambda *args: "/".join(args)
-        mock_exists.return_value = True
         mock_listdir.return_value = ["test_artifact"]
-        mock_find_node_modules.return_value = "/path/to/node_modules"
-        result = xray_scan_instance.run_tool_dependencies_sca(
+        remote_config = {
+            "XRAY": {"CLI_VERSION": "1.0"},
+        }
+        token = "token123"
+        dir_to_scan_path = "/path/to/working_dir"
+        bypass_limits_flag = False
+
+        xray_scan_instance.run_tool_dependencies_sca(
             remote_config,
-            working_dir,
-            skip_flag,
-            scan_flag,
+            dir_to_scan_path,
             bypass_limits_flag,
-            pattern,
             token,
         )
 
-        mock_install_tool_windows.assert_called_with("1.0")
+        mock_install_tool.assert_called_with("1.0")
         mock_config_server.assert_called_with("./jf.exe", token)
-        mock_rmtree.assert_any_call
-        mock_makedirs.assert_any_call
         mock_listdir.assert_any_call
-        mock_find_node_modules.assert_called_with(working_dir)
-        mock_compress_and_mv.assert_any_call
-        mock_find_artifacts.assert_called_with(
-            pattern,
-            working_dir,
-            working_dir + "/dependencies_to_scan",
-            "/path/to/node_modules",
-        )
         mock_scan_dependencies.assert_called_with(
             "./jf.exe",
-            working_dir + "/dependencies_to_scan",
-            working_dir,
+            dir_to_scan_path,
             bypass_limits_flag,
         )
 
 
 def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
-    remote_config = {
-        "XRAY": {"CLI_VERSION": "1.0"},
-    }
-    token = "token123"
-    working_dir = "/path/to/working_dir"
-    skip_flag = False
-    scan_flag = True
-    bypass_limits_flag = False
-    pattern = "\\.(jar|ear|war)$"
-
     with patch("platform.system") as mock_system, patch(
-        "os.path.join"
-    ) as mock_join, patch("os.path.exists") as mock_exists, patch(
-        "os.makedirs"
-    ) as mock_makedirs, patch(
         "os.listdir"
     ) as mock_listdir, patch(
-        "shutil.rmtree"
-    ) as mock_rmtree, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_darwin"
-    ) as mock_install_tool_darwin, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_windows"
-    ) as mock_install_tool_windows, patch(
+    ) as mock_install_tool, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.config_server"
     ) as mock_config_server, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.compress_and_mv"
-    ) as mock_compress_and_mv, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.find_artifacts"
-    ) as mock_find_artifacts, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.scan_dependencies"
-    ) as mock_scan_dependencies, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.find_node_modules"
-    ) as mock_find_node_modules:
+    ) as mock_scan_dependencies:
         mock_system.return_value = "Darwin"
-        mock_join.side_effect = lambda *args: "/".join(args)
-        mock_exists.return_value = True
         mock_listdir.return_value = ["test_artifact"]
-        mock_find_node_modules.return_value = "/path/to/node_modules"
-        result = xray_scan_instance.run_tool_dependencies_sca(
+        remote_config = {
+            "XRAY": {"CLI_VERSION": "1.0"},
+        }
+        token = "token123"
+        dir_to_scan_path = "/path/to/working_dir"
+        bypass_limits_flag = False
+
+        xray_scan_instance.run_tool_dependencies_sca(
             remote_config,
-            working_dir,
-            skip_flag,
-            scan_flag,
+            dir_to_scan_path,
             bypass_limits_flag,
-            pattern,
             token,
         )
 
-        mock_install_tool_darwin.assert_called_with("1.0")
+        mock_install_tool.assert_called_with("1.0")
         mock_config_server.assert_called_with("./jf", token)
-        mock_rmtree.assert_any_call
-        mock_makedirs.assert_any_call
         mock_listdir.assert_any_call
-        mock_find_node_modules.assert_called_with(working_dir)
-        mock_compress_and_mv.assert_any_call
-        mock_find_artifacts.assert_called_with(
-            pattern,
-            working_dir,
-            working_dir + "/dependencies_to_scan",
-            "/path/to/node_modules",
-        )
         mock_scan_dependencies.assert_called_with(
             "./jf",
-            working_dir + "/dependencies_to_scan",
-            working_dir,
+            dir_to_scan_path,
             bypass_limits_flag,
         )
