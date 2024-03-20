@@ -7,16 +7,19 @@ from unittest.mock import mock_open, patch, Mock
 
 
 def test_init():
-    with patch(
-        "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
-    ) as mock_tool_remote:
-        dict_args = {"key1": "value1", "key2": "value2"}
-        handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
-            mock_tool_remote, dict_args
-        )
+    remote_config = {"remote_config_key": "remote_config_value"}
+    exclusions = {"Exclusion": "Exclusion_value"}
+    pipeline_name = "pipeline"
+    agent_directory = "agent_directory"
 
-        assert handle_remote_config_patterns_instance.tool_remote == mock_tool_remote
-        assert handle_remote_config_patterns_instance.dict_args == dict_args
+    handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
+        remote_config, exclusions, pipeline_name, agent_directory
+    )
+
+    assert handle_remote_config_patterns_instance.remote_config == remote_config
+    assert handle_remote_config_patterns_instance.exclusions == exclusions
+    assert handle_remote_config_patterns_instance.pipeline_name == pipeline_name
+    assert handle_remote_config_patterns_instance.agent_directory == agent_directory
 
 
 def test_get_remote_config():
