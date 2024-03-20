@@ -51,6 +51,13 @@ class SetInputCore:
                     ]
                     list_exclusions.extend(exclusions)
         return list_exclusions
+    
+    def update_threshold(self, threshold, exclusions_data, pipeline_name):
+        if (pipeline_name in exclusions_data) and (
+            exclusions_data[pipeline_name].get("THRESHOLD", 0)
+        ):
+            threshold["VULNERABILITY"] = exclusions_data[pipeline_name]["THRESHOLD"].get("VULNERABILITY")
+        return threshold
 
     def set_input_core(self, dependencies_scanned):
         """
@@ -66,7 +73,11 @@ class SetInputCore:
                 self.tool,
             ),
             Threshold(
-                self.get_remote_config("SCA/DEPENDENCIES/configTools.json")["THRESHOLD"]
+                self.update_threshold(
+                    self.get_remote_config("SCA/DEPENDENCIES/configTools.json")["THRESHOLD"],
+                    self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"),
+                    self.get_variable("pipeline_name")
+                )
             ),
             dependencies_scanned,
             self.get_remote_config("SCA/DEPENDENCIES/configTools.json")[

@@ -14,11 +14,16 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.f
 import os
 import sys
 
-
 def init_engine_dependencies(
     tool_run, tool_remote, tool_deserializator, dict_args, token, tool
 ):
     sys.stdout.reconfigure(encoding="utf-8")
+
+    remote_config = tool_remote.get_remote_config(dict_args["remote_config_repo"], "SCA/DEPENDENCIES/configTools.json")
+    exclusions = tool_remote.get_remote_config(dict_args["remote_config_repo"], "SCA/DEPENDENCIES/Exclusions/Exclusions.json")
+    pipeline_name = tool_remote.get_variable("pipeline_name")
+    agent_directory = tool_remote.get_variable("agent_directory")
+
 
     handle_remote_config_patterns = HandleRemoteConfigPatterns(tool_remote, dict_args)
     find_mono_repo = FindMonoRepos(tool_remote)
