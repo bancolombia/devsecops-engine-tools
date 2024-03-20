@@ -10,50 +10,68 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.h
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.find_mono_repos import (
     FindMonoRepos,
 )
+from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.find_artifacts import (
+    FindArtifacts,
+)
 
 import os
 import sys
+
 
 def init_engine_dependencies(
     tool_run, tool_remote, tool_deserializator, dict_args, token, tool
 ):
     sys.stdout.reconfigure(encoding="utf-8")
 
-    remote_config = tool_remote.get_remote_config(dict_args["remote_config_repo"], "SCA/DEPENDENCIES/configTools.json")
-    exclusions = tool_remote.get_remote_config(dict_args["remote_config_repo"], "SCA/DEPENDENCIES/Exclusions/Exclusions.json")
+    remote_config = tool_remote.get_remote_config(
+        dict_args["remote_config_repo"], "SCA/DEPENDENCIES/configTools.json"
+    )
+    exclusions = tool_remote.get_remote_config(
+        dict_args["remote_config_repo"], "SCA/DEPENDENCIES/Exclusions/Exclusions.json"
+    )
     pipeline_name = tool_remote.get_variable("pipeline_name")
     agent_directory = tool_remote.get_variable("agent_directory")
 
-
-    handle_remote_config_patterns = HandleRemoteConfigPatterns(tool_remote, dict_args)
-    find_mono_repo = FindMonoRepos(tool_remote)
-
-    current_path = os.getcwd()
-    mr_path = find_mono_repo.process_find_mono_repo()
-    agent_path = handle_remote_config_patterns.process_handle_working_directory()
-    if agent_path != current_path:
-        current_path = agent_path
-    elif mr_path != current_path:
-        current_path = mr_path
-
-    dependencies_sca_scan = DependenciesScan(
-        tool_run,
-        tool_remote,
-        tool_deserializator,
-        dict_args,
-        current_path,
-        handle_remote_config_patterns.process_handle_skip_tool(),
-        handle_remote_config_patterns.process_handle_analysis_pattern(),
-        handle_remote_config_patterns.process_handle_bypass_expression(),
-        handle_remote_config_patterns.process_handle_excluded_files(),
-        token,
+    handle_remote_config_patterns = HandleRemoteConfigPatterns(
+        remote_config, exclusions, pipeline_name, agent_directory
     )
-    input_core = SetInputCore(tool_remote, dict_args, tool)
-    dependencies_scanned = dependencies_sca_scan.process()
-    if dependencies_scanned:
-        deserialized = dependencies_sca_scan.deserializator(dependencies_scanned)
-    else:
-        deserialized = []
+    skip_flag = handle_remote_config_patterns.process_handle_skip_tool()
+    scan_flag = handle_remote_config_patterns.process_handle_analysis_pattern()
+
+    dependencies_scanned = None
+    deserialized = []
+    input_core = SetInputCore(remote_config, exclusions, pipeline_name, tool)
+
+    if scan_flag and not (skip_flag):
+        find_mono_repo = FindMonoRepos(pipeline_name)
+        mr_path = find_mono_repo.process_find_mono_repo()
+        agent_path = handle_remote_config_patterns.process_handle_working_directory()
+        current_path = os.getcwd()
+        if agent_path != current_path:
+            current_path = agent_path
+        elif mr_path != current_path:
+            current_path = mr_path
+
+        bypass_limits_flag = (
+            handle_remote_config_patterns.process_handle_bypass_expression()
+        )
+        pattern = handle_remote_config_patterns.process_handle_excluded_files()
+
+        find_artifacts = FindArtifacts(current_path, pattern)
+        dir_to_scan_path = find_artifacts.find_artifacts()
+
+        dependencies_sca_scan = DependenciesScan(
+            tool_run,
+            tool_deserializator,
+            remote_config,
+            dir_to_scan_path,
+            bypass_limits_flag,
+            token,
+        )
+        dependencies_scanned = dependencies_sca_scan.process()
+        if dependencies_scanned:
+            deserialized = dependencies_sca_scan.deserializator(dependencies_scanned)
+
     core_input = input_core.set_input_core(dependencies_scanned)
 
     return deserialized, core_input

@@ -1,7 +1,3 @@
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
-    DevopsPlatformGateway,
-)
-
 import re
 import os
 
@@ -9,29 +5,15 @@ import os
 class HandleRemoteConfigPatterns:
     def __init__(
         self,
-        tool_remote: DevopsPlatformGateway,
-        dict_args,
+        remote_config,
+        exclusions,
+        pipeline_name,
+        agent_directory,
     ):
-        self.tool_remote = tool_remote
-        self.dict_args = dict_args
-
-    def get_remote_config(self, file_path):
-        """
-        Get remote configuration
-        Return: dict: Remote configuration
-        """
-        return self.tool_remote.get_remote_config(
-            self.dict_args["remote_config_repo"], file_path
-        )
-
-    def get_variable(self, variable):
-        """
-        Get variable.
-
-        Returns:
-            dict: Remote variable.
-        """
-        return self.tool_remote.get_variable(variable)
+        self.remote_config = remote_config
+        self.exclusions = exclusions
+        self.pipeline_name = pipeline_name
+        self.agent_directory = agent_directory
 
     def handle_excluded_files(self, pattern, pipeline_name, exclusions):
         """
@@ -64,11 +46,9 @@ class HandleRemoteConfigPatterns:
         Return: string: new regex expresion.
         """
         return self.handle_excluded_files(
-            self.get_remote_config("SCA/DEPENDENCIES/configTools.json")[
-                "REGEX_EXPRESSION_EXTENSIONS"
-            ],
-            self.get_variable("pipeline_name"),
-            self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"),
+            self.remote_config["REGEX_EXPRESSION_EXTENSIONS"],
+            self.pipeline_name,
+            self.exclusions,
         )
 
     def handle_analysis_pattern(self, ignore, pipeline_name):
@@ -89,10 +69,8 @@ class HandleRemoteConfigPatterns:
         Return: bool: False -> not scan, True -> scan.
         """
         return self.handle_analysis_pattern(
-            self.get_remote_config("SCA/DEPENDENCIES/configTools.json")[
-                "IGNORE_ANALYSIS_PATTERN"
-            ],
-            self.get_variable("pipeline_name"),
+            self.remote_config["IGNORE_ANALYSIS_PATTERN"],
+            self.pipeline_name,
         )
 
     def handle_bypass_expression(self, bypass_limits, pipeline_name):
@@ -113,10 +91,8 @@ class HandleRemoteConfigPatterns:
         Return: bool: True -> Bypass archive limits, False -> Without bypass archive limits.
         """
         return self.handle_bypass_expression(
-            self.get_remote_config("SCA/DEPENDENCIES/configTools.json")[
-                "BYPASS_ARCHIVE_LIMITS"
-            ],
-            self.get_variable("pipeline_name"),
+            self.remote_config["BYPASS_ARCHIVE_LIMITS"],
+            self.pipeline_name,
         )
 
     def handle_skip_tool(self, exclusions, pipeline_name):
@@ -139,8 +115,8 @@ class HandleRemoteConfigPatterns:
         Return: bool: True -> skip tool, False -> not skip tool.
         """
         return self.handle_skip_tool(
-            self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"),
-            self.get_variable("pipeline_name"),
+            self.exclusions,
+            self.pipeline_name,
         )
 
     def handle_working_directory(self, work_dir_different_flag, agent_directory):
@@ -162,8 +138,6 @@ class HandleRemoteConfigPatterns:
         Return: String: Working directory.
         """
         return self.handle_working_directory(
-            self.get_remote_config("SCA/DEPENDENCIES/configTools.json")[
-                "WORK_DIR_DIFFERENT_FLAG"
-            ],
-            self.get_variable("agent_directory"),
+            self.remote_config["WORK_DIR_DIFFERENT_FLAG"],
+            self.agent_directory,
         )
