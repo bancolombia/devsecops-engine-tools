@@ -1,36 +1,14 @@
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
-    DevopsPlatformGateway,
-)
 
 
 class SetInputCore:
-    def __init__(self, tool_remote: DevopsPlatformGateway, dict_args, tool):
-        self.tool_remote = tool_remote
-        self.dict_args = dict_args
+    def __init__(self, remote_config, exclusions, pipeline_name, tool):
+        self.remote_config = remote_config
+        self.exclusions = exclusions
+        self.pipeline_name = pipeline_name
         self.tool = tool
-
-    def get_remote_config(self, file_path):
-        """
-        Get remote configuration.
-
-        Returns:
-            dict: Remote configuration.
-        """
-        return self.tool_remote.get_remote_config(
-            self.dict_args["remote_config_repo"], file_path
-        )
-
-    def get_variable(self, variable):
-        """
-        Get variable.
-
-        Returns:
-            dict: Remote variable.
-        """
-        return self.tool_remote.get_variable(variable)
 
     def get_exclusions(self, exclusions_data, pipeline_name, tool):
         list_exclusions = []
@@ -51,12 +29,14 @@ class SetInputCore:
                     ]
                     list_exclusions.extend(exclusions)
         return list_exclusions
-    
+
     def update_threshold(self, threshold, exclusions_data, pipeline_name):
         if (pipeline_name in exclusions_data) and (
             exclusions_data[pipeline_name].get("THRESHOLD", 0)
         ):
-            threshold["VULNERABILITY"] = exclusions_data[pipeline_name]["THRESHOLD"].get("VULNERABILITY")
+            threshold["VULNERABILITY"] = exclusions_data[pipeline_name][
+                "THRESHOLD"
+            ].get("VULNERABILITY")
         return threshold
 
     def set_input_core(self, dependencies_scanned):
@@ -68,21 +48,17 @@ class SetInputCore:
         """
         return InputCore(
             self.get_exclusions(
-                self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"),
-                self.get_variable("pipeline_name"),
+                self.exclusions,
+                self.pipeline_name,
                 self.tool,
             ),
             Threshold(
                 self.update_threshold(
-                    self.get_remote_config("SCA/DEPENDENCIES/configTools.json")["THRESHOLD"],
-                    self.get_remote_config("SCA/DEPENDENCIES/Exclusions/Exclusions.json"),
-                    self.get_variable("pipeline_name")
+                    self.remote_config["THRESHOLD"], self.exclusions, self.pipeline_name
                 )
             ),
             dependencies_scanned,
-            self.get_remote_config("SCA/DEPENDENCIES/configTools.json")[
-                "MESSAGE_INFO_SCA"
-            ],
-            self.get_variable("pipeline_name"),
+            self.remote_config["MESSAGE_INFO_SCA"],
+            self.pipeline_name,
             "Build",
         )

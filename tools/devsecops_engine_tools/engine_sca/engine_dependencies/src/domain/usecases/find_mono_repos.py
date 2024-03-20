@@ -1,26 +1,12 @@
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
-    DevopsPlatformGateway,
-)
-
-import re
 import os
 
 
 class FindMonoRepos:
     def __init__(
         self,
-        tool_remote: DevopsPlatformGateway,
+        pipeline_name,
     ):
-        self.tool_remote = tool_remote
-
-    def get_variable(self, variable):
-        """
-        Get variable.
-
-        Returns:
-            dict: Remote variable.
-        """
-        return self.tool_remote.get_variable(variable)
+        self.pipeline_name = pipeline_name
 
     def handle_find_mono_repo(self, pipeline_name):
         """
@@ -49,5 +35,5 @@ class FindMonoRepos:
         Return: String: Directory to scan.
         """
         return self.handle_find_mono_repo(
-            self.get_variable("pipeline_name"),
+            self.pipeline_name,
         )
