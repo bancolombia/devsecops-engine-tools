@@ -45,13 +45,11 @@ class TrufflehogRun(ToolGateway):
         exclude_path = agent_work_folder + "/excludedPath.txt"
         response = self.run_parallel_scans(files_commits, trufflehog_command, exclude_path)
         return response
-    
     def scan_file(self, file_path, trufflehog_command, exclude_path):
         command = f"{trufflehog_command} filesystem {file_path} --json --exclude-paths {exclude_path} --no-verification"
         response_command = subprocess.run(command, capture_output=True, shell=True)
         output = response_command.stdout.decode("utf-8")
         return output
-    
     def run_parallel_scans(self, files_commits, trufflehog_command, exclude_path):
         chunk_size = max(len(files_commits) // 4, 1)
         chunks = [files_commits[i:i+chunk_size] for i in range(0, len(files_commits), chunk_size)]
@@ -62,7 +60,6 @@ class TrufflehogRun(ToolGateway):
                 for future in concurrent.futures.as_completed(futures):
                     results.append(future.result())
         return self.decode_output(results)
-    
     def decode_output(self, results):
         for decode_output in results:
             if decode_output != '':
