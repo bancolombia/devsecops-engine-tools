@@ -1,5 +1,4 @@
 import json
-# from multiprocessing import Pool
 import concurrent.futures
 import re
 import subprocess
