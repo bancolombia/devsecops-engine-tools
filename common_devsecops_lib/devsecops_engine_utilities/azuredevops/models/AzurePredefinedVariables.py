@@ -34,7 +34,7 @@ class SystemVariables(BaseEnum):
     System_TeamProject = "System.TeamProject"
     System_TeamProjectId = "System.TeamProject"
     System_PullRequestId = "System.PullRequest.PullRequestId"
-    System_TargetBranch = "System.PullRequest.targetBranch"
+    System_TargetBranchName = "System.PullRequest.TargetBranchName"
 
 
 class BuildVariables(BaseEnum):
