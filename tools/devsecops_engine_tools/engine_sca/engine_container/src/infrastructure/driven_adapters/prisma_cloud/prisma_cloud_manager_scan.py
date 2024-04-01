@@ -19,9 +19,9 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class PrismaCloudManagerScan(ToolGateway):
     def download_twistcli(
-        self, file_path, prisma_access_key, prisma_secret_key, prisma_console_url
+        self, file_path, prisma_access_key, prisma_secret_key, prisma_console_url, prisma_api_version
     ):
-        url = f"{prisma_console_url}/api/v1/util/twistcli"
+        url = f"{prisma_console_url}/api/{prisma_api_version}/util/twistcli"
         credentials = base64.b64encode(
             f"{prisma_access_key}:{prisma_secret_key}".encode()
         ).decode()
@@ -106,6 +106,7 @@ class PrismaCloudManagerScan(ToolGateway):
                         remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
                         prisma_secret_key,
                         remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
+                        remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"],
                     )
                 for image in scan_image:
                     repository, tag = image["Repository"], image["Tag"]
