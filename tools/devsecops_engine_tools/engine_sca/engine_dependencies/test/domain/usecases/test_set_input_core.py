@@ -2,8 +2,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.s
     SetInputCore,
 )
 
-import pytest
-from unittest.mock import mock_open, patch, Mock
+from unittest.mock import patch
 
 
 def test_init():
@@ -20,44 +19,6 @@ def test_init():
     assert set_input_core_instance.exclusions == exclusions
     assert set_input_core_instance.pipeline_name == pipeline_name
     assert set_input_core_instance.tool == tool
-
-
-# def test_get_remote_config():
-#     with patch(
-#         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
-#     ) as mock_tool_remote:
-#         mock_tool_remote.get_remote_config.return_value = {
-#             "remote_config_key": "remote_config_value"
-#         }
-#         dict_args = {
-#             "dict_args_key": "dict_args_value",
-#             "remote_config_repo": "remote_config_repo_value",
-#         }
-#         file_path = "/path/to/file.txt"
-#         tool = "XRAY"
-#         set_input_core_instance = SetInputCore(mock_tool_remote, dict_args, tool)
-#         result = set_input_core_instance.get_remote_config(file_path)
-
-#         mock_tool_remote.get_remote_config.assert_called_once_with(
-#             dict_args["remote_config_repo"], file_path
-#         )
-#         assert result == {"remote_config_key": "remote_config_value"}
-
-
-# def test_get_variable():
-#     with patch(
-#         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
-#     ) as mock_tool_remote:
-#         mock_tool_remote.get_remote_config.return_value = {
-#             "remote_config_key": "remote_config_value"
-#         }
-#         dict_args = {"dict_args_key": "dict_args_value"}
-#         variable = "test_variable"
-#         tool = "XRAY"
-#         set_input_core_instance = SetInputCore(mock_tool_remote, dict_args, tool)
-#         result = set_input_core_instance.get_variable(variable)
-
-#         mock_tool_remote.get_variable.assert_called_once_with(variable)
 
 
 def test_get_exclusions():

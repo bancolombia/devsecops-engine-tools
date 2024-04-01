@@ -66,10 +66,10 @@ class PrismaCloudManagerScan(ToolGateway):
                         remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
                         "--password",
                         prisma_secret_key,
-                        image_name,
                         "--output-file",
                         result_file,
                         "--details",
+                        image_name,
                     )
                     try:
                         subprocess.run(

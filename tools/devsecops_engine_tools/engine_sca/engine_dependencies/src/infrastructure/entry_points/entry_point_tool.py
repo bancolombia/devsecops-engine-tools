@@ -35,8 +35,8 @@ def init_engine_dependencies(
     handle_remote_config_patterns = HandleRemoteConfigPatterns(
         remote_config, exclusions, pipeline_name, agent_directory
     )
-    skip_flag = handle_remote_config_patterns.process_handle_skip_tool()
-    scan_flag = handle_remote_config_patterns.process_handle_analysis_pattern()
+    skip_flag = handle_remote_config_patterns.skip_from_exclusion()
+    scan_flag = handle_remote_config_patterns.ignore_analysis_pattern()
 
     dependencies_scanned = None
     deserialized = []
@@ -44,18 +44,16 @@ def init_engine_dependencies(
 
     if scan_flag and not (skip_flag):
         find_mono_repo = FindMonoRepos(pipeline_name)
-        mr_path = find_mono_repo.process_find_mono_repo()
-        agent_path = handle_remote_config_patterns.process_handle_working_directory()
+        mr_path = find_mono_repo.find_mono_repo()
+        agent_path = handle_remote_config_patterns.different_working_directory()
         current_path = os.getcwd()
         if agent_path != current_path:
             current_path = agent_path
         elif mr_path != current_path:
             current_path = mr_path
 
-        bypass_limits_flag = (
-            handle_remote_config_patterns.process_handle_bypass_expression()
-        )
-        pattern = handle_remote_config_patterns.process_handle_excluded_files()
+        bypass_limits_flag = handle_remote_config_patterns.bypass_archive_limits()
+        pattern = handle_remote_config_patterns.excluded_files()
 
         find_artifacts = FindArtifacts(current_path, pattern)
         dir_to_scan_path = find_artifacts.find_artifacts()

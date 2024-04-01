@@ -2,8 +2,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.h
     HandleRemoteConfigPatterns,
 )
 
-import pytest
-from unittest.mock import mock_open, patch, Mock
+from unittest.mock import patch
 
 
 def test_init():
@@ -22,10 +21,12 @@ def test_init():
     assert handle_remote_config_patterns_instance.agent_directory == agent_directory
 
 
-def test_handle_excluded_files():
-    remote_config = {"remote_config_key": "remote_config_value"}
+def test_excluded_files():
+    remote_config = {
+        "remote_config_key": "remote_config_value",
+        "REGEX_EXPRESSION_EXTENSIONS": ".js|.py|.txt",
+    }
     pipeline_name = "pipeline1"
-    pattern = ".js|.py|.txt"
     exclusions = {"pipeline1": {"SKIP_FILES": {"files": [".py", ".txt"]}}}
     agent_directory = "agent_directory"
     expected_result = ".js"
@@ -33,40 +34,16 @@ def test_handle_excluded_files():
     handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
         remote_config, exclusions, pipeline_name, agent_directory
     )
-    result = handle_remote_config_patterns_instance.handle_excluded_files(
-        pattern, pipeline_name, exclusions
-    )
+    result = handle_remote_config_patterns_instance.excluded_files()
 
     assert result == expected_result
 
 
-def test_process_handle_excluded_files():
-    with patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.handle_remote_config_patterns.HandleRemoteConfigPatterns.handle_excluded_files"
-    ) as mock_handle_excluded_files:
-        remote_config = {
-            "remote_config_key": "remote_config_value",
-            "REGEX_EXPRESSION_EXTENSIONS": "regex",
-        }
-        pipeline_name = "pipeline1"
-        exclusions = {"pipeline1": {"SKIP_FILES": {"files": [".py", ".txt"]}}}
-        agent_directory = "agent_directory"
-
-        handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
-            remote_config, exclusions, pipeline_name, agent_directory
-        )
-        handle_remote_config_patterns_instance.process_handle_excluded_files()
-
-        mock_handle_excluded_files.assert_called_with(
-            "regex", pipeline_name, exclusions
-        )
-
-
-def test_handle_analysis_pattern_matched():
+def test_ignore_analysis_pattern_matched():
     remote_config = {
         "remote_config_key": "remote_config_value",
+        "IGNORE_ANALYSIS_PATTERN": "(.*_test|Template_.*)",
     }
-    ignore = "(.*_test|Template_.*)"
     pipeline_name = "pipeline_test"
     exclusions = {"pipeline1": {"SKIP_FILES": {"files": [".py", ".txt"]}}}
     agent_directory = "agent_directory"
@@ -74,18 +51,16 @@ def test_handle_analysis_pattern_matched():
     handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
         remote_config, exclusions, pipeline_name, agent_directory
     )
-    result = handle_remote_config_patterns_instance.handle_analysis_pattern(
-        ignore, pipeline_name
-    )
+    result = handle_remote_config_patterns_instance.ignore_analysis_pattern()
 
     assert result == False
 
 
-def test_handle_analysis_pattern_not_matched():
+def test_ignore_analysis_pattern_matched():
     remote_config = {
         "remote_config_key": "remote_config_value",
+        "IGNORE_ANALYSIS_PATTERN": "(.*_test|Template_.*)",
     }
-    ignore = "(.*_test|Template_.*)"
     pipeline_name = "pipeline"
     exclusions = {"pipeline1": {"SKIP_FILES": {"files": [".py", ".txt"]}}}
     agent_directory = "agent_directory"
@@ -93,40 +68,33 @@ def test_handle_analysis_pattern_not_matched():
     handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
         remote_config, exclusions, pipeline_name, agent_directory
     )
-    result = handle_remote_config_patterns_instance.handle_analysis_pattern(
-        ignore, pipeline_name
-    )
+    result = handle_remote_config_patterns_instance.ignore_analysis_pattern()
 
     assert result == True
 
 
-def test_process_handle_analysis_pattern():
-    with patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.handle_remote_config_patterns.HandleRemoteConfigPatterns.handle_analysis_pattern"
-    ) as mock_handle_analysis_pattern:
-        remote_config = {
-            "remote_config_key": "remote_config_value",
-            "IGNORE_ANALYSIS_PATTERN": "(.*_test|Template_.*)",
-        }
-        pipeline_name = "pipeline_name"
-        exclusions = {"pipeline1": {"SKIP_FILES": {"files": [".py", ".txt"]}}}
-        agent_directory = "agent_directory"
-
-        handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
-            remote_config, exclusions, pipeline_name, agent_directory
-        )
-        handle_remote_config_patterns_instance.process_handle_analysis_pattern()
-
-        mock_handle_analysis_pattern.assert_called_with(
-            "(.*_test|Template_.*)", pipeline_name
-        )
-
-
-def test_handle_bypass_expression_matched():
+def test_bypass_archive_limits_not_matched():
     remote_config = {
         "remote_config_key": "remote_config_value",
+        "BYPASS_ARCHIVE_LIMITS": "(pipeline1|pipeline2)",
     }
-    bypass_limits = "(pipeline1|pipeline2)"
+    pipeline_name = "pipeline"
+    exclusions = {"pipeline1": {"SKIP_FILES": {"files": [".py", ".txt"]}}}
+    agent_directory = "agent_directory"
+
+    handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
+        remote_config, exclusions, pipeline_name, agent_directory
+    )
+    result = handle_remote_config_patterns_instance.bypass_archive_limits()
+
+    assert result == False
+
+
+def test_bypass_archive_limits_matched():
+    remote_config = {
+        "remote_config_key": "remote_config_value",
+        "BYPASS_ARCHIVE_LIMITS": "(pipeline1|pipeline2)",
+    }
     pipeline_name = "pipeline1"
     exclusions = {"pipeline1": {"SKIP_FILES": {"files": [".py", ".txt"]}}}
     agent_directory = "agent_directory"
@@ -134,55 +102,12 @@ def test_handle_bypass_expression_matched():
     handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
         remote_config, exclusions, pipeline_name, agent_directory
     )
-    result = handle_remote_config_patterns_instance.handle_bypass_expression(
-        bypass_limits, pipeline_name
-    )
+    result = handle_remote_config_patterns_instance.bypass_archive_limits()
 
     assert result == True
 
 
-def test_handle_bypass_expression_not_matched():
-    remote_config = {
-        "remote_config_key": "remote_config_value",
-    }
-    bypass_limits = "(pipeline1|pipeline2)"
-    pipeline_name = "pipeline"
-    exclusions = {"pipeline1": {"SKIP_FILES": {"files": [".py", ".txt"]}}}
-    agent_directory = "agent_directory"
-
-    handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
-        remote_config, exclusions, pipeline_name, agent_directory
-    )
-    result = handle_remote_config_patterns_instance.handle_bypass_expression(
-        bypass_limits, pipeline_name
-    )
-
-    assert result == False
-
-
-def test_process_handle_bypass_expression():
-    with patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.handle_remote_config_patterns.HandleRemoteConfigPatterns.handle_bypass_expression"
-    ) as mock_handle_bypass_expression:
-        remote_config = {
-            "remote_config_key": "remote_config_value",
-            "BYPASS_ARCHIVE_LIMITS": "(pipeline1|pipeline2)",
-        }
-        pipeline_name = "pipeline_name"
-        exclusions = {"pipeline1": {"SKIP_FILES": {"files": [".py", ".txt"]}}}
-        agent_directory = "agent_directory"
-
-        handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
-            remote_config, exclusions, pipeline_name, agent_directory
-        )
-        handle_remote_config_patterns_instance.process_handle_bypass_expression()
-
-        mock_handle_bypass_expression.assert_called_with(
-            "(pipeline1|pipeline2)", pipeline_name
-        )
-
-
-def test_handle_skip_tool_skip():
+def test_skip_from_exclusion():
     remote_config = {
         "remote_config_key": "remote_config_value",
     }
@@ -193,14 +118,12 @@ def test_handle_skip_tool_skip():
     handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
         remote_config, exclusions, pipeline_name, agent_directory
     )
-    result = handle_remote_config_patterns_instance.handle_skip_tool(
-        exclusions, pipeline_name
-    )
+    result = handle_remote_config_patterns_instance.skip_from_exclusion()
 
     assert result == True
 
 
-def test_handle_skip_tool_not_skip():
+def test_skip_from_exclusion_not_skip():
     remote_config = {
         "remote_config_key": "remote_config_value",
     }
@@ -211,41 +134,20 @@ def test_handle_skip_tool_not_skip():
     handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
         remote_config, exclusions, pipeline_name, agent_directory
     )
-    result = handle_remote_config_patterns_instance.handle_skip_tool(
-        exclusions, pipeline_name
-    )
+    result = handle_remote_config_patterns_instance.skip_from_exclusion()
 
     assert result == False
 
 
-def test_process_handle_skip_tool():
-    with patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.handle_remote_config_patterns.HandleRemoteConfigPatterns.handle_skip_tool"
-    ) as mock_handle_skip_tool:
-        remote_config = {
-            "remote_config_key": "remote_config_value",
-        }
-        pipeline_name = "pipeline_name"
-        exclusions = {"pipeline1": {"SKIP_TOOL": {"hu": ""}}}
-        agent_directory = "agent_directory"
-
-        handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
-            remote_config, exclusions, pipeline_name, agent_directory
-        )
-        handle_remote_config_patterns_instance.process_handle_skip_tool()
-
-        mock_handle_skip_tool.assert_called_with(exclusions, pipeline_name)
-
-
-def test_handle_working_directory_agentdir():
+def test_different_working_directory_agentdir():
     with patch("os.walk") as mock_walk:
         remote_config = {
             "remote_config_key": "remote_config_value",
             "ENGINE_DEPENDENCIES": {"ENABLED": "true"},
+            "WORK_DIR_DIFFERENT_FLAG": "test_dir",
         }
         pipeline_name = "pipeline_name"
         exclusions = {"pipeline1": {"SKIP_TOOL": {"hu": ""}}}
-        work_dir_different_flag = "test_dir"
         agent_directory = "/path/to/agent"
         mock_walk.return_value = [
             (agent_directory, ["dir1", "dir2"], ["file1.txt", "file2.json"]),
@@ -256,23 +158,21 @@ def test_handle_working_directory_agentdir():
         handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
             remote_config, exclusions, pipeline_name, agent_directory
         )
-        result = handle_remote_config_patterns_instance.handle_working_directory(
-            work_dir_different_flag, agent_directory
-        )
+        result = handle_remote_config_patterns_instance.different_working_directory()
 
         assert result == agent_directory
 
 
-def test_handle_working_directory_workingdir():
+def test_different_working_directory_workingdir():
     with patch("os.walk") as mock_walk, patch("os.getcwd") as mock_getcwd:
         remote_config = {
             "remote_config_key": "remote_config_value",
             "ENGINE_DEPENDENCIES": {"ENABLED": "true"},
+            "WORK_DIR_DIFFERENT_FLAG": "test_dir",
         }
         pipeline_name = "pipeline_name"
         exclusions = {"pipeline1": {"SKIP_TOOL": {"hu": ""}}}
         mock_getcwd.return_value = "/path/to/working/dir"
-        work_dir_different_flag = "test_dir"
         agent_directory = None
         mock_walk.return_value = [
             ("/agent_directory", ["dir1", "dir2"], ["file1.txt", "file2.json"]),
@@ -283,28 +183,6 @@ def test_handle_working_directory_workingdir():
         handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
             remote_config, exclusions, pipeline_name, agent_directory
         )
-        result = handle_remote_config_patterns_instance.handle_working_directory(
-            work_dir_different_flag, agent_directory
-        )
+        result = handle_remote_config_patterns_instance.different_working_directory()
 
         assert result == "/path/to/working/dir"
-
-
-def test_process_handle_working_directory():
-    with patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.handle_remote_config_patterns.HandleRemoteConfigPatterns.handle_working_directory"
-    ) as mock_handle_working_directory:
-        remote_config = {
-            "remote_config_key": "remote_config_value",
-            "WORK_DIR_DIFFERENT_FLAG": "test_dir",
-        }
-        agent_directory = "agent_directory"
-        pipeline_name = "pipeline_name"
-        exclusions = {"pipeline1": {"SKIP_TOOL": {"hu": ""}}}
-
-        handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
-            remote_config, exclusions, pipeline_name, agent_directory
-        )
-        handle_remote_config_patterns_instance.process_handle_working_directory()
-
-        mock_handle_working_directory.assert_called_with("test_dir", agent_directory)
