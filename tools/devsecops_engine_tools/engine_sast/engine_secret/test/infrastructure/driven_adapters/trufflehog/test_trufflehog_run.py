@@ -1,8 +1,5 @@
 import unittest
-from unittest.mock import patch
-
-from mock import MagicMock
-
+from unittest.mock import patch, MagicMock
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run import TrufflehogRun
 
 class TestTrufflehogRun(unittest.TestCase):
