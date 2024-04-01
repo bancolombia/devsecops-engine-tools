@@ -49,8 +49,8 @@ class FindArtifacts:
             if not (excluded_dir in root) or excluded_dir == "":
                 for file in files:
                     if extension_pattern.search(file):
-                        ruta_completa = os.path.join(root, file)
-                        finded_files.append(ruta_completa)
+                        full_path = os.path.join(root, file)
+                        finded_files.append(full_path)
 
         for file in finded_files:
             target = os.path.join(dir_to_scan_path, os.path.basename(file))
