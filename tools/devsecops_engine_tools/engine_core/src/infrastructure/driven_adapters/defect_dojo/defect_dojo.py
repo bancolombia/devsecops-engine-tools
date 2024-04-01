@@ -98,11 +98,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
                 response = DefectDojo.send_import_scan(request)
                 if hasattr(response, "url"):
-                    url_parts = response.url.split("/")
-                    test_string = (
-                        "/".join(url_parts[:3]) + "/" + "/".join(url_parts[3:7])
-                    )
-                    print("Report sent to vulnerability management: ", test_string)
+                    url_parts = response.url.split("//")
+                    test_string = "//".join([url_parts[0] + "/", url_parts[1]])
+                    print("Report sent to vulnerability management: ", f"{test_string}?tags={vulnerability_management.dict_args['tool']}")
                 else:
                     raise ExceptionVulnerabilityManagement(response)
         except Exception as ex:
