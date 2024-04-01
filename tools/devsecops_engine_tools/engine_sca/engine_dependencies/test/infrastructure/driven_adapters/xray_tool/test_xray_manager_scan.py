@@ -3,10 +3,9 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.dr
 )
 
 import pytest
-from unittest.mock import mock_open, patch, Mock
+from unittest.mock import patch, Mock
 
 import subprocess
-import os
 
 
 @pytest.fixture

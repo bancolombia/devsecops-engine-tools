@@ -8,7 +8,7 @@ class FindMonoRepos:
     ):
         self.pipeline_name = pipeline_name
 
-    def handle_find_mono_repo(self, pipeline_name):
+    def find_mono_repo(self):
         """
         Handle find mono repository dir.
 
@@ -16,8 +16,8 @@ class FindMonoRepos:
         """
         current_dir = os.getcwd()
         pattern = "_MR_"
-        if pattern in pipeline_name:
-            mr_dir = pipeline_name.split(pattern)[1]
+        if pattern in self.pipeline_name:
+            mr_dir = self.pipeline_name.split(pattern)[1]
             mr_dir_path = os.path.join(current_dir, mr_dir)
             if os.path.isdir(mr_dir_path):
                 return mr_dir_path
@@ -27,13 +27,3 @@ class FindMonoRepos:
                     return os.path.join(root, mr_dir)
 
         return current_dir
-
-    def process_find_mono_repo(self):
-        """
-        Process handle find mono repository dir.
-
-        Return: String: Directory to scan.
-        """
-        return self.handle_find_mono_repo(
-            self.pipeline_name,
-        )

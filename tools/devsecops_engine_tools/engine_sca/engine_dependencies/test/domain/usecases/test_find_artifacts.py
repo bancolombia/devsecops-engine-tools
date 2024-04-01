@@ -2,8 +2,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.f
     FindArtifacts,
 )
 
-import pytest
-from unittest.mock import mock_open, patch, Mock
+from unittest.mock import patch
 import os
 import subprocess
 

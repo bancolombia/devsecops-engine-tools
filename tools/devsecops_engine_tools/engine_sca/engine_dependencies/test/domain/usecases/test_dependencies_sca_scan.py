@@ -2,8 +2,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.d
     DependenciesScan,
 )
 
-import pytest
-from unittest.mock import mock_open, patch, Mock
+from unittest.mock import patch
 
 
 def test_init():
