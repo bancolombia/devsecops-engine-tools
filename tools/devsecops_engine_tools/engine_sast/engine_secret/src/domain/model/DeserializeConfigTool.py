@@ -7,3 +7,4 @@ class DeserializeConfigTool:
         self.level_compliance = Threshold(json_data[tool]['THRESHOLD'])
         self.scope_pipeline = ''
         self.exclude_path = json_data[tool]["EXCLUDE_PATH"]
+        self.number_threads = json_data[tool]["NUMBER_THREADS"]

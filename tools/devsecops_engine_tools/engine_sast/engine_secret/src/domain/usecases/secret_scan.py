@@ -42,6 +42,8 @@ class SecretScan:
                     config_tool.exclude_path,
                     self.devops_platform_gateway.get_variable("OS"),
                     self.devops_platform_gateway.get_variable("WORK_FOLDER"),
+                    self.devops_platform_gateway.get_variable("PATH_DIRECTORY"),
+                    config_tool.number_threads,
                     ),
                 self.devops_platform_gateway
                 )

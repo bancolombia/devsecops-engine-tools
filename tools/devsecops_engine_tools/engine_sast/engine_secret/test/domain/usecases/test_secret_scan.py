@@ -40,7 +40,8 @@ class TestSecretScan(unittest.TestCase):
                         "Critical": 1
                     }
                 },
-                "EXCLUDE_PATH": [".git"]
+                "EXCLUDE_PATH": [".git"],
+                "NUMBER_THREADS": 4
             }
         }
 
@@ -101,7 +102,8 @@ class TestSecretScan(unittest.TestCase):
                         "Critical": 1
                     }
                 },
-                "EXCLUDE_PATH": [".git"]
+                "EXCLUDE_PATH": [".git"],
+                "NUMBER_THREADS": 4
             }
         }
 

@@ -161,15 +161,12 @@ class TestAzureDevops(unittest.TestCase):
             "changes": [{"item": {"gitObjectType": "blob", "path": "/file1.py"}}]
         })
         ]
-
-        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables2:
-            mock_system_variables2.System_DefaultWorkingDirectory.value.return_value = "/path/to/working/dir"
             
-            azure_devops = AzureDevops()
-            results = []
-            results = azure_devops.get_pullrequest_iterations("repository_name", "12345")
+        azure_devops = AzureDevops()
+        results = []
+        results = azure_devops.get_pullrequest_iterations("repository_name", "12345")
 
-            assert results == ["/path/to/working/dir/file1.py"]
+        assert results == ["/file1.py"]
     @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables",
         autospec=True,
@@ -199,16 +196,13 @@ class TestAzureDevops(unittest.TestCase):
         }
         mock_get.return_value = mock_pr_response
 
-        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables') as mock_system_variables2:
-            mock_system_variables2.System_DefaultWorkingDirectory.value.return_value = "/path/to/working/dir"
+        azure_devops = AzureDevops()
+        commits = [{"sourceRefCommit": {"commitId": "e6c3acf12218202069e5bfcce75f9541f8ecfe8c"}}]
+        headers = {}
+        results = []
+        azure_devops.get_commits_files(commits, results, "repository_name", headers)
 
-            azure_devops = AzureDevops()
-            commits = [{"sourceRefCommit": {"commitId": "e6c3acf12218202069e5bfcce75f9541f8ecfe8c"}}]
-            headers = {}
-            results = []
-            azure_devops.get_commits_files(commits, results, "repository_name", headers)
-
-            assert results == ["/path/to/working/dir/file1.py"]
+        assert results == ["/file1.py"]
 
     @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.SystemVariables",

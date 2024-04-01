@@ -76,7 +76,7 @@ class AzureDevops(DevopsPlatformGateway):
             commit_data_list = commit_data["changes"]
             for change in commit_data_list:
                 if change["item"]["gitObjectType"] == "blob":
-                    path_changed = SystemVariables.System_DefaultWorkingDirectory.value() + change["item"]["path"]
+                    path_changed = change["item"]["path"]
                     if not path_changed in results:
                         logger.debug("file of pull request to scan",path_changed)
                         results.append(path_changed)
