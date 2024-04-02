@@ -42,6 +42,7 @@ class BuildVariables(BaseEnum):
     Build_DefinitionName = "Build.DefinitionName"
     Build_Project_Name = "Build.ProjectName"
     Build_Repository_Name = "Build.Repository.Name"
+    Build_Repository_Uri = "Build.Repository.Uri"
     Build_SourceBranch = "Build.SourceBranch"
     Build_SourceBranchName = "Build.SourceBranchName"
     Build_StagingDirectory = "Build.StagingDirectory"
