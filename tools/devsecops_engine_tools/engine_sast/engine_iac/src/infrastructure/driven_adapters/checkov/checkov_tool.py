@@ -149,12 +149,12 @@ class CheckovTool(ToolGateway):
                     ]
                     if config_tool.use_external_checks_git == "True"
                     and agent_env is not None
-                    and rule in ["RULES_K8S", "RULES_CLOUDFORMATION"]
+                    and rule in ["RULES_K8S", "RULES_CLOUDFORMATION","RULES_DOCKER"]
                     else [],
                     env=agent_env,
                     external_checks_dir=f"/tmp/rules/{self.framework_mapping[rule]}"
                     if config_tool.use_external_checks_dir == "True"
-                    and rule in ["RULES_K8S", "RULES_CLOUDFORMATION"]
+                    and rule in ["RULES_K8S", "RULES_CLOUDFORMATION","RULES_DOCKER"]
                     else [],
                 )
 
