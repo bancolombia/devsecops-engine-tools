@@ -8,8 +8,6 @@ import requests
 import re
 import os
 import json
-import shutil
-import tarfile
 
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities import settings
@@ -97,47 +95,7 @@ class XrayScan(ToolGateway):
         except subprocess.CalledProcessError as error:
             logger.error(f"Error during Xray Server configuration: {error}")
 
-    def compress_and_mv(self, npm_modules, target_dir):
-        try:
-            tar_path = os.path.join(target_dir, "node_modules.tar")
-            if os.path.exists(tar_path):
-                os.remove(tar_path)
-            with tarfile.open(tar_path, "w") as tar:
-                tar.add(
-                    npm_modules,
-                    arcname=os.path.basename(npm_modules),
-                    filter=lambda x: None if "/.bin/" in x.name else x,
-                )
-                logger.debug(f"File to scan: {tar_path}")
-
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Error during npm_modules compression: {e}")
-
-    def find_node_modules(self, working_dir):
-        for root, dirs, files in os.walk(working_dir):
-            if "node_modules" in dirs:
-                return os.path.join(root, "node_modules")
-        return None
-
-    def find_artifacts(self, pattern, working_dir, target_dir, excluded_dir):
-        finded_files = []
-        extension_pattern = re.compile(pattern, re.IGNORECASE)
-
-        for root, dirs, files in os.walk(working_dir):
-            if not (excluded_dir in root) or excluded_dir == "":
-                for file in files:
-                    if extension_pattern.search(file):
-                        ruta_completa = os.path.join(root, file)
-                        finded_files.append(ruta_completa)
-
-        for file in finded_files:
-            target = os.path.join(target_dir, os.path.basename(file))
-            shutil.copy2(file, target)
-            logger.debug(f"File to scan: {file}")
-
-    def scan_dependencies(
-        self, prefix, target_dir_name, working_dir, bypass_limits_flag
-    ):
+    def scan_dependencies(self, prefix, target_dir_name, bypass_limits_flag):
         try:
             if bypass_limits_flag:
                 command = [
@@ -153,7 +111,7 @@ class XrayScan(ToolGateway):
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
             scan_result = json.loads(result.stdout)
-            file_result = os.path.join(working_dir, "scan_result.json")
+            file_result = os.path.join(target_dir_name, "scan_result.json")
             with open(file_result, "w") as file:
                 json.dump(scan_result, file, indent=4)
             return file_result
@@ -163,53 +121,34 @@ class XrayScan(ToolGateway):
     def run_tool_dependencies_sca(
         self,
         remote_config,
-        working_dir,
-        skip_flag,
-        scan_flag,
+        dir_to_scan_path,
         bypass_limits_flag,
-        pattern,
         token,
     ):
 
+        cli_version = remote_config["XRAY"]["CLI_VERSION"]
+        os_platform = platform.system()
+
+        if os_platform == "Linux":
+            self.install_tool_linux(cli_version)
+            command_prefix = "./jf"
+        elif os_platform == "Windows":
+            self.install_tool_windows(cli_version)
+            command_prefix = "./jf.exe"
+        elif os_platform == "Darwin":
+            command_prefix = "./jf"
+            self.install_tool_darwin(cli_version)
+        else:
+            logger.warning(f"{os_platform} is not supported.")
+
+        self.config_server(command_prefix, token)
+
         results_file = None
-
-        if scan_flag and not (skip_flag):
-
-            cli_version = remote_config["XRAY"]["CLI_VERSION"]
-            os_platform = platform.system()
-
-            if os_platform == "Linux":
-                self.install_tool_linux(cli_version)
-                command_prefix = "./jf"
-            elif os_platform == "Windows":
-                self.install_tool_windows(cli_version)
-                command_prefix = "./jf.exe"
-            elif os_platform == "Darwin":
-                command_prefix = "./jf"
-                self.install_tool_darwin(cli_version)
-            else:
-                logger.warning(f"{os_platform} is not supported.")
-
-            self.config_server(command_prefix, token)
-
-            dir_to_scan_path = os.path.join(working_dir, "dependencies_to_scan")
-            if os.path.exists(dir_to_scan_path):
-                shutil.rmtree(dir_to_scan_path)
-            os.makedirs(dir_to_scan_path)
-
-            npm_modules_path = self.find_node_modules(working_dir)
-            if npm_modules_path:
-                self.compress_and_mv(npm_modules_path, dir_to_scan_path)
-                excluded_dir = npm_modules_path
-            else:
-                excluded_dir = ""
-            self.find_artifacts(pattern, working_dir, dir_to_scan_path, excluded_dir)
-
-            if len(os.listdir(dir_to_scan_path)) == 0:
-                logger.warning("No artifacts found")
-            else:
-                results_file = self.scan_dependencies(
-                    command_prefix, dir_to_scan_path, working_dir, bypass_limits_flag
-                )
+        if len(os.listdir(dir_to_scan_path)) == 0:
+            logger.warning("No artifacts found")
+        else:
+            results_file = self.scan_dependencies(
+                command_prefix, dir_to_scan_path, bypass_limits_flag
+            )
 
         return results_file
