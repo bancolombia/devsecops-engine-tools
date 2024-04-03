@@ -33,6 +33,7 @@ class TestHandleScan(unittest.TestCase):
         config_tool = {"ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
         secret_tool = "some_secret"
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
+        self.devops_platform_gateway.get_variable.return_value = "dev"
 
         # Mock the runner_engine_iac function and its return values
         findings_list = ["finding1", "finding2"]
@@ -63,7 +64,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
         mock_runner_engine_iac.assert_called_once_with(
-            dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool
+            dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool, "dev"
         )
         self.vulnerability_management.send_vulnerability_management.assert_called_once()
         self.vulnerability_management.get_findings_risk_acceptance.assert_called_once()
