@@ -26,17 +26,14 @@ from devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.applications.runner_dependencies_scan import (
     runner_engine_dependencies,
 )
+from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
+    define_env,
+)
 
 from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
-
-from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities import settings
-
-logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
-
 
 MESSAGE_ENABLED = "not yet enabled"
 
@@ -51,15 +48,6 @@ class HandleScan:
         self.vulnerability_management = vulnerability_management
         self.secrets_manager_gateway = secrets_manager_gateway
         self.devops_platform_gateway = devops_platform_gateway
-
-    def _define_envvm(self):
-        (
-            "pdn"
-            if self.devops_platform_gateway.get_variable("branch_name")
-            in ["trunk,master"]
-            else "qa" if self.devops_platform_gateway.get_variable("branch_name") in 
-            "release" else "dev"
-        )
 
     def _use_vulnerability_management(
         self, config_tool, input_core, dict_args, secret_tool, env
@@ -100,15 +88,19 @@ class HandleScan:
 
     def process(self, dict_args: any, config_tool: any):
         secret_tool = None
+        env = define_env(
+                    self.devops_platform_gateway.get_variable("environment"),
+                    self.devops_platform_gateway.get_variable("branch_name"),
+                )
         if dict_args["use_secrets_manager"] == "true":
             secret_tool = self.secrets_manager_gateway.get_secret(config_tool)
         if "engine_iac" in dict_args["tool"]:
             findings_list, input_core = runner_engine_iac(
-                dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool
+                dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool, env
             )
             if dict_args["use_vulnerability_management"] == "true":
                 self._use_vulnerability_management(
-                    config_tool, input_core, dict_args, secret_tool, self.devops_platform_gateway.get_variable("environment")
+                    config_tool, input_core, dict_args, secret_tool, env
                 )
             return findings_list, input_core
         elif "engine_container" in dict_args["tool"]:
@@ -125,7 +117,7 @@ class HandleScan:
                 and input_core.path_file_results
             ):
                 self._use_vulnerability_management(
-                    config_tool, input_core, dict_args, secret_tool, self.devops_platform_gateway.get_variable("environment")
+                    config_tool, input_core, dict_args, secret_tool, env
                 )
             return findings_list, input_core
         elif "engine_dast" in dict_args["tool"]:
@@ -150,6 +142,6 @@ class HandleScan:
                 and input_core.path_file_results
             ):
                 self._use_vulnerability_management(
-                    config_tool, input_core, dict_args, secret_tool, self._define_envvm()
+                    config_tool, input_core, dict_args, secret_tool, env
                 )
             return findings_list, input_core

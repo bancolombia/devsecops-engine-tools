@@ -44,6 +44,6 @@ class S3ManagerTests(unittest.TestCase):
             aws_secret_access_key=mock.ANY,
             aws_session_token=mock.ANY,
         )
-        mock_client.return_value.upload_fileobj.assert_called_once_with(
-            mock.ANY, "my-bucket", "my-tool/file.txt"
+        mock_client.return_value.put_object.assert_called_once_with(
+            Bucket="my-bucket", Key="my-tool/file.txt", Body=mock.ANY
         )

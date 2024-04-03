@@ -2,7 +2,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.metrics_manager
     MetricsManagerGateway,
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.aws import (
-    assume_role
+    assume_role,
 )
 import boto3
 import logging
@@ -21,6 +21,23 @@ class S3Manager(MetricsManagerGateway):
             aws_secret_access_key=temp_credentials["SecretAccessKey"],
             aws_session_token=temp_credentials["SessionToken"],
         )
+        data = ""
+        try:
+            response = client.get_object(
+                Bucket=config_tool["METRICS_MANAGER"]["AWS"]["BUCKET"],
+                Key=f'{tool}/{file_path.split("/")[-1]}',
+            )
+            data = response["Body"].read().decode("utf-8")
+        except client.exceptions.NoSuchKey:
+            pass
 
-        with open(file_path, "rb") as data:
-            client.upload_fileobj(data, config_tool["METRICS_MANAGER"]["AWS"]["BUCKET"], f'{tool}/{file_path.split("/")[-1]}')
+        with open(file_path, "rb") as new_data:
+            if data != "":
+                data = data + "\n" + new_data.read().decode("utf-8")
+            else:
+                data = new_data.read().decode("utf-8")
+            client.put_object(
+                Bucket=config_tool["METRICS_MANAGER"]["AWS"]["BUCKET"],
+                Key=f'{tool}/{file_path.split("/")[-1]}',
+                Body=data,
+            )
