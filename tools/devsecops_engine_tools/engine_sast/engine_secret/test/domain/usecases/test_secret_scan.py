@@ -1,25 +1,23 @@
 import unittest
 from unittest.mock import Mock, patch
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.DeserializeConfigTool import DeserializeConfigTool
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway import ToolGateway
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator import DeseralizatorGateway
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway import DevopsPlatformGateway
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.secret_scan import SecretScan
 
 class TestSecretScan(unittest.TestCase):
 
+    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway.GitGateway')
     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway')
     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator.DeseralizatorGateway')
     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway.ToolGateway')
-    def test_process(self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway):
+    def test_process(self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway, mock_git_gateway):
         # Configuración de mocks
         mock_tool_gateway_instance = mock_tool_gateway.return_value
         mock_devops_gateway_instance = mock_devops_gateway.return_value
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
+        mock_git_gateway_instance = mock_git_gateway.return_value
         
         # Configuración de la instancia de SecretScan
-        secret_scan = SecretScan(mock_tool_gateway_instance, mock_devops_gateway_instance, mock_deserialize_gateway_instance)
+        secret_scan = SecretScan(mock_tool_gateway_instance, mock_devops_gateway_instance, mock_deserialize_gateway_instance,mock_git_gateway_instance)
 
         # Configura el valor de retorno esperado para get_list_vulnerability
         mock_deserialize_gateway_instance.get_list_vulnerability.return_value = ["vulnerability_data"]
@@ -41,7 +39,8 @@ class TestSecretScan(unittest.TestCase):
                     }
                 },
                 "EXCLUDE_PATH": [".git"],
-                "NUMBER_THREADS": 4
+                "NUMBER_THREADS": 4,
+                "TARGET_BRANCHES": ['trunk', 'develop']
             }
         }
 
@@ -71,17 +70,19 @@ class TestSecretScan(unittest.TestCase):
         mock_tool_gateway_instance.install_tool.assert_called_once()
         mock_tool_gateway_instance.run_tool_secret_scan.assert_called_once()
 
+    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway.GitGateway')
     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway')
     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator.DeseralizatorGateway')
     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway.ToolGateway')
-    def test_process_empty(self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway):
+    def test_process_empty(self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway, mock_git_gateway):
         # Configuración de mocks
         mock_tool_gateway_instance = mock_tool_gateway.return_value
         mock_devops_gateway_instance = mock_devops_gateway.return_value
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
+        mock_git_gateway_instance = mock_git_gateway.return_value
         
         # Configuración de la instancia de SecretScan
-        secret_scan = SecretScan(mock_tool_gateway_instance, mock_devops_gateway_instance, mock_deserialize_gateway_instance)
+        secret_scan = SecretScan(mock_tool_gateway_instance, mock_devops_gateway_instance, mock_deserialize_gateway_instance, mock_git_gateway_instance)
 
         # Configura el valor de retorno esperado para get_list_vulnerability
         mock_deserialize_gateway_instance.get_list_vulnerability.return_value = []
@@ -103,7 +104,8 @@ class TestSecretScan(unittest.TestCase):
                     }
                 },
                 "EXCLUDE_PATH": [".git"],
-                "NUMBER_THREADS": 4
+                "NUMBER_THREADS": 4,
+                "TARGET_BRANCHES": ['trunk','develop']
             }
         }
 
