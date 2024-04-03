@@ -42,8 +42,10 @@ class TrufflehogRun(ToolGateway):
             results = executor.map(self.run_trufflehog, [trufflehog_command]*len(include_paths), [sys_working_dir]*len(include_paths), [exclude_path]* len(include_paths), include_paths)
         return self.decode_output(results)
     def config_include_path(self, files, agent_work_folder):
-        chunk_size = (len(files) + 3) // 4
-        chunks = [files[i:i + chunk_size] for i in range(0, len(files), chunk_size)]
+        chunks = []
+        if len(files) != 0:
+            chunk_size = (len(files) + 3) // 4
+            chunks = [files[i:i + chunk_size] for i in range(0, len(files), chunk_size)]
         include_paths = []
         for i, chunk in enumerate(chunks):
             if not chunk:
