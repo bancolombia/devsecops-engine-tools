@@ -19,7 +19,12 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class PrismaCloudManagerScan(ToolGateway):
     def download_twistcli(
-        self, file_path, prisma_access_key, prisma_secret_key, prisma_console_url, prisma_api_version
+        self,
+        file_path,
+        prisma_access_key,
+        prisma_secret_key,
+        prisma_console_url,
+        prisma_api_version,
     ):
         url = f"{prisma_console_url}/api/{prisma_api_version}/util/twistcli"
         credentials = base64.b64encode(
@@ -44,56 +49,49 @@ class PrismaCloudManagerScan(ToolGateway):
         self, file_path, repository, tag, remoteconfig, prisma_secret_key, release
     ):
         file_name = "scanned_images.txt"
-        repo = repository.split("/")[1] if len(repository.split("/")) >= 2 else ""
         image_name = f"{repository}:{tag}"
-        result_file = f"{repo}:{tag}" + "_scan_result.json"
+        result_file = f"{repository}:{tag}" + "_scan_result.json"
         images_scanned = []
 
         if (result_file) in ImagesScanned.get_images_already_scanned(file_name):
             print(f"The image {image_name} has already been scanned previously.")
         else:
-            pattern = remoteconfig["REGEX_EXPRESSION_PROJECTS"]
-            match = re.match(pattern, repo.upper())
-            if match:
-                if match.group() in release.upper():
-                    command = (
-                        file_path,
-                        "images",
-                        "scan",
-                        "--address",
-                        remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
-                        "--user",
-                        remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
-                        "--password",
-                        prisma_secret_key,
-                        "--output-file",
-                        result_file,
-                        "--details",
-                        image_name,
-                    )
-                    try:
-                        subprocess.run(
-                            command,
-                            check=True,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            text=True,
-                        )
-                        images_scanned.append(result_file)
-                        print(f"The image {image_name} was scanned")
-                        with open(file_name, "a") as file:
-                            file.write(result_file + "\n")
-                    except subprocess.CalledProcessError as e:
-                        logger.error(
-                            f"Error during image scan of {repository}: {e.stderr}"
-                        )
+            command = (
+                file_path,
+                "images",
+                "scan",
+                "--address",
+                remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
+                "--user",
+                remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
+                "--password",
+                prisma_secret_key,
+                "--output-file",
+                result_file,
+                "--details",
+                image_name,
+            )
+            try:
+                subprocess.run(
+                    command,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                images_scanned.append(result_file)
+                print(f"The image {image_name} was scanned")
+                with open(file_name, "a") as file:
+                    file.write(result_file + "\n")
+            except subprocess.CalledProcessError as e:
+                logger.error(f"Error during image scan of {repository}: {e.stderr}")
 
         return images_scanned
 
     def run_tool_container_sca(
-        self, remoteconfig, prisma_secret_key, scan_image, release ,skip_flag
+        self, remoteconfig, prisma_secret_key, scan_image, release, skip_flag
     ):
-        images_scanned=[]
+        images_scanned = []
         if not (skip_flag):
             try:
                 file_path = os.path.join(
