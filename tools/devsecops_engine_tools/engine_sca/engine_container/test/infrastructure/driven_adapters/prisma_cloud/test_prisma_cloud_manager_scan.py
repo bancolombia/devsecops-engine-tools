@@ -22,7 +22,8 @@ def mock_remoteconfig():
     "PRISMA_CLOUD": {
         "TWISTCLI_PATH": "twistcli",
         "PRISMA_CONSOLE_URL": "",
-        "PRISMA_ACCESS_KEY": ""        
+        "PRISMA_ACCESS_KEY": "" ,
+         "PRISMA_API_VERSION":"v32.03"        
     },
     "TRIVY": {
         "TRIVY_VERSION": "0.48.1"
@@ -71,6 +72,7 @@ def test_download_twistcli_success(mock_remoteconfig):
             "prisma_access_key",
             "prisma_secret_key",
             mock_remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
+            mock_remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"]
         )
      
 def test_download_twistcli_failure(twistcli_instance, mock_requests_get):
@@ -78,6 +80,7 @@ def test_download_twistcli_failure(twistcli_instance, mock_requests_get):
     prisma_access_key = 'your_access_key'
     prisma_secret_key = 'your_secret_key'
     prisma_console_url = 'https://prisma-console-url.com'
+    prisma_api_version = 'v1'
 
     expected_url = f"{prisma_console_url}/api/v1/util/twistcli"
     expected_credentials = 'your_access_key:your_secret_key'
@@ -92,7 +95,7 @@ def test_download_twistcli_failure(twistcli_instance, mock_requests_get):
          patch('os.chmod') as mock_chmod, \
          patch('devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.logger.info') as mock_logger_info:
         
-        twistcli_instance.download_twistcli(file_path, prisma_access_key, prisma_secret_key, prisma_console_url)
+        twistcli_instance.download_twistcli(file_path, prisma_access_key, prisma_secret_key, prisma_console_url,prisma_api_version)
 
         mock_requests_get.assert_called_once_with(expected_url, headers=expected_headers)
         mock_response.raise_for_status.assert_called_once()

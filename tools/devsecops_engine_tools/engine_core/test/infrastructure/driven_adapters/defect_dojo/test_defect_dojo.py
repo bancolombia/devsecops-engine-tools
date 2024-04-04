@@ -2,22 +2,26 @@ import unittest
 from unittest.mock import MagicMock, patch
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo import DefectDojoPlatform
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
+from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
+    VulnerabilityManagement,
+)
 
 class TestDefectDojoPlatform(unittest.TestCase):
     def setUp(self):
-        self.vulnerability_management = MagicMock()
+        self.vulnerability_management = VulnerabilityManagement
         self.defect_dojo = DefectDojoPlatform()
 
-    def test_send_vulnerability_management(self):
+    @patch("devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.DefectDojo.send_import_scan")
+    def test_send_vulnerability_management(self, mock_send_import_scan):
         self.vulnerability_management.dict_args = {
             "token_vulnerability_management": "token1",
-            "token_cmdb": "token2"
+            "token_cmdb": "token2",
+            "tool": "engine_iac"
         }
         self.vulnerability_management.secret_tool = {
             "token_defect_dojo": "token3",
             "token_cmdb": "token4"
         }
-        self.vulnerability_management.branch_name = "trunk"
         self.vulnerability_management.base_compact_remote_config_url = "http://example.com/"
         self.vulnerability_management.config_tool = {
             "VULNERABILITY_MANAGER": {
@@ -44,6 +48,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
         with patch("devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Connect.cmdb") as mock_cmdb:
             mock_cmdb.return_value = MagicMock()
+            mock_send_import_scan.return_value = MagicMock(url="http://example.com/")
+
             self.defect_dojo.send_vulnerability_management(self.vulnerability_management)
 
             mock_cmdb.assert_called_with(
