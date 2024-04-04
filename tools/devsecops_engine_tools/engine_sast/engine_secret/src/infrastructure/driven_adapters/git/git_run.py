@@ -11,21 +11,28 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 class GitRun(GitGateway):
 
     def get_files_pull_request(self, sys_working_dir, target_branch, config_target_branch):
-        try:
-            files_pr = []
-            if target_branch in config_target_branch:             
-                command = f"cd {sys_working_dir} && git fetch && git branch -a"
-                result = subprocess.run(command, capture_output=True, shell=True)
-                print(result)
-                branches = result.stdout.decode('utf-8').strip().splitlines()               
-                regex = r'remotes/(.*)'
-                branches_modify = re.sub(regex, r'\1', branches[1])
+        if target_branch not in config_target_branch:             
+            return []
 
-                command = f"cd {sys_working_dir} && git diff --name-only {branches_modify.strip()}..origin/{target_branch}"
-                result = subprocess.run(command, capture_output=True, shell=True)
-                print(result)
-                files_pr = result.stdout.decode('utf-8').strip().splitlines()
-                print(files_pr)
-            return files_pr
-        except Exception as e:
-            logger.warning(f"Error getting variable {str(e)}")
+        source_branch = self.get_git_source_branch(sys_working_dir)
+        
+        command = f"cd {sys_working_dir} && git diff --name-only {source_branch.strip()}..origin/{target_branch}"
+        result = subprocess.run(command, capture_output=True, shell=True)
+        print(result)
+        if result.returncode != 0:
+            logger.warning(f"Error getting pullrequest files: {result.stderr}")
+            return []
+        files_pr = result.stdout.decode('utf-8').strip().splitlines()
+        print(files_pr)
+        return files_pr
+
+    def get_git_source_branch(self, sys_working_dir):
+        command = f"cd {sys_working_dir} && git fetch && git branch -a"
+        result = subprocess.run(command, capture_output=True, shell=True)
+        print(result)
+        if result.returncode != 0:
+            logger.warning(f"Error getting branches: {result.stderr}")
+            return []
+        branches = result.stdout.decode('utf-8').strip().splitlines()               
+        regex = r'remotes/(.*)'
+        return re.sub(regex, r'\1', branches[1])
