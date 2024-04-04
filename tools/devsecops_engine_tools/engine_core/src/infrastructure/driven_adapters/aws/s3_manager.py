@@ -6,6 +6,7 @@ from devsecops_engine_tools.engine_core.src.infrastructure.helpers.aws import (
 )
 import boto3
 import logging
+import datetime
 
 boto3.set_stream_logger(name="botocore.credentials", level=logging.WARNING)
 
@@ -22,10 +23,12 @@ class S3Manager(MetricsManagerGateway):
             aws_session_token=temp_credentials["SessionToken"],
         )
         data = ""
+        date = datetime.datetime.now()
+        path_bucket = f'{tool}/{date.strftime("%Y")}/{date.strftime("%m")}/{date.strftime("%d")}/{file_path.split("/")[-1]}'
         try:
             response = client.get_object(
                 Bucket=config_tool["METRICS_MANAGER"]["AWS"]["BUCKET"],
-                Key=f'{tool}/{file_path.split("/")[-1]}',
+                Key=path_bucket,
             )
             data = response["Body"].read().decode("utf-8")
         except client.exceptions.NoSuchKey:
@@ -38,6 +41,6 @@ class S3Manager(MetricsManagerGateway):
                 data = new_data.read().decode("utf-8")
             client.put_object(
                 Bucket=config_tool["METRICS_MANAGER"]["AWS"]["BUCKET"],
-                Key=f'{tool}/{file_path.split("/")[-1]}',
+                Key=path_bucket,
                 Body=data,
             )
