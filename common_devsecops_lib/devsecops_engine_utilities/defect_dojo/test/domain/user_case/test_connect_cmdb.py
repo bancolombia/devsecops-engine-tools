@@ -121,6 +121,7 @@ def test_execute(engagement_name, obj_cmdb):
     assert response.scan_type == "JFrog Xray Scan"
     assert response.code_app == "nu0429001"
     assert response.tags in ["ORPHAN", "tag_product_test"]
+    assert response.product_type_name in ["Orphan product type", "Product_type_test"]
 
 
 @pytest.mark.parametrize("engagement_name", [("error"), ("nu12212error")])
