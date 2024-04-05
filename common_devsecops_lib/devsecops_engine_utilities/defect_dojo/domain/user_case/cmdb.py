@@ -25,7 +25,14 @@ class CmdbUserCase:
 
         # connect cmdb
         product_data = self.__rc_cmdb.get_product_info(request.code_app)
-        search_type_product = next((key for key, list in remote_config.get("products_sync_with_other_productype", {}).items() if request.code_app in list), None)
+        search_type_product = next(
+            (
+                key
+                for key, list in remote_config.get("products_sync_with_other_productype", {}).items()
+                if request.code_app in list
+            ),
+            None,
+        )
         if search_type_product:
             request.product_type_name = search_type_product
         else:
@@ -33,7 +40,7 @@ class CmdbUserCase:
                 product_data.product_type_name, product_data.product_type_name
             )
         request.product_name = product_data.product_name
-        request.tags = product_data.tag_product
+        request.tags = product_data.tag_product if product_data.tag_product else "ORPHAN"
         request.product_description = product_data.product_description
 
         return request
