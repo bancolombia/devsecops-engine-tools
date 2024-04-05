@@ -36,7 +36,7 @@ def get_cmdb_instance():
         product_name="product name test",
         tag_product="tag product test",
         product_description="description test",
-        codigo_app="nu0429001",
+        codigo_app="nu0000001",
     )
     return mock_rest_consumer_cmdb
 
@@ -45,7 +45,7 @@ def get_cmdb_instance():
     "engagement_name, obj_cmdb",
     [
         (
-            "NU0429001_Acceptance Tests",
+            "nu0000001_Acceptance Tests",
             Cmdb(
                 product_type_name="Product_type_test",
                 product_name="product_name_test",
@@ -55,7 +55,7 @@ def get_cmdb_instance():
             ),
         ),
         (
-            "NU0429001_Acceptance Tests23",
+            "nu0000001_Acceptance Tests23",
             Cmdb(
                 product_type_name="",
                 product_name="",
@@ -105,6 +105,10 @@ def test_execute(engagement_name, obj_cmdb):
     # mock class azureDevopsApi
     mock_utils_azure = MagicMock(spec=AzureDevopsApi)
     mock_utils_azure.get_azure_connection.return_value = mock_connection
+    # mock get_remote_json_config
+    mock_utils_azure.get_remote_json_config.return_value = {
+        "types_product": {"ORPHAN_PRODUCT_TYPE": "ORPHAN_PRODUCT_TYPE"}
+    }
     AzureDevopsApi(
         personal_access_token="asjfdiajf",
         project_remote_config="project remote test",
@@ -119,9 +123,9 @@ def test_execute(engagement_name, obj_cmdb):
 
     response = uc.execute(request)
     assert response.scan_type == "JFrog Xray Scan"
-    assert response.code_app == "nu0429001"
+    assert response.code_app == "nu0000001"
     assert response.tags in ["ORPHAN", "tag_product_test"]
-    assert response.product_type_name in ["Orphan product type", "Product_type_test"]
+    assert response.product_type_name in ["ORPHAN_PRODUCT_TYPE", "Product_type_test"]
 
 
 @pytest.mark.parametrize("engagement_name", [("error"), ("nu12212error")])
