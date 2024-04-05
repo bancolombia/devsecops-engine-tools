@@ -41,8 +41,32 @@ def get_cmdb_instance():
     return mock_rest_consumer_cmdb
 
 
-@pytest.mark.parametrize("engagement_name", [("NU0429001_Acceptance Tests"), ("NU0429001_Acceptance Tests23")])
-def test_execute(engagement_name):
+@pytest.mark.parametrize(
+    "engagement_name, obj_cmdb",
+    [
+        (
+            "NU0429001_Acceptance Tests",
+            Cmdb(
+                product_type_name="Product_type_test",
+                product_name="product_name_test",
+                tag_product="tag_product_test",
+                product_description="description test",
+                codigo_app="n1234",
+            ),
+        ),
+        (
+            "NU0429001_Acceptance Tests23",
+            Cmdb(
+                product_type_name="",
+                product_name="",
+                tag_product="",
+                product_description="Orphan Product Description",
+                codigo_app="n1234",
+            ),
+        ),
+    ],
+)
+def test_execute(engagement_name, obj_cmdb):
     mock_rest_consumer_cmdb = get_cmdb_instance()
     request = {
         "cmdb_mapping": {
@@ -86,7 +110,7 @@ def test_execute(engagement_name):
         project_remote_config="project remote test",
         organization_url="http://organization_url/",
     )
-
+    mock_rc.get_product_info.return_value = obj_cmdb
     uc = CmdbUserCase(
         rest_consumer_cmdb=mock_rc,
         utils_azure=mock_utils_azure,
@@ -96,6 +120,7 @@ def test_execute(engagement_name):
     response = uc.execute(request)
     assert response.scan_type == "JFrog Xray Scan"
     assert response.code_app == "nu0429001"
+    assert response.tags in ["ORPHAN", "tag_product_test"]
 
 
 @pytest.mark.parametrize("engagement_name", [("error"), ("nu12212error")])
