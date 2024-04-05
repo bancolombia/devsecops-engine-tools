@@ -33,7 +33,7 @@ class CmdbRestConsumer:
                 # Producto is Orphan
                 return Cmdb(
                     product_type_name="ORPHAN_PRODUCT_TYPE",
-                    product_name=request.product_name,
+                    product_name=f"{request.code_app}_Product",
                     tag_product="ORPHAN",
                     product_description="Orphan Product Description",
                     codigo_app=str(request.code_app),
