@@ -10,5 +10,7 @@ class ToolGateway(metaclass=ABCMeta):
                             files_pullrequest: dict,
                             exclude_path: dict,
                             agent_os: str,
-                            agent_work_folder: str) -> str:
+                            agent_work_folder: str,
+                            sys_working_dir: str,
+                            num_threads: int) -> str:
         "run tool secret scan"
