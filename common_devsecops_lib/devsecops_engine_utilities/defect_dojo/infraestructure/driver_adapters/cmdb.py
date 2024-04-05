@@ -16,8 +16,8 @@ class CmdbRestConsumer:
         self.__mapping_cmdb = mapping_cmdb
         self.__session = session._instance
 
-    def get_product_info(self, code_app: int) -> Cmdb:
-        data = json.dumps({"codapp": code_app})
+    def get_product_info(self, request: int) -> Cmdb:
+        data = json.dumps({"codapp": request.code_app})
         headers = {"tokenkey": self.__token, "Content-Type": "application/json"}
         logger.info("Search info of name product")
         try:
@@ -25,10 +25,19 @@ class CmdbRestConsumer:
             if response.status_code != 200:
                 logger.error(response)
                 raise ApiError(response.json()["Message"])
+
             if response.json() == []:
-                e = f"Engagement: {code_app} not found"
-                logger.error(e)
-                raise ApiError(e)
+                e = f"Engagement: {request.code_app} not found"
+                logger.warning(e)
+                # Producto is Orphan
+                return Cmdb(
+                    product_type_name="ORPHAN_PRODUCT_TYPE",
+                    product_name=request.product_name,
+                    tag_product="ORPHAN",
+                    product_description="Orphan Product Description",
+                    codigo_app=str(request.code_app),
+                )
+
             data = response.json()[0]
             data_map = self.mapping_cmdb(data)
             logger.info(data_map)
