@@ -4,6 +4,7 @@ from devsecops_engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
 from devsecops_engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
 from devsecops_engine_utilities.utils.session_manager import SessionManager
+from devsecops_engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_utilities.settings import SETTING_LOGGER
 
 logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
@@ -16,7 +17,7 @@ class CmdbRestConsumer:
         self.__mapping_cmdb = mapping_cmdb
         self.__session = session._instance
 
-    def get_product_info(self, request: int) -> Cmdb:
+    def get_product_info(self, request: ImportScanRequest) -> Cmdb:
         data = json.dumps({"codapp": request.code_app})
         headers = {"tokenkey": self.__token, "Content-Type": "application/json"}
         logger.info("Search info of name product")
