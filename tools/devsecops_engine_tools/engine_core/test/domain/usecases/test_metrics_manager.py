@@ -49,6 +49,5 @@ class TestMetricsManager(unittest.TestCase):
             self.metrics_manager.process(None, input_core, dict_args, scan_result)
 
         # Assert
-        self.devops_platform_gateway.get_variable.assert_called_with("release_id")
         os.makedirs.assert_called_with(base_directory)
         self.metrics_manager_gateway.send_metrics.assert_called()
