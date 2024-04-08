@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 from unittest import mock
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.s3_manager import S3Manager
+import datetime
 
 class S3ManagerTests(unittest.TestCase):
     def setUp(self):
@@ -44,6 +45,7 @@ class S3ManagerTests(unittest.TestCase):
             aws_secret_access_key=mock.ANY,
             aws_session_token=mock.ANY,
         )
-        mock_client.return_value.upload_fileobj.assert_called_once_with(
-            mock.ANY, "my-bucket", "my-tool/file.txt"
+        date = datetime.datetime.now()
+        mock_client.return_value.put_object.assert_called_once_with(
+            Bucket="my-bucket", Key=f"my-tool/{date.strftime('%Y')}/{date.strftime('%m')}/{date.strftime('%d')}/file.txt", Body=mock.ANY
         )

@@ -90,6 +90,5 @@ class AzureDevops(DevopsPlatformGateway):
             elif variable  == "release_name":
                 return ReleaseVariables.Release_Definitionname.value()
 
-        except Exception as ex:
-            logger.warning(f"Error getting variable {str(ex)}")
+        except Exception:
             return None
