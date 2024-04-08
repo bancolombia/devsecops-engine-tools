@@ -33,7 +33,7 @@ def init_engine_sca_rm(
             handle_remote_config_patterns.process_handle_skip_tool(),
         )
         images_scanned = container_sca_scan.process()
-        deseralized = container_sca_scan.deseralizator(images_scanned)  
+        deseralized = container_sca_scan.deseralizator(images_scanned)
     input_core = SetInputCore(tool_remote, dict_args, config_tool)
     
     return deseralized, input_core.set_input_core(
