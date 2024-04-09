@@ -46,7 +46,7 @@ class IacScan:
             findings_list, path_file_results = self.tool_gateway.run_tool(
                 config_tool,
                 folders_to_scan,
-                env,
+                "pdn" if env not in ["dev","qa","pdn"] else env,
                 dict_args["platform"],
                 secret_tool,
             )
