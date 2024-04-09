@@ -7,11 +7,11 @@ def format_date(date, to_format, from_format):
 
 def define_env(variable_env, branch):
     return (
-        variable_env
+        variable_env.lower()
         if variable_env is not None
         else (
             "pdn"
-            if branch in ["trunk,master"]
+            if branch in ["trunk", "master"]
             else "qa" if branch in "release" else "dev"
         )
     )
