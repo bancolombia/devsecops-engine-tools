@@ -123,7 +123,7 @@ def test_scan_image_success(mock_remoteconfig, mock_scan_image, mock_images_scan
             "release",
         )
 
-        assert result ==  [f"repository:tag_scan_result.json"]
+        assert result == mock_images_scanned
 
 
 def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image, mock_images_scanned):
