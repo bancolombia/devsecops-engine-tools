@@ -19,18 +19,23 @@ def init_engine_sca_rm(
     config_tool,
 ):
     handle_remote_config_patterns = HandleRemoteConfigPatterns(tool_remote, dict_args)
-    container_sca_scan = ContainerScaScan(
-        tool_run,
-        tool_remote,
-        tool_images,
-        tool_deseralizator,
-        dict_args,
-        token,
-        handle_remote_config_patterns.process_handle_skip_tool(),
-    )
+    flag = handle_remote_config_patterns.ignore_analysis_pattern()
+    images_scanned = []
+    deseralized = []
+    if flag:
+        container_sca_scan = ContainerScaScan(
+            tool_run,
+            tool_remote,
+            tool_images,
+            tool_deseralizator,
+            dict_args,
+            token,
+            handle_remote_config_patterns.process_handle_skip_tool(),
+        )
+        images_scanned = container_sca_scan.process()
+        deseralized = container_sca_scan.deseralizator(images_scanned)
     input_core = SetInputCore(tool_remote, dict_args, config_tool)
-    images_scanned = container_sca_scan.process()
-
-    return container_sca_scan.deseralizator(images_scanned), input_core.set_input_core(
+    
+    return deseralized, input_core.set_input_core(
         images_scanned
     )
