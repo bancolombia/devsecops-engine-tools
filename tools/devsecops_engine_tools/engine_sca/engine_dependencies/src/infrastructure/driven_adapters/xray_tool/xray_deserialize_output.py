@@ -12,58 +12,45 @@ from datetime import datetime
 
 @dataclass
 class XrayDeserializator(DeserializatorGateway):
+    def set_list_finding(self, vul):
+        vulnerabilities = [
+            Finding(
+                id=vul.get("issue_id", ""),
+                cvss=(
+                    vul["cves"][0].get("cvss_v3_score")
+                    if vul.get("cves", 0) and vul["cves"][0].get("cvss_v3_score", 0)
+                    else ""
+                )
+                + (
+                    vul["cves"][0].get("cvss_v2_score")
+                    if vul.get("cves", 0)
+                    and not (vul["cves"][0].get("cvss_v3_score", 0))
+                    and vul["cves"][0].get("cvss_v2_score", 0)
+                    else ""
+                ),
+                where=(component),
+                description=(
+                    vul["cves"][0].get("cve", "") if vul.get("cves", 0) else ""
+                ),
+                severity=vul.get("severity", "").lower(),
+                identification_date=datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+                module="engine_dependencies",
+                category=Category.VULNERABILITY,
+                requirements=(
+                    "".join(vul["components"][component].get("fixed_versions", [""]))
+                ),
+                tool="XRAY",
+            )
+            for component in vul.get("components", [])
+        ]
+        return vulnerabilities
+
     def get_list_findings(self, dependencies_scanned_file) -> "list[Finding]":
         list_open_vulnerabilities = []
         with open(dependencies_scanned_file, "rb") as file:
             json_data = json.loads(file.read())
-            vulnerabilities = []
             if json_data:
                 for data in json_data:
-                    if data.get("vulnerabilities", 0):
-                        vulnerabilities = [
-                            Finding(
-                                id=vul.get("issue_id", ""),
-                                cvss=(
-                                    vul["cves"][0].get("cvss_v3_score")
-                                    if vul.get("cves", 0)
-                                    and vul["cves"][0].get("cvss_v3_score", 0)
-                                    else ""
-                                )
-                                + (
-                                    vul["cves"][0].get("cvss_v2_score")
-                                    if vul.get("cves", 0)
-                                    and not (vul["cves"][0].get("cvss_v3_score", 0))
-                                    and vul["cves"][0].get("cvss_v2_score", 0)
-                                    else ""
-                                ),
-                                where=(
-                                    list(vul["components"].keys())[0]
-                                    if vul.get("components", 0)
-                                    else ""
-                                ),
-                                description=(
-                                    vul["cves"][0].get("cve", "")
-                                    if vul.get("cves", 0)
-                                    else ""
-                                ),
-                                severity=vul.get("severity", "").lower(),
-                                identification_date=datetime.now().strftime(
-                                    "%d-%m-%Y %H:%M:%S"
-                                ),
-                                module="engine_dependencies",
-                                category=Category.VULNERABILITY,
-                                requirements=(
-                                    "".join(
-                                        list(vul["components"].values())[0].get(
-                                            "fixed_versions", [""]
-                                        )
-                                    )
-                                    if vul.get("components", 0)
-                                    else ""
-                                ),
-                                tool="XRAY",
-                            )
-                            for vul in data.get("vulnerabilities")
-                        ]
-                        list_open_vulnerabilities.extend(vulnerabilities)
+                    for vul in data.get("vulnerabilities", []):
+                        list_open_vulnerabilities.extend(self.set_list_finding(vul))
         return list_open_vulnerabilities

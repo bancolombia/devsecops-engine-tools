@@ -9,17 +9,22 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.g
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway
 )
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway import (
+    GitGateway
+)
 
 class SecretScan:
     def __init__(
         self,
         tool_gateway: ToolGateway,
         devops_platform_gateway: DevopsPlatformGateway,
-        tool_deserialize: DeseralizatorGateway
+        tool_deserialize: DeseralizatorGateway,
+        git_gateway: GitGateway
         ):
         self.tool_gateway = tool_gateway
         self.devops_platform_gateway = devops_platform_gateway
         self.tool_deserialize = tool_deserialize
+        self.git_gateway = git_gateway
 
     def process(self, dict_args, tool):
         tool = str(tool).lower()
@@ -31,26 +36,16 @@ class SecretScan:
         )
         finding_list = []
         if skip_tool == "false":
-            agent_temp_dir = self.devops_platform_gateway.get_variable(
-            "TEMP_DIRECTORY"
-            )
-            system_working_dir = self.devops_platform_gateway.get_variable(
-            "PATH_DIRECTORY"
-            )
-            exclude_path = config_tool.exclude_path
-            agent_os = self.devops_platform_gateway.get_variable(
-            "OS"
-            )
-            agent_work_folder = self.devops_platform_gateway.get_variable(
-            "WORK_FOLDER"
-            )
-            self.tool_gateway.install_tool(agent_os, agent_temp_dir)
+            self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("OS"), self.devops_platform_gateway.get_variable("TEMP_DIRECTORY"))
+            files_pullrequest = self.git_gateway.get_files_pull_request(self.devops_platform_gateway.get_variable("PATH_DIRECTORY"), self.devops_platform_gateway.get_variable("TARGET_BRANCH"), config_tool.target_branches)
             finding_list = self.tool_deserialize.get_list_vulnerability(
                 self.tool_gateway.run_tool_secret_scan(
-                    system_working_dir,
-                    exclude_path,
-                    agent_os,
-                    agent_work_folder,
+                    files_pullrequest,
+                    config_tool.exclude_path,
+                    self.devops_platform_gateway.get_variable("OS"),
+                    self.devops_platform_gateway.get_variable("WORK_FOLDER"),
+                    self.devops_platform_gateway.get_variable("PATH_DIRECTORY"),
+                    config_tool.number_threads,
                     ),
                 self.devops_platform_gateway
                 )

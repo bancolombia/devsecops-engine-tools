@@ -26,7 +26,7 @@ class IacScan:
         self.tool_gateway = tool_gateway
         self.devops_platform_gateway = devops_platform_gateway
 
-    def process(self, dict_args, secret_tool, tool):
+    def process(self, dict_args, secret_tool, tool, env):
         init_config_tool = self.devops_platform_gateway.get_remote_config(
             dict_args["remote_config_repo"], "SAST/IAC/configTools.json"
         )
@@ -46,7 +46,7 @@ class IacScan:
             findings_list, path_file_results = self.tool_gateway.run_tool(
                 config_tool,
                 folders_to_scan,
-                dict_args["environment"],
+                "pdn" if env not in ["dev","qa","pdn"] else env,
                 dict_args["platform"],
                 secret_tool,
             )

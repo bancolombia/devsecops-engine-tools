@@ -66,7 +66,7 @@ class TestIacScan(unittest.TestCase):
             "/path/to/results",
         )
 
-        findings_list, input_core = self.iac_scan.process(dict_args, secret_tool, tool)
+        findings_list, input_core = self.iac_scan.process(dict_args, secret_tool, tool, "pdn")
 
         # Assert the expected return values
         self.assertEqual(findings_list, ["finding1", "finding2"])
@@ -155,7 +155,7 @@ class TestIacScan(unittest.TestCase):
 
         self.devops_platform_gateway.get_variable.return_value = "example_pipeline"
 
-        findings_list, input_core = self.iac_scan.process(dict_args, secret_tool, tool)
+        findings_list, input_core = self.iac_scan.process(dict_args, secret_tool, tool, "qa")
 
         # Assert the expected return values
         self.assertEqual(findings_list, [])

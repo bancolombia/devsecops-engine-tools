@@ -17,15 +17,21 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
     ExceptionVulnerabilityManagement,
     ExceptionFindingsRiskAcceptance,
 )
+from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
+    format_date,
+)
 
 
 @dataclass
 class DefectDojoPlatform(VulnerabilityManagementGateway):
-    def send_vulnerability_management(self, vulnerability_management: VulnerabilityManagement):
+    def send_vulnerability_management(
+        self, vulnerability_management: VulnerabilityManagement
+    ):
         try:
             token_dd = (
                 vulnerability_management.dict_args["token_vulnerability_management"]
-                if vulnerability_management.dict_args["token_vulnerability_management"] is not None
+                if vulnerability_management.dict_args["token_vulnerability_management"]
+                is not None
                 else vulnerability_management.secret_tool["token_defect_dojo"]
             )
             token_cmdb = (
@@ -38,18 +44,20 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "dev": "Development",
                 "qa": "Staging",
                 "pdn": "Production",
-                None: "Production",
+                "default": "Production",
             }
             scan_type_mapping = {
                 "CHECKOV": "Checkov Scan",
-                "XRAY": "JFrog Xray On Demand Binary Scan"
+                "PRISMA": "Twistlock Image Scan",
+                "XRAY": "JFrog Xray On Demand Binary Scan",
             }
 
-            if str(vulnerability_management.branch_name) in [
-                "trunk",
-                "develop",
-                "master",
-            ]:
+            if any(
+                branch in str(vulnerability_management.branch_tag)
+                for branch in vulnerability_management.config_tool[
+                    "VULNERABILITY_MANAGER"
+                ]["BRANCH_FILTER"].split(",")
+            ):
                 request: ImportScanRequest = Connect.cmdb(
                     cmdb_mapping={
                         "product_type_name": "nombreevc",
@@ -61,14 +69,16 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     compact_remote_config_url=f'{vulnerability_management.base_compact_remote_config_url}{vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB_MAPPING_PATH"]}',
                     personal_access_token=vulnerability_management.access_token,
                     token_cmdb=token_cmdb,
-                    host_cmdb=vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_CMDB"],
-                    expression=vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
-                        "REGEX_EXPRESSION_CMDB"
-                    ],
+                    host_cmdb=vulnerability_management.config_tool[
+                        "VULNERABILITY_MANAGER"
+                    ]["DEFECT_DOJO"]["HOST_CMDB"],
+                    expression=vulnerability_management.config_tool[
+                        "VULNERABILITY_MANAGER"
+                    ]["DEFECT_DOJO"]["REGEX_EXPRESSION_CMDB"],
                     token_defect_dojo=token_dd,
-                    host_defect_dojo=vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
-                        "HOST_DEFECT_DOJO"
-                    ],
+                    host_defect_dojo=vulnerability_management.config_tool[
+                        "VULNERABILITY_MANAGER"
+                    ]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"],
                     scan_type=scan_type_mapping[vulnerability_management.scan_type],
                     engagement_name=vulnerability_management.input_core.scope_pipeline,
                     service=vulnerability_management.input_core.scope_pipeline,
@@ -78,21 +88,31 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     source_code_management_uri=vulnerability_management.source_code_management_uri,
                     branch_tag=vulnerability_management.branch_tag,
                     commit_hash=vulnerability_management.commit_hash,
-                    environment=enviroment_mapping[vulnerability_management.environment],
+                    environment=(
+                        enviroment_mapping[vulnerability_management.environment.lower()]
+                        if vulnerability_management.environment is not None and vulnerability_management.environment.lower() in enviroment_mapping
+                        else enviroment_mapping["default"]
+                    ),
                     tags="evc",
                 )
 
                 response = DefectDojo.send_import_scan(request)
                 if hasattr(response, "url"):
-                    print("Report sent to vulnerability management: ", response.url)
+                    url_parts = response.url.split("//")
+                    test_string = "//".join([url_parts[0] + "/", url_parts[1]])
+                    print("Report sent to vulnerability management: ", f"{test_string}?tags={vulnerability_management.dict_args['tool']}")
                 else:
                     raise ExceptionVulnerabilityManagement(response)
         except Exception as ex:
             raise ExceptionVulnerabilityManagement(
-                "Error sending report to vulnerability management with the following error: {0} ".format(ex)
+                "Error sending report to vulnerability management with the following error: {0} ".format(
+                    ex
+                )
             )
 
-    def get_findings_risk_acceptance(self, service, dict_args, secret_tool, config_tool):
+    def get_findings_risk_acceptance(
+        self, service, dict_args, secret_tool, config_tool
+    ):
         try:
             token_dd = (
                 dict_args["token_vulnerability_management"]
@@ -105,15 +125,33 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"],
             )
 
-            findings_list = Finding.get_finding(session=session_manager, service=service, risk_accepted=True).results
+            findings_list = Finding.get_finding(
+                session=session_manager,
+                service=service,
+                risk_accepted=True,
+                tags=dict_args["tool"],
+                limit=config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                    "LIMITS_QUERY"
+                ],
+            ).results
             return list(
                 map(
                     lambda finding: Exclusions(
                         **{
                             "id": finding.vuln_id_from_tool,
                             "where": self._get_where(finding, dict_args),
-                            "create_date": finding.accepted_risks[-1]["created"],
-                            "expired_date": finding.accepted_risks[-1]["expiration_date"],
+                            "create_date": format_date(
+                                finding.accepted_risks[-1]["created"].split("T")[0],
+                                "%Y-%m-%d",
+                                "%d%m%Y",
+                            ),
+                            "expired_date": format_date(
+                                finding.accepted_risks[-1]["expiration_date"].split(
+                                    "T"
+                                )[0],
+                                "%Y-%m-%d",
+                                "%d%m%Y",
+                            ),
                         }
                     ),
                     findings_list,
@@ -121,9 +159,11 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             )
         except Exception as ex:
             raise ExceptionFindingsRiskAcceptance(
-                "Error getting risk acceptance findings with the following error: {0} ".format(ex)
+                "Error getting risk acceptance findings with the following error: {0} ".format(
+                    ex
+                )
             )
-    
+
     def _get_where(self, finding, dict_args):
         if dict_args["tool"] in ["engine_iac", "engine_secret"]:
             return finding.file_path

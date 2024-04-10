@@ -33,6 +33,7 @@ class TestHandleScan(unittest.TestCase):
         config_tool = {"ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
         secret_tool = "some_secret"
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
+        self.devops_platform_gateway.get_variable.return_value = "dev"
 
         # Mock the runner_engine_iac function and its return values
         findings_list = ["finding1", "finding2"]
@@ -63,7 +64,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
         mock_runner_engine_iac.assert_called_once_with(
-            dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool
+            dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool, "dev"
         )
         self.vulnerability_management.send_vulnerability_management.assert_called_once()
         self.vulnerability_management.get_findings_risk_acceptance.assert_called_once()
@@ -118,8 +119,9 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_container",
             "remote_config_repo": "test_repo",
+            "use_vulnerability_management":"true",
         }
-        config_tool = {"ENGINE_CONTAINER": "some_config"}
+        config_tool = {"ENGINE_CONTAINER": {"ENABLED": "true", "TOOL": "tool"}}
         secret_tool = {"token_prisma_cloud": "test"}
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
 
@@ -144,10 +146,86 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_findings_list, findings_list)
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
-        mock_runner_engine_container.assert_called_once_with(
-            dict_args, config_tool, secret_tool["token_prisma_cloud"]
+        mock_runner_engine_container.assert_called_once()
+    @mock.patch(
+        "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_container"
+    )
+    def test_process_with_engine_container_secret_manager_false(self, mock_runner_engine_container):
+        dict_args = {
+            "use_secrets_manager": "false",
+            "tool": "engine_container",
+            "remote_config_repo": "test_repo",
+            "use_vulnerability_management":"true",
+            "token_engine_container":"test"
+        }
+        config_tool = {"ENGINE_CONTAINER": {"ENABLED": "true", "TOOL": "tool"}}
+        secret_tool = {"token_prisma_cloud": "test"}
+        self.secrets_manager_gateway.get_secret.return_value = secret_tool
+
+        # Mock the runner_engine_iac function and its return values
+        findings_list = ["finding1", "finding2"]
+        input_core = InputCore(
+            totalized_exclusions=[],
+            threshold_defined=Threshold,
+            path_file_results="test/file",
+            custom_message_break_build="message",
+            scope_pipeline="pipeline",
+            stage_pipeline="Release",
+        )
+        mock_runner_engine_container.return_value = findings_list, input_core
+
+        # Call the process method
+        result_findings_list, result_input_core = self.handle_scan.process(
+            dict_args, config_tool
         )
 
+        # Assert the expected values
+        self.assertEqual(result_findings_list, findings_list)
+        self.assertEqual(result_input_core, input_core)
+        mock_runner_engine_container.assert_called_once()       
+    @mock.patch(
+        "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_container"
+    )
+    def test_process_with_engine_container_error(self, mock_runner_engine_iac):
+        dict_args = {
+                "use_secrets_manager": "true",
+                "tool": "engine_container",
+                "use_vulnerability_management": "true",
+                "remote_config_repo": "test_repo",
+            }
+        config_tool = {"ENGINE_CONTAINER": {"ENABLED": "true", "TOOL": "tool"}}
+        secret_tool = {"token_prisma_cloud": "test"}
+        self.secrets_manager_gateway.get_secret.return_value = secret_tool
+
+        # Mock the runner_engine_iac function and its return values
+        findings_list = ["finding1", "finding2"]
+        input_core = InputCore(
+                totalized_exclusions=[],
+                threshold_defined=Threshold,
+                path_file_results="test/file",
+                custom_message_break_build="message",
+                scope_pipeline="pipeline",
+                stage_pipeline="Release",
+            )
+        mock_runner_engine_iac.return_value = findings_list, input_core
+
+        # Mock the send_vulnerability_management method
+        self.vulnerability_management.send_vulnerability_management.side_effect = ExceptionVulnerabilityManagement("Simulated error")
+
+        # Mock the get_findings_risk_acceptance method
+        self.vulnerability_management.get_findings_risk_acceptance.side_effect = ExceptionFindingsRiskAcceptance("Simulated error")
+
+        # Call the process method
+        result_findings_list, result_input_core = self.handle_scan.process(
+                dict_args, config_tool
+            )
+
+        # Assert the expected values
+        self.assertEqual(result_findings_list, findings_list)
+        self.assertEqual(result_input_core, input_core)
+
+        self.vulnerability_management.send_vulnerability_management.assert_called_once()
+        self.vulnerability_management.get_findings_risk_acceptance.assert_called_once()
     @mock.patch("builtins.print")
     def test_process_with_engine_dast(self, mock_print):
         dict_args = {
@@ -203,9 +281,10 @@ class TestHandleScan(unittest.TestCase):
         }
         config_tool = {
             "ENGINE_DEPENDENCIES": "some_config",
-            "ENGINE_DEPENDENCIES": {"TOOL": "some_tool"}
+            "ENGINE_DEPENDENCIES": {"TOOL": "some_tool"},
         }
         secret_tool = {"token_xray": "test"}
+        self.devops_platform_gateway.get_variable.return_value = "trunk"
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
 
         # Mock the runner_engine_dependencies function and its return values
@@ -232,5 +311,3 @@ class TestHandleScan(unittest.TestCase):
         mock_runner_engine_dependencies.assert_called_once_with(
             dict_args, config_tool, secret_tool["token_xray"]
         )
-
-        

@@ -2,8 +2,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.applications.runn
     runner_engine_dependencies,
 )
 
-import pytest
-from unittest.mock import mock_open, patch
+from unittest.mock import patch
 
 
 def test_init_engine_dependencies():

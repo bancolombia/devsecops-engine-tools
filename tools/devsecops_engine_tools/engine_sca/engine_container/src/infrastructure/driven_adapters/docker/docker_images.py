@@ -20,9 +20,8 @@ class DockerImages(ImagesGateway):
                 text=True,
             )
             results = results.stdout.split("\n")
-            results.pop()
-            json_list = [json.loads(result) for result in results]
-            return json_list
+            results.pop()  
+            return [json.loads(results[0])] if results else []
 
         except subprocess.CalledProcessError as e:
-            raise ValueError(f"Error al listar imagenes: {e.stderr}")
+            raise ValueError(f"Error listing images:{e.stderr}")

@@ -51,5 +51,4 @@ jf.exe
 target
 dependencies_to_scan
 node_modules
-azp/
-*.azp
+DevSecOps_Remote_Config

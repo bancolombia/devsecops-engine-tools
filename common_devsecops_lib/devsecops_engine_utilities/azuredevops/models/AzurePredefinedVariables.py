@@ -33,6 +33,9 @@ class SystemVariables(BaseEnum):
     System_TeamFoundationCollectionUri = "System.TeamFoundationCollectionUri"
     System_TeamProject = "System.TeamProject"
     System_TeamProjectId = "System.TeamProject"
+    System_PullRequestId = "System.PullRequest.PullRequestId"
+    System_TargetBranchName = "System.PullRequest.TargetBranchName"
+    System_SourceBranch = "System.PullRequest.SourceBranch"
 
 
 class BuildVariables(BaseEnum):
@@ -55,12 +58,7 @@ class ReleaseVariables(BaseEnum):
 
 
 class AgentVariables(BaseEnum):
-    Agent_WorkFolder = "Agent.WorkFolder"
-    Agent_TempDirectory = "Agent.TempDirectory"
-    Agent_OS = "Agent.OS"
-
-
-class AgentVariables(BaseEnum):
+    Agent_BuildDirectory = "Agent.BuildDirectory"
     Agent_WorkFolder = "Agent.WorkFolder"
     Agent_TempDirectory = "Agent.TempDirectory"
     Agent_OS = "Agent.OS"

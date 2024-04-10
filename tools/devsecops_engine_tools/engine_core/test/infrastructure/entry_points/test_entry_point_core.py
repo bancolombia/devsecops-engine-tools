@@ -18,6 +18,7 @@ class TestEntryPointCore(unittest.TestCase):
             platform="eks",
             use_secrets_manager="true",
             use_vulnerability_management="false",
+            send_metrics="false",
             token_cmdb="abc123",
             token_vulnerability_management=None,
             token_engine_container=None,
@@ -37,6 +38,7 @@ class TestEntryPointCore(unittest.TestCase):
             "platform": "eks",
             "use_secrets_manager": "true",
             "use_vulnerability_management": "false",
+            "send_metrics": "false",
             "token_cmdb": "abc123",
             "token_vulnerability_management": None,
             "token_engine_container": None,
@@ -71,6 +73,7 @@ class TestEntryPointCore(unittest.TestCase):
             "platform": "eks",
             "use_secrets_manager": "true",
             "use_vulnerability_management": "false",
+            "send_metrics": "true",
             "token_cmdb": "abc123",
             "token_vulnerability_management": None,
             "token_engine_container": None,
@@ -78,7 +81,6 @@ class TestEntryPointCore(unittest.TestCase):
         }
 
         mock_config_tool = {
-            "METRICS_MANAGER": {"ENABLED": "true"},
             "ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}
         }
         mock_findings_list = []
@@ -132,13 +134,13 @@ class TestEntryPointCore(unittest.TestCase):
             "environment": "dev",
             "platform": "eks",
             "use_secrets_manager": "false",
-            "use_vulnerability_management": "false"
+            "use_vulnerability_management": "false",
+            "send_metrics": "true"
         }
 
         mock_get_inputs_from_cli.return_value = mock_args
 
         mock_config_tool = {
-            "METRICS_MANAGER": {"ENABLED": "true"},
             "ENGINE_IAC": {"ENABLED": "false", "TOOL": "tool"}
         }
         mock_devops_platform_gateway = mock.Mock()

@@ -30,7 +30,7 @@ def test_runner_engine_iac(mock_entry_point_tool):
     secret_tool = "secret"
 
     # Call the function
-    [] , input_output = runner_engine_iac(dict_args, tool, secret_tool)
+    [] , input_output = runner_engine_iac(dict_args, tool, secret_tool, "qa")
 
     # Assert the expected behavior
     assert input_output == input_core
@@ -47,7 +47,7 @@ def test_runner_engine_iac_exception(mock_entry_point_tool):
 
         # Act and Assert
         with unittest.TestCase().assertRaises(Exception) as context:
-            runner_engine_iac(dict_args, tool, secret_tool)
+            runner_engine_iac(dict_args, tool, secret_tool, "dev")
 
         # Optionally, you can check the exception message or other details
         assert str(context.exception) == "Error engine_iac : Simulated error"

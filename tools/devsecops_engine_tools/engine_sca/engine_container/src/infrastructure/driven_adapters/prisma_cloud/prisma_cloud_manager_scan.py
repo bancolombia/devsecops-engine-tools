@@ -19,9 +19,9 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class PrismaCloudManagerScan(ToolGateway):
     def download_twistcli(
-        self, file_path, prisma_access_key, prisma_secret_key, prisma_console_url
+        self, file_path, prisma_access_key, prisma_secret_key, prisma_console_url, prisma_api_version
     ):
-        url = f"{prisma_console_url}/api/v1/util/twistcli"
+        url = f"{prisma_console_url}/api/{prisma_api_version}/util/twistcli"
         credentials = base64.b64encode(
             f"{prisma_access_key}:{prisma_secret_key}".encode()
         ).decode()
@@ -66,10 +66,10 @@ class PrismaCloudManagerScan(ToolGateway):
                         remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
                         "--password",
                         prisma_secret_key,
-                        image_name,
                         "--output-file",
                         result_file,
                         "--details",
+                        image_name,
                     )
                     try:
                         subprocess.run(
@@ -91,39 +91,39 @@ class PrismaCloudManagerScan(ToolGateway):
         return images_scanned
 
     def run_tool_container_sca(
-        self, remoteconfig, prisma_secret_key, scan_image, release
+        self, remoteconfig, prisma_secret_key, scan_image, release ,skip_flag
     ):
-        try:
-            file_path = os.path.join(
-                os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
-            )
-
-            if not os.path.exists(file_path):
-                self.download_twistcli(
-                    file_path,
-                    remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
-                    prisma_secret_key,
-                    remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
+        images_scanned=[]
+        if not (skip_flag):
+            try:
+                file_path = os.path.join(
+                    os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
                 )
 
-            images_scanned = []
-
-            for image in scan_image:
-                repository, tag = image["Repository"], image["Tag"]
-                images_scanned.extend(
-                    self.scan_image(
+                if not os.path.exists(file_path):
+                    self.download_twistcli(
                         file_path,
-                        repository,
-                        tag,
-                        remoteconfig,
+                        remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
                         prisma_secret_key,
-                        release,
+                        remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
+                        remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"],
                     )
-                )
+                for image in scan_image:
+                    repository, tag = image["Repository"], image["Tag"]
+                    images_scanned.extend(
+                        self.scan_image(
+                            file_path,
+                            repository,
+                            tag,
+                            remoteconfig,
+                            prisma_secret_key,
+                            release,
+                        )
+                    )
 
-            return images_scanned
+                return images_scanned
 
-        except Exception as ex:
-            logger.error(f"An overall error occurred: {ex}")
+            except Exception as ex:
+                logger.error(f"An overall error occurred: {ex}")
 
-        return 0
+        return images_scanned

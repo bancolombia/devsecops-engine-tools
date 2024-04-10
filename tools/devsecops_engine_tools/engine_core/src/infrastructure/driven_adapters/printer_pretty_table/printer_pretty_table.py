@@ -6,6 +6,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_g
 from devsecops_engine_tools.engine_core.src.domain.model.finding import (
     Finding,
 )
+from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
+    format_date
+)
 from prettytable import PrettyTable, DOUBLE_BORDER
 
 
@@ -28,7 +31,7 @@ class PrinterPrettyTable(PrinterTableGateway):
 
             table.add_row(row_data)
 
-        severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+        severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3, "unknown": 4}
         sorted_table = PrettyTable()
         sorted_table.field_names = table.field_names
         sorted_table.add_rows(
@@ -41,7 +44,7 @@ class PrinterPrettyTable(PrinterTableGateway):
         sorted_table.set_style(DOUBLE_BORDER)
         return sorted_table
 
-    def print_table(self, finding_list: "list[Finding]"):
+    def print_table_findings(self, finding_list: "list[Finding]"):
         if (
             finding_list
             and (finding_list[0].module != "engine_container")
@@ -55,3 +58,27 @@ class PrinterPrettyTable(PrinterTableGateway):
 
         if len(sorted_table.rows) > 0:
             print(sorted_table)
+    
+    def print_table_exclusions(self, exclusions):
+        if (exclusions):
+            headers = ["Severity", "ID", "Where", "Create Date", "Expired Date", "Reason"]
+
+        table = PrettyTable(headers)
+
+        for exclusion in exclusions:
+            row_data = [
+                exclusion["severity"],
+                exclusion["id"],
+                exclusion["where"],
+                format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
+                format_date(exclusion["expired_date"], "%d%m%Y", "%d/%m/%Y"),
+                exclusion["reason"],
+            ]
+            table.add_row(row_data)
+
+        for column in table.field_names:
+            table.align[column] = "l"
+   
+        table.set_style(DOUBLE_BORDER)
+        if len(table.rows) > 0:
+            print(table)
