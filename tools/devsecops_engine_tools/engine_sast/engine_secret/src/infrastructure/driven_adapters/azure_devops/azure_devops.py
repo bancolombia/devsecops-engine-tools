@@ -50,6 +50,8 @@ class AzureDevops(DevopsPlatformGateway):
                 return SystemVariables.System_PullRequestId.value()
             elif variable == "TARGET_BRANCH":
                 return SystemVariables.System_TargetBranchName.value()
+            elif variable == "SOURCE_BRANCH":
+                return SystemVariables.System_SourceBranch.value()
             elif variable == "OS":
                 return AgentVariables.Agent_OS.value()
             elif variable == "WORK_FOLDER":
