@@ -1,4 +1,3 @@
-import re
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
@@ -43,18 +42,6 @@ class HandleRemoteConfigPatterns:
             return True
         else:
             return False
-    
-    def ignore_analysis_pattern(self):
-        """
-        Handle analysis pattern.
-
-        Return: bool: False -> not scan, True -> scan.
-        """
-        ignore = self.get_remote_config("SCA/CONTAINER/ConfigTool.json")["IGNORE_SEARCH_PATTERN"]
-        if re.match(ignore, self.get_variable("release_name"), re.IGNORECASE):
-            return False
-        else:
-            return True
 
     def process_handle_skip_tool(self):
         """
