@@ -24,7 +24,7 @@ class SetInputCore:
                             expired_date=item.get("expired_date", ""),
                             severity=item.get("severity", ""),
                             hu=item.get("hu", ""),
-                            treatment=item.get("treatment", "Risk acceptance")
+                            treatment=item.get("treatment", "Risk acceptance"),
                         )
                         for item in value[tool]
                     ]
