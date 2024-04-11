@@ -53,8 +53,8 @@ class TrufflehogRun(ToolGateway):
             file_path = f"{agent_work_folder}/includePath{i}.txt"
             include_paths.append(file_path)
             with open(file_path, "w") as file:
-                for file_path in chunk:
-                    file.write(f"{file_path.strip()}\n")
+                for file_pr_path in chunk:
+                    file.write(f"{file_pr_path.strip()}\n")
         return include_paths
     def run_trufflehog(self, trufflehog_command, sys_working_dir, exclude_path, include_path):
         command = f"{trufflehog_command} filesystem {sys_working_dir} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
