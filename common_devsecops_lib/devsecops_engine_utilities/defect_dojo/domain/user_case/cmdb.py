@@ -38,7 +38,7 @@ class CmdbUserCase:
         else:
             request.product_type_name = (
                 remote_config["types_product"].get(product_data.product_type_name, product_data.product_type_name)
-                if request.product_type_name
+                if product_data.product_type_name
                 else remote_config["types_product"].get("ORPHAN_PRODUCT_TYPE", "ORPHAN_PRODUCT_TYPE")
             )
 
