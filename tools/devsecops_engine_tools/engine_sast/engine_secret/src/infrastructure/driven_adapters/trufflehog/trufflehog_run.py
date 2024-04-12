@@ -66,5 +66,6 @@ class TrufflehogRun(ToolGateway):
                 object_json = decode_output.strip().split('\n')
                 json_list = [json.loads(object) for object in object_json]
                 for json_obj in json_list:
-                    result.append(json_obj)
+                    if json_obj not in result:
+                        result.append(json_obj)
         return result

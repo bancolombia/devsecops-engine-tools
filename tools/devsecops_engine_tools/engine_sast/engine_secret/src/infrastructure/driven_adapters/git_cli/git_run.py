@@ -29,7 +29,7 @@ class GitRun(GitGateway):
     
     def get_git_source_branch(self, repository, source_branch):
         try:            
-            branches = repository.remotes.origin.fetch()
+            repository.remotes.origin.fetch()
             source_branch = source_branch.replace("refs/heads/", "")
             return source_branch
         except Exception as e:
