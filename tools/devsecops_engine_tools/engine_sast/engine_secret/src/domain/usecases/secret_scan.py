@@ -60,7 +60,7 @@ class SecretScan:
         return finding_list, input_core
     def complete_config_tool(self, data_file_tool, tool):
         config_tool = DeserializeConfigTool(json_data=data_file_tool, tool=tool)
-        config_tool.scope_pipeline = self.devops_platform_gateway.get_variable("REPOSITORY")
+        config_tool.scope_pipeline = self.devops_platform_gateway.get_variable("PIPELINE_NAME")
         skip_tool = "false"
         if config_tool.scope_pipeline in config_tool.ignore_search_pattern:
             skip_tool = "true"
