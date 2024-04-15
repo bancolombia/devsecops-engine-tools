@@ -54,7 +54,7 @@ class TestAzureDevops(unittest.TestCase):
     def test_get_variable_build_pipeline_name(self):
         # Mock the BuildVariables class
         with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.BuildVariables') as mock_build_variables:
-            mock_build_variables.Build_Repository_Name.value.return_value = "BUILD_DEFINITION_NAME"
+            mock_build_variables.Build_DefinitionName.value.return_value = "BUILD_DEFINITION_NAME"
 
             result = self.azure_devops.get_variable("PIPELINE_NAME")
 
