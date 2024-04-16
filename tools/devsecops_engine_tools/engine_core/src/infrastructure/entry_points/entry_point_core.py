@@ -6,6 +6,9 @@ from devsecops_engine_tools.engine_core.src.domain.usecases.break_build import (
 from devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan import (
     HandleScan,
 )
+from devsecops_engine_tools.engine_core.src.domain.usecases.handle_risk import (
+    HandleRisk,
+)
 from devsecops_engine_tools.engine_core.src.domain.usecases.metrics_manager import (
     MetricsManager,
 )
@@ -25,6 +28,7 @@ def get_inputs_from_cli(args):
             "engine_secret",
             "engine_dependencies",
             "engine_container",
+            "engine_risk",
         ],
         type=str,
         required=True,
@@ -92,7 +96,14 @@ def init_engine_core(
         args["remote_config_repo"], "/resources/ConfigTool.json"
     )
 
-    if config_tool[args["tool"].upper()]["ENABLED"] == "true":
+    if args["tool"] == "engine_risk":
+        findings_list = HandleRisk(
+            vulnerability_management_gateway,
+            secrets_manager_gateway,
+            devops_platform_gateway,
+        ).process(args, config_tool)
+
+    elif config_tool[args["tool"].upper()]["ENABLED"] == "true":
         findings_list, input_core = HandleScan(
             vulnerability_management_gateway,
             secrets_manager_gateway,
