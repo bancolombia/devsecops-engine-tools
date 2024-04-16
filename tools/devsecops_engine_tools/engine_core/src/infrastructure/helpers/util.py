@@ -13,3 +13,12 @@ def define_env(variable_env, branch):
         if branch in ["trunk", "master"]
         else "qa" if branch in "release" else "dev"
     )
+
+
+def get_scope_pipeline(release_name, build_name):
+    scope_pipeline = None
+    if release_name:
+        scope_pipeline = release_name
+    elif build_name:
+        scope_pipeline = build_name
+    return scope_pipeline

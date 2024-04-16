@@ -16,6 +16,7 @@ from devsecops_engine_utilities.utils.session_manager import SessionManager
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionVulnerabilityManagement,
     ExceptionFindingsRiskAcceptance,
+    ExceptionGettingFindings,
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     format_date,
@@ -160,6 +161,36 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         except Exception as ex:
             raise ExceptionFindingsRiskAcceptance(
                 "Error getting risk acceptance findings with the following error: {0} ".format(
+                    ex
+                )
+            )
+
+    def get_findings(
+        self, service, dict_args, secret_tool, config_tool
+    ):
+        try:
+            token_dd = (
+                dict_args["token_vulnerability_management"]
+                if dict_args["token_vulnerability_management"] is not None
+                else secret_tool["token_defect_dojo"]
+            )
+
+            session_manager = SessionManager(
+                token_dd,
+                config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"],
+            )
+
+            findings_list = Finding.get_finding(
+                session=session_manager,
+                service=service,
+                limit=config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                    "LIMITS_QUERY"
+                ],
+            ).results
+            return findings_list
+        except Exception as ex:
+            raise ExceptionGettingFindings(
+                "Error getting findings with the following error: {0} ".format(
                     ex
                 )
             )
