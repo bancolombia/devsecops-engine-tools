@@ -104,7 +104,6 @@ class PrismaCloudManagerScan(ToolGateway):
                         remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
                         remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"],
                     )
-                #repository, tag = scan_image["Repository"], scan_image["Tag"]
                 images_scanned.extend(
                     self.scan_image(
                         file_path,
