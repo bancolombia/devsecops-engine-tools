@@ -1,5 +1,5 @@
-from devsecops_engine_tools.engine_risk.src.domain.usecases.handle_remote_config import (
-    HandleRemoteConfig,
+from devsecops_engine_tools.engine_risk.src.domain.usecases.handle_filters import (
+    HandleFilters,
 )
 
 from devsecops_engine_utilities.utils.logger_info import MyLogger
@@ -14,10 +14,10 @@ def init_engine_risk(
         dict_args["remote_config_repo"], "Risk/configTools.json"
     )
     if len(findings):
-        handle_remote_config = HandleRemoteConfig(
+        handle_filters = HandleFilters(
             remote_config, findings
         )
-        findings = handle_remote_config.filter_by_tag()
+        findings = handle_filters.filter_by_tag()
         
     else:
         logger.info("No Findings found in Vultracker")
