@@ -46,7 +46,7 @@ class HandleRisk:
                 secret_tool,
                 remote_config,
             )
-            return runner_engine_risk(findigs_list, remote_config)
+            return runner_engine_risk(dict_args, findigs_list)
         except Exception as e:
             logger.error("Error in handle risk: {0} ".format(str(e)))
             print(
