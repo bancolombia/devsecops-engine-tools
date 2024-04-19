@@ -96,7 +96,7 @@ def init_engine_core(
         args["remote_config_repo"], "/resources/ConfigTool.json"
     )
 
-    if args["tool"] == "engine_risk":
+    if (args["tool"] == "engine_risk") and (config_tool[args["tool"].upper()]["ENABLED"] == "true"):
         findings_list = HandleRisk(
             vulnerability_management_gateway,
             secrets_manager_gateway,

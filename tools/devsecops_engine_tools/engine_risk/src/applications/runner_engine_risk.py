@@ -12,9 +12,15 @@ from devsecops_engine_utilities import settings
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
-def runner_engine_risk(findings, remote_config):
+def runner_engine_risk(dict_args, findings):
     try:
-        return init_engine_risk(findings, remote_config)
+        devops_platform_gateway = AzureDevops()
+
+        return init_engine_risk(
+            devops_platform_gateway,
+            dict_args,
+            findings,
+        )
     except Exception as e:
         logger.error("Error in engine risk: {0} ".format(str(e)))
         raise Exception("Error in engine risk: {0} ".format(str(e)))
