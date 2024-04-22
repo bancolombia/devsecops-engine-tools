@@ -48,6 +48,8 @@ class AzureDevops(DevopsPlatformGateway):
                 return SystemVariables.System_TeamFoundationCollectionUri.value()
             elif variable == "PROJECT_ID":
                 return SystemVariables.System_TeamProjectId.value()
+            elif variable == "PROJECT_NAME":
+                return SystemVariables.System_TeamProject.value()
             elif variable == "PR_ID":
                 return SystemVariables.System_PullRequestId.value()
             elif variable == "TARGET_BRANCH":
