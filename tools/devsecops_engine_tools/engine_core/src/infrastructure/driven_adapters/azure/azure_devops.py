@@ -94,6 +94,5 @@ class AzureDevops(DevopsPlatformGateway):
             elif variable  == "pipeline_type":
                 return SystemVariables.System_HostType.value()
 
-        except Exception as ex:
-            logger.warning(f"Error getting variable {str(ex)}")
+        except Exception:
             return None
