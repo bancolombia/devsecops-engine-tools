@@ -12,6 +12,7 @@ from devsecops_engine_utilities.defect_dojo import (
     Finding,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
+from devsecops_engine_tools.engine_core.src.domain.model.report import Report
 from devsecops_engine_utilities.utils.session_manager import SessionManager
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionVulnerabilityManagement,
@@ -165,7 +166,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 )
             )
 
-    def get_findings(
+    def get_report(
         self, service, dict_args, secret_tool, config_tool
     ):
         try:
@@ -187,7 +188,31 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     "LIMITS_QUERY"
                 ],
             ).results
-            return findings_list
+
+            maped_list = list(
+                map(
+                    lambda finding: Report(
+                        **{
+                            "id": finding.vuln_id_from_tool,
+                            "date": format_date(
+                                finding.date,
+                                "%Y-%m-%d",
+                                "%d%m%Y",
+                            ),
+                            "status": finding.display_status,
+                            "where": self._get_where(finding, dict_args),
+                            "tags": finding.tags,
+                            "severity": finding.severity,
+                            "active": finding.active,
+                            "status": finding.display_status,
+                        }
+                    ),
+                    findings_list,
+                )
+            )
+
+            return maped_list
+
         except Exception as ex:
             raise ExceptionGettingFindings(
                 "Error getting findings with the following error: {0} ".format(
@@ -202,3 +227,12 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             return finding.component_name + ":" + finding.component_version
         elif dict_args["tool"] == "engine_dast":
             return finding.endpoints
+        elif dict_args["tool"] == "engine_risk":
+            for tag in finding.tags:
+                if tag in ["engine_iac", "engine_secret", "7waysecurity", "fluidattacks"]:
+                    return finding.file_path
+                elif tag in ["engine_container", "engine_dependencies"]:
+                    return finding.component_name + ":" + finding.component_version
+                elif tag in ["engine_dast"]:
+                    return finding.endpoints
+            return "Not found"

@@ -97,7 +97,7 @@ def init_engine_core(
     )
 
     if (args["tool"] == "engine_risk") and (config_tool[args["tool"].upper()]["ENABLED"] == "true"):
-        findings_list = HandleRisk(
+        HandleRisk(
             vulnerability_management_gateway,
             secrets_manager_gateway,
             devops_platform_gateway,

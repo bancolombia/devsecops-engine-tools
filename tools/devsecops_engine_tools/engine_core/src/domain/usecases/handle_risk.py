@@ -40,13 +40,13 @@ class HandleRisk:
         if dict_args["use_secrets_manager"] == "true":
             secret_tool = self.secrets_manager_gateway.get_secret(remote_config)
         try:
-            findigs_list = self.vulnerability_management.get_findings(
+            findigs_list = self.vulnerability_management.get_report(
                 scope_pipeline,
                 dict_args,
                 secret_tool,
                 remote_config,
             )
-            return runner_engine_risk(dict_args, findigs_list)
+            runner_engine_risk(dict_args, findigs_list)
         except Exception as e:
             logger.error("Error in handle risk: {0} ".format(str(e)))
             print(
