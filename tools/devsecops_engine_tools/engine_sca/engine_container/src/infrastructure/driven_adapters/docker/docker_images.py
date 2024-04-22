@@ -20,9 +20,9 @@ class DockerImages(ImagesGateway):
 
             latest_image = images_sorted[0]
             
-            print("ID de la última imagen:", latest_image.id)
-            print("Tag de la última imagen:", latest_image.tags)
-            print("Fecha de creación de la última imagen:", latest_image.attrs['Created'])
+            print("ID last image:", latest_image.id)
+            print("Tag last image:", latest_image.tags)
+            print("Created date last image:", latest_image.attrs['Created'])
             
             return latest_image
         except subprocess.CalledProcessError as e:

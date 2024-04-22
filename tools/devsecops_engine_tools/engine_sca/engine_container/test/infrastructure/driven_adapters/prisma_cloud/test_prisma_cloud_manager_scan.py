@@ -103,8 +103,7 @@ def test_download_twistcli_failure(twistcli_instance, mock_requests_get):
         mock_chmod.assert_not_called()
         mock_logger_info.assert_not_called()
         
-
-def test_scan_image_success(mock_remoteconfig, mock_scan_image, mock_images_scanned):
+def test_scan_image_success(mock_remoteconfig, mock_images_scanned):
     with patch("builtins.print") as mock_print, \
             patch("devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.subprocess.run") as mock_run, \
             patch("builtins.open", create=True) as mock_open:
@@ -112,12 +111,12 @@ def test_scan_image_success(mock_remoteconfig, mock_scan_image, mock_images_scan
         mock_run.return_value.stdout = ""
         mock_run.return_value.stderr = ""
         mock_open().readlines.return_value = mock_images_scanned
-
+        mock_scan_image_instance = MagicMock()
+     
         scan_manager = PrismaCloudManagerScan()
         result = scan_manager.scan_image(
             "file_path",
-            "repository",
-            "tag",
+            mock_scan_image_instance,
             mock_remoteconfig,
             "prisma_secret_key",
             "release",
