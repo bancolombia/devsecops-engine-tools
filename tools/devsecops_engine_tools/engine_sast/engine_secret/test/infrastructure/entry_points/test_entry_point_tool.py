@@ -24,11 +24,12 @@ def test_engine_secret_scan(mock_secret_scan):
     devops_platform_gateway = MagicMock()
     tool_gateway = MagicMock()
     tool_deserializator = MagicMock()
+    git_gateway = MagicMock()
     dict_args = {}
     tool = "TRUFFLEHOG"
 
     # Call the function
-    [] , input_output = engine_secret_scan(devops_platform_gateway, tool_gateway, dict_args, tool, tool_deserializator)
+    [] , input_output = engine_secret_scan(devops_platform_gateway, tool_gateway, dict_args, tool, tool_deserializator, git_gateway)
 
     # Assert the expected behavior
     assert input_output == input_core

@@ -10,11 +10,15 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_deserealizator import (
     SecretScanDeserealizator
     )
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.git_cli.git_run import (
+    GitRun
+    )
 
 def runner_secret_scan(dict_args, tool):
     try:
         devops_platform_gateway = AzureDevops()
         tool_deserealizator = SecretScanDeserealizator()
+        git_gateway = GitRun()
         tool_gateway = None
         if (tool == "TRUFFLEHOG"):
             tool_gateway = TrufflehogRun()
@@ -24,6 +28,7 @@ def runner_secret_scan(dict_args, tool):
             dict_args = dict_args,
             tool=tool,
             tool_deserealizator = tool_deserealizator,
+            git_gateway = git_gateway
         )
     except Exception as e:
         raise Exception(f"Error engine_secret : {str(e)}")
