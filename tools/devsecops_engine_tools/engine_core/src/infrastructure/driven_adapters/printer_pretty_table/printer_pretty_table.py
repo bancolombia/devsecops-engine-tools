@@ -6,6 +6,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_g
 from devsecops_engine_tools.engine_core.src.domain.model.finding import (
     Finding,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.report import (
+    Report,
+)
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     format_date
 )
@@ -58,7 +61,34 @@ class PrinterPrettyTable(PrinterTableGateway):
 
         if len(sorted_table.rows) > 0:
             print(sorted_table)
-    
+
+    def print_table_report(self, report_list: "list[Report]"):
+        headers = ["Severity", "ID", "Tag", "Where"]
+        table = PrettyTable(headers)
+        for report in report_list:
+            row_data = [
+                report.severity,
+                report.id,
+                report.tags,
+                report.where,
+            ]
+            table.add_row(row_data)
+
+        severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3, "unknown": 4}
+        sorted_table = PrettyTable()
+        sorted_table.field_names = table.field_names
+        sorted_table.add_rows(
+            sorted(table._rows, key=lambda row: severity_order[row[0]])
+        )
+
+        for column in table.field_names:
+            sorted_table.align[column] = "l"
+
+        sorted_table.set_style(DOUBLE_BORDER)
+
+        if len(sorted_table.rows) > 0:
+            print(sorted_table)
+
     def print_table_exclusions(self, exclusions):
         if (exclusions):
             headers = ["Severity", "ID", "Where", "Create Date", "Expired Date", "Reason"]
