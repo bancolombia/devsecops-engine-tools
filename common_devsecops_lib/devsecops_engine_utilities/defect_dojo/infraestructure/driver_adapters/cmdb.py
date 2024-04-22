@@ -39,7 +39,7 @@ class CmdbRestConsumer:
                     codigo_app=str(request.code_app),
                 )
 
-            data = response.json()[0]
+            data = response.json()[-1]
             data_map = self.mapping_cmdb(data)
             logger.info(data_map)
             cmdb_object = Cmdb.from_dict(data_map)
