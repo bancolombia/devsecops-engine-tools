@@ -19,7 +19,12 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class PrismaCloudManagerScan(ToolGateway):
     def download_twistcli(
-        self, file_path, prisma_access_key, prisma_secret_key, prisma_console_url, prisma_api_version
+        self,
+        file_path,
+        prisma_access_key,
+        prisma_secret_key,
+        prisma_console_url,
+        prisma_api_version,
     ):
         url = f"{prisma_console_url}/api/{prisma_api_version}/util/twistcli"
         credentials = base64.b64encode(
@@ -40,9 +45,7 @@ class PrismaCloudManagerScan(ToolGateway):
         except Exception as e:
             raise ValueError(f"Error downloading twistcli: {e}")
 
-    def scan_image(
-        self, file_path, image, remoteconfig, prisma_secret_key, build_id
-    ):
+    def scan_image(self, file_path, image, remoteconfig, prisma_secret_key, build_id):
         file_name = "scanned_images.txt"
         image_name = f"{image.tags[0]}"
         result_file = f"{image_name}" + "_scan_result.json"
@@ -80,16 +83,14 @@ class PrismaCloudManagerScan(ToolGateway):
                     with open(file_name, "a") as file:
                         file.write(result_file + "\n")
                 except subprocess.CalledProcessError as e:
-                    logger.error(
-                        f"Error during image scan of {image_name}: {e.stderr}"
-                    )
+                    logger.error(f"Error during image scan of {image_name}: {e.stderr}")
 
         return images_scanned
 
     def run_tool_container_sca(
-        self, remoteconfig, prisma_secret_key, image, build_id ,skip_flag
+        self, remoteconfig, prisma_secret_key, image, build_id, skip_flag
     ):
-        images_scanned=[]
+        images_scanned = []
         if not (skip_flag):
             try:
                 file_path = os.path.join(
