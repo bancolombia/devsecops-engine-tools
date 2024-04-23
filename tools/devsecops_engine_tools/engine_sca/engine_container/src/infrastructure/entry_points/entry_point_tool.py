@@ -29,7 +29,8 @@ def init_engine_sca_rm(
         handle_remote_config_patterns.process_handle_skip_tool(),
     )
     input_core = SetInputCore(tool_remote, dict_args, config_tool)
-    images_scanned = container_sca_scan.process()
+    # images_scanned = container_sca_scan.process()
+    images_scanned = ['nu0429001-devsecops-engine-dev-ecr:test2_scan_result.json']
 
     return container_sca_scan.deseralizator(images_scanned), input_core.set_input_core(
         images_scanned

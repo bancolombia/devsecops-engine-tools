@@ -24,6 +24,7 @@ class CheckovDeserealizator:
                         description=rules[scan.get("check_id")].get("checkID", scan.get("check_name")),
                         severity=rules[scan.get("check_id")].get("severity").lower(),
                         identification_date=datetime.now().strftime("%d%m%Y"),
+                        published_date_cve=None,
                         module="engine_iac",
                         category=Category(rules[scan.get("check_id")].get("category").lower()),
                         requirements=scan.get("guideline"),

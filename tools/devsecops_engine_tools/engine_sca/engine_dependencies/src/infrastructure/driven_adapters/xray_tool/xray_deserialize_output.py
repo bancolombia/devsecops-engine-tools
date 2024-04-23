@@ -34,6 +34,7 @@ class XrayDeserializator(DeserializatorGateway):
                 ),
                 severity=vul.get("severity", "").lower(),
                 identification_date=datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+                published_date_cve=None,
                 module="engine_dependencies",
                 category=Category.VULNERABILITY,
                 requirements=(
