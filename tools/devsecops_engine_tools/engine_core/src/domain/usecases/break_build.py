@@ -12,6 +12,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_gateway import (
     PrinterTableGateway,
 )
+
 from collections import Counter
 
 
@@ -209,7 +210,11 @@ class BreakBuild:
                         ),
                     )
                 )
-                print(devops_platform_gateway.result_pipeline("succeeded"))
+                
+                if devops_platform_gateway.get_variable("pipeline_type") == "build":
+                    print(devops_platform_gateway.result_pipeline("succeeded_with_issues"))
+                else:
+                    print(devops_platform_gateway.result_pipeline("succeeded"))
 
                 scan_result["vulnerabilities"] = {
                     "threshold": {
