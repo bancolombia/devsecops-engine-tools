@@ -30,16 +30,20 @@ class GitRun(GitGateway):
             f"{repository_name}"
             )
             
-            url_sin_https = base_compact_url.replace("https://", "")
-            url_with_token = f"https://x-access-token:{access_token}@{url_sin_https}"
+            url_without_https = base_compact_url.replace("https://", "")
+            url_with_token = f"https://x-access-token:{access_token}@{url_without_https}"
 
-            ruta_nueva_carpeta = sys_working_dir + '/' + repository_name
-            os.makedirs(ruta_nueva_carpeta)
-            os.chdir(sys_working_dir)
-            subprocess.run(["git", "clone", url_with_token, ruta_nueva_carpeta], capture_output=True, text=True)
-            os.chdir(ruta_nueva_carpeta)
+            path_new_folder = sys_working_dir + '/' + repository_name
             
-            repository = git.Repo(ruta_nueva_carpeta)
+            if os.path.exists(path_new_folder):
+                logger.warning(f"Error: folder {repository_name} already exist")
+                return []
+            os.makedirs(path_new_folder)
+            os.chdir(sys_working_dir)
+            subprocess.run(["git", "clone", url_with_token, path_new_folder], capture_output=True, text=True)
+            os.chdir(path_new_folder)
+            
+            repository = git.Repo(path_new_folder)
 
             source_branch = source_branch.replace("refs/heads/", "")
             subprocess.run(["git", "checkout", f"origin/{source_branch}"], capture_output=True, text=True)
