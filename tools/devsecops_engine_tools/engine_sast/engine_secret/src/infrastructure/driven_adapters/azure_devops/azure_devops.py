@@ -38,6 +38,8 @@ class AzureDevops(DevopsPlatformGateway):
         try:
             if variable == "REPOSITORY":
                 return BuildVariables.Build_Repository_Name.value()
+            elif variable == "PIPELINE_NAME":
+                return BuildVariables.Build_DefinitionName.value()
             elif variable == "PATH_DIRECTORY":
                 return SystemVariables.System_DefaultWorkingDirectory.value()
             elif variable == "ACCESS_TOKEN":
