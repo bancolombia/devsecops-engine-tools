@@ -24,20 +24,18 @@ class FindArtifacts:
         py_packages = []
         ext_files = []
         extension_pattern = re.compile(pattern, re.IGNORECASE)
-        search_path = os.path.expanduser("~")
-        for root, dirs, files in os.walk(search_path):
+        for root, dirs, files in os.walk(working_dir):
             components = root.split(os.path.sep)
             if not ("node_modules" in components) and not (
                 "site-packages" in components
             ):
                 if "site-packages" in dirs:
                     py_packages.append(os.path.join(root, "site-packages"))
-                if ("node_modules" in dirs) and (working_dir in root):
+                if "node_modules" in dirs:
                     npm_packages.append(os.path.join(root, "node_modules"))
-                if working_dir in root:
-                    for file in files:
-                        if extension_pattern.search(file):
-                            ext_files.append(os.path.join(root, file))
+                for file in files:
+                    if extension_pattern.search(file):
+                        ext_files.append(os.path.join(root, file))
         return npm_packages, py_packages, ext_files
 
     def get_recent_package(self, packages):
