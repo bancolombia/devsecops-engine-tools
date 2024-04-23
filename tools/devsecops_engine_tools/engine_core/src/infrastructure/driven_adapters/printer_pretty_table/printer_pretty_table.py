@@ -67,7 +67,7 @@ class PrinterPrettyTable(PrinterTableGateway):
         table = PrettyTable(headers)
         for report in report_list:
             row_data = [
-                report.severity,
+                report.severity.lower(),
                 report.id,
                 report.tags,
                 report.where,

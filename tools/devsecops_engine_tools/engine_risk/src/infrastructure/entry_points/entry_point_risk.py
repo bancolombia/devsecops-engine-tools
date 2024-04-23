@@ -31,5 +31,3 @@ def init_engine_risk(
     else:
         print("No Findings found in Vultracker")
         logger.info("No Findings found in Vultracker")
-
-    return findings_to_break
