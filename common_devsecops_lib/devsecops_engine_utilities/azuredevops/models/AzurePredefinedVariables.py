@@ -48,6 +48,7 @@ class BuildVariables(BaseEnum):
     Build_SourceBranchName = "Build.SourceBranchName"
     Build_StagingDirectory = "Build.StagingDirectory"
     Build_SourceVersion = "Build.SourceVersion"
+    Build_Repository_Provider = "Build.Repository.Provider"
 
 
 class ReleaseVariables(BaseEnum):
