@@ -51,5 +51,5 @@ class CmdbRestConsumer:
     def mapping_cmdb(self, data):
         data_map = {}
         for key, value in self.__mapping_cmdb.items():
-            data_map[key] = data[value]
+            data_map[key] = data[value] if value in data else ""
         return data_map
