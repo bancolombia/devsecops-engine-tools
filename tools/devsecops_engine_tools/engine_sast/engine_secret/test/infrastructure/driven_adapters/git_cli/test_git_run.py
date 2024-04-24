@@ -16,12 +16,13 @@ class TestGitRun(unittest.TestCase):
         collection_uri = "https://dev.azure.com/orgName"
         team_project = "team_project"
         repository_name = "NU00001_Repo_test"
+        repository_provider = "TfsGit"
 
         mock_git_repo.side_effect = Exception("Simulated exception")
         
         git_run = GitRun()
         files = git_run.get_files_pull_request(sys_working_dir, target_branch, config_target_branch, source_branch,
-                                               access_token, collection_uri, team_project, repository_name)
+                                               access_token, collection_uri, team_project, repository_name, repository_provider)
         
         self.assertEqual(files, [])
         
@@ -39,6 +40,7 @@ class TestGitRun(unittest.TestCase):
         collection_uri = "https://dev.azure.com/orgName"
         team_project = "team_project"
         repository_name = "NU00001_Repo_test"
+        repository_provider = "TfsGit"
 
         mock_repo = MagicMock()
         mock_repo.git.diff.return_value = "file1.py\nfile2.py"
@@ -48,7 +50,7 @@ class TestGitRun(unittest.TestCase):
         
         git_run = GitRun()
         files = git_run.get_files_pull_request(sys_working_dir, target_branch, config_target_branch, source_branch,
-                                               access_token, collection_uri, team_project, repository_name)
+                                               access_token, collection_uri, team_project, repository_name, repository_provider)
 
         self.assertEqual(files, ["file1.py", "file2.py"])
         mock_os_makedirs.assert_called_once_with("/azp/_work/1/s/NU00001_Repo_test")
@@ -65,12 +67,13 @@ class TestGitRun(unittest.TestCase):
         collection_uri = "https://dev.azure.com/orgName"
         team_project = "team_project"
         repository_name = "NU00001_Repo_test"
+        repository_provider = "TfsGit"
    
         mock_path_exists.return_value = True
         
         git_run = GitRun()
         files = git_run.get_files_pull_request(sys_working_dir, target_branch, config_target_branch, source_branch,
-                                               access_token, collection_uri, team_project, repository_name)
+                                               access_token, collection_uri, team_project, repository_name, repository_provider)
 
         self.assertEqual(files, [])
         
@@ -83,10 +86,28 @@ class TestGitRun(unittest.TestCase):
         collection_uri = "https://dev.azure.com/orgName"
         team_project = "team_project"
         repository_name = "NU00001_Repo_test"
+        repository_provider = "TfsGit"
         
         git_run = GitRun()
         files = git_run.get_files_pull_request(sys_working_dir, target_branch, config_target_branch, source_branch,
-                                               access_token, collection_uri, team_project, repository_name)
+                                               access_token, collection_uri, team_project, repository_name, repository_provider)
+
+        self.assertEqual(files, [])
+        
+    def test_get_files_pull_request_github_provider(self):
+        sys_working_dir = "/azp/_work/1/s"
+        target_branch = "trunk"
+        config_target_branch = ["trunk", "develop"]
+        source_branch = "refs/heads/feature/branch"
+        access_token = "ABCDEFG123456"
+        collection_uri = "https://dev.azure.com/orgName"
+        team_project = "team_project"
+        repository_name = "NU00001_Repo_test"
+        repository_provider = "GitHub"
+        
+        git_run = GitRun()
+        files = git_run.get_files_pull_request(sys_working_dir, target_branch, config_target_branch, source_branch,
+                                               access_token, collection_uri, team_project, repository_name, repository_provider)
 
         self.assertEqual(files, [])
 if __name__ == '__main__':

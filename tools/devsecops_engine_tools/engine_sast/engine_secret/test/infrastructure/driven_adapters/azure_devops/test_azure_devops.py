@@ -51,6 +51,14 @@ class TestAzureDevops(unittest.TestCase):
 
         self.assertEqual(result, "BUILD_REPOSITORY_NAME")
 
+    def test_get_variable_build_repository_provider(self):
+        # Mock the BuildVariables class
+        with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.BuildVariables') as mock_build_variables:
+            mock_build_variables.Build_Repository_Provider.value.return_value = "BUILD_REPOSITORY_PROVIDER"
+
+            result = self.azure_devops.get_variable("REPOSITORY_PROVIDER")
+
+        self.assertEqual(result, "BUILD_REPOSITORY_PROVIDER")
     def test_get_variable_build_pipeline_name(self):
         # Mock the BuildVariables class
         with unittest.mock.patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops.BuildVariables') as mock_build_variables:
