@@ -10,5 +10,6 @@ class GitGateway(metaclass=ABCMeta):
                                access_token: str,
                                collection_uri: str,
                                team_project: str,
-                               repository_name: str) -> dict:
+                               repository_name: str,
+                               repository_provider: str) -> dict:
         "get_files_pull_request"

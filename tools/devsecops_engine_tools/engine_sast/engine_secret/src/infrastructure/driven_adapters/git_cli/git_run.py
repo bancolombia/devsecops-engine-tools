@@ -20,9 +20,10 @@ class GitRun(GitGateway):
                                access_token,
                                collection_uri,
                                team_project,
-                               repository_name):
+                               repository_name,
+                               repository_provider):
         try:
-            if target_branch not in config_target_branch:
+            if repository_provider == 'GitHub' or target_branch not in config_target_branch:
                 return []
             base_compact_url = (
             f"https://{collection_uri.rstrip('/').split('/')[-1].replace('.visualstudio.com','')}"

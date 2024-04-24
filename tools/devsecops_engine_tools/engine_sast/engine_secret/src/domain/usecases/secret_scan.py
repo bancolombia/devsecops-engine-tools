@@ -45,7 +45,8 @@ class SecretScan:
                 self.devops_platform_gateway.get_variable("ACCESS_TOKEN"),
                 self.devops_platform_gateway.get_variable("ORGANIZATION"),
                 self.devops_platform_gateway.get_variable("PROJECT_NAME"),
-                self.devops_platform_gateway.get_variable("REPOSITORY"))
+                self.devops_platform_gateway.get_variable("REPOSITORY"),
+                self.devops_platform_gateway.get_variable("REPOSITORY_PROVIDER"))
             finding_list = self.tool_deserialize.get_list_vulnerability(
                 self.tool_gateway.run_tool_secret_scan(
                     files_pullrequest,
