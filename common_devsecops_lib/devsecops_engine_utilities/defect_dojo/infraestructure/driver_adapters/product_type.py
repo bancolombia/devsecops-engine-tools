@@ -53,7 +53,7 @@ class ProductTypeRestConsumer:
             if response.status_code != 200:
                 raise ApiError(response.json())
             logger.info(response)
-            product_type_object = ProductTypeList.from_dict(response.json())
+            product_type_object = ProductType.from_dict(response.json())
         except Exception as e:
             raise ApiError(e)
         return product_type_object
