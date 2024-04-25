@@ -69,7 +69,7 @@ class ContainerScaScan:
             self.get_remote_config("SCA/CONTAINER/ConfigTool.json"),
             self.token,
             self.scan_image(),
-            self.get_variable("release_name"),
+            self.get_variable("build_id"),
             self.skip_flag
         )
 
