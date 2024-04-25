@@ -17,7 +17,7 @@ class ProductRestConsumer:
         self.__session = session._instance
 
     def get_products(self, request: ImportScanRequest) -> ProductList:
-        url = f"{self.__host}/api/v2/products/?name={request.product_name}"
+        url = f"{self.__host}/api/v2/products/?name={request.code_app}"
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
         try:
             response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
