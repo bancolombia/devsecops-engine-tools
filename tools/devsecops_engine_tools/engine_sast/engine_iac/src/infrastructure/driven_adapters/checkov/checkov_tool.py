@@ -106,8 +106,6 @@ class CheckovTool(ToolGateway):
         )
         output = result.stdout.strip()
         error = result.stderr.strip()
-        if error is not None and error != "":
-            logger.error(f"Error running checkov.. {error}")
         return output
 
     def async_scan(self, queue, checkov_config: CheckovConfig):
