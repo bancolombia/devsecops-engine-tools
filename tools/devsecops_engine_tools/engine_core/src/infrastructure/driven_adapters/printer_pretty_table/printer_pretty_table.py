@@ -71,7 +71,7 @@ class PrinterPrettyTable(PrinterTableGateway):
                 exclusion["id"],
                 exclusion["where"],
                 format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
-                format_date(exclusion["expired_date"], "%d%m%Y", "%d/%m/%Y") if exclusion["expired_date"] else "NA",
+                format_date(exclusion["expired_date"], "%d%m%Y", "%d/%m/%Y") if exclusion["expired_date"] and exclusion["expired_date"] != "undefined" else "NA",
                 exclusion["reason"],
             ]
             table.add_row(row_data)
