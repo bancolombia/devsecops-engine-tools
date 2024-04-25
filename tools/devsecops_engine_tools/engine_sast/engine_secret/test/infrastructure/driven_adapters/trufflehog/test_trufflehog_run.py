@@ -9,13 +9,13 @@ class TestTrufflehogRun(unittest.TestCase):
         os_patch = patch.dict('os.environ', {'AGENT_OS': 'Linux'})
         os_patch.start()
         self.addCleanup(os_patch.stop)
-        # Configuramos un valor de retorno para el subprocess.run
+
         mock_subprocess_run.return_value.stdout = b'Trufflehog version 1.0.0'
         mock_subprocess_run.return_value.stderr = b''
 
         trufflehog_run = TrufflehogRun()
         trufflehog_run.install_tool("Linux", "/tmp")
-        # Aseguramos que subprocess.run fue llamado con el comando esperado
+
         mock_subprocess_run.assert_called_once_with("trufflehog --version", capture_output=True, shell=True)
     
     @patch('subprocess.run')
@@ -34,7 +34,6 @@ class TestTrufflehogRun(unittest.TestCase):
         trufflehog_run = TrufflehogRun()
         trufflehog_run.run_install_win("C:/temp")
 
-        # Aseguramos que subprocess.Popen fue llamado con el comando esperado
         expected_command = (
             "powershell -Command "
             "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; [Net.ServicePointManager]::SecurityProtocol; " +
@@ -49,30 +48,25 @@ class TestTrufflehogRun(unittest.TestCase):
     @patch('concurrent.futures.ThreadPoolExecutor')
     @patch.object(TrufflehogRun, 'config_include_path')
     def test_run_tool_secret_scan(self, mock_config_include_path, mock_thread_pool_executor, mock_open):
-        # Configurar mock de ThreadPoolExecutor
         mock_executor = MagicMock()
         mock_executor_map_result = ['{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}\n']
         mock_executor.map.return_value = mock_executor_map_result
         mock_thread_pool_executor.return_value.__enter__.return_value = mock_executor
 
-        # Configurar mock de config_include_path
         mock_config_include_path.return_value = ['/usr/temp/includePath0.txt']
 
-        # Configurar parámetros de prueba
         files_commits = ['/usr/file1.py', '/usr/file2.py']
         exclude_paths = ['.git', 'gradle']
         agent_os = 'Windows'
         agent_work_folder = '/usr/temp'
         sys_working_dir = '/usr/local'
         num_threads = 4
+        repository_name = 'NU00000_Repo_Test'
 
-        # Crear instancia de la clase
         trufflehog_run = TrufflehogRun()
 
-        # Llamar a la función bajo prueba
-        result = trufflehog_run.run_tool_secret_scan(files_commits, exclude_paths, agent_os, agent_work_folder, sys_working_dir, num_threads)
+        result = trufflehog_run.run_tool_secret_scan(files_commits, exclude_paths, agent_os, agent_work_folder, sys_working_dir, num_threads, repository_name)
 
-        # Verificar el resultado
         expected_result = [
             {"SourceMetadata": {"Data": {"Filesystem": {"file": "/usr/bin/local/file1.txt", "line": 1}}}, "SourceID": 1,
             "SourceType": 15, "SourceName": "trufflehog - filesystem", "DetectorType": 17, "DetectorName": "URI",
@@ -85,28 +79,21 @@ class TestTrufflehogRun(unittest.TestCase):
 
     @patch('builtins.open', create=True)
     def test_config_include_path(self, mock_open):
-        # Crear instancia de la clase
         trufflehog_run = TrufflehogRun()
 
-        # Llamar a la función bajo prueba
         result = trufflehog_run.config_include_path(['/usr/file1.py', '/usr/file2.py'], '/usr/temp')
 
-        # Verificar el resultado
         expected_result = ['/usr/temp/includePath0.txt', '/usr/temp/includePath1.txt']
         self.assertEqual(result, expected_result)
 
     @patch('subprocess.run')
     def test_run_trufflehog(self, mock_subprocess_run):
-        # Configurar mock
         mock_subprocess_run.return_value.stdout.strip.return_value = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
 
-        # Crear instancia de la clase
         trufflehog_run = TrufflehogRun()
 
-        # Llamar a la función bajo prueba
-        result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt')
+        result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt', 'NU00000_Repo_Test')
 
-        # Verificar el resultado
         expected_result = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
         self.assertEqual(result, expected_result)
         
