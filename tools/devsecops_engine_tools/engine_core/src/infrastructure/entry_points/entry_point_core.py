@@ -91,17 +91,18 @@ def init_engine_core(
     config_tool = devops_platform_gateway.get_remote_config(
         args["remote_config_repo"], "/resources/ConfigTool.json"
     )
-
+    
     if config_tool[args["tool"].upper()]["ENABLED"] == "true":
         findings_list, input_core = HandleScan(
             vulnerability_management_gateway,
             secrets_manager_gateway,
             devops_platform_gateway,
         ).process(args, config_tool)
-
+    
         scan_result = BreakBuild(devops_platform_gateway, print_table_gateway).process(
             findings_list,
             input_core,
+            args
         )
         if args["send_metrics"] == "true":
             MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(

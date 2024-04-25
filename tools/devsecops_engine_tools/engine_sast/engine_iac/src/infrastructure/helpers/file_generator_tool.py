@@ -68,5 +68,7 @@ def update_fields(check_result, rules_doc):
         check_result["custom_vuln_id"] = rule_info["customID"]
     if "guideline" in rule_info:
         check_result["guideline"] = rule_info["guideline"]
+    if "category" in rule_info:
+        check_result["bc_category"] = rule_info["category"]
 
     return check_result
