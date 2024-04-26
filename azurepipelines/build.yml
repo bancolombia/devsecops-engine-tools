@@ -35,7 +35,6 @@ steps:
 
 - script: |
     set -e
-    
     python3 -m virtualenv _venv
     source _venv/bin/activate
     python -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
