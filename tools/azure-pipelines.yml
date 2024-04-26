@@ -13,9 +13,9 @@ trigger:
     include:
       - trunk
       - feature/*
-  # paths:
-  #   include:
-  #     - "tools/*"
+  paths:
+    include:
+      - "tools/*"
 
 resources:
   - repo: self
