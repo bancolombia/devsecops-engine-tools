@@ -22,7 +22,7 @@ app-service.jar
 **build/lib**
 
 #Ignorar cualquir archivo TXT
-**.txt
+scanned_images.txt
 *.pyc
 data
 
