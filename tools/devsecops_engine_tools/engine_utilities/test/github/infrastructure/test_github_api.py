@@ -1,13 +1,13 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from common_devsecops_lib.devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import GithubApi
+from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import GithubApi
 
 class TestGithubApi(unittest.TestCase):
     def setUp(self):
         self.token = "your_token"
         self.github_api = GithubApi(token=self.token)
 
-    @patch('common_devsecops_lib.devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.zipfile.ZipFile')
+    @patch('devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.zipfile.ZipFile')
     def test_unzip_file(self, mock_zipfile):
         # Configurar el mock de zipfile
         mock_zip_ref = mock_zipfile.return_value
@@ -19,8 +19,8 @@ class TestGithubApi(unittest.TestCase):
         mock_zipfile.assert_called_once_with('/path/to/your/file.zip', 'r')
 
 
-    @patch('common_devsecops_lib.devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.requests.get')
-    @patch('common_devsecops_lib.devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.GithubApi.unzip_file')
+    @patch('devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.requests.get')
+    @patch('devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.GithubApi.unzip_file')
     @patch('builtins.open', new_callable=unittest.mock.mock_open())
     def test_download_latest_release_assets(self, mock_open, mock_unzip_file, mock_get):
         # Configurar el objeto de respuesta simulado

@@ -1,6 +1,6 @@
 import pytest
 from devsecops_engine_tools.engine_utilities.utils.api_error import ApiError
-from devsecops_engine_tools.engine_utilities.settings import devsecops_engine_tools.engine_utilities_PATH
+from devsecops_engine_tools.engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_PATH
 from unittest.mock import MagicMock
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.serializers.import_scan import ImportScanSerializer
@@ -23,7 +23,7 @@ def import_scan_request_instance(par_scan_type) -> ImportScanRequest:
         host_defect_dojo="http://localhost:8000",
         scan_type=par_scan_type,
         engagement_name="test engagement name",
-        file=f"{devsecops_engine_tools.engine_utilities_PATH}/defect_dojo/tests/files/xray_scan.json",
+        file=f"{DEVSECOPS_ENGINE_UTILITIES_PATH}/defect_dojo/tests/files/xray_scan.json",
         tags="evc",
     )
     return request
@@ -65,7 +65,7 @@ def test_execute(engagement_name):
         "host_defect_dojo": "http://localhost:8000",
         "scan_type": "JFrog Xray Scan",
         "engagement_name": engagement_name,
-        "file": f"{devsecops_engine_tools.engine_utilities_PATH}/defect_dojo/test/files/xray_scan.json",
+        "file": f"{DEVSECOPS_ENGINE_UTILITIES_PATH}/defect_dojo/test/files/xray_scan.json",
         "tags": "evc",
     }
     request: ImportScanRequest = ImportScanSerializer().load(request)

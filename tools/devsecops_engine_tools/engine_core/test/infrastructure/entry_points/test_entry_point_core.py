@@ -17,7 +17,10 @@ class TestEntryPointCore(unittest.TestCase):
         "devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core.MetricsManager"
     )
     def test_init_engine_core(
-        self, mock_metrics_manager, mock_break_build, mock_handle_scan
+        self,
+        mock_metrics_manager,
+        mock_break_build,
+        mock_handle_scan
     ):
         # Set up mock arguments
 
@@ -37,6 +40,12 @@ class TestEntryPointCore(unittest.TestCase):
 
         mock_break_build.return_value.process.return_value = mock_scan_result
 
+        args = {
+            "remote_config_repo": "https://github.com/example/repo",
+            "tool": "engine_iac",
+            "send_metrics": "true",
+        }
+
         # Call the function
         init_engine_core(
             vulnerability_management_gateway=mock.Mock(),
@@ -44,11 +53,7 @@ class TestEntryPointCore(unittest.TestCase):
             devops_platform_gateway=mock_devops_platform_gateway,
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
-            args={
-                "remote_config_repo": "https://github.com/example/repo",
-                "tool": "engine_iac",
-                "send_metrics": "true",
-            },
+            args=args,
         )
 
         # Assert that the function calls were made with the expected arguments
@@ -64,16 +69,12 @@ class TestEntryPointCore(unittest.TestCase):
             mock_config_tool,
         )
         mock_break_build.return_value.process.assert_called_once_with(
-            mock_findings_list, mock_input_core
+            mock_findings_list, mock_input_core, args
         )
         mock_metrics_manager.return_value.process.assert_called_once_with(
             mock_config_tool,
             mock_input_core,
-            {
-                "remote_config_repo": "https://github.com/example/repo",
-                "tool": "engine_iac",
-                "send_metrics": "true",
-            },
+            args,
             mock_scan_result,
         )
 

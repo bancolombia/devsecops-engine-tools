@@ -1,4 +1,4 @@
-from common_devsecops_lib.devsecops_engine_tools.engine_utilities.utils.name_conversion import snake_case_to_camel_case
+from devsecops_engine_tools.engine_utilities.utils.name_conversion import snake_case_to_camel_case
 
 
 def test_camel_case_to_snake_case():

@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
 from devsecops_engine_tools.engine_utilities.utils.api_error import ApiError
-from engine_utilities.defect_dojo.test.files.get_response import (
+from devsecops_engine_tools.engine_utilities.defect_dojo.test.files.get_response import (
     get_response,
     session_manager_post,
     session_manager_get,

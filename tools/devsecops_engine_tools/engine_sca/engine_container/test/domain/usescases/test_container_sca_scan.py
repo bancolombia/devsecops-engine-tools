@@ -20,7 +20,8 @@ def mock_tool_deseralizator():
 
 @pytest.fixture
 def container_sca_scan(mock_tool_run, mock_tool_remote, mock_tool_images, mock_tool_deseralizator):
-    return ContainerScaScan(mock_tool_run, mock_tool_remote, mock_tool_images, mock_tool_deseralizator, {"remote_config_repo": "test"}, "token")
+    dict_args = {"remote_config_repo": "path_to_config"}
+    return ContainerScaScan(mock_tool_run, mock_tool_remote, mock_tool_images, mock_tool_deseralizator, dict_args, "token",False)
 
 def test_get_remote_config(container_sca_scan):
     container_sca_scan.tool_remote.get_remote_config.return_value = {"config_key": "config_value"}

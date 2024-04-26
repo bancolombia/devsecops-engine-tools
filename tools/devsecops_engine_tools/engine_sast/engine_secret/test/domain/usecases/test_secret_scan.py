@@ -8,6 +8,7 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.secret
 
 class TestSecretScan(unittest.TestCase):
 
+    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway.GitGateway')
     @patch(
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
@@ -18,18 +19,20 @@ class TestSecretScan(unittest.TestCase):
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway.ToolGateway"
     )
     def test_process(
-        self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway
+        self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway, mock_git_gateway
     ):
         # Configuración de mocks
         mock_tool_gateway_instance = mock_tool_gateway.return_value
         mock_devops_gateway_instance = mock_devops_gateway.return_value
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
+        mock_git_gateway_instance = mock_git_gateway.return_value
 
         # Configuración de la instancia de SecretScan
         secret_scan = SecretScan(
             mock_tool_gateway_instance,
             mock_devops_gateway_instance,
             mock_deserialize_gateway_instance,
+            mock_git_gateway_instance
         )
 
         # Configura el valor de retorno esperado para get_list_vulnerability
@@ -45,7 +48,8 @@ class TestSecretScan(unittest.TestCase):
                 "VULNERABILITY": {"Critical": 1, "High": 1, "Medium": 1, "Low": 1},
                 "COMPLIANCE": {"Critical": 1},
             },
-            "trufflehog": {"EXCLUDE_PATH": [".git"]},
+            "TARGET_BRANCHES": ['trunk', 'develop'],
+            "trufflehog": {"EXCLUDE_PATH": [".git"], "NUMBER_THREADS": 4},
         }
 
         mock_devops_gateway_instance.get_remote_config.return_value = json_config
@@ -74,10 +78,11 @@ class TestSecretScan(unittest.TestCase):
         self.assertEqual(input_core.path_file_results, ["vulnerability_data"])
         self.assertEqual(input_core.custom_message_break_build, "message test")
         self.assertEqual(input_core.scope_pipeline, "example_pipeline")
-        self.assertEqual(input_core.stage_pipeline, "Build")
+        self.assertEqual(input_core.stage_pipeline, "Example_pipeline")
         mock_tool_gateway_instance.install_tool.assert_called_once()
         mock_tool_gateway_instance.run_tool_secret_scan.assert_called_once()
 
+    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway.GitGateway')
     @patch(
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
@@ -88,18 +93,20 @@ class TestSecretScan(unittest.TestCase):
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway.ToolGateway"
     )
     def test_process_empty(
-        self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway
+        self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway, mock_git_gateway
     ):
         # Configuración de mocks
         mock_tool_gateway_instance = mock_tool_gateway.return_value
         mock_devops_gateway_instance = mock_devops_gateway.return_value
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
+        mock_git_gateway_instance = mock_git_gateway.return_value
 
         # Configuración de la instancia de SecretScan
         secret_scan = SecretScan(
             mock_tool_gateway_instance,
             mock_devops_gateway_instance,
             mock_deserialize_gateway_instance,
+            mock_git_gateway_instance
         )
 
         # Configura el valor de retorno esperado para get_list_vulnerability
@@ -113,8 +120,10 @@ class TestSecretScan(unittest.TestCase):
                 "VULNERABILITY": {"Critical": 1, "High": 1, "Medium": 1, "Low": 1},
                 "COMPLIANCE": {"Critical": 1},
             },
+            "TARGET_BRANCHES": ['trunk', 'develop'],
             "trufflehog": {
                 "EXCLUDE_PATH": [".git"],
+                "NUMBER_THREADS": 4
             },
         }
 
@@ -144,6 +153,6 @@ class TestSecretScan(unittest.TestCase):
         self.assertEqual(input_core.path_file_results, [])
         self.assertEqual(input_core.custom_message_break_build, "message test")
         self.assertEqual(input_core.scope_pipeline, "example_pipeline")
-        self.assertEqual(input_core.stage_pipeline, "Build")
+        self.assertEqual(input_core.stage_pipeline, "Example_pipeline")
         mock_tool_gateway_instance.install_tool.assert_called_once()
         mock_tool_gateway_instance.run_tool_secret_scan.assert_called_once()
