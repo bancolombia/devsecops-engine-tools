@@ -116,7 +116,7 @@ class TestEntryPointCore(unittest.TestCase):
             mock_args, mock_config_tool
         )
         mock_break_build.return_value.process.assert_called_once_with(
-            mock_findings_list, mock_input_core
+            mock_findings_list, mock_input_core, mock_args
         )
         mock_metrics_manager.return_value.process.assert_called_once_with(
             mock_config_tool, mock_input_core, mock_args, mock_scan_result

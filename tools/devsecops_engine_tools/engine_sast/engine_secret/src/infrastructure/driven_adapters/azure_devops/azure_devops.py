@@ -40,6 +40,8 @@ class AzureDevops(DevopsPlatformGateway):
                 return BuildVariables.Build_Repository_Name.value()
             elif variable == "PIPELINE_NAME":
                 return BuildVariables.Build_DefinitionName.value()
+            elif variable == "REPOSITORY_PROVIDER":
+                return BuildVariables.Build_Repository_Provider.value()
             elif variable == "PATH_DIRECTORY":
                 return SystemVariables.System_DefaultWorkingDirectory.value()
             elif variable == "ACCESS_TOKEN":
@@ -48,6 +50,8 @@ class AzureDevops(DevopsPlatformGateway):
                 return SystemVariables.System_TeamFoundationCollectionUri.value()
             elif variable == "PROJECT_ID":
                 return SystemVariables.System_TeamProjectId.value()
+            elif variable == "PROJECT_NAME":
+                return SystemVariables.System_TeamProject.value()
             elif variable == "PR_ID":
                 return SystemVariables.System_PullRequestId.value()
             elif variable == "TARGET_BRANCH":

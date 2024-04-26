@@ -7,7 +7,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
 )
 from dataclasses import dataclass
 import json
-
+from datetime import datetime
 
 @dataclass
 class TrivyDeserializator(DeseralizatorGateway):
@@ -34,7 +34,8 @@ class TrivyDeserializator(DeseralizatorGateway):
                         + vul.get("InstalledVersion", ""),
                         description=vul.get("Description", "").replace("\n", ""),
                         severity=vul.get("Severity", "").lower(),
-                        identification_date=vul.get("PublishedDate", ""),
+                        identification_date=datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+                        published_date_cve=vul.get("PublishedDate", ""),
                         module="engine_container",
                         category=Category.VULNERABILITY,
                         requirements=vul.get("FixedVersion") or vul.get("Status", ""),

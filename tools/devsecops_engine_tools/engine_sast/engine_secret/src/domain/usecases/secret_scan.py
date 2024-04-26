@@ -37,7 +37,16 @@ class SecretScan:
         finding_list = []
         if skip_tool == "false":
             self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("OS"), self.devops_platform_gateway.get_variable("TEMP_DIRECTORY"))
-            files_pullrequest = self.git_gateway.get_files_pull_request(self.devops_platform_gateway.get_variable("PATH_DIRECTORY"), self.devops_platform_gateway.get_variable("TARGET_BRANCH"), config_tool.target_branches, self.devops_platform_gateway.get_variable("SOURCE_BRANCH"))
+            files_pullrequest = self.git_gateway.get_files_pull_request(
+                self.devops_platform_gateway.get_variable("PATH_DIRECTORY"),
+                self.devops_platform_gateway.get_variable("TARGET_BRANCH"),
+                config_tool.target_branches,
+                self.devops_platform_gateway.get_variable("SOURCE_BRANCH"),
+                self.devops_platform_gateway.get_variable("ACCESS_TOKEN"),
+                self.devops_platform_gateway.get_variable("ORGANIZATION"),
+                self.devops_platform_gateway.get_variable("PROJECT_NAME"),
+                self.devops_platform_gateway.get_variable("REPOSITORY"),
+                self.devops_platform_gateway.get_variable("REPOSITORY_PROVIDER"))
             finding_list = self.tool_deserialize.get_list_vulnerability(
                 self.tool_gateway.run_tool_secret_scan(
                     files_pullrequest,
@@ -46,6 +55,7 @@ class SecretScan:
                     self.devops_platform_gateway.get_variable("WORK_FOLDER"),
                     self.devops_platform_gateway.get_variable("PATH_DIRECTORY"),
                     config_tool.number_threads,
+                    self.devops_platform_gateway.get_variable("REPOSITORY")
                     ),
                 self.devops_platform_gateway
                 )
