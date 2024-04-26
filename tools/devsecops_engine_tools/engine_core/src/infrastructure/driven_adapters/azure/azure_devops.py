@@ -50,6 +50,8 @@ class AzureDevops(DevopsPlatformGateway):
             return AzureMessageResultPipeline.Failed.value
         elif type == "succeeded":
             return AzureMessageResultPipeline.Succeeded.value
+        elif type == "succeeded_with_issues":
+            return AzureMessageResultPipeline.SucceededWithIssues.value
 
     def get_source_code_management_uri(self):
         source_code_management_uri = (
@@ -89,6 +91,8 @@ class AzureDevops(DevopsPlatformGateway):
                 return AgentVariables.Agent_BuildDirectory.value()
             elif variable  == "release_name":
                 return ReleaseVariables.Release_Definitionname.value()
+            elif variable  == "pipeline_type":
+                return SystemVariables.System_HostType.value()
 
         except Exception:
             return None

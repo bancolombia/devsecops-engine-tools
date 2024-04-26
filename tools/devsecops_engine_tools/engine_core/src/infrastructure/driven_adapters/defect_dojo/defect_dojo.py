@@ -15,11 +15,12 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclu
 from devsecops_engine_utilities.utils.session_manager import SessionManager
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionVulnerabilityManagement,
-    ExceptionFindingsRiskAcceptance,
+    ExceptionFindingsExcepted,
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     format_date,
 )
+from functools import partial
 
 
 @dataclass
@@ -90,7 +91,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     commit_hash=vulnerability_management.commit_hash,
                     environment=(
                         enviroment_mapping[vulnerability_management.environment.lower()]
-                        if vulnerability_management.environment is not None and vulnerability_management.environment.lower() in enviroment_mapping
+                        if vulnerability_management.environment is not None
+                        and vulnerability_management.environment.lower()
+                        in enviroment_mapping
                         else enviroment_mapping["default"]
                     ),
                     tags="evc",
@@ -100,7 +103,10 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 if hasattr(response, "url"):
                     url_parts = response.url.split("//")
                     test_string = "//".join([url_parts[0] + "/", url_parts[1]])
-                    print("Report sent to vulnerability management: ", f"{test_string}?tags={vulnerability_management.dict_args['tool']}")
+                    print(
+                        "Report sent to vulnerability management: ",
+                        f"{test_string}?tags={vulnerability_management.dict_args['tool']}",
+                    )
                 else:
                     raise ExceptionVulnerabilityManagement(response)
         except Exception as ex:
@@ -110,64 +116,100 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 )
             )
 
-    def get_findings_risk_acceptance(
-        self, service, dict_args, secret_tool, config_tool
-    ):
+    def get_findings_excepted(self, service, dict_args, secret_tool, config_tool):
         try:
-            token_dd = (
-                dict_args["token_vulnerability_management"]
-                if dict_args["token_vulnerability_management"] is not None
-                else secret_tool["token_defect_dojo"]
-            )
-
+            token_dd = dict_args.get(
+                "token_vulnerability_management"
+            ) or secret_tool.get("token_defect_dojo")
             session_manager = SessionManager(
                 token_dd,
                 config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"],
             )
 
-            findings_list = Finding.get_finding(
-                session=session_manager,
-                service=service,
-                risk_accepted=True,
-                tags=dict_args["tool"],
-                limit=config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
-                    "LIMITS_QUERY"
-                ],
-            ).results
-            return list(
-                map(
-                    lambda finding: Exclusions(
-                        **{
-                            "id": finding.vuln_id_from_tool,
-                            "where": self._get_where(finding, dict_args),
-                            "create_date": format_date(
-                                finding.accepted_risks[-1]["created"].split("T")[0],
-                                "%Y-%m-%d",
-                                "%d%m%Y",
-                            ),
-                            "expired_date": format_date(
-                                finding.accepted_risks[-1]["expiration_date"].split(
-                                    "T"
-                                )[0],
-                                "%Y-%m-%d",
-                                "%d%m%Y",
-                            ),
-                        }
-                    ),
-                    findings_list,
-                )
+            dd_limits_query = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                "LIMITS_QUERY"
+            ]
+            tool = dict_args["tool"]
+
+            risk_accepted_query_params = {
+                "risk_accepted": True,
+                "tags": tool,
+                "limit": dd_limits_query,
+            }
+            false_positive_query_params = {
+                "false_p": True,
+                "tags": tool,
+                "limit": dd_limits_query,
+            }
+
+            exclusions_risk_accepted = self._get_findings_with_exclusions(
+                session_manager,
+                service,
+                risk_accepted_query_params,
+                tool,
+                self._format_date_to_dd_format,
+                "Risk Accepted",
             )
+
+            exclusions_false_positive = self._get_findings_with_exclusions(
+                session_manager,
+                service,
+                false_positive_query_params,
+                tool,
+                self._format_date_to_dd_format,
+                "False Positive",
+            )
+
+            return list(exclusions_risk_accepted) + list(exclusions_false_positive)
         except Exception as ex:
-            raise ExceptionFindingsRiskAcceptance(
-                "Error getting risk acceptance findings with the following error: {0} ".format(
+            raise ExceptionFindingsExcepted(
+                "Error getting excepted findings with the following error: {0} ".format(
                     ex
                 )
             )
 
-    def _get_where(self, finding, dict_args):
-        if dict_args["tool"] in ["engine_iac", "engine_secret"]:
+    def _get_findings_with_exclusions(
+        self, session_manager, service, query_params, tool, date_fn, reason
+    ):
+        findings = self._get_findings(session_manager, service, query_params)
+        return map(
+            partial(self._create_exclusion, date_fn=date_fn, tool=tool, reason=reason),
+            findings,
+        )
+
+    def _get_findings(self, session_manager, service, query_params):
+        return Finding.get_finding(
+            session=session_manager, service=service, **query_params
+        ).results
+
+    def _create_exclusion(self, finding, date_fn, tool, reason):
+        return Exclusions(
+            id=finding.vuln_id_from_tool,
+            where=self._get_where(finding, tool),
+            create_date=date_fn(
+                finding.last_status_update
+                if reason == "False Positive"
+                else finding.accepted_risks[-1]["created"]
+            ),
+            expired_date=date_fn(
+                None
+                if reason == "False Positive"
+                else finding.accepted_risks[-1]["expiration_date"]
+            ),
+            reason=reason,
+        )
+
+    def _format_date_to_dd_format(self, date_string):
+        return (
+            format_date(date_string.split("T")[0], "%Y-%m-%d", "%d%m%Y")
+            if date_string
+            else None
+        )
+
+    def _get_where(self, finding, tool):
+        if tool in ["engine_iac", "engine_secret"]:
             return finding.file_path
-        elif dict_args["tool"] in ["engine_container", "engine_dependencies"]:
+        elif tool in ["engine_container", "engine_dependencies"]:
             return finding.component_name + ":" + finding.component_version
-        elif dict_args["tool"] == "engine_dast":
+        elif tool == "engine_dast":
             return finding.endpoints

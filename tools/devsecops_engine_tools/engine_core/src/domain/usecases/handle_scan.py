@@ -18,7 +18,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_managemen
 )
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionVulnerabilityManagement,
-    ExceptionFindingsRiskAcceptance,
+    ExceptionFindingsExcepted,
 )
 from devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan import (
     runner_engine_container,
@@ -76,14 +76,14 @@ class HandleScan:
             logger.error(str(ex1))
         try:
             input_core.totalized_exclusions.extend(
-                self.vulnerability_management.get_findings_risk_acceptance(
+                self.vulnerability_management.get_findings_excepted(
                     input_core.scope_pipeline,
                     dict_args,
                     secret_tool,
                     config_tool,
                 )
             )
-        except ExceptionFindingsRiskAcceptance as ex2:
+        except ExceptionFindingsExcepted as ex2:
             logger.error(str(ex2))
 
     def process(self, dict_args: any, config_tool: any):

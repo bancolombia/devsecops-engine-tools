@@ -23,6 +23,7 @@ class SecretScanDeserealizator(DeseralizatorGateway):
                 description="Sensitive information in source code",
                 severity="critical",
                 identification_date=datetime.now().strftime("%d%m%Y"),
+                published_date_cve=None,
                 module="engine_secret",
                 category=Category.VULNERABILITY,
                 requirements=result.get("DetectorName"),
