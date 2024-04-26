@@ -26,7 +26,7 @@ class TestSecretScanDeserealizator(unittest.TestCase):
             ]
             
             # Testing the method
-            vulnerabilities = self.deserealizator.get_list_vulnerability(results_scan_list, "/path/to", "Linux")
+            vulnerabilities = self.deserealizator.get_list_vulnerability(results_scan_list, "Linux", "/path/to", )
 
             # Assertions
             self.assertEqual(len(vulnerabilities), 1)
@@ -56,7 +56,7 @@ class TestSecretScanDeserealizator(unittest.TestCase):
                 }
             }
             self.assertEqual(
-                self.deserealizator.get_where_correctly(result, "/path/to", "linux"),
+                self.deserealizator.get_where_correctly(result, "linux", "/path/to", ),
                 ("/file.py", "10")
             )
 
@@ -74,6 +74,6 @@ class TestSecretScanDeserealizator(unittest.TestCase):
             }
             
             self.assertEqual(
-                self.deserealizator.get_where_correctly(result,  "C:\\path\\to", "Win"),
+                self.deserealizator.get_where_correctly(result,  "Win", "C:\\path\\to", ),
                 ("\\file.py", "10")
             )

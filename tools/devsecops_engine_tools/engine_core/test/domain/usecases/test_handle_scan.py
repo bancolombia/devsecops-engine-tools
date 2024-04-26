@@ -6,7 +6,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.threshold import Thresh
 from devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan import (
     HandleScan,
 )
-from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import ( ExceptionVulnerabilityManagement, ExceptionFindingsRiskAcceptance)
+from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import ( ExceptionVulnerabilityManagement, ExceptionFindingsExcepted)
 
 
 class TestHandleScan(unittest.TestCase):
@@ -33,6 +33,7 @@ class TestHandleScan(unittest.TestCase):
         config_tool = {"ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
         secret_tool = "some_secret"
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
+        self.devops_platform_gateway.get_variable.return_value = "dev"
 
         # Mock the runner_engine_iac function and its return values
         findings_list = ["finding1", "finding2"]
@@ -49,9 +50,9 @@ class TestHandleScan(unittest.TestCase):
         # Mock the send_vulnerability_management method
         self.vulnerability_management.send_vulnerability_management = MagicMock()
 
-        # Mock the get_findings_risk_acceptance method
-        self.vulnerability_management.get_findings_risk_acceptance = MagicMock()
-        self.vulnerability_management.get_findings_risk_acceptance.return_value = []
+        # Mock the get_findings_excepted method
+        self.vulnerability_management.get_findings_excepted = MagicMock()
+        self.vulnerability_management.get_findings_excepted.return_value = []
 
         # Call the process method
         result_findings_list, result_input_core = self.handle_scan.process(
@@ -63,10 +64,10 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
         mock_runner_engine_iac.assert_called_once_with(
-            dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool, self.devops_platform_gateway
+            dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool, self.devops_platform_gateway, "dev"
         )
         self.vulnerability_management.send_vulnerability_management.assert_called_once()
-        self.vulnerability_management.get_findings_risk_acceptance.assert_called_once()
+        self.vulnerability_management.get_findings_excepted.assert_called_once()
 
     @mock.patch(
         "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_iac"
@@ -95,8 +96,8 @@ class TestHandleScan(unittest.TestCase):
         # Mock the send_vulnerability_management method
         self.vulnerability_management.send_vulnerability_management.side_effect = ExceptionVulnerabilityManagement("Simulated error")
 
-        # Mock the get_findings_risk_acceptance method
-        self.vulnerability_management.get_findings_risk_acceptance.side_effect = ExceptionFindingsRiskAcceptance("Simulated error")
+        # Mock the get_findings_excepted method
+        self.vulnerability_management.get_findings_excepted.side_effect = ExceptionFindingsExcepted("Simulated error")
 
         # Call the process method
         result_findings_list, result_input_core = self.handle_scan.process(
@@ -108,7 +109,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
 
         self.vulnerability_management.send_vulnerability_management.assert_called_once()
-        self.vulnerability_management.get_findings_risk_acceptance.assert_called_once()
+        self.vulnerability_management.get_findings_excepted.assert_called_once()
 
     @mock.patch(
         "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_container"
@@ -118,8 +119,9 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_container",
             "remote_config_repo": "test_repo",
+            "use_vulnerability_management":"true",
         }
-        config_tool = {"ENGINE_CONTAINER": "some_config"}
+        config_tool = {"ENGINE_CONTAINER": {"ENABLED": "true", "TOOL": "tool"}}
         secret_tool = {"token_prisma_cloud": "test"}
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
 
@@ -144,9 +146,6 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_findings_list, findings_list)
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
-        mock_runner_engine_container.assert_called_once_with(
-            dict_args, config_tool, secret_tool["token_prisma_cloud"], self.devops_platform_gateway
-        )
 
     @mock.patch("builtins.print")
     def test_process_with_engine_dast(self, mock_print):

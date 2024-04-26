@@ -1,6 +1,6 @@
 import pytest
 import json
-from devsecops_engine_tools.engine_utilities.settings import devsecops_engine_tools.engine_utilities_PATH
+from devsecops_engine_tools.engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_PATH
 from unittest.mock import MagicMock
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.product_type_list import ProductTypeList
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.scan_configuration import ScanConfiguration
@@ -22,7 +22,7 @@ from devsecops_engine_tools.engine_utilities.utils.session_manager import Sessio
 
 
 def import_scan_request_instance(par_scan_type, product_name="test product name", file_name=None) -> ImportScanRequest:
-    file = f"{devsecops_engine_tools.engine_utilities_PATH}/defect_dojo/test/files/request_file/{file_name}"
+    file = f"{DEVSECOPS_ENGINE_UTILITIES_PATH}/defect_dojo/test/files/request_file/{file_name}"
     request = ImportScanRequest(
         product_name=product_name,
         token_cmdb="123456789",
@@ -59,7 +59,7 @@ def test_user_case_creation():
 
 def mock_rest_import_scan(file_path, scan_type=None):
     mock_import_scan = MagicMock()
-    with open(f"{devsecops_engine_tools.engine_utilities_PATH}/defect_dojo/test/files/{file_path}", "r") as fp:
+    with open(f"{DEVSECOPS_ENGINE_UTILITIES_PATH}/defect_dojo/test/files/{file_path}", "r") as fp:
         data = json.load(fp)
         if scan_type:
             data["scan_type"] = scan_type

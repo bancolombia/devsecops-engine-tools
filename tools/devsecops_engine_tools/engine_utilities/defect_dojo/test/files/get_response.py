@@ -2,12 +2,12 @@ import requests
 import re
 import json
 from unittest.mock import Mock
-from devsecops_engine_tools.engine_utilities.settings import devsecops_engine_tools.engine_utilities_PATH
+from devsecops_engine_tools.engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_PATH
 from devsecops_engine_tools.engine_utilities.utils.session_manager import SessionManager
 
 
 def get_response(name_file: str):
-    with open(f"{devsecops_engine_tools.engine_utilities_PATH}/defect_dojo/test/files/{name_file}", "r") as fp:
+    with open(f"{DEVSECOPS_ENGINE_UTILITIES_PATH}/defect_dojo/test/files/{name_file}", "r") as fp:
         data = json.load(fp)
         return data
 

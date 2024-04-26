@@ -1,4 +1,4 @@
-from common_devsecops_lib.devsecops_engine_tools.engine_utilities.utils.printers import Printers
+from devsecops_engine_tools.engine_utilities.utils.printers import Printers
 
 
 def test_print_title():
