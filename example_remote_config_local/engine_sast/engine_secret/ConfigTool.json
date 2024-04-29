@@ -14,7 +14,9 @@
             "Critical": 0
         }
     },
+    "TARGET_BRANCHES": ["trunk", "develop"],
     "trufflehog": {
-        "EXCLUDE_PATH": [".git"]
+        "EXCLUDE_PATH": [".git"],
+        "NUMBER_THREADS": 4
     }
 }

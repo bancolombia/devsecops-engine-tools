@@ -79,4 +79,11 @@ devsecops_engine_tools
 |                   driven_adapters
 |                   entry_points
 |                   utils.
+├───engine_utilities -> Utilities transversal.
+|           azuredevops
+|           defect_dojo
+|           github
+|           input_validations
+|           ssh
+|           utils
 ```

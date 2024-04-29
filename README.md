@@ -33,17 +33,13 @@ Here are the channels we use to communicate about the project:
 ### Installation
 
 ```bash
-python3 -m pip install https://artifactory.apps.bancolombia.com/artifactory/common-pypi/devsecops_engine_utilities/{last_version}/devsecops_engine_utilities-{last_version}-py3-none-any.whl -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple
-```
-
-```bash
-python3 -m pip install https://artifactory.apps.bancolombia.com/artifactory/common-pypi/devsecops_engine_tools/{last_version}/devsecops_engine_tools-{last_version}-py3-none-any.whl -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple
+python3 -m pip install devsecops_engine_tools
 ```
 
 ### Scan running - flags (CLI)
 
 ```bash
-python3 -m devsecops_engine_tools.engine_core.src.applications.runner_engine_core --platform_devops ["local","devops"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --environment ["dev", "qa", "pdn"] --platform ["eks","openshift"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] 
+python3 -m devsecops_engine_tools.engine_core.src.applications.runner_engine_core --platform_devops ["local","azure"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["eks","openshift"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] 
 ```
 
 ### Structure Remote Config

@@ -1,12 +1,12 @@
 # How to setup your enviroment
 
-1. In the root of the project execute the following commands (Important to have the vpn active to be able to download from artifactory):
+1. In the root of the project execute the following commands:
  
 ```bash
-python -m pip install --upgrade pip -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+python -m pip install
 ```
 ```bash
-python -m pip install setuptools virtualenv wheel -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+python -m pip install setuptools virtualenv wheel
 ```
 * Create a virtual environment and activate it:
 ```bash
@@ -14,16 +14,16 @@ virtualenv .venv
 source .venv/bin/activate
 ```
 ```bash
-python -m pip install -r tools/requirements.txt -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+python -m pip install -r tools/requirements.txt
 ```
 ```bash
-python -m pip install -r tools/requirements_test.txt -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com     
+python -m pip install -r tools/requirements_test.txt     
 ```
 ```bash
-python -m pip install -r common_devsecops_lib/requirements.txt -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+python -m pip install -r common_devsecops_lib/requirements.txt
 ```
 ```bash
-python -m pip install -r common_devsecops_lib/requirements_test.txt -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com     
+python -m pip install -r common_devsecops_lib/requirements_test.txt     
 ```
 2. Then build the common_devsecops_lib library and Install the created library:
 ```bash
@@ -32,7 +32,7 @@ python setup.py bdist_wheel
 ```
 * Put the command bellow and press key tab after utilities word:
 ```bash
-pip install 'dist/devsecops_engine_utilities<KEY-TAB>' -i https://artifactory.apps.bancolombia.com/api/pypi/python-org/simple --trusted-host artifactory.apps.bancolombia.com
+pip install 'dist/devsecops_engine_utilities<KEY-TAB>'
 ```
  
 3. In the root of the project create a file named ".env" and add:

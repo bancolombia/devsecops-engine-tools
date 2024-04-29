@@ -2,7 +2,7 @@
 _AW1234
 _nu1234
 DevSecOps_Remote_Config
-app-service.jar
+*.jar
 
 # Virtual Enviroment python
 .venv
@@ -53,7 +53,3 @@ target
 dependencies_to_scan
 node_modules
 DevSecOps_Remote_Config
-
-#tmp
-common_devsecops_lib_bk
-tools_bk
