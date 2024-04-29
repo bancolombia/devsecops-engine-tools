@@ -38,3 +38,14 @@ def test_handle_skip_tool(handle_remote):
     result = handle_remote.handle_skip_tool(exclusions, "dummy_pipeline")
 
     assert result is True
+
+def test_ignore_analysis_pattern_false(mock_devops_gateway, handle_remote):
+    mock_devops_gateway.get_remote_config.return_value = {"IGNORE_SEARCH_PATTERN": "dummy_pattern"}
+    mock_devops_gateway.get_variable.return_value = "dummy_pattern"
+
+    result = handle_remote.ignore_analysis_pattern()
+
+    mock_devops_gateway.get_remote_config.assert_called_once_with('dummy_repo', 'SCA/CONTAINER/ConfigTool.json')
+    mock_devops_gateway.get_variable.assert_called_once_with("release_name")
+
+    assert result is False
