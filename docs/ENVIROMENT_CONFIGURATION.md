@@ -19,28 +19,13 @@ python -m pip install -r tools/requirements.txt
 ```bash
 python -m pip install -r tools/requirements_test.txt     
 ```
-```bash
-python -m pip install -r common_devsecops_lib/requirements.txt
-```
-```bash
-python -m pip install -r common_devsecops_lib/requirements_test.txt     
-```
-2. Then build the common_devsecops_lib library and Install the created library:
-```bash
-cd common_devsecops_lib/
-python setup.py bdist_wheel
-```
-* Put the command bellow and press key tab after utilities word:
-```bash
-pip install 'dist/devsecops_engine_utilities<KEY-TAB>'
-```
  
-3. In the root of the project create a file named ".env" and add:
+2. In the root of the project create a file named ".env" and add:
 ```bash
 PYTHONPATH=tools/
 ```
 
-4. Inside the folder located in the root .vscode. Configure the launch.json file as follows:
+3. Inside the folder located in the root .vscode. Configure the launch.json file as follows:
 
 ```json
 {
@@ -54,18 +39,21 @@ PYTHONPATH=tools/
             "program": "tools/devsecops_engine_tools/engine_core/src/applications/runner_engine_core.py",
             "console": "integratedTerminal",
             "args": [
+                "--platform_devops",
+                "local",
                 "--remote_config_repo",
                 "DevSecOps_Remote_Config",
                 "--tool",
                 "engine_iac",
-                "--environment",
-                "dev",
                 "--use_secrets_manager",
                 "false",
                 "--use_vulnerability_management",
-                "false"
+                "false",
+                "--send_metrics",
+                "false",
             ],
             "env": {
+                //platform azure
                 "BUILD_BUILDID": "2688",
                 "BUILD_DEFINITIONNAME": "[DEFINITIONNAME]",
                 "BUILD_REPOSITORY_ID": "57a0ece4-aa98-4a6a-a1f3-a17b2207fb6f",
@@ -86,7 +74,30 @@ PYTHONPATH=tools/
                 "RELEASE_DEFINITIONNAME": "DEFINITION_NAME",
                 "BUILD_PROJECTNAME" : "Pruebas_PNF_Engine",
                 "BUILD_BUILDNUMBER" : "2688",
-                "ENV": "dev"
+                "ENV": "dev",
+                //platform local
+                "DET_PIPELINE_NAME": "[DET_PIPELINE_NAME]",
+                "DET_PATH_DIRECTORY": "[DET_PATH_DIRECTORY]",
+                "DET_OS": "[DET_OS]",
+                "DET_WORK_FOLDER": "[DET_WORK_FOLDER]",
+                "DET_TEMP_DIRECTORY": "/tmp",
+                "DET_BRANCH_NAME": "trunk",
+                "DET_SOURCE_CODE_MANAGEMENT_URI": "[DET_SOURCE_CODE_MANAGEMENT_URI]",
+                "DET_BASE_COMPACT_REMOTE_CONFIG_URL": "[DET_BASE_COMPACT_REMOTE_CONFIG_URL]",
+                "DET_ACCESS_TOKEN": "[DET_ACCESS_TOKEN]",
+                "DET_BUILD_EXECUTION_ID": "2688",
+                "DET_BUILD_ID": "2688",
+                "DET_BRANCH_TAG": "refs/heads/trunk",
+                "DET_COMMIT_HASH": "2d545969a76516156d76e1c88f8e699537e889bd",
+                "DET_ENVIRONMENT": "dev",
+                "DET_STAGE": "Release",
+                "DET_AGENT_DIRECTORY": "[DET_AGENT_DIRECTORY]",
+                "DET_REPOSITORY_PROVIDER": "AzureDevOps",
+                "DET_TARGET_BRANCH": "trunk",
+                "DET_SOURCE_BRANCH": "feature/test",
+                "DET_ORGANIZATION": "[DET_ORGANIZATION]",
+                "DET_PROJECT_NAME": "[DET_PROJECT_NAME]",
+                "DET_REPOSITORY": "[DET_REPOSITORY]",
             },
             "justMyCode": true
         }
@@ -94,4 +105,4 @@ PYTHONPATH=tools/
 }
 ```
 
-5. Go Run :arrow_forward:
+4. Go Run :arrow_forward:

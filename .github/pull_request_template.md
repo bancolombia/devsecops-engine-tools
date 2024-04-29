@@ -7,7 +7,7 @@
 
 ## Checklist:
 
-- [ ] The pull request is complete according to the guide of [contributing](https://github.com/bancolombia/NU0429001_devsecops_engine/blob/trunk/docs/CONTRIBUTING.md) of this project
+- [ ] The pull request is complete according to the guide of [contributing](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/docs/CONTRIBUTING.md) of this project
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
