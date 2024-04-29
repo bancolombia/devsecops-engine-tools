@@ -66,8 +66,7 @@ def init_engine_dependencies(
             bypass_limits_flag,
             token,
         )
-        # dependencies_scanned = dependencies_sca_scan.process()
-        dependencies_scanned = "/Users/sagavir/Documents/Repositorios/Github/NU0429001_devsecops_engine/dependencies_to_scan/scan_result.json"
+        dependencies_scanned = dependencies_sca_scan.process()
         if dependencies_scanned:
             deserialized = dependencies_sca_scan.deserializator(dependencies_scanned)
 

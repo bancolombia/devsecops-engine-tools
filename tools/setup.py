@@ -14,12 +14,12 @@ def get_requirements():
 setup(
     name="devsecops_engine_tools",
     version="1.7.0",
-    author="Bancolombia devsecops Team ",
+    author="Bancolombia DevSecOps Team",
     author_email="devsecops@bancolombia.com.co",
     description="tool for devsecops strategy",
     long_description=get_readme(),
     long_description_content_type="text/markdown",
-    url="https://github.com/bancolombia/NU0429001_devsecops_engine",
+    url="https://github.com/bancolombia/devsecops-engine-tools",
     package_dir={
         "devsecops_engine_tools": "devsecops_engine_tools",
     },

@@ -12,7 +12,7 @@ def test_get_product_info_success():
     request.code_app = "123"
     request.product_name = "test_product_name"
     session_mock = session_manager_post(
-        status_code=200, mock_response=[{"name_cmdb": "NU0429001_Test", "product_type_name_cmdb": "software"}]
+        status_code=200, mock_response=[{"name_cmdb": "NU1245_Test", "product_type_name_cmdb": "software"}]
     )
     # Crear una instancia de CmdbRestConsumer con los mocks
     consumer = CmdbRestConsumer(
@@ -27,7 +27,7 @@ def test_get_product_info_success():
 
     # Verificar el resultado
     assert isinstance(cmdb_object, Cmdb)
-    assert cmdb_object.product_name == "NU0429001_Test"
+    assert cmdb_object.product_name == "NU1245_Test"
     assert cmdb_object.product_type_name == "software"
 
 
