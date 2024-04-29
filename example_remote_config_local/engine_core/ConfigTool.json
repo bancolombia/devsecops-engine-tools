@@ -7,11 +7,13 @@
         }
     },
     "VULNERABILITY_MANAGER": {
+        "BRANCH_FILTER": "",
         "DEFECT_DOJO": {
             "CMDB_MAPPING_PATH": "",
             "HOST_CMDB": "",
             "HOST_DEFECT_DOJO": "",
-            "REGEX_EXPRESSION_CMDB": ""
+            "REGEX_EXPRESSION_CMDB": "",
+            "LIMITS_QUERY": 100
         }
     },
     "METRICS_MANAGER": {
