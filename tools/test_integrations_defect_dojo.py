@@ -7,7 +7,7 @@ from devsecops_engine_tools.engine_utilities.utils.printers import Printers
 from tabulate import tabulate
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
-path_file = settings.devsecops_engine_tools.engine_utilities_PATH
+path_file = settings.DEVSECOPS_ENGINE_UTILITIES_PATH
 work_directory = "/defect_dojo/test/files/request_file"
 path_file = path_file + work_directory
 
