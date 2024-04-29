@@ -23,12 +23,14 @@ import sys
 import argparse
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
+from devsecops_engine_tools.version import version
 
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
+    parser.add_argument("--version", action='version', version='{version}'.format(version=version))
     parser.add_argument("--platform_devops", choices=["azure", "local"], type=str, required=True, help="")
     parser.add_argument("--remote_config_repo", type=str, required=True, help="")
     parser.add_argument(
@@ -117,7 +119,6 @@ def application_core():
             )
         )
         print(devops_platform_gateway.result_pipeline("failed"))
-
 
 if __name__ == "__main__":
     application_core()
