@@ -27,7 +27,7 @@ scanned_images.txt
 data
 
 #Archivos de Pruebas
-**/.env*
+.env
 test-output.xml
 report.html
 out_report.xml

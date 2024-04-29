@@ -27,13 +27,13 @@ Here are the channels we use to communicate about the project:
 ### Installation
 
 ```bash
-python3 -m pip install devsecops_engine_tools
+pip3 install devsecops_engine_tools
 ```
 
 ### Scan running - flags (CLI)
 
 ```bash
-python3 -m devsecops_engine_tools.engine_core.src.applications.runner_engine_core --platform_devops ["local","azure"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["eks","openshift"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] 
+devsecops_engine_tools --platform_devops ["local","azure"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["eks","openshift"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] 
 ```
 
 ### Structure Remote Config
@@ -56,10 +56,18 @@ python3 -m devsecops_engine_tools.engine_core.src.applications.runner_engine_cor
    ┃   ┗ 📜ConfigTool.json
    ┃   ┗ 📜Exclusions.json
 ```
-### Scan running sample (CLI)
+### Scan running sample (CLI) - Local
+
+> Complete the value in **.envdetlocal** file a set in execution environment
+```
+$ set -a
+$ source .envdetlocal
+$ set +a
+```
+
 
 ```bash
-python3 -m devsecops_engine_tools.engine_core.src.applications.runner_engine_core --platform_devops local --remote_config_repo DevSecOps_Remote_Config --tool engine_iac --use_secrets_manager false --use_vulnerability_management false --send_metrics false
+devsecops_engine_tools --platform_devops local --remote_config_repo DevSecOps_Remote_Config --tool engine_iac
 
 ```
 ### Scan result sample (CLI)
