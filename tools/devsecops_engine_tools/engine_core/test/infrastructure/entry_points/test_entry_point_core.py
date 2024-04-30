@@ -24,7 +24,7 @@ class TestEntryPointCore(unittest.TestCase):
     ):
         # Set up mock arguments
 
-        mock_config_tool = {"ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
+        mock_config_tool = {"BANNER": "DevSecOps Engine Tools", "ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
         mock_findings_list = []
         mock_input_core = {}
         mock_scan_result = {}
@@ -83,6 +83,7 @@ class TestEntryPointCore(unittest.TestCase):
         # Set up mock arguments
 
         mock_config_tool = {
+            "BANNER": "DevSecOps Engine Tools",
             "ENGINE_IAC": {"ENABLED": "false", "TOOL": "tool", "send_metrics": "false"}
         }
         mock_devops_platform_gateway = mock.Mock()
