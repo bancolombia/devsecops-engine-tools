@@ -10,7 +10,7 @@ on:
       - trunk
 
 env:
-  DEPLOY_DEV: True
+  DEPLOY_DEV: true
 
 jobs:
   build:
