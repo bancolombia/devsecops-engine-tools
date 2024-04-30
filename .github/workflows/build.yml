@@ -1,9 +1,9 @@
 name: Build
 
 on:
-  push:
-    branches:
-      - feature/*
+  # push:
+  #   branches:
+  #     - feature/*
 
   pull_request:
     branches:
