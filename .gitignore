@@ -18,7 +18,7 @@ DevSecOps_Remote_Config
 **.egg-info/
 *.pyc
 **_pycache_**
-**build**
+**tools/build/**
 **build/lib**
 
 #Ignorar cualquir archivo TXT
