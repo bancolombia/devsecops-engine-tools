@@ -9,6 +9,9 @@ on:
     branches:
       - trunk
 
+permissions:
+  contents: write
+
 env:
   pathComponentName: 'devsecops_engine_tools'
 
