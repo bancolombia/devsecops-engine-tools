@@ -1,4 +1,5 @@
 {
+    "BANNER": "DevSecOps Engine Tools",
     "SECRET_MANAGER": {
         "AWS": {
             "SECRET_NAME": "",
