@@ -31,7 +31,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install virtualenv
-          apt-get update
+          sudo apt-get update
           apt-get install openssh-client -y
 
       - name: Prepare analysis on SonarQube
@@ -70,7 +70,7 @@ jobs:
       - name: Run Code Analysis
         uses: SonarSource/sonarqube-scan-action@v1
 
-      - name: Publish a Python distribution to PyPI
+      - name: Publish a Python distribution to PyPI Test
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: tools/dist/
