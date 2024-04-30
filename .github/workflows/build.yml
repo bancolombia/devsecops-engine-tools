@@ -12,8 +12,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - uses: actions/checkout@v4
 
@@ -64,20 +62,37 @@ jobs:
           PERSONAL_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TOKEN_CMDB: ${{ secrets.TOKEN_CMDB }}
           TOKEN_DEFECT_DOJO: ${{ secrets.TOKEN_DEFECT_DOJO }}
-
-      - name: Publish a Python distribution to PyPI Test
-        uses: pypa/gh-action-pypi-publish@release/v1
+      
+      - name: Build
+        if: contains(github.ref,'refs/pull/') || contains(github.ref,'refs/heads/trunk')
+        run: |
+          cd tools/
+          source _venv/bin/activate
+          python -m pip install setuptools virtualenv wheel
+          python setup.py bdist_wheel
+      
+      - name: Store the distribution packages
+        if: contains(github.ref,'refs/pull/') || contains(github.ref,'refs/heads/trunk')
+        uses: actions/upload-artifact@v3
         with:
-          packages-dir: tools/dist/
-          repository-url: https://test.pypi.org/devsecops-engine-tools/
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          name: python-package-distributions
+          path: tools/dist/
 
   release_dev:
       if: contains(github.ref,'refs/pull/')
+      needs:
+        - build
       runs-on: ubuntu-latest
       permissions:
         id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
       steps:
+
+        - name: Download the distribution packages
+          uses: actions/download-artifact@v3
+          with:
+            name: python-package-distributions
+            path: tools/dist/
+
         - name: Publish a Python distribution to PyPI Test
           uses: pypa/gh-action-pypi-publish@release/v1
           with:
