@@ -19,7 +19,7 @@ spec.loader.exec_module(mod)
 version = mod.version
 
 setup(
-    name="devsecops_engine_tools",
+    name="devsecops-engine-tools",
     version=version,
     author="Bancolombia DevSecOps Team",
     author_email="devsecops@bancolombia.com.co",
@@ -33,7 +33,7 @@ setup(
     packages=find_packages(exclude=["**test**"]),
     entry_points={
         'console_scripts': [
-            'devsecops_engine_tools=devsecops_engine_tools.engine_core.src.applications.runner_engine_core:application_core'
+            'devsecops-engine-tools=devsecops_engine_tools.engine_core.src.applications.runner_engine_core:application_core'
         ]
     },
     classifiers=[

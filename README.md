@@ -1,8 +1,8 @@
 # DevSecOps Engine Tools
 
-![Maintained by Bancolombia](https://img.shields.io/badge/maintained_by-Bancolombia-yellow)
+[![Maintained by Bancolombia](https://img.shields.io/badge/maintained_by-Bancolombia-yellow)](#)
 [![Build](https://github.com/bancolombia/devsecops-engine-tools/actions/workflows/build.yml/badge.svg)](https://github.com/bancolombia/devsecops-engine-tools/actions/workflows/build.yml)
-![Static Badge](https://img.shields.io/badge/python%20-%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20-blue)
+[![Python Version](https://img.shields.io/badge/python%20-%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20-blue)](#)
 
 # Objective
 
@@ -29,13 +29,13 @@ Here are the channels we use to communicate about the project:
 ### Installation
 
 ```bash
-pip3 install devsecops_engine_tools
+pip3 install devsecops-engine-tools
 ```
 
 ### Scan running - flags (CLI)
 
 ```bash
-devsecops_engine_tools --platform_devops ["local","azure"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["eks","openshift"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] 
+devsecops-engine-tools --platform_devops ["local","azure"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["eks","openshift"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] 
 ```
 
 ### Structure Remote Config
@@ -69,7 +69,7 @@ $ set +a
 
 
 ```bash
-devsecops_engine_tools --platform_devops local --remote_config_repo DevSecOps_Remote_Config --tool engine_iac
+devsecops-engine-tools --platform_devops local --remote_config_repo DevSecOps_Remote_Config --tool engine_iac
 
 ```
 ### Scan result sample (CLI)
