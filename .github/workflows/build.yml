@@ -32,7 +32,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install virtualenv
           sudo apt-get update
-          apt-get install openssh-client -y
+          sudo apt-get install openssh-client -y
 
       - name: Prepare analysis on SonarQube
         uses: SonarSource/sonarqube-scan-action@v1
