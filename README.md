@@ -1,7 +1,7 @@
 # DevSecOps Engine Tools
 
 ![Maintained by Bancolombia](https://img.shields.io/badge/maintained_by-Bancolombia-yellow)
-[![Build](https://github.com/bancolombia/devsecops-engine-tools/actions/workflows/build.yml/badge.svg)](https://github.com/bancolombia/devsecops-engine-tools/actions/workflows/build)
+[![Build](https://github.com/bancolombia/devsecops-engine-tools/actions/workflows/build.yml/badge.svg)](https://github.com/bancolombia/devsecops-engine-tools/actions/workflows/Build)
 
 # Objective
 
