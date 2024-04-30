@@ -50,12 +50,12 @@ jobs:
 
       - name: Run Unit Test
         run: |
+          cd tools/
           python -m virtualenv _venv
           source _venv/bin/activate
-          cd tools/
           python -m pip install --upgrade pip
           python -m pip install -r requirements_test.txt
-          python -m pytest -x --cov=$pathComponentName --cov-config=.coveragerc
+          python -m pytest -x --cov=devsecops_engine_tools --cov-config=.coveragerc
           python -m coverage report -m
           python -m coverage xml
 
