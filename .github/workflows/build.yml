@@ -62,6 +62,7 @@ jobs:
 
       - name: Integration Test
         run: |
+          cd tools/
           source _venv/bin/activate
           python test_integrations_defect_dojo.py
         env:
