@@ -5,6 +5,9 @@ on:
     branches:
       - feature/*
 
+permissions:
+  contents: write
+
 jobs:
   # deploy:
   #   runs-on: ubuntu-latest
@@ -45,5 +48,5 @@ jobs:
       - name: Push tag
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.PUSHSECRET }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           tags: true
