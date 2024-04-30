@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
@@ -69,20 +69,21 @@ jobs:
           cd tools/
           source _venv/bin/activate
           python -m pip install setuptools virtualenv wheel
-          python setup.py bdist_wheel
+          python setup.py sdist bdist_wheel
       
       - name: Store the distribution packages
         # if: contains(github.ref,'refs/pull/') || contains(github.ref,'refs/heads/trunk')
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
           path: tools/dist/
 
-  release_dev:
+  deploy_dev:
       # if: contains(github.ref,'refs/pull/')
       needs:
         - build
       runs-on: ubuntu-latest
+      environment: release
       permissions:
         id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
       steps:
