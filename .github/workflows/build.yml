@@ -18,6 +18,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -78,3 +80,4 @@ jobs:
         with:
           packages-dir: tools/dist/
           repository-url: https://test.pypi.org/devsecops-engine-tools/
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
