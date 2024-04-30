@@ -26,8 +26,8 @@ jobs:
   #         password: ${{ secrets.PDN_PYPI_API_TOKEN }}
 
   create_tag:
-    needs:
-      - deploy
+    # needs:
+    #   - deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
