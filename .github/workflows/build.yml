@@ -9,9 +9,6 @@ on:
     branches:
       - trunk
 
-env:
-  DEPLOY_DEV: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -70,7 +67,7 @@ jobs:
       #   uses: SonarSource/sonarqube-scan-action@v1
 
   release_dev:
-      if: ${{ env.DEPLOY_DEV }}
+      if: contains(github.ref,'refs/pull/')
       runs-on: ubuntu-latest
       permissions:
         id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
