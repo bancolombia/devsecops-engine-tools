@@ -6,24 +6,24 @@ on:
       - feature/*
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     id-token: write
 
-    steps:
-      # - name: Download the distribution packages
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: python-package-distributions
-      #     path: tools/dist/
+  #   steps:
+  #     - name: Download the distribution packages
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: python-package-distributions
+  #         path: tools/dist/
 
-      # - name: Publish a Python distribution to PyPI
-      #   uses: pypa/gh-action-pypi-publish@release/v1
-      #   with:
-      #     packages-dir: tools/dist/
-      #     repository-url: https://pypi.org/p/devsecops-engine-tools
-      #     password: ${{ secrets.PDN_PYPI_API_TOKEN }}
+  #     - name: Publish a Python distribution to PyPI
+  #       uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         packages-dir: tools/dist/
+  #         repository-url: https://pypi.org/p/devsecops-engine-tools
+  #         password: ${{ secrets.PDN_PYPI_API_TOKEN }}
 
   create_tag:
     needs:
