@@ -3,7 +3,7 @@ from importlib import util
 import os
 
 def get_readme():
-    with open("README.md", "r") as fh:
+    with open("../README.md", "r") as fh:
         return fh.read()
 
 
