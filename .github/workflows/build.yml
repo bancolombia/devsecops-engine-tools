@@ -64,7 +64,7 @@ jobs:
           TOKEN_DEFECT_DOJO: ${{ secrets.TOKEN_DEFECT_DOJO }}
       
       - name: Build
-        if: contains(github.ref,'refs/pull/') || contains(github.ref,'refs/heads/trunk')
+        # if: contains(github.ref,'refs/pull/') || contains(github.ref,'refs/heads/trunk')
         run: |
           cd tools/
           source _venv/bin/activate
