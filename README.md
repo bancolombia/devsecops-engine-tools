@@ -2,6 +2,7 @@
 
 ![Maintained by Bancolombia](https://img.shields.io/badge/maintained_by-Bancolombia-yellow)
 [![Build](https://github.com/bancolombia/devsecops-engine-tools/actions/workflows/build.yml/badge.svg)](https://github.com/bancolombia/devsecops-engine-tools/actions/workflows/build.yml)
+![Static Badge](https://img.shields.io/badge/python%20-%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20-blue)
 
 # Objective
 
