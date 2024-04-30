@@ -67,7 +67,7 @@ jobs:
       #   uses: SonarSource/sonarqube-scan-action@v1
 
   release_dev:
-      if: contains(github.ref,'refs/pull/')
+      # if: contains(github.ref,'refs/pull/')
       runs-on: ubuntu-latest
       permissions:
         id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
