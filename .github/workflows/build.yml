@@ -83,7 +83,7 @@ jobs:
       needs:
         - build
       runs-on: ubuntu-latest
-      # environment: release
+      environment: release
       permissions:
         id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
       steps:
@@ -99,7 +99,7 @@ jobs:
           with:
             packages-dir: tools/dist/
             repository-url: https://test.pypi.org/legacy/
-            password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+            # password: ${{ secrets.TEST_PYPI_API_TOKEN }}
 
 
 
