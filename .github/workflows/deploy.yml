@@ -6,7 +6,7 @@ on:
       - trunk
 
 jobs:
-  deploy:
+  release_pdn:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
