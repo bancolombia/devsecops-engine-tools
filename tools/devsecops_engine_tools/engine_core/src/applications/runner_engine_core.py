@@ -30,10 +30,10 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--version", action='version', version='{version}'.format(version=version))
-    parser.add_argument("--platform_devops", choices=["azure", "local"], type=str, required=True, help="")
-    parser.add_argument("--remote_config_repo", type=str, required=True, help="")
-    parser.add_argument(
+    parser.add_argument("-v", "--version", action='version', version='{version}'.format(version=version))
+    parser.add_argument("-pd", "--platform_devops", choices=["azure", "local"], type=str, required=True, help="Platform where is executed")
+    parser.add_argument("-rcf" ,"--remote_config_repo", type=str, required=True, help="Name or Folder Path of Config Repo")
+    parser.add_argument("-t",
         "--tool",
         choices=[
             "engine_iac",
@@ -44,37 +44,37 @@ def get_inputs_from_cli(args):
         ],
         type=str,
         required=True,
-        help="",
+        help="Tool to execute",
     )
-    parser.add_argument("--folder_path", type=str, required=False, help="")
-    parser.add_argument(
-        "--platform", choices=["eks", "openshift"], type=str, required=False, help=""
+    parser.add_argument("-fp", "--folder_path", type=str, required=False, help="Folder Path to execute the tool engine_iac")
+    parser.add_argument("-p",
+        "--platform", choices=["eks", "openshift"], type=str, required=False, help="Platform to execute the tool engine_iac"
     )
     parser.add_argument(
         "--use_secrets_manager",
         choices=["true", "false"],
         type=str,
         required=False,
-        help="",
+        help="Use Secrets Manager to get the tokens",
     )
     parser.add_argument(
         "--use_vulnerability_management",
         choices=["true", "false"],
         type=str,
         required=False,
-        help="",
+        help="Use Vulnerability Management to send the vulnerabilities to the platform",
     )
     parser.add_argument(
         "--send_metrics",
         choices=["true", "false"],
         type=str,
         required=False,
-        help="",
+        help="Enable or Disable the send metrics to the driven adapter metrics",
     )
-    parser.add_argument("--token_cmdb", required=False, help="")
-    parser.add_argument("--token_vulnerability_management", required=False, help="")
-    parser.add_argument("--token_engine_container", required=False, help="")
-    parser.add_argument("--token_engine_dependencies", required=False, help="")
+    parser.add_argument("--token_cmdb", required=False, help="Token to connect to the CMDB")
+    parser.add_argument("--token_vulnerability_management", required=False, help="Token to connect to the Vulnerability Management")
+    parser.add_argument("--token_engine_container", required=False, help="Token to execute engine_container if is necessary")
+    parser.add_argument("--token_engine_dependencies", required=False, help="Token to execute engine_dependencies if is necessary")
     args = parser.parse_args()
     return {
         "platform_devops": args.platform_devops,
