@@ -9,17 +9,14 @@ on:
     branches:
       - trunk
 
-permissions:
-  contents: write
-
 env:
-  pathComponentName: 'devsecops_engine_tools'
+  DEPLOY_DEV: True
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
+    environment:
+      pathComponentName: 'devsecops_engine_tools'
 
     steps:
       - uses: actions/checkout@v4
@@ -75,9 +72,19 @@ jobs:
       # - name: Run Code Analysis
       #   uses: SonarSource/sonarqube-scan-action@v1
 
-      - name: Publish a Python distribution to PyPI Test
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: tools/dist/
-          repository-url: https://test.pypi.org/devsecops-engine-tools/
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+  release_dev:
+      if: ${{ env.DEPLOY_DEV }}
+      runs-on: ubuntu-latest
+      permissions:
+        id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+      steps:
+        - name: Publish a Python distribution to PyPI Test
+          uses: pypa/gh-action-pypi-publish@release/v1
+          with:
+            packages-dir: tools/dist/
+            repository-url: https://test.pypi.org/devsecops-engine-tools/
+            password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+
+
+
+
