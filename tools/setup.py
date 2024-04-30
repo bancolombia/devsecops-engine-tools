@@ -9,7 +9,7 @@ def get_readme():
 
 def get_requirements():
     with open("requirements.txt", "r") as fh:
-        return fh.read()
+        return fh.read().splitlines()
 
 spec = util.spec_from_file_location(
     "devsecops_engine_tools.version", os.path.join("devsecops_engine_tools", "version.py")
