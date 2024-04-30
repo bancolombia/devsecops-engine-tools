@@ -12,7 +12,7 @@ trigger:
   branches:
     include:
       - trunk
-      # - feature/*
+      - feature/*
   paths:
     include:
       - "tools/*"
