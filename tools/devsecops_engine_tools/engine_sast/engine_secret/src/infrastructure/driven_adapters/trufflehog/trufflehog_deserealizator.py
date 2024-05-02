@@ -20,6 +20,7 @@ class SecretScanDeserealizator(DeseralizatorGateway):
                 id="SECRET_SCANNING",
                 cvss=None,
                 where=f"{where_text}, Line: {line}",
+                # where=f"{where_text}",
                 description="Sensitive information in source code",
                 severity="critical",
                 identification_date=datetime.now().strftime("%d%m%Y"),
@@ -39,7 +40,7 @@ class SecretScanDeserealizator(DeseralizatorGateway):
         if re.search(r'Linux', operative_system):
             original_where = original_where.replace("\\", "/")
         
-        directory = devops_gateway.get_variable("PATH_DIRECTORY")
+        directory = devops_gateway.get_variable("WORK_FOLDER")
         path_remove = directory or ""
         where_text = original_where.replace(path_remove, "")
         return where_text, line
