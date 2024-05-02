@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -62,22 +62,39 @@ jobs:
           PERSONAL_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TOKEN_CMDB: ${{ secrets.TOKEN_CMDB }}
           TOKEN_DEFECT_DOJO: ${{ secrets.TOKEN_DEFECT_DOJO }}
-      
+
       - name: Build
-        if: contains(github.ref,'refs/heads/trunk')
+        if: contains(github.ref,'refs/heads/trunk') || contains(github.event.head_commit.message, 'deploy dev')
         run: |
           cd tools/
           source _venv/bin/activate
           python -m pip install setuptools virtualenv wheel
           python setup.py sdist bdist_wheel
-      
+
       - name: Store the distribution packages
-        if: contains(github.ref,'refs/heads/trunk')
+        if: contains(github.ref,'refs/heads/trunk') || contains(github.event.head_commit.message, 'deploy dev')
         uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
           path: tools/dist/
 
+  deploy_dev:
+    if: ${{ contains(github.event.head_commit.message, 'deploy dev') }}
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
 
+    steps:
+      - name: Download the distribution packages
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: tools/dist/
 
-
+      - name: Publish a Python distribution to PyPI Test
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: tools/dist/
+          repository-url: https://test.pypi.org/legacy/
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
