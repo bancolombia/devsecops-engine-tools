@@ -23,7 +23,7 @@ setup(
     version=version,
     author="Bancolombia DevSecOps Team",
     author_email="devsecops@bancolombia.com.co",
-    description="tool for devsecops strategy",
+    description="Tool for DevSecOps strategy",
     long_description=get_readme(),
     long_description_content_type="text/markdown",
     url="https://github.com/bancolombia/devsecops-engine-tools",
