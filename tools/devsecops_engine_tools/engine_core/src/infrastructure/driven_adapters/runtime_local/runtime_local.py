@@ -45,45 +45,27 @@ class RuntimeLocal(DevopsPlatformGateway):
         return os.environ.get("DET_BASE_COMPACT_REMOTE_CONFIG_URL")
 
     def get_variable(self, variable):
-        if variable == "branch_name":
-            return os.environ.get("DET_BRANCH_NAME")
-        elif variable == "build_id":
-            return os.environ.get("DET_BUILD_ID")
-        elif variable == "build_execution_id":
-            return os.environ.get("DET_BUILD_EXECUTION_ID")
-        elif variable == "commit_hash":
-            return os.environ.get("DET_COMMIT_HASH")
-        elif variable == "environment":
-            return os.environ.get("DET_ENVIRONMENT")
-        elif variable == "release_id":
-            return os.environ.get("DET_RELEASE_ID")
-        elif variable == "branch_tag":
-            return os.environ.get("DET_BRANCH_TAG")
-        elif variable == "access_token":
-            return os.environ.get("DET_ACCESS_TOKEN")
-        elif variable == "organization":
-            return os.environ.get("DET_ORGANIZATION")
-        elif variable == "project_name":
-            return os.environ.get("DET_PROJECT_NAME")
-        elif variable == "repository":
-            return os.environ.get("DET_REPOSITORY")
-        elif variable == "pipeline_name":
-            return os.environ.get("DET_PIPELINE_NAME")
-        elif variable == "stage":
-            return os.environ.get("DET_STAGE")
-        elif variable == "path_directory":
-            return os.environ.get("DET_PATH_DIRECTORY")
-        elif variable == "os":
-            return os.environ.get("DET_OS")
-        elif variable == "work_folder":
-            return os.environ.get("DET_WORK_FOLDER")
-        elif variable == "temp_directory":
-            return os.environ.get("DET_TEMP_DIRECTORY")
-        elif variable == "agent_directory":
-            return os.environ.get("DET_AGENT_DIRECTORY")
-        elif variable == "target_branch":
-            return os.environ.get("DET_TARGET_BRANCH")
-        elif variable == "source_branch":
-            return os.environ.get("DET_SOURCE_BRANCH")
-        elif variable == "repository_provider":
-            return os.environ.get("DET_REPOSITORY_PROVIDER")
+        env_variables = {
+            "branch_name" : "DET_BRANCH_NAME",
+            "build_id" : "DET_BUILD_ID",
+            "build_execution_id" : "DET_BUILD_EXECUTION_ID",
+            "commit_hash" : "DET_COMMIT_HASH",
+            "environment" : "DET_ENVIRONMENT",
+            "release_id" : "DET_RELEASE_ID",
+            "branch_tag" : "DET_BRANCH_TAG",
+            "access_token" : "DET_ACCESS_TOKEN",
+            "organization" : "DET_ORGANIZATION",
+            "project_name" : "DET_PROJECT_NAME",
+            "repository" : "DET_REPOSITORY",
+            "pipeline_name" : "DET_PIPELINE_NAME",
+            "stage" : "DET_STAGE",
+            "path_directory" : "DET_PATH_DIRECTORY",
+            "os" : "DET_OS",
+            "work_folder" : "DET_WORK_FOLDER",
+            "temp_directory" : "DET_TEMP_DIRECTORY",
+            "agent_directory" : "DET_AGENT_DIRECTORY",
+            "target_branch" : "DET_TARGET_BRANCH",
+            "source_branch" : "DET_SOURCE_BRANCH",
+            "repository_provider" : "DET_REPOSITORY_PROVIDER"
+        }
+        return os.environ.get(env_variables[variable], None)

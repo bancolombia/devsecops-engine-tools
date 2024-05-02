@@ -64,7 +64,7 @@ jobs:
           TOKEN_DEFECT_DOJO: ${{ secrets.TOKEN_DEFECT_DOJO }}
       
       - name: Build
-        if: contains(github.ref,'refs/pull/') || contains(github.ref,'refs/heads/trunk')
+        if: contains(github.ref,'refs/heads/trunk')
         run: |
           cd tools/
           source _venv/bin/activate
@@ -72,33 +72,11 @@ jobs:
           python setup.py sdist bdist_wheel
       
       - name: Store the distribution packages
-        if: contains(github.ref,'refs/pull/') || contains(github.ref,'refs/heads/trunk')
+        if: contains(github.ref,'refs/heads/trunk')
         uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
           path: tools/dist/
-
-  deploy_dev:
-      if: contains(github.ref,'refs/pull/')
-      needs:
-        - build
-      runs-on: ubuntu-latest
-      permissions:
-        id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
-      steps:
-
-        - name: Download the distribution packages
-          uses: actions/download-artifact@v4
-          with:
-            name: python-package-distributions
-            path: tools/dist/
-
-        - name: Publish a Python distribution to PyPI Test
-          uses: pypa/gh-action-pypi-publish@release/v1
-          with:
-            packages-dir: tools/dist/
-            repository-url: https://test.pypi.org/legacy/
-            password: ${{ secrets.TEST_PYPI_API_TOKEN }}
 
 
 

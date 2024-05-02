@@ -9,6 +9,7 @@ permissions:
   contents: write
 
 jobs:
+
   deploy:
     runs-on: ubuntu-latest
     permissions:
@@ -21,7 +22,14 @@ jobs:
           name: python-package-distributions
           path: tools/dist/
 
-      - name: Publish a Python distribution to PyPI
+      - name: Publish a Python distribution to PyPI Test
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: tools/dist/
+          repository-url: https://test.pypi.org/legacy/
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+
+      - name: Publish a Python distribution to PyPI PDN
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: tools/dist/
