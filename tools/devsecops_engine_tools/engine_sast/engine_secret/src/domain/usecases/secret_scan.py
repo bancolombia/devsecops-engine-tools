@@ -61,15 +61,6 @@ class SecretScan:
                     ),
                 self.devops_platform_gateway
                 )
-        # input_core = InputCore(
-        #     totalized_exclusions=[],
-        #     threshold_defined=config_tool.level_compliance,
-        #     path_file_results=finding_list,
-        #     custom_message_break_build=config_tool.message_info_sast_build,
-        #     scope_pipeline=config_tool.scope_pipeline,
-        #     stage_pipeline="Build"
-        # )
-        # return finding_list, input_core
         return finding_list, config_tool
     def complete_config_tool(self, data_file_tool, tool):
         config_tool = DeserializeConfigTool(json_data=data_file_tool, tool=tool)

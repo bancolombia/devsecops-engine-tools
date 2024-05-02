@@ -35,7 +35,6 @@ class SetInputCore:
         return self.tool_remote.get_variable(variable)
 
     def get_exclusions(self, exclusions_data, pipeline_name, tool):
-        pipeline_name = "NU0429001_DevSecOps_toolchain"
         list_exclusions = []
         for key, value in exclusions_data.items():
             if (key == "All") or (key == pipeline_name):
