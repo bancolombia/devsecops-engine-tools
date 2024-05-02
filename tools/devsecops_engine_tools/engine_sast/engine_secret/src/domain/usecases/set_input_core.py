@@ -42,7 +42,6 @@ class SetInputCore:
                     Exclusions(
                         id=item.get("id", ""),
                         where=item.get("where", ""),
-                        cve_id=item.get("cve_id", ""),
                         create_date=item.get("create_date", ""),
                         expired_date=item.get("expired_date", ""),
                         severity=item.get("severity", ""),
