@@ -30,7 +30,7 @@ class TrufflehogRun(ToolGateway):
         command_complete = f"powershell -Command [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; [Net.ServicePointManager]::SecurityProtocol; New-Item -Path {agent_temp_dir} -ItemType Directory -Force; Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh' -OutFile {agent_temp_dir}\install_trufflehog.sh; bash {agent_temp_dir}\install_trufflehog.sh -b C:/Trufflehog/bin; $env:Path += ';C:/Trufflehog/bin'; C:/Trufflehog/bin/trufflehog.exe --version"
         process = subprocess.Popen(command_complete, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         process.communicate()
-    def run_tool_secret_scan(self, files_commits, exclude_paths, agent_os, agent_work_folder, sys_working_dir, num_threads, repository_name):
+    def run_tool_secret_scan(self, files_commits, exclude_paths, agent_os, agent_work_folder, sys_working_dirs, num_threads, repository_name):
         trufflehog_command = "trufflehog"
         if "Windows" in agent_os:
             trufflehog_command = "C:/Trufflehog/bin/trufflehog.exe"
@@ -39,7 +39,7 @@ class TrufflehogRun(ToolGateway):
         exclude_path = f"{agent_work_folder}/excludedPath.txt"
         include_paths = self.config_include_path(files_commits, agent_work_folder)
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
-            results = executor.map(self.run_trufflehog, [trufflehog_command]*len(include_paths), [sys_working_dir]*len(include_paths), [exclude_path]* len(include_paths), include_paths, [repository_name]*len(include_paths))
+            results = executor.map(self.run_trufflehog, [trufflehog_command]*len(include_paths), [agent_work_folder]*len(include_paths), [exclude_path]* len(include_paths), include_paths, [repository_name]*len(include_paths))
         return self.decode_output(results)
     def config_include_path(self, files, agent_work_folder):
         chunks = []
@@ -56,8 +56,8 @@ class TrufflehogRun(ToolGateway):
                 for file_pr_path in chunk:
                     file.write(f"{file_pr_path.strip()}\n")
         return include_paths
-    def run_trufflehog(self, trufflehog_command, sys_working_dir, exclude_path, include_path, repository_name):
-        command = f"{trufflehog_command} filesystem {sys_working_dir + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
+    def run_trufflehog(self, trufflehog_command, agent_work_folder, exclude_path, include_path, repository_name):
+        command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
         result = subprocess.run(command, capture_output=True, shell=True, text=True)
         return result.stdout.strip()
     def decode_output(self, results):
