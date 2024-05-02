@@ -40,7 +40,7 @@ class SecretScan:
         if skip_tool == "false":
             self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("os"), self.devops_platform_gateway.get_variable("temp_directory"))
             files_pullrequest = self.git_gateway.get_files_pull_request(
-                self.devops_platform_gateway.get_variable("path_directory"),
+                self.devops_platform_gateway.get_variable("work_folder"),
                 self.devops_platform_gateway.get_variable("target_branch"),
                 config_tool.target_branches,
                 self.devops_platform_gateway.get_variable("source_branch"),
@@ -55,22 +55,13 @@ class SecretScan:
                     config_tool.exclude_path,
                     self.devops_platform_gateway.get_variable("os"),
                     self.devops_platform_gateway.get_variable("work_folder"),
-                    self.devops_platform_gateway.get_variable("path_directory"),
                     config_tool.number_threads,
                     self.devops_platform_gateway.get_variable("repository")
                     ),
                 self.devops_platform_gateway.get_variable("os"),
                 self.devops_platform_gateway.get_variable("path_directory")
                 )
-        input_core = InputCore(
-            totalized_exclusions=[],
-            threshold_defined=config_tool.level_compliance,
-            path_file_results=finding_list,
-            custom_message_break_build=config_tool.message_info_engine_secret,
-            scope_pipeline=config_tool.scope_pipeline,
-            stage_pipeline=self.devops_platform_gateway.get_variable("stage").capitalize()
-        )
-        return finding_list, input_core
+        return finding_list, config_tool
     
     def complete_config_tool(self, data_file_tool, tool):
         config_tool = DeserializeConfigTool(json_data=data_file_tool, tool=tool)

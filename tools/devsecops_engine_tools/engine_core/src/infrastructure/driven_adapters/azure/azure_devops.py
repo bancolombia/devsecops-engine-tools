@@ -6,7 +6,7 @@ from devsecops_engine_tools.engine_utilities.azuredevops.models.AzurePredefinedV
     BuildVariables,
     SystemVariables,
     ReleaseVariables,
-    AgentVariables
+    AgentVariables,
 )
 from devsecops_engine_tools.engine_utilities.azuredevops.infrastructure.azure_devops_api import (
     AzureDevopsApi,
@@ -17,6 +17,7 @@ from devsecops_engine_tools.engine_utilities.azuredevops.models.AzureMessageLogg
 )
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
+
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
@@ -68,51 +69,31 @@ class AzureDevops(DevopsPlatformGateway):
         )
 
     def get_variable(self, variable):
-        try:
-            if variable == "branch_name":
-                return BuildVariables.Build_SourceBranchName.value()
-            elif variable == "build_id":
-                return BuildVariables.Build_BuildNumber.value()
-            elif variable == "build_execution_id":
-                return BuildVariables.Build_BuildId.value()
-            elif variable == "commit_hash":
-                return BuildVariables.Build_SourceVersion.value()
-            elif variable == "environment":
-                return ReleaseVariables.Environment.value()
-            elif variable == "release_id":
-                return ReleaseVariables.Release_Releaseid.value()
-            elif variable == "branch_tag":
-                return BuildVariables.Build_SourceBranch.value()
-            elif variable == "access_token":
-                return SystemVariables.System_AccessToken.value()
-            elif variable == "organization":
-                return SystemVariables.System_TeamFoundationCollectionUri.value()
-            elif variable == "project_name":
-                return SystemVariables.System_TeamProject.value()
-            elif variable == "repository":
-                return BuildVariables.Build_Repository_Name.value()
-            elif variable == "pipeline_name":
-                if SystemVariables.System_HostType.value() == "build":
-                    return BuildVariables.Build_DefinitionName.value()
-                return ReleaseVariables.Release_Definitionname.value()
-            elif variable == "stage":
-                return SystemVariables.System_HostType.value()
-            elif variable == "path_directory":
-                return SystemVariables.System_DefaultWorkingDirectory.value()
-            elif variable == "os":
-                return AgentVariables.Agent_OS.value()
-            elif variable == "work_folder":
-                return AgentVariables.Agent_WorkFolder.value()
-            elif variable == "temp_directory":
-                return AgentVariables.Agent_TempDirectory.value()
-            elif variable == "agent_directory":
-                return AgentVariables.Agent_BuildDirectory.value()
-            elif variable == "target_branch":
-                return SystemVariables.System_TargetBranchName.value()
-            elif variable == "source_branch":
-                return SystemVariables.System_SourceBranch.value()
-            elif variable == "repository_provider":
-                return BuildVariables.Build_Repository_Provider.value()
-
-        except Exception:
-            return None
+        variable_map = {
+            "branch_name": BuildVariables.Build_SourceBranchName.value(),
+            "build_id": BuildVariables.Build_BuildNumber.value(),
+            "build_execution_id": BuildVariables.Build_BuildId.value(),
+            "commit_hash": BuildVariables.Build_SourceVersion.value(),
+            "environment": ReleaseVariables.Environment.value(),
+            "release_id": ReleaseVariables.Release_Releaseid.value(),
+            "branch_tag": BuildVariables.Build_SourceBranch.value(),
+            "access_token": SystemVariables.System_AccessToken.value(),
+            "organization": SystemVariables.System_TeamFoundationCollectionUri.value(),
+            "project_name": SystemVariables.System_TeamProject.value(),
+            "repository": BuildVariables.Build_Repository_Name.value(),
+            "pipeline_name": (
+                BuildVariables.Build_DefinitionName.value()
+                if SystemVariables.System_HostType.value() == "build"
+                else ReleaseVariables.Release_Definitionname.value()
+            ),
+            "stage": SystemVariables.System_HostType.value(),
+            "path_directory": SystemVariables.System_DefaultWorkingDirectory.value(),
+            "os": AgentVariables.Agent_OS.value(),
+            "work_folder": AgentVariables.Agent_WorkFolder.value(),
+            "temp_directory": AgentVariables.Agent_TempDirectory.value(),
+            "agent_directory": AgentVariables.Agent_BuildDirectory.value(),
+            "target_branch": SystemVariables.System_TargetBranchName.value(),
+            "source_branch": SystemVariables.System_SourceBranch.value(),
+            "repository_provider": BuildVariables.Build_Repository_Provider.value(),
+        }
+        return variable_map.get(variable, None)

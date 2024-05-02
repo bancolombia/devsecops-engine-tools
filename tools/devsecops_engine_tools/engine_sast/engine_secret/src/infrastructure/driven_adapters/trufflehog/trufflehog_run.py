@@ -42,7 +42,6 @@ class TrufflehogRun(ToolGateway):
         exclude_paths,
         agent_os,
         agent_work_folder,
-        sys_working_dir,
         num_threads,
         repository_name,
     ):
@@ -57,7 +56,7 @@ class TrufflehogRun(ToolGateway):
             results = executor.map(
                 self.run_trufflehog,
                 [trufflehog_command] * len(include_paths),
-                [sys_working_dir] * len(include_paths),
+                [agent_work_folder] * len(include_paths),
                 [exclude_path] * len(include_paths),
                 include_paths,
                 [repository_name] * len(include_paths),
@@ -85,12 +84,12 @@ class TrufflehogRun(ToolGateway):
     def run_trufflehog(
         self,
         trufflehog_command,
-        sys_working_dir,
+        agent_work_folder,
         exclude_path,
         include_path,
         repository_name,
     ):
-        command = f"{trufflehog_command} filesystem {sys_working_dir + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
+        command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
         result = subprocess.run(command, capture_output=True, shell=True, text=True)
         return result.stdout.strip()
 

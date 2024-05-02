@@ -65,7 +65,7 @@ class TestTrufflehogRun(unittest.TestCase):
 
         trufflehog_run = TrufflehogRun()
 
-        result = trufflehog_run.run_tool_secret_scan(files_commits, exclude_paths, agent_os, agent_work_folder, sys_working_dir, num_threads, repository_name)
+        result = trufflehog_run.run_tool_secret_scan(files_commits, exclude_paths, agent_os, agent_work_folder, num_threads, repository_name)
 
         expected_result = [
             {"SourceMetadata": {"Data": {"Filesystem": {"file": "/usr/bin/local/file1.txt", "line": 1}}}, "SourceID": 1,
