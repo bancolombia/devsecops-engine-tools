@@ -52,7 +52,6 @@ class SetInputCore:
                     for item in value[tool]
                 ]
                 list_exclusions.extend(exclusions)
-        print(list_exclusions)
         return list_exclusions
 
     def set_input_core(self, finding_list):
@@ -62,7 +61,6 @@ class SetInputCore:
         Returns:
             dict: Input core.
         """
-        print(finding_list)
         return InputCore(
             totalized_exclusions=self.get_exclusions(
                 self.get_remote_config("SAST/Secret_Scan/Exclusions/Exclusions.json"),

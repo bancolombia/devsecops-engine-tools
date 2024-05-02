@@ -20,7 +20,6 @@ class SecretScanDeserealizator(DeseralizatorGateway):
                 id="SECRET_SCANNING",
                 cvss=None,
                 where=f"{where_text}, Line: {line}",
-                # where=f"{where_text}",
                 description="Sensitive information in source code",
                 severity="critical",
                 identification_date=datetime.now().strftime("%d%m%Y"),

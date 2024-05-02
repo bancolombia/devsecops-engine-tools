@@ -39,11 +39,9 @@ class SecretScan:
             self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("OS"), self.devops_platform_gateway.get_variable("TEMP_DIRECTORY"))
             files_pullrequest = self.git_gateway.get_files_pull_request(
                 self.devops_platform_gateway.get_variable("WORK_FOLDER"),
-                # self.devops_platform_gateway.get_variable("TARGET_BRANCH"),
-                "trunk",
+                self.devops_platform_gateway.get_variable("TARGET_BRANCH"),
                 config_tool.target_branches,
-                "refs/heads/feature/test_commits",
-                # self.devops_platform_gateway.get_variable("SOURCE_BRANCH"),
+                self.devops_platform_gateway.get_variable("SOURCE_BRANCH"),
                 self.devops_platform_gateway.get_variable("ACCESS_TOKEN"),
                 self.devops_platform_gateway.get_variable("ORGANIZATION"),
                 self.devops_platform_gateway.get_variable("PROJECT_NAME"),
