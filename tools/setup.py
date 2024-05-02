@@ -9,7 +9,7 @@ def get_readme():
 
 def get_requirements():
     with open("requirements.txt", "r") as fh:
-        return [line.strip() for line in fh.readlines()]
+        return fh.read()
 
 spec = util.spec_from_file_location(
     "devsecops_engine_tools.version", os.path.join("devsecops_engine_tools", "version.py")
@@ -42,19 +42,5 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.8",
-    install_requires=[
-        "requests==2.31.0",
-        "multipledispatch==0.6.0",
-        "PyYAML==6.0.1",
-        "checkov==2.3.296",
-        "pyfiglet==0.7",
-        "prettytable==3.8.0",
-        "azure-devops==7.1.0b3",
-        "marshmallow==3.19.0",
-        "pytz==2023.3",
-        "python-decouple==3.8",
-        "requests_toolbelt==1.0.0",
-        "python-dateutil==2.8.2",
-        "pexpect==4.9.0"
-    ],
+    install_requires=get_requirements(),
 )

@@ -12,8 +12,8 @@ steps:
     SonarQube: SonarQube
     scannerMode: CLI
     configMode: manual
-    cliProjectKey: 'NU0429001_devsecops_engine_$(pathComponentName)'
-    cliProjectName: 'NU0429001_devsecops_engine_$(pathComponentName)'
+    cliProjectKey: '$(project_base)_$(pathComponentName)'
+    cliProjectName: '$(project_base)_$(pathComponentName)'
     cliProjectVersion: '$(Build.BuildNumber)'
     extraProperties: |
       sonar.verbose=true
@@ -47,12 +47,12 @@ steps:
   displayName: 'Run Unit Test'
 
 - script: |
-    # if [ "$(Build.SourceBranch)" == "refs/heads/trunk" ]; then
-    #   echo "Integration tests are only run in feature branch"
-    # else
+    if [ "$(Build.SourceBranch)" == "refs/heads/trunk" ]; then
+      echo "Integration tests are only run in feature branch"
+    else
     source _venv/bin/activate
     python test_integrations_defect_dojo.py
-    # fi
+    fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(pathComponentName)
   displayName: 'Integration Test'
   env:
