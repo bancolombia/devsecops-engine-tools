@@ -24,7 +24,7 @@ def test_get_exclusions(mock_tool_remote):
           "TRUFFLEHOG": [
           ]
       },
-      "NU0429001_DevSecOps_toolchain": {
+      "NU00001_Pruebas": {
         "TRUFFLEHOG": [
           {
               "id": "SECRET_SCANNING",
@@ -38,7 +38,7 @@ def test_get_exclusions(mock_tool_remote):
         ]
       }
     }
-    pipeline_name = "NU0429001_DevSecOps_toolchain"
+    pipeline_name = "NU00001_Pruebas"
     tool = "TRUFFLEHOG"
     config_tool = MagicMock()
 
