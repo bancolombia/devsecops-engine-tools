@@ -69,31 +69,35 @@ class AzureDevops(DevopsPlatformGateway):
         )
 
     def get_variable(self, variable):
-        variable_map = {
-            "branch_name": BuildVariables.Build_SourceBranchName.value(),
-            "build_id": BuildVariables.Build_BuildNumber.value(),
-            "build_execution_id": BuildVariables.Build_BuildId.value(),
-            "commit_hash": BuildVariables.Build_SourceVersion.value(),
-            "environment": ReleaseVariables.Environment.value(),
-            "release_id": ReleaseVariables.Release_Releaseid.value(),
-            "branch_tag": BuildVariables.Build_SourceBranch.value(),
-            "access_token": SystemVariables.System_AccessToken.value(),
-            "organization": SystemVariables.System_TeamFoundationCollectionUri.value(),
-            "project_name": SystemVariables.System_TeamProject.value(),
-            "repository": BuildVariables.Build_Repository_Name.value(),
-            "pipeline_name": (
-                BuildVariables.Build_DefinitionName.value()
-                if SystemVariables.System_HostType.value() == "build"
-                else ReleaseVariables.Release_Definitionname.value()
-            ),
-            "stage": SystemVariables.System_HostType.value(),
-            "path_directory": SystemVariables.System_DefaultWorkingDirectory.value(),
-            "os": AgentVariables.Agent_OS.value(),
-            "work_folder": AgentVariables.Agent_WorkFolder.value(),
-            "temp_directory": AgentVariables.Agent_TempDirectory.value(),
-            "agent_directory": AgentVariables.Agent_BuildDirectory.value(),
-            "target_branch": SystemVariables.System_TargetBranchName.value(),
-            "source_branch": SystemVariables.System_SourceBranch.value(),
-            "repository_provider": BuildVariables.Build_Repository_Provider.value(),
-        }
-        return variable_map.get(variable, None)
+
+            variable_map = {
+                "branch_name": BuildVariables.Build_SourceBranchName,
+                "build_id": BuildVariables.Build_BuildNumber,
+                "build_execution_id": BuildVariables.Build_BuildId,
+                "commit_hash": BuildVariables.Build_SourceVersion,
+                "environment": ReleaseVariables.Environment,
+                "release_id": ReleaseVariables.Release_Releaseid,
+                "branch_tag": BuildVariables.Build_SourceBranch,
+                "access_token": SystemVariables.System_AccessToken,
+                "organization": SystemVariables.System_TeamFoundationCollectionUri,
+                "project_name": SystemVariables.System_TeamProject,
+                "repository": BuildVariables.Build_Repository_Name,
+                "pipeline_name": (
+                    BuildVariables.Build_DefinitionName
+                    if SystemVariables.System_HostType.value() == "build"
+                    else ReleaseVariables.Release_Definitionname
+                ),
+                "stage": SystemVariables.System_HostType,
+                "path_directory": SystemVariables.System_DefaultWorkingDirectory,
+                "os": AgentVariables.Agent_OS,
+                "work_folder": AgentVariables.Agent_WorkFolder,
+                "temp_directory": AgentVariables.Agent_TempDirectory,
+                "agent_directory": AgentVariables.Agent_BuildDirectory,
+                "target_branch": SystemVariables.System_TargetBranchName,
+                "source_branch": SystemVariables.System_SourceBranch,
+                "repository_provider": BuildVariables.Build_Repository_Provider,
+            }
+            try:
+                return variable_map.get(variable).value()
+            except ValueError:
+                return None
