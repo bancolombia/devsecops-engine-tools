@@ -1,6 +1,3 @@
-from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops import (
-    AzureDevops,
-)
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.printer_pretty_table.printer_pretty_table import (
     PrinterPrettyTable,
 )
@@ -15,14 +12,11 @@ from devsecops_engine_utilities import settings
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
-def runner_engine_risk(dict_args, findings):
+def runner_engine_risk(dict_args, findings, devops_platform_gateway, print_table_gateway):
     try:
-        devops_platform_gateway = AzureDevops()
-        printer_table_gateway = PrinterPrettyTable()
-
         init_engine_risk(
             devops_platform_gateway,
-            printer_table_gateway,
+            print_table_gateway,
             dict_args,
             findings,
         )

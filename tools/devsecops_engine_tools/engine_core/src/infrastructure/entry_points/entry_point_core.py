@@ -99,6 +99,7 @@ def init_engine_core(
             vulnerability_management_gateway,
             secrets_manager_gateway,
             devops_platform_gateway,
+            print_table_gateway,
         ).process(args, config_tool)
 
     elif config_tool[args["tool"].upper()]["ENABLED"] == "true":

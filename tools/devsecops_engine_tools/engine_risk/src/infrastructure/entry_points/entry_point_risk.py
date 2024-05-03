@@ -14,7 +14,7 @@ def init_engine_risk(
         devops_platform_gateway, print_table_gateway, dict_args, findings 
 ):
     remote_config = devops_platform_gateway.get_remote_config(
-        dict_args["remote_config_repo"], "Risk/configTools.json"
+        dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
     )
     findings_to_break = []
     if len(findings):

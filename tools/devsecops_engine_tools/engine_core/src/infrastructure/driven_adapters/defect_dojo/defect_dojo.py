@@ -170,48 +170,32 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 )
             )
 
-    def get_report(
+    def get_all_findings(
         self, service, dict_args, secret_tool, config_tool
     ):
         try:
-            token_dd = (
-                dict_args["token_vulnerability_management"]
-                if dict_args["token_vulnerability_management"] is not None
-                else secret_tool["token_defect_dojo"]
-            )
-
+            token_dd = dict_args.get(
+                "token_vulnerability_management"
+            ) or secret_tool.get("token_defect_dojo")
             session_manager = SessionManager(
                 token_dd,
                 config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"],
             )
 
-            findings_list = Finding.get_finding(
-                session=session_manager,
-                service=service,
-                limit=config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
-                    "LIMITS_QUERY"
-                ],
-            ).results
+            dd_limits_query = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                "LIMITS_QUERY"
+            ]
+
+            all_findings_query_params = {
+                "limit": dd_limits_query,
+            }
+
+            findings = self._get_findings(session_manager, service, all_findings_query_params)
 
             maped_list = list(
                 map(
-                    lambda finding: Report(
-                        **{
-                            "id": finding.vuln_id_from_tool,
-                            "date": format_date(
-                                finding.date,
-                                "%Y-%m-%d",
-                                "%d%m%Y",
-                            ),
-                            "status": finding.display_status,
-                            "where": self._get_where(finding, dict_args),
-                            "tags": finding.tags,
-                            "severity": finding.severity,
-                            "active": finding.active,
-                            "status": finding.display_status,
-                        }
-                    ),
-                    findings_list,
+                    partial(self._create_report, date_fn=self._format_date_to_dd_format, tool=dict_args["tool"]),
+                    findings,
                 )
             )
 
@@ -255,6 +239,19 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             reason=reason,
         )
 
+    def _create_report(self, finding, date_fn, tool):
+        return Report(
+            id=finding.vuln_id_from_tool,
+            date=date_fn(
+                finding.date
+            ),
+            status=finding.display_status,
+            where=self._get_where(finding, tool),
+            tags=finding.tags,
+            severity=finding.severity,
+            active=finding.active,
+        )
+
     def _format_date_to_dd_format(self, date_string):
         return (
             format_date(date_string.split("T")[0], "%Y-%m-%d", "%d%m%Y")
@@ -269,7 +266,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             return finding.component_name + ":" + finding.component_version
         elif tool == "engine_dast":
             return finding.endpoints
-        elif dict_args["tool"] == "engine_risk":
+        elif tool == "engine_risk":
             for tag in finding.tags:
                 if tag in ["engine_iac", "engine_secret", "7waysecurity", "fluidattacks"]:
                     return finding.file_path
