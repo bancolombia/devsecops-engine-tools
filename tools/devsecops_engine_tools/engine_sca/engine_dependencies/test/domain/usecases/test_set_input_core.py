@@ -98,7 +98,7 @@ def test_set_input_core():
                 },
                 "COMPLIANCE": {"Critical": 1},
             },
-            "MESSAGE_INFO_SCA": "Test",
+            "MESSAGE_INFO_ENGINE_DEPENDENCIES": "Test",
         }
         exclusions = {"exclusion": "value"}
         dependencies_scanned = "tests_file"

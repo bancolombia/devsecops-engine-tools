@@ -1,5 +1,3 @@
-import argparse
-import sys
 from devsecops_engine_tools.engine_core.src.domain.usecases.break_build import (
     BreakBuild,
 )
@@ -12,7 +10,7 @@ from devsecops_engine_tools.engine_core.src.domain.usecases.handle_risk import (
 from devsecops_engine_tools.engine_core.src.domain.usecases.metrics_manager import (
     MetricsManager,
 )
-from devsecops_engine_utilities.utils.printers import (
+from devsecops_engine_tools.engine_utilities.utils.printers import (
     Printers,
 )
 
@@ -89,12 +87,12 @@ def init_engine_core(
     devops_platform_gateway: any,
     print_table_gateway: any,
     metrics_manager_gateway: any,
+    args: any
 ):
-    Printers.print_logo_tool()
-    args = get_inputs_from_cli(sys.argv[1:])
     config_tool = devops_platform_gateway.get_remote_config(
-        args["remote_config_repo"], "/resources/ConfigTool.json"
+        args["remote_config_repo"], "/engine_core/ConfigTool.json"
     )
+    Printers.print_logo_tool(config_tool["BANNER"])
 
     if (args["tool"] == "engine_risk") and (config_tool[args["tool"].upper()]["ENABLED"] == "true"):
         HandleRisk(
@@ -113,6 +111,7 @@ def init_engine_core(
         scan_result = BreakBuild(devops_platform_gateway, print_table_gateway).process(
             findings_list,
             input_core,
+            args
         )
         if args["send_metrics"] == "true":
             MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(

@@ -22,15 +22,15 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.fi
     generate_file_from_tool,
 )
 
-from devsecops_engine_utilities.github.infrastructure.github_api import GithubApi
-from devsecops_engine_utilities.ssh.managment_private_key import (
+from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import GithubApi
+from devsecops_engine_tools.engine_utilities.ssh.managment_private_key import (
     create_ssh_private_file,
     add_ssh_private_key,
     decode_base64,
     config_knowns_hosts,
 )
-from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities import settings
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
@@ -106,8 +106,6 @@ class CheckovTool(ToolGateway):
         )
         output = result.stdout.strip()
         error = result.stderr.strip()
-        if error is not None and error != "":
-            logger.error(f"Error running checkov.. {error}")
         return output
 
     def async_scan(self, queue, checkov_config: CheckovConfig):

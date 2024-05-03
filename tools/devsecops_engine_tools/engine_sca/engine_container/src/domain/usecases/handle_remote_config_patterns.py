@@ -1,3 +1,4 @@
+import re
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
@@ -30,6 +31,17 @@ class HandleRemoteConfigPatterns:
         """
         return self.tool_remote.get_variable(variable)
     
+    def ignore_analysis_pattern(self):
+        """
+        Handle analysis pattern.
+        Return: bool: False -> not scan, True -> scan.
+        """
+        ignore = self.get_remote_config("SCA/CONTAINER/ConfigTool.json")["IGNORE_SEARCH_PATTERN"]
+        if re.match(ignore, self.get_variable("release_name"), re.IGNORECASE):
+            return False
+        else:
+            return True
+    
     def handle_skip_tool(self, exclusions, pipeline_name):
         """
         Handle skip tool.
@@ -50,6 +62,6 @@ class HandleRemoteConfigPatterns:
         Return: bool: True -> skip tool, False -> not skip tool.
         """
         return self.handle_skip_tool(
-            self.get_remote_config("SCA/CONTAINER/Exclusions/Exclusions.json"),
-            self.get_variable("release_name"),
+            self.get_remote_config("engine_sca/engine_container/Exclusions.json"),
+            self.get_variable("pipeline_name"),
         )

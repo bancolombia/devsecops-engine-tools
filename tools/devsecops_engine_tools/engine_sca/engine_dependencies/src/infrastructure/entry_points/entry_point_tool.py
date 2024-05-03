@@ -17,6 +17,11 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.f
 import os
 import sys
 
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
+
 
 def init_engine_dependencies(
     tool_run, tool_remote, tool_deserializator, dict_args, token, tool
@@ -24,10 +29,10 @@ def init_engine_dependencies(
     sys.stdout.reconfigure(encoding="utf-8")
 
     remote_config = tool_remote.get_remote_config(
-        dict_args["remote_config_repo"], "SCA/DEPENDENCIES/configTools.json"
+        dict_args["remote_config_repo"], "engine_sca/engine_dependencies/ConfigTool.json"
     )
     exclusions = tool_remote.get_remote_config(
-        dict_args["remote_config_repo"], "SCA/DEPENDENCIES/Exclusions/Exclusions.json"
+        dict_args["remote_config_repo"], "engine_sca/engine_dependencies/Exclusions.json"
     )
     pipeline_name = tool_remote.get_variable("pipeline_name")
     agent_directory = tool_remote.get_variable("agent_directory")
@@ -69,6 +74,9 @@ def init_engine_dependencies(
         dependencies_scanned = dependencies_sca_scan.process()
         if dependencies_scanned:
             deserialized = dependencies_sca_scan.deserializator(dependencies_scanned)
+    else:
+        print(f"Tool skipped by DevSecOps policy")
+        logger.info(f"Tool skipped by DevSecOps policy")
 
     core_input = input_core.set_input_core(dependencies_scanned)
 

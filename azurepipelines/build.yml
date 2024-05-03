@@ -12,8 +12,8 @@ steps:
     SonarQube: SonarQube
     scannerMode: CLI
     configMode: manual
-    cliProjectKey: 'NU0429001_devsecops_engine_$(pathComponentName)'
-    cliProjectName: 'NU0429001_devsecops_engine_$(pathComponentName)'
+    cliProjectKey: '$(project_base)_$(pathComponentName)'
+    cliProjectName: '$(project_base)_$(pathComponentName)'
     cliProjectVersion: '$(Build.BuildNumber)'
     extraProperties: |
       sonar.verbose=true
@@ -32,21 +32,12 @@ steps:
     apt-get install openssh-client -y
   workingDirectory: $(System.DefaultWorkingDirectory)/$(pathComponentName)
   displayName: 'Installation openssh-client'
-  condition: eq(variables['pathComponentName'], 'common_devsecops_lib')
 
 - script: |
     set -e
-    
     python3 -m virtualenv _venv
     source _venv/bin/activate
     python -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
-    if [ "$(pathComponentName)" == "tools" ]; then
-      cd ../common_devsecops_lib/
-      python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
-      python setup.py bdist_wheel
-      python -m pip install dist/*.whl
-      cd ../tools
-    fi
     python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python -m pip install -r requirements_test.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python -m pytest -x --cov=$(System.DefaultWorkingDirectory)/$(pathComponentName) --cov-config=.coveragerc
@@ -64,7 +55,6 @@ steps:
     fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(pathComponentName)
   displayName: 'Integration Test'
-  condition: eq(variables['pathComponentName'], 'common_devsecops_lib')
   env:
     PERSONAL_ACCESS_TOKEN: $(System.AccessToken)
     TOKEN_CMDB: $(TOKEN_CMDB)

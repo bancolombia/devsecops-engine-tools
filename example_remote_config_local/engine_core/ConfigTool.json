@@ -1,0 +1,47 @@
+{
+    "BANNER": "DevSecOps Engine Tools",
+    "SECRET_MANAGER": {
+        "AWS": {
+            "SECRET_NAME": "",
+            "ROLE_ARN": "",
+            "REGION_NAME": ""
+        }
+    },
+    "VULNERABILITY_MANAGER": {
+        "BRANCH_FILTER": "",
+        "DEFECT_DOJO": {
+            "CMDB_MAPPING_PATH": "",
+            "HOST_CMDB": "",
+            "HOST_DEFECT_DOJO": "",
+            "REGEX_EXPRESSION_CMDB": "",
+            "LIMITS_QUERY": 100
+        }
+    },
+    "METRICS_MANAGER": {
+        "AWS": {
+            "BUCKET": "",
+            "ROLE_ARN": "",
+            "REGION_NAME": ""
+        }
+    },
+    "ENGINE_IAC": {
+        "ENABLED": "true",
+        "TOOL": "CHECKOV"
+    },
+    "ENGINE_CONTAINER": {
+        "ENABLED": "true",
+        "TOOL": "PRISMA|SNYK"
+    },
+    "ENGINE_DAST": {
+        "ENABLED": "true",
+        "TOOL": "NUCLEI"
+    },
+    "ENGINE_SECRET": {
+        "ENABLED": "true",
+        "TOOL": "TRUFFLEHOG"
+    },
+    "ENGINE_DEPENDENCIES": {
+        "ENABLED": "true",
+        "TOOL": "XRAY"
+    }
+}

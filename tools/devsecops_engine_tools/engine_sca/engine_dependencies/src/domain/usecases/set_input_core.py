@@ -24,7 +24,7 @@ class SetInputCore:
                             expired_date=item.get("expired_date", ""),
                             severity=item.get("severity", ""),
                             hu=item.get("hu", ""),
-                            treatment=item.get("treatment", "Risk acceptance")
+                            reason=item.get("reason", "Risk acceptance")
                         )
                         for item in value[tool]
                     ]
@@ -59,7 +59,7 @@ class SetInputCore:
                 )
             ),
             dependencies_scanned,
-            self.remote_config["MESSAGE_INFO_SCA"],
+            self.remote_config["MESSAGE_INFO_ENGINE_DEPENDENCIES"],
             self.pipeline_name,
             "Build",
         )
