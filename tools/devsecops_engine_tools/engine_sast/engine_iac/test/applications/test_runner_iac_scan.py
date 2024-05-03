@@ -28,9 +28,10 @@ def test_runner_engine_iac(mock_entry_point_tool):
     dict_args = {}
     tool = "CHECKOV"
     secret_tool = "secret"
+    devops_platform_gateway = None
 
     # Call the function
-    [] , input_output = runner_engine_iac(dict_args, tool, secret_tool, "qa")
+    [] , input_output = runner_engine_iac(dict_args, tool, secret_tool, devops_platform_gateway, "qa")
 
     # Assert the expected behavior
     assert input_output == input_core
@@ -41,13 +42,14 @@ def test_runner_engine_iac_exception(mock_entry_point_tool):
         dict_args = {'arg1': 'value1', 'arg2': 'value2'}
         tool = 'CHECKOV'
         secret_tool = 'my_secret'
+        devops_platform_gateway = None
 
         # Mock the necessary methods or properties to simulate an exception
         mock_entry_point_tool.side_effect = Exception("Simulated error")
 
         # Act and Assert
         with unittest.TestCase().assertRaises(Exception) as context:
-            runner_engine_iac(dict_args, tool, secret_tool, "dev")
+            runner_engine_iac(dict_args, tool, secret_tool, devops_platform_gateway, "dev")
 
         # Optionally, you can check the exception message or other details
         assert str(context.exception) == "Error engine_iac : Simulated error"

@@ -239,7 +239,7 @@ class BreakBuild:
                     )
                 )
                 
-                if devops_platform_gateway.get_variable("pipeline_type") == "build":
+                if devops_platform_gateway.get_variable("stage") == "build":
                     print(devops_platform_gateway.result_pipeline("succeeded_with_issues"))
                 else:
                     print(devops_platform_gateway.result_pipeline("succeeded"))

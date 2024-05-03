@@ -1,11 +1,6 @@
 import pytest
-import json
 from unittest.mock import Mock
-from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
-from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
-    DevopsPlatformGateway,
-)
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import DevopsPlatformGateway
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.set_input_core import SetInputCore  
@@ -29,7 +24,7 @@ def test_get_exclusions(mock_tool_remote):
       }
     ]
   },
-  "ISSTI0002_STI_automations_extension": {
+  "repository_test": {
     "PRISMA": [
       {
         "id": "XRAY-N94",
@@ -39,7 +34,7 @@ def test_get_exclusions(mock_tool_remote):
       }
     ]
   },
-  "nu0429001_ProyectoEjemplo_RM": {
+  "12345_ProyectoEjemplo_RM": {
     "PRISMA": [
       {
         "id": "CVE-2023-6237",

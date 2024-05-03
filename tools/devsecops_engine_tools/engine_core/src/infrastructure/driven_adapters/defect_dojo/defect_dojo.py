@@ -5,14 +5,14 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_m
 from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
     VulnerabilityManagement,
 )
-from devsecops_engine_utilities.defect_dojo import (
+from devsecops_engine_tools.engine_utilities.defect_dojo import (
     DefectDojo,
     ImportScanRequest,
     Connect,
     Finding,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
-from devsecops_engine_utilities.utils.session_manager import SessionManager
+from devsecops_engine_tools.engine_utilities.utils.session_manager import SessionManager
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionVulnerabilityManagement,
     ExceptionFindingsExcepted,
