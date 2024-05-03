@@ -118,7 +118,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: tools/dist/
-          repository-url: https://pypi.org/p/devsecops-engine-tools
+          repository-url: https://pypi.org/p/devsecops-engine-tools/
           password: ${{ secrets.PDN_PYPI_API_TOKEN }}
   
   create_tag:
