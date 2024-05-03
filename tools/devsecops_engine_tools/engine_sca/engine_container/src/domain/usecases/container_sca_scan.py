@@ -11,7 +11,6 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateway
     DeseralizatorGateway,
 )
 
-
 class ContainerScaScan:
     def __init__(
         self,
@@ -66,10 +65,10 @@ class ContainerScaScan:
             dict: SCA scanning results.
         """
         return self.tool_run.run_tool_container_sca(
-            self.get_remote_config("SCA/CONTAINER/ConfigTool.json"),
+            self.get_remote_config("engine_sca/engine_container/ConfigTool.json"),
             self.token,
             self.scan_image(),
-            self.get_variable("release_name"),
+            self.get_variable("build_id"),
             self.skip_flag
         )
 

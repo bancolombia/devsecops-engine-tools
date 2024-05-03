@@ -1,7 +1,6 @@
 import re
 import os
 
-
 class HandleRemoteConfigPatterns:
     def __init__(
         self,

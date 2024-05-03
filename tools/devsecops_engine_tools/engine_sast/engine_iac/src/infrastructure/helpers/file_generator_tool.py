@@ -1,7 +1,7 @@
 import json
 import os
-from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities import settings
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
@@ -68,5 +68,7 @@ def update_fields(check_result, rules_doc):
         check_result["custom_vuln_id"] = rule_info["customID"]
     if "guideline" in rule_info:
         check_result["guideline"] = rule_info["guideline"]
+    if "category" in rule_info:
+        check_result["bc_category"] = rule_info["category"]
 
     return check_result

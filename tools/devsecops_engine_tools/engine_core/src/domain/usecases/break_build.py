@@ -6,13 +6,17 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
     Finding,
     Category,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_gateway import (
     PrinterTableGateway,
 )
+
 from collections import Counter
+from datetime import timedelta, datetime
+import pytz
 
 
 @dataclass
@@ -25,7 +29,29 @@ class BreakBuild:
         self.devops_platform_gateway = devops_platform_gateway
         self.printer_table_gateway = printer_table_gateway
 
-    def process(self, findings_list: "list[Finding]", input_core: InputCore):
+    def _apply_policie_exception_new_vulnerability_industry(
+        self, findings_list: "list[Finding]", exclusions: "list[Exclusions]", args: any
+    ):
+        if args["tool"] in ["engine_container", "engine_dependencies"]:
+            date_actual = datetime.now(pytz.utc)
+            for item in findings_list:
+                if item.published_date_cve:
+                    date_initial = datetime.fromisoformat(item.published_date_cve)
+                    date_final = date_initial + timedelta(days=5)
+                    if date_initial <= date_actual <= date_final:
+                        exclusions.append(
+                            Exclusions(
+                                **{
+                                    "id": item.id,
+                                    "where": "all",
+                                    "create_date": date_initial.strftime("%d%m%Y"),
+                                    "expired_date": date_final.strftime("%d%m%Y"),
+                                    "reason": "New vulnerability in the industry",
+                                }
+                            )
+                        )
+
+    def process(self, findings_list: "list[Finding]", input_core: InputCore, args: any):
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
         threshold = input_core.threshold_defined
@@ -39,7 +65,10 @@ class BreakBuild:
         }
 
         if len(findings_list) != 0:
-            # Esta lista de excluidas no se imprimira para dejar un resultado más limpio
+            self._apply_policie_exception_new_vulnerability_industry(
+                findings_list, exclusions, args
+            )
+
             findings_excluded_list = list(
                 filter(
                     lambda item: any(
@@ -84,45 +113,45 @@ class BreakBuild:
             )
 
             vulnerabilities_critical = reduce(
-                lambda count, vulnerability: count + 1
-                if vulnerability.severity == "critical"
-                else count,
+                lambda count, vulnerability: (
+                    count + 1 if vulnerability.severity == "critical" else count
+                ),
                 vulnerabilities_without_exclusions_list,
                 0,
             )
             vulnerabilities_high = reduce(
-                lambda count, vulnerability: count + 1
-                if vulnerability.severity == "high"
-                else count,
+                lambda count, vulnerability: (
+                    count + 1 if vulnerability.severity == "high" else count
+                ),
                 vulnerabilities_without_exclusions_list,
                 0,
             )
             vulnerabilities_medium = reduce(
-                lambda count, vulnerability: count + 1
-                if vulnerability.severity == "medium"
-                else count,
+                lambda count, vulnerability: (
+                    count + 1 if vulnerability.severity == "medium" else count
+                ),
                 vulnerabilities_without_exclusions_list,
                 0,
             )
             vulnerabilities_low = reduce(
-                lambda count, vulnerability: count + 1
-                if vulnerability.severity == "low"
-                else count,
+                lambda count, vulnerability: (
+                    count + 1 if vulnerability.severity == "low" else count
+                ),
                 vulnerabilities_without_exclusions_list,
                 0,
             )
             vulnerabilities_unknown = reduce(
-                lambda count, vulnerability: count + 1
-                if vulnerability.severity == "unknown"
-                else count,
+                lambda count, vulnerability: (
+                    count + 1 if vulnerability.severity == "unknown" else count
+                ),
                 vulnerabilities_without_exclusions_list,
                 0,
             )
 
             compliance_critical = reduce(
-                lambda count, compliance: count + 1
-                if compliance.severity == "critical"
-                else count,
+                lambda count, compliance: (
+                    count + 1 if compliance.severity == "critical" else count
+                ),
                 compliances_without_exclusions_list,
                 0,
             )
@@ -209,7 +238,11 @@ class BreakBuild:
                         ),
                     )
                 )
-                print(devops_platform_gateway.result_pipeline("succeeded"))
+                
+                if devops_platform_gateway.get_variable("stage") == "build":
+                    print(devops_platform_gateway.result_pipeline("succeeded_with_issues"))
+                else:
+                    print(devops_platform_gateway.result_pipeline("succeeded"))
 
                 scan_result["vulnerabilities"] = {
                     "threshold": {
@@ -230,9 +263,11 @@ class BreakBuild:
                     ),
                 }
 
-            ids_vulnerabilitites = list(map(lambda x: x.id, vulnerabilities_without_exclusions_list))
+            ids_vulnerabilitites = list(
+                map(lambda x: x.id, vulnerabilities_without_exclusions_list)
+            )
             ids_match = list(filter(lambda x: x in ids_vulnerabilitites, threshold.cve))
-            if len(ids_match) > 0 :
+            if len(ids_match) > 0:
                 print(
                     devops_platform_gateway.message(
                         "error",
@@ -246,7 +281,9 @@ class BreakBuild:
             print()
             if len(compliances_without_exclusions_list) > 0:
                 print("Below are all compliances issues detected.")
-                printer_table_gateway.print_table_findings(compliances_without_exclusions_list)
+                printer_table_gateway.print_table_findings(
+                    compliances_without_exclusions_list
+                )
                 status = "succeeded"
                 if compliance_critical >= threshold.compliance.critical:
                     print(
@@ -287,20 +324,43 @@ class BreakBuild:
                             "severity": item.severity,
                             "id": item.id,
                             "where": item.where,
-                            "create_date": next((elem.create_date for elem in exclusions if elem.id == item.id), None),
-                            "expired_date": next((elem.expired_date for elem in exclusions if elem.id == item.id), None),
-                            "reason": next((elem.treatment for elem in exclusions if elem.id == item.id), None),
+                            "create_date": next(
+                                (
+                                    elem.create_date
+                                    for elem in exclusions
+                                    if elem.id == item.id
+                                ),
+                                None,
+                            ),
+                            "expired_date": next(
+                                (
+                                    elem.expired_date
+                                    for elem in exclusions
+                                    if elem.id == item.id
+                                ),
+                                None,
+                            ),
+                            "reason": next(
+                                (
+                                    elem.reason
+                                    for elem in exclusions
+                                    if elem.id == item.id
+                                ),
+                                None,
+                            ),
                         },
                         findings_excluded_list,
                     )
-            )
+                )
                 print(
                     devops_platform_gateway.message(
-                        "warning",
-                        "Bellow are all findings that were accepted.")
+                        "warning", "Bellow are all findings that were excepted."
+                    )
                 )
                 printer_table_gateway.print_table_exclusions(exclusions_list)
-                for reason, total in Counter(map(lambda x: x['reason'], exclusions_list)).items():
+                for reason, total in Counter(
+                    map(lambda x: x["reason"], exclusions_list)
+                ).items():
                     print("{0} findings count: {1}".format(reason, total))
         else:
             print(devops_platform_gateway.message("succeeded", "There are no findings"))

@@ -1,9 +1,6 @@
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.entry_points.entry_point_tool import (
     engine_secret_scan
     )
-from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.azure_devops.azure_devops import (
-    AzureDevops
-    )
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run import (
     TrufflehogRun
     )
@@ -14,14 +11,14 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_
     GitRun
     )
 
-def runner_secret_scan(dict_args, tool):
+def runner_secret_scan(dict_args, tool, devops_platform_gateway):
     try:
-        devops_platform_gateway = AzureDevops()
-        tool_deserealizator = SecretScanDeserealizator()
-        git_gateway = GitRun()
+        tool_deserealizator = None
         tool_gateway = None
+        git_gateway = GitRun()
         if (tool == "TRUFFLEHOG"):
             tool_gateway = TrufflehogRun()
+            tool_deserealizator = SecretScanDeserealizator()
         return engine_secret_scan(
             devops_platform_gateway = devops_platform_gateway,
             tool_gateway = tool_gateway,

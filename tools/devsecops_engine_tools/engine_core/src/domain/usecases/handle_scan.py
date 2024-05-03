@@ -18,7 +18,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_managemen
 )
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionVulnerabilityManagement,
-    ExceptionFindingsRiskAcceptance,
+    ExceptionFindingsExcepted,
 )
 from devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan import (
     runner_engine_container,
@@ -30,8 +30,8 @@ from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     define_env,
 )
 
-from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities import settings
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
@@ -76,14 +76,14 @@ class HandleScan:
             logger.error(str(ex1))
         try:
             input_core.totalized_exclusions.extend(
-                self.vulnerability_management.get_findings_risk_acceptance(
+                self.vulnerability_management.get_findings_excepted(
                     input_core.scope_pipeline,
                     dict_args,
                     secret_tool,
                     config_tool,
                 )
             )
-        except ExceptionFindingsRiskAcceptance as ex2:
+        except ExceptionFindingsExcepted as ex2:
             logger.error(str(ex2))
 
     def process(self, dict_args: any, config_tool: any):
@@ -96,7 +96,7 @@ class HandleScan:
             secret_tool = self.secrets_manager_gateway.get_secret(config_tool)
         if "engine_iac" in dict_args["tool"]:
             findings_list, input_core = runner_engine_iac(
-                dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool, env
+                dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool,self.devops_platform_gateway, env
             )
             if dict_args["use_vulnerability_management"] == "true":
                 self._use_vulnerability_management(
@@ -126,6 +126,7 @@ class HandleScan:
             findings_list, input_core = runner_secret_scan(
                 dict_args,
                 config_tool["ENGINE_SECRET"]["TOOL"],
+                self.devops_platform_gateway
             )
             return findings_list, input_core
         elif "engine_dependencies" in dict_args["tool"]:
@@ -134,7 +135,7 @@ class HandleScan:
             else:
                 secret_sca = dict_args["token_engine_dependencies"]
             findings_list, input_core = runner_engine_dependencies(
-                dict_args, config_tool, secret_sca
+                dict_args, config_tool, secret_sca, self.devops_platform_gateway
             )
 
             if (
