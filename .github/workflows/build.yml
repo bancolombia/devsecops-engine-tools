@@ -101,7 +101,7 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
 
   deploy_prod:
-    # if: ${{ contains(github.ref,'refs/heads/trunk') }}
+    if: ${{ contains(github.ref,'refs/heads/trunk') }}
     runs-on: ubuntu-latest
     needs: build
     permissions:
