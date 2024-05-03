@@ -9,6 +9,7 @@
     },
     "MESSAGE_INFO_ENGINE_CONTAINER": "message custom",
     "REGEX_EXPRESSION_PROJECTS": "((NU)\\d+)",
+    "IGNORE_SEARCH_PATTERN":"(.*_demo0|.*_cer)",
     "THRESHOLD": {
         "VULNERABILITY": {
             "Critical": 4,
