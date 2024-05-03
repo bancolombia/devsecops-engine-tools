@@ -1,6 +1,5 @@
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
-from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.devops_platform_gateway import (
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.DeserializeConfigTool import (
@@ -62,13 +61,13 @@ class SetInputCore:
         """
         return InputCore(
             totalized_exclusions=self.get_exclusions(
-                self.get_remote_config("SAST/Secret_Scan/Exclusions/Exclusions.json"),
-                self.get_variable("PIPELINE_NAME"),
+                self.get_remote_config("engine_sast/engine_secret/Exclusions.json"),
+                self.get_variable("pipeline_name"),
                 self.tool,
             ),
             threshold_defined=self.config_tool.level_compliance,
             path_file_results=finding_list,
-            custom_message_break_build=self.config_tool.message_info_sast_build,
+            custom_message_break_build=self.config_tool.message_info_engine_secret,
             scope_pipeline=self.config_tool.scope_pipeline,
-            stage_pipeline="Build"
+            stage_pipeline=self.tool_remote.get_variable("stage").capitalize()
         )

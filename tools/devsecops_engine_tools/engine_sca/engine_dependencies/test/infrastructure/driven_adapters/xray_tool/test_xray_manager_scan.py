@@ -130,14 +130,14 @@ def test_config_server_success(xray_scan_instance):
         mock_subprocess.side_effect = [
             Mock(
                 returncode=0,
-                stderr="15:43:29 [🔵Info] Importing server ID 'ArtifactoryBancolombia'",
+                stderr="15:43:29 [🔵Info] Importing server ID 'Artifactory'",
             ),
             Mock(returncode=0),
         ]
         xray_scan_instance.config_server(prefix, token)
 
         mock_subprocess.assert_called_with(
-            [prefix, "c", "use", "ArtifactoryBancolombia"],
+            [prefix, "c", "use", "Artifactory"],
             check=True,
             stdout=-1,
             stderr=-1,
@@ -154,7 +154,7 @@ def test_config_server_failure(xray_scan_instance):
         mock_subprocess.side_effect = [
             Mock(
                 returncode=0,
-                stderr="15:43:29 [🔵Info] Importing server ID 'ArtifactoryBancolombia'",
+                stderr="15:43:29 [🔵Info] Importing server ID 'Artifactory'",
             ),
             subprocess.CalledProcessError(returncode=1, cmd="chmod"),
         ]

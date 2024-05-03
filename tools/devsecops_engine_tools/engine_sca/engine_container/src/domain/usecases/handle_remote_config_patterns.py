@@ -62,6 +62,6 @@ class HandleRemoteConfigPatterns:
         Return: bool: True -> skip tool, False -> not skip tool.
         """
         return self.handle_skip_tool(
-            self.get_remote_config("SCA/CONTAINER/Exclusions/Exclusions.json"),
-            self.get_variable("release_name"),
+            self.get_remote_config("engine_sca/engine_container/Exclusions.json"),
+            self.get_variable("pipeline_name"),
         )

@@ -30,8 +30,8 @@ from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     define_env,
 )
 
-from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities import settings
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
@@ -96,7 +96,7 @@ class HandleScan:
             secret_tool = self.secrets_manager_gateway.get_secret(config_tool)
         if "engine_iac" in dict_args["tool"]:
             findings_list, input_core = runner_engine_iac(
-                dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool, env
+                dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool,self.devops_platform_gateway, env
             )
             if dict_args["use_vulnerability_management"] == "true":
                 self._use_vulnerability_management(
@@ -126,6 +126,7 @@ class HandleScan:
             findings_list, input_core = runner_secret_scan(
                 dict_args,
                 config_tool["ENGINE_SECRET"]["TOOL"],
+                self.devops_platform_gateway
             )
             return findings_list, input_core
         elif "engine_dependencies" in dict_args["tool"]:
@@ -134,7 +135,7 @@ class HandleScan:
             else:
                 secret_sca = dict_args["token_engine_dependencies"]
             findings_list, input_core = runner_engine_dependencies(
-                dict_args, config_tool, secret_sca
+                dict_args, config_tool, secret_sca, self.devops_platform_gateway
             )
 
             if (

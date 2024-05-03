@@ -1,0 +1,22 @@
+{
+    "IGNORE_SEARCH_PATTERN": [
+        "test"
+    ],
+    "MESSAGE_INFO_ENGINE_SECRET": "message custom",
+    "THRESHOLD": {
+        "VULNERABILITY": {
+            "Critical": 1,
+            "High": 0,
+            "Medium": 0,
+            "Low": 0
+        },
+        "COMPLIANCE": {
+            "Critical": 0
+        }
+    },
+    "TARGET_BRANCHES": ["trunk", "develop"],
+    "trufflehog": {
+        "EXCLUDE_PATH": [".git"],
+        "NUMBER_THREADS": 4
+    }
+}
