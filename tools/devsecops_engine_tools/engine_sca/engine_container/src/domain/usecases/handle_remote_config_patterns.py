@@ -36,8 +36,8 @@ class HandleRemoteConfigPatterns:
         Handle analysis pattern.
         Return: bool: False -> not scan, True -> scan.
         """
-        ignore = self.get_remote_config("SCA/CONTAINER/ConfigTool.json")["IGNORE_SEARCH_PATTERN"]
-        if re.match(ignore, self.get_variable("release_name"), re.IGNORECASE):
+        ignore = self.get_remote_config("engine_sca/engine_container/ConfigTool.json")["IGNORE_SEARCH_PATTERN"]
+        if re.match(ignore, self.get_variable("pipeline_name"), re.IGNORECASE):
             return False
         else:
             return True
