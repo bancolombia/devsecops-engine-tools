@@ -45,7 +45,7 @@ def test_ignore_analysis_pattern_false(mock_devops_gateway, handle_remote):
 
     result = handle_remote.ignore_analysis_pattern()
 
-    mock_devops_gateway.get_remote_config.assert_called_once_with('dummy_repo', 'SCA/CONTAINER/ConfigTool.json')
-    mock_devops_gateway.get_variable.assert_called_once_with("release_name")
+    mock_devops_gateway.get_remote_config.assert_called_once_with('dummy_repo', 'engine_sca/engine_container/ConfigTool.json')
+    mock_devops_gateway.get_variable.assert_called_once_with("pipeline_name")
 
     assert result is False
