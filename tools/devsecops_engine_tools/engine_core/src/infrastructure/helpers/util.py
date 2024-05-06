@@ -13,4 +13,3 @@ def define_env(variable_env, branch):
         if branch in ["trunk", "master"]
         else "qa" if branch in "release" else "dev"
     )
-
