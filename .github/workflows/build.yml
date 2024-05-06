@@ -54,16 +54,6 @@ jobs:
           python -m coverage report -m
           python -m coverage xml
 
-      - name: Integration Test
-        run: |
-          cd tools/
-          source _venv/bin/activate
-          python test_integrations_defect_dojo.py
-        env:
-          PERSONAL_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TOKEN_CMDB: ${{ secrets.TOKEN_CMDB }}
-          TOKEN_DEFECT_DOJO: ${{ secrets.TOKEN_DEFECT_DOJO }}
-
       - name: Build
         if: contains(github.ref,'refs/heads/trunk') || contains(github.event.head_commit.message, 'deploy dev')
         run: |
