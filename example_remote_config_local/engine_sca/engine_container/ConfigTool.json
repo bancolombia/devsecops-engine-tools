@@ -2,7 +2,8 @@
     "PRISMA_CLOUD": {
         "TWISTCLI_PATH": "twistcli",
         "PRISMA_CONSOLE_URL": "",
-        "PRISMA_ACCESS_KEY": ""        
+        "PRISMA_ACCESS_KEY": "",
+        "PRISMA_API_VERSION":""
     },
     "TRIVY": {
         "TRIVY_VERSION": "0.48.1"
