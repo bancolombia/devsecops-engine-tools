@@ -1,6 +1,3 @@
-from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.printer_pretty_table.printer_pretty_table import (
-    PrinterPrettyTable,
-)
 from devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk import (
     init_engine_risk,
 )
