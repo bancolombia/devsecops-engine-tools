@@ -51,3 +51,7 @@ target
 dependencies_to_scan
 node_modules
 DevSecOps_Remote_Config
+NU0429001_DevSecOps_Remote_Config
+/azp
+/customized-nuclei-templates
+result_dast_scan.json
