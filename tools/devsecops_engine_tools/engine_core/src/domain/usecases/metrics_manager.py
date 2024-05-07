@@ -5,7 +5,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.metrics_manager
     MetricsManagerGateway,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
-from devsecops_engine_utilities.utils.logger_info import log_records
+from devsecops_engine_tools.engine_utilities.utils.logger_info import log_records
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     define_env,
 )
@@ -26,11 +26,7 @@ class MetricsManager:
     def process(
         self, config_tool: any, input_core: InputCore, dict_args: any, scan_result: any
     ):
-        execution_id = (
-            self.devops_platform_gateway.get_variable("release_id")
-            if input_core.stage_pipeline == "Release"
-            else self.devops_platform_gateway.get_variable("build_execution_id")
-        )
+        execution_id = self.devops_platform_gateway.get_variable("release_id") if input_core.stage_pipeline == "Release" else self.devops_platform_gateway.get_variable("build_execution_id")
         scope_pipeline = input_core.scope_pipeline
         base_directory = os.path.expanduser("/tmp/log_engine_tools")
         file_path = f"{base_directory}/{scope_pipeline}.json"
@@ -55,7 +51,7 @@ class MetricsManager:
                     self.devops_platform_gateway.get_variable("branch_name"),
                 ),
                 "events": log_records,
-                "scan_result": scan_result,
+                "scan_result": scan_result
             }
             json.dump(body, file)
         self.metrics_manager_gateway.send_metrics(

@@ -10,8 +10,6 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_deserialize_output import (
     PrismaDeserealizator,
 )
-
-
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.trivy_tool.trivy_manager_scan import (
     TrivyScan,
 )
@@ -20,7 +18,7 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
 )
 
 
-def runner_engine_container(dict_args, config_tool, token,tool_remote):
+def runner_engine_container(dict_args, config_tool, token, tool_remote):
     try:
         if config_tool["ENGINE_CONTAINER"]["TOOL"].lower() == "trivy":
             tool_run = TrivyScan()

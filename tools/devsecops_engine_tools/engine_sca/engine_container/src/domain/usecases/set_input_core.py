@@ -3,6 +3,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.threshold import Thresh
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
+
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 
 
@@ -43,7 +44,7 @@ class SetInputCore:
                         expired_date=item.get("expired_date", ""),
                         severity=item.get("severity", ""),
                         hu=item.get("hu", ""),
-                        treatment=item.get("treatment", "Risk acceptance"),
+                        reason=item.get("reason", "Risk acceptance"),
                     )
                     for item in value[config_tool["ENGINE_CONTAINER"]["TOOL"]]
                 ]
@@ -59,17 +60,17 @@ class SetInputCore:
         """
         return InputCore(
             self.get_exclusions(
-                self.get_remote_config("SCA/CONTAINER/Exclusions/Exclusions.json"),
-                self.get_variable("release_name"),
+                self.get_remote_config("engine_sca/engine_container/Exclusions.json"),
+                self.get_variable("pipeline_name"),
                 self.config_tool,
             ),
             Threshold(
-                self.get_remote_config("SCA/CONTAINER/ConfigTool.json")["THRESHOLD"]
+                self.get_remote_config("engine_sca/engine_container/ConfigTool.json")["THRESHOLD"]
             ),
             images_scanned[-1] if images_scanned else None,
-            self.get_remote_config("SCA/CONTAINER/ConfigTool.json")[
-                "MESSAGE_INFO_SCA_RM"
+            self.get_remote_config("engine_sca/engine_container/ConfigTool.json")[
+                "MESSAGE_INFO_ENGINE_CONTAINER"
             ],
-            self.get_variable("release_name"),
-            "Release",
+            self.get_variable("pipeline_name"),
+            self.get_variable("stage").capitalize(),
         )

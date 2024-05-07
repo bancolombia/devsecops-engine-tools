@@ -29,12 +29,23 @@ class TestIacScan(unittest.TestCase):
 
         # Mock the return values of the dependencies
         self.devops_platform_gateway.get_remote_config.return_value = {
+            "SEARCH_PATTERN": ["AW", "NU"],
+            "IGNORE_SEARCH_PATTERN": [
+                "test",
+            ],
+            "EXCLUSIONS_PATH": "Exclusions.json",
+            "MESSAGE_INFO_ENGINE_IAC": "message test",
+            "THRESHOLD": {
+                "VULNERABILITY": {
+                    "Critical": 10,
+                    "High": 3,
+                    "Medium": 20,
+                    "Low": 30,
+                },
+                "COMPLIANCE": {"Critical": 4},
+            },
             "CHECKOV": {
                 "VERSION": "2.3.296",
-                "SEARCH_PATTERN": ["AW", "NU"],
-                "IGNORE_SEARCH_PATTERN": [
-                    "test",
-                ],
                 "USE_EXTERNAL_CHECKS_GIT": "True",
                 "EXTERNAL_CHECKS_GIT": "rules",
                 "EXTERNAL_GIT_SSH_HOST": "github",
@@ -42,20 +53,8 @@ class TestIacScan(unittest.TestCase):
                 "USE_EXTERNAL_CHECKS_DIR": "False",
                 "EXTERNAL_DIR_OWNER": "test",
                 "EXTERNAL_DIR_REPOSITORY": "repository",
-                "EXTERNAL_DIR_ASSET_NAME": "rules",
-                "EXCLUSIONS_PATH": "Exclusions.json",
-                "MESSAGE_INFO_SAST_RM": "message test",
-                "THRESHOLD": {
-                    "VULNERABILITY": {
-                        "Critical": 10,
-                        "High": 3,
-                        "Medium": 20,
-                        "Low": 30,
-                    },
-                    "COMPLIANCE": {"Critical": 4},
-                },
                 "RULES": "",
-            }
+            },
         }
 
         # self.devops_platform_gateway.get_variable.return_value = "example_pipeline"
@@ -90,12 +89,23 @@ class TestIacScan(unittest.TestCase):
         self.devops_platform_gateway.get_remote_config.side_effect = [
             # Resultado para el primer llamado (init_config_tool)
             {
+                "SEARCH_PATTERN": ["AW", "NU"],
+                "IGNORE_SEARCH_PATTERN": [
+                    "test",
+                ],
+                "EXCLUSIONS_PATH": "Exclusions.json",
+                "MESSAGE_INFO_ENGINE_IAC": "message test",
+                "THRESHOLD": {
+                    "VULNERABILITY": {
+                        "Critical": 10,
+                        "High": 3,
+                        "Medium": 20,
+                        "Low": 30,
+                    },
+                    "COMPLIANCE": {"Critical": 4},
+                },
                 "CHECKOV": {
                     "VERSION": "2.3.296",
-                    "SEARCH_PATTERN": ["AW", "NU"],
-                    "IGNORE_SEARCH_PATTERN": [
-                        "test",
-                    ],
                     "USE_EXTERNAL_CHECKS_GIT": "True",
                     "EXTERNAL_CHECKS_GIT": "rules",
                     "EXTERNAL_GIT_SSH_HOST": "github",
@@ -103,20 +113,8 @@ class TestIacScan(unittest.TestCase):
                     "USE_EXTERNAL_CHECKS_DIR": "False",
                     "EXTERNAL_DIR_OWNER": "test",
                     "EXTERNAL_DIR_REPOSITORY": "repository",
-                    "EXTERNAL_DIR_ASSET_NAME": "rules",
-                    "EXCLUSIONS_PATH": "Exclusions.json",
-                    "MESSAGE_INFO_SAST_RM": "message test",
-                    "THRESHOLD": {
-                        "VULNERABILITY": {
-                            "Critical": 10,
-                            "High": 3,
-                            "Medium": 20,
-                            "Low": 30,
-                        },
-                        "COMPLIANCE": {"Critical": 4},
-                    },
                     "RULES": "",
-                }
+                },
             },
             # Resultado para el segundo llamado (exclusions)
             {

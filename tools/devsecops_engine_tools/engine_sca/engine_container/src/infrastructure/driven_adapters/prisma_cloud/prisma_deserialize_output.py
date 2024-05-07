@@ -31,9 +31,8 @@ class PrismaDeserealizator(DeseralizatorGateway):
                 image_object = file.read()
 
                 json_data = json.loads(image_object)
-
-                vulnerabilities_data = json_data["results"][0]["vulnerabilities"]
-
+                vulnerabilities_data = json_data["results"][0]["vulnerabilities"] if "vulnerabilities" in json_data["results"][0] else []
+                
                 # Create a list of findings instances from the JSON data
                 vulnerabilities = [
                     Finding(
@@ -47,6 +46,7 @@ class PrismaDeserealizator(DeseralizatorGateway):
                         identification_date=datetime.strptime(
                             vul.get("discoveredDate", ""), "%Y-%m-%dT%H:%M:%S%z"
                         ),
+                        published_date_cve=vul.get("publishedDate", None),
                         module="engine_container",
                         category=Category.VULNERABILITY,
                         requirements=vul.get("status", ""),

@@ -2,21 +2,22 @@ from dataclasses import dataclass
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
-from devsecops_engine_utilities.azuredevops.models.AzurePredefinedVariables import (
+from devsecops_engine_tools.engine_utilities.azuredevops.models.AzurePredefinedVariables import (
     BuildVariables,
     SystemVariables,
     ReleaseVariables,
     AgentVariables,
 )
-from devsecops_engine_utilities.azuredevops.infrastructure.azure_devops_api import (
+from devsecops_engine_tools.engine_utilities.azuredevops.infrastructure.azure_devops_api import (
     AzureDevopsApi,
 )
-from devsecops_engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
+from devsecops_engine_tools.engine_utilities.azuredevops.models.AzureMessageLoggingPipeline import (
     AzureMessageLoggingPipeline,
     AzureMessageResultPipeline,
 )
-from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities import settings
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
+
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
@@ -50,6 +51,8 @@ class AzureDevops(DevopsPlatformGateway):
             return AzureMessageResultPipeline.Failed.value
         elif type == "succeeded":
             return AzureMessageResultPipeline.Succeeded.value
+        elif type == "succeeded_with_issues":
+            return AzureMessageResultPipeline.SucceededWithIssues.value
 
     def get_source_code_management_uri(self):
         source_code_management_uri = (
@@ -66,29 +69,35 @@ class AzureDevops(DevopsPlatformGateway):
         )
 
     def get_variable(self, variable):
-        try:
-            if variable == "branch_name":
-                return BuildVariables.Build_SourceBranchName.value()
-            elif variable == "build_id":
-                return BuildVariables.Build_BuildNumber.value()
-            elif variable == "build_execution_id":
-                return BuildVariables.Build_BuildId.value()
-            elif variable == "commit_hash":
-                return BuildVariables.Build_SourceVersion.value()
-            elif variable == "environment":
-                return ReleaseVariables.Environment.value()
-            elif variable == "release_id":
-                return ReleaseVariables.Release_Releaseid.value()
-            elif variable == "branch_tag":
-                return BuildVariables.Build_SourceBranch.value()
-            elif variable == "access_token":
-                return SystemVariables.System_AccessToken.value()
-            elif variable == "pipeline_name":
-                return BuildVariables.Build_DefinitionName.value()
-            elif variable == "agent_directory":
-                return AgentVariables.Agent_BuildDirectory.value()
-            elif variable  == "release_name":
-                return ReleaseVariables.Release_Definitionname.value()
 
-        except Exception:
-            return None
+            variable_map = {
+                "branch_name": BuildVariables.Build_SourceBranchName,
+                "build_id": BuildVariables.Build_BuildNumber,
+                "build_execution_id": BuildVariables.Build_BuildId,
+                "commit_hash": BuildVariables.Build_SourceVersion,
+                "environment": ReleaseVariables.Environment,
+                "release_id": ReleaseVariables.Release_Releaseid,
+                "branch_tag": BuildVariables.Build_SourceBranch,
+                "access_token": SystemVariables.System_AccessToken,
+                "organization": SystemVariables.System_TeamFoundationCollectionUri,
+                "project_name": SystemVariables.System_TeamProject,
+                "repository": BuildVariables.Build_Repository_Name,
+                "pipeline_name": (
+                    BuildVariables.Build_DefinitionName
+                    if SystemVariables.System_HostType.value() == "build"
+                    else ReleaseVariables.Release_Definitionname
+                ),
+                "stage": SystemVariables.System_HostType,
+                "path_directory": SystemVariables.System_DefaultWorkingDirectory,
+                "os": AgentVariables.Agent_OS,
+                "work_folder": AgentVariables.Agent_WorkFolder,
+                "temp_directory": AgentVariables.Agent_TempDirectory,
+                "agent_directory": AgentVariables.Agent_BuildDirectory,
+                "target_branch": SystemVariables.System_TargetBranchName,
+                "source_branch": SystemVariables.System_SourceBranch,
+                "repository_provider": BuildVariables.Build_Repository_Provider,
+            }
+            try:
+                return variable_map.get(variable).value()
+            except ValueError:
+                return None

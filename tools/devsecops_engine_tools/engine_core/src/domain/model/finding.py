@@ -13,6 +13,7 @@ class Finding:
     description: str
     severity: str
     identification_date: str
+    published_date_cve: str
     module: str
     category: Category
     requirements: str

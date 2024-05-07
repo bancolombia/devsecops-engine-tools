@@ -3,7 +3,7 @@ import re
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
-from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.devops_platform_gateway import (
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.config_tool import (
@@ -13,8 +13,8 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclu
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore
 )
-from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities import settings
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
@@ -28,12 +28,11 @@ class IacScan:
 
     def process(self, dict_args, secret_tool, tool, env):
         init_config_tool = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "SAST/IAC/configTools.json"
+            dict_args["remote_config_repo"], "engine_sast/engine_iac/ConfigTool.json"
         )
 
         exclusions = self.devops_platform_gateway.get_remote_config(
-            remote_config_repo=dict_args["remote_config_repo"],
-            remote_config_path="/SAST/IAC/Exclusions/Exclusions.json",
+            dict_args["remote_config_repo"], "engine_sast/engine_iac/Exclusions.json"
         )
 
         config_tool, folders_to_scan, skip_tool = self.complete_config_tool(
@@ -52,18 +51,26 @@ class IacScan:
             )
 
         totalized_exclusions = []
-        totalized_exclusions.extend(
-            map(lambda elem: Exclusions(**elem), config_tool.exclusions_all)
-        ) if config_tool.exclusions_all is not None else None
-        totalized_exclusions.extend(
-            map(lambda elem: Exclusions(**elem), config_tool.exclusions_scope)
-        ) if config_tool.exclusions_scope is not None else None
+        (
+            totalized_exclusions.extend(
+                map(lambda elem: Exclusions(**elem), config_tool.exclusions_all)
+            )
+            if config_tool.exclusions_all is not None
+            else None
+        )
+        (
+            totalized_exclusions.extend(
+                map(lambda elem: Exclusions(**elem), config_tool.exclusions_scope)
+            )
+            if config_tool.exclusions_scope is not None
+            else None
+        )
 
         input_core = InputCore(
             totalized_exclusions=totalized_exclusions,
             threshold_defined=config_tool.threshold,
             path_file_results=path_file_results,
-            custom_message_break_build=config_tool.message_info_sast_rm,
+            custom_message_break_build=config_tool.message_info_engine_iac,
             scope_pipeline=config_tool.scope_pipeline,
             stage_pipeline=self.devops_platform_gateway.get_variable("stage").capitalize(),
         )
@@ -76,7 +83,7 @@ class IacScan:
 
         config_tool.exclusions = exclusions
         config_tool.scope_pipeline = self.devops_platform_gateway.get_variable(
-            "pipeline"
+            "pipeline_name"
         )
 
         if config_tool.exclusions.get("All") is not None:

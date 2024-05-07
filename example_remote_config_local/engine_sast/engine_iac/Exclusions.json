@@ -1,0 +1,31 @@
+{
+	"All": {
+		"CHECKOV": [
+			{
+				"id": "CKV_K8S_24",
+				"where": "all",
+				"create_date": "18112023",
+				"expired_date": "18032024",
+				"severity": "HIGH",
+				"hu": "4338704"
+			}
+		]
+	},
+	"Repository_Test": {
+		"SKIP_TOOL": {
+			"create_date": "24012024",
+			"expired_date": "30012024",
+			"hu": "3423213"
+		},
+		"CHECKOV": [
+			{
+				"id": "CKV_K8S_8",
+				"where": "deployment-configmap.yaml",
+				"create_date": "18112023",
+				"expired_date": "18032024",
+				"severity": "HIGH",
+				"hu": "4338704"
+			}
+		]
+	}
+}

@@ -1,0 +1,25 @@
+{
+    "PRISMA_CLOUD": {
+        "TWISTCLI_PATH": "twistcli",
+        "PRISMA_CONSOLE_URL": "",
+        "PRISMA_ACCESS_KEY": "",
+        "PRISMA_API_VERSION":""
+    },
+    "TRIVY": {
+        "TRIVY_VERSION": "0.48.1"
+    },
+    "MESSAGE_INFO_ENGINE_CONTAINER": "message custom",
+    "REGEX_EXPRESSION_PROJECTS": "((NU)\\d+)",
+    "IGNORE_SEARCH_PATTERN":"(.*_demo0|.*_cer)",
+    "THRESHOLD": {
+        "VULNERABILITY": {
+            "Critical": 4,
+            "High": 10,
+            "Medium": 20,
+            "Low": 999
+        },
+        "COMPLIANCE": {
+            "Critical": 1
+        }
+    }
+}

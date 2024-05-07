@@ -9,8 +9,8 @@ import boto3
 import json
 from botocore.exceptions import NoCredentialsError
 import logging
-from devsecops_engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_utilities import settings
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
 
 boto3.set_stream_logger(name="botocore.credentials", level=logging.WARNING)
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()

@@ -1,6 +1,6 @@
 # How to contribute
 
-To contribute you must be first [configure you enviroment](https://github.com/bancolombia/NU0429001_devsecops_engine/blob/trunk/docs/ENVIROMENT_CONFIGURATION.md):
+To contribute you must be first [configure you enviroment](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/docs/ENVIROMENT_CONFIGURATION.md):
 
 The naming style is based on [PEP 8](https://peps.python.org/pep-0008/) which means that the `Snake Case` style is used for function, variable and module names, and `Camel Case` is used for class naming.
 
