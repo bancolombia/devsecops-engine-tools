@@ -1,0 +1,34 @@
+{
+    "endpoint": "https://gw-medios-de-pago.apps.ocpqa.ambientesbc.lab",
+    "operations": [
+        {
+            "operation": {
+                "headers": {
+                    "accept": "application/json",
+                    "client-id": "31444ca0488311e1cc6ad299625ddce7",
+                    "client-secret": "04f178d6267b13c5c86d5c9aef909279",
+                    "content-type": "application/json",
+                    "json-web-token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJQUk9EVUNUT1JDT05TVU1JRE9SIiwic3VtIjoiMzE0NDRjYTA0ODgzMTFlMWNjNmFkMjk5NjI1ZGRjZTciLCJhdWQiOiJBUElHYXRld2F5X0xBTiIsImV4cCI6MTY1ODQ5NTA1NS4zMTgsImlhdCI6MTY1ODQwOTA1NS4zMTgsIm5vbmNlIjoiM2Q0M2I4Njk4MzFiIn0.U9VmIsgt-IZDaxuxu18FXa46jPLFG5p-KseBSiM2ge4zLjTncyyuAsEXhffni3vlqx79MMuxtk_4UoEvukVlaeRD3SLE6nEqKNwmwtM87oAWJvwOM_QL0Vn_OjsFpSOTtLn4_S9OBRjqFKosfFHLKFFctGVGMMwvlr1fJvFxcoXm2ZetHPPkTMZGrDgAGWYRbctaOQK8gzrSBiQNvSnyh_qAVOHBklB8Mc5L7DunkBUqTp3nk8kU2UrKK0bjABulqDibao38oWlzkufm8jkPPMg6cgcJe2B6Xe1lLYlLtUQrUbrR9Q3Yg-k4KmfUBNBmDeEResXFw6iu7zRkdZ7J_g",
+                    "message-id": "MessageIdTests1209125",
+                    "userId": "SVP",
+                    "x-client-certificate": "-----BEGIN CERTIFICATE-----MIIENzCCAx+gAwIBAgIUZ+AmU84MboHHd0daiHtk3M9LocEwDQYJKoZIhvcNAQELBQAwgaoxCzAJBgNVBAYTAkNPMRIwEAYDVQQIDAlBTlRJT1FVSUExETAPBgNVBAcMCE1FREVMTElOMRkwFwYDVQQKDBBCQU5DT0xPTUJJQSBTLkEuMSYwJAYDVQQLDB1WSUNFUFJFU0lERU5DSUEgREUgVEVDTk9MT0dJQTExMC8GA1UEAwwoUFJPRFVDVE9SQ09OU1VNSURPUi5hcHBzLmFtYmllbnRlc2JjLmNvbTAeFw0yMjA3MDgxNDA2MTBaFw0yMzA3MDgxNDA2MTBaMIGqMQswCQYDVQQGEwJDTzESMBAGA1UECAwJQU5USU9RVUlBMREwDwYDVQQHDAhNRURFTExJTjEZMBcGA1UECgwQQkFOQ09MT01CSUEgUy5BLjEmMCQGA1UECwwdVklDRVBSRVNJREVOQ0lBIERFIFRFQ05PTE9HSUExMTAvBgNVBAMMKFBST0RVQ1RPUkNPTlNVTUlET1IuYXBwcy5hbWJpZW50ZXNiYy5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDgHJtDs7+IKQ12WUSDYUUxZjy4PefSB46tHlfyK5G/x71sHwt9wiIcsGAI5ocZ9QHnrew2iWqmbOVGkTfXosqAIaNDIjznUrjAi4RBTZVts3UDHm0yHXM2vUIsNvkjNrV0mLm0HdX/OSHVgiKvyKbO9AOYoZDSqz9rh3klPk3c1kqhn5CGJypxZwCgUSoWIw8xdoSPnA7UMNGH2SqHSDPDx+SX7WM8VAyS2S67W9k0rJUiUXwE4utCChwzEE2vDw93+k4Gx2q95A7XdhYICCennoj9fo9ws+ykrUx7Jy6Zpt4sWucIbI/IrJvyLOfc4OK4IQMHcnSEsSWXEps2b50HAgMBAAGjUzBRMB0GA1UdDgQWBBQk1R4aAntntytjglvpGA3kzpI9LTAfBgNVHSMEGDAWgBQk1R4aAntntytjglvpGA3kzpI9LTAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBagF0sOomIWIamK6pD0WidPz/522GoS0ZtHwp0qvgdBsGaR9rrX3k7trIvonaQCgjzbxJKbZ8oN/9zlMBtgtQIwPEOEP0hHXaLYaVsJ4ExW1A2NoCYqjx23xFAwOGW13CFdd0piUH4ZfMJGsS7FqZh7knGl8odCKwgBUdxDbqvsJA5dUCDuwCzU6MO9SOEg6bVbkQkZIlnxt+6qAVYZU6uctMJLHBitqb94kFHyrXa9FfaSPySqKSQVcjAnhUPOq3iKgZ7dh16ohK+6NBun+OWxGwCCqMqSXt472cqW82+tzqfUmx4VqT0lVZS4yUOp21rP6pthciYXG2UNM9gLeCR-----END CERTIFICATE-----"
+                },
+                "method": "POST",
+                "path": "/private-bancolombia/testing/v1/reference-data/product-management/debit-card-design/customer/debit-cards/handlingfee/retrieve",
+                "payload": {
+                    "data": {
+                        "customerCard": {
+                            "number": "6016607120514899"
+                        },
+                        "user": {
+                            "id": "BROKE"
+                        }
+                    }
+                },
+                "security_auth": {
+                    "type": "none"
+                }
+            }
+        }
+    ]
+}

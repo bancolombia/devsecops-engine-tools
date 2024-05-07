@@ -1,0 +1,14 @@
+{
+    "All": {
+        "XRAY": [
+            {
+                "id": "XRAY-522015",
+                "cve_id": "CVE-2023-35116",
+                "where": "all",
+                "create_date": "19022024",
+                "expired_date": "undefined",
+                "hu": "4662904"
+            }
+        ]
+    }
+}

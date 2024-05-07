@@ -75,6 +75,7 @@ def get_inputs_from_cli(args):
     parser.add_argument("--token_vulnerability_management", required=False, help="Token to connect to the Vulnerability Management")
     parser.add_argument("--token_engine_container", required=False, help="Token to execute engine_container if is necessary")
     parser.add_argument("--token_engine_dependencies", required=False, help="Token to execute engine_dependencies if is necessary")
+    parser.add_argument("--dast_file_path", required=False, help="Engine DAST path file")
     args = parser.parse_args()
     return {
         "platform_devops": args.platform_devops,
@@ -89,6 +90,7 @@ def get_inputs_from_cli(args):
         "token_vulnerability_management": args.token_vulnerability_management,
         "token_engine_container": args.token_engine_container,
         "token_engine_dependencies": args.token_engine_dependencies,
+        "dast_file_path": args.dast_file_path
     }
 
 def application_core():

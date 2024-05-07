@@ -1,0 +1,66 @@
+{
+    "endpoint": "https://gw-monitoreo-qa.apps.ambientesbc.lab",
+    "operations": [
+        {
+            "operation": {
+                "headers": {
+                    "accept": "application/vnd.bancolombia.v4+json",
+                    "client-id": "1c397a732e5763619a45d3ffb117f01e",
+                    "client-secret": "6b8fb3748f756daffb6d5e421d311bbe",
+                    "content-type": "application/vnd.bancolombia.v4+json",
+                    "messageid": "c4e6bd04-5149-11e7-b114-b2f933d5fe66"
+                },
+                "method": "POST",
+                "path": "/private-bancolombia/testing/v1/operations/risk-compliance/models/fraud-models/CustomerInformation",
+                "payload": {
+                    "data": {
+                        "employee": {
+                            "user": ""
+                        },
+                        "identification": {
+                            "number": "18052405551",
+                            "type": "TIPDOC_FS001"
+                        }
+                    }
+                },
+                "security_auth": {
+                    "type": "client_secret"
+                }
+            }
+        },
+        {
+            "operation": {
+                "headers": {
+                    "accept": "application/vnd.bancolombia.v4+json",
+                    "client-id": "1c397a732e5763619a45d3ffb117f01e",
+                    "client-secret": "6b8fb3748f756daffb6d5e421d311bbe",
+                    "content-type": "application/vnd.bancolombia.v4+json",
+                    "messageid": "c4e6bd04-5149-11e7-b114-b2f933d5fe66"
+                },
+                "method": "POST",
+                "path": "/private-bancolombia/testing/v1/operations/risk-compliance/models/fraud-models/CustomerContactManagement",
+                "payload": {
+                    "data": {
+                        "contactData": [
+                            {
+                                "dialContact": "efectivo",
+                                "email": "pepito@correo.com",
+                                "phone": "3229750374"
+                            }
+                        ],
+                        "employee": {
+                            "user": ""
+                        },
+                        "identification": {
+                            "number": "18052405551",
+                            "type": "TIPDOC_FS001"
+                        }
+                    }
+                },
+                "security_auth": {
+                    "type": "client_secret"
+                }
+            }
+        }
+    ]
+}

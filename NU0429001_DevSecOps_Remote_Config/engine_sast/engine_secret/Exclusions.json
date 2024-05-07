@@ -1,0 +1,26 @@
+{
+    "All": {
+        "TRUFFLEHOG": [
+        ]
+    },
+    "Repository_test": {
+        "TRUFFLEHOG": [
+            {
+                "id": "SECRET_SCANNING",
+                "where": "azure_api/secretos_azure_api.txt",
+                "create_date": "30042024",
+                "expired_date": "undefined",
+                "hu": "12345",
+                "reason": "false_positive"
+            },
+            {
+                "id": "SECRET_SCANNING",
+                "where": "keys_test.txt",
+                "create_date": "30042024",
+                "expired_date": "undefined",
+                "hu": "12345",
+                "reason": "false_positive"
+            }
+        ]
+    }
+}
