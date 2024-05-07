@@ -1,13 +1,11 @@
-from typing import List
-import json
+from typing import (
+    List, Tuple, Any
+)
 from devsecops_engine_tools.engine_dast.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
 from devsecops_engine_tools.engine_dast.src.domain.model.gateways.devops_platform_gateway import (
     DevopsPlatformGateway,
-)
-from devsecops_engine_tools.engine_dast.src.domain.model.gateways.authentication_method import (
-    AuthenticationGateway,
 )
 from devsecops_engine_tools.engine_dast.src.infrastructure.entry_points.config_dast.config_tool import (
     config_tool_local,
@@ -24,30 +22,23 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
 from devsecops_engine_tools.engine_dast.src.domain.model.config_tool import (
     ConfigTool,
 )
-from devsecops_engine_tools.engine_dast.src.domain.model.target_config import (
-    TargetConfig,
-)
-
 
 class DastScan:
     def __init__(
-        self, tool_gateway: ToolGateway, 
+        self,
+        tool_gateway: ToolGateway,
         devops_platform_gateway: DevopsPlatformGateway,
-        authentication_gateway_list: List[AuthenticationGateway]
+        data_target,
+        aditional_tools: "List[ToolGateway]"
     ):
         self.tool_gateway = tool_gateway
         self.devops_platform_gateway = devops_platform_gateway
-        self.authentication_gateway = authentication_gateway_list
-
-    def process_target_data(self, target_file_path):
-        with open(target_file_path, "r") as f:
-            data = json.load(f)
-        target_config = TargetConfig(data)
-        return target_config
+        self.data_target = data_target
+        self.other_tools = aditional_tools
 
     def complete_config_tool(
-        self, data_file_tool, exclusions, target_file_path, tool
-    ) -> (ConfigTool, TargetConfig):
+        self, data_file_tool, exclusions, tool
+    ) -> "Tuple[ConfigTool, Any]":
         config_tool = ConfigTool(
             json_data=data_file_tool,
             tool=tool,
@@ -59,51 +50,73 @@ class DastScan:
         )
 
         if config_tool.exclusions.get("All") is not None:
-            config_tool.exclusions_all = config_tool.exclusions.get("All").get(tool)
+            config_tool.exclusions_all = config_tool.exclusions.get("All").get(
+                tool
+            )
         if config_tool.exclusions.get(config_tool.scope_pipeline) is not None:
             config_tool.exclusions_scope = config_tool.exclusions.get(
                 config_tool.scope_pipeline
             ).get(tool)
 
-        data_target_config = self.process_target_data(
-            target_file_path
-        )  # configuration for the current target #BORRAR PDN
-
+        data_target_config = self.data_target
         return config_tool, data_target_config
 
-    def process(self, dict_args, secret_tool, tool):
-        # init_config_tool = self.devops_platform_gateway.get_remote_config(
-        #    dict_args["remote_config_repo"], "DAST/configTools.json"
-        # )
-        # DATA PDN
+    def process(
+        self, dict_args, secret_tool, tool
+    ) -> "Tuple[List, InputCore]":
+        """init_config_tool = self.devops_platform_gateway.get_remote_config(
+            dict_args["remote_config_repo"], "DAST/configTools.json"
+        )"""
+        init_config_tool = config_tool_local
 
-        init_config_tool = config_tool_local  # DATA LOCAL BORRAR
+        """exclusions = self.devops_platform_gateway.get_remote_config(
+            remote_config_repo=dict_args["remote_config_repo"],
+            remote_config_path="/DAST/Exclusions/Exclusions.json",
+         )"""
 
-        # exclusions = self.devops_platform_gateway.get_remote_config(
-        #    remote_config_repo=dict_args["remote_config_repo"],
-        #    remote_config_path="/DAST/Exclusions/Exclusions.json",
-        # )
-        # DATA PDN
-        exclusions = config_exclusions  # DATA LOCAL BORRAR
+        exclusions = config_exclusions
 
-        config_tool, target_data = self.complete_config_tool(
+        config_tool, data_target = self.complete_config_tool(
             data_file_tool=init_config_tool,
             exclusions=exclusions,
-            target_file_path=dict_args["dast_file_path"],
             tool=tool,
         )
 
         finding_list, path_file_results = self.tool_gateway.run_tool(
-            target_data=target_data, config_tool=config_tool, secret_tool=secret_tool
+            target_data=data_target,
+            config_tool=config_tool,
+            secret_tool=secret_tool,
         )
+        #Here exceute other tools and append to finding list
+        if len(self.other_tools) > 0:
+            extra_finding_list = self.other_tools[0].run_tool(
+                target_data=data_target,
+                config_tool=config_tool,
+                secret_tool=secret_tool
+            )
+            if len(extra_finding_list) > 0:
+                finding_list.extend(extra_finding_list)
 
         totalized_exclusions = []
-        totalized_exclusions.extend(
-            map(lambda elem: Exclusions(**elem), config_tool.exclusions_all)
-        ) if config_tool.exclusions_all is not None else None
-        totalized_exclusions.extend(
-            map(lambda elem: Exclusions(**elem), config_tool.exclusions_scope)
-        ) if config_tool.exclusions_scope is not None else None
+        (
+            totalized_exclusions.extend(
+                map(
+                    lambda elem: Exclusions(**elem), config_tool.exclusions_all
+                )
+            )
+            if config_tool.exclusions_all is not None
+            else None
+        )
+        (
+            totalized_exclusions.extend(
+                map(
+                    lambda elem: Exclusions(**elem),
+                    config_tool.exclusions_scope,
+                )
+            )
+            if config_tool.exclusions_scope is not None
+            else None
+        )
 
         input_core = InputCore(
             totalized_exclusions=totalized_exclusions,

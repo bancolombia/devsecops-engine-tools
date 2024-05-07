@@ -20,7 +20,7 @@ class GithubApi:
 
         headers = {"Authorization": f"token {self.token}"}
 
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, verify=False)#modificar pdn
 
         if response.status_code == 200:
             latest_release = response.json()

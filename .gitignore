@@ -55,3 +55,4 @@ DevSecOps_Remote_Config
 nuclei_template*
 /nuclei_templates/
 /azp/
+result_dast_scan.json

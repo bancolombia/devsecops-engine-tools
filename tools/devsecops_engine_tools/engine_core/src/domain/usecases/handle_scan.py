@@ -127,7 +127,8 @@ class HandleScan:
             findings_list, input_core = runner_engine_dast(
                 dict_args,
                 config_tool["ENGINE_DAST"]["TOOL"],
-                secret_tool
+                secret_tool,
+                config_tool["ENGINE_DAST"]["EXTRA_TOOLS"]
             )
             return findings_list, input_core
         elif "engine_secret" in dict_args["tool"]:

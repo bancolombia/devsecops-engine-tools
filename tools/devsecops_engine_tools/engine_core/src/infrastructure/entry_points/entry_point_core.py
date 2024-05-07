@@ -90,11 +90,11 @@ def init_engine_core(
 ):
     Printers.print_logo_tool()
     args = get_inputs_from_cli(sys.argv[1:])
-    #config_tool = devops_platform_gateway.get_remote_config(   #DATA PDN
-    #    args["remote_config_repo"], "/resources/ConfigTool.json"
-    #)
+    """config_tool = devops_platform_gateway.get_remote_config(   #DATA PDN
+        args["remote_config_repo"], "/resources/ConfigTool.json"
+    )"""
+    config_tool = configtools   #DATA LOCAL
 
-    config_tool = configtools #DATA DEV LOCAL BORRAR
     if config_tool[args["tool"].upper()]["ENABLED"] == "true":
         findings_list, input_core = HandleScan(
             vulnerability_management_gateway,

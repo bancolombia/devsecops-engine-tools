@@ -1,16 +1,13 @@
 import os
 import subprocess
 import json
-import platform
-
-from regex import E
 from devsecops_engine_tools.engine_dast.src.domain.model.config_tool import (
     ConfigTool,
 )
 from devsecops_engine_tools.engine_dast.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
-from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nuclei.target_config import (
+from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nuclei.nuclei_config import (
     NucleiConfig,
 )
 from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nuclei.nuclei_deserealizer import (
@@ -19,12 +16,8 @@ from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nucle
 from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.file_generator_tool import (
     generate_file_from_tool,
 )
-from devsecops_engine_utilities.github.infrastructure.github_api import GithubApi
-from devsecops_engine_utilities.ssh.managment_private_key import (
-    create_ssh_private_file,
-    add_ssh_private_key,
-    decode_base64,
-    config_knowns_hosts,
+from devsecops_engine_utilities.github.infrastructure.github_api import (
+    GithubApi
 )
 
 
@@ -36,52 +29,21 @@ class NucleiTool(ToolGateway):
         """Initialize the class with the data from the config file and the cli"""
         self.target_config = target_config
         self.data_config_cli = data_config_cli
-        self.TOOL = "NUCLEI"
-        self.debug = os.environ.get("DEBUG", "false")
+        self.TOOL: str = "NUCLEI"
+        self.debug: str = os.environ.get("DEBUG", "false")
 
     def configurate_external_checks(
-        self, config_tool: ConfigTool, secret_tool, output_dir: str = "azp/_work/r1/a"
+        self, config_tool: ConfigTool, github_token: str, output_dir: str = "azp/_work/r1/a"
     ):
-        agent_env = None
-        try:
-            if secret_tool is None:
-                print("Secrets manager is not enabled to configure external checks")
-            else:
-                if (
-                    config_tool.use_external_checks_git == "True"
-                    and platform.system()
-                    in (
-                        "Linux",
-                        "Darwin",
-                    )
-                ):
-                    config_knowns_hosts(
-                        config_tool.repository_ssh_host,
-                        config_tool.repository_public_key_fp,
-                    )
-                    ssh_key_content = decode_base64(
-                        secret_tool, "repository_ssh_private_key"
-                    )
-                    ssh_key_file_path = "/tmp/ssh_key_file"
-                    create_ssh_private_file(ssh_key_file_path, ssh_key_content)
-                    ssh_key_password = decode_base64(
-                        secret_tool, "repository_ssh_password"
-                    )
-                    agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
-
-                # Create configuration dir external checks
-                if config_tool.use_external_checks_dir == "True":
-                    github_api = GithubApi(secret_tool["github_token"])
-                    github_api.download_latest_release_assets(
-                        config_tool.external_dir_owner,
-                        config_tool.external_dir_repository,
-                        output_dir,
-                    )
-                    return output_dir + "/nuclei_templates/http-security-headers"
-
-        except Exception as ex:
-            print(f"An error ocurred configuring external checks {ex}")
-        return output_dir + "/nuclei_templates/http-security-headers"  # BORRAR
+        # Create configuration dir external checks
+        if config_tool.use_external_checks_dir == "True":
+            github_api = GithubApi(github_token)
+            github_api.download_latest_release_assets(
+                config_tool.external_dir_owner,
+                config_tool.external_dir_repository,
+                output_dir,
+            )
+            return output_dir + "/dast_nuclei_templates/"
 
     def execute(self, target_config: NucleiConfig) -> dict:
         """Interact with nuclei's core application"""
@@ -116,7 +78,9 @@ class NucleiTool(ToolGateway):
 
     def run_tool(self, target_data, config_tool, secret_tool):
         nuclei_config = NucleiConfig(target_data)
-        checks_directory = self.configurate_external_checks(config_tool, secret_tool)
+        #checks_directory = self.configurate_external_checks(config_tool, secret_tool["github_token"]) #DATA PDN
+        checks_directory = self.configurate_external_checks(config_tool,
+            github_token=os.getenv('GITHUB_TOKEN'))#BORRAR PDN
         nuclei_config.customize_templates(checks_directory)
         result_scans = self.execute(nuclei_config)
         nuclei_deserealizator = NucleiDesealizator()
