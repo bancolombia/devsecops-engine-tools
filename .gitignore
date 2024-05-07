@@ -56,3 +56,4 @@ nuclei_template*
 /nuclei_templates/
 /azp/
 result_dast_scan.json
+/customized-templates/
