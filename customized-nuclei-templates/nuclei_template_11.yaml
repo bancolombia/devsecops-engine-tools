@@ -1,0 +1,35 @@
+id: strict-transport-security-header
+
+info:
+  name: Strict Transport Security Headers
+  author: devsecops
+  severity: low
+  description: |
+    The server lacks the HTTP Strict-Transport-Security header. Alternatively, the max-age value of it is too small.
+  metadata:
+    max-request: 1
+  tags: misconfig,headers,generic
+  classification:
+    cvss-metrics: CVSS:3.1/AV:A/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N/E:P/RL:O/RC:C
+    cvss-score: 3.2
+http:
+- method: POST
+  path:
+  - '{{BaseURL}}/private-bancolombia/testing/v1/operations/risk-compliance/models/fraud-models/CustomerContactManagement'
+  host-redirects: true
+  max-redirects: 3
+
+  matchers-condition: or
+  matchers:
+  - type: dsl
+    name: missing-header
+    dsl:
+    - "!regex('(?i)strict-transport-security', header)"
+    - status_code != 301 && status_code != 302
+    condition: and
+  headers:
+    accept: application/vnd.bancolombia.v4+json
+    client-id: 1c397a732e5763619a45d3ffb117f01e
+    client-secret: 6b8fb3748f756daffb6d5e421d311bbe
+    content-type: application/vnd.bancolombia.v4+json
+    messageid: c4e6bd04-5149-11e7-b114-b2f933d5fe66

@@ -1,0 +1,35 @@
+id: x-frame-options-header
+
+info:
+  name: X Frame Options Header
+  author: devsecops
+  severity: low
+  description: |
+    The application uses the X-Frame Options header as the only protection measure against clickjacking attacks. This header is considered obsolete, because its protection can be bypassed using multiple-layer iframes.
+  metadata:
+    max-request: 1
+  tags: misconfig,headers,generic
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:N/I:L/A:N/E:H/RL:O/RC:C
+    cvss-score: 3.0
+http:
+- method: POST
+  path:
+  - '{{BaseURL}}/private-bancolombia/testing/v1/operations/risk-compliance/models/fraud-models/CustomerInformation'
+  host-redirects: true
+  max-redirects: 3
+
+  matchers-condition: or
+  matchers:
+  - type: dsl
+    name: x-frame-options
+    dsl:
+    - "!regex('(?i)x-frame-options', header)"
+    - status_code != 301 && status_code != 302
+    condition: and
+  headers:
+    accept: application/vnd.bancolombia.v4+json
+    client-id: 1c397a732e5763619a45d3ffb117f01e
+    client-secret: 6b8fb3748f756daffb6d5e421d311bbe
+    content-type: application/vnd.bancolombia.v4+json
+    messageid: c4e6bd04-5149-11e7-b114-b2f933d5fe66

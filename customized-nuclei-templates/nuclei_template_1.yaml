@@ -1,0 +1,35 @@
+id: permissions-policy-header
+
+info:
+  name: Permissions Policy
+  author: devsecops
+  severity: low
+  description: |
+    This template checks if the target website has a Permissions-Policy header, which allows or denies the use of browser features in a document or within any iframe elements in the document.
+  metadata:
+    max-request: 1
+  tags: misconfig,headers,generic
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:N/E:U/RL:O/RC:C
+    cvss-score: 2.7
+http:
+- method: POST
+  path:
+  - '{{BaseURL}}/private-bancolombia/testing/v1/operations/risk-compliance/models/fraud-models/CustomerInformation'
+  host-redirects: true
+  max-redirects: 3
+
+  matchers-condition: or
+  matchers:
+  - type: dsl
+    name: missing-header
+    dsl:
+    - "!regex('(?i)permissions-policy', header)"
+    - status_code != 301 && status_code != 302
+    condition: and
+  headers:
+    accept: application/vnd.bancolombia.v4+json
+    client-id: 1c397a732e5763619a45d3ffb117f01e
+    client-secret: 6b8fb3748f756daffb6d5e421d311bbe
+    content-type: application/vnd.bancolombia.v4+json
+    messageid: c4e6bd04-5149-11e7-b114-b2f933d5fe66
