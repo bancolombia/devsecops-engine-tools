@@ -1,0 +1,22 @@
+{
+    "endpoint": "https://api.us.apiconnect.ibmcloud.com",
+    "operations": [
+        {
+            "operation": {
+                "headers": {
+                    "accept": "application/json"
+                },
+                "method": "GET",
+                "parm": {
+                    "latitude": "6.227002",
+                    "longitude": "-75.575427"
+                },
+                "path": "/bancolombiabluemix-dev/development/tec/v2/sales-service/cross-channel/service-points/atms?",
+                "security_auth": {
+                    "type": "client_secret"
+                }
+            }
+        }
+    ],
+    "rate_limit": "30"
+}

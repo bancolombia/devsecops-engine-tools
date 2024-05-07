@@ -1,0 +1,88 @@
+{
+    "SEARCH_PATTERN": [
+        "ms_"
+    ],
+    "IGNORE_SEARCH_PATTERN": [
+        "test"
+    ],
+    "MESSAGE_INFO_ENGINE_IAC": "message custom",
+    "EXCLUSIONS_PATH": "/engine_sast/engine_iac/Exclusions.json",
+    "THRESHOLD": {
+        "VULNERABILITY": {
+            "Critical": 1,
+            "High": 8,
+            "Medium": 10,
+            "Low": 15
+        },
+        "COMPLIANCE": {
+            "Critical": 1
+        }
+    },
+    "CHECKOV": {
+        "VERSION": "2.3.296",
+        "USE_EXTERNAL_CHECKS_GIT": "False",
+        "EXTERNAL_CHECKS_GIT": "",
+        "EXTERNAL_GIT_SSH_HOST": "",
+        "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "",
+        "USE_EXTERNAL_CHECKS_DIR": "False",
+        "EXTERNAL_DIR_OWNER": "",
+        "EXTERNAL_DIR_REPOSITORY": "",
+        "RULES": {
+            "RULES_DOCKER": {
+                "CKV_DOCKER_1": {
+                    "checkID": "IAC-CKV-DOCKER-1 Ensure port 22 is not exposed",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "guideline",
+                    "severity": "Critical",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                }
+            },
+            "RULES_K8S": {
+                "CKV_K8S_16": {
+                    "checkID": "IAC-CKV_K8S_16 Container should not be privileged",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "guideline",
+                    "severity": "Critical",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                },
+                "CKV_K8S_21": {
+                    "checkID": "IAC-CKV_K8S_21 The default namespace should not be used",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "guideline",
+                    "severity": "High",
+                    "cvss": "",
+                    "category": "Compliance"
+                }
+            },
+            "RULES_CLOUDFORMATION": {
+                "CKV_AWS_20": {
+                    "customID": "customID",
+                    "checkID": "AWS S3 buckets are accessible to public",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "guideline",
+                    "severity": "High",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                }
+            }
+        }
+    }
+}
