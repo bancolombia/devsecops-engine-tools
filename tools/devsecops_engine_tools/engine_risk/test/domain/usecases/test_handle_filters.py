@@ -38,9 +38,6 @@ class TestHandleFilters(unittest.TestCase):
             ),
         ]
         self.handle_filters = HandleFilters(self.remote_config)
-    
-    def test_init(self):
-        self.handle_filters
 
     def test_filter_by_tag(self):
         result = self.handle_filters.filter_by_tag(self.findings)
