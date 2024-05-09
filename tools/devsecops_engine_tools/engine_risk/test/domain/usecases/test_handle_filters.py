@@ -1,8 +1,9 @@
 import unittest
 from devsecops_engine_tools.engine_risk.src.domain.usecases.handle_filters import (
-    HandleFilters
+    HandleFilters,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.report import Report
+
 
 class TestHandleFilters(unittest.TestCase):
     def setUp(self):

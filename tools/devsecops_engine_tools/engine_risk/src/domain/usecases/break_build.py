@@ -8,6 +8,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.report import (
     Report,
 )
 
+
 class BreakBuild:
     def __init__(
         self,
@@ -31,5 +32,3 @@ class BreakBuild:
                     "succeeded", "There are no vulnerabilities"
                 )
             )
-
-

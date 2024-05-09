@@ -1,6 +1,9 @@
 from unittest.mock import patch
-from devsecops_engine_tools.engine_risk.src.applications.runner_engine_risk import runner_engine_risk
+from devsecops_engine_tools.engine_risk.src.applications.runner_engine_risk import (
+    runner_engine_risk,
+)
 import subprocess
+
 
 @patch(
     "devsecops_engine_tools.engine_risk.src.applications.runner_engine_risk.init_engine_risk"
@@ -25,16 +28,17 @@ def test_runner_engine_risk(mock_init_engine_risk):
         findings,
     )
 
+
 @patch(
     "devsecops_engine_tools.engine_risk.src.applications.runner_engine_risk.init_engine_risk"
 )
 @patch(
     "devsecops_engine_tools.engine_risk.src.applications.runner_engine_risk.logger.error"
 )
-@patch(
-    "subprocess.run"
-)
-def test_runner_engine_risk_exception(mock_subprocess, mock_logger_error, mock_init_engine_risk):
+@patch("subprocess.run")
+def test_runner_engine_risk_exception(
+    mock_subprocess, mock_logger_error, mock_init_engine_risk
+):
     devops_platform_gateway = "devops_platform_gateway"
     print_table_gateway = "print_table_gateway"
     dict_args = {"key": "value"}

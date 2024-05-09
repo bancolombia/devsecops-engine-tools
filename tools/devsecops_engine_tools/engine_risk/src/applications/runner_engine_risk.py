@@ -9,7 +9,9 @@ from devsecops_engine_tools.engine_utilities import settings
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
-def runner_engine_risk(dict_args, findings, devops_platform_gateway, print_table_gateway):
+def runner_engine_risk(
+    dict_args, findings, devops_platform_gateway, print_table_gateway
+):
     try:
         init_engine_risk(
             devops_platform_gateway,

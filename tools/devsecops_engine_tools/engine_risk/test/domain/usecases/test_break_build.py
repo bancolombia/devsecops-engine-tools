@@ -1,9 +1,10 @@
 import unittest
 from unittest.mock import MagicMock, patch
 from devsecops_engine_tools.engine_risk.src.domain.usecases.break_build import (
-    BreakBuild
+    BreakBuild,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.report import Report
+
 
 class TestBreakBuild(unittest.TestCase):
     @patch(
@@ -16,7 +17,6 @@ class TestBreakBuild(unittest.TestCase):
 
         mock_print_table.print_table_report.assert_called_with(report_list)
 
-
     @patch(
         "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.DevopsPlatformGateway"
     )
@@ -25,4 +25,6 @@ class TestBreakBuild(unittest.TestCase):
 
         BreakBuild(mock_devops_platform, MagicMock()).process(report_list)
 
-        mock_devops_platform.message.assert_called_with("succeeded", "There are no vulnerabilities")
+        mock_devops_platform.message.assert_called_with(
+            "succeeded", "There are no vulnerabilities"
+        )
