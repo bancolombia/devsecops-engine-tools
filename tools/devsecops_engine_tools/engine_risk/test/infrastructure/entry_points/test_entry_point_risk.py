@@ -18,11 +18,8 @@ def test_init_engine_risk(mock_break_build, mock_handle_filters):
         findings
     )
 
-    mock_handle_filters.assert_called_once
-    mock_handle_filters.filter_by_status.assert_called_once
-    mock_handle_filters.filter_by_tag.assert_called_once
-    mock_break_build.assert_called_once
-    mock_break_build.process.assert_called_once
+    mock_handle_filters.assert_called_once()
+    mock_break_build.assert_called_once()
 
 @patch(
     "builtins.print"
