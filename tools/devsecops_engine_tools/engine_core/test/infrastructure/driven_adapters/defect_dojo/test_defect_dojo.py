@@ -4,6 +4,7 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defec
     DefectDojoPlatform,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
+from devsecops_engine_tools.engine_core.src.domain.model.report import Report
 from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
     VulnerabilityManagement,
 )
@@ -295,5 +296,121 @@ class TestDefectDojoPlatform(unittest.TestCase):
             )
         assert (
             "Error getting excepted findings with the following error:"
+            in str(context.exception)
+        )
+
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.SessionManager"
+    )
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Finding.get_finding"
+    )
+    def test_get_all_findings(self, mock_finding, mock_session_manager):
+        service = "test"
+        dict_args = {
+            "tool": "engine_risk",
+            "token_vulnerability_management": "token1",
+        }
+        secret_tool = {"token_defect_dojo": "token2"}
+        config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "LIMITS_QUERY": 80,
+                }
+            }
+        }
+
+        mock_session_manager.return_value = MagicMock()
+        findings_list = [
+            # file_path
+            MagicMock(
+                vuln_id_from_tool="id1",
+                date="2024-02-21T00:00:00Z",
+                display_status="stat1",
+                file_path="path",
+                tags=["test1"],
+                severity="sev1",
+                active=True,
+            ),
+            # endpoints
+            MagicMock(
+                vuln_id_from_tool="id2",
+                date="2024-02-21T00:00:00Z",
+                display_status="stat2",
+                endpoints="endpoint",
+                tags=["engine_dast"],
+                severity="sev2",
+                active=True,
+            ),
+            # component_name + component_version
+            MagicMock(
+                vuln_id_from_tool="id3",
+                date="2024-02-21T00:00:00Z",
+                display_status="stat3",
+                component_name="name",
+                component_version="v1",
+                tags=["engine_container"],
+                severity="sev3",
+                active=True,
+            ),
+        ]
+        mock_finding.return_value.results = findings_list
+
+        result = self.defect_dojo.get_all_findings(
+            service, dict_args, secret_tool, config_tool
+        )
+
+        mock_session_manager.assert_called_with("token1", "host_defect_dojo")
+        mock_finding.assert_called_with(
+            session=mock_session_manager.return_value,
+            service=service,
+            limit=80,
+        )
+
+        expected_result = [
+            Report(
+                id="id2",
+                date="21022024",
+                status="stat2",
+                where="path",
+                tags=["test1"],
+                severity="sev1",
+                active=True,
+            ),
+            Report(
+                id="id2",
+                date="21022024",
+                status="stat2",
+                where="endpoint",
+                tags=["engine_dast"],
+                severity="sev2",
+                active=True,
+            ),
+            Report(
+                id="id3",
+                date="21022024",
+                status="stat3",
+                where="name:v1",
+                tags=["engine_container"],
+                severity="sev3",
+                active=True,
+            ),
+        ]
+        self.assertEqual(result, expected_result)
+
+    def test_get_all_findings_exception(self):
+
+        service = "test"
+        dict_args = {"token_vulnerability_management": "token1"}
+        secret_tool = {"token_defect_dojo": "token2"}
+        config_tool = {"VULNERABILITY_MANAGER": {}}
+
+        with unittest.TestCase().assertRaises(Exception) as context:
+            self.defect_dojo.get_all_findings(
+                service, dict_args, secret_tool, config_tool
+            )
+        assert (
+            "Error getting all findings with the following error:"
             in str(context.exception)
         )

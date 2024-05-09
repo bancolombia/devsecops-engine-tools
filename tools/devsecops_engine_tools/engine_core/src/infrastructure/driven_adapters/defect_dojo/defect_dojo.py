@@ -203,7 +203,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
         except Exception as ex:
             raise ExceptionGettingFindings(
-                "Error getting findings with the following error: {0} ".format(
+                "Error getting all findings with the following error: {0} ".format(
                     ex
                 )
             )
@@ -268,10 +268,10 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             return finding.endpoints
         elif tool == "engine_risk":
             for tag in finding.tags:
-                if tag in ["engine_iac", "engine_secret", "7waysecurity", "fluidattacks"]:
-                    return finding.file_path
-                elif tag in ["engine_container", "engine_dependencies"]:
+                if tag in ["engine_container", "engine_dependencies"]:
                     return finding.component_name + ":" + finding.component_version
                 elif tag in ["engine_dast"]:
                     return finding.endpoints
-            return "Not found"
+                else:
+                    return finding.file_path
+        return "Not found"

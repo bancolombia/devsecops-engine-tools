@@ -21,13 +21,13 @@ def init_engine_risk(
         handle_filters = HandleFilters(
             remote_config,
         )
-        findings_to_break = handle_filters.filter_by_status(findings)
-        findings_to_break = handle_filters.filter_by_tag(findings_to_break)
+        active_findings = handle_filters.filter_by_status(findings)
+        findings_to_break = handle_filters.filter_by_tag(active_findings)
 
         BreakBuild(devops_platform_gateway, print_table_gateway).process(
             findings_to_break,
         )
 
     else:
-        print("No Findings found in Vultracker")
-        logger.info("No Findings found in Vultracker")
+        print("No Findings found in Vulnerability Management Platform")
+        logger.info("No Findings found in Vulnerability Management Platform")
