@@ -78,6 +78,7 @@ class TrufflehogRun(ToolGateway):
             include_paths.append(file_path)
             with open(file_path, "w") as file:
                 for file_pr_path in chunk:
+                    file_pr_path = str(file_pr_path).replace("/","\\\\")
                     file.write(f"{file_pr_path.strip()}\n")
         return include_paths
 
