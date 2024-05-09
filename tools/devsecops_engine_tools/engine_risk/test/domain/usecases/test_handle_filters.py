@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import MagicMock, patch
 from devsecops_engine_tools.engine_risk.src.domain.usecases.handle_filters import (
     HandleFilters
 )
