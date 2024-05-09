@@ -21,7 +21,8 @@ class TestSecretScanDeserealizator(unittest.TestCase):
                                 "file": "/path/to/file.py"
                             }
                         }
-                    }
+                    },
+                    "Raw": "secret"
                 }
             ]
             
@@ -34,7 +35,7 @@ class TestSecretScanDeserealizator(unittest.TestCase):
             self.assertIsInstance(vulnerability, Finding)
             self.assertEqual(vulnerability.id, "SECRET_SCANNING")
             self.assertIsNone(vulnerability.cvss)
-            self.assertEqual(vulnerability.where, "/file.py, Line: 10")
+            self.assertEqual(vulnerability.where, "/file.py, Line: 11, Secret: secret")
             self.assertEqual(vulnerability.description, "Sensitive information in source code")
             self.assertEqual(vulnerability.severity, "critical")
             self.assertEqual(vulnerability.identification_date, datetime.now().strftime("%d%m%Y"))
@@ -53,11 +54,12 @@ class TestSecretScanDeserealizator(unittest.TestCase):
                             "file": r"/path/to/file.py"  # Simulating Linux path
                         }
                     }
-                }
+                },
+                "Raw": "secret"
             }
             self.assertEqual(
                 self.deserealizator.get_where_correctly(result, "linux", "/path/to", ),
-                ("/file.py", "10")
+                ("/file.py", "11", "secret")
             )
 
     def test_get_where_correctly_windows(self):
@@ -70,10 +72,11 @@ class TestSecretScanDeserealizator(unittest.TestCase):
                             "file": r"C:\path\to\file.py"  # Simulating Windows path
                         }
                     }
-                }
+                },
+                "Raw": "secret"
             }
             
             self.assertEqual(
                 self.deserealizator.get_where_correctly(result,  "Win", "C:\\path\\to", ),
-                ("\\file.py", "10")
+                ("\\file.py", "11", "secret")
             )
