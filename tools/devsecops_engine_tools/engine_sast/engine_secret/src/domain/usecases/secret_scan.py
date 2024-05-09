@@ -59,7 +59,7 @@ class SecretScan:
                     self.devops_platform_gateway.get_variable("repository")
                     ),
                 self.devops_platform_gateway.get_variable("os"),
-                self.devops_platform_gateway.get_variable("path_directory")
+                self.devops_platform_gateway.get_variable("work_folder")
                 )
         return finding_list, config_tool
     
