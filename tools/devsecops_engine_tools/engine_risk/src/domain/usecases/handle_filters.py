@@ -1,7 +1,7 @@
 class HandleFilters:
     def __init__(
-            self,
-            remote_config,
+        self,
+        remote_config,
     ):
         self.remote_config = remote_config
 
@@ -20,6 +20,3 @@ class HandleFilters:
             if finding.active:
                 findings_filtered.append(finding)
         return findings_filtered
-
-
-
