@@ -11,11 +11,11 @@ class SecretScanDeserealizator(DeseralizatorGateway):
     def get_list_vulnerability(self, results_scan_list: List[dict], os, path_directory) -> List[Finding]:
         list_open_vulnerabilities = []
         for result in results_scan_list:
-            where_text, line, raw = self.get_where_correctly(result, os, path_directory)
+            where_text, raw = self.get_where_correctly(result, os, path_directory)
             vulnerability_open = Finding(
                 id="SECRET_SCANNING",
                 cvss=None,
-                where=f"{where_text}, Line: {line}, Secret: {raw}",
+                where=f"{where_text}, Secret: {raw}",
                 description="Sensitive information in source code",
                 severity="critical",
                 identification_date=datetime.now().strftime("%d%m%Y"),
@@ -29,7 +29,6 @@ class SecretScanDeserealizator(DeseralizatorGateway):
         return list_open_vulnerabilities
     
     def get_where_correctly(self, result: dict, os, path_directory):
-        line = str(result.get("SourceMetadata").get("Data").get("Filesystem").get("line") + 1 or "Multiline")
         original_where = str(result.get("SourceMetadata").get("Data").get("Filesystem").get("file"))
         raw = str(result.get("Raw"))
         if re.search(r'Linux', os):
@@ -37,4 +36,4 @@ class SecretScanDeserealizator(DeseralizatorGateway):
         
         path_remove = path_directory or ""
         where_text = original_where.replace(path_remove, "")
-        return where_text, line, raw
+        return where_text, raw
