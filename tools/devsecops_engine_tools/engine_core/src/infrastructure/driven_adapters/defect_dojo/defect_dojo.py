@@ -96,7 +96,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         in enviroment_mapping
                         else enviroment_mapping["default"]
                     ),
-                    tags="evc",
+                    tags=vulnerability_management.dict_args["tool"],
                 )
 
                 response = DefectDojo.send_import_scan(request)
