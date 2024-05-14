@@ -4,7 +4,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.input_core import Input
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.secret_scan import (
     SecretScan,
 )
-
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.DeserializeConfigTool import (
+    DeserializeConfigTool,
+)
 
 class TestSecretScan(unittest.TestCase):
 
@@ -39,25 +41,36 @@ class TestSecretScan(unittest.TestCase):
         ]
 
         json_config = {
-            "IGNORE_SEARCH_PATTERN": ["test"],
-            "MESSAGE_INFO_ENGINE_SECRET": "message test",
+            "IGNORE_SEARCH_PATTERN": [
+                "test"
+            ],
+            "MESSAGE_INFO_ENGINE_SECRET": "If you have doubts, visit url",
             "THRESHOLD": {
-                "VULNERABILITY": {"Critical": 1, "High": 1, "Medium": 1, "Low": 1},
-                "COMPLIANCE": {"Critical": 1},
+                "VULNERABILITY": {
+                    "Critical": 1,
+                    "High": 1,
+                    "Medium": 1,
+                    "Low": 1
+                },
+                "COMPLIANCE": {
+                    "Critical": 0
+                }
             },
-            "TARGET_BRANCHES": ['trunk', 'develop'],
-            "trufflehog": {"EXCLUDE_PATH": [".git"], "NUMBER_THREADS": 4},
+            "TARGET_BRANCHES": ["trunk", "develop"],
+            "trufflehog": {
+                "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
+                "NUMBER_THREADS": 4
+            }
         }
-
+        obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
         mock_devops_gateway_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
         mock_tool_gateway_instance.run_tool_secret_scan.return_value = (
             "vulnerability_data"
         )
 
-        # Llamada al método a probar
-        finding_list, input_core = secret_scan.process(
-            {"remote_config_repo": "some_repo"}, "trufflehog"
+        finding_list, config_tool = secret_scan.process(
+            False, obj_config_tool
         )
 
         self.assertEqual(finding_list, ["vulnerability_data"])
@@ -93,25 +106,34 @@ class TestSecretScan(unittest.TestCase):
         mock_deserialize_gateway_instance.get_list_vulnerability.return_value = []
 
         json_config = {
-            "IGNORE_SEARCH_PATTERN": ["test"],
-            "MESSAGE_INFO_ENGINE_SECRET": "message test",
+            "IGNORE_SEARCH_PATTERN": [
+                "test"
+            ],
+            "MESSAGE_INFO_ENGINE_SECRET": "If you have doubts, visit url",
             "THRESHOLD": {
-                "VULNERABILITY": {"Critical": 1, "High": 1, "Medium": 1, "Low": 1},
-                "COMPLIANCE": {"Critical": 1},
+                "VULNERABILITY": {
+                    "Critical": 1,
+                    "High": 1,
+                    "Medium": 1,
+                    "Low": 1
+                },
+                "COMPLIANCE": {
+                    "Critical": 0
+                }
             },
-            "TARGET_BRANCHES": ['trunk', 'develop'],
+            "TARGET_BRANCHES": ["trunk", "develop"],
             "trufflehog": {
-                "EXCLUDE_PATH": [".git"],
+                "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
                 "NUMBER_THREADS": 4
-            },
+            }
         }
-
+        obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
         mock_devops_gateway_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
         mock_tool_gateway_instance.run_tool_secret_scan.return_value = ""
 
-        finding_list, input_core = secret_scan.process(
-            {"remote_config_repo": "some_repo"}, "trufflehog"
+        finding_list, config_tool = secret_scan.process(
+            False, obj_config_tool
         )
 
         self.assertEqual(finding_list, [])
