@@ -28,30 +28,30 @@ def init_engine_core(
     )
     Printers.print_logo_tool(config_tool["BANNER"])
 
-    if (args["tool"] == "engine_risk") and (config_tool[args["tool"].upper()]["ENABLED"] == "true"):
-        HandleRisk(
-            vulnerability_management_gateway,
-            secrets_manager_gateway,
-            devops_platform_gateway,
-            print_table_gateway,
-        ).process(args, config_tool)
+    if config_tool[args["tool"].upper()]["ENABLED"] == "true":
+        if args["tool"] == "engine_risk":
+            HandleRisk(
+                vulnerability_management_gateway,
+                secrets_manager_gateway,
+                devops_platform_gateway,
+                print_table_gateway,
+            ).process(args, config_tool)
+        else:
+            findings_list, input_core = HandleScan(
+                vulnerability_management_gateway,
+                secrets_manager_gateway,
+                devops_platform_gateway,
+            ).process(args, config_tool)
 
-    elif config_tool[args["tool"].upper()]["ENABLED"] == "true":
-        findings_list, input_core = HandleScan(
-            vulnerability_management_gateway,
-            secrets_manager_gateway,
-            devops_platform_gateway,
-        ).process(args, config_tool)
-
-        scan_result = BreakBuild(devops_platform_gateway, print_table_gateway).process(
-            findings_list,
-            input_core,
-            args
-        )
-        if args["send_metrics"] == "true":
-            MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(
-                config_tool, input_core, args, scan_result
+            scan_result = BreakBuild(devops_platform_gateway, print_table_gateway).process(
+                findings_list,
+                input_core,
+                args
             )
+            if args["send_metrics"] == "true":
+                MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(
+                    config_tool, input_core, args, scan_result
+                )
     else:
         print(
             devops_platform_gateway.message(
