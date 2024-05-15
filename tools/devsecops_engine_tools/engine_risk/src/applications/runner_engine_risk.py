@@ -20,5 +20,4 @@ def runner_engine_risk(
             findings,
         )
     except Exception as e:
-        logger.error("Error in engine risk: {0} ".format(str(e)))
-        raise Exception("Error in engine risk: {0} ".format(str(e)))
+        logger.error("Error in engine risk: {0}".format(str(e)))
