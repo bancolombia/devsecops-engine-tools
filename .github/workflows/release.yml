@@ -1,12 +1,8 @@
 on:
-  # push:
-  #   # Sequence of patterns matched against refs/tags
-  #   tags:
-  #     - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
-
   push:
-    branches:
-      - feature/*
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
 
 name: Create Release
 
@@ -20,5 +16,4 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         id: create_github_release
-        with:
-          tag_name: "1.7.5"
+
