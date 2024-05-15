@@ -49,6 +49,9 @@ class IacScan:
                 dict_args["platform"],
                 secret_tool,
             )
+        else:
+            print(f"Tool skipped by DevSecOps policy")
+            logger.info(f"Tool skipped by DevSecOps policy")
 
         totalized_exclusions = []
         (

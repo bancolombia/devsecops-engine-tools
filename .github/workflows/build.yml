@@ -88,7 +88,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: tools/dist/
-          skip-existing: true
           repository-url: https://test.pypi.org/legacy/
 
   deploy_prod:
