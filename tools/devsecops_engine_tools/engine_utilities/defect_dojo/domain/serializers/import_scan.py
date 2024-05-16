@@ -181,7 +181,7 @@ class ImportScanSerializer(Schema):
     auto_create_context = fields.Str(required=False, load_default="true")
     deduplication_on_engagement = fields.Str(required=False)
     lead = fields.Str(required=False)
-    tags = fields.Str(required=True, validate=validate.OneOf(["cde", "evc"]))
+    tags = fields.Str(required=True)
     close_old_findings = fields.Str(required=False, load_default=True)
     close_old_findings_product_scope = fields.Str(required=False)
     push_to_jira = fields.Str(required=False)

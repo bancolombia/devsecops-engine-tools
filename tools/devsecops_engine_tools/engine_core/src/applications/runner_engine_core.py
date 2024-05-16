@@ -113,10 +113,10 @@ def application_core():
             args
         )
     except Exception as e:
-        logger.error("Error SCAN: {0} ".format(str(e)))
+        logger.error("Error engine_core: {0} ".format(str(e)))
         print(
             devops_platform_gateway.message(
-                "error", "Error SCAN: {0} ".format(str(e))
+                "error", "Error engine_core: {0} ".format(str(e))
             )
         )
         print(devops_platform_gateway.result_pipeline("failed"))
