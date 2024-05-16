@@ -84,26 +84,3 @@ class TestHandleRisk(unittest.TestCase):
 
         # Assert the expected values
         mock_logger_error.assert_called_with("Error getting finding list in handle risk: error")
-
-
-
-
-
-
-
-    # @mock.patch("devsecops_engine_tools.engine_core.src.domain.usecases.handle_risk.logger.error")
-    # def test_process_exception(self, mock_print):
-    #     dict_args = {
-    #         "use_secrets_manager": "true",
-    #         "tool": "engine_risk",
-    #         "remote_config_repo": "test_repo",
-    #     }
-    #     config_tool = {"ENGINE_RISK": {"ENABLED": "true"}}
-
-    #     # Call the process method
-    #     self.handle_risk.process(
-    #         dict_args, config_tool
-    #     )
-
-    #     # Assert the expected values
-    #     mock_print.assert_called
