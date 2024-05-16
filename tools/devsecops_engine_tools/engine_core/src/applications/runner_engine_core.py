@@ -41,6 +41,7 @@ def get_inputs_from_cli(args):
             "engine_secret",
             "engine_dependencies",
             "engine_container",
+            "engine_risk",
         ],
         type=str,
         required=True,
