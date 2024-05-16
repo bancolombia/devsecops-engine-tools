@@ -102,3 +102,30 @@ class TestEntryPointCore(unittest.TestCase):
 
         # Assert
         assert mock_print.called
+
+    @mock.patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core.HandleRisk"
+    )
+    def test_init_engine_core_risk(self, mock_handle_risk):
+        # Set up mock arguments
+
+        mock_config_tool = {
+            "BANNER": "DevSecOps Engine Tools",
+            "ENGINE_RISK": {"ENABLED": "true"}
+        }
+        mock_devops_platform_gateway = mock.Mock()
+
+        mock_devops_platform_gateway.get_remote_config.return_value = mock_config_tool
+
+        # Call the function
+        init_engine_core(
+            vulnerability_management_gateway=mock.Mock(),
+            secrets_manager_gateway=mock.Mock(),
+            devops_platform_gateway=mock_devops_platform_gateway,
+            print_table_gateway=mock.Mock(),
+            metrics_manager_gateway=mock.Mock(),
+            args={"remote_config_repo": "test", "tool": "engine_risk"},
+        )
+
+        #Assert
+        mock_handle_risk.return_value.process.assert_called_once
