@@ -39,12 +39,8 @@ class TestHandleFilters(unittest.TestCase):
         ]
         self.handle_filters = HandleFilters(self.remote_config)
 
-    def test_filter_by_tag(self):
-        result = self.handle_filters.filter_by_tag(self.findings)
+    def test_filter(self):
+        result = self.handle_filters.filter(self.findings)
 
         assert result[0].tags == self.remote_config["TAG_FILTER"]
-
-    def test_filter_by_status(self):
-        result = self.handle_filters.filter_by_status(self.findings)
-
-        assert len(result) == 2
+        assert len(result) == 1

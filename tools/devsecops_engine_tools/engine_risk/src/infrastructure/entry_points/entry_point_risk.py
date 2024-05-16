@@ -15,16 +15,15 @@ def init_engine_risk(devops_platform_gateway, print_table_gateway, dict_args, fi
     remote_config = devops_platform_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
     )
-    findings_to_break = []
+    findings_filtered = []
     if len(findings):
         handle_filters = HandleFilters(
             remote_config,
         )
-        active_findings = handle_filters.filter_by_status(findings)
-        findings_to_break = handle_filters.filter_by_tag(active_findings)
+        findings_filtered = handle_filters.filter(findings)
 
         BreakBuild(devops_platform_gateway, print_table_gateway).process(
-            findings_to_break,
+            findings_filtered,
         )
 
     else:
