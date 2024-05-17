@@ -53,7 +53,7 @@ class TestEngineSecretScan(unittest.TestCase):
         mock_secret_scan_instance = MockSecretScan.return_value
         mock_secret_scan_instance.complete_config_tool.return_value = obj_config_tool
         mock_devops_platform_gateway.get_variable.side_effect = ["pipeline_name_carlos","pipeline_name_carlos", "pipeline_name", "build"]
-        mock_secret_scan_instance.process.return_value = ([], obj_config_tool)
+        mock_secret_scan_instance.process.return_value = ([], obj_config_tool, "")
         
         mock_set_input_core_instance = MockSetInputCore.return_value
         mock_set_input_core_instance.set_input_core.return_value = "input_core_result"

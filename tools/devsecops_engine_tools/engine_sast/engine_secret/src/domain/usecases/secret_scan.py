@@ -30,6 +30,7 @@ class SecretScan:
 
     def process(self, skip_tool, config_tool):
         finding_list = []
+        file_path_findings = ""
         if skip_tool == False:
             self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("os"), self.devops_platform_gateway.get_variable("temp_directory"))
             files_pullrequest = self.git_gateway.get_files_pull_request(
