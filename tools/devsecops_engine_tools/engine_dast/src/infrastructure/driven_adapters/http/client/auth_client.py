@@ -8,5 +8,5 @@ class AuthClientCredential(AuthenticationGateway):
         self.client_id: str = security_auth.get("client_id")
         self.client_secrets: str = security_auth.get("client_secret")
 
-    def get_credentials(self, target_data) -> dict:
-        return super().get_credentials(target_data)
+    def get_credentials(self):
+        return None
