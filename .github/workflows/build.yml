@@ -34,6 +34,7 @@ jobs:
           projectBaseDir: ${{ github.workspace }}/$pathComponentName
           projectName: devsecops-engine-tools
           projectVersion: ${{ github.run_number }}
+          sonarToken: ${{ secrets.SONAR_TOKEN }}
           extraProperties: |
             sonar.verbose=true
             sonar.sources=${{ github.workspace }}/$pathComponentName
