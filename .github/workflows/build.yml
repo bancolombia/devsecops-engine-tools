@@ -27,12 +27,6 @@ jobs:
           python -m pip install virtualenv
           sudo apt-get update
           sudo apt-get install openssh-client -y
-      
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin' 
-          java-version: 17
 
       - name: Prepare analysis on SonarQube
         uses: SonarSource/sonarqube-scan-action@v2
@@ -43,6 +37,8 @@ jobs:
           projectBaseDir: tools
           args: >
             -Dsonar.verbose=true
+            -Dsonar.projectKey=devsecops-engine-tools
+            -Dsonar.organization=Bancolombia
             -Dsonar.python.coverage.reportPaths=tools/coverage.xml
             -Dsonar.language=py
             -Dsonar.exclusions=**test_integrations_defect_dojo.py**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**
