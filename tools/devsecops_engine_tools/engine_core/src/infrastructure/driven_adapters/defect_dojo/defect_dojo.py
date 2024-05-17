@@ -51,6 +51,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "CHECKOV": "Checkov Scan",
                 "PRISMA": "Twistlock Image Scan",
                 "XRAY": "JFrog Xray On Demand Binary Scan",
+                "TRUFFLEHOG": "Trufflehog Scan",
             }
 
             if any(
@@ -58,7 +59,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 for branch in vulnerability_management.config_tool[
                     "VULNERABILITY_MANAGER"
                 ]["BRANCH_FILTER"].split(",")
-            ):
+            ) or (vulnerability_management.dict_args["tool"] == 'engine_secret'):
                 request: ImportScanRequest = Connect.cmdb(
                     cmdb_mapping={
                         "product_type_name": "nombreevc",
