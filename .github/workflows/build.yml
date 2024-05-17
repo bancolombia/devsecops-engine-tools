@@ -112,7 +112,7 @@ jobs:
   
   create_tag:
     needs:
-      - build
+      - deploy_prod
     runs-on: ubuntu-latest
     steps:
       - name: Generate a token of Github APP
