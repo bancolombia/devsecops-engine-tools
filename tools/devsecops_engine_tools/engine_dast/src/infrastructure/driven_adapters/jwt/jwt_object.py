@@ -1,10 +1,15 @@
-from authlib.jose import jwt
+from time import (
+    time
+)
+from secrets import (
+    token_hex
+)
+from authlib.jose import (
+    jwt
+)
 from devsecops_engine_tools.engine_dast.src.domain.model.gateways.authentication_method import (
     AuthenticationGateway,
 )
-import time
-import secrets
-
 
 class JwtObject(AuthenticationGateway):
     def __init__(self, security_auth: dict):
@@ -13,12 +18,12 @@ class JwtObject(AuthenticationGateway):
         self.iss: str = security_auth.get("jwt_iss")
         self.sum: str = security_auth.get("jwt_sum")
         self.aud: str = security_auth.get("jwt_aud")
-        self.iat: float = time.time()
+        self.iat: float = time()
         self.exp: float = self.iat + 60 * 60
-        self.nonce = secrets.token_hex(10)
+        self.nonce = token_hex(10)
         self.payload: dict = {}
         self.header: dict = {}
-        self.jwt_token: str = None
+        self.jwt_token: str = ""
         self.header_name: str = security_auth.get("jwt_header_name")
 
     def init_header(self) -> None:
@@ -35,7 +40,7 @@ class JwtObject(AuthenticationGateway):
         }
         return self.payload
 
-    def get_credentials(self) -> str:
+    def get_credentials(self) -> tuple:
         self.private_key = (
             self.private_key.replace(" ", "\n")
             .replace("-----BEGIN\nPRIVATE\nKEY-----", "-----BEGIN PRIVATE KEY-----")
@@ -44,4 +49,4 @@ class JwtObject(AuthenticationGateway):
         self.jwt_token = jwt.encode(self.header, self.payload, self.private_key).decode(
             "utf-8"
         )
-        return self.jwt_token
+        return self.header_name, self.jwt_token
