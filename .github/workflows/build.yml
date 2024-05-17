@@ -34,11 +34,10 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
-          projectBaseDir: ${{ github.workspace }}/$pathComponentName
+          projectBaseDir: /tools
           args: >
             -Dsonar.verbose=true
-            -Dsonar.sources=${{ github.workspace }}/$pathComponentName
-            -Dsonar.python.coverage.reportPaths=${{ github.workspace }}/$pathComponentName/coverage.xml
+            -Dsonar.python.coverage.reportPaths=/tools/coverage.xml
             -Dsonar.language=py
             -Dsonar.exclusions=**test_integrations_defect_dojo.py**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**
             -Dsonar.coverage.exclusions=**test_integrations_defect_dojo.py**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**
