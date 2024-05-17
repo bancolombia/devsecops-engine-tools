@@ -56,7 +56,7 @@ class SecretScan:
                 self.devops_platform_gateway.get_variable("os"),
                 self.devops_platform_gateway.get_variable("work_folder")
                 )
-        return finding_list, config_tool, file_path_findings
+        return finding_list, file_path_findings
     
     def complete_config_tool(self, dict_args, tool):
         tool = str(tool).lower()
