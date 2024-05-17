@@ -3,6 +3,7 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.print
     PrinterPrettyTable,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.finding import Finding
+from devsecops_engine_tools.engine_core.src.domain.model.report import Report
 
 
 class TestPrinterPrettyTable:
@@ -111,3 +112,28 @@ class TestPrinterPrettyTable:
         # Assert
         assert mock_print.called
         # Add more assertions to validate the output
+
+    @patch("builtins.print")
+    def test_print_table_report(self, mock_print):
+        # Arrange
+        report_list = [
+            Report(
+                id="id2",
+                date="21022024",
+                status="stat2",
+                where="path",
+                tags=["tag1"],
+                severity="low",
+                active=True,
+            ),
+        ]
+        printer = PrinterPrettyTable()
+
+        # Act
+        printer.print_table_report(report_list)
+
+        # Assert
+        assert mock_print.called
+        # Add more assertions to validate the output
+
+
