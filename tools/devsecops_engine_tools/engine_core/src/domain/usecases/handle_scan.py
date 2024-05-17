@@ -100,7 +100,7 @@ class HandleScan:
             findings_list, input_core = runner_engine_iac(
                 dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool,self.devops_platform_gateway, env
             )
-            if dict_args["use_vulnerability_management"] == "true":
+            if dict_args["use_vulnerability_management"] == "true" and input_core.path_file_results:
                 self._use_vulnerability_management(
                     config_tool, input_core, dict_args, secret_tool, env
                 )
