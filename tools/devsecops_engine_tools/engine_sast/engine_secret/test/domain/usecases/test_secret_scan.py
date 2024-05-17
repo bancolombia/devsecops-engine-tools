@@ -69,7 +69,7 @@ class TestSecretScan(unittest.TestCase):
             "vulnerability_data", "path/findings"
         )
 
-        finding_list, config_tool, file_path_findings = secret_scan.process(
+        finding_list, file_path_findings = secret_scan.process(
             False, obj_config_tool
         )
 
@@ -133,11 +133,12 @@ class TestSecretScan(unittest.TestCase):
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
         mock_tool_gateway_instance.run_tool_secret_scan.return_value = "", ""
 
-        finding_list, config_tool, file_path_findings = secret_scan.process(
+        finding_list, file_path_findings = secret_scan.process(
             False, obj_config_tool
         )
 
         self.assertEqual(finding_list, [])
+        self.assertEqual(file_path_findings, "")
         mock_tool_gateway_instance.install_tool.assert_called_once()
         mock_tool_gateway_instance.run_tool_secret_scan.assert_called_once()
 
