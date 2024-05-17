@@ -43,7 +43,6 @@ class CmdbUserCase:
             )
 
         request.product_name = product_data.product_name
-        request.tags = product_data.tag_product if product_data.tag_product else "ORPHAN"
         request.product_description = product_data.product_description
 
         return request

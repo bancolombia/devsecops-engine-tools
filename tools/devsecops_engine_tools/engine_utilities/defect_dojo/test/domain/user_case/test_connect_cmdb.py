@@ -124,7 +124,7 @@ def test_execute(engagement_name, obj_cmdb):
     response = uc.execute(request)
     assert response.scan_type == "JFrog Xray Scan"
     assert response.code_app == "nu0000001"
-    assert response.tags in ["ORPHAN", "tag_product_test"]
+    assert response.tags in ["evc"]
     assert response.product_type_name in ["ORPHAN_PRODUCT_TYPE", "Product_type_test"]
 
 
