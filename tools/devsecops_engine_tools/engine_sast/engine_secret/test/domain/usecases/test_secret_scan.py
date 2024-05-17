@@ -66,14 +66,15 @@ class TestSecretScan(unittest.TestCase):
         mock_devops_gateway_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
         mock_tool_gateway_instance.run_tool_secret_scan.return_value = (
-            "vulnerability_data"
+            "vulnerability_data", "path/findings"
         )
 
-        finding_list, config_tool = secret_scan.process(
+        finding_list, config_tool, file_path_findings = secret_scan.process(
             False, obj_config_tool
         )
 
         self.assertEqual(finding_list, ["vulnerability_data"])
+        self.assertEqual(file_path_findings, "path/findings")
         mock_tool_gateway_instance.install_tool.assert_called_once()
         mock_tool_gateway_instance.run_tool_secret_scan.assert_called_once()
 
@@ -130,9 +131,9 @@ class TestSecretScan(unittest.TestCase):
         obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
         mock_devops_gateway_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
-        mock_tool_gateway_instance.run_tool_secret_scan.return_value = ""
+        mock_tool_gateway_instance.run_tool_secret_scan.return_value = "", ""
 
-        finding_list, config_tool = secret_scan.process(
+        finding_list, config_tool, file_path_findings = secret_scan.process(
             False, obj_config_tool
         )
 
