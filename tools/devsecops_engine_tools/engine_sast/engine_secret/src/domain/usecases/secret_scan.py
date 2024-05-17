@@ -42,19 +42,20 @@ class SecretScan:
                 self.devops_platform_gateway.get_variable("project_name"),
                 self.devops_platform_gateway.get_variable("repository"),
                 self.devops_platform_gateway.get_variable("repository_provider"))
-            finding_list = self.tool_deserialize.get_list_vulnerability(
-                self.tool_gateway.run_tool_secret_scan(
+            findings, file_path_findings = self.tool_gateway.run_tool_secret_scan(
                     files_pullrequest,
                     config_tool.exclude_path,
                     self.devops_platform_gateway.get_variable("os"),
                     self.devops_platform_gateway.get_variable("work_folder"),
                     config_tool.number_threads,
                     self.devops_platform_gateway.get_variable("repository")
-                    ),
+                    )
+            finding_list = self.tool_deserialize.get_list_vulnerability(
+                findings,
                 self.devops_platform_gateway.get_variable("os"),
                 self.devops_platform_gateway.get_variable("work_folder")
                 )
-        return finding_list, config_tool
+        return finding_list, config_tool, file_path_findings
     
     def complete_config_tool(self, dict_args, tool):
         tool = str(tool).lower()
