@@ -12,10 +12,12 @@ from devsecops_engine_tools.engine_utilities.defect_dojo import (
     Finding,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
+from devsecops_engine_tools.engine_core.src.domain.model.report import Report
 from devsecops_engine_tools.engine_utilities.utils.session_manager import SessionManager
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionVulnerabilityManagement,
     ExceptionFindingsExcepted,
+    ExceptionGettingFindings,
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     format_date,
@@ -97,7 +99,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         in enviroment_mapping
                         else enviroment_mapping["default"]
                     ),
-                    tags="evc",
+                    tags=vulnerability_management.dict_args["tool"],
                 )
 
                 response = DefectDojo.send_import_scan(request)
@@ -119,13 +121,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
     def get_findings_excepted(self, service, dict_args, secret_tool, config_tool):
         try:
-            token_dd = dict_args.get(
-                "token_vulnerability_management"
-            ) or secret_tool.get("token_defect_dojo")
-            session_manager = SessionManager(
-                token_dd,
-                config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"],
-            )
+            session_manager = self._get_session_manager(dict_args, secret_tool, config_tool)
 
             dd_limits_query = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
                 "LIMITS_QUERY"
@@ -169,6 +165,45 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 )
             )
 
+    def get_all_findings(
+        self, service, dict_args, secret_tool, config_tool
+    ):
+        try:
+            all_findings_query_params = {
+                "limit": config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["LIMITS_QUERY"]
+            }
+
+            findings = self._get_findings(
+                self._get_session_manager(dict_args, secret_tool, config_tool),
+                service, 
+                all_findings_query_params
+            )
+
+            maped_list = list(
+                map(
+                    partial(self._create_report, date_fn=self._format_date_to_dd_format),
+                    findings,
+                )
+            )
+
+            return maped_list
+
+        except Exception as ex:
+            raise ExceptionGettingFindings(
+                "Error getting all findings with the following error: {0} ".format(
+                    ex
+                )
+            )
+
+    def _get_session_manager(self, dict_args, secret_tool, config_tool):
+        token_dd = dict_args.get(
+                "token_vulnerability_management"
+            ) or secret_tool.get("token_defect_dojo")
+        return SessionManager(
+            token_dd,
+            config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"],
+        )
+
     def _get_findings_with_exclusions(
         self, session_manager, service, query_params, tool, date_fn, reason
     ):
@@ -200,17 +235,34 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             reason=reason,
         )
 
+    def _create_report(self, finding, date_fn):
+        return Report(
+            id=finding.vuln_id_from_tool,
+            date=date_fn(
+                finding.date
+            ),
+            status=finding.display_status,
+            where=self._get_where_report(finding),
+            tags=finding.tags,
+            severity=finding.severity,
+            active=finding.active,
+        )
+
     def _format_date_to_dd_format(self, date_string):
         return (
             format_date(date_string.split("T")[0], "%Y-%m-%d", "%d%m%Y")
             if date_string
             else None
         )
+    
+    def _get_where_report(self, finding):
+        for tag in finding.tags:
+            return self._get_where(finding, tag)
 
     def _get_where(self, finding, tool):
-        if tool in ["engine_iac", "engine_secret"]:
-            return finding.file_path
-        elif tool in ["engine_container", "engine_dependencies"]:
+        if tool in ["engine_container", "engine_dependencies"]:
             return finding.component_name + ":" + finding.component_version
         elif tool == "engine_dast":
             return finding.endpoints
+        else:
+            return finding.file_path
