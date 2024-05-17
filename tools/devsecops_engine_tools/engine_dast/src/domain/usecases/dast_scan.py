@@ -7,12 +7,6 @@ from devsecops_engine_tools.engine_dast.src.domain.model.gateways.tool_gateway i
 from devsecops_engine_tools.engine_dast.src.domain.model.gateways.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
-from devsecops_engine_tools.engine_dast.src.infrastructure.entry_points.config_dast.config_tool import (
-    config_tool_local,
-)
-from devsecops_engine_tools.engine_dast.src.infrastructure.entry_points.config_dast.config_exclusions import (
-    config_exclusions,
-)
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore,
 )

@@ -18,7 +18,6 @@ from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.oauth
 from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.http.client.auth_client import (
     AuthClientCredential,
 )
-
 from devsecops_engine_tools.engine_dast.src.domain.model.api_config import (
     ApiConfig
 )
@@ -85,10 +84,10 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
             tool_gateway=tool_run,
             dict_args=dict_args,
             secret_tool=secret_tool,
-            config_tool=config_tool, #the name of the tool
+            config_tool=config_tool,
             extra_tools=extra_tools,
             target_data=target_config
         )
 
-    except Exception as e:
-        raise Exception(f"Error engine dast : {str(e)}")
+    except KeyError as e:
+        raise KeyError(f"Error accessing the key in runner engine dast: {str(e)}")

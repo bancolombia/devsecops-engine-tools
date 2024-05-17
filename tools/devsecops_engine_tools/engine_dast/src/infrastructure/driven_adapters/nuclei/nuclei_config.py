@@ -2,6 +2,7 @@ from typing import List
 import os
 from uu import Error
 from ruamel.yaml import YAML
+from json import dumps as json_dumps
 
 
 class NucleiConfig:
@@ -32,24 +33,15 @@ class NucleiConfig:
         with open(template_file_path, "r") as template_file:  # abrir  archivo
             template_data = self.yaml.load(template_file)
             if "http" in template_data:
-                security_auth = new_template_data.get("operation").get("security_auth")
                 template_data["http"][0]["method"] = new_template_data["operation"]["method"]
                 template_data["http"][0]["path"] = [
                     "{{BaseURL}}" + new_template_data["operation"]["path"]
                 ]
-                auth_type = security_auth.get("type")
-                if auth_type == "client_secret":
-                    #Any header change
-                    template_data["http"][0]["headers"] = new_template_data["operation"]["headers"]
-                elif auth_type == "jwt":
-                    jwt = ""
-                    new_template_data["operation"]["headers"]["Authorization"] = get_token()
-                    #jwt header must be added
+                template_data["http"][0]["headers"] = new_template_data["operation"]["headers"]
                 if "payload" in new_template_data["operation"]:
-                    pass
+                    body = json_dumps(new_template_data["operation"]["payload"])
+                    template_data["http"][0]["body"] = body
             elif "ssl" in template_data:
-                pass
-            elif "dns" in template_data:
                 pass
 
         new_template_path = os.path.join(dest_folder, new_template_name)
@@ -64,6 +56,7 @@ class NucleiConfig:
         if self.target_type.lower() == "api":
             t_counter = 0
             for operation in self.data:
+                operation.authenticate() #Api Authentication
                 for template_name in os.listdir(base_folder):
                     if template_name.endswith(".yaml"):
                         self.process_template_file(
