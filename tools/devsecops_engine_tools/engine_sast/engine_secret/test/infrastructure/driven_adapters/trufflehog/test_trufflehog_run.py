@@ -76,7 +76,7 @@ class TestTrufflehogRun(unittest.TestCase):
             "Redacted": "https://admin:********@the-internet.herokuapp.com", "ExtraData": None,
             "StructuredData": None}]
         self.assertEqual(result, expected_result)
-        self.assertEqual(file_findings, '/usr/temp\\secret_scan_result.json')
+        self.assertEqual(file_findings, '/usr/temp/secret_scan_result.json')
 
     @patch('builtins.open', create=True)
     def test_config_include_path(self, mock_open):
