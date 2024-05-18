@@ -9,6 +9,30 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.Deseriali
 )
 
 class TestSecretScan(unittest.TestCase):
+    def setUp(self) -> None:
+        global json_config
+        json_config = {
+            "IGNORE_SEARCH_PATTERN": [
+                "test"
+            ],
+            "MESSAGE_INFO_ENGINE_SECRET": "If you have doubts, visit url",
+            "THRESHOLD": {
+                "VULNERABILITY": {
+                    "Critical": 1,
+                    "High": 1,
+                    "Medium": 1,
+                    "Low": 1
+                },
+                "COMPLIANCE": {
+                    "Critical": 0
+                }
+            },
+            "TARGET_BRANCHES": ["trunk", "develop"],
+            "trufflehog": {
+                "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
+                "NUMBER_THREADS": 4
+            }
+        }
 
     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway.GitGateway')
     @patch(
@@ -40,28 +64,6 @@ class TestSecretScan(unittest.TestCase):
             "vulnerability_data"
         ]
 
-        json_config = {
-            "IGNORE_SEARCH_PATTERN": [
-                "test"
-            ],
-            "MESSAGE_INFO_ENGINE_SECRET": "If you have doubts, visit url",
-            "THRESHOLD": {
-                "VULNERABILITY": {
-                    "Critical": 1,
-                    "High": 1,
-                    "Medium": 1,
-                    "Low": 1
-                },
-                "COMPLIANCE": {
-                    "Critical": 0
-                }
-            },
-            "TARGET_BRANCHES": ["trunk", "develop"],
-            "trufflehog": {
-                "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
-                "NUMBER_THREADS": 4
-            }
-        }
         obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
         mock_devops_gateway_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
@@ -106,28 +108,6 @@ class TestSecretScan(unittest.TestCase):
 
         mock_deserialize_gateway_instance.get_list_vulnerability.return_value = []
 
-        json_config = {
-            "IGNORE_SEARCH_PATTERN": [
-                "test"
-            ],
-            "MESSAGE_INFO_ENGINE_SECRET": "If you have doubts, visit url",
-            "THRESHOLD": {
-                "VULNERABILITY": {
-                    "Critical": 1,
-                    "High": 1,
-                    "Medium": 1,
-                    "Low": 1
-                },
-                "COMPLIANCE": {
-                    "Critical": 0
-                }
-            },
-            "TARGET_BRANCHES": ["trunk", "develop"],
-            "trufflehog": {
-                "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
-                "NUMBER_THREADS": 4
-            }
-        }
         obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
         mock_devops_gateway_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
@@ -230,28 +210,6 @@ class TestSecretScan(unittest.TestCase):
             mock_git_gateway_instance
         )
 
-        json_config = {
-            "IGNORE_SEARCH_PATTERN": [
-                "test"
-            ],
-            "MESSAGE_INFO_ENGINE_SECRET": "If you have doubts, visit url",
-            "THRESHOLD": {
-                "VULNERABILITY": {
-                    "Critical": 1,
-                    "High": 1,
-                    "Medium": 1,
-                    "Low": 1
-                },
-                "COMPLIANCE": {
-                    "Critical": 0
-                }
-            },
-            "TARGET_BRANCHES": ["trunk", "develop"],
-            "trufflehog": {
-                "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
-                "NUMBER_THREADS": 4
-            }
-        }
         mock_devops_gateway_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
 
