@@ -27,21 +27,7 @@ jobs:
           python -m pip install virtualenv
           sudo apt-get update
           sudo apt-get install openssh-client -y
-
-      # - name: Prepare analysis on SonarQube
-      #   uses: SonarSource/sonarqube-scan-action@v1
-      #   with:
-      #     projectBaseDir: ${{ github.workspace }}/$pathComponentName
-      #     projectName: devsecops-engine-tools
-      #     projectVersion: ${{ github.run_number }}
-      #     extraProperties: |
-      #       sonar.verbose=true
-      #       sonar.sources=${{ github.workspace }}/$pathComponentName
-      #       sonar.python.coverage.reportPaths=${{ github.workspace }}/$pathComponentName/coverage.xml
-      #       sonar.language=py
-      #       sonar.exclusions=**test_integrations_defect_dojo.py**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**
-      #       sonar.coverage.exclusions=**test_integrations_defect_dojo.py**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**
-
+          
       - name: Run Unit Test
         run: |
           cd tools/
@@ -53,6 +39,22 @@ jobs:
           python -m pytest -x --cov=devsecops_engine_tools --cov-config=.coveragerc
           python -m coverage report -m
           python -m coverage xml
+
+      - name: Run analysis on SonarQube
+        uses: SonarSource/sonarqube-scan-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          projectBaseDir: tools
+          args: >
+            -Dsonar.organization=grupo-bancolombia
+            -Dsonar.projectKey=bancolombia_devsecops-engine-tools
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.language=py
+            -Dsonar.verbose=true
+            -Dsonar.exclusions=**test_integrations_defect_dojo.py**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**
+            -Dsonar.coverage.exclusions=**test_integrations_defect_dojo.py**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**
 
       - name: Build
         if: contains(github.ref,'refs/heads/trunk') || contains(github.event.head_commit.message, 'deploy dev')
