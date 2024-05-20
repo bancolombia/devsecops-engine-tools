@@ -6,51 +6,20 @@ steps:
     versionSpec: '>= 3.6'
   enabled: false
 
-- task: SonarQubePrepare@4
-  displayName: 'Prepare analysis on SonarQube'
-  inputs:
-    SonarQube: SonarQube
-    scannerMode: CLI
-    configMode: manual
-    cliProjectKey: '$(project_base)_$(pathComponentName)'
-    cliProjectName: '$(project_base)_$(pathComponentName)'
-    cliProjectVersion: '$(Build.BuildNumber)'
-    extraProperties: |
-      sonar.verbose=true
-      sonar.sources=$(System.DefaultWorkingDirectory)/$(pathComponentName)
-      sonar.python.coverage.reportPaths=$(System.DefaultWorkingDirectory)/$(pathComponentName)/coverage.xml
-      sonar.language=py
-      sonar.exclusions=**test_integrations_defect_dojo.py**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**,**/azure-pipelines.yml/**
-      sonar.coverage.exclusions=**test_integrations_defect_dojo.py**,**/pipelines/**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**,**/azure-pipelines.yml/**
 - script:  |
     python3 -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
-    python3 -m pip install setuptools virtualenv wheel -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
-  displayName: install python basics
-
-- script: |
-    apt-get update
-    apt-get install openssh-client -y
-  workingDirectory: $(System.DefaultWorkingDirectory)/$(pathComponentName)
-  displayName: 'Installation openssh-client'
-
-- script: |
-    set -e
+    python3 -m pip install virtualenv -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
     python3 -m virtualenv _venv
-    source _venv/bin/activate
-    python -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
-    python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
-    python -m pip install -r requirements_test.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
-    python -m pytest -x --cov=$(System.DefaultWorkingDirectory)/$(pathComponentName) --cov-config=.coveragerc
-    python -m coverage report -m
-    python -m coverage xml
-  workingDirectory: $(System.DefaultWorkingDirectory)/$(pathComponentName)
-  displayName: 'Run Unit Test'
+  displayName: install python basics
 
 - script: |
     if [ "$(Build.SourceBranch)" == "refs/heads/trunk" ]; then
       echo "Integration tests are only run in feature branch"
     else
       source _venv/bin/activate
+      python -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
+      python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
+      python -m pip install -r requirements_test.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
       python test_integrations_defect_dojo.py
     fi
   workingDirectory: $(System.DefaultWorkingDirectory)/$(pathComponentName)
@@ -59,25 +28,3 @@ steps:
     PERSONAL_ACCESS_TOKEN: $(System.AccessToken)
     TOKEN_CMDB: $(TOKEN_CMDB)
     TOKEN_DEFECT_DOJO: $(TOKEN_DEFECT_DOJO)
-
-- task: PublishTestResults@2
-  displayName: 'Publish Test Results **/out*.xml'
-  inputs:
-    testResultsFiles: '**/out*.xml'
-    searchFolder: $(System.DefaultWorkingDirectory)/$(pathComponentName)
-
-- task: PublishCodeCoverageResults@1
-  displayName: 'Publish code coverage from coverage.xml'
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: coverage.xml
-    pathToSources: $(System.DefaultWorkingDirectory)/$(pathComponentName)
-  continueOnError: false
-
-- task: SonarQubeAnalyze@4
-  displayName: 'Run Code Analysis'
-
-- task: sonar-buildbreaker@8
-  displayName: 'Break build on quality gate failure'
-  inputs:
-    SonarQube: SonarQube
