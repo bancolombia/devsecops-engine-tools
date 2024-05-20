@@ -38,7 +38,7 @@ jobs:
           args: >
             -Dsonar.organization=grupo-bancolombia
             -Dsonar.projectKey=bancolombia_devsecops-engine-tools
-            -Dsonar.python.coverage.reportPaths=tools/coverage.xml
+            -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.language=py
             -Dsonar.verbose=true
             -Dsonar.exclusions=**test_integrations_defect_dojo.py**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**
