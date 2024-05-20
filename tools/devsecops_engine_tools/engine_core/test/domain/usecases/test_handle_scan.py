@@ -163,6 +163,7 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "false",
             "tool": "engine_secret",
             "remote_config_repo": "test_repo",
+            "use_vulnerability_management": "true",
         }
         config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
 

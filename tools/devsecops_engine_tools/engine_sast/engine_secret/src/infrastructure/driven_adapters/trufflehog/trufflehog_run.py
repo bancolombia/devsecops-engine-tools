@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import subprocess
 import concurrent.futures
@@ -61,7 +62,8 @@ class TrufflehogRun(ToolGateway):
                 include_paths,
                 [repository_name] * len(include_paths),
             )
-        return self.decode_output(results)
+        findings, file_findings = self.create_file(self.decode_output(results), agent_work_folder)
+        return  findings, file_findings
 
     def config_include_path(self, files, agent_work_folder):
         chunks = []
@@ -102,3 +104,15 @@ class TrufflehogRun(ToolGateway):
                     if json_obj not in result:
                         result.append(json_obj)
         return result
+    
+    def create_file(self, findings, agent_work_folder):
+        file_findings = os.path.join(agent_work_folder, "secret_scan_result.json")
+        with open(file_findings, "w") as file:
+            for find in findings:
+                original_where = str(find.get("SourceMetadata").get("Data").get("Filesystem").get("file"))
+                original_where = original_where.replace("\\", "/")
+                where_text = original_where.replace(agent_work_folder, "")
+                find["SourceMetadata"]["Data"]["Filesystem"]["file"] = where_text
+                json_str = json.dumps(find)
+                file.write(json_str + '\n')
+        return findings, file_findings

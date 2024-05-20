@@ -128,6 +128,13 @@ class HandleScan:
                 config_tool["ENGINE_SECRET"]["TOOL"],
                 self.devops_platform_gateway
             )
+            if (
+                dict_args["use_vulnerability_management"] == "true"
+                and input_core.path_file_results
+            ):
+                self._use_vulnerability_management(
+                    config_tool, input_core, dict_args, secret_tool, env
+                )
             return findings_list, input_core
         elif "engine_dependencies" in dict_args["tool"]:
             if secret_tool is not None:
