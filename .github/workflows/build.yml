@@ -27,8 +27,20 @@ jobs:
           python -m pip install virtualenv
           sudo apt-get update
           sudo apt-get install openssh-client -y
+          
+      - name: Run Unit Test
+        run: |
+          cd tools/
+          python -m virtualenv _venv
+          source _venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements_test.txt
+          python -m pip install -r requirements.txt
+          python -m pytest -x --cov=devsecops_engine_tools --cov-config=.coveragerc
+          python -m coverage report -m
+          python -m coverage xml
 
-      - name: Prepare analysis on SonarQube
+      - name: Run analysis on SonarQube
         uses: SonarSource/sonarqube-scan-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -43,18 +55,6 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.exclusions=**test_integrations_defect_dojo.py**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile**,**/coverage/**
             -Dsonar.coverage.exclusions=**test_integrations_defect_dojo.py**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**
-
-      - name: Run Unit Test
-        run: |
-          cd tools/
-          python -m virtualenv _venv
-          source _venv/bin/activate
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements_test.txt
-          python -m pip install -r requirements.txt
-          python -m pytest -x --cov=devsecops_engine_tools --cov-config=.coveragerc
-          python -m coverage report -m
-          python -m coverage xml
 
       - name: Build
         if: contains(github.ref,'refs/heads/trunk') || contains(github.event.head_commit.message, 'deploy dev')
