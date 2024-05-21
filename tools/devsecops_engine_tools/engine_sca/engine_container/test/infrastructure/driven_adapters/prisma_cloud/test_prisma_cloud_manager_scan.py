@@ -152,7 +152,7 @@ def test_run_tool_container_sca_success(
 
         scan_manager = PrismaCloudManagerScan()
         result = scan_manager.run_tool_container_sca(
-            mock_remoteconfig, "prisma_secret_key", mock_scan_image, "release", False
+            mock_remoteconfig, "prisma_secret_key", mock_scan_image, "build_id"
         )
 
         assert result == mock_images_scanned
