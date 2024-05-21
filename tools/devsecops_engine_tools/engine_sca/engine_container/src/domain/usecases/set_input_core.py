@@ -14,24 +14,21 @@ class SetInputCore:
         self.stage = stage
 
     def get_exclusions(self, exclusions_data, pipeline_name, tool):
-        list_exclusions = []
-        for key, value in exclusions_data.items():
-            if (key == "All") or (key == pipeline_name):
-                if value.get(tool, 0):
-                    exclusions = [
-                        Exclusions(
-                            id=item.get("id", ""),
-                            where=item.get("where", ""),
-                            cve_id=item.get("cve_id", ""),
-                            create_date=item.get("create_date", ""),
-                            expired_date=item.get("expired_date", ""),
-                            severity=item.get("severity", ""),
-                            hu=item.get("hu", ""),
-                            reason=item.get("reason", "Risk acceptance"),
-                        )
-                        for item in value[tool]
-                    ]
-                list_exclusions.extend(exclusions)
+        list_exclusions = [
+            Exclusions(
+                id=item.get("id", ""),
+                where=item.get("where", ""),
+                cve_id=item.get("cve_id", ""),
+                create_date=item.get("create_date", ""),
+                expired_date=item.get("expired_date", ""),
+                severity=item.get("severity", ""),
+                hu=item.get("hu", ""),
+                reason=item.get("reason", "Risk acceptance"),
+            )
+            for key, value in exclusions_data.items()
+            if key in {"All", pipeline_name} and value.get(tool)
+            for item in value[tool]
+        ]
         return list_exclusions
 
     def set_input_core(self, images_scanned):
