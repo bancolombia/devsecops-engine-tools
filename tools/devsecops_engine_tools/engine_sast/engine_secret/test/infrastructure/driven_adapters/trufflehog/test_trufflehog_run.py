@@ -65,7 +65,7 @@ class TestTrufflehogRun(unittest.TestCase):
 
         trufflehog_run = TrufflehogRun()
 
-        result = trufflehog_run.run_tool_secret_scan(files_commits, exclude_paths, agent_os, agent_work_folder, num_threads, repository_name)
+        result, file_findings = trufflehog_run.run_tool_secret_scan(files_commits, exclude_paths, agent_os, agent_work_folder, num_threads, repository_name)
 
         expected_result = [
             {"SourceMetadata": {"Data": {"Filesystem": {"file": "/usr/bin/local/file1.txt", "line": 1}}}, "SourceID": 1,
@@ -76,6 +76,7 @@ class TestTrufflehogRun(unittest.TestCase):
             "Redacted": "https://admin:********@the-internet.herokuapp.com", "ExtraData": None,
             "StructuredData": None}]
         self.assertEqual(result, expected_result)
+        self.assertEqual(file_findings, '/usr/temp/secret_scan_result.json')
 
     @patch('builtins.open', create=True)
     def test_config_include_path(self, mock_open):
