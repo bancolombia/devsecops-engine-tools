@@ -19,17 +19,17 @@ class SetInputCore:
             if (key == "All") or (key == pipeline_name):
                 if value.get(tool, 0):
                     exclusions = [
-                    Exclusions(
-                        id=item.get("id", ""),
-                        where=item.get("where", ""),
-                        cve_id=item.get("cve_id", ""),
-                        create_date=item.get("create_date", ""),
-                        expired_date=item.get("expired_date", ""),
-                        severity=item.get("severity", ""),
-                        hu=item.get("hu", ""),
-                        reason=item.get("reason", "Risk acceptance"),
-                    )
-                    for item in value[tool]
+                        Exclusions(
+                            id=item.get("id", ""),
+                            where=item.get("where", ""),
+                            cve_id=item.get("cve_id", ""),
+                            create_date=item.get("create_date", ""),
+                            expired_date=item.get("expired_date", ""),
+                            severity=item.get("severity", ""),
+                            hu=item.get("hu", ""),
+                            reason=item.get("reason", "Risk acceptance"),
+                        )
+                        for item in value[tool]
                     ]
                 list_exclusions.extend(exclusions)
         return list_exclusions
@@ -47,9 +47,7 @@ class SetInputCore:
                 self.pipeline_name,
                 self.tool,
             ),
-            Threshold(
-                self.remote_config["THRESHOLD"]
-            ),
+            Threshold(self.remote_config["THRESHOLD"]),
             images_scanned[-1] if images_scanned else None,
             self.remote_config["MESSAGE_INFO_ENGINE_CONTAINER"],
             self.pipeline_name,
