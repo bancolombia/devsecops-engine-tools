@@ -1,5 +1,6 @@
 import re
 
+
 class HandleRemoteConfigPatterns:
     def __init__(self, remote_config, exclusions, pipeline_name):
         self.remote_config = remote_config
