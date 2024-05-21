@@ -18,11 +18,22 @@ def init_engine_sca_rm(
     token,
     config_tool,
 ):
-    handle_remote_config_patterns = HandleRemoteConfigPatterns(tool_remote, dict_args)
-    flag = handle_remote_config_patterns.ignore_analysis_pattern()
+    remote_config = tool_remote.get_remote_config(
+        dict_args["remote_config_repo"], "engine_sca/engine_container/ConfigTool.json"
+    )
+    exclusions = tool_remote.get_remote_config(
+        dict_args["remote_config_repo"], "engine_sca/engine_container/Exclusions.json"
+    )
+    pipeline_name = tool_remote.get_variable("pipeline_name")
+    handle_remote_config_patterns = HandleRemoteConfigPatterns(
+        remote_config, exclusions, pipeline_name
+    )
+    skip_flag = handle_remote_config_patterns.skip_from_exclusion()
+    scan_flag = handle_remote_config_patterns.ignore_analysis_pattern()
+    build_id = tool_remote.get_variable("build_id")
     images_scanned = []
     deseralized = []
-    if flag:
+    if scan_flag and not (skip_flag):
         container_sca_scan = ContainerScaScan(
             tool_run,
             tool_remote,
@@ -30,11 +41,9 @@ def init_engine_sca_rm(
             tool_deseralizator,
             dict_args,
             token,
-            handle_remote_config_patterns.process_handle_skip_tool(),
         )
         images_scanned = container_sca_scan.process()
         deseralized = container_sca_scan.deseralizator(images_scanned)
     input_core = SetInputCore(tool_remote, dict_args, config_tool)
-    
-    return deseralized, input_core.set_input_core(images_scanned
-    )
+
+    return deseralized, input_core.set_input_core(images_scanned)
