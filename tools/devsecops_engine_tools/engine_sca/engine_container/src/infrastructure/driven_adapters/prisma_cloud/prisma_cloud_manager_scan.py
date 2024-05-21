@@ -3,7 +3,6 @@ import requests
 import os
 import subprocess
 import logging
-import re
 import base64
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.images_scanned import (
     ImagesScanned,
@@ -87,9 +86,7 @@ class PrismaCloudManagerScan(ToolGateway):
 
         return images_scanned
 
-    def run_tool_container_sca(
-        self, remoteconfig, prisma_secret_key, image, build_id
-    ):
+    def run_tool_container_sca(self, remoteconfig, prisma_secret_key, image, build_id):
         images_scanned = []
         try:
             file_path = os.path.join(
