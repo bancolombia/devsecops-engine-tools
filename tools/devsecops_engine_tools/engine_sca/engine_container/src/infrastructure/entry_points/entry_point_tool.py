@@ -51,8 +51,8 @@ def init_engine_sca_rm(
         images_scanned = container_sca_scan.process()
         deseralized = container_sca_scan.deseralizator(images_scanned)
     else:
-        print(f"Tool skipped by DevSecOps policy")
-        logger.info(f"Tool skipped by DevSecOps policy")
+        print("Tool skipped by DevSecOps policy")
+        logger.info("Tool skipped by DevSecOps policy")
     core_input = input_core.set_input_core(images_scanned)
 
     return deseralized, core_input
