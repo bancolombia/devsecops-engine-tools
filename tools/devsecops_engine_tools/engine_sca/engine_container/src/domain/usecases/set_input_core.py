@@ -1,43 +1,23 @@
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
-    DevopsPlatformGateway,
-)
+
 
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 
 
 class SetInputCore:
-    def __init__(self, tool_remote: DevopsPlatformGateway, dict_args, config_tool):
-        self.tool_remote = tool_remote
-        self.dict_args = dict_args
-        self.config_tool = config_tool
+    def __init__(self, remote_config, exclusions, pipeline_name, tool, stage):
+        self.remote_config = remote_config
+        self.exclusions = exclusions
+        self.pipeline_name = pipeline_name
+        self.tool = tool
+        self.stage = stage
 
-    def get_remote_config(self, file_path):
-        """
-        Get remote configuration.
-
-        Returns:
-            dict: Remote configuration.
-        """
-        return self.tool_remote.get_remote_config(
-            self.dict_args["remote_config_repo"], file_path
-        )
-
-    def get_variable(self, variable):
-        """
-        Get variable.
-
-        Returns:
-            dict: Remote variable.
-        """
-        return self.tool_remote.get_variable(variable)
-
-    def get_exclusions(self, exclusions_data, pipeline_name, config_tool):
+    def get_exclusions(self, exclusions_data, pipeline_name, tool):
         list_exclusions = []
         for key, value in exclusions_data.items():
             if (key == "All") or (key == pipeline_name):
-                if value.get(config_tool["ENGINE_CONTAINER"]["TOOL"], 0):
+                if value.get(tool, 0):
                     exclusions = [
                     Exclusions(
                         id=item.get("id", ""),
@@ -49,7 +29,7 @@ class SetInputCore:
                         hu=item.get("hu", ""),
                         reason=item.get("reason", "Risk acceptance"),
                     )
-                    for item in value[config_tool["ENGINE_CONTAINER"]["TOOL"]]
+                    for item in value[tool]
                     ]
                 list_exclusions.extend(exclusions)
         return list_exclusions
@@ -63,19 +43,15 @@ class SetInputCore:
         """
         return InputCore(
             self.get_exclusions(
-                self.get_remote_config("engine_sca/engine_container/Exclusions.json"),
-                self.get_variable("pipeline_name"),
-                self.config_tool,
+                self.exclusions,
+                self.pipeline_name,
+                self.tool,
             ),
             Threshold(
-                self.get_remote_config("engine_sca/engine_container/ConfigTool.json")[
-                    "THRESHOLD"
-                ]
+                self.remote_config["THRESHOLD"]
             ),
             images_scanned[-1] if images_scanned else None,
-            self.get_remote_config("engine_sca/engine_container/ConfigTool.json")[
-                "MESSAGE_INFO_ENGINE_CONTAINER"
-            ],
-            self.get_variable("pipeline_name"),
-            self.get_variable("stage").capitalize(),
+            self.remote_config["MESSAGE_INFO_ENGINE_CONTAINER"],
+            self.pipeline_name,
+            self.stage.capitalize(),
         )
