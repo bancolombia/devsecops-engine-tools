@@ -20,7 +20,9 @@ class SetInputCore:
         Returns:
             dict: Remote configuration.
         """
-        return self.tool_remote.get_remote_config(self.dict_args["remote_config_repo"], file_path)
+        return self.tool_remote.get_remote_config(
+            self.dict_args["remote_config_repo"], file_path
+        )
 
     def get_variable(self, variable):
         """
@@ -35,7 +37,8 @@ class SetInputCore:
         list_exclusions = []
         for key, value in exclusions_data.items():
             if (key == "All") or (key == pipeline_name):
-                exclusions = [
+                if value.get(config_tool["ENGINE_CONTAINER"]["TOOL"], 0):
+                    exclusions = [
                     Exclusions(
                         id=item.get("id", ""),
                         where=item.get("where", ""),
@@ -47,7 +50,7 @@ class SetInputCore:
                         reason=item.get("reason", "Risk acceptance"),
                     )
                     for item in value[config_tool["ENGINE_CONTAINER"]["TOOL"]]
-                ]
+                    ]
                 list_exclusions.extend(exclusions)
         return list_exclusions
 
@@ -65,7 +68,9 @@ class SetInputCore:
                 self.config_tool,
             ),
             Threshold(
-                self.get_remote_config("engine_sca/engine_container/ConfigTool.json")["THRESHOLD"]
+                self.get_remote_config("engine_sca/engine_container/ConfigTool.json")[
+                    "THRESHOLD"
+                ]
             ),
             images_scanned[-1] if images_scanned else None,
             self.get_remote_config("engine_sca/engine_container/ConfigTool.json")[

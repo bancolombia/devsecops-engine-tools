@@ -1,21 +1,11 @@
 import re
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
-    DevopsPlatformGateway,
-)
-
 
 class HandleRemoteConfigPatterns:
-    def __init__(
-        self,
-        remote_config,
-        exclusions,
-        pipeline_name
-    ):
+    def __init__(self, remote_config, exclusions, pipeline_name):
         self.remote_config = remote_config
         self.exclusions = exclusions
-        self.pipeline_name= pipeline_name
+        self.pipeline_name = pipeline_name
 
-    
     def ignore_analysis_pattern(self):
         """
         Handle analysis pattern.
@@ -26,7 +16,7 @@ class HandleRemoteConfigPatterns:
             return False
         else:
             return True
-    
+
     def skip_from_exclusion(self):
         """
         Handle skip tool.

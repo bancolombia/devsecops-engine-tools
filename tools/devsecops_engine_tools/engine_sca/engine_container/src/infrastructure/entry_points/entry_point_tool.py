@@ -36,10 +36,10 @@ def init_engine_sca_rm(
     if scan_flag and not (skip_flag):
         container_sca_scan = ContainerScaScan(
             tool_run,
-            tool_remote,
+            remote_config,
             tool_images,
             tool_deseralizator,
-            dict_args,
+            build_id,
             token,
         )
         images_scanned = container_sca_scan.process()
