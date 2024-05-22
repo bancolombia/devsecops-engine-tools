@@ -3,7 +3,6 @@ import requests
 import os
 import subprocess
 import logging
-import re
 import base64
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.images_scanned import (
     ImagesScanned,
@@ -87,37 +86,34 @@ class PrismaCloudManagerScan(ToolGateway):
 
         return images_scanned
 
-    def run_tool_container_sca(
-        self, remoteconfig, prisma_secret_key, image, build_id, skip_flag
-    ):
+    def run_tool_container_sca(self, remoteconfig, prisma_secret_key, image, build_id):
         images_scanned = []
-        if not (skip_flag):
-            try:
-                file_path = os.path.join(
-                    os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
+        try:
+            file_path = os.path.join(
+                os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
+            )
+
+            if not os.path.exists(file_path):
+                self.download_twistcli(
+                    file_path,
+                    remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
+                    prisma_secret_key,
+                    remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
+                    remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"],
                 )
-
-                if not os.path.exists(file_path):
-                    self.download_twistcli(
-                        file_path,
-                        remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
-                        prisma_secret_key,
-                        remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
-                        remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"],
-                    )
-                images_scanned.extend(
-                    self.scan_image(
-                        file_path,
-                        image,
-                        remoteconfig,
-                        prisma_secret_key,
-                        build_id,
-                    )
+            images_scanned.extend(
+                self.scan_image(
+                    file_path,
+                    image,
+                    remoteconfig,
+                    prisma_secret_key,
+                    build_id,
                 )
+            )
 
-                return images_scanned
+            return images_scanned
 
-            except Exception as ex:
-                logger.error(f"An overall error occurred: {ex}")
+        except Exception as ex:
+            logger.error(f"An overall error occurred: {ex}")
 
         return images_scanned

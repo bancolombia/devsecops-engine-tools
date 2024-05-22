@@ -110,7 +110,7 @@ class HandleScan:
             else:
                 secret_sca = dict_args["token_engine_container"]
             findings_list, input_core = runner_engine_container(
-                dict_args, config_tool, secret_sca, self.devops_platform_gateway
+                dict_args, config_tool["ENGINE_CONTAINER"]["TOOL"], secret_sca, self.devops_platform_gateway
             )
             if (
                 dict_args["use_vulnerability_management"] == "true"

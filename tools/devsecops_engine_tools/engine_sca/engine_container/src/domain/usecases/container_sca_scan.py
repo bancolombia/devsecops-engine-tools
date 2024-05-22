@@ -1,6 +1,3 @@
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
-    DevopsPlatformGateway,
-)
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -11,33 +8,23 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateway
     DeseralizatorGateway,
 )
 
+
 class ContainerScaScan:
     def __init__(
         self,
         tool_run: ToolGateway,
-        tool_remote: DevopsPlatformGateway,
+        remote_config,
         tool_images: ImagesGateway,
         tool_deseralizator: DeseralizatorGateway,
-        dict_args,
+        build_id,
         token,
-        skip_flag
     ):
         self.tool_run = tool_run
-        self.tool_remote = tool_remote
+        self.remote_config = remote_config
         self.tool_images = tool_images
         self.tool_deseralizator = tool_deseralizator
-        self.dict_args = dict_args
+        self.build_id = build_id
         self.token = token
-        self.skip_flag = skip_flag
-
-    def get_remote_config(self, file_path):
-        """
-        Get remote configuration.
-
-        Returns:
-            dict: Remote configuration.
-        """
-        return self.tool_remote.get_remote_config(self.dict_args["remote_config_repo"], file_path)
 
     def scan_image(self):
         """
@@ -48,15 +35,6 @@ class ContainerScaScan:
         """
         return self.tool_images.list_images()
 
-    def get_variable(self, variable):
-        """
-        Get variable.
-
-        Returns:
-            dict: Remote variable.
-        """
-        return self.tool_remote.get_variable(variable)
-
     def process(self):
         """
         Process SCA scanning.
@@ -65,11 +43,7 @@ class ContainerScaScan:
             dict: SCA scanning results.
         """
         return self.tool_run.run_tool_container_sca(
-            self.get_remote_config("engine_sca/engine_container/ConfigTool.json"),
-            self.token,
-            self.scan_image(),
-            self.get_variable("build_id"),
-            self.skip_flag
+            self.remote_config, self.token, self.scan_image(), self.build_id
         )
 
     def deseralizator(self, image_scanned):

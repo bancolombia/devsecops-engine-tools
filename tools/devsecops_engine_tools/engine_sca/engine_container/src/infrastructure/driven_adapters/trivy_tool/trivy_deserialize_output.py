@@ -9,6 +9,7 @@ from dataclasses import dataclass
 import json
 from datetime import datetime
 
+
 @dataclass
 class TrivyDeserializator(DeseralizatorGateway):
     def get_list_findings(self, images_scanned: list) -> "list[Finding]":
@@ -34,7 +35,9 @@ class TrivyDeserializator(DeseralizatorGateway):
                         + vul.get("InstalledVersion", ""),
                         description=vul.get("Description", "").replace("\n", ""),
                         severity=vul.get("Severity", "").lower(),
-                        identification_date=datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+                        identification_date=datetime.now().strftime(
+                            "%d-%m-%Y %H:%M:%S"
+                        ),
                         published_date_cve=vul.get("PublishedDate", ""),
                         module="engine_container",
                         category=Category.VULNERABILITY,
