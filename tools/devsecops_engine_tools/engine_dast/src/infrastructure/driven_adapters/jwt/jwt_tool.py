@@ -28,45 +28,6 @@ class JwtTool(ToolGateway):
         self.GOOD_JWE_ENC = ["A256GCM"]
         self.target_config = target_config
 
-    def downgrade(self, token):
-        newtoken = False
-        alg = jwt.get_unverified_header(token)["alg"]
-        data = jwt.decode(token, options={"verify_signature": False})
-
-        if alg == "HS256":
-            newtoken = jwt.encode(data, "", algorithm=None)
-        return newtoken
-
-    def send_req_downgrade(
-        self, agent, natural_response=None, url="", token="", params=None, data=None
-    ):
-        """Send downgraded JWT token in request using agent"""
-
-        check_id = "ENGINE_JWT_004"
-        is_vulnerable = False
-        message_downgrade = "Downgrade de JWT fallido"
-
-        if natural_response is None:
-            agent.auth_bearer(token)
-            if data is None:
-                natural_response = agent.get(url, params)
-            else:
-                natural_response = agent.post(url, params)
-
-        agent.auth_bearer(token)
-        bad_token = self.downgrade(token)
-
-        if bad_token:
-            bad_response = agent.get(url, params)
-        else:
-            bad_response = agent.post(url, data)
-        if natural_response.status_code == bad_response.status_code:
-            if natural_response.txt == bad_response.text:
-                is_vulnerable = True
-                message_downgrade = "Downgrade de JWT exitoso"
-
-        return ("JWT token", check_id, is_vulnerable, message_downgrade, token)
-
     def verify_jwt_alg(self, token):
         "Evaluate JSON Web token's algorithm"
 
