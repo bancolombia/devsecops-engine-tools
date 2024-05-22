@@ -1,9 +1,7 @@
 from typing import List
 import os
-from uu import Error
 from ruamel.yaml import YAML
 from json import dumps as json_dumps
-
 
 class NucleiConfig:
     def __init__(self, target_config):
@@ -17,7 +15,7 @@ class NucleiConfig:
         elif self.target_type.lower() == "wa":
             self.data: dict = target_config.data
         else:
-            raise Error("No se ha podido establecer si el objetivo a escanear es una api o un aplicativo web.")
+            raise ValueError("No se ha podido establecer si el objetivo a escanear es una api o un aplicativo web.")
 
     def process_template_file(
         self,
