@@ -18,12 +18,12 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
 )
 
 
-def runner_engine_container(dict_args, config_tool, token, tool_remote):
+def runner_engine_container(dict_args, tool, token, tool_remote):
     try:
-        if config_tool["ENGINE_CONTAINER"]["TOOL"].lower() == "trivy":
+        if tool.lower() == "trivy":
             tool_run = TrivyScan()
             tool_deseralizator = TrivyDeserializator()
-        elif config_tool["ENGINE_CONTAINER"]["TOOL"].lower() == "prisma":
+        elif tool.lower() == "prisma":
             tool_run = PrismaCloudManagerScan()
             tool_deseralizator = PrismaDeserealizator()
         tool_images = DockerImages()
@@ -34,7 +34,7 @@ def runner_engine_container(dict_args, config_tool, token, tool_remote):
             tool_deseralizator,
             dict_args,
             token,
-            config_tool,
+            tool,
         )
 
     except Exception as e:
