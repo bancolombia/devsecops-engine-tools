@@ -32,6 +32,7 @@ class NucleiDesealizator:
                     category=Category("vulnerability"),
                     requirements=scan["info"].get("remediation"),
                     tool="Nuclei",
+                    published_date_cve=None
                 )
                 list_open_findings.append(finding_open)
 

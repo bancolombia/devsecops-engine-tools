@@ -28,9 +28,7 @@ class NucleiConfig:
         template_counter: int,
     ) -> None:
         new_template_name: str = "nuclei_template_" + str(template_counter) + ".yaml"
-
-        template_file_path = os.path.join(base_folder, template_name)
-        with open(template_file_path, "r") as template_file:  # abrir  archivo
+        with open(template_name, "r") as template_file:  # abrir  archivo
             template_data = self.yaml.load(template_file)
             if "http" in template_data:
                 template_data["http"][0]["method"] = new_template_data["operation"]["method"]
@@ -57,16 +55,17 @@ class NucleiConfig:
             t_counter = 0
             for operation in self.data:
                 operation.authenticate() #Api Authentication
-                for template_name in os.listdir(base_folder):
-                    if template_name.endswith(".yaml"):
-                        self.process_template_file(
-                            base_folder=base_folder,
-                            dest_folder=self.custom_templates_dir,
-                            template_name=template_name,
-                            new_template_data=operation.data,
-                            template_counter=t_counter,
-                        )
-                    t_counter += 1
+                for root, dirs, files in os.walk(base_folder):
+                    for file in files:
+                        if file.endswith(".yaml"):
+                            self.process_template_file(
+                                base_folder=base_folder,
+                                dest_folder=self.custom_templates_dir,
+                                template_name=os.path.join(root, file),
+                                new_template_data=operation.data,
+                                template_counter=t_counter,
+                            )
+                        t_counter += 1
 
     def customize_templates(self, directory: str) -> None:
         if self.target_type.lower() == "api":

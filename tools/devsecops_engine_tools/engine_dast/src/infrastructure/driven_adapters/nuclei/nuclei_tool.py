@@ -33,7 +33,7 @@ class NucleiTool(ToolGateway):
         self.debug: str = os.environ.get("DEBUG", "false")
 
     def configurate_external_checks(
-        self, config_tool: ConfigTool, github_token: str, output_dir: str = "azp/_work/r1/a"
+        self, config_tool: ConfigTool, github_token: str, output_dir: str = "tmp"
     ):
         # Create configuration dir external checks
         if config_tool.use_external_checks_dir == "True":
@@ -43,7 +43,7 @@ class NucleiTool(ToolGateway):
                 config_tool.external_dir_repository,
                 output_dir,
             )
-            return output_dir + "/http/http-security-headers"
+            return output_dir + config_tool.external_checks_save_path
 
     def execute(self, target_config: NucleiConfig) -> dict:
         """Interact with nuclei's core application"""

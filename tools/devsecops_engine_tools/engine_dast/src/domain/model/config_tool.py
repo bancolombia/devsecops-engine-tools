@@ -15,6 +15,7 @@ class ConfigTool:
         self.external_dir_owner = json_data[tool]["EXTERNAL_DIR_OWNER"]
         self.external_dir_repository = json_data[tool]["EXTERNAL_DIR_REPOSITORY"]
         self.external_asset_name = json_data[tool]["EXTERNAL_DIR_ASSET_NAME"]
+        self.external_checks_save_path = json_data[tool]["EXTERNAL_CHECKS_PATH"]
         self.message_info_dast = json_data[tool]["MESSAGE_INFO_DAST"]
         self.threshold = Threshold(json_data[tool]["THRESHOLD"])
         self.rules_data_type = json_data[tool]["RULES"]
