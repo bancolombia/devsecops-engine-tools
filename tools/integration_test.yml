@@ -28,3 +28,5 @@ steps:
     displayName: 'Integration Test'
     env:
       PERSONAL_ACCESS_TOKEN: $(System.AccessToken)
+      TOKEN_CMDB: $(TOKEN_CMDB)
+      TOKEN_DEFECT_DOJO: $(TOKEN_DEFECT_DOJO)
