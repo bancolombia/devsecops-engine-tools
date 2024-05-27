@@ -58,3 +58,6 @@ Packages (directories) and modules (.py files) must be lowercase.
   </tbody>
 </table>
 
+# GOVERNANCE
+
+Read more [Governance](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/docs/GOVERNANCE.md)
