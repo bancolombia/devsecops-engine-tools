@@ -74,7 +74,7 @@ devsecops-engine-tools --platform_devops local --remote_config_repo DevSecOps_Re
 ```
 ### Scan result sample (CLI)
 
-![Dashboard Grafana](docs/demo_session.svg)
+![Dashboard Grafana](docs/demo_session1.svg)
 
 # Metrics
 
