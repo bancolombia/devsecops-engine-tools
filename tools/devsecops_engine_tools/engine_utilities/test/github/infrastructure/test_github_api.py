@@ -4,8 +4,8 @@ from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api im
 
 class TestGithubApi(unittest.TestCase):
     def setUp(self):
-        self.token = "your_token"
-        self.github_api = GithubApi(token=self.token)
+        self.personal_access_token = "your_token"
+        self.github_api = GithubApi(personal_access_token=self.personal_access_token)
 
     @patch('devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.zipfile.ZipFile')
     def test_unzip_file(self, mock_zipfile):
