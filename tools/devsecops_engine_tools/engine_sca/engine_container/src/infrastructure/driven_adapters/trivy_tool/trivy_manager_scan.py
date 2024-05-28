@@ -58,46 +58,33 @@ class TrivyScan(ToolGateway):
             except subprocess.CalledProcessError as error:
                 logger.error(f"Error installing trivy: {error}")
 
-    def scan_image(self, prefix, image):
-        file_name = "scanned_images.txt"
-        image_name = f"{image.tags[0]}"
-        result_file = f"{image_name}" + "_scan_result.json"
-        image_scanned = []
+    def scan_image(self, prefix, image_name, result_file):
+        command = [
+            prefix,
+            "--scanners",
+            "vuln",
+            "-f",
+            "json",
+            "-o",
+            result_file,
+        ]
+        command.extend(["--quiet", "image", image_name])
+        try:
+            subprocess.run(
+                command,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            print(f"The image {image_name} was scanned")
 
-        if (result_file) in ImagesScanned.get_images_already_scanned(file_name):
-            print(f"The image {image_name} has already been scanned previously.")
-        else:
-            command = [
-                prefix,
-                "--scanners",
-                "vuln",
-                "-f",
-                "json",
-                "-o",
-                result_file,
-            ]
-            command.extend(["--quiet", "image", image_name])
-            try:
-                subprocess.run(
-                    command,
-                    check=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                )
-                image_scanned.append(result_file)
-                print(f"The image {image_name} was scanned")
-                with open(file_name, "a") as file:
-                    file.write(result_file + "\n")
-            except subprocess.CalledProcessError as e:
-                logger.error(
-                    f"Error during image scan of {image_name}: {e.stderr}"
-                )
+            return result_file
 
-        return image_scanned
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error during image scan of {image_name}: {e.stderr}")
 
-    def run_tool_container_sca(self, remoteconfig, token, image):
-        image_scanned=[]
+    def run_tool_container_sca(self, remoteconfig, token, image_name, result_file):
         trivy_version = remoteconfig["TRIVY"]["TRIVY_VERSION"]
         os_platform = platform.system()
         base_url = f"https://github.com/aquasecurity/trivy/releases/download/v{trivy_version}/"
@@ -116,10 +103,10 @@ class TrivyScan(ToolGateway):
             command_prefix = "./trivy.exe"
         else:
             logger.warning(f"{os_platform} is not supported.")
-            
+            return None
 
-        image_scanned.extend(
-            self.scan_image(command_prefix, image)
+        image_scanned = (
+            self.scan_image(command_prefix, image_name, result_file)
         )
 
         return image_scanned
