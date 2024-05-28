@@ -21,7 +21,15 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class TrivyScan(ToolGateway):
-    def install_tool(self, version, platform):
+    def download_tool(self, file, url):
+        try:
+            response = requests.get(url, allow_redirects=True)
+            with open(file, "wb") as compress_file:
+                compress_file.write(response.content)
+        except subprocess.CalledProcessError as error:
+            logger.error(f"Error downloading trivy: {error}")
+
+    def install_tool(self, file, url):
         installed = subprocess.run(
             ["which", "./trivy"],
             stdout=subprocess.PIPE,
@@ -29,17 +37,13 @@ class TrivyScan(ToolGateway):
         )
         if installed.returncode == 1:
             try:
-                file=f"trivy_{version}_{platform}-64bit.tar.gz"
-                url=f"https://github.com/aquasecurity/trivy/releases/download/v{version}/{file}"
-                response = requests.get(url, allow_redirects=True)
-                with open(file, "wb") as tar_file:
-                    tar_file.write(response.content)
+                self.download_tool(file, url)
                 with tarfile.open(file, 'r:gz') as tar_file:
-                    tar_file.extractall()
+                    tar_file.extract(member=tar_file.getmember("trivy"))
             except subprocess.CalledProcessError as error:
-                raise RuntimeError(f"Error installing trivy: {error}")
+                logger.error(f"Error installing trivy: {error}")
         
-    def install_tool_windows(self, version):
+    def install_tool_windows(self, file, url):
         try:
             subprocess.run(
                 ["./trivy.exe", "--version"],
@@ -48,15 +52,11 @@ class TrivyScan(ToolGateway):
             )
         except:
             try:
-                file=f"trivy_{version}_windows-64bit.zip"
-                url=f"https://github.com/aquasecurity/trivy/releases/download/v{version}/{file}"
-                response = requests.get(url, allow_redirects=True)
-                with open(file, "wb") as zip_file:
-                    zip_file.write(response.content)
+                self.download_tool(file, url)
                 with zipfile.ZipFile(file, 'r') as zip_file:
-                    zip_file.extractall()
+                    zip_file.extract(member="trivy.exe")
             except subprocess.CalledProcessError as error:
-                raise RuntimeError(f"Error installing trivy: {error}")
+                logger.error(f"Error installing trivy: {error}")
 
     def scan_image(self, prefix, image):
         file_name = "scanned_images.txt"
@@ -100,15 +100,19 @@ class TrivyScan(ToolGateway):
         image_scanned=[]
         trivy_version = remoteconfig["TRIVY"]["TRIVY_VERSION"]
         os_platform = platform.system()
+        base_url = f"https://github.com/aquasecurity/trivy/releases/download/v{trivy_version}/"
 
         if os_platform == "Linux":
-            self.install_tool(trivy_version, "Linux")
+            file=f"trivy_{trivy_version}_Linux-64bit.tar.gz"
+            self.install_tool(file, base_url+file)
             command_prefix = "./trivy"
         elif os_platform == "Darwin":
-            self.install_tool(trivy_version, "macOS")
+            file=f"trivy_{trivy_version}_macOS-64bit.tar.gz"
+            self.install_tool(file, base_url+file)
             command_prefix = "./trivy"
         elif os_platform == "Windows":
-            self.install_tool_windows(trivy_version)
+            file=f"trivy_{trivy_version}_windows-64bit.zip"
+            self.install_tool_windows(file, base_url+file)
             command_prefix = "./trivy.exe"
         else:
             logger.warning(f"{os_platform} is not supported.")
