@@ -7,7 +7,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
 )
 from dataclasses import dataclass
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 @dataclass
@@ -22,23 +22,26 @@ class TrivyDeserializator(DeseralizatorGateway):
                 vulnerabilities = [
                     Finding(
                         id=vul.get("VulnerabilityID", ""),
-                        cvss=next(
+                        cvss=str(next(
                             (
                                 v["V3Score"]
                                 for v in vul["CVSS"].values()
                                 if "V3Score" in v
                             ),
                             None,
-                        ),
+                        )),
                         where=vul.get("PkgName", "")
                         + " "
                         + vul.get("InstalledVersion", ""),
-                        description=vul.get("Description", "").replace("\n", ""),
+                        description=vul.get("Description", "").replace("\n", "")[:150],
                         severity=vul.get("Severity", "").lower(),
                         identification_date=datetime.now().strftime(
-                            "%d-%m-%Y %H:%M:%S"
+                            "%Y-%m-%dT%H:%M:%S%z"
                         ),
-                        published_date_cve=vul.get("PublishedDate", ""),
+                        published_date_cve=datetime.strptime(
+                            vul.get("PublishedDate"),
+                            "%Y-%m-%dT%H:%M:%S.%fZ"
+                            ).replace(tzinfo=timezone.utc).isoformat(),
                         module="engine_container",
                         category=Category.VULNERABILITY,
                         requirements=vul.get("FixedVersion") or vul.get("Status", ""),
