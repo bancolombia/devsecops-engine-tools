@@ -1,5 +1,8 @@
 import pytest
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.handle_remote_config_patterns import HandleRemoteConfigPatterns
+from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.handle_remote_config_patterns import (
+    HandleRemoteConfigPatterns,
+)
+
 
 @pytest.fixture
 def remote_config():
@@ -8,11 +11,7 @@ def remote_config():
 
 @pytest.fixture
 def exclusions():
-    return {
-        "dummy_pipeline": {
-            "SKIP_TOOL": 1
-        }
-    }
+    return {"dummy_pipeline": {"SKIP_TOOL": 1}}
 
 
 @pytest.fixture

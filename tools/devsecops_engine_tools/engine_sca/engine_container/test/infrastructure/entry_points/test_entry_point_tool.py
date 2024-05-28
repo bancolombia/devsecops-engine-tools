@@ -4,6 +4,7 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry
 from unittest.mock import patch, Mock
 import pytest
 
+
 def test_init_engine_sca_rm():
     with patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool.ContainerScaScan"
@@ -33,6 +34,7 @@ def test_init_engine_sca_rm():
             token,
             tool,
         )
+
 
 def test_init_engine_sca_rm_skip_tool():
     with patch(
@@ -65,6 +67,7 @@ def test_init_engine_sca_rm_skip_tool():
         assert deserialized == []
         mock_container_sca_scan.assert_not_called()
 
+
 def test_init_engine_sca_rm_no_exclusions():
     with patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool.ContainerScaScan"
@@ -96,6 +99,7 @@ def test_init_engine_sca_rm_no_exclusions():
         )
         assert deserialized == []
         mock_container_sca_scan.assert_not_called()
+
 
 def test_init_engine_sca_rm_empty_remote_config():
     with patch(
