@@ -26,7 +26,7 @@ class ContainerScaScan:
         self.build_id = build_id
         self.token = token
 
-    def scan_image(self):
+    def get_latest_image(self):
         """
         Process the list of images.
 
@@ -42,9 +42,13 @@ class ContainerScaScan:
         Returns:
             dict: SCA scanning results.
         """
-        return self.tool_run.run_tool_container_sca(
-            self.remote_config, self.token, self.scan_image(), self.build_id
-        )
+        latest_image = self.get_latest_image()
+        if self.build_id in latest_image.tags[0]:
+            return self.tool_run.run_tool_container_sca(
+                self.remote_config, self.token, latest_image
+            )
+        print(f"{latest_image.tags[0]} name does not contain build number {self.build_id}. Tool skipped.")
+        return []
 
     def deseralizator(self, image_scanned):
         """

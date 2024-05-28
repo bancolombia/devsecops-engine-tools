@@ -44,7 +44,7 @@ class PrismaCloudManagerScan(ToolGateway):
         except Exception as e:
             raise ValueError(f"Error downloading twistcli: {e}")
 
-    def scan_image(self, file_path, image, remoteconfig, prisma_secret_key, build_id):
+    def scan_image(self, file_path, image, remoteconfig, prisma_secret_key):
         file_name = "scanned_images.txt"
         image_name = f"{image.tags[0]}"
         result_file = f"{image_name}" + "_scan_result.json"
@@ -53,40 +53,39 @@ class PrismaCloudManagerScan(ToolGateway):
         if (result_file) in ImagesScanned.get_images_already_scanned(file_name):
             print(f"The image {image_name} has already been scanned previously.")
         else:
-            if build_id in image_name:
-                command = (
-                    file_path,
-                    "images",
-                    "scan",
-                    "--address",
-                    remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
-                    "--user",
-                    remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
-                    "--password",
-                    prisma_secret_key,
-                    "--output-file",
-                    result_file,
-                    "--details",
-                    image_name,
+            command = (
+                file_path,
+                "images",
+                "scan",
+                "--address",
+                remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
+                "--user",
+                remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
+                "--password",
+                prisma_secret_key,
+                "--output-file",
+                result_file,
+                "--details",
+                image_name,
+            )
+            try:
+                subprocess.run(
+                    command,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
                 )
-                try:
-                    subprocess.run(
-                        command,
-                        check=True,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        text=True,
-                    )
-                    images_scanned.append(result_file)
-                    print(f"The image {image_name} was scanned")
-                    with open(file_name, "a") as file:
-                        file.write(result_file + "\n")
-                except subprocess.CalledProcessError as e:
-                    logger.error(f"Error during image scan of {image_name}: {e.stderr}")
+                images_scanned.append(result_file)
+                print(f"The image {image_name} was scanned")
+                with open(file_name, "a") as file:
+                    file.write(result_file + "\n")
+            except subprocess.CalledProcessError as e:
+                logger.error(f"Error during image scan of {image_name}: {e.stderr}")
 
         return images_scanned
 
-    def run_tool_container_sca(self, remoteconfig, prisma_secret_key, image, build_id):
+    def run_tool_container_sca(self, remoteconfig, prisma_secret_key, image):
         images_scanned = []
         try:
             file_path = os.path.join(
@@ -107,7 +106,6 @@ class PrismaCloudManagerScan(ToolGateway):
                     image,
                     remoteconfig,
                     prisma_secret_key,
-                    build_id,
                 )
             )
 
