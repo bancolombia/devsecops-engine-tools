@@ -1,5 +1,4 @@
 import re
-import os
 
 
 class HandleRemoteConfigPatterns:
