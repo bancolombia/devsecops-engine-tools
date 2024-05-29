@@ -49,7 +49,7 @@ def init_engine_dependencies(
         bypass_limits_flag = handle_remote_config_patterns.bypass_archive_limits()
         pattern = handle_remote_config_patterns.excluded_files()
 
-        find_artifacts = FindArtifacts(os.getcwd(), pattern)
+        find_artifacts = FindArtifacts(os.getcwd(), pattern, remote_config["PACKAGES_TO_SCAN"])
         dir_to_scan_path = find_artifacts.find_artifacts()
 
         dependencies_sca_scan = DependenciesScan(
