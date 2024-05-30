@@ -89,7 +89,8 @@ class FindArtifacts:
             if os.path.isfile(os.path.join(dir_to_scan_path, file))
         ]
         if files:
-            logger.debug(f"Files to scan: {", ".join(files)}")
-            print(f"Files to scan: {", ".join(files)}")
+            files_string = ", ".join(files)
+            logger.debug(f"Files to scan: {files_string}")
+            print(f"Files to scan: {files_string}")
 
         return dir_to_scan_path
