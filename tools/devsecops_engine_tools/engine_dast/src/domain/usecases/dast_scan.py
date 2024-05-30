@@ -56,66 +56,68 @@ class DastScan:
         return config_tool, data_target_config
 
     def process(
-        self, dict_args, secret_tool, config_tool
+        self, dict_args, dast_token, config_tool
     ) -> "Tuple[List, InputCore]":
-        init_config_tool = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_dast/configTool.json"
-        )
+        try:
+            init_config_tool = self.devops_platform_gateway.get_remote_config(
+                dict_args["remote_config_repo"], "engine_dast/configTool.json"
+            )
 
-        exclusions = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"],
-            "engine_dast/Exclusions.json"
-         )
+            exclusions = self.devops_platform_gateway.get_remote_config(
+                dict_args["remote_config_repo"],
+                "engine_dast/Exclusions.json"
+            )
 
+            config_tool, data_target = self.complete_config_tool(
+                data_file_tool=init_config_tool,
+                exclusions=exclusions,
+                tool=config_tool["ENGINE_DAST"]["TOOL"],
+            )
 
-        config_tool, data_target = self.complete_config_tool(
-            data_file_tool=init_config_tool,
-            exclusions=exclusions,
-            tool=config_tool["ENGINE_DAST"]["TOOL"],
-        )
-
-        finding_list, path_file_results = self.tool_gateway.run_tool(
-            target_data=data_target,
-            config_tool=config_tool,
-            secret_tool=secret_tool,
-        )
-        #Here exceute other tools and append to finding list
-        if len(self.other_tools) > 0:
-            extra_finding_list = self.other_tools[0].run_tool(
+            finding_list, path_file_results = self.tool_gateway.run_tool(
                 target_data=data_target,
-                config_tool=config_tool
+                config_tool=config_tool,
+                token=dast_token,
             )
-            if len(extra_finding_list) > 0:
-                finding_list.extend(extra_finding_list)
-
-        totalized_exclusions = []
-        (
-            totalized_exclusions.extend(
-                map(
-                    lambda elem: Exclusions(**elem), config_tool.exclusions_all
+            #Here exceute other tools and append to finding list
+            if len(self.other_tools) > 0:
+                extra_finding_list = self.other_tools[0].run_tool(
+                    target_data=data_target,
+                    config_tool=config_tool
                 )
-            )
-            if config_tool.exclusions_all is not None
-            else None
-        )
-        (
-            totalized_exclusions.extend(
-                map(
-                    lambda elem: Exclusions(**elem),
-                    config_tool.exclusions_scope,
+                if len(extra_finding_list) > 0:
+                    finding_list.extend(extra_finding_list)
+
+            totalized_exclusions = []
+            (
+                totalized_exclusions.extend(
+                    map(
+                        lambda elem: Exclusions(**elem), config_tool.exclusions_all
+                    )
                 )
+                if config_tool.exclusions_all is not None
+                else None
             )
-            if config_tool.exclusions_scope is not None
-            else None
-        )
+            (
+                totalized_exclusions.extend(
+                    map(
+                        lambda elem: Exclusions(**elem),
+                        config_tool.exclusions_scope,
+                    )
+                )
+                if config_tool.exclusions_scope is not None
+                else None
+            )
 
-        input_core = InputCore(
-            totalized_exclusions=totalized_exclusions,
-            threshold_defined=config_tool.threshold,
-            path_file_results=path_file_results,
-            custom_message_break_build=config_tool.message_info_dast,
-            scope_pipeline=config_tool.scope_pipeline,
-            stage_pipeline="Release",
-        )
+            input_core = InputCore(
+                totalized_exclusions=totalized_exclusions,
+                threshold_defined=config_tool.threshold,
+                path_file_results=path_file_results,
+                custom_message_break_build=config_tool.message_info_dast,
+                scope_pipeline=config_tool.scope_pipeline,
+                stage_pipeline="Release",
+            )
 
-        return finding_list, input_core
+            return finding_list, input_core
+        except Exception as e:
+            raise Exception(f"Error engine_secret : {str(e)}")

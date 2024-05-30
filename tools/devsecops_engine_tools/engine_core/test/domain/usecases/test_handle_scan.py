@@ -147,15 +147,44 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
 
-    @mock.patch("builtins.print")
-    def test_process_with_engine_dast(self, mock_print):
+    @mock.patch("devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_dast")
+    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data='''{
+        "endpoint": "https://example.com",
+        "operations": [
+            {
+                "operation": {
+                    "headers": {
+                        "accept": "/"
+                    },
+                    "method": "POST",
+                    "path": "/example_path",
+                    "security_auth": {
+                        "type": "jwt"
+                    }
+                }
+            }
+        ]
+    }''')
+    def test_process_with_engine_dast(self, mock_open, mock_runner_engine_dast):
         dict_args = {
-            "use_secrets_manager": "false",
+            "use_secrets_manager": "true",
             "tool": "engine_dast",
+            "dast_file_path": "example_dast.json"
         }
-        config_tool = {"ENGINE_DAST": "some_config"}
-        self.handle_scan.process(dict_args, config_tool)
-        mock_print.assert_called_once_with("not yet enabled")
+        secret_tool = {"github_token": "example_token"}
+        self.secrets_manager_gateway.get_secret.return_value = secret_tool
+        config_tool = {"ENGINE_DAST": {"ENABLED": "true", "TOOL": "NUCLEI"}}
+        # Simula lo que devolverá runner_engine_dast
+        mock_runner_engine_dast.return_value = (["finding1", "finding2"], "input_core_mock")
+        # Llama al método que deseas probar
+        result_findings_list, result_input_core = self.handle_scan.process(dict_args, config_tool)
+        # Verifica que el mock se haya llamado correctamente
+        mock_runner_engine_dast.assert_called_once_with(
+            dict_args, config_tool, secret_tool, self.devops_platform_gateway
+        )
+        # Verifica los resultados devueltos
+        self.assertEqual(result_findings_list, ["finding1", "finding2"])
+        self.assertEqual(result_input_core, "input_core_mock")
 
     @mock.patch("devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_secret_scan")
     def test_process_with_engine_secret(self, mock_runner_secret_scan):

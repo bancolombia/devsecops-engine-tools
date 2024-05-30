@@ -8,18 +8,14 @@ class GenericOauth(AuthenticationGateway):
         self.data: dict = data
 
     def process_data(self):
-        client_id = self.data["security_auth"]["client_id"]
-        client_secret = self.data["security_auth"]["client_secret"]
-        tenant_id = self.data["security_auth"]["tenant_id"]
-        username = self.data["security_auth"].get("username")
-        password = self.data["security_auth"].get("password")
 
         config = {
-            "client_id": client_id,
-            "client_secret": client_secret,
-            "tenant_id": tenant_id,
-            "username": username,
-            "password": password,
+            "client_id": self.data["security_auth"]["client_id"],
+            "client_secret": self.data["security_auth"]["client_secret"],
+            "endpoint": self.data["security_auth"]["endpoint"],
+            "username": self.data["security_auth"].get("username"),
+            "password": self.data["security_auth"].get("password"),
+            "scope": self.data["security_auth"].get("scope")
         }
 
         return config
@@ -33,26 +29,24 @@ class GenericOauth(AuthenticationGateway):
             return self.get_access_token_client_credentials()
 
     def get_credentials(self):
-        pass
+        return self.get_access_token()
 
     def get_access_token_client_credentials(self):
-        """Obtener access token desde microsoft graph."""
+        """Obtain access token using client credentials flow."""
         try:
-            # Verifica que el diccionario de configuración contenga todas las claves necesarias
             required_keys = ["client_id", "client_secret", "tenant_id"]
             if not all(key in self.config for key in required_keys):
-                raise ValueError("Falta una o más claves de configuración.")
+                raise ValueError("One or more keys is missing in OAuth config")
 
-            tenant_id = self.config["tenant_id"]
             data = {
                 "client_id": self.config["client_id"],
                 "client_secret": self.config["client_secret"],
                 "tenant_id": self.config["tenant_id"],
                 "grant_type": "client_credentials",
-                "scope": "https://graph.microsoft.com/.default",
+                "scope": self.config["scope"],
             }
 
-            url = "https://login.microsoftonline.com/" f"{tenant_id}/oauth2/v2.0/token"
+            url = self.config["endpoint"]
             headers = {
                 "Content-Type": "application/x-www-form-urlencoded",
             }
@@ -64,35 +58,32 @@ class GenericOauth(AuthenticationGateway):
                 return result
             else:
                 print(
-                    "[graph] No se obtuvo el access "
+                    "Can't obtain access token"
                     "token Unknown status "
                     "code {0}: -> {1}".format(response.status_code, response.text)
                 )
         except (ConnectionError, ValueError, KeyError) as e:
-            print("[graph] No se obtuvo el access " "token Excepcion: {0}".format(e))
+            print("Can't obtain accesstoken: {0}".format(e))
 
     def get_access_token_resource_owner(self):
-        """Obtener access token desde microsoft graph."""
+        """Obtain access token using resource owner flow."""
         try:
-            # Verifica que el diccionario de configuración contenga todas las claves necesarias
             required_keys = [
                 "client_id",
                 "client_secret",
                 "tenant_id",
                 "username",
-                "password",
+                "password"
             ]
             if not all(key in self.config for key in required_keys):
                 raise ValueError("Falta una o más claves de configuración.")
 
-            tenant_id = self.config["tenant_id"]
-
-            url = "https://login.microsoftonline.com/" f"{tenant_id}/oauth2/v2.0/token"
+            url = self.config["endpoint"]
             data = {
                 "client_id": self.config["client_id"],
                 "client_secret": self.config["client_secret"],
                 "grant_type": "password",
-                "scope": "https://graph.microsoft.com/.default",
+                "scope": self.config["scope"],
                 "username": self.config["username"],
                 "password": self.config["password"],
             }
