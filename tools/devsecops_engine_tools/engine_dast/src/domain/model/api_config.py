@@ -9,4 +9,4 @@ class ApiConfig():
             self.rate_limit: str = api_data.get("rate_limit")
             self.operations: "List[ApiOperation]" = api_data["operations"]
         except KeyError:
-            raise KeyError("Configuración faltante, validar endpoint y  acda uno de los operations")
+            raise KeyError("Missing configuration, validate the endpoint and every single operation")
