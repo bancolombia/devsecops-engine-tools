@@ -82,4 +82,15 @@ class FindArtifacts:
         if len(files_list):
             self.move_files(dir_to_scan_path, files_list)
 
+        files = os.listdir(dir_to_scan_path)
+        files = [
+            file
+            for file in files
+            if os.path.isfile(os.path.join(dir_to_scan_path, file))
+        ]
+        if files:
+            files_string = ", ".join(files)
+            logger.debug(f"Files to scan: {files_string}")
+            print(f"Files to scan: {files_string}")
+
         return dir_to_scan_path
