@@ -25,6 +25,7 @@ def test_application_core(mock_get_inputs_from_cli, mock_entry_point_tool):
         "token_vulnerability_management": None,
         "token_engine_container": None,
         "token_engine_dependencies": None,
+        "dast_file_path": None,
     }
 
     # Mock the dependencies
