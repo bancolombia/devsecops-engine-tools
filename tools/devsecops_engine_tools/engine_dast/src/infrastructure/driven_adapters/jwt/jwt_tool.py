@@ -19,6 +19,7 @@ from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.file_generato
 class JwtTool(ToolGateway):
 
     def __init__(self, target_config):
+        self.TOOL = "JWT"
         self.BAD_JWT_ALG = ["none", "ES256", "ES384", "ES512"]
         self.BAD_JWS_ALG = ["none", "ES256", "ES384", "ES512"]
         self.GOOD_JWE_ALG = ["dir", "RSA-OAEP", "RSA-OAEP-256"]
