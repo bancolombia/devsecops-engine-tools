@@ -3,7 +3,6 @@ from unittest import mock
 from devsecops_engine_tools.engine_dast.src.applications.runner_dast_scan import (
     runner_engine_dast
 )
-from devsecops_engine_tools.engine_dast.src.domain.model.api_config import ApiConfig
 
 class TestRunnerEngineDast(unittest.TestCase):
 

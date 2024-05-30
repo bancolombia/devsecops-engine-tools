@@ -120,4 +120,4 @@ class DastScan:
 
             return finding_list, input_core
         except Exception as e:
-            raise Exception(f"Error engine_secret : {str(e)}")
+            raise Exception(f"Error engine dast : {str(e)}")
