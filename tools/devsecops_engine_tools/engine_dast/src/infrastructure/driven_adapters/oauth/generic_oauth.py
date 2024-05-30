@@ -6,10 +6,11 @@ from devsecops_engine_tools.engine_dast.src.domain.model.gateways.authentication
 class GenericOauth(AuthenticationGateway):
     def __init__(self, data):
         self.data: dict = data
+        self.config = {}
 
     def process_data(self):
 
-        config = {
+        self.config = {
             "client_id": self.data["security_auth"]["client_id"],
             "client_secret": self.data["security_auth"]["client_secret"],
             "endpoint": self.data["security_auth"]["endpoint"],
@@ -18,7 +19,7 @@ class GenericOauth(AuthenticationGateway):
             "scope": self.data["security_auth"].get("scope")
         }
 
-        return config
+        return self.config
 
     def get_access_token(self):
         auth_config = self.process_data()

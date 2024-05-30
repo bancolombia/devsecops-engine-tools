@@ -12,7 +12,7 @@ def generate_file_from_tool(tool, result_list, rules_doc):
                 result_two = result_list[1]
             file_name = "results.json"
             results_data = {
-                "check_type": "Dockerfile and Kubernetes",
+                "check_type": "Dast scanning",
                 "results": {
                     "failed_checks": list(
                         map(
