@@ -23,7 +23,7 @@ class NucleiDesealizator:
             for scan in results_scan_list:
                 finding_open = Finding(
                     id=scan.get("template-id"),
-                    cvss=scan["info"]["classification"].get("cvss-score"),
+                    cvss=scan["info"].get("classification").get("cvss-score"),
                     where=scan.get("matched-at"),
                     description=scan["info"].get("description"),
                     severity=scan["info"].get("severity").lower(),

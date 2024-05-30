@@ -6,16 +6,16 @@ from json import dumps as json_dumps
 class NucleiConfig:
     def __init__(self, target_config):
         self.url: str = target_config.endpoint
-        self.target_type: str = target_config.target_type
+        self.target_type: str = target_config.target_type.lower()
         self.custom_templates_dir: str = ""
         self.output_file: str = "result_dast_scan.json"
         self.yaml = YAML()
-        if self.target_type.lower() == "api":
+        if self.target_type == "api":
             self.data: List = target_config.operations
-        elif self.target_type.lower() == "wa":
+        elif self.target_type == "wa":
             self.data: dict = target_config.data
         else:
-            raise ValueError("No se ha podido establecer si el objetivo a escanear es una api o un aplicativo web.")
+            raise ValueError("ERROR: The objective is not an api or web application type")
 
     def process_template_file(
         self,
@@ -37,8 +37,6 @@ class NucleiConfig:
                 if "payload" in new_template_data["operation"]:
                     body = json_dumps(new_template_data["operation"]["payload"])
                     template_data["http"][0]["body"] = body
-            elif "ssl" in template_data:
-                pass
 
         new_template_path = os.path.join(dest_folder, new_template_name)
 
@@ -49,25 +47,24 @@ class NucleiConfig:
         if not os.path.exists(self.custom_templates_dir):
             os.makedirs(self.custom_templates_dir)
 
-        if self.target_type.lower() == "api":
-            t_counter = 0
-            for operation in self.data:
-                operation.authenticate() #Api Authentication
-                for root, dirs, files in os.walk(base_folder):
-                    for file in files:
-                        if file.endswith(".yaml"):
-                            self.process_template_file(
-                                base_folder=base_folder,
-                                dest_folder=self.custom_templates_dir,
-                                template_name=os.path.join(root, file),
-                                new_template_data=operation.data,
-                                template_counter=t_counter,
-                            )
+        t_counter = 0
+        for operation in self.data:
+            operation.authenticate() #Api Authentication
+            for root, dirs, files in os.walk(base_folder):
+                for file in files:
+                    if file.endswith(".yaml"):
+                        self.process_template_file(
+                            base_folder=base_folder,
+                            dest_folder=self.custom_templates_dir,
+                            template_name=os.path.join(root, file),
+                            new_template_data=operation.data,
+                            template_counter=t_counter,
+                        )
                         t_counter += 1
 
     def customize_templates(self, directory: str) -> None:
-        if self.target_type.lower() == "api":
-            self.custom_templates_dir = "customized-nuclei-templates/"
+        if self.target_type == "api":
+            self.custom_templates_dir = "customized-nuclei-templates"
             self.process_templates_folder(
                 base_folder=directory
             )

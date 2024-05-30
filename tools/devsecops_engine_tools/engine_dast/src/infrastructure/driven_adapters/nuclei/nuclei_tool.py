@@ -57,7 +57,9 @@ class NucleiTool(ToolGateway):
             + target_config.custom_templates_dir
             + " -ni "  # disable interactsh server
             + "-dc "  # disable clustering of requests
-            + "-je "  # file to export results in JSON format
+            + "-tags " # Excute only templates with the especified tag
+            + target_config.target_type
+            + " -je "  # file to export results in JSON format
             + str(target_config.output_file)
         )
 
@@ -76,11 +78,9 @@ class NucleiTool(ToolGateway):
             json_response = json.load(f)
         return json_response
 
-    def run_tool(self, target_data, config_tool, secret_tool):
+    def run_tool(self, target_data, config_tool, token):
         nuclei_config = NucleiConfig(target_data)
-        #checks_directory = self.configurate_external_checks(config_tool, secret_tool["github_token"]) #DATA PDN
-        checks_directory = self.configurate_external_checks(config_tool,
-            github_token=os.getenv('GITHUB_TOKEN'))#BORRAR PDN
+        checks_directory = self.configurate_external_checks(config_tool, token) #DATA PDN
         nuclei_config.customize_templates(checks_directory)
         result_scans = self.execute(nuclei_config)
         nuclei_deserealizator = NucleiDesealizator()
