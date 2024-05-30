@@ -30,7 +30,6 @@ def mock_remoteconfig():
         },
         "TRIVY": {"TRIVY_VERSION": "0.48.1"},
         "MESSAGE_INFO_SCA_RM": "If you have doubts, visit ",
-        "REGEX_EXPRESSION_PROJECTS": "((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS[A-Z]{3})\\d+)",
         "THRESHOLD": {
             "VULNERABILITY": {"Critical": 999, "High": 999, "Medium": 999, "Low": 999},
             "COMPLIANCE": {"Critical": 1},
