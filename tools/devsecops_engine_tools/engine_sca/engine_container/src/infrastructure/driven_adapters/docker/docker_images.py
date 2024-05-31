@@ -9,6 +9,7 @@ from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
+
 class DockerImages(ImagesGateway):
     def list_images(self):
         try:
@@ -23,4 +24,6 @@ class DockerImages(ImagesGateway):
             print("Created date last image:", latest_image.attrs["Created"])
             return latest_image
         except Exception as e:
-            logger.error(f"Error listing images, docker must be running and added to PATH: {e}")
+            logger.error(
+                f"Error listing images, docker must be running and added to PATH: {e}"
+            )

@@ -41,7 +41,9 @@ class PrismaCloudManagerScan(ToolGateway):
         except Exception as e:
             raise ValueError(f"Error downloading twistcli: {e}")
 
-    def scan_image(self, file_path, image_name, result_file, remoteconfig, prisma_secret_key):
+    def scan_image(
+        self, file_path, image_name, result_file, remoteconfig, prisma_secret_key
+    ):
         command = (
             file_path,
             "images",
@@ -72,7 +74,9 @@ class PrismaCloudManagerScan(ToolGateway):
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during image scan of {image_name}: {e.stderr}")
 
-    def run_tool_container_sca(self, remoteconfig, prisma_secret_key, image_name, result_file):
+    def run_tool_container_sca(
+        self, remoteconfig, prisma_secret_key, image_name, result_file
+    ):
         file_path = os.path.join(
             os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
         )
@@ -85,14 +89,12 @@ class PrismaCloudManagerScan(ToolGateway):
                 remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
                 remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"],
             )
-        image_scanned = (
-            self.scan_image(
-                file_path,
-                image_name,
-                result_file,
-                remoteconfig,
-                prisma_secret_key,
-            )
+        image_scanned = self.scan_image(
+            file_path,
+            image_name,
+            result_file,
+            remoteconfig,
+            prisma_secret_key,
         )
 
         return image_scanned
