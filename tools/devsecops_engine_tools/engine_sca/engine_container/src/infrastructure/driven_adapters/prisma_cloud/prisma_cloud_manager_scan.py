@@ -4,9 +4,6 @@ import os
 import subprocess
 import logging
 import base64
-from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.images_scanned import (
-    ImagesScanned,
-)
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
