@@ -10,6 +10,7 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateway
 
 import os
 
+
 class ContainerScaScan:
     def __init__(
         self,
@@ -35,7 +36,7 @@ class ContainerScaScan:
             list: List of processed images.
         """
         return self.tool_images.list_images()
-    
+
     def get_images_already_scanned(self):
         """
         Create images scanned file if it does not exist and get the images that have already been scanned.
@@ -46,7 +47,7 @@ class ContainerScaScan:
         with open(scanned_images_file, "r") as file:
             images_scanned = file.read().splitlines()
         return images_scanned
-    
+
     def set_image_scanned(self, result_file):
         """
         Write in scanned_images.txt the result file

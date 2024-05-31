@@ -20,8 +20,8 @@ class TrivyScan(ToolGateway):
             response = requests.get(url, allow_redirects=True)
             with open(file, "wb") as compress_file:
                 compress_file.write(response.content)
-        except subprocess.CalledProcessError as error:
-            logger.error(f"Error downloading trivy: {error}")
+        except Exception as e:
+            logger.error(f"Error downloading trivy: {e}")
 
     def install_tool(self, file, url):
         installed = subprocess.run(
@@ -34,8 +34,8 @@ class TrivyScan(ToolGateway):
                 self.download_tool(file, url)
                 with tarfile.open(file, 'r:gz') as tar_file:
                     tar_file.extract(member=tar_file.getmember("trivy"))
-            except subprocess.CalledProcessError as error:
-                logger.error(f"Error installing trivy: {error}")
+            except Exception as e:
+                logger.error(f"Error installing trivy: {e}")
         
     def install_tool_windows(self, file, url):
         try:
@@ -49,8 +49,8 @@ class TrivyScan(ToolGateway):
                 self.download_tool(file, url)
                 with zipfile.ZipFile(file, 'r') as zip_file:
                     zip_file.extract(member="trivy.exe")
-            except subprocess.CalledProcessError as error:
-                logger.error(f"Error installing trivy: {error}")
+            except Exception as e:
+                logger.error(f"Error installing trivy: {e}")
 
     def scan_image(self, prefix, image_name, result_file):
         command = [
@@ -75,8 +75,8 @@ class TrivyScan(ToolGateway):
 
             return result_file
 
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Error during image scan of {image_name}: {e.stderr}")
+        except Exception as e:
+            logger.error(f"Error during image scan of {image_name}: {e}")
 
     def run_tool_container_sca(self, remoteconfig, token, image_name, result_file):
         trivy_version = remoteconfig["TRIVY"]["TRIVY_VERSION"]

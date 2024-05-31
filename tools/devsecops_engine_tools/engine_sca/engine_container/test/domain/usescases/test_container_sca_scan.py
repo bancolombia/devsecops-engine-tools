@@ -46,13 +46,12 @@ def test_get_latest_image(container_sca_scan):
     container_sca_scan.tool_images.list_images.return_value = ["image1", "image2"]
     assert container_sca_scan.get_latest_image() == ["image1", "image2"]
 
+
 def test_get_images_already_scanned(container_sca_scan):
     with patch("os.path.join") as mock_path_join, patch(
         "os.getcwd"
-    ) as mock_getcwd, patch(
-        "os.path.exists"
-    ) as mock_path_exists, patch(
-            "builtins.open"
+    ) as mock_getcwd, patch("os.path.exists") as mock_path_exists, patch(
+        "builtins.open"
     ) as mock_open:
         mock_path_join.return_value = "/path/to/scanned_images.txt"
         mock_path_exists.return_value = False
@@ -60,11 +59,12 @@ def test_get_images_already_scanned(container_sca_scan):
         container_sca_scan.get_images_already_scanned()
         assert mock_open.call_count == 2
 
+
 def test_set_image_scanned(container_sca_scan):
     with patch("builtins.open") as mock_open:
         container_sca_scan.set_image_scanned("result.json")
         assert mock_open.call_count == 1
-        
+
 
 def test_process_image_already_scanned(container_sca_scan):
     mock_latest_image = MagicMock()
@@ -72,8 +72,11 @@ def test_process_image_already_scanned(container_sca_scan):
     container_sca_scan.get_images_already_scanned = MagicMock()
     container_sca_scan.get_latest_image = MagicMock()
     container_sca_scan.get_latest_image.return_value = mock_latest_image
-    container_sca_scan.get_images_already_scanned.return_value = ["my_image:1234_scan_result.json"]
+    container_sca_scan.get_images_already_scanned.return_value = [
+        "my_image:1234_scan_result.json"
+    ]
     assert container_sca_scan.process() == None
+
 
 def test_process_image_not_already_scanned(container_sca_scan):
     mock_latest_image = MagicMock()
@@ -81,17 +84,23 @@ def test_process_image_not_already_scanned(container_sca_scan):
     container_sca_scan.get_images_already_scanned = MagicMock()
     container_sca_scan.get_latest_image = MagicMock()
     container_sca_scan.get_latest_image.return_value = mock_latest_image
-    container_sca_scan.get_images_already_scanned.return_value = ["my_image_scan_result.json"]
-    container_sca_scan.tool_run.run_tool_container_sca.return_value = ["my_image:1234_scan_result.json"]
+    container_sca_scan.get_images_already_scanned.return_value = [
+        "my_image_scan_result.json"
+    ]
+    container_sca_scan.tool_run.run_tool_container_sca.return_value = [
+        "my_image:1234_scan_result.json"
+    ]
     container_sca_scan.set_image_scanned = MagicMock()
     assert container_sca_scan.process() == ["my_image:1234_scan_result.json"]
 
+
 def test_process_not_buildid(container_sca_scan):
-    with patch('builtins.print') as mock_print:
+    with patch("builtins.print") as mock_print:
         mock_latest_image = MagicMock()
         mock_latest_image.tags = ["my_image:1234"]
         container_sca_scan.process()
         mock_print.assert_called_once()
+
 
 def test_deserialize(container_sca_scan):
     container_sca_scan.tool_deseralizator.get_list_findings.return_value = [
