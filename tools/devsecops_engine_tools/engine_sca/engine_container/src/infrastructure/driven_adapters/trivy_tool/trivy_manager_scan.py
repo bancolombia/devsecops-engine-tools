@@ -1,14 +1,8 @@
-import subprocess
-import re
-
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
 
-from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.images_scanned import (
-    ImagesScanned,
-)
-
+import subprocess
 import platform
 import requests
 import tarfile
