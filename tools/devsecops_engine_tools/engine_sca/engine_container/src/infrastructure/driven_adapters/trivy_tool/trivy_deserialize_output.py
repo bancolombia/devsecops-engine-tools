@@ -47,7 +47,7 @@ class TrivyDeserializator(DeseralizatorGateway):
                     tool="Trivy",
                 )
                 for vul in vulnerabilities_data
-                if "CVSS" in vul
+                if vul.get("CVSS") and vul.get("PublishedDate")
             ]
             list_open_vulnerabilities.extend(vulnerabilities)
         return list_open_vulnerabilities
