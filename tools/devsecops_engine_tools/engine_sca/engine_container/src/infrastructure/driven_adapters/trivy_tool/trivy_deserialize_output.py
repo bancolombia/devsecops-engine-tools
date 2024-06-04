@@ -17,7 +17,7 @@ class TrivyDeserializator(DeseralizatorGateway):
         with open(image_scanned, "rb") as file:
             image_object = file.read()
             json_data = json.loads(image_object)
-            vulnerabilities_data = json_data["Results"][0]["Vulnerabilities"]
+            vulnerabilities_data = json_data["Results"][0].get("Vulnerabilities", [])
             vulnerabilities = [
                 Finding(
                     id=vul.get("VulnerabilityID", ""),
