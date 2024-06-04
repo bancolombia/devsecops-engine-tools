@@ -65,23 +65,18 @@ class ContainerScaScan:
         latest_image = self.get_latest_image()
         image_name = latest_image.tags[0]
         image_scanned = None
-        if self.build_id:
-            if self.build_id in image_name:
-                result_file = image_name + "_scan_result.json"
-                if result_file in self.get_images_already_scanned():
-                    print(f"The image {image_name} has already been scanned previously.")
-                    return image_scanned
-                image_scanned = self.tool_run.run_tool_container_sca(
-                    self.remote_config, self.token, image_name, result_file
-                )
-                self.set_image_scanned(result_file)
-            else:
-                print(
-                    f"'{image_name}' name does not contain build number '{self.build_id}'. Tool skipped."
-                )
+        if str(self.build_id) in image_name:
+            result_file = image_name + "_scan_result.json"
+            if result_file in self.get_images_already_scanned():
+                print(f"The image {image_name} has already been scanned previously.")
+                return image_scanned
+            image_scanned = self.tool_run.run_tool_container_sca(
+                self.remote_config, self.token, image_name, result_file
+            )
+            self.set_image_scanned(result_file)
         else:
             print(
-                f"BUILD ID not set. Tool skipped."
+                f"'{image_name}' name does not contain build number '{self.build_id}'. Tool skipped."
             )
         return image_scanned
 
