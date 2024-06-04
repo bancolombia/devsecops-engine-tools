@@ -4,15 +4,19 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.entry_poin
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_tool import (
     CheckovTool
 )
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool import (
+    KicsTool
+)
 
 
 def runner_engine_iac(dict_args, tool, secret_tool, devops_platform_gateway, env):
     try:
         # Define driven adapters for gateways
         tool_gateway = None
-        if (tool == "CHECKOV"):
+        if tool == "CHECKOV":
             tool_gateway = CheckovTool()
-
+        elif tool == "KICS":
+            tool_gateway = KicsTool()
         return init_engine_sast_rm(
             devops_platform_gateway=devops_platform_gateway,
             tool_gateway=tool_gateway,
