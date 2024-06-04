@@ -49,7 +49,7 @@ class PrismaDeserealizator(DeseralizatorGateway):
                     identification_date=datetime.strptime(
                         vul.get("discoveredDate", ""), "%Y-%m-%dT%H:%M:%S%z"
                     ),
-                    published_date_cve=vul.get("publishedDate").replace('Z', '+00:00'),
+                    published_date_cve=vul.get("publishedDate").replace("Z", "+00:00"),
                     module="engine_container",
                     category=Category.VULNERABILITY,
                     requirements=vul.get("status", ""),
