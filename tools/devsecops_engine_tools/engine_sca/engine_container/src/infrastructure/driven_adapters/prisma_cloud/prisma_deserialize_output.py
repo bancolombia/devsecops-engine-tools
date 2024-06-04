@@ -6,6 +6,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
     Category,
 )
 from datetime import datetime
+from dateutil import parser
 from dataclasses import dataclass
 import json
 
@@ -49,7 +50,7 @@ class PrismaDeserealizator(DeseralizatorGateway):
                     identification_date=datetime.strptime(
                         vul.get("discoveredDate", ""), "%Y-%m-%dT%H:%M:%S%z"
                     ),
-                    published_date_cve=vul.get("publishedDate", None),
+                    published_date_cve=vul.get("publishedDate").replace('Z', '+00:00'),
                     module="engine_container",
                     category=Category.VULNERABILITY,
                     requirements=vul.get("status", ""),
