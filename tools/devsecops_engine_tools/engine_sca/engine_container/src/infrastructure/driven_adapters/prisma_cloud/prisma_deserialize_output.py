@@ -6,7 +6,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
     Category,
 )
 from datetime import datetime
-from dateutil import parser
 from dataclasses import dataclass
 import json
 
