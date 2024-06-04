@@ -12,6 +12,19 @@ from datetime import datetime, timezone
 
 @dataclass
 class TrivyDeserializator(DeseralizatorGateway):
+    def check_date_format(self, vul):
+        try:
+            published_date_cve=datetime.strptime(
+                vul.get("PublishedDate"),
+                "%Y-%m-%dT%H:%M:%S.%fZ"
+            ).replace(tzinfo=timezone.utc).isoformat()
+        except:
+            published_date_cve=datetime.strptime(
+                vul.get("PublishedDate"),
+                "%Y-%m-%dT%H:%M:%SZ"
+            ).replace(tzinfo=timezone.utc).isoformat()
+        return published_date_cve
+
     def get_list_findings(self, image_scanned) -> "list[Finding]":
         list_open_vulnerabilities = []
         with open(image_scanned, "rb") as file:
@@ -37,10 +50,7 @@ class TrivyDeserializator(DeseralizatorGateway):
                     identification_date=datetime.now().strftime(
                         "%Y-%m-%dT%H:%M:%S%z"
                     ),
-                    published_date_cve=datetime.strptime(
-                        vul.get("PublishedDate"),
-                        "%Y-%m-%dT%H:%M:%S.%fZ"
-                        ).replace(tzinfo=timezone.utc).isoformat(),
+                    published_date_cve=self.check_date_format(vul),
                     module="engine_container",
                     category=Category.VULNERABILITY,
                     requirements=vul.get("FixedVersion") or vul.get("Status", ""),
