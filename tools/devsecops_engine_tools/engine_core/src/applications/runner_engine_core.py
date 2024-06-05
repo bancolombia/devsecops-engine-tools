@@ -28,6 +28,20 @@ from devsecops_engine_tools.version import version
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
+def parse_separated_list(value, choices):
+    values = value.split(',')
+    # Validar cada elemento de la lista
+    for val in values:
+        if val not in choices:
+            raise argparse.ArgumentTypeError(f"Invalid value: {val}. Valid values are: {', '.join(choices)}")
+    
+    return values
+
+def parse_choices(choices):
+    def parse_with_choices(value):
+        return parse_separated_list(value, choices)
+    return parse_with_choices
+
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--version", action='version', version='{version}'.format(version=version))
@@ -49,7 +63,7 @@ def get_inputs_from_cli(args):
     )
     parser.add_argument("-fp", "--folder_path", type=str, required=False, help="Folder Path to scan, only apply engine_iac tool")
     parser.add_argument("-p",
-        "--platform", choices=["eks", "openshift"], type=str, required=False, help="Platform to execute,  only apply engine_iac tool"
+        "--platform", type=parse_choices({"all", "docker", "k8s", "cloudformation"}), required=False, default="all" ,help="Platform to scan, only apply engine_iac tool"
     )
     parser.add_argument(
         "--use_secrets_manager",
