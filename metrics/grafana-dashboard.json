@@ -1,0 +1,915 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": false,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 196,
+    "links": [],
+    "panels": [
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "fdi4lxnplmigwa"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "failed"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "dark-red",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "succeeded_without_findings"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "dark-green",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "id": 5,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "right",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "10.4.0-pre",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": true,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "fdi4lxnplmigwa"
+            },
+            "format": 1,
+            "rawSQL": "select $__parseTime(date, 'yyyy-MM-dd'),\ncount(CASE WHEN scan_result.vulnerabilities.status = 'failed' THEN 1 END) AS failed,\ncount(CASE WHEN scan_result.vulnerabilities.status = 'succeeded' THEN 1 END) AS succeeded_with_findings,\nCOUNT(CASE WHEN scan_result.vulnerabilities.status is NULL THEN 1 END) AS succeeded_without_findings\nfrom metrics_engine_tools GROUP BY date",
+            "refId": "A"
+          }
+        ],
+        "title": "Vulnerabilities Scan Result",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "fdi4lxnplmigwa"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "failed"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "dark-red",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "succeeded_without_findings"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "dark-green",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "id": 6,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "right",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "10.4.0-pre",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": true,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "fdi4lxnplmigwa"
+            },
+            "format": 1,
+            "rawSQL": "select $__parseTime(date, 'yyyy-MM-dd'),\ncount(CASE WHEN scan_result.compliances.status = 'failed' THEN 1 END) AS failed,\ncount(CASE WHEN scan_result.compliances.status = 'succeeded' THEN 1 END) AS succeeded_with_findings,\nCOUNT(CASE WHEN scan_result.compliances.status is NULL THEN 1 END) AS succeeded_without_findings\nfrom metrics_engine_tools GROUP BY date",
+            "refId": "A"
+          }
+        ],
+        "title": "Compliances Scan Result",
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "fdi4lxnplmigwa"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 30,
+              "gradientMode": "opacity",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineStyle": {
+                "fill": "solid"
+              },
+              "lineWidth": 3,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": true,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        },
+        "id": 2,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "10.4.0-pre",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": true,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "fdi4lxnplmigwa"
+            },
+            "format": 1,
+            "rawSQL": "SELECT\n  $__parseTime(date, 'yyyy-MM-dd') AS parsed_time,\n  count(CASE WHEN check_type = 'engine_dependencies' THEN 1 END) AS engine_dependencies,\n  count(CASE WHEN check_type = 'engine_iac' THEN 1 END) AS engine_iac,\n  count(CASE WHEN check_type = 'engine_secret' THEN 1 END) AS engine_secret,\n  count(CASE WHEN check_type = 'engine_container' THEN 1 END) AS engine_container\nFROM\n  metrics_engine_tools\nGROUP BY\n  date",
+            "refId": "A"
+          }
+        ],
+        "title": "Scan Trend",
+        "transformations": [
+          {
+            "id": "calculateField",
+            "options": {
+              "mode": "reduceRow",
+              "reduce": {
+                "reducer": "mean"
+              }
+            }
+          },
+          {
+            "id": "calculateField",
+            "options": {}
+          }
+        ],
+        "transparent": true,
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "fdi4lxnplmigwa"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "fixedColor": "blue",
+              "mode": "fixed"
+            },
+            "fieldMinMax": false,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "text",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 3,
+          "x": 12,
+          "y": 8
+        },
+        "id": 8,
+        "maxDataPoints": 100,
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "sum"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showPercentChange": false,
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "pluginVersion": "10.4.0",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": true,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "fdi4lxnplmigwa"
+            },
+            "format": 1,
+            "rawSQL": "SELECT \n  parsed_time,\n  (engine_dependencies + engine_iac + engine_secret + engine_container) AS total_count\nFROM (\nSELECT\n  $__parseTime(date, 'yyyy-MM-dd') AS parsed_time,\n  count(CASE WHEN check_type = 'engine_dependencies' THEN 1 END) AS engine_dependencies,\n  count(CASE WHEN check_type = 'engine_iac' THEN 1 END) AS engine_iac,\n  count(CASE WHEN check_type = 'engine_secret' THEN 1 END) AS engine_secret,\n  count(CASE WHEN check_type = 'engine_container' THEN 1 END) AS engine_container\nFROM\n  metrics_engine_tools\nWHERE $__dateFilter($__parseTime(date, 'yyyy-MM-dd'))\nGROUP BY\n  date\n)",
+            "refId": "A"
+          }
+        ],
+        "title": "Scan Total",
+        "transparent": true,
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "fdi4lxnplmigwa"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              }
+            },
+            "mappings": []
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 9,
+          "x": 15,
+          "y": 8
+        },
+        "id": 4,
+        "options": {
+          "displayLabels": [
+            "percent"
+          ],
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "right",
+            "showLegend": true,
+            "values": []
+          },
+          "pieType": "pie",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "10.4.0-pre",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": true,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "fdi4lxnplmigwa"
+            },
+            "format": 1,
+            "rawSQL": "SELECT \n  SUM(DISTINCT engine_iac_findings_excluded) AS total_engine_iac_findings_excluded,\n  SUM(DISTINCT engine_dependencies_findings_excluded) AS engine_dependencies_findings_excluded,\n  SUM(DISTINCT engine_container_findings_excluded) AS total_engine_container_findings_excluded\nFROM (\n  SELECT \n    CASE WHEN check_type = 'engine_iac' THEN CARDINALITY(scan_result.findings_excluded) END AS engine_iac_findings_excluded,\n    CASE WHEN check_type = 'engine_dependencies' THEN CARDINALITY(scan_result.findings_excluded) END AS engine_dependencies_findings_excluded,\n    CASE WHEN check_type = 'engine_container' THEN CARDINALITY(scan_result.findings_excluded) ELSE 0 END AS engine_container_findings_excluded\n  FROM metrics_engine_tools\n  WHERE CARDINALITY(scan_result.findings_excluded) > 0 AND $__dateFilter($__parseTime(date, 'yyyy-MM-dd'))\n) AS subquery;",
+            "refId": "A"
+          }
+        ],
+        "title": "% Findings Excluded",
+        "transparent": true,
+        "type": "piechart"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "fdi4lxnplmigwa"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "WARNING"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "yellow",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "2 DEBUG"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "blue",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "3 ERROR"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "red",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        },
+        "id": 7,
+        "options": {
+          "displayMode": "lcd",
+          "maxVizHeight": 300,
+          "minVizHeight": 16,
+          "minVizWidth": 8,
+          "namePlacement": "auto",
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showUnfilled": true,
+          "sizing": "auto",
+          "valueMode": "color"
+        },
+        "pluginVersion": "10.4.0",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": true,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "fdi4lxnplmigwa"
+            },
+            "format": 1,
+            "rawSQL": "SELECT\n    count(event.LEVEL) AS \"WARNING\"\nFROM\n    metrics_engine_tools,\n    UNNEST(events) as t(event)\nWHERE\n  CARDINALITY(events) > 0 AND event.level='WARNING' AND $__dateFilter($__parseTime(date, 'yyyy-MM-dd'))",
+            "refId": "A"
+          },
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": false,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "fdi4lxnplmigwa"
+            },
+            "format": 1,
+            "hide": false,
+            "rawSQL": "SELECT\n    count(event.LEVEL) AS \"DEBUG\"\nFROM\n    metrics_engine_tools,\n    UNNEST(events) as t(event)\nWHERE\n  CARDINALITY(events) > 0 AND event.level='DEBUG' AND $__dateFilter($__parseTime(date, 'yyyy-MM-dd'))",
+            "refId": "B"
+          },
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": false,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "fdi4lxnplmigwa"
+            },
+            "format": 1,
+            "hide": false,
+            "rawSQL": "SELECT\n    count(event.LEVEL) AS \"ERROR\"\nFROM\n    metrics_engine_tools,\n    UNNEST(events) as t(event)\nWHERE\n  CARDINALITY(events) > 0 AND event.level='ERROR' AND $__dateFilter($__parseTime(date, 'yyyy-MM-dd'))",
+            "refId": "C"
+          }
+        ],
+        "title": "% Level Classification",
+        "transparent": true,
+        "type": "bargauge"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "fdi4lxnplmigwa"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "scaleDistribution": {
+                "type": "linear"
+              }
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 17
+        },
+        "id": 3,
+        "options": {
+          "calculate": false,
+          "cellGap": 1,
+          "color": {
+            "exponent": 0.5,
+            "fill": "dark-orange",
+            "mode": "scheme",
+            "reverse": false,
+            "scale": "exponential",
+            "scheme": "Oranges",
+            "steps": 64
+          },
+          "exemplars": {
+            "color": "rgba(255,0,255,0.7)"
+          },
+          "filterValues": {
+            "le": 1e-9
+          },
+          "legend": {
+            "show": true
+          },
+          "rowsFrame": {
+            "layout": "auto"
+          },
+          "tooltip": {
+            "mode": "single",
+            "showColorScale": false,
+            "yHistogram": false
+          },
+          "yAxis": {
+            "axisPlacement": "left",
+            "reverse": false
+          }
+        },
+        "pluginVersion": "10.4.0",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": true,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "fdi4lxnplmigwa"
+            },
+            "format": 1,
+            "rawSQL": "SELECT\n  $__parseTime(date, 'yyyy-MM-dd'),\n  count(CASE WHEN check_type = 'engine_dependencies' THEN 1 END) AS engine_dependencies,\n  count(CASE WHEN check_type = 'engine_iac' THEN 1 END) AS engine_iac,\n  count(CASE WHEN check_type = 'engine_secret' THEN 1 END) AS engine_secret,\n  count(CASE WHEN check_type = 'engine_container' THEN 1 END) AS engine_container\nFROM\n  metrics_engine_tools\nWHERE\n  CARDINALITY(events) > 0\nGROUP BY\n  date\n",
+            "refId": "A"
+          }
+        ],
+        "title": "Events Tools",
+        "transparent": true,
+        "type": "heatmap"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "fdi4lxnplmigwa"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              },
+              "filterable": true,
+              "inspect": false,
+              "minWidth": 50
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "component"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 393
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 15,
+          "w": 24,
+          "x": 0,
+          "y": 25
+        },
+        "id": 1,
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "enablePagination": true,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": true
+          },
+          "showHeader": true,
+          "sortBy": []
+        },
+        "pluginVersion": "10.4.0",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": true,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "fdi4lxnplmigwa"
+            },
+            "format": 1,
+            "rawSQL": "SELECT\n      check_type,component,count(events) AS num_events\n    FROM\n      metrics_engine_tools WHERE CARDINALITY(events) > 0 AND $__dateFilter($__parseTime(date, 'yyyy-MM-dd')) GROUP BY check_type,component\n      ORDER BY num_events desc",
+            "refId": "A"
+          }
+        ],
+        "title": "Events Summary",
+        "type": "table"
+      }
+    ],
+    "refresh": "",
+    "schemaVersion": 39,
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ]
+    },
+    "timezone": "utc",
+    "title": "Engine Tools Metrics",
+    "uid": "fdicfimdmd0xsd",
+    "version": 8,
+    "weekStart": ""
+  }
