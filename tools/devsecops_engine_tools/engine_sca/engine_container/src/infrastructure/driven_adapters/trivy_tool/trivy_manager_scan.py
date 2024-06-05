@@ -1,13 +1,12 @@
-import subprocess
-import re
-
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
 
-from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.images_scanned import (
-    ImagesScanned,
-)
+import subprocess
+import platform
+import requests
+import tarfile
+import zipfile
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -16,99 +15,92 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class TrivyScan(ToolGateway):
-    def install_tool(self, version):
+    def download_tool(self, file, url):
+        try:
+            response = requests.get(url, allow_redirects=True)
+            with open(file, "wb") as compress_file:
+                compress_file.write(response.content)
+        except Exception as e:
+            logger.error(f"Error downloading trivy: {e}")
+
+    def install_tool(self, file, url):
         installed = subprocess.run(
-            ["which", "trivy"],
+            ["which", "./trivy"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
         if installed.returncode == 1:
             try:
-                command1 = [
-                    "wget",
-                    "https://github.com/aquasecurity/trivy/releases/download/v"
-                    + version
-                    + "/trivy_"
-                    + version
-                    + "_Linux-64bit.deb",
-                ]
-                subprocess.run(
-                    command1, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-                )
-                command2 = [
-                    "sudo",
-                    "dpkg",
-                    "-i",
-                    "trivy_" + version + "_Linux-64bit.deb",
-                ]
-                subprocess.run(
-                    command2, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-                )
-            except subprocess.CalledProcessError as error:
-                raise RuntimeError(f"Error al instalar trivy: {error}")
-
-    def scan_image(self, repository, tag, remoteconfig, release):
-        file_name = "scanned_images.txt"
-        repo = repository.split("/")[1] if len(repository.split("/")) >= 2 else ""
-        image_name = f"{repository}:{tag}"
-        result_file = f"{repo}:{tag}" + "_scan_result.json"
-        images_scanned = []
-
-        if not ((result_file) in ImagesScanned.get_images_already_scanned(file_name)):
-            pattern = remoteconfig["REGEX_EXPRESSION_PROJECTS"]
-            match = re.match(pattern, repo.upper())
-            if match:
-                if match.group() in release.upper():
-                    command1 = ["trivy", "image", "--download-db-only"]
-                    command2 = [
-                        "trivy",
-                        "--scanners",
-                        "vuln",
-                        "-f",
-                        "json",
-                        "-o",
-                        result_file,
-                    ]
-                    command2.extend(["--quiet", "image", image_name])
-                    try:
-                        subprocess.run(
-                            command1,
-                            check=True,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                        )
-                        subprocess.run(
-                            command2,
-                            check=True,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            text=True,
-                        )
-                        images_scanned.append(result_file)
-                        with open(file_name, "a") as file:
-                            file.write(result_file + "\n")
-                    except subprocess.CalledProcessError as e:
-                        logger.error(
-                            f"Error during image scan of {repository}: {e.stderr}"
-                        )
-
-        return images_scanned
-
-    def run_tool_container_sca(self, remoteconfig, token, scan_image, release):
+                self.download_tool(file, url)
+                with tarfile.open(file, 'r:gz') as tar_file:
+                    tar_file.extract(member=tar_file.getmember("trivy"))
+            except Exception as e:
+                logger.error(f"Error installing trivy: {e}")
+        
+    def install_tool_windows(self, file, url):
         try:
-            trivy_version = remoteconfig["TRIVY"]["TRIVY_VERSION"]
-            self.install_tool(trivy_version)
-            images_scanned = []
+            subprocess.run(
+                ["./trivy.exe", "--version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        except:
+            try:
+                self.download_tool(file, url)
+                with zipfile.ZipFile(file, 'r') as zip_file:
+                    zip_file.extract(member="trivy.exe")
+            except Exception as e:
+                logger.error(f"Error installing trivy: {e}")
 
-            for image in scan_image:
-                repository, tag = image["Repository"], image["Tag"]
-                images_scanned.extend(
-                    self.scan_image(repository, tag, remoteconfig, release)
-                )
+    def scan_image(self, prefix, image_name, result_file):
+        command = [
+            prefix,
+            "--scanners",
+            "vuln",
+            "-f",
+            "json",
+            "-o",
+            result_file,
+        ]
+        command.extend(["--quiet", "image", image_name])
+        try:
+            subprocess.run(
+                command,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            print(f"The image {image_name} was scanned")
 
-            return images_scanned
+            return result_file
 
-        except Exception as ex:
-            logger.error(f"An overall error occurred: {ex}")
+        except Exception as e:
+            logger.error(f"Error during image scan of {image_name}: {e}")
 
-        return 0
+    def run_tool_container_sca(self, remoteconfig, token, image_name, result_file):
+        trivy_version = remoteconfig["TRIVY"]["TRIVY_VERSION"]
+        os_platform = platform.system()
+        base_url = f"https://github.com/aquasecurity/trivy/releases/download/v{trivy_version}/"
+
+        if os_platform == "Linux":
+            file=f"trivy_{trivy_version}_Linux-64bit.tar.gz"
+            self.install_tool(file, base_url+file)
+            command_prefix = "./trivy"
+        elif os_platform == "Darwin":
+            file=f"trivy_{trivy_version}_macOS-64bit.tar.gz"
+            self.install_tool(file, base_url+file)
+            command_prefix = "./trivy"
+        elif os_platform == "Windows":
+            file=f"trivy_{trivy_version}_windows-64bit.zip"
+            self.install_tool_windows(file, base_url+file)
+            command_prefix = "./trivy.exe"
+        else:
+            logger.warning(f"{os_platform} is not supported.")
+            return None
+
+        image_scanned = (
+            self.scan_image(command_prefix, image_name, result_file)
+        )
+
+        return image_scanned
