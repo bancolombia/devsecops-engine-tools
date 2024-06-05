@@ -31,7 +31,7 @@ class SetInputCore:
         ]
         return list_exclusions
 
-    def set_input_core(self, images_scanned):
+    def set_input_core(self, image_scanned):
         """
         Set the input core.
 
@@ -45,7 +45,7 @@ class SetInputCore:
                 self.tool,
             ),
             Threshold(self.remote_config["THRESHOLD"]),
-            images_scanned[-1] if images_scanned else None,
+            image_scanned,
             self.remote_config["MESSAGE_INFO_ENGINE_CONTAINER"],
             self.pipeline_name,
             self.stage.capitalize(),
