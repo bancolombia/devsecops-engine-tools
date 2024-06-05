@@ -4,6 +4,11 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateway
 )
 import docker
 
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
+
 
 class DockerImages(ImagesGateway):
     def list_images(self):
@@ -18,5 +23,7 @@ class DockerImages(ImagesGateway):
             print("Tag last image:", latest_image.tags)
             print("Created date last image:", latest_image.attrs["Created"])
             return latest_image
-        except subprocess.CalledProcessError as e:
-            raise ValueError(f"Error listing images:{e.stderr}")
+        except Exception as e:
+            logger.error(
+                f"Error listing images, docker must be running and added to PATH: {e}"
+            )

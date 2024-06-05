@@ -2,10 +2,8 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
     PrismaCloudManagerScan,
 )
 
-from unittest.mock import patch, Mock, mock_open, MagicMock
+from unittest.mock import patch, Mock, MagicMock
 import pytest
-import stat
-import base64
 
 
 @pytest.fixture
@@ -30,7 +28,6 @@ def mock_remoteconfig():
         },
         "TRIVY": {"TRIVY_VERSION": "0.48.1"},
         "MESSAGE_INFO_SCA_RM": "If you have doubts, visit ",
-        "REGEX_EXPRESSION_PROJECTS": "((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS[A-Z]{3})\\d+)",
         "THRESHOLD": {
             "VULNERABILITY": {"Critical": 999, "High": 999, "Medium": 999, "Low": 999},
             "COMPLIANCE": {"Critical": 1},
@@ -43,11 +40,6 @@ def mock_scan_image():
     return [
         {"Repository": "466.com/nu04cr", "Tag": "ms_broker_db-trunk-trunk.20240126.1"}
     ]
-
-
-@pytest.fixture
-def mock_images_scanned():
-    return []
 
 
 @pytest.fixture
@@ -115,45 +107,38 @@ def test_download_twistcli_failure(twistcli_instance, mock_requests_get):
         mock_logger_info.assert_not_called()
 
 
-def test_scan_image_success(mock_remoteconfig, mock_images_scanned):
+def test_scan_image_success(mock_remoteconfig):
     with patch("builtins.print") as mock_print, patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.subprocess.run"
-    ) as mock_run, patch("builtins.open", create=True) as mock_open:
+    ) as mock_run:
         mock_run.return_value = MagicMock()
         mock_run.return_value.stdout = ""
         mock_run.return_value.stderr = ""
-        mock_open().readlines.return_value = mock_images_scanned
-        mock_scan_image_instance = MagicMock()
 
         scan_manager = PrismaCloudManagerScan()
         result = scan_manager.scan_image(
             "file_path",
-            mock_scan_image_instance,
+            "image_name",
+            "result.json",
             mock_remoteconfig,
             "prisma_secret_key",
-            "release",
         )
 
-        assert result == mock_images_scanned
+        assert result == "result.json"
 
 
-def test_run_tool_container_sca_success(
-    mock_remoteconfig, mock_scan_image, mock_images_scanned
-):
-    with patch(
-        "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.os.path.exists"
-    ) as mock_exists, patch("builtins.open", create=True) as mock_open, patch.object(
-        PrismaCloudManagerScan, "download_twistcli"
-    ) as mock_download_twistcli, patch.object(
-        PrismaCloudManagerScan, "scan_image"
-    ) as mock_scan_image:
+def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image):
+    with patch("builtins.open") as mock_open, patch("os.path.join") as mock_join, patch(
+        "os.path.exists"
+    ) as mock_exists:
+        PrismaCloudManagerScan.download_twistcli = MagicMock()
+        PrismaCloudManagerScan.scan_image = MagicMock()
         mock_exists.return_value = False
-        mock_scan_image.return_value = mock_images_scanned
+        PrismaCloudManagerScan.scan_image.return_value = "result.json"
 
         scan_manager = PrismaCloudManagerScan()
         result = scan_manager.run_tool_container_sca(
-            mock_remoteconfig, "prisma_secret_key", mock_scan_image, "build_id"
+            mock_remoteconfig, "prisma_secret_key", "image_name", "result.json"
         )
 
-        assert result == mock_images_scanned
-        mock_download_twistcli.assert_called_once()
+        assert result == "result.json"
