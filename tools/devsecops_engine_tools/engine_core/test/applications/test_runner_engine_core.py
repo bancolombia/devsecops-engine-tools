@@ -1,6 +1,8 @@
 from unittest import mock
 from devsecops_engine_tools.engine_core.src.applications.runner_engine_core import (
-    application_core, get_inputs_from_cli
+    application_core,
+    get_inputs_from_cli,
+    parse_separated_list,
 )
 
 
@@ -115,3 +117,11 @@ def test_get_inputs_from_cli(mock_parse_args):
         "token_engine_container": None,
         "token_engine_dependencies": None,
     }
+
+
+def test_parse_choices():
+    # Set up mock arguments
+    result = parse_separated_list(
+        "docker,k8s", {"all", "docker", "k8s", "cloudformation"}
+    )
+    assert result == ["docker", "k8s"]
