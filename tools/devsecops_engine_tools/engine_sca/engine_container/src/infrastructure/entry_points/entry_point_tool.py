@@ -36,7 +36,7 @@ def init_engine_sca_rm(
     scan_flag = handle_remote_config_patterns.ignore_analysis_pattern()
     build_id = tool_remote.get_variable("build_id")
     stage = tool_remote.get_variable("stage")
-    images_scanned = []
+    image_scanned = None
     deseralized = []
     input_core = SetInputCore(remote_config, exclusions, pipeline_name, tool, stage)
     if scan_flag and not (skip_flag):
@@ -48,11 +48,12 @@ def init_engine_sca_rm(
             build_id,
             token,
         )
-        images_scanned = container_sca_scan.process()
-        deseralized = container_sca_scan.deseralizator(images_scanned)
+        image_scanned = container_sca_scan.process()
+        if image_scanned:
+            deseralized = container_sca_scan.deseralizator(image_scanned)
     else:
         print("Tool skipped by DevSecOps policy")
         logger.info("Tool skipped by DevSecOps policy")
-    core_input = input_core.set_input_core(images_scanned)
+    core_input = input_core.set_input_core(image_scanned)
 
     return deseralized, core_input
