@@ -2,20 +2,20 @@ FROM alpine@sha256:77726ef6b57ddf65bb551896826ec38bc3e53f75cdde31354fbffb4f25238
 WORKDIR /app
 
 # Setting environment variables
-ENV DET_PIPELINE_NAME="Example_devsecops_engine_tools" \
+ENV DET_PIPELINE_NAME="" \
     DET_PATH_DIRECTORY="." \
     DET_OS="Linux" \
-    DET_WORK_FOLDER="/Users/user/work" \
+    DET_WORK_FOLDER="" \
     DET_TEMP_DIRECTORY="/tmp" \
-    DET_BRANCH_NAME="trunk" \
-    DET_SOURCE_CODE_MANAGEMENT_URI="https://github.com/bancolombia/devsecops-engine-tools" \
+    DET_BRANCH_NAME="" \
+    DET_SOURCE_CODE_MANAGEMENT_URI="" \
     DET_BASE_COMPACT_REMOTE_CONFIG_URL="" \
     DET_ACCESS_TOKEN="" \
-    DET_BUILD_EXECUTION_ID="2688" \
-    DET_BUILD_ID="2688" \
-    DET_BRANCH_TAG="refs/heads/trunk" \
-    DET_COMMIT_HASH="2d545969a76516156d76e1c88f8e699537e889bd" \
-    DET_ENVIRONMENT="dev" \
+    DET_BUILD_EXECUTION_ID="" \
+    DET_BUILD_ID="" \
+    DET_BRANCH_TAG="" \
+    DET_COMMIT_HASH="" \
+    DET_ENVIRONMENT="" \
     DET_STAGE="Release" \
     DET_AGENT_DIRECTORY="" \
     DET_REPOSITORY_PROVIDER="" \
@@ -32,6 +32,8 @@ COPY .envdetlocal /app/.env
 # Install dependencies for building Python
 RUN apk update && \
     apk add --no-cache \
+    docker \
+    openrc \
     git \
     build-base \
     libffi-dev \
@@ -42,6 +44,9 @@ RUN apk update && \
     sqlite-dev \
     wget \
     xz
+
+# Enable and start Docker service
+RUN rc-update add docker boot
 
 # Download and install Python 3.11.8
 RUN wget https://www.python.org/ftp/python/3.11.8/Python-3.11.8.tgz && \
@@ -63,4 +68,4 @@ RUN source venv/bin/activate
 # Install devsecops-engine-tools
 RUN /usr/local/bin/python3.11 -m pip install devsecops-engine-tools==1.7.6
 
-CMD ["source", "venv/bin/activate"]
+CMD ["sh", "-c", "dockerd & while ! docker info > /dev/null 2>&1; do sleep 1; done; sh"]
