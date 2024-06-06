@@ -35,27 +35,27 @@ def generate_file_from_tool(tool, result_list, rules_doc):
                         "checkov_version", None
                     )
 
-            file_name = "results.json"
-            results_data = {
-                "check_type": "Dockerfile, Kubernetes and CloudFormation",
-                "results": {
-                    "failed_checks": all_failed_checks,
-                },
-                "summary": {
-                    "passed": summary_passed,
-                    "failed": summary_failed,
-                    "skipped": summary_skipped,
-                    "parsing_errors": summary_parsing_errors,
-                    "resource_count": summary_resource_count,
-                    "checkov_version": checkov_version,
-                },
-            }
+                file_name = "results.json"
+                results_data = {
+                    "check_type": "Dockerfile, Kubernetes and CloudFormation",
+                    "results": {
+                        "failed_checks": all_failed_checks,
+                    },
+                    "summary": {
+                        "passed": summary_passed,
+                        "failed": summary_failed,
+                        "skipped": summary_skipped,
+                        "parsing_errors": summary_parsing_errors,
+                        "resource_count": summary_resource_count,
+                        "checkov_version": checkov_version,
+                    },
+                }
 
-            with open(file_name, "w") as json_file:
-                json.dump(results_data, json_file, indent=4)
+                with open(file_name, "w") as json_file:
+                    json.dump(results_data, json_file, indent=4)
 
-            absolute_path = os.path.abspath(file_name)
-            return absolute_path
+                absolute_path = os.path.abspath(file_name)
+                return absolute_path
         except Exception as ex:
             logger.error(f"Error during handling checkov json integrator {ex}")
 

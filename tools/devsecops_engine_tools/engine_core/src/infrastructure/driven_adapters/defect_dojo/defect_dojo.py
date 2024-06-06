@@ -54,6 +54,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "PRISMA": "Twistlock Image Scan",
                 "XRAY": "JFrog Xray On Demand Binary Scan",
                 "TRUFFLEHOG": "Trufflehog Scan",
+                "TRIVY": "Trivy Scan",
             }
 
             if any(
