@@ -46,11 +46,11 @@ class GitRun(GitGateway):
             os.chdir(path_new_folder)
             
             repository = git.Repo(path_new_folder)
-
             source_branch = source_branch.replace("refs/heads/", "")
-            subprocess.run(["git", "checkout", f"origin/{source_branch}"], capture_output=True, text=True)
+            repository.git.checkout(source_branch)
+            repository.git.pull('-X', 'theirs', '--no-edit', 'origin', target_branch)
             if source_branch != None:
-                diff = repository.git.diff(f"origin/{source_branch}..origin/{target_branch}", name_only=True)
+                diff = repository.git.diff(f"{source_branch}..{target_branch}", name_only=True)
                 if diff:
                     diff_files = diff.strip().split("\n")
                 print("Pull Requests Associated Files:",len(diff_files))
