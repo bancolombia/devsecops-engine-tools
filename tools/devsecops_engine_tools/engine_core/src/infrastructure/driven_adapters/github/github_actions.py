@@ -38,20 +38,20 @@ class GithubActions(DevopsPlatformGateway):
         return json_config
 
     def message(self, type, message):
-        if type == "succeeded":
-            return f"{self.OKGREEN}{message}{self.ENDC}"
-        elif type == "info":
-            return f"{self.BOLD}{message}{self.ENDC}"
-        elif type == "warning":
-            return f"{self.WARNING}{message}{self.ENDC}"
-        elif type == "error":
-            return f"{self.FAIL}{message}{self.ENDC}"
+        formats = {
+            "succeeded": f"{self.OKGREEN}{message}{self.ENDC}",
+            "info": f"{self.BOLD}{message}{self.ENDC}",
+            "warning": f"{self.WARNING}{message}{self.ENDC}",
+            "error": f"{self.FAIL}{message}{self.ENDC}"
+        }
+        return formats.get(type, message)
 
     def result_pipeline(self, type):
-        if type == "failed":
-            return f"{self.FAIL}{self.ICON_FAIL}Failed{self.ENDC}"
-        elif type == "succeeded":
-            return f"{self.OKGREEN}{self.ICON_SUCCESS}Succeeded{self.ENDC}"
+        results = {
+            "failed": f"{self.FAIL}{self.ICON_FAIL}Failed{self.ENDC}",
+            "succeeded": f"{self.OKGREEN}{self.ICON_SUCCESS}Succeeded{self.ENDC}"
+        }
+        return results.get(type)
 
     def get_source_code_management_uri(self):
         return os.environ.get("GH_SOURCE_CODE_MANAGEMENT_URI")
