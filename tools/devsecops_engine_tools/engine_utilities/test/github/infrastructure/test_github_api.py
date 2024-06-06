@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import GithubApi
+from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import GithubApi, ApiError
+import json
+
 
 class TestGithubApi(unittest.TestCase):
     def setUp(self):
@@ -17,7 +19,6 @@ class TestGithubApi(unittest.TestCase):
 
         # Verificar que se haya llamado a los métodos/métodos simulados según lo esperado
         mock_zipfile.assert_called_once_with('/path/to/your/file.zip', 'r')
-
 
     @patch('devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.requests.get')
     @patch('devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.GithubApi.unzip_file')
@@ -52,3 +53,62 @@ class TestGithubApi(unittest.TestCase):
         )
 
         mock_open.assert_called_once_with(f"{download_path}/asset.zip", "wb")
+
+    @patch('devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.Github')
+    def test_get_github_connection(self, mock_github):
+        mock_github_instance = MagicMock()
+        mock_github.return_value = mock_github_instance
+
+        test_token = "test_token"
+
+        github_api = GithubApi(test_token)
+
+        result = github_api.get_github_connection()
+
+        mock_github.assert_called_once_with(test_token)
+
+        self.assertEqual(result, mock_github_instance)
+
+    @patch('devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.Github')
+    def test_get_remote_json_config(self, MockGithub):
+        owner = "test_owner"
+        repository = "test_repo"
+        path = "path/to/config.json"
+        expected_json = {"key": "value"}
+        encoded_content = json.dumps(expected_json).encode()
+
+        mock_github_instance = MagicMock()
+        mock_repo = MagicMock()
+        mock_file_content = MagicMock()
+        mock_file_content.decoded_content = encoded_content
+
+        mock_github_instance.get_repo.return_value = mock_repo
+        mock_repo.get_contents.return_value = mock_file_content
+        MockGithub.return_value = mock_github_instance
+
+        github_api = GithubApi("test_token")
+
+        result = github_api.get_remote_json_config(mock_github_instance, owner, repository, path)
+
+        mock_github_instance.get_repo.assert_called_once_with(f"{owner}/{repository}")
+        mock_repo.get_contents.assert_called_once_with(path)
+
+        self.assertEqual(result, expected_json)
+
+    @patch('devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.Github')
+    def test_get_remote_json_config_raises_error(self, MockGithub):
+        owner = "test_owner"
+        repository = "test_repo"
+        path = "path/to/config.json"
+
+        mock_github_instance = MagicMock()
+        mock_github_instance.get_repo.side_effect = Exception("Test exception")
+
+        MockGithub.return_value = mock_github_instance
+
+        github_api = GithubApi("test_token")
+
+        with self.assertRaises(ApiError) as context:
+            github_api.get_remote_json_config(mock_github_instance, owner, repository, path)
+
+        self.assertIn("Error getting remote github configuration file: Test exception", str(context.exception))
