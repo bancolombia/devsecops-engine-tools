@@ -1,6 +1,8 @@
 from unittest import mock
 from devsecops_engine_tools.engine_core.src.applications.runner_engine_core import (
     application_core,
+    get_inputs_from_cli,
+    parse_separated_list,
 )
 
 
@@ -17,7 +19,7 @@ def test_application_core(mock_get_inputs_from_cli, mock_entry_point_tool):
         "remote_config_repo": "https://github.com/example/repo",
         "tool": "engine_iac",
         "environment": "dev",
-        "platform": "eks",
+        "platform": "k8s",
         "use_secrets_manager": "true",
         "use_vulnerability_management": "false",
         "send_metrics": "true",
@@ -54,7 +56,7 @@ def test_application_core_exception(
         "remote_config_repo": "https://github.com/example/repo",
         "tool": "engine_iac",
         "environment": "dev",
-        "platform": "eks",
+        "platform": "all",
         "use_secrets_manager": "true",
         "use_vulnerability_management": "false",
         "send_metrics": "true",
@@ -75,3 +77,51 @@ def test_application_core_exception(
 
     # Optionally, you can check the exception message or other details
     mock_print.assert_called()
+
+
+@mock.patch("argparse.ArgumentParser.parse_args")
+def test_get_inputs_from_cli(mock_parse_args):
+    # Set up mock arguments
+    mock_args = mock.MagicMock()
+    mock_args.platform_devops = "azure"
+    mock_args.remote_config_repo = "https://github.com/example/repo"
+    mock_args.tool = "engine_iac"
+    mock_args.folder_path = "/path/to/folder"
+    mock_args.platform = "k8s,docker"
+    mock_args.use_secrets_manager = "true"
+    mock_args.use_vulnerability_management = "false"
+    mock_args.send_metrics = "true"
+    mock_args.token_cmdb = "abc123"
+    mock_args.token_vulnerability_management = None
+    mock_args.token_engine_container = None
+    mock_args.token_engine_dependencies = None
+
+    # Mock the parse_args method
+    mock_parse_args.return_value = mock_args
+
+    # Call the function
+    result = get_inputs_from_cli(None)
+
+    # Assert that the function returns the expected result
+    assert result == {
+        "platform_devops": "azure",
+        "remote_config_repo": "https://github.com/example/repo",
+        "tool": "engine_iac",
+        "folder_path": "/path/to/folder",
+        "platform": "k8s,docker",
+        "use_secrets_manager": "true",
+        "use_vulnerability_management": "false",
+        "send_metrics": "true",
+        "token_cmdb": "abc123",
+        "token_vulnerability_management": None,
+        "token_engine_container": None,
+        "token_engine_dependencies": None,
+    }
+
+
+def test_parse_choices():
+    # Set up mock arguments
+    result = parse_separated_list(
+        "docker,k8s", {"all", "docker", "k8s", "cloudformation"}
+    )
+    assert result == ["docker", "k8s"]
