@@ -89,7 +89,7 @@ def get_inputs_from_cli(args):
     parser.add_argument("--token_cmdb", required=False, help="Token to connect to the CMDB")
     parser.add_argument("--token_vulnerability_management", required=False, help="Token to connect to the Vulnerability Management")
     parser.add_argument("--token_engine_container", required=False, help="Token to execute engine_container if is necessary")
-    parser.add_argument("--token_engine_dependencies", required=False, help="Token to execute engine_dependencies if is necessary")
+    parser.add_argument("--token_engine_dependencies", required=False, help="Token to execute engine_dependencies if is necessary. If using xray as engine_dependencies tool, the token is the base64 of artifactory server config.")
     args = parser.parse_args()
     return {
         "platform_devops": args.platform_devops,
