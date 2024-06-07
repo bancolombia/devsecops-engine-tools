@@ -172,14 +172,17 @@ def test_scan_dependencies_success(xray_scan_instance):
         "builtins.open"
     ) as mock_open, patch(
         "os.path.join"
-    ) as mock_path_join:
+    ) as mock_path_join, patch(
+        "os.getcwd"
+    ) as mock_os_getcwd:
         prefix = "jf"
-        target_dir_name = "target_dir"
+        file_to_scan = "target_file.tar"
         bypass_limits_flag = True
         mock_subprocess_run.side_effect = Mock(returncode=0)
+        mock_os_getcwd.return_value = "/working_dir"
 
         xray_scan_instance.scan_dependencies(
-            prefix, target_dir_name, bypass_limits_flag
+            prefix, file_to_scan, bypass_limits_flag
         )
 
         mock_subprocess_run.assert_called_with(
@@ -188,14 +191,14 @@ def test_scan_dependencies_success(xray_scan_instance):
                 "scan",
                 "--format=json",
                 "--bypass-archive-limits",
-                f"{target_dir_name}/",
+                f"{file_to_scan}",
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
         )
         mock_json_loads.assert_any_call
-        mock_path_join.assert_called_with(target_dir_name, "scan_result.json")
+        mock_path_join.assert_called_with("/working_dir", "scan_result.json")
         mock_open.assert_any_call
         mock_json_dump.assert_any_call
 
@@ -205,14 +208,14 @@ def test_scan_dependencies_failure(xray_scan_instance):
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.logger.error"
     ) as mock_logger_error:
         prefix = "jf"
-        target_dir_name = "target_dir"
+        file_to_scan = "target_file.tar"
         bypass_limits_flag = False
         mock_subprocess_run.side_effect = subprocess.CalledProcessError(
             returncode=1, cmd="xray scan"
         )
 
         xray_scan_instance.scan_dependencies(
-            prefix, target_dir_name, bypass_limits_flag
+            prefix, file_to_scan, bypass_limits_flag
         )
 
         mock_logger_error.assert_called_with(

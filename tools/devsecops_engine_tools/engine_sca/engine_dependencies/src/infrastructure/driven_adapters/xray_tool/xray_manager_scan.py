@@ -95,7 +95,7 @@ class XrayScan(ToolGateway):
         except subprocess.CalledProcessError as error:
             logger.error(f"Error during Xray Server configuration: {error}")
 
-    def scan_dependencies(self, prefix, target_dir_name, bypass_limits_flag):
+    def scan_dependencies(self, prefix, file_to_scan, bypass_limits_flag):
         try:
             if bypass_limits_flag:
                 command = [
@@ -103,15 +103,15 @@ class XrayScan(ToolGateway):
                     "scan",
                     "--format=json",
                     "--bypass-archive-limits",
-                    f"{target_dir_name}/",
+                    f"{file_to_scan}",
                 ]
             else:
-                command = [prefix, "scan", "--format=json", f"{target_dir_name}/"]
+                command = [prefix, "scan", "--format=json", f"{file_to_scan}"]
             result = subprocess.run(
                 command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
             scan_result = json.loads(result.stdout)
-            file_result = os.path.join(target_dir_name, "scan_result.json")
+            file_result = os.path.join(os.getcwd(), "scan_result.json")
             with open(file_result, "w") as file:
                 json.dump(scan_result, file, indent=4)
             return file_result
@@ -121,7 +121,7 @@ class XrayScan(ToolGateway):
     def run_tool_dependencies_sca(
         self,
         remote_config,
-        dir_to_scan_path,
+        file_to_scan,
         bypass_limits_flag,
         token,
     ):
@@ -143,12 +143,8 @@ class XrayScan(ToolGateway):
 
         self.config_server(command_prefix, token)
 
-        results_file = None
-        if len(os.listdir(dir_to_scan_path)) == 0:
-            logger.warning("No artifacts found")
-        else:
-            results_file = self.scan_dependencies(
-                command_prefix, dir_to_scan_path, bypass_limits_flag
-            )
+        results_file = self.scan_dependencies(
+            command_prefix, file_to_scan, bypass_limits_flag
+        )
 
         return results_file

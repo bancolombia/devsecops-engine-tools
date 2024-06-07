@@ -47,7 +47,6 @@ class FindArtifacts:
                     arcname=os.path.basename(package),
                     filter=lambda x: None if "/.bin/" in x.name else x,
                 )
-                logger.debug(f"File to scan: {tar_path}")
 
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during {package} compression: {e}")
@@ -88,9 +87,14 @@ class FindArtifacts:
             for file in files
             if os.path.isfile(os.path.join(dir_to_scan_path, file))
         ]
+        file_to_scan = None
         if files:
+            file_to_scan = os.path.join(dir_to_scan_path, "file_to_scan.tar")
+            self.compress_and_mv(file_to_scan, dir_to_scan_path)
             files_string = ", ".join(files)
             logger.debug(f"Files to scan: {files_string}")
             print(f"Files to scan: {files_string}")
+        else:
+            logger.warning("No artifacts found")
 
-        return dir_to_scan_path
+        return file_to_scan
