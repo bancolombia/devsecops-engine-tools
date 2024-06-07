@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 import os
 import subprocess
-import git
 from urllib.parse import quote
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway import GitGateway
 
@@ -44,15 +43,15 @@ class GitRun(GitGateway):
             os.chdir(sys_working_dir)
             subprocess.run(["git", "clone", url_with_token, path_new_folder], capture_output=True, text=True)
             os.chdir(path_new_folder)
-            
-            repository = git.Repo(path_new_folder)
+
             source_branch = source_branch.replace("refs/heads/", "")
-            repository.git.checkout(source_branch)
-            repository.git.pull('-X', 'theirs', '--no-edit', 'origin', target_branch)
+            subprocess.run(["git", "checkout", "-b", source_branch], capture_output=True, text=True)
+            subprocess.run(["git", "pull", "-X", "theirs", "--no-edit", "origin", source_branch], capture_output=True, text=True)
+            subprocess.run(["git", "pull", "-X", "theirs", "--no-edit", "origin", target_branch], capture_output=True, text=True)
             if source_branch != None:
-                diff = repository.git.diff(f"{source_branch}..{target_branch}", name_only=True)
+                diff = subprocess.run(['git', 'diff', "--name-only", f'{source_branch}..{target_branch}'], capture_output=True, text=True)
                 if diff:
-                    diff_files = diff.strip().split("\n")
+                    diff_files = diff.stdout.strip().split("\n")
                 print("Pull Requests Associated Files:",len(diff_files))
                 return diff_files
         except Exception as e:
