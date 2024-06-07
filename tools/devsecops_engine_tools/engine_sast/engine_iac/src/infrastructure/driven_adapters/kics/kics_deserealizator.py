@@ -13,7 +13,7 @@ class KicsDeserealizator:
 
         for result in results_scan_list:
             finding_open = Finding(
-                id="IAC_SCANNING",
+                id=result.get("id"),
                 cvss=None,
                 where=result.get("file_name"),
                 description=result.get("description"),
