@@ -6,7 +6,6 @@
         "test"
     ],
     "MESSAGE_INFO_ENGINE_IAC": "message custom",
-    "EXCLUSIONS_PATH": "/engine_sast/engine_iac/Exclusions.json",
     "THRESHOLD": {
         "VULNERABILITY": {
             "Critical": 1,
