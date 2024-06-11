@@ -44,12 +44,11 @@ class GitRun(GitGateway):
             subprocess.run(["git", "clone", url_with_token, path_new_folder], capture_output=True, text=True)
             os.chdir(path_new_folder)
 
+
             source_branch = source_branch.replace("refs/heads/", "")
-            subprocess.run(["git", "checkout", "-b", source_branch], capture_output=True, text=True)
-            subprocess.run(["git", "pull", "-X", "theirs", "--no-edit", "origin", source_branch], capture_output=True, text=True)
-            subprocess.run(["git", "pull", "-X", "theirs", "--no-edit", "origin", target_branch], capture_output=True, text=True)
+            subprocess.run(["git", "checkout", f"origin/{source_branch}"], capture_output=True, text=True)
             if source_branch != None:
-                diff = subprocess.run(['git', 'diff', "--name-only", f'{source_branch}..{target_branch}'], capture_output=True, text=True)
+                diff = repository.git.diff(f"origin/{source_branch}..origin/{target_branch}", name_only=True)
                 if diff:
                     diff_files = diff.stdout.strip().split("\n")
                 print("Pull Requests Associated Files:",len(diff_files))
