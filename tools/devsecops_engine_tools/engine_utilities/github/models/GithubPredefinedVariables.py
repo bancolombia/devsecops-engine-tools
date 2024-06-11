@@ -22,34 +22,35 @@ class BaseEnum(Enum):
 
 
 class SystemVariables(BaseEnum):
-    GH_AccessToken = "GH.AccessToken"
-    GH_DefaultWorkingDirectory = "GH.DefaultWorkingDirectory"
-    GH_HostType = "GH.HostType"
-    GH_TeamFoundationCollectionUri = "GH.TeamFoundationCollectionUri"
-    GH_TeamProject = "GH.TeamProject"
-    GH_TargetBranchName = "GH.PullRequest.TargetBranchName"
-    GH_SourceBranch = "GH.PullRequest.SourceBranch"
+    github_access_token = "github.access.token"
+    github_workspace = "github.workspace"
+    build = "build"
+    github_server_url = "github.server.url"
+    github_repository = "github.repository"
+    github_event_number = "github.event.number"
+    github_event_base_ref = "github.event.base.ref"
+    github_ref = "github.ref"
 
 
 class BuildVariables(BaseEnum):
-    GH_Build_BuildId = "GH.Build.BuildId"
-    GH_Build_BuildNumber = "GH.Build.BuildNumber"
-    GH_Build_DefinitionName = "GH.Build.DefinitionName"
-    GH_Build_Repository_Name = "GH.Build.Repository.Name"
-    GH_Build_SourceBranch = "GH.Build.SourceBranch"
-    GH_Build_SourceBranchName = "GH.Build.SourceBranchName"
-    GH_Build_SourceVersion = "GH.Build.SourceVersion"
-    GH_Build_Repository_Provider = "GH.Build.Repository.Provider"
+    github_run_id = "github.run.id"
+    github_run_number = "github.run.number"
+    github_workflow = "github.workflow"
+    github_repository = "github.repository"
+    github_ref = "github.ref"
+    runner_temp = "runner.temp"
+    github_sha = "github.sha"
+    GitHub = "GitHub"
 
 
 class ReleaseVariables(BaseEnum):
-    GH_Release_Definitionname = "GH.Release.DefinitionName"
-    GH_Release_Releaseid = "GH.Release.ReleaseId"
-    GH_Environment = "GH.ENV"
+    github_workflow = "github.workflow"
+    github_env = "github.env"
+    github_run_number = "github.run.number"
 
 
 class AgentVariables(BaseEnum):
-    GH_Agent_BuildDirectory = "GH.Agent.BuildDirectory"
-    GH_Agent_WorkFolder = "GH.Agent.WorkFolder"
-    GH_Agent_TempDirectory = "GH.Agent.TempDirectory"
-    GH_Agent_OS = "GH.Agent.OS"
+    runner_workspace = "runner.workspace"
+    github_workspace = "github.workspace"
+    runner_os = "runner.os"
+    runner_tool_cache = "runner.tool.cache"
