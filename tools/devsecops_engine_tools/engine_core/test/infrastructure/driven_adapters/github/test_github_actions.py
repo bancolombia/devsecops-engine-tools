@@ -18,7 +18,7 @@ class TestGithubActions(unittest.TestCase):
         github_actions = GithubActions()
 
         # Set up mock values for SystemVariables
-        mock_system_variables.GH_TeamFoundationCollectionUri.value.return_value = "GH_TeamFoundationCollectionUri"
+        mock_system_variables.github_repository.value.return_value = "github_repository"
 
         # Mock the AzureDevopsApi class
         mock_github_api_instance = MagicMock()
@@ -33,18 +33,13 @@ class TestGithubActions(unittest.TestCase):
         assert result == {"key": "value"}
 
     def test_message(self):
-        OKGREEN = "\033[92m"
-        WARNING = "\033[93m"
-        FAIL = "\033[91m"
-        ENDC = "\033[0m"
-        BOLD = "\033[1m"
 
         github_actions = GithubActions()
 
-        assert github_actions.message("succeeded", "message") == f"{OKGREEN}message{ENDC}"
-        assert github_actions.message("info", "message") == f"{BOLD}message{ENDC}"
-        assert github_actions.message("warning", "message") == f"{WARNING}message{ENDC}"
-        assert github_actions.message("error", "message") == f"{FAIL}message{ENDC}"
+        assert github_actions.message("succeeded", "message") == "::group::message"
+        assert github_actions.message("info", "message") == "::notice::message"
+        assert github_actions.message("warning", "message") == "::warning::message"
+        assert github_actions.message("error", "message") == "::error::message"
 
     def test_result_pipeline(self):
         ENDC = "\033[0m"
@@ -68,42 +63,43 @@ class TestGithubActions(unittest.TestCase):
         'devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.github.github_actions.ReleaseVariables',
         autospec=True)
     def test_get_variable(self, mock_release_variables, mock_build_variables, mock_system_variables):
-        azure_devops = GithubActions()
+        github_actions = GithubActions()
 
         # Mock the BuildVariables class
-        mock_build_variables.GH_Build_SourceBranchName.value.return_value = "GH_Build_SourceBranchName"
-        mock_build_variables.GH_Build_BuildNumber.value.return_value = "GH_Build_BuildNumber"
-        mock_build_variables.GH_Build_BuildId.value.return_value = "GH_Build_BuildId"
-        mock_build_variables.GH_Build_SourceVersion.value.return_value = "GH_Build_SourceVersion"
-        mock_build_variables.GH_Build_SourceBranch.value.return_value = "GH_Build_SourceBranch"
+        mock_build_variables.github_ref.value.return_value = "github_ref"
+        mock_build_variables.github_run_number.value.return_value = "github_run_number"
+        mock_build_variables.github_run_id.value.return_value = "github_run_id"
+        mock_build_variables.github_sha.value.return_value = "github_sha"
+        
 
         # Mock the ReleaseVariables class
-        mock_release_variables.GH_Environment.value.return_value = "GH_Environment"
-        mock_release_variables.GH_Release_Releaseid.value.return_value = "GH_Release_Releaseid"
+        mock_release_variables.github_workflow.value.return_value = "github_workflow"
+        mock_release_variables.github_env.value.return_value = "github_env"
+        mock_release_variables.github_run_number.value.return_value = "github_run_number"
 
         # Mock the SystemVariables class
-        mock_system_variables.GH_AccessToken.value.return_value = "GH_AccessToken"
+        mock_system_variables.github_access_token.value.return_value = "github_access_token"
 
-        result = azure_devops.get_variable("branch_name")
-        assert result == "GH_Build_SourceBranchName"
+        result = github_actions.get_variable("branch_name")
+        assert result == "github_ref"
 
-        result = azure_devops.get_variable("build_id")
-        assert result == "GH_Build_BuildNumber"
+        result = github_actions.get_variable("build_id")
+        assert result == "github_run_number"
 
-        result = azure_devops.get_variable("build_execution_id")
-        assert result == "GH_Build_BuildId"
+        result = github_actions.get_variable("build_execution_id")
+        assert result == "github_run_id"
 
-        result = azure_devops.get_variable("commit_hash")
-        assert result == "GH_Build_SourceVersion"
+        result = github_actions.get_variable("commit_hash")
+        assert result == "github_sha"
 
-        result = azure_devops.get_variable("environment")
-        assert result == "GH_Environment"
+        result = github_actions.get_variable("environment")
+        assert result == "github_env"
 
-        result = azure_devops.get_variable("release_id")
-        assert result == "GH_Release_Releaseid"
+        result = github_actions.get_variable("release_id")
+        assert result == "github_run_number"
 
-        result = azure_devops.get_variable("branch_tag")
-        assert result == "GH_Build_SourceBranch"
+        result = github_actions.get_variable("branch_tag")
+        assert result == "github_ref"
 
-        result = azure_devops.get_variable("access_token")
-        assert result == "GH_AccessToken"
+        result = github_actions.get_variable("access_token")
+        assert result == "github_access_token"

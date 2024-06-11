@@ -17,19 +17,19 @@ import os
 @dataclass
 class GithubActions(DevopsPlatformGateway):
     OKGREEN = "\033[92m"
-    WARNING = "\033[93m"
     FAIL = "\033[91m"
     ENDC = "\033[0m"
-    BOLD = "\033[1m"
     ICON_FAIL = "\u2718"
     ICON_SUCCESS = "\u2714"
 
     def get_remote_config(self, repository, path):
 
-        owner = SystemVariables.GH_TeamFoundationCollectionUri.value()
+        github_repository = SystemVariables.github_repository.value()
+        split = github_repository.split("/")
+        owner = split[0]
 
         utils_github = GithubApi(
-            personal_access_token=SystemVariables.GH_AccessToken.value()
+            personal_access_token=SystemVariables.github_access_token.value()
         )
 
         git_client = utils_github.get_github_connection()
@@ -39,10 +39,10 @@ class GithubActions(DevopsPlatformGateway):
 
     def message(self, type, message):
         formats = {
-            "succeeded": f"{self.OKGREEN}{message}{self.ENDC}",
-            "info": f"{self.BOLD}{message}{self.ENDC}",
-            "warning": f"{self.WARNING}{message}{self.ENDC}",
-            "error": f"{self.FAIL}{message}{self.ENDC}"
+            "succeeded": f"::group::{message}",
+            "info": f"::notice::{message}",
+            "warning": f"::warning::{message}",
+            "error": f"::error::{message}"
         }
         return formats.get(type, message)
 
@@ -54,38 +54,41 @@ class GithubActions(DevopsPlatformGateway):
         return results.get(type)
 
     def get_source_code_management_uri(self):
-        return os.environ.get("GH_SOURCE_CODE_MANAGEMENT_URI")
+        return f"{SystemVariables.github_server_url}/{SystemVariables.github_repository}"
 
     def get_base_compact_remote_config_url(self, remote_config_repo):
-        return os.environ.get("GH_BASE_COMPACT_REMOTE_CONFIG_URL")
+        github_repository = SystemVariables.github_repository.value()
+        split = github_repository.split("/")
+        owner = split[0]
+        return f"{SystemVariables.github_server_url}/{owner}/{remote_config_repo}"
 
     def get_variable(self, variable):
         variable_map = {
-            "branch_name": BuildVariables.GH_Build_SourceBranchName,
-            "build_id": BuildVariables.GH_Build_BuildNumber,
-            "build_execution_id": BuildVariables.GH_Build_BuildId,
-            "commit_hash": BuildVariables.GH_Build_SourceVersion,
-            "environment": ReleaseVariables.GH_Environment,
-            "release_id": ReleaseVariables.GH_Release_Releaseid,
-            "branch_tag": BuildVariables.GH_Build_SourceBranch,
-            "access_token": SystemVariables.GH_AccessToken,
-            "organization": SystemVariables.GH_TeamFoundationCollectionUri,
-            "project_name": SystemVariables.GH_TeamProject,
-            "repository": BuildVariables.GH_Build_Repository_Name,
+            "branch_name": BuildVariables.github_ref,
+            "build_id": BuildVariables.github_run_number,
+            "build_execution_id": BuildVariables.github_run_id,
+            "commit_hash": BuildVariables.github_sha,
+            "environment": ReleaseVariables.github_env,
+            "release_id": ReleaseVariables.github_run_number,
+            "branch_tag": BuildVariables.github_ref,
+            "access_token": SystemVariables.github_access_token,
+            "organization": f"{SystemVariables.github_server_url}/{SystemVariables.github_repository}",
+            "project_name": SystemVariables.github_repository,
+            "repository": BuildVariables.github_repository,
             "pipeline_name": (
-                BuildVariables.GH_Build_DefinitionName
-                if SystemVariables.GH_HostType.value() == "build"
-                else ReleaseVariables.GH_Release_Definitionname
+                BuildVariables.github_workflow
+                if SystemVariables.build.value() == "build"
+                else ReleaseVariables.github_workflow
             ),
-            "stage": SystemVariables.GH_HostType,
-            "path_directory": SystemVariables.GH_DefaultWorkingDirectory,
-            "os": AgentVariables.GH_Agent_OS,
-            "work_folder": AgentVariables.GH_Agent_WorkFolder,
-            "temp_directory": AgentVariables.GH_Agent_TempDirectory,
-            "agent_directory": AgentVariables.GH_Agent_BuildDirectory,
-            "target_branch": SystemVariables.GH_TargetBranchName,
-            "source_branch": SystemVariables.GH_SourceBranch,
-            "repository_provider": BuildVariables.GH_Build_Repository_Provider,
+            "stage": SystemVariables.build,
+            "path_directory": SystemVariables.github_workspace,
+            "os": AgentVariables.runner_os,
+            "work_folder": AgentVariables.github_workspace,
+            "temp_directory": AgentVariables.runner_tool_cache,
+            "agent_directory": AgentVariables.runner_workspace,
+            "target_branch": SystemVariables.github_event_base_ref,
+            "source_branch": SystemVariables.github_ref,
+            "repository_provider": BuildVariables.GitHub,
         }
         try:
             return variable_map.get(variable).value()
