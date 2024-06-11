@@ -110,7 +110,6 @@ PYTHONPATH=tools/
                 "GITHUB_RUN_ID": "1234567",
                 "GITHUB_RUN_NUMBER": "3",
                 "GITHUB_WORKFLOW": "",
-                "BUILD_PROJECT_NAME": "[GH_BUILD_REPOSITORY_PROVIDER]",
                 "RUNNER_TEMP": "D:/a/_temp",
                 "GITHUB_SHA": "ffac537e6cbbf934b08745a378932722df287a53",
                 "GITHUB": "Provider",
