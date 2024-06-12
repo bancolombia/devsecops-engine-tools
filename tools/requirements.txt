@@ -11,3 +11,4 @@ python-decouple==3.8
 requests_toolbelt==1.0.0
 python-dateutil==2.8.2
 pexpect==4.9.0
+PyGithub==2.3.0

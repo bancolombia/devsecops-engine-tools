@@ -98,6 +98,26 @@ PYTHONPATH=tools/
                 "DET_ORGANIZATION": "[DET_ORGANIZATION]",
                 "DET_PROJECT_NAME": "[DET_PROJECT_NAME]",
                 "DET_REPOSITORY": "[DET_REPOSITORY]",
+                //platform github
+                "GITHUB_ACCESS_TOKEN": "token",
+                "GITHUB_WORKSPACE": "",
+                "BUILD": "build",
+                "GITHUB_SERVER_URL": "https://github.com",
+                "GITHUB_REPOSITORY": "Owner/repository",
+                "GITHUB_EVENT_NUMBER": "",
+                "GITHUB_EVENT_BASE_RE": "",
+                "GITHUB_REF": "release",
+                "GITHUB_RUN_ID": "1234567",
+                "GITHUB_RUN_NUMBER": "3",
+                "GITHUB_WORKFLOW": "",
+                "RUNNER_TEMP": "D:/a/_temp",
+                "GITHUB_SHA": "ffac537e6cbbf934b08745a378932722df287a53",
+                "GITHUB": "Provider",
+                "GITHUB_ENV": "dev",
+                "RUNNER_WORKSPACE": "",
+                "RUNNER_OS": "Linux",
+                "GITHUB_SOURCE_CODE_MANAGEMENT_URI": "https://github.com/Owner/repository",
+                "RUNNER_TOOL_CACHE": ""
             },
             "justMyCode": true
         }
