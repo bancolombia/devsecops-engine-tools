@@ -15,7 +15,7 @@ class TestHandleFilters(unittest.TestCase):
                 status="stat2",
                 where="path",
                 tags=["tag1"],
-                severity="sev1",
+                severity="low",
                 active=True,
             ),
             Report(
@@ -24,7 +24,7 @@ class TestHandleFilters(unittest.TestCase):
                 status="stat2",
                 where="path2",
                 tags=["tag2"],
-                severity="sev2",
+                severity="low",
                 active=None,
             ),
             Report(
@@ -33,7 +33,7 @@ class TestHandleFilters(unittest.TestCase):
                 status="stat3",
                 where="path3",
                 tags=["tag3"],
-                severity="sev3",
+                severity="low",
                 active=True,
             ),
         ]
