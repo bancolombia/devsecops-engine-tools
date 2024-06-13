@@ -1,0 +1,17 @@
+metadata:
+  name: "Ensure use metadata version IMDSv2"
+  id: "CKV2_AWS_137"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::EMR::SecurityConfiguration"
+      attribute: "SecurityConfiguration.InstanceMetadataServiceConfiguration.MinimumInstanceMetadataServiceVersion"
+      operator: "exists"
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::EMR::SecurityConfiguration"
+      attribute: "SecurityConfiguration.InstanceMetadataServiceConfiguration.MinimumInstanceMetadataServiceVersion"
+      operator: "equals"
+      value: 2

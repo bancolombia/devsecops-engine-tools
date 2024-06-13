@@ -1,0 +1,23 @@
+metadata:
+  name: "Ensure define the PubliclyAccessible property is declared and is false"
+  id: "CKV2_AWS_135"
+  category: "GENERAL_SECURITY"
+definition:
+  or:
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::DMS::ReplicationInstance"
+      attribute: "PubliclyAccessible"
+      operator: "not_exists"
+    - and:
+      - cond_type: "attribute"
+        resource_types:
+          - "AWS::DMS::ReplicationInstance"
+        attribute: "PubliclyAccessible"
+        operator: "exists"
+      - cond_type: "attribute"
+        resource_types:
+          - "AWS::DMS::ReplicationInstance"
+        attribute: "PubliclyAccessible"
+        operator: "equals"
+        value: false

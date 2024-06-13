@@ -1,0 +1,58 @@
+---
+metadata:
+  name: "Ensure SQS has data in transit enabled"
+  id: "CKV2_AWS_121"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+    - cond_type: "filter"
+      attribute: "resource_type"
+      value:
+        - "AWS::SQS::QueuePolicy"
+      operator: "within"
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::SQS::QueuePolicy"
+      attribute: "Queues"
+      operator: "exists"
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::SQS::QueuePolicy"
+      attribute: "Queues"
+      operator: "is_not_empty"
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::SQS::QueuePolicy"
+      attribute: "PolicyDocument"
+      operator: "exists"
+    - cond_type: attribute
+      attribute: PolicyDocument.Statement.*.Effect
+      operator: equals
+      value: "Deny"
+      resource_types:
+        - AWS::SQS::QueuePolicy
+    - or:
+          - cond_type: attribute
+            attribute: PolicyDocument.Statement.*.Action.*
+            operator: equals
+            value: "sqs:*"
+            resource_types:
+              - AWS::SQS::QueuePolicy
+          - cond_type: attribute
+            attribute: PolicyDocument.Statement.*.Action
+            operator: equals
+            value: "sqs:*"
+            resource_types:
+              - AWS::SQS::QueuePolicy    
+    - cond_type: "attribute"
+      attribute: "PolicyDocument.Statement.*.Condition.Bool.aws:SecureTransport"
+      operator: "is_not_empty"
+      resource_types:
+        - "AWS::SQS::QueuePolicy"
+    - and:
+        - cond_type: "attribute"
+          resource_types:
+            - "AWS::SQS::QueuePolicy"
+          attribute: "PolicyDocument.Statement.*.Condition.Bool.aws:SecureTransport"
+          operator: "equals"
+          value: false

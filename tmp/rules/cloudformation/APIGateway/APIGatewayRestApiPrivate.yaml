@@ -1,0 +1,29 @@
+---
+metadata:
+  name: "Check that API Gateway has private endpoint configuration"
+  id: "CKV2_AWS_140"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+    - cond_type: "attribute"
+      resource_types:
+      - "AWS::ApiGateway::RestApi"
+      attribute: "EndpointConfiguration.Types"
+      operator: "exists"
+    - cond_type: "attribute"
+      resource_types:
+      - "AWS::ApiGateway::RestApi"
+      attribute: "EndpointConfiguration.Types.*"
+      operator: "equals"
+      value: "PRIVATE"  
+    - cond_type: "attribute"
+      resource_types:
+      - "AWS::ApiGateway::RestApi"
+      attribute: "EndpointConfiguration.VpcEndpointIds"
+      operator: "exists"
+    - cond_type: "attribute"
+      resource_types:
+      - "AWS::ApiGateway::RestApi"
+      attribute: "EndpointConfiguration.VpcEndpointIds.*"
+      operator: "is_not_empty"
+ 

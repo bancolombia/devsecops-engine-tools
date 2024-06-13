@@ -1,0 +1,120 @@
+---
+metadata:
+  name: "Check Glue service has tags"
+  id: "CKV2_AWS_116"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+     - cond_type: "filter"
+       attribute: "resource_type"
+       value:
+       - "AWS::Glue::Job"
+       operator: "within"
+     - cond_type: "attribute"
+       resource_types:
+       - "AWS::Glue::Job"
+       attribute: "Tags"
+       operator: "exists"
+     -  and:
+        - cond_type: "attribute"
+          resource_types: 
+          - "AWS::Glue::Job"
+          attribute: "Tags.bancolombia:clasificacion-confidencialidad"
+          operator: "exists"
+        - or: 
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-confidencialidad"
+            operator: "equals"
+            value: "publica"
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-confidencialidad"
+            operator: "equals"
+            value: "interna"
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-confidencialidad"
+            operator: "equals"
+            value: "confidencial"
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-confidencialidad"
+            operator: "equals"
+            value: "restringida"
+        - cond_type: "attribute"
+          resource_types: 
+          - "AWS::Glue::Job"
+          attribute: "Tags.bancolombia:clasificacion-integridad"
+          operator: "exists"
+        - or: 
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-integridad"
+            operator: "equals"
+            value: "sin impacto"
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-integridad"
+            operator: "equals"
+            value: "impacto tolerable"
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-integridad"
+            operator: "equals"
+            value: "impacto moderado"
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-integridad"
+            operator: "equals"
+            value: "impacto critico"
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-integridad"
+            operator: "equals"
+            value: "na"
+        - cond_type: "attribute"
+          resource_types: 
+          - "AWS::Glue::Job"
+          attribute: "Tags.bancolombia:clasificacion-disponibilidad"
+          operator: "exists"
+        - or: 
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-disponibilidad"
+            operator: "equals"
+            value: "sin impacto"
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-disponibilidad"
+            operator: "equals"
+            value: "impacto tolerable"
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-disponibilidad"
+            operator: "equals"
+            value: "impacto moderado"
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-disponibilidad"
+            operator: "equals"
+            value: "impacto critico"
+          - cond_type: "attribute"
+            resource_types: 
+            - "AWS::Glue::Job"
+            attribute: "Tags.bancolombia:clasificacion-disponibilidad"
+            operator: "equals"
+            value: "na"

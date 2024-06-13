@@ -1,0 +1,19 @@
+---
+metadata:
+  name: "Check that API Gateway has DisableExecuteApiEndpoint"
+  id: "CKV2_AWS_143"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+    - cond_type: "attribute"
+      resource_types:
+      - "AWS::ApiGatewayV2::Api"
+      attribute: "DisableExecuteApiEndpoint"
+      operator: "exists"
+    - cond_type: "attribute"
+      resource_types:
+      - "AWS::ApiGatewayV2::Api"
+      attribute: "DisableExecuteApiEndpoint"
+      operator: "equals"
+      value: True
+ 

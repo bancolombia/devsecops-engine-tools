@@ -20,7 +20,7 @@ class CheckovDeserealizator:
                     finding_open = Finding(
                         id=scan.get("check_id"),
                         cvss=None,
-                        where=scan.get("repo_file_path"),
+                        where = scan.get("repo_file_path") + ": " + str(scan.get("resource")),
                         description=rules[scan.get("check_id")].get("checkID", scan.get("check_name")),
                         severity=rules[scan.get("check_id")].get("severity").lower(),
                         identification_date=datetime.now().strftime("%d%m%Y"),

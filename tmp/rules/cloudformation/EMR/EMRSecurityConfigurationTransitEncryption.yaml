@@ -1,0 +1,17 @@
+metadata:
+  name: "Ensure use the CMKs for encryption of data in transit."
+  id: "CKV2_AWS_132"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::EMR::SecurityConfiguration"
+      attribute: "SecurityConfiguration.EncryptionConfiguration.EnableInTransitEncryption"
+      operator: "exists"
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::EMR::SecurityConfiguration"
+      attribute: "SecurityConfiguration.EncryptionConfiguration.EnableInTransitEncryption"
+      operator: "equals"
+      value: true

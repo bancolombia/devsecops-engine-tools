@@ -1,0 +1,40 @@
+metadata:
+    name: "Glue has events monitoring"
+    id: "CKV2_AWS_117"
+    category: "GENERAL_SECURITY"
+definition:
+    and:
+        - cond_type: "filter"
+          attribute: "resource_type"
+          value:
+            - "AWS::Glue::Job"
+          operator: "within"
+        - cond_type: connection
+          operator: exists
+          resource_types:
+              - AWS::Glue::Job
+          connected_resource_types:
+              - AWS::Events::Rule
+        - and:
+          - cond_type: "attribute"
+            resource_types:
+              - "AWS::Events::Rule"
+            attribute: "EventPattern.source"
+            operator: "exists"
+          - cond_type: "attribute"
+            resource_types:
+              - "AWS::Events::Rule"
+            attribute: "EventPattern.source"
+            operator: "is_not_empty"
+          - cond_type: "attribute"
+            resource_types:
+              - "AWS::Events::Rule"
+            attribute: "State"
+            operator: "exists"
+          - cond_type: "attribute"
+            resource_types:
+              - "AWS::Events::Rule"
+            attribute: "State"
+            operator: "equals"
+            value: "ENABLED"
+          

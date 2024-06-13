@@ -1,0 +1,31 @@
+---
+metadata:
+  name: "Check that API Gateway has associated WAF"
+  id: "CKV2_AWS_101"
+  category: "GENERAL_SECURITY"
+definition:
+  or:
+    - cond_type: attribute
+      attribute: EndpointConfiguration.Types
+      operator: contains
+      value: "PRIVATE"
+      resource_types:
+        - AWS::ApiGateway::RestApi
+    - and:
+        - cond_type: connection
+          operator: exists
+          resource_types:
+            - AWS::ApiGateway::RestApi
+          connected_resource_types:
+            - AWS::ApiGateway::Stage
+        - cond_type: attribute
+          attribute: ResourceArn
+          operator: exists
+          resource_types:
+            - AWS::WAFv2::WebACLAssociation
+        - cond_type: attribute
+          attribute: ResourceArn
+          operator: contains
+          value: "restapis"
+          resource_types:
+            - AWS::WAFv2::WebACLAssociation

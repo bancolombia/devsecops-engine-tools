@@ -1,0 +1,17 @@
+metadata:
+  name: "Ensure use the CMKs for encryption of data at rest."
+  id: "CKV2_AWS_131"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::EMR::SecurityConfiguration"
+      attribute: "SecurityConfiguration.EncryptionConfiguration.EnableAtRestEncryption"
+      operator: "exists"
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::EMR::SecurityConfiguration"
+      attribute: "SecurityConfiguration.EncryptionConfiguration.EnableAtRestEncryption"
+      operator: "equals"
+      value: true
