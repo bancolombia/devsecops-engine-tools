@@ -1,0 +1,26 @@
+---
+metadata:
+  name: "Check that API Gateway has http logging"
+  id: "CKV2_AWS_144"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+    - cond_type: "attribute"
+      resource_types:
+      - "AWS::ApiGatewayV2::Stage"
+      attribute: "AccessLogSettings.Format"
+      operator: "exists"
+    - or:  
+        - cond_type: "attribute"
+          resource_types:
+          - "AWS::ApiGatewayV2::Stage"
+          attribute: "AccessLogSettings.Format"
+          operator: "contains"
+          value: "$context.requestId"
+        - cond_type: "attribute"
+          resource_types:
+          - "AWS::ApiGatewayV2::Stage"
+          attribute: "AccessLogSettings.Format"
+          operator: "contains"
+          value: "$context.extendedRequestId"
+    

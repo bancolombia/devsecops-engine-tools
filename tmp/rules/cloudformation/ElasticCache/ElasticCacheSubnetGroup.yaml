@@ -1,0 +1,26 @@
+metadata:
+  name: "Ensure ElastiCache have SubnetIds are defined"
+  id: "CKV2_AWS_125"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::ElastiCache::SubnetGroup"
+      attribute: "SubnetIds"
+      operator: "exists"
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::ElastiCache::SubnetGroup"
+      attribute: "SubnetIds"
+      operator: "is_not_empty"
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::ElastiCache::SubnetGroup"
+      attribute: "CacheSubnetGroupName"
+      operator: "exists"
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::ElastiCache::SubnetGroup"
+      attribute: "CacheSubnetGroupName"
+      operator: "is_not_empty"

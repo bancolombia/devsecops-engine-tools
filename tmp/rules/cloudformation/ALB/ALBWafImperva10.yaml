@@ -1,0 +1,90 @@
+---
+metadata:
+  name: "IAC-ALB-010 WAF Imperva"
+  id: "CKV2_AWS_147"
+  category: "GENERAL_SECURITY"
+definition:
+  or:
+    #Only application
+    - and:
+      - cond_type: "attribute"
+        resource_types:
+        - "AWS::ElasticLoadBalancingV2::LoadBalancer"
+        attribute: "Type"
+        operator: "exists"
+      - cond_type: "attribute"
+        resource_types:
+        - "AWS::ElasticLoadBalancingV2::LoadBalancer"
+        attribute: "Type"
+        operator: "not_equals"
+        value: "application"
+    - and:
+      - cond_type: "attribute"
+        resource_types:
+        - "AWS::ElasticLoadBalancingV2::LoadBalancer"
+        attribute: "Scheme"
+        operator: "exists"
+      - cond_type: "attribute"
+        resource_types:
+        - "AWS::ElasticLoadBalancingV2::LoadBalancer"
+        attribute: "Scheme"
+        operator: "not_equals"
+        value: "internet-facing"
+    - and:
+
+      - and:
+        - cond_type: "connection"
+          resource_types:
+          - "AWS::CloudFormation::CustomResource"
+          connected_resource_types:
+          - "AWS::ElasticLoadBalancingV2::LoadBalancer"
+          operator: "exists"
+
+        - cond_type: "attribute"
+          resource_types:
+          - "AWS::CloudFormation::CustomResource"
+          attribute: "ServiceToken"
+          operator: "within"
+          value:
+          - "arn:aws:sns:us-east-1:126174654303:waf-dev"
+          - "arn:aws:sns:us-east-1:831688958710:waf-pdn"
+
+        - cond_type: "attribute"
+          resource_types:
+          - "AWS::CloudFormation::CustomResource"
+          attribute: "CommonName"
+          operator: "exists"
+
+        - cond_type: "attribute"
+          resource_types:
+          - "AWS::CloudFormation::CustomResource"
+          attribute: "SANS"
+          operator: "exists"
+
+        - cond_type: "attribute"
+          resource_types:
+          - "AWS::CloudFormation::CustomResource"
+          attribute: "Categoria"
+          operator: "exists"
+
+        - cond_type: "attribute"
+          resource_types:
+          - "AWS::CloudFormation::CustomResource"
+          attribute: "Ambiente"
+          operator: "within"
+          value:
+          - "DEV"
+          - "QA"
+          - "PDN"
+
+        - cond_type: "attribute"
+          resource_types:
+          - "AWS::CloudFormation::CustomResource"
+          attribute: "CNAME"
+          operator: "exists"
+
+        - cond_type: "attribute"
+          resource_types:
+          - "AWS::CloudFormation::CustomResource"
+          attribute: "Email"
+          operator: "exists"

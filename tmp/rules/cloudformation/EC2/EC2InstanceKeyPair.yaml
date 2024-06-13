@@ -1,0 +1,22 @@
+metadata:
+  name: "Ensure access is restricted through the KeyName for the KeyPairs."
+  id: "CKV2_AWS_128"
+  category: "GENERAL_SECURITY"
+definition:
+  or:
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::EC2::Instance"
+      attribute: "KeyName"
+      operator: "not_exists"
+    - and:
+      - cond_type: "attribute"
+        resource_types:
+          - "AWS::EC2::Instance"
+        attribute: "KeyName"
+        operator: "exists"
+      - cond_type: "attribute"
+        resource_types:
+          - "AWS::EC2::Instance"
+        attribute: "KeyName"
+        operator: "is_empty"

@@ -1,0 +1,17 @@
+---
+metadata:
+  name: "Ensure CloudWatch Logs are encrypted"
+  id: "CKV2_AWS_122"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::Logs::LogGroup"
+      attribute: "KmsKeyId"
+      operator: "exists"
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::Logs::LogGroup"
+      attribute: "KmsKeyId"
+      operator: "is_not_empty"

@@ -1,0 +1,16 @@
+metadata:
+  name: "Ensure ElastCache has SecurityGroupIds defined."
+  id: "CKV2_AWS_126"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::ElastiCache::ReplicationGroup"
+      attribute: "SecurityGroupIds"
+      operator: "exists"
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::ElastiCache::ReplicationGroup"
+      attribute: "SecurityGroupIds"
+      operator: "is_not_empty"

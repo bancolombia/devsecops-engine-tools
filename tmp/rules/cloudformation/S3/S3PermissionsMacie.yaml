@@ -1,0 +1,128 @@
+metadata:
+  name: "Check that S3 Key Policy has permissions for Macie"
+  id: "CKV2_AWS_103"
+  category: "GENERAL_SECURITY"
+definition:
+  or:
+    ########################################## DEJAR PASAR S3 Bucket AES 256 ########################################
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::S3::Bucket"
+      attribute: "BucketEncryption.ServerSideEncryptionConfiguration.*.ServerSideEncryptionByDefault.SSEAlgorithm"
+      operator: "contains"
+      value: "AES256"
+    ########################################## DEJAR PASAR S3 Bucket KMS Import ########################################
+    - cond_type: "attribute"
+      resource_types:
+        - "AWS::S3::Bucket"
+      attribute: "BucketEncryption.ServerSideEncryptionConfiguration.*.ServerSideEncryptionByDefault.KMSMasterKeyID"
+      operator: "regex_match"
+      value: "(.*Fn::Join*.|.*Fn::ImportValue*.|.*arn:aws:kms:*.|.*project-key*.)"
+    ########################################## CONNECTION KMS ARN ########################################
+    - and:
+        - cond_type: "filter"
+          attribute: "resource_type"
+          value:
+            - AWS::S3::Bucket
+          operator: within
+        - cond_type: "connection"
+          resource_types:
+            - AWS::KMS::Key
+          connected_resource_types:
+            - AWS::S3::Bucket
+          operator: exists
+        - and:
+            - cond_type: attribute
+              attribute: KeyPolicy.Statement.*.Effect
+              operator: equals
+              value: "Allow"
+              resource_types:
+                - AWS::KMS::Key
+            - cond_type: attribute
+              attribute: KeyPolicy.Statement.*.Principal.AWS
+              operator: regex_match
+              value: .*AWSServiceRoleForAmazonMacie*.
+              resource_types:
+                - AWS::KMS::Key
+            - cond_type: attribute
+              attribute: KeyPolicy.Statement.*.Action.*
+              operator: equals
+              value: "kms:Decrypt"
+              resource_types:
+                - AWS::KMS::Key
+            - cond_type: attribute
+              attribute: KeyPolicy.Statement.*.Resource
+              operator: contains
+              value: "*"
+              resource_types:
+                - AWS::KMS::Key
+    ########################################## CONNECTION KMS ALIAS ARN ########################################
+    - and:
+        - cond_type: "filter"
+          attribute: "resource_type"
+          value:
+            - AWS::S3::Bucket
+          operator: within
+        - cond_type: "connection"
+          resource_types:
+            - AWS::KMS::Alias
+          connected_resource_types:
+            - AWS::S3::Bucket
+          operator: exists
+        - cond_type: "connection"
+          resource_types:
+            - AWS::KMS::Alias
+          connected_resource_types:
+            - AWS::KMS::Key
+          operator: exists
+        - or:
+          - and:
+              - cond_type: attribute
+                attribute: KeyPolicy.Statement.*.Effect
+                operator: equals
+                value: "Allow"
+                resource_types:
+                  -  AWS::KMS::Key
+              - cond_type: attribute
+                attribute: KeyPolicy.Statement.*.Principal.AWS
+                operator: regex_match
+                value: .*AWSServiceRoleForAmazonMacie*.
+                resource_types:
+                  -  AWS::KMS::Key
+              - cond_type: attribute
+                attribute: KeyPolicy.Statement.*.Action.*
+                operator: equals
+                value: "kms:Decrypt"
+                resource_types:
+                  -  AWS::KMS::Key
+              - cond_type: attribute
+                attribute: KeyPolicy.Statement.*.Resource
+                operator: contains
+                value: "*"
+                resource_types:
+                  -  AWS::KMS::Key
+          - and:
+              - cond_type: attribute
+                attribute: KeyPolicy.Statement.Fn::If.*.*
+                operator: regex_match
+                value: ".*Effect*.*Allow*."
+                resource_types:
+                  - AWS::KMS::Key
+              - cond_type: attribute
+                attribute: KeyPolicy.Statement.Fn::If.*.*
+                operator: regex_match
+                value: .*Principal*.*AWSServiceRoleForAmazonMacie*.
+                resource_types:
+                  - AWS::KMS::Key
+              - cond_type: attribute
+                attribute: KeyPolicy.Statement.Fn::If.*.*
+                operator: regex_match
+                value: ".*Action*..*kms:Decrypt*."
+                resource_types:
+                  - AWS::KMS::Key
+              - cond_type: attribute
+                attribute: KeyPolicy.Statement.Fn::If.*.*
+                operator: regex_match
+                value: ".*Resource*.*"
+                resource_types:
+                  - AWS::KMS::Key

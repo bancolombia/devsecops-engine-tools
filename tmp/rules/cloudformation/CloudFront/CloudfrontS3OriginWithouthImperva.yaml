@@ -1,0 +1,133 @@
+---
+metadata:
+  name: "Check that CloudFront has configured DDOS Shield - Static Scenario"
+  id: "CKV2_AWS_106"
+  category: "GENERAL_SECURITY"
+definition:
+  or:
+########################################## DEJAR PASAR CLOUDFRONT CON CUSTOM ORIGIN ########################################
+    - cond_type: "attribute"
+      resource_types:
+      - "AWS::CloudFront::Distribution"
+      attribute: "DistributionConfig.Origins.*.CustomOriginConfig"
+      operator: "exists"
+###################################### CLOUDFRONTS ASOCIADOS CON CUSTOM ACL UPDATE #####################################
+    - and:
+      - cond_type: "filter"
+        attribute: "resource_type"
+        value:
+        - "AWS::CloudFront::Distribution"
+        operator: "within"
+      - cond_type: "connection"
+        resource_types:
+            - "AWS::CloudFront::Distribution"
+        connected_resource_types:
+          - "Custom::customaclupdate"
+        operator: "exists"
+########################################## CLOUDFRONT CON S3 ORIGIN ########################################
+      # - cond_type: "attribute"
+      #   resource_types:
+      #   - "AWS::CloudFront::Distribution"
+      #   attribute: "DistributionConfig.Origins.S3OriginConfig"
+      #   operator: "exists"
+#################################### CAMPOS DE CUSTOM ACL UPDATE SIN IMPERVA ###################################
+      - and:
+        - cond_type: "attribute"
+          resource_types:
+          - "Custom::customaclupdate"
+          attribute: "ServiceToken"
+          operator: "exists"
+        - cond_type: "attribute"
+          resource_types:
+          - "Custom::customaclupdate"
+          attribute: "ServiceToken"
+          operator: "equals"
+          value: "arn:aws:sns:us-east-1:831688958710:Antiddos-ACLUpdate-sns"
+        - cond_type: "attribute"
+          resource_types:
+          - "Custom::customaclupdate"
+          attribute: "scope"
+          operator: "exists"
+        - cond_type: "attribute"
+          resource_types:
+          - "Custom::customaclupdate"
+          attribute: "scope"
+          operator: "equals"
+          value: "CLOUDFRONT"
+        - cond_type: "attribute"
+          resource_types:
+          - "Custom::customaclupdate"
+          attribute: "Kinesis_arn"
+          operator: "exists"
+        - or:
+          - cond_type: "attribute"
+            resource_types:
+            - "Custom::customaclupdate"
+            attribute: "Kinesis_arn"
+            operator: "regex_match"
+            value: ".*aws-waf-logs-pdn-*."
+          - cond_type: "attribute"
+            resource_types:
+            - "Custom::customaclupdate"
+            attribute: "Kinesis_arn"
+            operator: "regex_match"
+            value: ".*aws-waf-logs-devqa-*."
+        - cond_type: "attribute"
+          resource_types:
+          - "Custom::customaclupdate"
+          attribute: "change_webacl"
+          operator: "exists"
+        - cond_type: "attribute"
+          resource_types:
+          - "Custom::customaclupdate"
+          attribute: "change_webacl"
+          operator: "equals"
+          value: true
+        - cond_type: "attribute"
+          resource_types:
+          - "Custom::customaclupdate"
+          attribute: "waf_name"
+          operator: "exists"
+        - or:
+          - cond_type: "attribute"
+            resource_types:
+            - "Custom::customaclupdate"
+            attribute: "waf_name"
+            operator: "contains"
+            value: "Global-Block1"
+          - cond_type: "attribute"
+            resource_types:
+            - "Custom::customaclupdate"
+            attribute: "waf_name"
+            operator: "contains"
+            value: "Global-Block2"
+          - cond_type: "attribute"
+            resource_types:
+            - "Custom::customaclupdate"
+            attribute: "waf_name"
+            operator: "contains"
+            value: "Global-Block3"
+          - cond_type: "attribute"
+            resource_types:
+            - "Custom::customaclupdate"
+            attribute: "waf_name"
+            operator: "contains"
+            value: "Global-Block4"
+          - and:
+            - cond_type: "attribute"
+              resource_types:
+              - "Custom::customaclupdate"
+              attribute: "ipset_interno"
+              operator: "exists"
+            - cond_type: "attribute"
+              resource_types:
+              - "Custom::customaclupdate"
+              attribute: "ipset_interno"
+              operator: "contains"
+              value: "IPSetInterno"
+            - cond_type: "attribute"
+              resource_types:
+              - "Custom::customaclupdate"
+              attribute: "waf_name"
+              operator: "contains"
+              value: "Global-Block-Interna"

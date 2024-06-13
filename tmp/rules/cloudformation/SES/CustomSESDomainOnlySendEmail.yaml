@@ -1,0 +1,17 @@
+metadata:
+  name: "Ensure use the SES service only for sending email."
+  id: "CKV2_AWS_130"
+  category: "GENERAL_SECURITY"
+definition:
+  and:
+    - cond_type: "attribute"
+      resource_types:
+        - "Custom::SES_Domain"
+      attribute: "EnableReceive"
+      operator: "exists"
+    - cond_type: "attribute"
+      resource_types:
+        - "Custom::SES_Domain"
+      attribute: "EnableReceive"
+      operator: "equals"
+      value: false
