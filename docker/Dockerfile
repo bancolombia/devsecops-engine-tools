@@ -66,6 +66,6 @@ RUN /usr/local/bin/python3.11 -m venv venv
 RUN source venv/bin/activate
 
 # Install devsecops-engine-tools
-RUN /usr/local/bin/python3.11 -m pip install devsecops-engine-tools==1.7.6
+RUN /usr/local/bin/python3.11 -m pip install devsecops-engine-tools
 
 CMD ["sh", "-c", "dockerd & while ! docker info > /dev/null 2>&1; do sleep 1; done; sh"]
