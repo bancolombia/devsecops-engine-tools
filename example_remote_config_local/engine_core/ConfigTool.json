@@ -30,7 +30,7 @@
     },
     "ENGINE_CONTAINER": {
         "ENABLED": "true",
-        "TOOL": "TRIVY"
+        "TOOL": "PRISMA|SNYK"
     },
     "ENGINE_DAST": {
         "ENABLED": "true",
