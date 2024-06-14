@@ -41,7 +41,7 @@ class GitRun(GitGateway):
                 return []
             os.makedirs(path_new_folder)
             os.chdir(sys_working_dir)
-            subprocess.run(["git", "clone", url_with_token, path_new_folder], capture_output=True, text=True)
+            subprocess.run(["git", "clone", "--branch", target_branch, url_with_token, path_new_folder], capture_output=True, text=True)
             os.chdir(path_new_folder)
  
             source_branch = source_branch.replace("refs/heads/", "")
