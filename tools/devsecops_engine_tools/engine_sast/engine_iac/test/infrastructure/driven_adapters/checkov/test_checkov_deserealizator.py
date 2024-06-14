@@ -22,6 +22,7 @@ def test_get_list_finding():
                             "results_configuration": None,
                         },
                         "code_block": None,
+                        "resource": "docker",
                         "file_path": "/Dockerfile",
                         "file_abs_path": "./_AW1234/Dockerfile",
                         "repo_file_path": "/_AW1234/Dockerfile",
@@ -100,7 +101,7 @@ def test_get_list_finding():
         Finding(
             id="CKV_DOCKER_3",
             cvss=None,
-            where="/_AW1234/Dockerfile",
+            where="/_AW1234/Dockerfile: docker",
             description="IAC-CKV-DOCKER-3 Ensure that a user for the container has been created",
             severity="high",
             identification_date=datetime.now().strftime("%d%m%Y"),
@@ -116,7 +117,7 @@ def test_get_list_finding():
         Finding(
             id="CKV_K8S_13",
             cvss=None,
-            where="/_AW1234/app.yaml",
+            where="/_AW1234/app.yaml: Deployment.devsecops-engine-dev.ms-async-provider-deployment",
             description='IAC-CKV_K8S_13 Ensure memory limits are set',
             severity="high",
             identification_date=datetime.now().strftime("%d%m%Y"),
