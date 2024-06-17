@@ -12,6 +12,7 @@ DevSecOps_Remote_Config
 *pycache*
 *_pycache_*
 .*DS_Store
+Pipfile
 
 #Distribucioes de lib
 **dist**
@@ -44,6 +45,8 @@ RULES_K8Scheckov_config.yaml
 RULES_CLOUDFORMATIONcheckov_config.yaml
 log/
 twistcli
+trivy*
+trivy_*
 *scan_result.json
 jf
 jf.exe
