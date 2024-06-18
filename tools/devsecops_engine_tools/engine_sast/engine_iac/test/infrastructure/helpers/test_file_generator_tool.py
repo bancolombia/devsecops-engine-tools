@@ -235,3 +235,32 @@ def test_generate_file_from_tool_Exception():
     absolute_path = generate_file_from_tool("CHECKOV", results_scan_list, None)
 
     assert absolute_path == None
+
+
+def test_generate_file_from_tool_kubescape():
+    results_scan_list = {
+        "metadata": {
+            "scanMetadata": {
+                "kubescapeVersion": "v1.0.0"
+            }
+        },
+        "summaryDetails": {
+            "frameworks": [
+                {
+                    "controls": {
+                        "control_1": {"status": "failed"},
+                        "control_2": {"status": "passed"},
+                        "control_3": {"status": "failed"}
+                    }
+                }
+            ]
+        }
+    }
+
+    absolute_path = generate_file_from_tool("KUBESCAPE", results_scan_list, {})
+
+    with open(absolute_path, "r") as file:
+        data = file.read()
+        json_data = json.loads(data)
+        assert len(json_data["results"]["failed_checks"]) ==  2
+        
