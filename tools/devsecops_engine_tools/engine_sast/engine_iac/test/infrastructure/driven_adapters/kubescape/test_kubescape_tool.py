@@ -7,7 +7,6 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
     KubescapeTool
 )
 
-
 logger = logging.getLogger()
 logger.setLevel(logging.ERROR)
 stream_handler = logging.StreamHandler()
@@ -74,6 +73,13 @@ class TestKubescapeTool(unittest.TestCase):
             "powershell -Command \"iwr -useb https://raw.githubusercontent.com/kubescape/kubescape/master/install.ps1 | iex\"",
             capture_output=True, shell=True, text=True
         )
+
+    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data='{"key": "value"}')
+    def test_load_json_success(self, mock_file):
+        kubescape_tool = KubescapeTool()
+        result = self.kubescape_tool.load_json()
+        self.assertEqual(result, {"key": "value"})
+        mock_file.assert_called_once_with("results_kubescape.json")
 
     @mock.patch('subprocess.run')
     def test_execute_kubescape_success(self, mock_run):
