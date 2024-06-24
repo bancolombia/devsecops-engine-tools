@@ -1,6 +1,8 @@
 import json
 import subprocess
 import platform
+import requests
+import distro
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -11,7 +13,7 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
     KubescapeDeserealizator,
 )
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
-    generate_file_from_tool,
+    generate_file_from_kubescape,
 )
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -20,25 +22,48 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class KubescapeTool(ToolGateway):
-    TOOL = "KUBESCAPE"
 
-    def install_tool_linux(self, version):
-        command = f"curl -s https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash -s -- -v v{version}"
-        result = subprocess.run(command, capture_output=True, shell=True, text=True)
-        if result.returncode != 0:
-            logger.error(f"Error during Kubescape installation on Linux: {result.stderr}")
+    def download_tool(self, file, url):
+        try:
+            response = requests.get(url, allow_redirects=True)
+            with open(file, "wb") as binary_file:
+                binary_file.write(response.content)
+        except Exception as e:
+            logger.error(f"Error downloading Kubescape: {e}")
 
-    def install_tool_windows(self):
-        command = "powershell -Command \"iwr -useb https://raw.githubusercontent.com/kubescape/kubescape/master/install.ps1 | iex\""
-        result = subprocess.run(command, capture_output=True, shell=True, text=True)
-        if result.returncode != 0:
-            logger.error(f"Error during Kubescape installation on Windows: {result.stderr}")
-
-    def execute_kubescape(self, folders_to_scan):
-        for folder in folders_to_scan:
-            command = f"kubescape scan framework nsa {folder} --format json --format-version v2 --output results_kubescape.json -v"
+    def install_tool(self, file, url):
+        installed = subprocess.run(
+            ["which", f"./{file}"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if installed.returncode == 1:
             try:
-                subprocess.run(command, capture_output=True, shell=True)
+                self.download_tool(file, url)
+                subprocess.run(["chmod", "+x", f"./{file}"])
+
+            except Exception as e:
+                logger.error(f"Error installing Kubescape: {e}")
+
+    def install_tool_windows(self, file, url):
+        try:
+            subprocess.run(
+                [f"./{file}", "version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        except:
+            try:
+                self.download_tool(file, url)
+
+            except Exception as e:
+                logger.error(f"Error installing Kubescape: {e}")
+
+    def execute_kubescape(self, folders_to_scan, prefix):
+        for folder in folders_to_scan:
+            command = [prefix, "scan", "framework", "nsa", folder, "--format", "json", "--format-version", "v2", "--output", "results_kubescape.json", "-v"]
+            try:
+                subprocess.run(command, capture_output=True)
             except subprocess.CalledProcessError as e:
                 logger.error(f"Error during Kubescape execution: {e}")
 
@@ -98,29 +123,42 @@ class KubescapeTool(ToolGateway):
         return None
 
     def run_tool(self, config_tool: ConfigTool, folders_to_scan, environment, platform_to_scan, secret_tool):
-        if not folders_to_scan:
-            return [], None
 
-        version = config_tool.version
-        os_platform = platform.system()
+        if folders_to_scan:
 
-        if os_platform == "Linux":
-            self.install_tool_linux(version)
-        elif os_platform == "Windows":
-            self.install_tool_windows()
+            kubescape_version = config_tool.version
+            os_platform = platform.system()
+            base_url = f"https://github.com/kubescape/kubescape/releases/download/v{kubescape_version}/"
+
+            if os_platform == "Linux":
+                distro_name = distro.name()
+                if distro_name == "Ubuntu":
+                    file = "kubescape-ubuntu-latest"
+                    self.install_tool(file, base_url + file)
+                    command_prefix = f"./{file}"
+                else:
+                    logger.warning(f"{distro_name} is not supported.")
+                    return None
+            elif os_platform == "Windows":
+                file = "kubescape-windows-latest.exe"
+                self.install_tool_windows(file, base_url + file)
+                command_prefix = "./kubescape-windows-latest"
+            else:
+                logger.warning(f"{os_platform} is not supported.")
+                return None
+
+            self.execute_kubescape(folders_to_scan, command_prefix)
+            data = self.load_json()
+
+            if not data:
+                return [], None
+            else:
+                result_extracted_data = self.extract_failed_controls(data)
+                kubescape_deserealizator = KubescapeDeserealizator()
+                finding_list = kubescape_deserealizator.get_list_finding(result_extracted_data)
+                path_file_results = generate_file_from_kubescape(data)
+
+                return finding_list, path_file_results
+
         else:
-            logger.warning(f"{os_platform} is not supported.")
             return [], None
-
-        self.execute_kubescape(folders_to_scan)
-        data = self.load_json()
-
-        if not data:
-            return [], None
-
-        result_extracted_data = self.extract_failed_controls(data)
-        kubescape_deserealizator = KubescapeDeserealizator()
-        finding_list = kubescape_deserealizator.get_list_finding(result_extracted_data)
-        path_file_results = generate_file_from_tool(self.TOOL, data, config_tool.rules_all)
-
-        return finding_list, path_file_results
