@@ -239,14 +239,23 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
     def _create_report(self, finding, date_fn):
         return Report(
             id=finding.vuln_id_from_tool,
-            date=date_fn(
-                finding.date
-            ),
             status=finding.display_status,
             where=self._get_where_report(finding),
             tags=finding.tags,
             severity=finding.severity,
             active=finding.active,
+            risk_status=finding.risk_status,
+            created=date_fn(
+                finding.created
+            ),
+            last_reviewed=date_fn(
+                finding.last_reviewed
+            ),
+            last_status_update=date_fn(
+                finding.last_status_update
+            ),
+            vul_id=finding.vulnerability_ids[0]['vulnerability_id'] if finding.vulnerability_ids else "",
+            vul_description=finding.description,
         )
 
     def _format_date_to_dd_format(self, date_string):
