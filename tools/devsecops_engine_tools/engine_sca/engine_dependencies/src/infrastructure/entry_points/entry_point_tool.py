@@ -49,19 +49,20 @@ def init_engine_dependencies(
         bypass_limits_flag = handle_remote_config_patterns.bypass_archive_limits()
         pattern = handle_remote_config_patterns.excluded_files()
 
-        find_artifacts = FindArtifacts(os.getcwd(), pattern, remote_config["PACKAGES_TO_SCAN"])
-        dir_to_scan_path = find_artifacts.find_artifacts()
-
-        dependencies_sca_scan = DependenciesScan(
-            tool_run,
-            tool_deserializator,
-            remote_config,
-            dir_to_scan_path,
-            bypass_limits_flag,
-            token,
+        find_artifacts = FindArtifacts(
+            os.getcwd(), pattern, remote_config["PACKAGES_TO_SCAN"]
         )
-        dependencies_scanned = dependencies_sca_scan.process()
-        if dependencies_scanned:
+        file_to_scan = find_artifacts.find_artifacts()
+        if file_to_scan:
+            dependencies_sca_scan = DependenciesScan(
+                tool_run,
+                tool_deserializator,
+                remote_config,
+                file_to_scan,
+                bypass_limits_flag,
+                token,
+            )
+            dependencies_scanned = dependencies_sca_scan.process()
             deserialized = dependencies_sca_scan.deserializator(dependencies_scanned)
     else:
         print(f"Tool skipped by DevSecOps policy")
