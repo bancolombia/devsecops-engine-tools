@@ -21,3 +21,7 @@ class ConfigTool:
         self.exclusions_all = None
         self.exclusions_scope = None
         self.rules_all = {}
+        if "KICS_LINUX" in json_data[tool]:
+            self.kics_linux = json_data[tool]["KICS_LINUX"]
+        if "KICS_WINDOWS" in json_data[tool]:
+            self.kics_windows = json_data[tool]["KICS_WINDOWS"]
