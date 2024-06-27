@@ -1,5 +1,6 @@
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
     generate_file_from_tool,
+    generate_file_from_kubescape
 )
 import json
 from functools import reduce
@@ -134,7 +135,7 @@ def test_generate_file_from_tool():
         assert len(json_data["results"]["failed_checks"]) ==  reduce(lambda x, y: x + y, map(lambda x: len(x["results"]["failed_checks"]), results_scan_list))
 
 
-def test_generate_file_from_tool_Exception():
+def test_generate_file_from_tool_exception():
     results_scan_list = [
         {
             "check_type": "dockerfile",
@@ -235,3 +236,32 @@ def test_generate_file_from_tool_Exception():
     absolute_path = generate_file_from_tool("CHECKOV", results_scan_list, None)
 
     assert absolute_path == None
+
+
+def test_generate_file_from_tool_kubescape():
+    results_scan_list = {
+        "metadata": {
+            "scanMetadata": {
+                "kubescapeVersion": "v1.0.0"
+            }
+        },
+        "summaryDetails": {
+            "frameworks": [
+                {
+                    "controls": {
+                        "control_1": {"status": "failed"},
+                        "control_2": {"status": "passed"},
+                        "control_3": {"status": "failed"}
+                    }
+                }
+            ]
+        }
+    }
+
+    absolute_path = generate_file_from_kubescape(results_scan_list)
+
+    with open(absolute_path, "r") as file:
+        data = file.read()
+        json_data = json.loads(data)
+        assert len(json_data["results"]["failed_checks"]) ==  2
+        
