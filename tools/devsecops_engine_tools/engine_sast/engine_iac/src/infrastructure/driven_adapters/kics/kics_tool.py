@@ -11,6 +11,9 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.config_tool 
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_deserealizator import (
     KicsDeserealizator
 )
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
+    generate_file_from_kics,
+)
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import GithubApi
@@ -146,15 +149,18 @@ class KicsTool(ToolGateway):
 
             total_vulnerabilities = self.process_results()
 
+            data = self.load_results()
+            path_file = generate_file_from_kics(data)
+
             if total_vulnerabilities != 0:
                 filtered_results = self.get_findings()
             else:
-                return [], None
+                return [], path_file
 
             kics_deserealizator = KicsDeserealizator()
             finding_list = kics_deserealizator.get_list_finding(filtered_results)
 
-            return finding_list, None
+            return finding_list, path_file
 
         return [], None
 
