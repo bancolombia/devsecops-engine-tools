@@ -103,6 +103,37 @@ def generate_file_from_kubescape(result_list):
         logger.error(f"Error during handling kubescape json integrator {ex}")
 
 
+def generate_file_from_kics(result_list):
+    try:
+        if result_list:
+
+            queries = result_list.get("queries", [])
+
+            file_name = "results_scan.json"
+            results_data = {
+                "check_type": "Dockerfile, Kubernetes and CloudFormation",
+                "results": {
+                    "failed_checks": queries,
+                },
+                "summary": {
+                    "files_scanned": result_list.get("files_scanned", 0),
+                    "lines_scanned": result_list.get("lines_scanned", 0),
+                    "files_parsed": result_list.get("files_parsed", 0),
+                    "lines_parsed": result_list.get("lines_parsed", 0),
+                    "queries_total": result_list.get("queries_total", 0)
+                },
+            }
+
+            with open(file_name, "w") as json_file:
+                json.dump(results_data, json_file, indent=4)
+
+            absolute_path = os.path.abspath(file_name)
+            return absolute_path
+
+    except Exception as ex:
+        logger.error(f"Error during handling kubescape json integrator {ex}")
+
+
 def update_fields(check_result, rules_doc):
     rule_info = rules_doc.get(check_result.get("check_id"), {})
 
