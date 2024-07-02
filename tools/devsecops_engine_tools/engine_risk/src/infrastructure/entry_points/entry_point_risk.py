@@ -4,6 +4,9 @@ from devsecops_engine_tools.engine_risk.src.domain.usecases.handle_filters impor
 from devsecops_engine_tools.engine_risk.src.domain.usecases.break_build import (
     BreakBuild,
 )
+from devsecops_engine_tools.engine_risk.src.domain.usecases.add_data import (
+    AddData,
+)
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -21,6 +24,7 @@ def init_engine_risk(devops_platform_gateway, print_table_gateway, dict_args, fi
             remote_config,
         )
         findings_filtered = handle_filters.filter(findings)
+        data_added = AddData(findings_filtered).add_data()
 
         BreakBuild(devops_platform_gateway, print_table_gateway).process(
             findings_filtered,
