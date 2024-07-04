@@ -51,3 +51,69 @@ class TestKubescapeDeserealizator(unittest.TestCase):
 
         self.assertEqual(len(actual_list), 1)
         self.assertEqual(actual_list[0], expected_list[0])
+
+    def test_extract_failed_controls_no_failures(self):
+        data = {
+            "results": [
+                {
+                    "resourceID": "res1",
+                    "controls": [
+                        {"controlID": "ctrl1", "status": {"status": "passed"}}
+                    ]
+                }
+            ],
+            "resources": [
+                {"resourceID": "res1", "source": {"relativePath": "path/to/res1"}}
+            ],
+            "summaryDetails": {
+                "frameworks": []
+            }
+        }
+        result = self.deserealizator.extract_failed_controls(data)
+        self.assertEqual(result, [])
+
+    def test_extract_failed_controls_with_failures(self):
+        data = {
+            "results": [
+                {
+                    "resourceID": "res1",
+                    "controls": [
+                        {"controlID": "ctrl1", "name": "Control 1", "status": {"status": "failed"}}
+                    ]
+                }
+            ],
+            "resources": [
+                {"resourceID": "res1", "source": {"relativePath": "path/to/res1"}}
+            ],
+            "summaryDetails": {
+                "frameworks": [{"controls": {"ctrl1": {"scoreFactor": 5}}}]
+            }
+        }
+        result = self.deserealizator.extract_failed_controls(data)
+        expected_result = [{
+            "id": "ctrl1",
+            "description": "Control 1",
+            "where": "path/to/res1",
+            "severity": "medium"
+        }]
+        self.assertEqual(result, expected_result)
+
+    def test_get_severity_score_none(self):
+        frameworks = [{"controls": {"control1": {"scoreFactor": 0.0}}}]
+        result = self.deserealizator.get_severity_score(frameworks, "control1")
+        self.assertEqual(result, "none")
+
+    def test_get_severity_score_medium(self):
+        frameworks = [{"controls": {"control1": {"scoreFactor": 5.0}}}]
+        result = self.deserealizator.get_severity_score(frameworks, "control1")
+        self.assertEqual(result, "medium")
+
+    def test_get_severity_score_high(self):
+        frameworks = [{"controls": {"control1": {"scoreFactor": 8.0}}}]
+        result = self.deserealizator.get_severity_score(frameworks, "control1")
+        self.assertEqual(result, "high")
+
+    def test_get_severity_score_critical(self):
+        frameworks = [{"controls": {"control1": {"scoreFactor": 9.5}}}]
+        result = self.deserealizator.get_severity_score(frameworks, "control1")
+        self.assertEqual(result, "critical")
