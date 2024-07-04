@@ -172,22 +172,24 @@ class TestKubescapeTool(unittest.TestCase):
 
         mock_logger.error.assert_called_once_with("Error installing Kubescape: Download exception")
 
+    @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.time.strftime', return_value='20220101-120000')
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
-    def test_execute_kubescape_success(self, mock_logger, mock_subprocess_run):
+    def test_execute_kubescape_success(self, mock_logger, mock_subprocess_run, mock_time_strftime):
         mock_subprocess_run.return_value = MagicMock()
 
         folders_to_scan = ["folder1", "folder2"]
         prefix = "kubescape"
-        self.kubescape_tool.execute_kubescape(folders_to_scan, prefix)
+        platform_to_scan = "k8s"
+        self.kubescape_tool.execute_kubescape(folders_to_scan, prefix, platform_to_scan)
 
         expected_calls = [
             call(
-                ["kubescape", "scan", "framework", "nsa", "folder1", "--format", "json", "--format-version", "v2", "--output", "results_kubescape.json", "-v"],
+                ["kubescape", "scan", "framework", "nsa", "folder1", "--format", "json", "--format-version", "v2", "--output", "results_kubescape_20220101-120000.json", "-v"],
                 capture_output=True
             ),
             call(
-                ["kubescape", "scan", "framework", "nsa", "folder2", "--format", "json", "--format-version", "v2", "--output", "results_kubescape.json", "-v"],
+                ["kubescape", "scan", "framework", "nsa", "folder2", "--format", "json", "--format-version", "v2", "--output", "results_kubescape_20220101-120000.json", "-v"],
                 capture_output=True
             )
         ]
@@ -195,16 +197,18 @@ class TestKubescapeTool(unittest.TestCase):
 
         mock_logger.error.assert_not_called()
 
+    @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.time.strftime', return_value='20220101-120000')
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run", side_effect=subprocess.CalledProcessError(returncode=1, cmd="kubescape"))
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
-    def test_execute_kubescape_failure(self, mock_logger, mock_subprocess_run):
+    def test_execute_kubescape_failure(self, mock_logger, mock_subprocess_run, mock_time_strftime):
 
         folders_to_scan = ["folder1"]
         prefix = "kubescape"
-        self.kubescape_tool.execute_kubescape(folders_to_scan, prefix)
+        platform_to_scan = "k8s"
+        self.kubescape_tool.execute_kubescape(folders_to_scan, prefix,platform_to_scan)
 
         mock_subprocess_run.assert_called_once_with(
-            ["kubescape", "scan", "framework", "nsa", "folder1", "--format", "json", "--format-version", "v2", "--output", "results_kubescape.json", "-v"],
+            ["kubescape", "scan", "framework", "nsa", "folder1", "--format", "json", "--format-version", "v2", "--output", "results_kubescape_20220101-120000.json", "-v"],
             capture_output=True
         )
 
@@ -212,75 +216,9 @@ class TestKubescapeTool(unittest.TestCase):
 
     @patch("builtins.open", new_callable=mock.mock_open, read_data='{"key": "value"}')
     def test_load_json_success(self, mock_file):
-        result = self.kubescape_tool.load_json()
+        result = self.kubescape_tool.load_json("json_name.json")
         self.assertEqual(result, {"key": "value"})
-        mock_file.assert_called_once_with("results_kubescape.json")
-
-    def test_extract_failed_controls_no_failures(self):
-        data = {
-            "results": [
-                {
-                    "resourceID": "res1",
-                    "controls": [
-                        {"controlID": "ctrl1", "status": {"status": "passed"}}
-                    ]
-                }
-            ],
-            "resources": [
-                {"resourceID": "res1", "source": {"relativePath": "path/to/res1"}}
-            ],
-            "summaryDetails": {
-                "frameworks": []
-            }
-        }
-        result = self.kubescape_tool.extract_failed_controls(data)
-        self.assertEqual(result, [])
-
-    def test_extract_failed_controls_with_failures(self):
-        data = {
-            "results": [
-                {
-                    "resourceID": "res1",
-                    "controls": [
-                        {"controlID": "ctrl1", "name": "Control 1", "status": {"status": "failed"}}
-                    ]
-                }
-            ],
-            "resources": [
-                {"resourceID": "res1", "source": {"relativePath": "path/to/res1"}}
-            ],
-            "summaryDetails": {
-                "frameworks": [{"controls": {"ctrl1": {"scoreFactor": 5}}}]
-            }
-        }
-        result = self.kubescape_tool.extract_failed_controls(data)
-        expected_result = [{
-            "id": "ctrl1",
-            "description": "Control 1",
-            "where": "path/to/res1",
-            "severity": "medium"
-        }]
-        self.assertEqual(result, expected_result)
-
-    def test_get_severity_score_none(self):
-        frameworks = [{"controls": {"control1": {"scoreFactor": 0.0}}}]
-        result = self.kubescape_tool.get_severity_score(frameworks, "control1")
-        self.assertEqual(result, "none")
-
-    def test_get_severity_score_medium(self):
-        frameworks = [{"controls": {"control1": {"scoreFactor": 5.0}}}]
-        result = self.kubescape_tool.get_severity_score(frameworks, "control1")
-        self.assertEqual(result, "medium")
-
-    def test_get_severity_score_high(self):
-        frameworks = [{"controls": {"control1": {"scoreFactor": 8.0}}}]
-        result = self.kubescape_tool.get_severity_score(frameworks, "control1")
-        self.assertEqual(result, "high")
-
-    def test_get_severity_score_critical(self):
-        frameworks = [{"controls": {"control1": {"scoreFactor": 9.5}}}]
-        result = self.kubescape_tool.get_severity_score(frameworks, "control1")
-        self.assertEqual(result, "critical")
+        mock_file.assert_called_once_with("json_name.json")
 
     def test_run_tool_empty_folders(self):
         config_tool = MagicMock()
