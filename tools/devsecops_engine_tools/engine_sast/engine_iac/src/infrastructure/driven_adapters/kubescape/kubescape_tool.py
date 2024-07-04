@@ -64,7 +64,7 @@ class KubescapeTool(ToolGateway):
             if "k8s" in platform_to_scan:
                 timestamp = time.strftime("%Y%m%d-%H%M%S")
                 output_filename = f"results_kubescape_{timestamp}.json"
-                command = [prefix, "scan", "framework", "nsa", folder, "--format", "json", "--format-version", "v2",
+                command = [prefix, "scan", folder, "--format", "json", "--format-version", "v2",
                            "--output", output_filename, "-v"]
                 try:
                     subprocess.run(command, capture_output=True)
