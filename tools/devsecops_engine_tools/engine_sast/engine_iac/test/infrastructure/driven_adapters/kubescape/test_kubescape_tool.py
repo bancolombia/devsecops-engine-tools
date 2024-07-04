@@ -188,11 +188,11 @@ class TestKubescapeTool(unittest.TestCase):
 
         expected_calls = [
             call(
-                ["kubescape", "scan", "framework", "nsa", "folder1", "--format", "json", "--format-version", "v2", "--output", "results_kubescape_20220101-120000.json", "-v"],
+                ["kubescape", "scan", "folder1", "--format", "json", "--format-version", "v2", "--output", "results_kubescape_20220101-120000.json", "-v"],
                 capture_output=True
             ),
             call(
-                ["kubescape", "scan", "framework", "nsa", "folder2", "--format", "json", "--format-version", "v2", "--output", "results_kubescape_20220101-120000.json", "-v"],
+                ["kubescape", "scan", "folder2", "--format", "json", "--format-version", "v2", "--output", "results_kubescape_20220101-120000.json", "-v"],
                 capture_output=True
             )
         ]
@@ -211,7 +211,7 @@ class TestKubescapeTool(unittest.TestCase):
         self.kubescape_tool.execute_kubescape(folders_to_scan, prefix,platform_to_scan)
 
         mock_subprocess_run.assert_called_once_with(
-            ["kubescape", "scan", "framework", "nsa", "folder1", "--format", "json", "--format-version", "v2", "--output", "results_kubescape_20220101-120000.json", "-v"],
+            ["kubescape", "scan", "folder1", "--format", "json", "--format-version", "v2", "--output", "results_kubescape_20220101-120000.json", "-v"],
             capture_output=True
         )
 
