@@ -46,7 +46,7 @@ class KubescapeDeserealizator:
                     resource = resources.get(resource_id)
 
                     if resource:
-                        relative_path = resource.get("source", {}).get("relativePath", "").replace("\\", "/")
+                        relative_path = resource.get("source", {}).get("path", "").replace("\\", "/")
                         severity_score = self.get_severity_score(frameworks, control_id)
 
                         result_extracted_data.append({

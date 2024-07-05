@@ -4,7 +4,6 @@ import platform
 import requests
 import distro
 import os
-import time
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -59,19 +58,13 @@ class KubescapeTool(ToolGateway):
                 logger.error(f"Error installing Kubescape: {e}")
 
     def execute_kubescape(self, folders_to_scan, prefix, platform_to_scan):
-        outputs_json = []
-        for folder in folders_to_scan:
-            if "k8s" in platform_to_scan:
-                timestamp = time.strftime("%Y%m%d-%H%M%S")
-                output_filename = f"results_kubescape_{timestamp}.json"
-                command = [prefix, "scan", folder, "--format", "json", "--format-version", "v2",
-                           "--output", output_filename, "-v"]
-                try:
-                    subprocess.run(command, capture_output=True)
-                    outputs_json.append(output_filename)
-                except subprocess.CalledProcessError as e:
-                    logger.error(f"Error during Kubescape execution: {e}")
-        return outputs_json
+        if "k8s" in platform_to_scan:
+            command = [prefix, "scan"] + folders_to_scan + ["--format", "json", "--format-version", "v2", "--output",
+                                                            "results_kubescape.json", "-v"]
+            try:
+                subprocess.run(command, capture_output=True)
+            except subprocess.CalledProcessError as e:
+                logger.error(f"Error during Kubescape execution: {e}")
 
     def load_json(self, json_name):
         try:
@@ -105,8 +98,7 @@ class KubescapeTool(ToolGateway):
             logger.warning(f"{os_platform} is not supported.")
             return [], None
 
-        outputs_json = self.execute_kubescape(folders_to_scan, command_prefix, platform_to_scan)
-        return outputs_json
+        self.execute_kubescape(folders_to_scan, command_prefix, platform_to_scan)
 
     def run_tool(self, config_tool: ConfigTool, folders_to_scan, environment, platform_to_scan, secret_tool):
 
@@ -115,26 +107,18 @@ class KubescapeTool(ToolGateway):
             kubescape_version = config_tool.version
             os_platform = platform.system()
             base_url = f"https://github.com/kubescape/kubescape/releases/download/v{kubescape_version}/"
-            outputs_json = self.select_operative_system(os_platform, folders_to_scan, platform_to_scan, base_url)
+            self.select_operative_system(os_platform, folders_to_scan, platform_to_scan, base_url)
 
-            total_findings = []
-            path_json_result = []
-            for json_name in outputs_json:
+            json_name = "results_kubescape.json"
+            data = self.load_json(json_name)
 
-                path = os.path.abspath(json_name)
-                path_json_result.append(path)
-
-                data = self.load_json(json_name)
-
-                if not data:
-                    return [], None
-                else:
-                    kubescape_deserealizator = KubescapeDeserealizator()
-                    result_extracted_data = kubescape_deserealizator.extract_failed_controls(data)
-                    finding_list = kubescape_deserealizator.get_list_finding(result_extracted_data)
-                    total_findings.extend(finding_list)
-
-            return total_findings, path_json_result
-
+            if not data:
+                return [], None
+            else:
+                kubescape_deserealizator = KubescapeDeserealizator()
+                result_extracted_data = kubescape_deserealizator.extract_failed_controls(data)
+                finding_list = kubescape_deserealizator.get_list_finding(result_extracted_data)
+                path_results = os.path.abspath(json_name)
+            return finding_list, path_results
         else:
             return [], None
