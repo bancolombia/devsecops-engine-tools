@@ -83,5 +83,18 @@
                 }
             }
         }
+    },
+    "KUBESCAPE": {
+        "VERSION": "3.0.11",
+        "USE_EXTERNAL_CHECKS_GIT": "False",
+        "EXTERNAL_CHECKS_GIT": "",
+        "EXTERNAL_GIT_SSH_HOST": "",
+        "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "",
+        "USE_EXTERNAL_CHECKS_DIR": "",
+        "EXTERNAL_DIR_OWNER": "",
+        "EXTERNAL_DIR_REPOSITORY": "",
+        "RULES": {
+
+        }
     }
 }
