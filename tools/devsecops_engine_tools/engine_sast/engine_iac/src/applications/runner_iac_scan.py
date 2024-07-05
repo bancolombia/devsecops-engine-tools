@@ -16,12 +16,14 @@ def runner_engine_iac(dict_args, tool, secret_tool, devops_platform_gateway, env
     try:
         # Define driven adapters for gateways
         tool_gateway = None
-        if tool == "CHECKOV":
-            tool_gateway = CheckovTool()
-        elif tool == "KUBESCAPE":
-            tool_gateway = KubescapeTool()
-        elif tool == "KICS":
-            tool_gateway = KicsTool()
+
+        tools = {
+            "CHECKOV": CheckovTool(),
+            "KUBESCAPE": KubescapeTool(),
+        }
+
+        if tool in tools:
+            tool_gateway = tools[tool]
 
         return init_engine_sast_rm(
             devops_platform_gateway=devops_platform_gateway,
