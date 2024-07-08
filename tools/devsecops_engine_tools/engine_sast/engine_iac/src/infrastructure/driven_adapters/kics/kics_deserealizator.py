@@ -28,3 +28,30 @@ class KicsDeserealizator:
             list_open_findings.append(finding_open)
 
         return list_open_findings
+
+    def get_findings(self, data):
+        filtered_results = []
+        for query in data.get("queries", []):
+            severity = query.get("severity", "").upper()
+            if severity in {"LOW", "MEDIUM", "HIGH", "CRITICAL"}:
+                description = query.get("query_name", "")
+                query_id = query.get("query_id", "")
+                for file in query.get("files", []):
+                    file_name = file.get("file_name", "")
+                    filtered_results.append({
+                        "severity": severity,
+                        "description": description,
+                        "file_name": file_name,
+                        "id": query_id
+                    })
+        return filtered_results
+
+    def calculate_total_vulnerabilities(self, data):
+        severity_counters = data.get("severity_counters", {})
+
+        critical = severity_counters.get("CRITICAL", 0)
+        high = severity_counters.get("HIGH", 0)
+        medium = severity_counters.get("MEDIUM", 0)
+        low = severity_counters.get("LOW", 0)
+
+        return critical + high + medium + low

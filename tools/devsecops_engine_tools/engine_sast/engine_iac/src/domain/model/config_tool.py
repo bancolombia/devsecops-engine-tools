@@ -25,3 +25,5 @@ class ConfigTool:
             self.kics_linux = json_data[tool]["KICS_LINUX"]
         if "KICS_WINDOWS" in json_data[tool]:
             self.kics_windows = json_data[tool]["KICS_WINDOWS"]
+        if "KICS_MAC" in json_data[tool]:
+            self.kics_mac = json_data[tool]["KICS_MAC"]

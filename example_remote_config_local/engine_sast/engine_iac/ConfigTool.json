@@ -96,5 +96,21 @@
         "RULES": {
 
         }
+    },
+    "KICS": {
+        "VERSION": "2.1.0",
+        "USE_EXTERNAL_CHECKS_GIT": "False",
+        "EXTERNAL_CHECKS_GIT": "",
+        "EXTERNAL_GIT_SSH_HOST": "",
+        "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "",
+        "USE_EXTERNAL_CHECKS_DIR": "",
+        "EXTERNAL_DIR_OWNER": "",
+        "EXTERNAL_DIR_REPOSITORY": "",
+        "KICS_LINUX": "https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/kics/bin/linux/kics.zip",
+        "KICS_WINDOWS": "https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/kics/bin/windows/kics.zip",
+        "KICS_MAC": "https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/kics/bin/mac/kics.zip",
+        "RULES": {
+
+        }
     }
 }
