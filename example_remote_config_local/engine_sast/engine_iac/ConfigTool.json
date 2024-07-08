@@ -106,9 +106,9 @@
         "USE_EXTERNAL_CHECKS_DIR": "",
         "EXTERNAL_DIR_OWNER": "",
         "EXTERNAL_DIR_REPOSITORY": "",
-        "KICS_LINUX": "https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/kics/bin/linux/kics.zip",
-        "KICS_WINDOWS": "https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/kics/bin/windows/kics.zip",
-        "KICS_MAC": "https://artifactory.apps.bancolombia.com/artifactory/devops-toolset/DevSecOps/kics/bin/mac/kics.zip",
+        "KICS_LINUX": "https://example.url/kics/bin/linux/kics.zip",
+        "KICS_WINDOWS": "https://example.url/kics/bin/windows/kics.zip",
+        "KICS_MAC": "https://example.url/kics/bin/mac/kics.zip",
         "RULES": {
 
         }
