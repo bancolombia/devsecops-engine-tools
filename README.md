@@ -37,7 +37,7 @@ pip3 install devsecops-engine-tools
 ### Scan running - flags (CLI)
 
 ```bash
-devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["eks","openshift"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] 
+devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["k8s","cloudformation","docker", "openapi"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] 
 ```
 
 ### Structure Remote Config
@@ -60,6 +60,46 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
    ┃   ┗ 📜ConfigTool.json
    ┃   ┗ 📜Exclusions.json
 ```
+
+### Tools available for the modules (Configuration engine_core/ConfigTool.json)
+
+
+<table>
+  <tr>
+    <th>Module</th>
+    <th>Tool</th>
+    <th>Type</th>
+  </tr>
+  <tr>
+    <td rowspan="2">ENGINE_IAC</td>
+    <td><a href="https://www.checkov.io/">CHECKOV</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td><a href="https://kubescape.io/">KUBESCAPE</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td>ENGINE_SECRET</td>
+    <td><a href="https://trufflesecurity.com/trufflehog">TRUFFLEHOG</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td rowspan="2">ENGINE_CONTAINER</td>
+    <td><a href="https://www.paloaltonetworks.com/prisma/cloud">PRISMA</a></td>
+    <td>Paid</td>
+  </tr>
+  <tr>
+    <td><a href="https://trivy.dev/">TRIVY</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td>ENGINE_DEPENDENCIES</td>
+    <td><a href="https://jfrog.com/help/r/get-started-with-the-jfrog-platform/jfrog-xray">XRAY</a></td>
+    <td>Paid</td>
+  </tr>
+</table>
+
 ### Scan running sample (CLI) - Local
 
 > Complete the value in **.envdetlocal** file a set in execution environment
@@ -87,8 +127,3 @@ With the flag **--send_metrics true** and the configuration of the AWS-METRICS_M
 # How can I help?
 
 Review the issues, we hear new ideas. Read more [Contributing](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/docs/CONTRIBUTING.md)
-
-
-
-
-

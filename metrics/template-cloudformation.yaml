@@ -338,7 +338,7 @@ Resources:
               Type: struct<findings_excluded:array<struct<id:string,severity:string,category:string>>,vulnerabilities:struct<threshold:struct<critical:int,high:int,medium:int,low:int>,status:string,found:array<struct<id:string,severity:string>>>,compliances:struct<threshold:struct<critical:int>,status:string,found:array<struct<id:string,severity:string>>>>
           Compressed: false
           InputFormat: org.apache.hadoop.mapred.TextInputFormat
-          Location: s3://metrics-devsecops-engine-tools/
+          Location: s3://metrics-devsecops-engine-tools/engine_tools/
           OutputFormat: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat
           SerdeInfo:
             SerializationLibrary: org.openx.data.jsonserde.JsonSerDe
