@@ -66,7 +66,7 @@ def get_inputs_from_cli(args):
     )
     parser.add_argument("-fp", "--folder_path", type=str, required=False, help="Folder Path to scan, only apply engine_iac tool")
     parser.add_argument("-p",
-        "--platform", type=parse_choices({"all", "docker", "k8s", "cloudformation"}), required=False, default="all" ,help="Platform to scan, only apply engine_iac tool"
+        "--platform", type=parse_choices({"all", "docker", "k8s", "cloudformation", "openapi"}), required=False, default="all" ,help="Platform to scan, only apply engine_iac tool"
     )
     parser.add_argument(
         "--use_secrets_manager",
