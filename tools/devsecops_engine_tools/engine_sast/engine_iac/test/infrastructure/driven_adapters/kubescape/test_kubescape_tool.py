@@ -182,8 +182,7 @@ class TestKubescapeTool(unittest.TestCase):
 
         folders_to_scan = ["folder1", "folder2"]
         prefix = "kubescape"
-        platform_to_scan = "k8s"
-        self.kubescape_tool.execute_kubescape(folders_to_scan, prefix, platform_to_scan)
+        self.kubescape_tool.execute_kubescape(folders_to_scan, prefix)
 
         expected_calls = [
             call(
@@ -201,8 +200,7 @@ class TestKubescapeTool(unittest.TestCase):
 
         folders_to_scan = ["folder1"]
         prefix = "kubescape"
-        platform_to_scan = "k8s"
-        self.kubescape_tool.execute_kubescape(folders_to_scan, prefix,platform_to_scan)
+        self.kubescape_tool.execute_kubescape(folders_to_scan, prefix)
 
         mock_subprocess_run.assert_called_once_with(
             ["kubescape", "scan"] + folders_to_scan + ["--format", "json", "--format-version", "v2", "--output", "results_kubescape.json", "-v"],
@@ -239,13 +237,12 @@ class TestKubescapeTool(unittest.TestCase):
         executor = KubescapeTool()
         os_platform = 'Linux'
         folders_to_scan = ['folder1']
-        platform_to_scan = 'k8s'
         base_url = 'http://example.com/'
         
-        executor.select_operative_system(os_platform, folders_to_scan, platform_to_scan, base_url)
+        executor.select_operative_system(os_platform, folders_to_scan, base_url)
         
         mock_install_tool.assert_called_once_with('kubescape-ubuntu-latest', 'http://example.com/kubescape-ubuntu-latest')
-        mock_execute_kubescape.assert_called_once_with(folders_to_scan, './kubescape-ubuntu-latest', platform_to_scan)
+        mock_execute_kubescape.assert_called_once_with(folders_to_scan, './kubescape-ubuntu-latest')
 
     @patch.object(KubescapeTool, 'install_tool_windows')
     @patch.object(KubescapeTool, 'execute_kubescape', return_value=['result.json'])
@@ -253,13 +250,12 @@ class TestKubescapeTool(unittest.TestCase):
         executor = KubescapeTool()
         os_platform = 'Windows'
         folders_to_scan = ['folder1']
-        platform_to_scan = 'k8s'
         base_url = 'http://example.com/'
         
-        executor.select_operative_system(os_platform, folders_to_scan, platform_to_scan, base_url)
+        executor.select_operative_system(os_platform, folders_to_scan, base_url)
         
         mock_install_tool_windows.assert_called_once_with('kubescape-windows-latest.exe', 'http://example.com/kubescape-windows-latest.exe')
-        mock_execute_kubescape.assert_called_once_with(folders_to_scan, './kubescape-windows-latest.exe', platform_to_scan)
+        mock_execute_kubescape.assert_called_once_with(folders_to_scan, './kubescape-windows-latest.exe')
 
     @patch.object(KubescapeTool, 'install_tool')
     @patch.object(KubescapeTool, 'execute_kubescape', return_value=['result.json'])
@@ -267,10 +263,9 @@ class TestKubescapeTool(unittest.TestCase):
         executor = KubescapeTool()
         os_platform = 'Darwin'
         folders_to_scan = ['folder1']
-        platform_to_scan = 'k8s'
         base_url = 'http://example.com/'
         
-        executor.select_operative_system(os_platform, folders_to_scan, platform_to_scan, base_url)
+        executor.select_operative_system(os_platform, folders_to_scan, base_url)
         
         mock_install_tool.assert_called_once_with('kubescape-macos-latest', 'http://example.com/kubescape-macos-latest')
-        mock_execute_kubescape.assert_called_once_with(folders_to_scan, './kubescape-macos-latest', platform_to_scan)
+        mock_execute_kubescape.assert_called_once_with(folders_to_scan, './kubescape-macos-latest')

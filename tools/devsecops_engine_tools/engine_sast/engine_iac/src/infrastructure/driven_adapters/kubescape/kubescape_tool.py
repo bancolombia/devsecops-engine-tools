@@ -57,14 +57,13 @@ class KubescapeTool(ToolGateway):
             except Exception as e:
                 logger.error(f"Error installing Kubescape: {e}")
 
-    def execute_kubescape(self, folders_to_scan, prefix, platform_to_scan):
-        if "k8s" in platform_to_scan:
-            command = [prefix, "scan"] + folders_to_scan + ["--format", "json", "--format-version", "v2", "--output",
-                                                            "results_kubescape.json", "-v"]
-            try:
-                subprocess.run(command, capture_output=True)
-            except subprocess.CalledProcessError as e:
-                logger.error(f"Error during Kubescape execution: {e}")
+    def execute_kubescape(self, folders_to_scan, prefix):
+        command = [prefix, "scan"] + folders_to_scan + ["--format", "json", "--format-version", "v2", "--output",
+                                                        "results_kubescape.json", "-v"]
+        try:
+            subprocess.run(command, capture_output=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error during Kubescape execution: {e}")
 
     def load_json(self, json_name):
         try:
@@ -76,7 +75,7 @@ class KubescapeTool(ToolGateway):
             logger.error("The JSON result is empty.")
         return None
 
-    def select_operative_system(self, os_platform, folders_to_scan, platform_to_scan, base_url):
+    def select_operative_system(self, os_platform, folders_to_scan, base_url):
         if os_platform == "Linux":
             distro_name = distro.name()
             if distro_name == "Ubuntu":
@@ -98,16 +97,16 @@ class KubescapeTool(ToolGateway):
             logger.warning(f"{os_platform} is not supported.")
             return [], None
 
-        self.execute_kubescape(folders_to_scan, command_prefix, platform_to_scan)
+        self.execute_kubescape(folders_to_scan, command_prefix)
 
     def run_tool(self, config_tool: ConfigTool, folders_to_scan, environment, platform_to_scan, secret_tool):
 
-        if folders_to_scan:
+        if folders_to_scan and "k8s" in platform_to_scan:
 
             kubescape_version = config_tool.version
             os_platform = platform.system()
             base_url = f"https://github.com/kubescape/kubescape/releases/download/v{kubescape_version}/"
-            self.select_operative_system(os_platform, folders_to_scan, platform_to_scan, base_url)
+            self.select_operative_system(os_platform, folders_to_scan, base_url)
 
             json_name = "results_kubescape.json"
             data = self.load_json(json_name)
