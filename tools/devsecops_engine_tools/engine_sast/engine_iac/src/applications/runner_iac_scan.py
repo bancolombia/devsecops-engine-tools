@@ -20,6 +20,7 @@ def runner_engine_iac(dict_args, tool, secret_tool, devops_platform_gateway, env
         tools = {
             "CHECKOV": CheckovTool(),
             "KUBESCAPE": KubescapeTool(),
+            "KICS": KicsTool()
         }
 
         if tool in tools:
