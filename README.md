@@ -61,7 +61,7 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
    ┃   ┗ 📜Exclusions.json
 ```
 
-### Tools available for the modules (Configuration engine_core/ConfigTool.json)
+#### Tools available for the modules (Configuration engine_core/ConfigTool.json)
 
 
 <table>
@@ -77,6 +77,11 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
   </tr>
   <tr>
     <td><a href="https://kubescape.io/">KUBESCAPE</a></td>
+    <td>Free</td>
+  </tr>
+   <tr>
+    <td>ENGINE_DAST</td>
+    <td><a href="https://projectdiscovery.io/nuclei">NUCLEI</a></td>
     <td>Free</td>
   </tr>
   <tr>
