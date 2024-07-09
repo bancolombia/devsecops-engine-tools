@@ -123,6 +123,57 @@ devsecops-engine-tools --platform_devops local --remote_config_repo DevSecOps_Re
 
 ![Dashboard Grafana](docs/demo_session.svg)
 
+### Scan running sample - Github Actions
+
+The remote config should be in a GitHub repository, either public or private.
+
+**If the repository is public:** 
+
+1. The yml file containing the workflow should be configured using the default secret **GITHUB_TOKEN**. 
+For more information, refer to [Automatic token authentication](https://docs.github.com/en/actions/security-guides/automatic-token-authentication).
+
+**If the repository is private:** 
+
+1. Create a personal access token with the necessary permissions to access the repository.
+2. Add the token as a secret in the GitHub repository.
+    ![Dashboard Grafana](docs/secret_token.png)
+
+3. Configure the yml file containing the workflow using the created secret.
+
+**Example of the workflow yml:**
+
+```yaml
+name: DevSecOps Engine Tools
+on:
+  push:
+    branches:
+      - feature/*
+env:
+  GITHUB_ACCESS_TOKEN: ${{ secrets.GH_ACCESSTOKEN }} #In this case, the remote config repository is private
+  # When the remote config repository is public, the secret should be like this: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Python
+        run: |
+          # Install devsecops-engine-tools
+          pip3 install -q devsecops-engine-tools
+          output=$(devsecops-engine-tools --platform_devops github --remote_config_repo remote_config --tool engine_iac)
+          echo "$output"
+          if [[ $output == *"✘Failed"* ]]; then
+            exit 1
+          fi
+```
+
 # Metrics
 
 With the flag **--send_metrics true** and the configuration of the AWS-METRICS_MANAGER driven adapter in ConfigTool.json of the engine_core the tool will send the report to bucket s3. In the [metrics](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/metrics/) folder you will find the base of the cloud formation template to deploy the infra and dashboard in grafana.
