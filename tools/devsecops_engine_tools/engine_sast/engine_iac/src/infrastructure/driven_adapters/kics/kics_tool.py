@@ -63,7 +63,7 @@ class KicsTool(ToolGateway):
 
     def execute_kics(self, folders_to_scan, prefix):
         folders = ','.join(folders_to_scan)
-        command = [prefix, "scan", "-p", folders, "-q", "./kics_assets/assets", "--report-formats", "json", "-o", "./"]
+        command = [f"./kics_bin/{prefix}", "scan", "-p", folders, "-q", "./kics_assets/assets", "--report-formats", "json", "-o", "./"]
         try:
             subprocess.run(command, capture_output=True)
         except subprocess.CalledProcessError as e:
@@ -79,21 +79,20 @@ class KicsTool(ToolGateway):
             return None
 
     def select_operative_system(self, os_platform, folders_to_scan, config_tool: ConfigTool):
+        command_prefix = "kics"
         if os_platform == "Linux":
             kics_zip = "kics_linux.zip"
             url_kics = config_tool.kics_linux
             self.install_tool(kics_zip, url_kics)
-            command_prefix = "./kics_bin/kics"
         elif os_platform == "Windows":
             kics_zip = "kics_windows.zip"
             url_kics = config_tool.kics_windows
             self.install_tool_windows(kics_zip, url_kics)
-            command_prefix = "./kics_bin/kics.exe"
+            command_prefix = "kics.exe"
         elif os_platform == "Darwin":
             kics_zip = "kics_macos.zip"
             url_kics = config_tool.kics_mac
             self.install_tool(kics_zip, url_kics)
-            command_prefix = "./kics_bin/kics"
         else:
             logger.warning(f"{os_platform} is not supported.")
             return [], None
@@ -112,16 +111,14 @@ class KicsTool(ToolGateway):
     def run_tool(
             self, config_tool: ConfigTool, folders_to_scan, environment, platform_to_scan, secret_tool
     ):
-        if folders_to_scan and "k8s" in platform_to_scan:
+        kics_version = config_tool.version
+        self.get_assets(kics_version)
 
-            kics_version = config_tool.version
-            self.get_assets(kics_version)
+        os_platform = platform.system()
+        self.select_operative_system(os_platform, folders_to_scan, config_tool)
 
-            os_platform = platform.system()
-            self.select_operative_system(os_platform, folders_to_scan, config_tool)
-
-            data = self.load_results()
-
+        data = self.load_results()
+        if data:
             kics_deserealizator = KicsDeserealizator()
             total_vulnerabilities = kics_deserealizator.calculate_total_vulnerabilities(data)
             path_file = os.path.abspath("results.json")
@@ -133,5 +130,4 @@ class KicsTool(ToolGateway):
             finding_list = kics_deserealizator.get_list_finding(filtered_results)
 
             return finding_list, path_file
-
         return [], None
