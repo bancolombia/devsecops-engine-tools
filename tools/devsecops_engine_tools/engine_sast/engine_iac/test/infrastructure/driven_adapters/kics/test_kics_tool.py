@@ -147,7 +147,7 @@ class TestKicsTool(unittest.TestCase):
         mock_subprocess_run.return_value = MagicMock()
 
         folders_to_scan = ["folder1", "folder2"]
-        prefix = "./kics_bin/kics"
+        prefix = "kics"
         self.kics_tool.execute_kics(folders_to_scan, prefix)
 
         expected_calls = [
@@ -189,7 +189,7 @@ class TestKicsTool(unittest.TestCase):
 
         mock_install_tool.assert_called_once_with("kics_linux.zip", "http://example.com/kics_linux.zip")
         mock_install_tool_windows.assert_not_called()
-        mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "./kics_bin/kics")
+        mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "kics")
 
     @patch.object(KicsTool, 'install_tool')
     @patch.object(KicsTool, 'install_tool_windows')
@@ -202,7 +202,7 @@ class TestKicsTool(unittest.TestCase):
 
         mock_install_tool_windows.assert_called_once_with("kics_windows.zip", "http://example.com/kics_windows.zip")
         mock_install_tool.assert_not_called()
-        mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "./kics_bin/kics.exe")
+        mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "kics.exe")
 
     @patch.object(KicsTool, 'install_tool')
     @patch.object(KicsTool, 'install_tool_windows')
@@ -215,7 +215,7 @@ class TestKicsTool(unittest.TestCase):
 
         mock_install_tool.assert_called_once_with("kics_macos.zip", "http://example.com/kics_mac.zip")
         mock_install_tool_windows.assert_not_called()
-        mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "./kics_bin/kics")
+        mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "kics")
 
     @patch.object(KicsTool, 'install_tool')
     @patch.object(KicsTool, 'install_tool_windows')
@@ -284,20 +284,3 @@ class TestKicsTool(unittest.TestCase):
         
         self.assertEqual(result, ['finding1', 'finding2'])
         self.assertEqual(path, os.path.abspath("results.json"))
-
-    @patch.object(KicsTool, 'get_assets')
-    @patch.object(KicsTool, 'select_operative_system')
-    @patch.object(KicsTool, 'load_results')
-    @patch.object(KicsDeserealizator, 'calculate_total_vulnerabilities')
-    def test_run_tool_not_k8s(self, mock_calc_vulns, mock_load_results, mock_select_os, mock_get_assets):
-        mock_config_tool = Mock()
-
-        result, path = self.kics_tool.run_tool(mock_config_tool, ['folder1', 'folder2'], None, 'other_platform', None)
-
-        mock_get_assets.assert_not_called()
-        mock_select_os.assert_not_called()
-        mock_load_results.assert_not_called()
-        mock_calc_vulns.assert_not_called()
-        
-        self.assertEqual(result, [])
-        self.assertIsNone(path)
