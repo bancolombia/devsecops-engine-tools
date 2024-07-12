@@ -71,12 +71,16 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
     <th>Type</th>
   </tr>
   <tr>
-    <td rowspan="2">ENGINE_IAC</td>
+    <td rowspan="3">ENGINE_IAC</td>
     <td><a href="https://www.checkov.io/">CHECKOV</a></td>
     <td>Free</td>
   </tr>
   <tr>
     <td><a href="https://kubescape.io/">KUBESCAPE</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td><a href="https://www.kics.io/">KICS</a></td>
     <td>Free</td>
   </tr>
    <tr>
