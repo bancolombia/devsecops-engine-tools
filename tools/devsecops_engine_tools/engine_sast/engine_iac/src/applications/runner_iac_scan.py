@@ -7,6 +7,9 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool import (
     KubescapeTool
 )
+from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool import (
+    KicsTool
+)
 
 
 def runner_engine_iac(dict_args, tool, secret_tool, devops_platform_gateway, env):
@@ -17,6 +20,7 @@ def runner_engine_iac(dict_args, tool, secret_tool, devops_platform_gateway, env
         tools = {
             "CHECKOV": CheckovTool(),
             "KUBESCAPE": KubescapeTool(),
+            "KICS": KicsTool()
         }
 
         if tool in tools:
