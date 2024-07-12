@@ -44,14 +44,15 @@ class TestKicsTool(unittest.TestCase):
         mock_installed = MagicMock()
         mock_installed.returncode = 0
         mock_subprocess_run.return_value = mock_installed
+        command_prefix = "kics"
 
         file = "testfile.zip"
         url = "http://example.com/test"
         tool = self.kics_tool
-        tool.install_tool(file, url)
+        tool.install_tool(file, url, command_prefix)
 
         mock_subprocess_run.assert_called_once_with(
-            ["which", "./kics_bin/kics"],
+            ["which", "kics"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -69,12 +70,12 @@ class TestKicsTool(unittest.TestCase):
             MagicMock()
         ]
 
-        self.kics_tool.install_tool("kics.zip", "http://example.com/kics.zip")
+        self.kics_tool.install_tool("kics.zip", "http://example.com/kics.zip", "kics")
 
         mock_download.assert_called_once_with("kics.zip", "http://example.com/kics.zip")
-        mock_unzip.assert_called_once_with("kics.zip", "kics_bin")
-        mock_subprocess.assert_any_call(["which", "./kics_bin/kics"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        mock_subprocess.assert_any_call(["chmod", "+x", "./kics_bin/kics"])
+        mock_unzip.assert_called_once_with("kics.zip", "kics")
+        mock_subprocess.assert_any_call(["which", "kics"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        mock_subprocess.assert_any_call(["chmod", "+x", "./kics/kics"])
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.logger")
@@ -82,14 +83,15 @@ class TestKicsTool(unittest.TestCase):
     def test_install_tool_windows_already_installed(self, mock_download_tool, mock_logger, mock_subprocess_run):
         mock_installed = MagicMock()
         mock_subprocess_run.return_value = mock_installed
+        command_prefix = "kics"
 
         file = "testfile.zip"
         url = "http://example.com/test"
         tool = self.kics_tool
-        tool.install_tool_windows(file, url)
+        tool.install_tool_windows(file, url, command_prefix)
 
         mock_subprocess_run.assert_called_once_with(
-            ["./kics_bin/kics.exe", "version"],
+            ["kics", "version"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -108,16 +110,17 @@ class TestKicsTool(unittest.TestCase):
         file = "testfile.zip"
         url = "http://example.com/test"
         tool = self.kics_tool
-        tool.install_tool_windows(file, url)
+        command_prefix = "kics"
+        tool.install_tool_windows(file, url, command_prefix)
 
         mock_subprocess_run.assert_called_once_with(
-            ["./kics_bin/kics.exe", "version"],
+            ["kics", "version"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
 
         mock_download_tool.assert_called_once_with(file, url)
-        mock_unzip_file.assert_called_once_with(file, "kics_bin")
+        mock_unzip_file.assert_called_once_with(file, "kics")
         mock_logger.error.assert_not_called()
 
     @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.GithubApi')
@@ -129,10 +132,11 @@ class TestKicsTool(unittest.TestCase):
         file = "testfile.zip"
         url = "http://example.com/test"
         tool = self.kics_tool
-        tool.install_tool_windows(file, url)
+        command_prefix = "kics"
+        tool.install_tool_windows(file, url, command_prefix)
 
         mock_subprocess_run.assert_called_once_with(
-            ["./kics_bin/kics.exe", "version"],
+            ["kics", "version"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -152,7 +156,7 @@ class TestKicsTool(unittest.TestCase):
 
         expected_calls = [
             call(
-                ["./kics_bin/kics", "scan", "-p", "folder1,folder2", "-q", "./kics_assets/assets", "--report-formats", "json", "-o", "./"],
+                ["kics", "scan", "-p", "folder1,folder2", "-q", "./kics_assets/assets", "--report-formats", "json", "-o", "./"],
                 capture_output=True
             )
         ]
@@ -184,10 +188,13 @@ class TestKicsTool(unittest.TestCase):
     def test_select_operative_system_linux(self, mock_execute_kics, mock_install_tool_windows, mock_install_tool):
         mock_config_tool = Mock()
         mock_config_tool.kics_linux = "http://example.com/kics_linux.zip"
+        path = "kics"
 
-        self.kics_tool.select_operative_system("Linux", ["folder1", "folder2"], mock_config_tool)
+        mock_install_tool.return_value = "kics"
 
-        mock_install_tool.assert_called_once_with("kics_linux.zip", "http://example.com/kics_linux.zip")
+        self.kics_tool.select_operative_system("Linux", ["folder1", "folder2"], mock_config_tool, path)
+
+        mock_install_tool.assert_called_once_with("kics_linux.zip", "http://example.com/kics_linux.zip", "kics")
         mock_install_tool_windows.assert_not_called()
         mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "kics")
 
@@ -197,12 +204,15 @@ class TestKicsTool(unittest.TestCase):
     def test_select_operative_system_windows(self, mock_execute_kics, mock_install_tool_windows, mock_install_tool):
         mock_config_tool = Mock()
         mock_config_tool.kics_windows = "http://example.com/kics_windows.zip"
+        path = "kics"
 
-        self.kics_tool.select_operative_system("Windows", ["folder1", "folder2"], mock_config_tool)
+        mock_install_tool_windows.return_value = "kics"
 
-        mock_install_tool_windows.assert_called_once_with("kics_windows.zip", "http://example.com/kics_windows.zip")
+        self.kics_tool.select_operative_system("Windows", ["folder1", "folder2"], mock_config_tool, path)
+
+        mock_install_tool_windows.assert_called_once_with("kics_windows.zip", "http://example.com/kics_windows.zip", "kics")
         mock_install_tool.assert_not_called()
-        mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "kics.exe")
+        mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "kics")
 
     @patch.object(KicsTool, 'install_tool')
     @patch.object(KicsTool, 'install_tool_windows')
@@ -210,10 +220,13 @@ class TestKicsTool(unittest.TestCase):
     def test_select_operative_system_darwin(self, mock_execute_kics, mock_install_tool_windows, mock_install_tool):
         mock_config_tool = Mock()
         mock_config_tool.kics_mac = "http://example.com/kics_mac.zip"
+        path = "kics"
 
-        self.kics_tool.select_operative_system("Darwin", ["folder1", "folder2"], mock_config_tool)
+        mock_install_tool.return_value = "kics"
 
-        mock_install_tool.assert_called_once_with("kics_macos.zip", "http://example.com/kics_mac.zip")
+        self.kics_tool.select_operative_system("Darwin", ["folder1", "folder2"], mock_config_tool, path)
+
+        mock_install_tool.assert_called_once_with("kics_macos.zip", "http://example.com/kics_mac.zip", "kics")
         mock_install_tool_windows.assert_not_called()
         mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "kics")
 
@@ -223,8 +236,9 @@ class TestKicsTool(unittest.TestCase):
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.logger")
     def test_select_operative_system_unsupported(self, mock_logger, mock_execute_kics, mock_install_tool_windows, mock_install_tool):
         mock_config_tool = Mock()
+        path = "kics"
 
-        result = self.kics_tool.select_operative_system("UnsupportedOS", ["folder1", "folder2"], mock_config_tool)
+        result = self.kics_tool.select_operative_system("UnsupportedOS", ["folder1", "folder2"], mock_config_tool, path)
 
         mock_install_tool.assert_not_called()
         mock_install_tool_windows.assert_not_called()
@@ -251,11 +265,12 @@ class TestKicsTool(unittest.TestCase):
     def test_run_tool_no_vulnerabilities(self, mock_calc_vulns, mock_load_results, mock_select_os, mock_get_assets, mock_platform):
         mock_config_tool = Mock()
         mock_config_tool.version = '1.2.3'
+        mock_config_tool.path_kics = 'mock/path/kics'
 
         result, path = self.kics_tool.run_tool(mock_config_tool, ['folder1', 'folder2'], None, 'k8s', None)
 
         mock_get_assets.assert_called_once_with('1.2.3')
-        mock_select_os.assert_called_once_with('Linux', ['folder1', 'folder2'], mock_config_tool)
+        mock_select_os.assert_called_once_with('Linux', ['folder1', 'folder2'], mock_config_tool, 'mock/path/kics')
         mock_load_results.assert_called_once()
         mock_calc_vulns.assert_called_once_with({'data': 'results'})
         
@@ -272,11 +287,12 @@ class TestKicsTool(unittest.TestCase):
     def test_run_tool_with_vulnerabilities(self, mock_get_list_finding, mock_get_findings, mock_calc_vulns, mock_load_results, mock_select_os, mock_get_assets, mock_platform):
         mock_config_tool = Mock()
         mock_config_tool.version = '1.2.3'
+        mock_config_tool.path_kics = 'mock/path/kics'
 
         result, path = self.kics_tool.run_tool(mock_config_tool, ['folder1', 'folder2'], None, 'k8s', None)
 
         mock_get_assets.assert_called_once_with('1.2.3')
-        mock_select_os.assert_called_once_with('Linux', ['folder1', 'folder2'], mock_config_tool)
+        mock_select_os.assert_called_once_with('Linux', ['folder1', 'folder2'], mock_config_tool, 'mock/path/kics')
         mock_load_results.assert_called_once()
         mock_calc_vulns.assert_called_once_with({'data': 'results'})
         mock_get_findings.assert_called_once_with({'data': 'results'})

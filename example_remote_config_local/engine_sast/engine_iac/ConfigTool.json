@@ -109,6 +109,8 @@
         "KICS_LINUX": "https://example.url/kics/bin/linux/kics.zip",
         "KICS_WINDOWS": "https://example.url/kics/bin/windows/kics.zip",
         "KICS_MAC": "https://example.url/kics/bin/mac/kics.zip",
+        "PATH_KICS": "./kics/kics",
+        "DOWNLOAD_KICS_ASSETS": false,
         "RULES": {
 
         }
