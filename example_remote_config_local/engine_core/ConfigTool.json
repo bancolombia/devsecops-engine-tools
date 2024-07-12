@@ -26,7 +26,7 @@
     },
     "ENGINE_IAC": {
         "ENABLED": "true",
-        "TOOL": "CHECKOV|KUBESCAPE"
+        "TOOL": "CHECKOV|KUBESCAPE|KICS"
     },
     "ENGINE_CONTAINER": {
         "ENABLED": "true",
