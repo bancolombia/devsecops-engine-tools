@@ -97,6 +97,11 @@ class IacScan:
             ).get(tool)
             skip_tool = "true" if config_tool.exclusions.get(config_tool.scope_pipeline).get("SKIP_TOOL") else "false"
         if(dict_args["folder_path"]):
+            if config_tool.update_service_file_name_cft == "True" and "cloudformation" in dict_args["platform"]:
+                files = os.listdir(os.path.join(os.getcwd(), dict_args["folder_path"]))
+                name_file, _ = os.path.splitext(files[0])
+                config_tool.scope_pipeline = f"{config_tool.scope_pipeline}_{name_file}"
+
             folders_to_scan = [dict_args["folder_path"]]
         else:
             folders_to_scan = self.search_folders(
