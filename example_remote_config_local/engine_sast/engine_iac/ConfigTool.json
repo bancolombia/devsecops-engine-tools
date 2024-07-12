@@ -97,5 +97,23 @@
         "RULES": {
 
         }
+    },
+    "KICS": {
+        "VERSION": "2.1.0",
+        "USE_EXTERNAL_CHECKS_GIT": "False",
+        "EXTERNAL_CHECKS_GIT": "",
+        "EXTERNAL_GIT_SSH_HOST": "",
+        "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "",
+        "USE_EXTERNAL_CHECKS_DIR": "",
+        "EXTERNAL_DIR_OWNER": "",
+        "EXTERNAL_DIR_REPOSITORY": "",
+        "KICS_LINUX": "https://example.url/kics/bin/linux/kics.zip",
+        "KICS_WINDOWS": "https://example.url/kics/bin/windows/kics.zip",
+        "KICS_MAC": "https://example.url/kics/bin/mac/kics.zip",
+        "PATH_KICS": "./kics/kics",
+        "DOWNLOAD_KICS_ASSETS": false,
+        "RULES": {
+
+        }
     }
 }

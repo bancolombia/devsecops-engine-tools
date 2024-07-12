@@ -55,6 +55,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "XRAY": "JFrog Xray On Demand Binary Scan",
                 "TRUFFLEHOG": "Trufflehog Scan",
                 "TRIVY": "Trivy Scan",
+                "KUBESCAPE": "Kubescape Scanner",
+                "KICS": "KICS Scanner"
             }
 
             if any(

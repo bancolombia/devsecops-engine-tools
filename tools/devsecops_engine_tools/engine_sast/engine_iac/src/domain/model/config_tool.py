@@ -22,3 +22,13 @@ class ConfigTool:
         self.exclusions_all = None
         self.exclusions_scope = None
         self.rules_all = {}
+        if "KICS_LINUX" in json_data[tool]:
+            self.kics_linux = json_data[tool]["KICS_LINUX"]
+        if "KICS_WINDOWS" in json_data[tool]:
+            self.kics_windows = json_data[tool]["KICS_WINDOWS"]
+        if "KICS_MAC" in json_data[tool]:
+            self.kics_mac = json_data[tool]["KICS_MAC"]
+        if "PATH_KICS" in json_data[tool]:
+            self.path_kics = json_data[tool]["PATH_KICS"]
+        if "DOWNLOAD_KICS_ASSETS" in json_data[tool]:
+            self.download_kics_assets = json_data[tool]["DOWNLOAD_KICS_ASSETS"]
