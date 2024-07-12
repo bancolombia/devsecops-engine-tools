@@ -29,41 +29,46 @@ class KicsTool(ToolGateway):
         except Exception as ex:
             logger.error(f"An error ocurred downloading {file} {ex}")
 
-    def install_tool(self, file, url):
+    def install_tool(self, file, url, command_prefix):
         github_api = GithubApi()
-        kics = "./kics_bin/kics"
+        kics = f"./{command_prefix}/kics"
         installed = subprocess.run(
-            ["which", kics],
+            ["which", command_prefix],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
         if installed.returncode == 1:
             try:
                 self.download(file, url)
-                github_api.unzip_file(file, "kics_bin")
+                github_api.unzip_file(file, command_prefix)
                 subprocess.run(["chmod", "+x", kics])
+                return kics
             except Exception as e:
                 logger.error(f"Error installing KICS: {e}")
+        else:
+            return command_prefix
 
-    def install_tool_windows(self, file, url):
+    def install_tool_windows(self, file, url, command_prefix):
         try:
             subprocess.run(
-                ["./kics_bin/kics.exe", "version"],
+                [command_prefix, "version"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
+            return command_prefix
         except:
             try:
                 github_api = GithubApi()
                 self.download(file, url)
-                github_api.unzip_file(file, "kics_bin")
+                github_api.unzip_file(file, command_prefix)
+                return f"./{command_prefix}/kics"
 
             except Exception as e:
                 logger.error(f"Error installing KICS: {e}")
 
     def execute_kics(self, folders_to_scan, prefix):
         folders = ','.join(folders_to_scan)
-        command = [f"./kics_bin/{prefix}", "scan", "-p", folders, "-q", "./kics_assets/assets", "--report-formats", "json", "-o", "./"]
+        command = [prefix, "scan", "-p", folders, "-q", "./kics_assets/assets", "--report-formats", "json", "-o", "./"]
         try:
             subprocess.run(command, capture_output=True)
         except subprocess.CalledProcessError as e:
@@ -78,21 +83,20 @@ class KicsTool(ToolGateway):
             logger.error(f"An error ocurred loading KICS results {ex}")
             return None
 
-    def select_operative_system(self, os_platform, folders_to_scan, config_tool: ConfigTool):
-        command_prefix = "kics"
+    def select_operative_system(self, os_platform, folders_to_scan, config_tool: ConfigTool, path_kics):
+        command_prefix = path_kics
         if os_platform == "Linux":
             kics_zip = "kics_linux.zip"
             url_kics = config_tool.kics_linux
-            self.install_tool(kics_zip, url_kics)
+            command_prefix = self.install_tool(kics_zip, url_kics, command_prefix)
         elif os_platform == "Windows":
             kics_zip = "kics_windows.zip"
             url_kics = config_tool.kics_windows
-            self.install_tool_windows(kics_zip, url_kics)
-            command_prefix = "kics.exe"
+            command_prefix = self.install_tool_windows(kics_zip, url_kics, command_prefix)
         elif os_platform == "Darwin":
             kics_zip = "kics_macos.zip"
             url_kics = config_tool.kics_mac
-            self.install_tool(kics_zip, url_kics)
+            command_prefix = self.install_tool(kics_zip, url_kics, command_prefix)
         else:
             logger.warning(f"{os_platform} is not supported.")
             return [], None
@@ -112,10 +116,13 @@ class KicsTool(ToolGateway):
             self, config_tool: ConfigTool, folders_to_scan, environment, platform_to_scan, secret_tool
     ):
         kics_version = config_tool.version
-        self.get_assets(kics_version)
+        path_kics = config_tool.path_kics
+        download_kics_assets = config_tool.download_kics_assets
+        if download_kics_assets:
+            self.get_assets(kics_version)
 
         os_platform = platform.system()
-        self.select_operative_system(os_platform, folders_to_scan, config_tool)
+        self.select_operative_system(os_platform, folders_to_scan, config_tool, path_kics)
 
         data = self.load_results()
         if data:
