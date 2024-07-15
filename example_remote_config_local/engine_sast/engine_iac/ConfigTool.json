@@ -17,6 +17,7 @@
             "Critical": 1
         }
     },
+    "UPDATE_SERVICE_WITH_FILE_NAME_CFT": "False",
     "CHECKOV": {
         "VERSION": "2.3.296",
         "USE_EXTERNAL_CHECKS_GIT": "False",

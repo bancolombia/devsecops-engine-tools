@@ -38,6 +38,7 @@ class TestCheckovTool(unittest.TestCase):
             ],
             "MESSAGE_INFO_ENGINE_IAC": "message test",
             "EXCLUSIONS_PATH": "Exclusions.json",
+            "UPDATE_SERVICE_WITH_FILE_NAME_CFT": "false",
             "THRESHOLD": {
                 "VULNERABILITY": {
                     "Critical": 10,
@@ -87,6 +88,7 @@ class TestCheckovTool(unittest.TestCase):
             ],
             "MESSAGE_INFO_ENGINE_IAC": "message test",
             "EXCLUSIONS_PATH": "Exclusions.json",
+            "UPDATE_SERVICE_WITH_FILE_NAME_CFT": "false",
             "THRESHOLD": {
                 "VULNERABILITY": {
                     "Critical": 10,
@@ -147,6 +149,7 @@ class TestCheckovTool(unittest.TestCase):
             ],
             "MESSAGE_INFO_ENGINE_IAC": "message test",
             "EXCLUSIONS_PATH": "Exclusions.json",
+            "UPDATE_SERVICE_WITH_FILE_NAME_CFT": "false",
             "THRESHOLD": {
                 "VULNERABILITY": {
                     "Critical": 10,
