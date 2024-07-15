@@ -6,6 +6,7 @@ class ConfigTool:
         self.version = json_data[tool]["VERSION"]
         self.search_pattern = json_data["SEARCH_PATTERN"]
         self.ignore_search_pattern = json_data["IGNORE_SEARCH_PATTERN"]
+        self.update_service_file_name_cft = json_data["UPDATE_SERVICE_WITH_FILE_NAME_CFT"]
         self.use_external_checks_git = json_data[tool]["USE_EXTERNAL_CHECKS_GIT"]
         self.external_checks_git = json_data[tool]["EXTERNAL_CHECKS_GIT"]
         self.repository_ssh_host = json_data[tool]["EXTERNAL_GIT_SSH_HOST"]
