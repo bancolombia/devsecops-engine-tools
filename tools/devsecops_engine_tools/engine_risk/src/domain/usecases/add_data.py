@@ -45,15 +45,7 @@ class AddData:
                 epss_dict[row[0]] = row[1]
 
         for finding in findings:
-            if "CVE" in finding.vul_id:
-                epss_value = epss_dict.get(finding.vul_id)
-                if epss_value:
-                    finding.epss = epss_value
-                else:
-                    finding.epss = ""
-            else:
-                finding.epss = ""
-
+            finding.epss = epss_dict.get(finding.vul_id, None)
 
     def add_data(self):
         epss_data = self.download_epss_data()
