@@ -176,13 +176,14 @@ def test_scan_dependencies_success(xray_scan_instance):
         "os.getcwd"
     ) as mock_os_getcwd:
         prefix = "jf"
-        file_to_scan = "target_file.tar"
-        bypass_limits_flag = True
+        cwd = "working_dir/"
+        mode = "scan"
+        to_scan = "target_file.tar"
         mock_subprocess_run.side_effect = Mock(returncode=0)
         mock_os_getcwd.return_value = "/working_dir"
 
         xray_scan_instance.scan_dependencies(
-            prefix, file_to_scan, bypass_limits_flag
+            prefix, cwd, mode, to_scan
         )
 
         mock_subprocess_run.assert_called_with(
@@ -190,17 +191,17 @@ def test_scan_dependencies_success(xray_scan_instance):
                 prefix,
                 "scan",
                 "--format=json",
-                "--bypass-archive-limits",
-                f"{file_to_scan}",
+                f"{to_scan}",
             ],
+            cwd=cwd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
         )
-        mock_json_loads.assert_any_call
+        mock_json_loads.assert_any_call()
         mock_path_join.assert_called_with("/working_dir", "scan_result.json")
-        mock_open.assert_any_call
-        mock_json_dump.assert_any_call
+        mock_open.assert_any_call()
+        mock_json_dump.assert_any_call()
 
 
 def test_scan_dependencies_failure(xray_scan_instance):
@@ -251,7 +252,7 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
 
         mock_install_tool.assert_called_with("1.0")
         mock_config_server.assert_called_with("./jf", token)
-        mock_listdir.assert_any_call
+        mock_listdir.assert_any_call()
         mock_scan_dependencies.assert_called_with(
             "./jf",
             dir_to_scan_path,
@@ -287,7 +288,7 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
 
         mock_install_tool.assert_called_with("1.0")
         mock_config_server.assert_called_with("./jf.exe", token)
-        mock_listdir.assert_any_call
+        mock_listdir.assert_any_call()
         mock_scan_dependencies.assert_called_with(
             "./jf.exe",
             dir_to_scan_path,
@@ -323,7 +324,7 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
 
         mock_install_tool.assert_called_with("1.0")
         mock_config_server.assert_called_with("./jf", token)
-        mock_listdir.assert_any_call
+        mock_listdir.assert_any_call()
         mock_scan_dependencies.assert_called_with(
             "./jf",
             dir_to_scan_path,
