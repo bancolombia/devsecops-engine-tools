@@ -27,6 +27,8 @@ def test_application_core(mock_get_inputs_from_cli, mock_entry_point_tool):
         "token_vulnerability_management": None,
         "token_engine_container": None,
         "token_engine_dependencies": None,
+        "xray_mode": "scan",
+        "dir_to_scan": "/path/to/folder",
     }
 
     # Mock the dependencies
@@ -64,6 +66,8 @@ def test_application_core_exception(
         "token_vulnerability_management": None,
         "token_engine_container": None,
         "token_engine_dependencies": None,
+        "xray_mode": "scan",
+        "dir_to_scan": "/path/to/folder",
     }
 
     # Mock the dependencies
@@ -95,6 +99,8 @@ def test_get_inputs_from_cli(mock_parse_args):
     mock_args.token_vulnerability_management = None
     mock_args.token_engine_container = None
     mock_args.token_engine_dependencies = None
+    mock_args.xray_mode = "scan"
+    mock_args.dir_to_scan = "/path/to/folder"
 
     # Mock the parse_args method
     mock_parse_args.return_value = mock_args
@@ -116,6 +122,8 @@ def test_get_inputs_from_cli(mock_parse_args):
         "token_vulnerability_management": None,
         "token_engine_container": None,
         "token_engine_dependencies": None,
+        "xray_mode": "scan",
+        "dir_to_scan": "/path/to/folder",
     }
 
 

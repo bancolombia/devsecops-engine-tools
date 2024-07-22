@@ -19,7 +19,7 @@ class HandleRemoteConfigPatterns:
         Return: string: new regex expresion.
         """
 
-        pattern = self.remote_config["REGEX_EXPRESSION_EXTENSIONS"]
+        pattern = self.remote_config["XRAY"]["REGEX_EXPRESSION_EXTENSIONS"]
         if (self.pipeline_name in self.exclusions) and (
             self.exclusions[self.pipeline_name].get("SKIP_FILES", 0)
         ):
@@ -48,18 +48,6 @@ class HandleRemoteConfigPatterns:
             return False
         else:
             return True
-
-    def bypass_archive_limits(self):
-        """
-        Handle bypass archive limits.
-
-        Return: bool: True -> Bypass archive limits, False -> Without bypass archive limits.
-        """
-        bypass_limits = self.remote_config["BYPASS_ARCHIVE_LIMITS"]
-        if re.match(bypass_limits, self.pipeline_name):
-            return True
-        else:
-            return False
 
     def skip_from_exclusion(self):
         """

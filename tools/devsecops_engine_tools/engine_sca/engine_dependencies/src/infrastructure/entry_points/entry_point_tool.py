@@ -46,24 +46,24 @@ def init_engine_dependencies(
     input_core = SetInputCore(remote_config, exclusions, pipeline_name, tool)
 
     if scan_flag and not (skip_flag):
-        bypass_limits_flag = handle_remote_config_patterns.bypass_archive_limits()
-        pattern = handle_remote_config_patterns.excluded_files()
-
-        find_artifacts = FindArtifacts(
-            os.getcwd(), pattern, remote_config["PACKAGES_TO_SCAN"]
-        )
-        file_to_scan = find_artifacts.find_artifacts()
-        if file_to_scan:
+        to_scan = dict_args["dir_to_scan"] if dict_args["dir_to_scan"] else os.getcwd()
+        if dict_args["xray_mode"] == "scan":
+            pattern = handle_remote_config_patterns.excluded_files()
+            find_artifacts = FindArtifacts(
+                to_scan, pattern, remote_config["XRAY"]["PACKAGES_TO_SCAN"]
+            )
+            to_scan = find_artifacts.find_artifacts()
+        if to_scan:
             dependencies_sca_scan = DependenciesScan(
                 tool_run,
                 tool_deserializator,
                 remote_config,
-                file_to_scan,
-                bypass_limits_flag,
+                dict_args,
+                to_scan,
                 token,
             )
             dependencies_scanned = dependencies_sca_scan.process()
-            deserialized = dependencies_sca_scan.deserializator(dependencies_scanned)
+            deserialized = dependencies_sca_scan.deserializator(dependencies_scanned) if dependencies_scanned is not None else []
     else:
         print(f"Tool skipped by DevSecOps policy")
         logger.info(f"Tool skipped by DevSecOps policy")
