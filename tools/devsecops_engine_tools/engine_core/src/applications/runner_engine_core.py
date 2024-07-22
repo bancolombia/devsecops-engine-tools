@@ -91,7 +91,7 @@ def get_inputs_from_cli(args):
         "--folder_path",
         type=str,
         required=False,
-        help="Folder Path to scan, only apply engine_iac tool",
+        help="Folder Path to scan, only apply engine_iac and engine_dependencies tools",
     )
     parser.add_argument(
         "-p",
@@ -147,11 +147,6 @@ def get_inputs_from_cli(args):
         default="scan",
         help="Mode to execute xray, only apply engine_dependencies xray tool",
     )
-    parser.add_argument(
-        "--dir_to_scan",
-        required=False,
-        help="Directory to scan, only apply engine_dependencies tool",
-    )
     args = parser.parse_args()
     return {
         "platform_devops": args.platform_devops,
@@ -167,7 +162,6 @@ def get_inputs_from_cli(args):
         "token_engine_container": args.token_engine_container,
         "token_engine_dependencies": args.token_engine_dependencies,
         "xray_mode": args.xray_mode,
-        "dir_to_scan": args.dir_to_scan,
     }
 
 

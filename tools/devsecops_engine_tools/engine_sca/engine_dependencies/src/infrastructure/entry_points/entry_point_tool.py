@@ -46,8 +46,8 @@ def init_engine_dependencies(
     input_core = SetInputCore(remote_config, exclusions, pipeline_name, tool)
 
     if scan_flag and not (skip_flag):
-        to_scan = dict_args["dir_to_scan"] if dict_args["dir_to_scan"] else os.getcwd()
-        if dict_args["xray_mode"] == "scan":
+        to_scan = dict_args["folder_path"] if dict_args["folder_path"] else os.getcwd()
+        if tool == "XRAY" and dict_args["xray_mode"] == "scan":
             pattern = handle_remote_config_patterns.excluded_files()
             find_artifacts = FindArtifacts(
                 to_scan, pattern, remote_config["XRAY"]["PACKAGES_TO_SCAN"]
