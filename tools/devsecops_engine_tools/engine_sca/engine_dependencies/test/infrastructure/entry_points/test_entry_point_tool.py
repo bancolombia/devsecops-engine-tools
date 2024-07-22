@@ -13,8 +13,6 @@ def test_init_engine_dependencies():
     ) as mock_set_input_core, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.HandleRemoteConfigPatterns"
     ) as mock_handle_remote_config_patterns, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.FindMonoRepos"
-    ) as mock_find_mono_repo, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.FindArtifacts"
     ) as mock_find_artifacts:
         dict_args = {"remote_config_repo": "remote_repo"}

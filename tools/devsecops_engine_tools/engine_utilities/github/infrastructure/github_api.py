@@ -1,13 +1,16 @@
 import requests
 import zipfile
+import json
+from github import Github
+from devsecops_engine_tools.engine_utilities.utils.api_error import ApiError
 
 
 class GithubApi:
     def __init__(
-        self,
-        token: str = ""
+            self,
+            personal_access_token: str = ""
     ):
-        self.token = token
+        self.__personal_access_token = personal_access_token
 
     def unzip_file(self, zip_file_path, extract_path):
         with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
@@ -18,7 +21,7 @@ class GithubApi:
     ):
         url = f"https://api.github.com/repos/{owner}/{repository}/releases/latest"
 
-        headers = {"Authorization": f"token {self.token}"}
+        headers = {"Authorization": f"token {self.__personal_access_token}"}
 
         response = requests.get(url, headers=headers)
 
@@ -47,3 +50,19 @@ class GithubApi:
             print(
                 f"Error getting the assets of the last release. Status code: {response.status_code}"
             )
+
+    def get_github_connection(self):
+        git_client = Github(self.__personal_access_token)
+
+        return git_client
+
+    def get_remote_json_config(self, git_client: Github, owner, repository, path):
+        try:
+            repo = git_client.get_repo(f"{owner}/{repository}")
+            file_content = repo.get_contents(path)
+            data = file_content.decoded_content.decode()
+            content_json = json.loads(data)
+
+            return content_json
+        except Exception as e:
+            raise ApiError("Error getting remote github configuration file: " + str(e))

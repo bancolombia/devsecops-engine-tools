@@ -1,5 +1,5 @@
 import re
-import os
+
 
 class HandleRemoteConfigPatterns:
     def __init__(
@@ -7,12 +7,10 @@ class HandleRemoteConfigPatterns:
         remote_config,
         exclusions,
         pipeline_name,
-        agent_directory,
     ):
         self.remote_config = remote_config
         self.exclusions = exclusions
         self.pipeline_name = pipeline_name
-        self.agent_directory = agent_directory
 
     def excluded_files(self):
         """
@@ -75,16 +73,3 @@ class HandleRemoteConfigPatterns:
             return True
         else:
             return False
-
-    def different_working_directory(self):
-        """
-        Handle working directory.
-
-        Return: String: Working directory.
-        """
-        work_dir_different_flag = self.remote_config["WORK_DIR_DIFFERENT_FLAG"]
-        if self.agent_directory:
-            for root, dirs, files in os.walk(self.agent_directory):
-                if work_dir_different_flag in dirs:
-                    return self.agent_directory
-        return os.getcwd()

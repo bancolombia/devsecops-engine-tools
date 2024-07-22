@@ -28,16 +28,10 @@ class SecretScan:
         self.tool_deserialize = tool_deserialize
         self.git_gateway = git_gateway
 
-    def process(self, dict_args, tool):
-        tool = str(tool).lower()
-        init_config_tool = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_sast/engine_secret/ConfigTool.json"
-        )
-        config_tool, skip_tool = self.complete_config_tool(
-            init_config_tool, tool
-        )
+    def process(self, skip_tool, config_tool):
         finding_list = []
-        if skip_tool == "false":
+        file_path_findings = ""
+        if skip_tool == False:
             self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("os"), self.devops_platform_gateway.get_variable("temp_directory"))
             files_pullrequest = self.git_gateway.get_files_pull_request(
                 self.devops_platform_gateway.get_variable("work_folder"),
@@ -49,24 +43,40 @@ class SecretScan:
                 self.devops_platform_gateway.get_variable("project_name"),
                 self.devops_platform_gateway.get_variable("repository"),
                 self.devops_platform_gateway.get_variable("repository_provider"))
-            finding_list = self.tool_deserialize.get_list_vulnerability(
-                self.tool_gateway.run_tool_secret_scan(
+            findings, file_path_findings = self.tool_gateway.run_tool_secret_scan(
                     files_pullrequest,
                     config_tool.exclude_path,
                     self.devops_platform_gateway.get_variable("os"),
                     self.devops_platform_gateway.get_variable("work_folder"),
                     config_tool.number_threads,
                     self.devops_platform_gateway.get_variable("repository")
-                    ),
+                    )
+            finding_list = self.tool_deserialize.get_list_vulnerability(
+                findings,
                 self.devops_platform_gateway.get_variable("os"),
                 self.devops_platform_gateway.get_variable("work_folder")
                 )
-        return finding_list, config_tool
+        return finding_list, file_path_findings
     
-    def complete_config_tool(self, data_file_tool, tool):
-        config_tool = DeserializeConfigTool(json_data=data_file_tool, tool=tool)
+    def complete_config_tool(self, dict_args, tool):
+        tool = str(tool).lower()
+        init_config_tool = self.devops_platform_gateway.get_remote_config(
+            dict_args["remote_config_repo"], "engine_sast/engine_secret/ConfigTool.json"
+        )
+        config_tool = DeserializeConfigTool(json_data=init_config_tool, tool=tool)
         config_tool.scope_pipeline = self.devops_platform_gateway.get_variable("pipeline_name")
-        skip_tool = "false"
-        if config_tool.scope_pipeline in config_tool.ignore_search_pattern:
-            skip_tool = "true"
-        return config_tool, skip_tool
+        return config_tool
+        
+    def skip_from_exclusion(self, exclusions):
+        """
+        Handle skip tool.
+
+        Return: bool: True -> skip tool, False -> not skip tool.
+        """
+        pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
+        if (pipeline_name in exclusions) and (
+            exclusions[pipeline_name].get("SKIP_TOOL", 0)
+        ):
+            return True
+        else:
+            return False

@@ -47,5 +47,5 @@ class S3ManagerTests(unittest.TestCase):
         )
         date = datetime.datetime.now()
         mock_client.return_value.put_object.assert_called_once_with(
-            Bucket="my-bucket", Key=f"my-tool/{date.strftime('%Y')}/{date.strftime('%m')}/{date.strftime('%d')}/file.txt", Body=mock.ANY
+            Bucket="my-bucket", Key=f"engine_tools/my-tool/{date.strftime('%Y')}/{date.strftime('%m')}/{date.strftime('%d')}/file.txt", Body=mock.ANY
         )

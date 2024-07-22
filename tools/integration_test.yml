@@ -1,0 +1,32 @@
+name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
+
+trigger:
+  branches:
+    include:
+      - feature/*
+  paths:
+    include:
+      - "tools/devsecops_engine_tools/engine_utilities/defect_dojo/*"
+
+queue:
+  name: Release-cloud
+
+steps:
+  - script:  |
+      python3 -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
+      python3 -m pip install virtualenv -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
+      python3 -m virtualenv _venv
+    displayName: install python basics
+
+  - script: |
+      source _venv/bin/activate
+      python -m pip install --upgrade pip -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
+      python -m pip install -r requirements.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
+      python -m pip install -r requirements_test.txt -i $(ARTIFACTORY_URL) --trusted-host $(ARTIFACTORY_HOST)
+      python test_integrations_defect_dojo.py
+    workingDirectory: $(System.DefaultWorkingDirectory)/tools
+    displayName: 'Integration Test'
+    env:
+      PERSONAL_ACCESS_TOKEN: $(System.AccessToken)
+      TOKEN_CMDB: $(TOKEN_CMDB)
+      TOKEN_DEFECT_DOJO: $(TOKEN_DEFECT_DOJO)

@@ -35,7 +35,7 @@ class TestSecretScanDeserealizator(unittest.TestCase):
             self.assertIsInstance(vulnerability, Finding)
             self.assertEqual(vulnerability.id, "SECRET_SCANNING")
             self.assertIsNone(vulnerability.cvss)
-            self.assertEqual(vulnerability.where, "/file.py, Secret: secret")
+            self.assertEqual(vulnerability.where, "/file.py, Secret: sec*********ret")
             self.assertEqual(vulnerability.description, "Sensitive information in source code")
             self.assertEqual(vulnerability.severity, "critical")
             self.assertEqual(vulnerability.identification_date, datetime.now().strftime("%d%m%Y"))
@@ -59,7 +59,7 @@ class TestSecretScanDeserealizator(unittest.TestCase):
             }
             self.assertEqual(
                 self.deserealizator.get_where_correctly(result, "linux", "/path/to", ),
-                ("/file.py", "secret")
+                ("/file.py", "sec*********ret")
             )
 
     def test_get_where_correctly_windows(self):
@@ -78,5 +78,5 @@ class TestSecretScanDeserealizator(unittest.TestCase):
             
             self.assertEqual(
                 self.deserealizator.get_where_correctly(result,  "Win", "C:\\path\\to", ),
-                ("\\file.py", "secret")
+                ("\\file.py", "sec*********ret")
             )
