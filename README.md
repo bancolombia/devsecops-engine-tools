@@ -2,6 +2,8 @@
 
 [![Maintained by Bancolombia](https://img.shields.io/badge/maintained_by-Bancolombia-yellow)](#)
 [![Build](https://github.com/bancolombia/devsecops-engine-tools/actions/workflows/build.yml/badge.svg)](https://github.com/bancolombia/devsecops-engine-tools/actions/workflows/build.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bancolombia_devsecops-engine-tools&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bancolombia_devsecops-engine-tools)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bancolombia_devsecops-engine-tools&metric=coverage)](https://sonarcloud.io/summary/new_code?id=bancolombia_devsecops-engine-tools)
 [![Python Version](https://img.shields.io/badge/python%20-%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20-blue)](#)
 
 # Objective
@@ -35,7 +37,7 @@ pip3 install devsecops-engine-tools
 ### Scan running - flags (CLI)
 
 ```bash
-devsecops-engine-tools --platform_devops ["local","azure"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["eks","openshift"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] 
+devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["k8s","cloudformation","docker", "openapi"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] 
 ```
 
 ### Structure Remote Config
@@ -58,6 +60,55 @@ devsecops-engine-tools --platform_devops ["local","azure"] --remote_config_repo 
    ┃   ┗ 📜ConfigTool.json
    ┃   ┗ 📜Exclusions.json
 ```
+
+#### Tools available for the modules (Configuration engine_core/ConfigTool.json)
+
+
+<table>
+  <tr>
+    <th>Module</th>
+    <th>Tool</th>
+    <th>Type</th>
+  </tr>
+  <tr>
+    <td rowspan="3">ENGINE_IAC</td>
+    <td><a href="https://www.checkov.io/">CHECKOV</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td><a href="https://kubescape.io/">KUBESCAPE</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td><a href="https://www.kics.io/">KICS</a></td>
+    <td>Free</td>
+  </tr>
+   <tr>
+    <td>ENGINE_DAST</td>
+    <td><a href="https://projectdiscovery.io/nuclei">NUCLEI</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td>ENGINE_SECRET</td>
+    <td><a href="https://trufflesecurity.com/trufflehog">TRUFFLEHOG</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td rowspan="2">ENGINE_CONTAINER</td>
+    <td><a href="https://www.paloaltonetworks.com/prisma/cloud">PRISMA</a></td>
+    <td>Paid</td>
+  </tr>
+  <tr>
+    <td><a href="https://trivy.dev/">TRIVY</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td>ENGINE_DEPENDENCIES</td>
+    <td><a href="https://jfrog.com/help/r/get-started-with-the-jfrog-platform/jfrog-xray">XRAY</a></td>
+    <td>Paid</td>
+  </tr>
+</table>
+
 ### Scan running sample (CLI) - Local
 
 > Complete the value in **.envdetlocal** file a set in execution environment
@@ -74,57 +125,65 @@ devsecops-engine-tools --platform_devops local --remote_config_repo DevSecOps_Re
 ```
 ### Scan result sample (CLI)
 
-```bash
-    ____            _____           ____                ______            _               ______            __    
-   / __ \___ _   __/ ___/___  _____/ __ \____  _____   / ____/___  ____ _(_)___  ___     /_  __/___  ____  / /____
-  / / / / _ \ | / /\__ \/ _ \/ ___/ / / / __ \/ ___/  / __/ / __ \/ __ `/ / __ \/ _ \     / / / __ \/ __ \/ / ___/
- / /_/ /  __/ |/ /___/ /  __/ /__/ /_/ / /_/ (__  )  / /___/ / / / /_/ / / / / /  __/    / / / /_/ / /_/ / (__  ) 
-/_____/\___/|___//____/\___/\___/\____/ .___/____/  /_____/_/ /_/\__, /_/_/ /_/\___/    /_/  \____/\____/_/____/  
-                                     /_/                        /____/                                            
+![Dashboard Grafana](docs/demo_session.svg)
 
-Secrets manager is not enabled to configure external checks
+### Scan running sample - Github Actions
 
-Below are all vulnerabilities detected.
-╔══════════╦════════════╦════════════════════════════════════════════════════════════════════════════════════╦════════════════════════╗
-║ Severity ║ ID         ║ Description                                                                        ║ Where                  ║
-╠══════════╬════════════╬════════════════════════════════════════════════════════════════════════════════════╬════════════════════════╣
-║ critical ║ CKV_K8S_37 ║ IAC-CKV_K8S_37 Minimize the admission of containers with capabilities assigned     ║ /_AW1234/app.yaml      ║
-║ critical ║ CKV_K8S_20 ║ IAC-CKV_K8S_20 Containers should not run with allowPrivilegeEscalation             ║ /_AW1234/app.yaml      ║
-║ critical ║ CKV_K8S_30 ║ IAC-CKV_K8S_30 Apply security context to your containers                           ║ /_AW1234/app.yaml      ║
-║ critical ║ CKV_K8S_23 ║ IAC-CKV_K8S_23 Minimize the admission of root containers                           ║ /_AW1234/app.yaml      ║
-║ high     ║ CKV_AWS_20 ║ C-S3-005-AWS S3 buckets are accessible to public                                   ║ /_AW1234/template.yaml ║
-║ high     ║ CKV_K8S_22 ║ IAC-CKV_K8S_22 Use read-only filesystem for containers where possible              ║ /_AW1234/app.yaml      ║
-║ high     ║ CKV_K8S_28 ║ IAC-CKV_K8S_28 Minimize the admission of containers with the NET_RAW capability    ║ /_AW1234/app.yaml      ║
-║ high     ║ CKV_K8S_38 ║ IAC-CKV_K8S_38 Ensure that Service Account Tokens are only mounted where necessary ║ /_AW1234/app.yaml      ║
-╚══════════╩════════════╩════════════════════════════════════════════════════════════════════════════════════╩════════════════════════╝
-Security count issues (critical: 4, high: 4, medium: 0, low: 0) is greater than or equal to failure criteria (critical: 1, high: 8, medium: 10, low:15, operator: or)
-✘Failed
+The remote config should be in a GitHub repository, either public or private.
 
-Below are all compliances issues detected.
-╔══════════╦═══════════╦════════════════════════════════════════════════════╦═══════════════════╗
-║ Severity ║ ID        ║ Description                                        ║ Where             ║
-╠══════════╬═══════════╬════════════════════════════════════════════════════╬═══════════════════╣
-║ critical ║ CKV_K8S_8 ║ IAC-CKV_K8S_8 Liveness Probe Should be Configured  ║ /_AW1234/app.yaml ║
-║ critical ║ CKV_K8S_9 ║ IAC-CKV_K8S_9 Readiness Probe Should be Configured ║ /_AW1234/app.yaml ║
-╚══════════╩═══════════╩════════════════════════════════════════════════════╩═══════════════════╝
-Compliance issues count (critical: 2) is greater than or equal to failure criteria (critical: 1)
-✘Failed
+**If the repository is public:** 
 
-Bellow are all the findings that were accepted.
-╔══════════╦════════════╦═══════════════════╦═════════════╦══════════════╦══════════════════╗
-║ Severity ║ ID         ║ Where             ║ Create Date ║ Expired Date ║ Reason           ║
-╠══════════╬════════════╬═══════════════════╬═════════════╬══════════════╬══════════════════╣
-║ high     ║ CKV_K8S_38 ║ /_AW1234/app.yaml ║ 18/11/2023  ║ 18/03/2024   ║ False Positive   ║
-╚══════════╩════════════╩═══════════════════╩═════════════╩══════════════╩══════════════════╝
+1. The yml file containing the workflow should be configured using the default secret **GITHUB_TOKEN**. 
+For more information, refer to [Automatic token authentication](https://docs.github.com/en/actions/security-guides/automatic-token-authentication).
 
-message custom
+**If the repository is private:** 
+
+1. Create a personal access token with the necessary permissions to access the repository.
+2. Add the token as a secret in the GitHub repository.
+    ![Dashboard Grafana](docs/secret_token.png)
+
+3. Configure the yml file containing the workflow using the created secret.
+
+**Example of the workflow yml:**
+
+```yaml
+name: DevSecOps Engine Tools
+on:
+  push:
+    branches:
+      - feature/*
+env:
+  GITHUB_ACCESS_TOKEN: ${{ secrets.GH_ACCESSTOKEN }} #In this case, the remote config repository is private
+  # When the remote config repository is public, the secret should be like this: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Python
+        run: |
+          # Install devsecops-engine-tools
+          pip3 install -q devsecops-engine-tools
+          output=$(devsecops-engine-tools --platform_devops github --remote_config_repo remote_config --tool engine_iac)
+          echo "$output"
+          if [[ $output == *"✘Failed"* ]]; then
+            exit 1
+          fi
 ```
+
+# Metrics
+
+With the flag **--send_metrics true** and the configuration of the AWS-METRICS_MANAGER driven adapter in ConfigTool.json of the engine_core the tool will send the report to bucket s3. In the [metrics](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/metrics/) folder you will find the base of the cloud formation template to deploy the infra and dashboard in grafana.
+
+![Dashboard Grafana](docs/metrics.png)
 
 # How can I help?
 
 Review the issues, we hear new ideas. Read more [Contributing](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/docs/CONTRIBUTING.md)
-
-
-
-
-

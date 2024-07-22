@@ -15,50 +15,38 @@ class FindArtifacts:
         self,
         working_dir,
         pattern,
+        packages,
     ):
         self.working_dir = working_dir
         self.pattern = pattern
+        self.packages = packages
 
-    def find_packages(self, pattern, working_dir):
-        npm_packages = []
-        py_packages = []
-        ext_files = []
+    def find_packages(self, pattern, packages, working_dir):
+        packages_list = []
+        files_list = []
         extension_pattern = re.compile(pattern, re.IGNORECASE)
         for root, dirs, files in os.walk(working_dir):
             components = root.split(os.path.sep)
-            if not ("node_modules" in components) and not (
-                "site-packages" in components
-            ):
-                if "site-packages" in dirs:
-                    py_packages.append(os.path.join(root, "site-packages"))
-                if "node_modules" in dirs:
-                    npm_packages.append(os.path.join(root, "node_modules"))
+            flag = 0
+            for package in packages:
+                if not (package in components):
+                    flag = 1
+                    if package in dirs:
+                        packages_list.append(os.path.join(root, package))
+            if flag:
                 for file in files:
                     if extension_pattern.search(file):
-                        ext_files.append(os.path.join(root, file))
-        return npm_packages, py_packages, ext_files
-
-    def get_recent_package(self, packages):
-        recent_package = None
-        recent_time = 0
-        for path in packages:
-            created_time = os.path.getctime(path)
-            if created_time > recent_time:
-                recent_time = created_time
-                recent_package = path
-        return recent_package
+                        files_list.append(os.path.join(root, file))
+        return packages_list, files_list
 
     def compress_and_mv(self, tar_path, package):
         try:
-            if os.path.exists(tar_path):
-                os.remove(tar_path)
             with tarfile.open(tar_path, "w") as tar:
                 tar.add(
                     package,
                     arcname=os.path.basename(package),
                     filter=lambda x: None if "/.bin/" in x.name else x,
                 )
-                logger.debug(f"File to scan: {tar_path}")
 
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during {package} compression: {e}")
@@ -75,21 +63,38 @@ class FindArtifacts:
             shutil.rmtree(dir_to_scan_path)
         os.makedirs(dir_to_scan_path)
 
-        npm_packages, py_packages, ext_files = self.find_packages(
-            self.pattern, self.working_dir
+        packages_list, files_list = self.find_packages(
+            self.pattern, self.packages, self.working_dir
         )
 
-        if len(npm_packages):
-            npm_recent = self.get_recent_package(npm_packages)
-            tar_path = os.path.join(dir_to_scan_path, "node_modules.tar")
-            self.compress_and_mv(tar_path, npm_recent)
+        for package in packages_list:
+            tar_path = os.path.join(
+                dir_to_scan_path,
+                "pkg"
+                + str(packages_list.index(package) + 1)
+                + "_"
+                + os.path.basename(package)
+                + ".tar",
+            )
+            self.compress_and_mv(tar_path, package)
 
-        if len(py_packages):
-            py_recent = self.get_recent_package(py_packages)
-            tar_path = os.path.join(dir_to_scan_path, "site-packages.tar")
-            self.compress_and_mv(tar_path, py_recent)
+        if len(files_list):
+            self.move_files(dir_to_scan_path, files_list)
 
-        if len(ext_files):
-            self.move_files(dir_to_scan_path, ext_files)
+        files = os.listdir(dir_to_scan_path)
+        files = [
+            file
+            for file in files
+            if os.path.isfile(os.path.join(dir_to_scan_path, file))
+        ]
+        file_to_scan = None
+        if files:
+            file_to_scan = os.path.join(dir_to_scan_path, "file_to_scan.tar")
+            self.compress_and_mv(file_to_scan, dir_to_scan_path)
+            files_string = ", ".join(files)
+            logger.debug(f"Files to scan: {files_string}")
+            print(f"Files to scan: {files_string}")
+        else:
+            logger.warning("No artifacts found")
 
-        return dir_to_scan_path
+        return file_to_scan

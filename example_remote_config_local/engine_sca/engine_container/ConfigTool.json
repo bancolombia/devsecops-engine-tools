@@ -6,10 +6,9 @@
         "PRISMA_API_VERSION":""
     },
     "TRIVY": {
-        "TRIVY_VERSION": "0.48.1"
+        "TRIVY_VERSION": "0.51.4"
     },
     "MESSAGE_INFO_ENGINE_CONTAINER": "message custom",
-    "REGEX_EXPRESSION_PROJECTS": "((NU)\\d+)",
     "IGNORE_SEARCH_PATTERN":"(.*_demo0|.*_cer)",
     "THRESHOLD": {
         "VULNERABILITY": {
