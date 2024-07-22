@@ -141,11 +141,6 @@ def get_inputs_from_cli(args):
         help="Token to execute engine_dependencies if is necessary. If using xray as engine_dependencies tool, the token is the base64 of artifactory server config.",
     )
     parser.add_argument(
-        "--engine_dependencies_tool",
-        required=False,
-        help="Tool to execute dependencies scan, only apply engine_dependencies tool",
-    )
-    parser.add_argument(
         "--xray_mode",
         choices=["scan", "audit"],
         required=False,
@@ -171,7 +166,6 @@ def get_inputs_from_cli(args):
         "token_vulnerability_management": args.token_vulnerability_management,
         "token_engine_container": args.token_engine_container,
         "token_engine_dependencies": args.token_engine_dependencies,
-        "engine_dependencies_tool": args.engine_dependencies_tool,
         "xray_mode": args.xray_mode,
         "dir_to_scan": args.dir_to_scan,
     }

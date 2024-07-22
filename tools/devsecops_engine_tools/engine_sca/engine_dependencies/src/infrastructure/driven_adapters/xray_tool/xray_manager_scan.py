@@ -8,6 +8,7 @@ import requests
 import re
 import os
 import json
+import shutil
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -34,6 +35,7 @@ class XrayScan(ToolGateway):
                     command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
             except subprocess.CalledProcessError as error:
+                print(f"Error during Jfrog Cli installation on Linux: {error}")
                 logger.error(f"Error during Jfrog Cli installation on Linux: {error}")
 
     def install_tool_windows(self, version):
@@ -51,6 +53,7 @@ class XrayScan(ToolGateway):
                 with open(exe_file, "wb") as archivo:
                     archivo.write(response.content)
             except subprocess.CalledProcessError as error:
+                print(f"Error while Jfrog Cli installation on Windows: {error}")
                 logger.error(f"Error while Jfrog Cli installation on Windows: {error}")
 
     def install_tool_darwin(self, version):
@@ -71,6 +74,7 @@ class XrayScan(ToolGateway):
                     command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
             except subprocess.CalledProcessError as error:
+                print(f"Error during Jfrog Cli installation on Darwin: {error}")
                 logger.error(f"Error during Jfrog Cli installation on Darwin: {error}")
 
     def config_server(self, prefix, token):
@@ -93,39 +97,45 @@ class XrayScan(ToolGateway):
                 text=True,
             )
         except subprocess.CalledProcessError as error:
+            print(f"Error during Xray Server configuration: {error}")
             logger.error(f"Error during Xray Server configuration: {error}")
 
-    def scan_dependencies(self, prefix, file_to_scan, bypass_limits_flag):
-        try:
-            if bypass_limits_flag:
-                command = [
-                    prefix,
-                    "scan",
-                    "--format=json",
-                    "--bypass-archive-limits",
-                    f"{file_to_scan}",
-                ]
-            else:
-                command = [prefix, "scan", "--format=json", f"{file_to_scan}"]
-            result = subprocess.run(
-                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-            )
+    def config_audit_scan(self, prefix, to_scan):
+        gradlew_path = os.path.join(to_scan, "gradlew")
+        if os.path.exists(gradlew_path):
+            os.chmod(gradlew_path, 0o755)
+        destination_path = os.path.join(to_scan, os.path.basename(prefix))
+        if not os.path.exists(destination_path):
+            shutil.move(prefix, destination_path)
+
+    def scan_dependencies(self, prefix, cwd, mode, to_scan):
+        command = [
+            prefix,
+            mode,
+            "--format=json",
+            f"{to_scan}",
+        ]
+        result = subprocess.run(
+            command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
+        if result.returncode == 0:
             scan_result = json.loads(result.stdout)
             file_result = os.path.join(os.getcwd(), "scan_result.json")
             with open(file_result, "w") as file:
                 json.dump(scan_result, file, indent=4)
             return file_result
-        except subprocess.CalledProcessError as error:
-            logger.error(f"Error executing jf scan: {error}")
+        else:
+            print(f"Error executing jf scan: {result.stderr}")
+            logger.error(f"Error executing jf scan: {result.stderr}")
+            return None
 
     def run_tool_dependencies_sca(
         self,
         remote_config,
-        file_to_scan,
-        bypass_limits_flag,
+        dict_args,
+        to_scan,
         token,
     ):
-
         cli_version = remote_config["XRAY"]["CLI_VERSION"]
         os_platform = platform.system()
 
@@ -143,8 +153,14 @@ class XrayScan(ToolGateway):
 
         self.config_server(command_prefix, token)
 
+        cwd = os.getcwd()
+        if dict_args["xray_mode"] == "audit":
+            self.config_audit_scan(command_prefix, to_scan)
+            cwd = to_scan
+            to_scan = ''
+
         results_file = self.scan_dependencies(
-            command_prefix, file_to_scan, bypass_limits_flag
+            command_prefix, cwd, dict_args["xray_mode"], to_scan,
         )
 
         return results_file
