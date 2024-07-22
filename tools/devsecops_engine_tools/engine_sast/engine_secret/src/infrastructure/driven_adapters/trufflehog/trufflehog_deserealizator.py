@@ -30,7 +30,10 @@ class SecretScanDeserealizator(DeseralizatorGateway):
     
     def get_where_correctly(self, result: dict, os, path_directory):
         original_where = str(result.get("SourceMetadata").get("Data").get("Filesystem").get("file"))
-        raw = str(result.get("Raw"))
+        initial_raw = str(result.get("Raw"))[:3]
+        final_raw = str(result.get("Raw"))[-3:]
+        hidden_raw = '*' * 9
+        raw = initial_raw + hidden_raw + final_raw
         if re.search(r'Linux', os):
             original_where = original_where.replace("\\", "/")
         

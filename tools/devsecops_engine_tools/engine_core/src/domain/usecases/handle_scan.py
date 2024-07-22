@@ -112,7 +112,7 @@ class HandleScan:
             else:
                 secret_sca = dict_args["token_engine_container"]
             findings_list, input_core = runner_engine_container(
-                dict_args, config_tool, secret_sca, self.devops_platform_gateway
+                dict_args, config_tool["ENGINE_CONTAINER"]["TOOL"], secret_sca, self.devops_platform_gateway
             )
             if (
                 dict_args["use_vulnerability_management"] == "true"
@@ -136,6 +136,13 @@ class HandleScan:
                 config_tool["ENGINE_SECRET"]["TOOL"],
                 self.devops_platform_gateway
             )
+            if (
+                dict_args["use_vulnerability_management"] == "true"
+                and input_core.path_file_results
+            ):
+                self._use_vulnerability_management(
+                    config_tool, input_core, dict_args, secret_tool, env
+                )
             return findings_list, input_core
         elif "engine_dependencies" in dict_args["tool"]:
             if secret_tool is not None:

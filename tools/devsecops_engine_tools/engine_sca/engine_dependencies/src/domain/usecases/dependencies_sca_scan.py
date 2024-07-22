@@ -12,14 +12,14 @@ class DependenciesScan:
         tool_run: ToolGateway,
         tool_deserializator: DeserializatorGateway,
         remote_config,
-        dir_to_scan_path,
+        file_to_scan,
         bypass_limits_flag,
         token,
     ):
         self.tool_run = tool_run
         self.tool_deserializator = tool_deserializator
         self.remote_config = remote_config
-        self.dir_to_scan_path = dir_to_scan_path
+        self.file_to_scan = file_to_scan
         self.bypass_limits_flag = bypass_limits_flag
         self.token = token
 
@@ -31,7 +31,7 @@ class DependenciesScan:
         """
         return self.tool_run.run_tool_dependencies_sca(
             self.remote_config,
-            self.dir_to_scan_path,
+            self.file_to_scan,
             self.bypass_limits_flag,
             self.token,
         )

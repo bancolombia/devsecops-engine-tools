@@ -1,0 +1,376 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Template to deploy metrics infra
+
+# Definicion de parametros
+Parameters:
+  #Athena
+  WorkGroupState:
+    Description: parametro para activar WorkGroup.
+    Type: String
+    Default: ENABLED
+
+# Definicion de recursos
+Resources: 
+
+  #Bucket donde se alojan los resultados de cada escaneo de DevSecOps Engine Tools
+  BucketS3MetricsDevSecOps:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: "metrics-devsecops-engine-tools"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: "arn:aws:kms:.." #KMS ARN
+            BucketKeyEnabled: true
+      VersioningConfiguration:
+        Status: Enabled
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  BucketPolicyEngineDevSecOps:
+    Type: AWS::S3::BucketPolicy
+    DependsOn:
+      - BucketS3MetricsDevSecOps
+    Properties:
+      Bucket: !Ref BucketS3MetricsDevSecOps
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Join ["", ["arn:aws:iam::", !Ref "AWS::AccountId", ":root"]]
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:DeleteObjectVersion
+              - s3:DeleteObject
+              - s3:GetObjectVersion
+              - s3:GetObjectACL
+              - s3:PutObjectACL
+            Resource:
+              - !Sub "arn:aws:s3:::${BucketS3MetricsDevSecOps}/*"
+          - Effect: Allow
+            Principal:
+              AWS: !Join ["", ["arn:aws:iam::", !Ref "AWS::AccountId", ":root"]]
+            Action:
+              - s3:ListBucket
+              - s3:GetBucketLocation
+            Resource:
+              !Join ["", ["arn:aws:s3:::", !Ref "BucketS3MetricsDevSecOps"]]
+          - Effect: Deny
+            Principal: "*"
+            Action:
+              - s3:*
+            Resource:
+              !Join ["", ["arn:aws:s3:::", !Ref "BucketS3MetricsDevSecOps", /*]]
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+          - Action: s3:*
+            Effect: Deny
+            Resource:
+              !Join ["", ["arn:aws:s3:::", !Ref "BucketS3MetricsDevSecOps"]]
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+            Principal: "*"
+    
+  S3BucketMetricsQuery:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: "metrics-query-devsecops-engine-tools"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: "arn:aws:kms:.." #KMS ARN
+            BucketKeyEnabled: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: DailyExpirationRule
+            Status: Enabled
+            ExpirationInDays: 1
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 1
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  rS3BucketAthenaPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3BucketMetricsQuery
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Join ["", ["arn:aws:iam::", !Ref "AWS::AccountId", ":root"]]
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:DeleteObjectVersion
+              - s3:DeleteObject
+              - s3:GetObjectVersion
+              - s3:GetObjectACL
+              - s3:PutObjectACL
+              - s3:ListBucket
+              - s3:GetBucketLocation
+            Resource:
+              - !GetAtt S3BucketMetricsQuery.Arn
+              - !Join ["/", [!GetAtt S3BucketMetricsQuery.Arn, "*"]]
+          - Sid: "Asegurar datos en transito"
+            Action: s3:*
+            Effect: Deny
+            Resource:
+              - !GetAtt S3BucketMetricsQuery.Arn
+              - !Join ["/", [!GetAtt S3BucketMetricsQuery.Arn, "*"]]
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+            Principal: "*"
+
+  rIamRoleGrafanaQuery:
+    Type: "AWS::IAM::Role"
+    Condition: envDevPdn
+    Properties:
+      RoleName: grafana-query-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Sub arn:aws:iam::${AWS::AccountId}:role/grafana-rol #Grafana Role ARN where the query will be executed. Example EC2 Instance role where Grafana is installed
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: athenaAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:DescribeKey
+                  - kms:Encrypt
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                  - kms:CreateGrant
+                Resource: "arn:aws:kms:.." #KMS ARN
+              - Effect: Allow
+                Action:
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:ListMultipartUploadParts
+                  - s3:AbortMultipartUpload
+                  - s3:CreateBucket
+                  - s3:PutObject
+                  - s3:PutBucketPublicAccessBlock
+                Resource:
+                  - !GetAtt S3BucketMetricsQuery.Arn
+                  - !Join ["/", [!GetAtt S3BucketMetricsQuery.Arn, "*"]]
+                  - !GetAtt BucketS3MetricsDevSecOps.Arn
+                  - !Join ["/", [!GetAtt BucketS3MetricsDevSecOps.Arn, "*"]]
+              - Effect: Allow
+                Action:
+                  - "glue:GetDatabase"
+                  - "glue:GetDatabases"
+                  - "glue:GetTable"
+                  - "glue:GetTables"
+                  - "glue:GetPartition"
+                  - "glue:GetPartitions"
+                  - "glue:BatchGetPartition"
+                Resource:
+                  - !Join [
+                      "",
+                      [
+                        "arn:aws:glue:",
+                        !Ref "AWS::Region",
+                        ":",
+                        !Ref "AWS::AccountId",
+                        ":catalog",
+                      ],
+                    ]
+                  - !Join [
+                      "",
+                      [
+                        "arn:aws:glue:",
+                        !Ref "AWS::Region",
+                        ":",
+                        !Ref "AWS::AccountId",
+                        ":database",
+                        "/*",
+                      ],
+                    ]
+                  - !Join [
+                      "",
+                      [
+                        "arn:aws:glue:",
+                        !Ref "AWS::Region",
+                        ":",
+                        !Ref "AWS::AccountId",
+                        ":table",
+                        "/*/*",
+                      ],
+                    ]
+              - Effect: Allow
+                Action:
+                  - "athena:ListWorkGroups"
+                  - "athena:StartQueryExecution"
+                  - "athena:GetQueryExecution"
+                  - "athena:GetQueryResults"
+                  - "athena:GetWorkGroup"
+                  - "athena:BatchGetQueryExecution"
+                  - "athena:GetQueryResultsStream"
+                  - "athena:ListQueryExecutions"
+                  - "athena:StopQueryExecution"
+                  - "athena:ListEngineVersions"
+                  - "athena:GetDataCatalog"
+                  - "athena:GetDatabase"
+                  - "athena:GetTableMetadata"
+                  - "athena:ListDataCatalogs"
+                  - "athena:ListDatabases"
+                  - "athena:ListTableMetadata"
+                  - "athena:CancelQueryExecution"
+                  - "athena:GetCatalogs"
+                  - "athena:GetExecutionEngine"
+                  - "athena:GetExecutionEngines"
+                  - "athena:GetNamespace"
+                  - "athena:GetNamespaces"
+                  - "athena:GetTable"
+                  - "athena:GetTables"
+                  - "athena:RunQuery"
+                Resource:
+                  - !Join [
+                      "",
+                      [
+                        "arn:aws:athena:",
+                        !Ref "AWS::Region",
+                        ":",
+                        !Ref "AWS::AccountId",
+                        ":workgroup",
+                        "/*",
+                      ],
+                    ]
+                  - !Join [
+                      "",
+                      [
+                        "arn:aws:athena:",
+                        !Ref "AWS::Region",
+                        ":",
+                        !Ref "AWS::AccountId",
+                        ":datacatalog",
+                        "/*",
+                      ],
+                    ]
+              - Effect: Allow
+                Action:
+                  - "athena:ListDataCatalogs"
+                  - "athena:ListWorkGroups"
+                Resource: "*"
+
+  AthenaWorkGroupMetrics:
+    Type: AWS::Athena::WorkGroup
+    DependsOn: [S3BucketMetricsQuery]
+    Properties:
+      Description: WorkGroup para metricas devsecops engine tools.
+      Name: workgroup-devsecops-engine-tools
+      RecursiveDeleteOption: true
+      State: !Ref WorkGroupState
+      WorkGroupConfiguration:
+        EnforceWorkGroupConfiguration: true
+        PublishCloudWatchMetricsEnabled: false
+        RequesterPaysEnabled: false
+        ResultConfiguration:
+          EncryptionConfiguration:
+            EncryptionOption: SSE_KMS
+            KmsKey: "arn:aws:kms:.." #KMS ARN
+          OutputLocation: s3://metrics-query-devsecops-engine-tools/
+
+  DataBaseMetrics:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Description: Base de datos de metricas de DevSecOps
+        Name: engine_tools_metrics
+
+  TableMetrics:
+    Type: AWS::Glue::Table
+    DependsOn: [DataBaseMetrics]
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName: !Ref DataBaseMetrics
+      TableInput:
+        Description: Metricas Engine Tools
+        Name: metrics_engine_tools
+        Parameters: 
+          EXTERNAL: true
+          classification: "json"
+          compressionType: "none"
+          typeOfData: "file"
+          projection.enabled: true
+        StorageDescriptor:
+          Columns:
+            - Name: id
+              Type: string
+            - Name: date
+              Type: string
+            - Name: component
+              Type: string
+            - Name: stage
+              Type: string
+            - Name: check_type
+              Type: string
+            - Name: environment
+              Type: string
+            - Name: events
+              Type: array<struct<timestamp:string,level:string,message:string,module:string,funcName:string,lineno:int>>
+            - Name: scan_result
+              Type: struct<findings_excluded:array<struct<id:string,severity:string,category:string>>,vulnerabilities:struct<threshold:struct<critical:int,high:int,medium:int,low:int>,status:string,found:array<struct<id:string,severity:string>>>,compliances:struct<threshold:struct<critical:int>,status:string,found:array<struct<id:string,severity:string>>>>
+          Compressed: false
+          InputFormat: org.apache.hadoop.mapred.TextInputFormat
+          Location: s3://metrics-devsecops-engine-tools/engine_tools/
+          OutputFormat: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat
+          SerdeInfo:
+            SerializationLibrary: org.openx.data.jsonserde.JsonSerDe
+            Parameters:
+              paths: id,date,component,stage,check_type,environment,events,scan_result.findings_excluded,scan_result.vulnerabilities,scan_result.compliances
+          StoredAsSubDirectories: true
+        TableType: EXTERNAL_TABLE
+
+  rIamRoleDevSecOpsEngineTools:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: IamRoleDevSecOpsEngineTools
+      Policies:
+        - PolicyName: secret
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:DescribeKey
+                  - kms:Encrypt
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                  - kms:CreateGrant
+                Resource: "arn:aws:kms:.." #KMS ARN
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                  - s3:GetObject
+                  - s3:GetObjectTagging
+                Resource:
+                  - !GetAtt BucketS3MetricsDevSecOps.Arn
+                  - !Join ["/", [!GetAtt BucketS3MetricsDevSecOps.Arn, "*"]]

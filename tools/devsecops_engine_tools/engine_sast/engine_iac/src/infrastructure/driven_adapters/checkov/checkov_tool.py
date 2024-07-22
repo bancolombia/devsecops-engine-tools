@@ -37,7 +37,8 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 class CheckovTool(ToolGateway):
     CHECKOV_CONFIG_FILE = "checkov_config.yaml"
     TOOL = "CHECKOV"
-    framework_mapping = {"RULES_DOCKER": "dockerfile", "RULES_K8S": "kubernetes", "RULES_CLOUDFORMATION": "cloudformation"}
+    framework_mapping = {"RULES_DOCKER": "dockerfile", "RULES_K8S": "kubernetes", "RULES_CLOUDFORMATION": "cloudformation", "RULES_OPENAPI": "openapi"}
+    framework_external_checks = ["RULES_K8S", "RULES_CLOUDFORMATION","RULES_DOCKER", "RULES_OPENAPI"]
 
 
     def create_config_file(self, checkov_config: CheckovConfig):
@@ -113,58 +114,50 @@ class CheckovTool(ToolGateway):
         output = self.execute(checkov_config)
         result.append(json.loads(output))
         queue.put(result)
-    
-    def if_platform(self,value,container_platform):
-        if value.get("platform_not_apply"):
-            if value.get("platform_not_apply") != container_platform:
-                return True
-            else:
-                return False
-        else:
-            return True
         
     def scan_folders(
-        self, folders_to_scan, config_tool: ConfigTool, agent_env, environment, container_platform
+        self, folders_to_scan, config_tool: ConfigTool, agent_env, environment, platform_to_scan
     ):
         output_queue = queue.Queue()
         # Crea una lista para almacenar los hilos
         threads = []  
         for folder in folders_to_scan:
             for rule in config_tool.rules_data_type:
-                checkov_config = CheckovConfig(
-                    path_config_file="",
-                    config_file_name=rule,
-                    framework=self.framework_mapping[rule],
-                    checks=[
-                        key
-                        for key, value in config_tool.rules_data_type[rule].items()
-                        if value["environment"].get(environment) and self.if_platform(value,container_platform)
-                    ],
-                    soft_fail=False,
-                    directories=folder,
-                    external_checks_git=[
-                        f"{config_tool.external_checks_git}/{self.framework_mapping[rule]}"
-                    ]
-                    if config_tool.use_external_checks_git == "True"
-                    and agent_env is not None
-                    and rule in ["RULES_K8S", "RULES_CLOUDFORMATION","RULES_DOCKER"]
-                    else [],
-                    env=agent_env,
-                    external_checks_dir=f"/tmp/rules/{self.framework_mapping[rule]}"
-                    if config_tool.use_external_checks_dir == "True"
-                    and rule in ["RULES_K8S", "RULES_CLOUDFORMATION","RULES_DOCKER"]
-                    else [],
-                )
+                if "all" in platform_to_scan or any(elem.upper() in rule for elem in platform_to_scan):
+                    checkov_config = CheckovConfig(
+                        path_config_file="",
+                        config_file_name=rule,
+                        framework=self.framework_mapping[rule],
+                        checks=[
+                            key
+                            for key, value in config_tool.rules_data_type[rule].items()
+                            if value["environment"].get(environment)
+                        ],
+                        soft_fail=False,
+                        directories=folder,
+                        external_checks_git=[
+                            f"{config_tool.external_checks_git}/{self.framework_mapping[rule]}"
+                        ]
+                        if config_tool.use_external_checks_git == "True"
+                        and agent_env is not None
+                        and rule in self.framework_external_checks
+                        else [],
+                        env=agent_env,
+                        external_checks_dir=f"/tmp/rules/{self.framework_mapping[rule]}"
+                        if config_tool.use_external_checks_dir == "True"
+                        and rule in self.framework_external_checks
+                        else [],
+                    )
 
-                checkov_config.create_config_dict()
-                self.create_config_file(checkov_config)
-                config_tool.rules_all.update(config_tool.rules_data_type[rule])
-                t = threading.Thread(
-                    target=self.async_scan,
-                    args=(output_queue, checkov_config),
-                )
-                t.start()
-                threads.append(t)
+                    checkov_config.create_config_dict()
+                    self.create_config_file(checkov_config)
+                    config_tool.rules_all.update(config_tool.rules_data_type[rule])
+                    t = threading.Thread(
+                        target=self.async_scan,
+                        args=(output_queue, checkov_config),
+                    )
+                    t.start()
+                    threads.append(t)
         # Espera a que todos los hilos terminen
         for t in threads:
             t.join()
@@ -176,12 +169,12 @@ class CheckovTool(ToolGateway):
         return result_scans
 
     def run_tool(
-        self, config_tool: ConfigTool, folders_to_scan, environment, container_platform, secret_tool
+        self, config_tool: ConfigTool, folders_to_scan, environment, platform_to_scan, secret_tool
     ):
         agent_env = self.configurate_external_checks(config_tool, secret_tool)
 
         result_scans = self.scan_folders(
-            folders_to_scan, config_tool, agent_env, environment, container_platform
+            folders_to_scan, config_tool, agent_env, environment, platform_to_scan
         )
 
         checkov_deserealizator = CheckovDeserealizator()

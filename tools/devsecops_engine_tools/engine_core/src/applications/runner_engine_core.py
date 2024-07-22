@@ -10,6 +10,9 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.s
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops import (
     AzureDevops,
 )
+from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.github.github_actions import (
+    GithubActions,
+)
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.runtime_local.runtime_local import (
     RuntimeLocal,
 )
@@ -28,10 +31,24 @@ from devsecops_engine_tools.version import version
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
+def parse_separated_list(value, choices):
+    values = value.split(',')
+    # Validar cada elemento de la lista
+    for val in values:
+        if val not in choices:
+            raise argparse.ArgumentTypeError(f"Invalid value: {val}. Valid values are: {', '.join(choices)}")
+    
+    return values
+
+def parse_choices(choices):
+    def parse_with_choices(value):
+        return parse_separated_list(value, choices)
+    return parse_with_choices
+
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--version", action='version', version='{version}'.format(version=version))
-    parser.add_argument("-pd", "--platform_devops", choices=["azure", "local"], type=str, required=True, help="Platform where is executed")
+    parser.add_argument("-pd", "--platform_devops", choices=["azure", "github", "local"], type=str, required=True, help="Platform where is executed")
     parser.add_argument("-rcf" ,"--remote_config_repo", type=str, required=True, help="Name or Folder Path of Config Repo")
     parser.add_argument("-t",
         "--tool",
@@ -49,7 +66,7 @@ def get_inputs_from_cli(args):
     )
     parser.add_argument("-fp", "--folder_path", type=str, required=False, help="Folder Path to scan, only apply engine_iac tool")
     parser.add_argument("-p",
-        "--platform", choices=["eks", "openshift"], type=str, required=False, help="Platform to execute,  only apply engine_iac tool"
+        "--platform", type=parse_choices({"all", "docker", "k8s", "cloudformation", "openapi"}), required=False, default="all" ,help="Platform to scan, only apply engine_iac tool"
     )
     parser.add_argument(
         "--use_secrets_manager",
@@ -75,7 +92,7 @@ def get_inputs_from_cli(args):
     parser.add_argument("--token_cmdb", required=False, help="Token to connect to the CMDB")
     parser.add_argument("--token_vulnerability_management", required=False, help="Token to connect to the Vulnerability Management")
     parser.add_argument("--token_engine_container", required=False, help="Token to execute engine_container if is necessary")
-    parser.add_argument("--token_engine_dependencies", required=False, help="Token to execute engine_dependencies if is necessary")
+    parser.add_argument("--token_engine_dependencies", required=False, help="Token to execute engine_dependencies if is necessary. If using xray as engine_dependencies tool, the token is the base64 of artifactory server config.")
     parser.add_argument("--dast_file_path", required=False, help="Engine DAST path file")
     args = parser.parse_args()
     return {
@@ -102,7 +119,11 @@ def application_core():
         # Define driven adapters for gateways
         vulnerability_management_gateway = DefectDojoPlatform()
         secrets_manager_gateway = SecretsManager()
-        devops_platform_gateway = AzureDevops() if args["platform_devops"] == "azure" else RuntimeLocal()
+        devops_platform_gateway = {
+            "azure": AzureDevops(),
+            "github": GithubActions(),
+            "local": RuntimeLocal()
+        }.get(args["platform_devops"])
         printer_table_gateway = PrinterPrettyTable()
         metrics_manager_gateway = S3Manager()
         
