@@ -165,6 +165,24 @@ def test_config_server_failure(xray_scan_instance):
         )
 
 
+def test_config_audit_scan(xray_scan_instance):
+    with patch("os.path.join") as mock_pathjoin, patch(
+        "os.path.exists"
+    ) as mock_pathexists, patch("os.chmod") as mock_chmod, patch(
+        "shutil.move"
+    ) as mock_move:
+        prefix = "jf"
+        to_scan = "folder"
+        mock_pathexists.side_effect = [True, False]
+
+        xray_scan_instance.config_audit_scan(prefix, to_scan)
+
+        assert mock_pathjoin.call_count == 2
+        assert mock_pathexists.call_count == 2
+        mock_chmod.assert_called_once()
+        mock_move.assert_called_once()
+
+
 def test_scan_dependencies_success(xray_scan_instance):
     with patch("subprocess.run") as mock_subprocess_run, patch(
         "json.dump"
@@ -220,9 +238,7 @@ def test_scan_dependencies_failure(xray_scan_instance):
 def test_run_tool_dependencies_sca_linux(xray_scan_instance):
     with patch("platform.system") as mock_system, patch(
         "os.getcwd"
-    ) as mock_getcwd, patch(
-        "os.path.exists"
-    ) as mock_pathexist, patch(
+    ) as mock_getcwd, patch("os.path.exists") as mock_pathexist, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_linux"
     ) as mock_install_tool, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.config_server"
@@ -260,9 +276,7 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
 def test_run_tool_dependencies_sca_windows(xray_scan_instance):
     with patch("platform.system") as mock_system, patch(
         "os.getcwd"
-    ) as mock_getcwd, patch(
-        "os.path.exists"
-    ) as mock_pathexist, patch(
+    ) as mock_getcwd, patch("os.path.exists") as mock_pathexist, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_windows"
     ) as mock_install_tool, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.config_server"
@@ -300,9 +314,7 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
 def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
     with patch("platform.system") as mock_system, patch(
         "os.getcwd"
-    ) as mock_getcwd, patch(
-        "os.path.exists"
-    ) as mock_pathexist, patch(
+    ) as mock_getcwd, patch("os.path.exists") as mock_pathexist, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_darwin"
     ) as mock_install_tool, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.config_server"
