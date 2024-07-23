@@ -42,6 +42,6 @@
     },
     "ENGINE_DEPENDENCIES": {
         "ENABLED": "true",
-        "TOOL": "XRAY"
+        "TOOL": "XRAY|DEPENDENCY_CHECK"
     }
 }
