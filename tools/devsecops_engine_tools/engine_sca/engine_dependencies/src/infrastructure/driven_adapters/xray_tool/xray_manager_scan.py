@@ -125,7 +125,6 @@ class XrayScan(ToolGateway):
                 json.dump(scan_result, file, indent=4)
             return file_result
         else:
-            print(f"Error executing jf scan: {result.stderr}")
             logger.error(f"Error executing jf scan: {result.stderr}")
             return None
 
@@ -155,12 +154,19 @@ class XrayScan(ToolGateway):
 
         cwd = os.getcwd()
         if dict_args["xray_mode"] == "audit":
-            self.config_audit_scan(command_prefix, to_scan)
-            cwd = to_scan
-            to_scan = ''
+            if os.path.exists(to_scan):
+                self.config_audit_scan(command_prefix, to_scan)
+                cwd = to_scan
+                to_scan = ""
+            else:
+                logger.warning(f"No such file or directory: {to_scan}")
+                return None
 
         results_file = self.scan_dependencies(
-            command_prefix, cwd, dict_args["xray_mode"], to_scan,
+            command_prefix,
+            cwd,
+            dict_args["xray_mode"],
+            to_scan,
         )
 
         return results_file
