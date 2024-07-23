@@ -149,6 +149,7 @@ class XrayScan(ToolGateway):
             self.install_tool_darwin(cli_version)
         else:
             logger.warning(f"{os_platform} is not supported.")
+            return None
 
         self.config_server(command_prefix, token)
 
