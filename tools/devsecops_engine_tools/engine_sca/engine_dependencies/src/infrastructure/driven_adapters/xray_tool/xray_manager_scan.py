@@ -35,7 +35,6 @@ class XrayScan(ToolGateway):
                     command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
             except subprocess.CalledProcessError as error:
-                print(f"Error during Jfrog Cli installation on Linux: {error}")
                 logger.error(f"Error during Jfrog Cli installation on Linux: {error}")
 
     def install_tool_windows(self, version):
@@ -53,7 +52,6 @@ class XrayScan(ToolGateway):
                 with open(exe_file, "wb") as archivo:
                     archivo.write(response.content)
             except subprocess.CalledProcessError as error:
-                print(f"Error while Jfrog Cli installation on Windows: {error}")
                 logger.error(f"Error while Jfrog Cli installation on Windows: {error}")
 
     def install_tool_darwin(self, version):
@@ -74,7 +72,6 @@ class XrayScan(ToolGateway):
                     command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
             except subprocess.CalledProcessError as error:
-                print(f"Error during Jfrog Cli installation on Darwin: {error}")
                 logger.error(f"Error during Jfrog Cli installation on Darwin: {error}")
 
     def config_server(self, prefix, token):
@@ -97,7 +94,6 @@ class XrayScan(ToolGateway):
                 text=True,
             )
         except subprocess.CalledProcessError as error:
-            print(f"Error during Xray Server configuration: {error}")
             logger.error(f"Error during Xray Server configuration: {error}")
 
     def config_audit_scan(self, prefix, to_scan):
