@@ -138,7 +138,7 @@ def get_inputs_from_cli(args):
     parser.add_argument(
         "--token_engine_dependencies",
         required=False,
-        help="Token to execute engine_dependencies if is necessary. If using xray as engine_dependencies tool, the token is the base64 of artifactory server config.",
+        help="Token to execute engine_dependencies if is necessary. If using xray as engine_dependencies tool, the token is the base64 of artifactory server config that can be obtain from jfrog cli with 'jf config export <ServerID>' command.",
     )
     parser.add_argument(
         "--xray_mode",

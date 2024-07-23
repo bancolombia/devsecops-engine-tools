@@ -47,7 +47,11 @@ def init_engine_dependencies(
 
     if scan_flag and not (skip_flag):
         to_scan = dict_args["folder_path"] if dict_args["folder_path"] else os.getcwd()
-        if tool == "XRAY" and dict_args["xray_mode"] == "scan":
+        if (
+            tool == "XRAY"
+            and dict_args["xray_mode"] == "scan"
+            and os.path.exists(to_scan)
+        ):
             pattern = handle_remote_config_patterns.excluded_files()
             find_artifacts = FindArtifacts(
                 to_scan, pattern, remote_config["XRAY"]["PACKAGES_TO_SCAN"]
@@ -63,7 +67,11 @@ def init_engine_dependencies(
                 token,
             )
             dependencies_scanned = dependencies_sca_scan.process()
-            deserialized = dependencies_sca_scan.deserializator(dependencies_scanned) if dependencies_scanned is not None else []
+            deserialized = (
+                dependencies_sca_scan.deserializator(dependencies_scanned)
+                if dependencies_scanned is not None
+                else []
+            )
     else:
         print(f"Tool skipped by DevSecOps policy")
         logger.info(f"Tool skipped by DevSecOps policy")

@@ -12,6 +12,7 @@ import subprocess
 def xray_scan_instance():
     return XrayScan()
 
+
 def test_install_tool_linux_success(xray_scan_instance):
     version = "2.52.8"
     with patch("subprocess.run") as mock_subprocess, patch(
@@ -163,6 +164,7 @@ def test_config_server_failure(xray_scan_instance):
             "Error during Xray Server configuration: Command 'chmod' returned non-zero exit status 1."
         )
 
+
 def test_scan_dependencies_success(xray_scan_instance):
     with patch("subprocess.run") as mock_subprocess_run, patch(
         "json.dump"
@@ -180,9 +182,7 @@ def test_scan_dependencies_success(xray_scan_instance):
         mock_subprocess_run.return_value = Mock(returncode=0)
         mock_os_getcwd.return_value = "working_dir"
 
-        xray_scan_instance.scan_dependencies(
-            prefix, cwd, mode, to_scan
-        )
+        xray_scan_instance.scan_dependencies(prefix, cwd, mode, to_scan)
 
         mock_subprocess_run.assert_called_with(
             [
@@ -206,11 +206,11 @@ def test_scan_dependencies_failure(xray_scan_instance):
         cwd = "working_dir"
         mode = "scan"
         to_scan = "target_file.tar"
-        mock_subprocess_run.return_value = Mock(returncode=1, stderr="Command 'xray scan' returned non-zero exit status 1.")
-
-        xray_scan_instance.scan_dependencies(
-            prefix, cwd, mode, to_scan
+        mock_subprocess_run.return_value = Mock(
+            returncode=1, stderr="Command 'xray scan' returned non-zero exit status 1."
         )
+
+        xray_scan_instance.scan_dependencies(prefix, cwd, mode, to_scan)
 
         mock_logger_error.assert_called_with(
             "Error executing jf scan: Command 'xray scan' returned non-zero exit status 1."
@@ -221,6 +221,8 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
     with patch("platform.system") as mock_system, patch(
         "os.getcwd"
     ) as mock_getcwd, patch(
+        "os.path.exists"
+    ) as mock_pathexist, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_linux"
     ) as mock_install_tool, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.config_server"
@@ -232,13 +234,12 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
         remote_config = {
             "XRAY": {"CLI_VERSION": "1.0"},
         }
-        dict_args = {
-            "xray_mode": "audit"
-        }
+        dict_args = {"xray_mode": "audit"}
         to_scan = "working_dir"
         token = "token123"
         mock_system.return_value = "Linux"
         mock_getcwd.return_value = "working_dir"
+        mock_pathexist.return_value = True
 
         xray_scan_instance.run_tool_dependencies_sca(
             remote_config,
@@ -252,10 +253,7 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
         mock_getcwd.assert_any_call()
 
         mock_scan_dependencies.assert_called_with(
-            "./jf",
-            "working_dir",
-            dict_args["xray_mode"],
-            ''
+            "./jf", "working_dir", dict_args["xray_mode"], ""
         )
 
 
@@ -263,6 +261,8 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
     with patch("platform.system") as mock_system, patch(
         "os.getcwd"
     ) as mock_getcwd, patch(
+        "os.path.exists"
+    ) as mock_pathexist, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_windows"
     ) as mock_install_tool, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.config_server"
@@ -274,13 +274,12 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
         remote_config = {
             "XRAY": {"CLI_VERSION": "1.0"},
         }
-        dict_args = {
-            "xray_mode": "audit"
-        }
+        dict_args = {"xray_mode": "audit"}
         to_scan = "working_dir"
         token = "token123"
         mock_system.return_value = "Windows"
         mock_getcwd.return_value = "working_dir"
+        mock_pathexist.return_value = True
 
         xray_scan_instance.run_tool_dependencies_sca(
             remote_config,
@@ -294,10 +293,7 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
         mock_getcwd.assert_any_call()
 
         mock_scan_dependencies.assert_called_with(
-            "./jf.exe",
-            "working_dir",
-            dict_args["xray_mode"],
-            ''
+            "./jf.exe", "working_dir", dict_args["xray_mode"], ""
         )
 
 
@@ -305,6 +301,8 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
     with patch("platform.system") as mock_system, patch(
         "os.getcwd"
     ) as mock_getcwd, patch(
+        "os.path.exists"
+    ) as mock_pathexist, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.install_tool_darwin"
     ) as mock_install_tool, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.config_server"
@@ -316,13 +314,12 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
         remote_config = {
             "XRAY": {"CLI_VERSION": "1.0"},
         }
-        dict_args = {
-            "xray_mode": "audit"
-        }
+        dict_args = {"xray_mode": "audit"}
         to_scan = "working_dir"
         token = "token123"
         mock_system.return_value = "Darwin"
         mock_getcwd.return_value = "working_dir"
+        mock_pathexist.return_value = True
 
         xray_scan_instance.run_tool_dependencies_sca(
             remote_config,
@@ -336,8 +333,5 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
         mock_getcwd.assert_any_call()
 
         mock_scan_dependencies.assert_called_with(
-            "./jf",
-            "working_dir",
-            dict_args["xray_mode"],
-            ''
+            "./jf", "working_dir", dict_args["xray_mode"], ""
         )
