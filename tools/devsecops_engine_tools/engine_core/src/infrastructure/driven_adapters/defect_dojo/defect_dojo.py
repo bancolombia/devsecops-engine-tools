@@ -56,7 +56,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "TRUFFLEHOG": "Trufflehog Scan",
                 "TRIVY": "Trivy Scan",
                 "KUBESCAPE": "Kubescape Scanner",
-                "KICS": "KICS Scanner"
+                "KICS": "KICS Scanner",
+                "DEPENDENCY_CHECK": "Dependency Check"
             }
 
             if any(

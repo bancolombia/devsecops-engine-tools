@@ -4,6 +4,12 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.dr
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_deserialize_output import (
     XrayDeserializator,
 )
+from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool import (
+    DependencyCheckTool,
+)
+from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_deserialize import (
+    DependencyCheckDeserialize,
+)
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool import (
     init_engine_dependencies,
 )
@@ -14,6 +20,10 @@ def runner_engine_dependencies(dict_args, config_tool, token, devops_platform_ga
         if config_tool["ENGINE_DEPENDENCIES"]["TOOL"] == "XRAY":
             tool_run = XrayScan()
             tool_deserializator = XrayDeserializator()
+        elif config_tool["ENGINE_DEPENDENCIES"]["TOOL"] == "DEPENDENCY_CHECK":
+            tool_run = DependencyCheckTool()
+            tool_deserializator = DependencyCheckDeserialize()
+
 
         return init_engine_dependencies(
             tool_run,

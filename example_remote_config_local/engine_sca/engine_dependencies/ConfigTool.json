@@ -18,5 +18,10 @@
             "Critical": 1
         },
         "CVE": ["CVE-123123"]
+    },
+    "DEPENDENCY_CHECK": {
+        "CLI_VERSION": "10.0.2",
+        "NVD_API_KEY": "api-key",
+        "UPDATE_NVD": false
     }
 }
