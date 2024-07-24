@@ -8,7 +8,6 @@ import requests
 import re
 import os
 import json
-import shutil
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -17,19 +16,18 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class XrayScan(ToolGateway):
-    def install_tool_linux(self, version):
+    def install_tool_linux(self, prefix, version):
         installed = subprocess.run(
-            ["which", "./jf"],
+            ["which", prefix],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
         if installed.returncode == 1:
-            command = ["chmod", "+x", "./jf"]
+            command = ["chmod", "+x", prefix]
             try:
                 url = f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-linux-amd64/jf"
-                file = "./jf"
                 response = requests.get(url, allow_redirects=True)
-                with open(file, "wb") as archivo:
+                with open(prefix, "wb") as archivo:
                     archivo.write(response.content)
                 subprocess.run(
                     command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -37,36 +35,34 @@ class XrayScan(ToolGateway):
             except subprocess.CalledProcessError as error:
                 logger.error(f"Error during Jfrog Cli installation on Linux: {error}")
 
-    def install_tool_windows(self, version):
+    def install_tool_windows(self, prefix, version):
         try:
             subprocess.run(
-                ["./jf.exe", "--version"],
+                [prefix, "--version"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
         except:
             try:
                 url = f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-windows-amd64/jf.exe"
-                exe_file = "./jf.exe"
                 response = requests.get(url, allow_redirects=True)
-                with open(exe_file, "wb") as archivo:
+                with open(prefix, "wb") as archivo:
                     archivo.write(response.content)
             except subprocess.CalledProcessError as error:
                 logger.error(f"Error while Jfrog Cli installation on Windows: {error}")
 
-    def install_tool_darwin(self, version):
+    def install_tool_darwin(self, prefix, version):
         installed = subprocess.run(
-            ["which", "./jf"],
+            ["which", prefix],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
         if installed.returncode == 1:
-            command = ["chmod", "+x", "./jf"]
+            command = ["chmod", "+x", prefix]
             try:
                 url = f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-mac-386/jf"
-                file = "./jf"
                 response = requests.get(url, allow_redirects=True)
-                with open(file, "wb") as archivo:
+                with open(prefix, "wb") as archivo:
                     archivo.write(response.content)
                 subprocess.run(
                     command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -96,13 +92,10 @@ class XrayScan(ToolGateway):
         except subprocess.CalledProcessError as error:
             logger.error(f"Error during Xray Server configuration: {error}")
 
-    def config_audit_scan(self, prefix, to_scan):
+    def config_audit_scan(self, to_scan):
         gradlew_path = os.path.join(to_scan, "gradlew")
         if os.path.exists(gradlew_path):
             os.chmod(gradlew_path, 0o755)
-        destination_path = os.path.join(to_scan, os.path.basename(prefix))
-        if not os.path.exists(destination_path):
-            shutil.move(prefix, destination_path)
 
     def scan_dependencies(self, prefix, cwd, mode, to_scan):
         command = [
@@ -119,9 +112,12 @@ class XrayScan(ToolGateway):
             file_result = os.path.join(os.getcwd(), "scan_result.json")
             with open(file_result, "w") as file:
                 json.dump(scan_result, file, indent=4)
+            if result.stdout == "null\n":
+                logger.warning(f"Xray scan returned null: {result.stderr}")
+                return None
             return file_result
         else:
-            logger.error(f"Error executing jf scan: {result.stderr}")
+            logger.error(f"Error executing Xray scan: {result.stderr}")
             return None
 
     def run_tool_dependencies_sca(
@@ -134,25 +130,25 @@ class XrayScan(ToolGateway):
         cli_version = remote_config["XRAY"]["CLI_VERSION"]
         os_platform = platform.system()
 
+        cwd = os.getcwd()
         if os_platform == "Linux":
-            self.install_tool_linux(cli_version)
-            command_prefix = "./jf"
+            command_prefix = os.path.join(cwd, "jf")
+            self.install_tool_linux(command_prefix, cli_version)
         elif os_platform == "Windows":
-            self.install_tool_windows(cli_version)
-            command_prefix = "./jf.exe"
+            command_prefix = os.path.join(cwd, "jf.exe")
+            self.install_tool_windows(command_prefix, cli_version)
         elif os_platform == "Darwin":
-            command_prefix = "./jf"
-            self.install_tool_darwin(cli_version)
+            command_prefix = os.path.join(cwd, "jf")
+            self.install_tool_darwin(command_prefix, cli_version)
         else:
             logger.warning(f"{os_platform} is not supported.")
             return None
 
         self.config_server(command_prefix, token)
 
-        cwd = os.getcwd()
         if dict_args["xray_mode"] == "audit":
             if os.path.exists(to_scan):
-                self.config_audit_scan(command_prefix, to_scan)
+                self.config_audit_scan(to_scan)
                 cwd = to_scan
                 to_scan = ""
             else:
