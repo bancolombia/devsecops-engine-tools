@@ -13,6 +13,8 @@ def test_init():
     ) as mock_deserializator_gateway:
         remote_config = {"remote_config_key": "remote_config_value"}
         dict_args = {"key": "arg"}
+        exclusion = {"exclusion_key": "exclusion_value"}
+        pipeline_name = "pipeline_name"
         to_scan = "path/"
         token = "token"
         dependencies_scan_instance = DependenciesScan(
@@ -20,6 +22,8 @@ def test_init():
             mock_deserializator_gateway,
             remote_config,
             dict_args,
+            exclusion,
+            pipeline_name,
             to_scan,
             token,
         )
@@ -31,6 +35,8 @@ def test_init():
         )
         assert dependencies_scan_instance.remote_config == remote_config
         assert dependencies_scan_instance.dict_args == dict_args
+        assert dependencies_scan_instance.exclusions == exclusion
+        assert dependencies_scan_instance.pipeline_name == pipeline_name
         assert dependencies_scan_instance.to_scan == to_scan
         assert dependencies_scan_instance.token == token
 
@@ -42,22 +48,25 @@ def test_process():
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.dependencies_sca_scan.DeserializatorGateway"
     ) as mock_deserializator_gateway:
         remote_config = {"remote_config_key": "remote_config_value"}
-        file_to_scan = "/working/dir/file.tar"
-        bypass_limits_flag = True
+        dict_args = {"key": "arg"}
+        exclusion = {"exclusion_key": "exclusion_value"}
+        pipeline_name = "pipeline_name"
+        to_scan = "path/"
         token = "token"
-
         dependencies_scan_instance = DependenciesScan(
             mock_tool_gateway,
             mock_deserializator_gateway,
             remote_config,
-            file_to_scan,
-            bypass_limits_flag,
+            dict_args,
+            exclusion,
+            pipeline_name,
+            to_scan,
             token,
         )
         dependencies_scan_instance.process()
 
         mock_tool_gateway.run_tool_dependencies_sca.assert_called_once_with(
-            remote_config, file_to_scan, bypass_limits_flag, token
+            remote_config, dict_args, exclusion, pipeline_name, to_scan, token
         )
 
 
@@ -68,8 +77,10 @@ def test_deserializator():
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.dependencies_sca_scan.DeserializatorGateway"
     ) as mock_deserializator_gateway:
         remote_config = {"remote_config_key": "remote_config_value"}
-        file_to_scan = "/working/dir/file.tar"
-        bypass_limits_flag = True
+        dict_args = {"key": "arg"}
+        exclusion = {"exclusion_key": "exclusion_value"}
+        pipeline_name = "pipeline_name"
+        to_scan = "path/"
         token = "token"
         dependencies_scanned = "scanned.json"
 
@@ -77,8 +88,10 @@ def test_deserializator():
             mock_tool_gateway,
             mock_deserializator_gateway,
             remote_config,
-            file_to_scan,
-            bypass_limits_flag,
+            dict_args,
+            exclusion,
+            pipeline_name,
+            to_scan,
             token,
         )
         dependencies_scan_instance.deserializator(dependencies_scanned)

@@ -7,9 +7,6 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.s
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.handle_remote_config_patterns import (
     HandleRemoteConfigPatterns,
 )
-from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.find_artifacts import (
-    FindArtifacts,
-)
 
 import os
 import sys
@@ -47,22 +44,14 @@ def init_engine_dependencies(
 
     if scan_flag and not (skip_flag):
         to_scan = dict_args["folder_path"] if dict_args["folder_path"] else os.getcwd()
-        if (
-            tool == "XRAY"
-            and dict_args["xray_mode"] == "scan"
-            and os.path.exists(to_scan)
-        ):
-            pattern = handle_remote_config_patterns.excluded_files()
-            find_artifacts = FindArtifacts(
-                to_scan, pattern, remote_config["XRAY"]["PACKAGES_TO_SCAN"]
-            )
-            to_scan = find_artifacts.find_artifacts()
-        if to_scan:
+        if os.path.exists(to_scan):
             dependencies_sca_scan = DependenciesScan(
                 tool_run,
                 tool_deserializator,
                 remote_config,
                 dict_args,
+                exclusions,
+                pipeline_name,
                 to_scan,
                 token,
             )
@@ -72,6 +61,8 @@ def init_engine_dependencies(
                 if dependencies_scanned is not None
                 else []
             )
+        else:
+            logger.error(f"Path {to_scan} does not exist")
     else:
         print(f"Tool skipped by DevSecOps policy")
         logger.info(f"Tool skipped by DevSecOps policy")

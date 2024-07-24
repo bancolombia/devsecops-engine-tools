@@ -12,31 +12,6 @@ class HandleRemoteConfigPatterns:
         self.exclusions = exclusions
         self.pipeline_name = pipeline_name
 
-    def excluded_files(self):
-        """
-        Handle excluded files.
-
-        Return: string: new regex expresion.
-        """
-
-        pattern = self.remote_config["XRAY"]["REGEX_EXPRESSION_EXTENSIONS"]
-        if (self.pipeline_name in self.exclusions) and (
-            self.exclusions[self.pipeline_name].get("SKIP_FILES", 0)
-        ):
-            exclusion = self.exclusions[self.pipeline_name]["SKIP_FILES"]
-            if exclusion.get("files", 0):
-                excluded_file_types = exclusion["files"]
-                pattern2 = pattern
-                for ext in excluded_file_types:
-                    pattern2 = (
-                        pattern2.replace("|" + ext, "")
-                        .replace(ext + "|", "")
-                        .replace(ext, "")
-                    )
-                pattern = pattern2
-
-        return pattern
-
     def ignore_analysis_pattern(self):
         """
         Handle analysis pattern.
