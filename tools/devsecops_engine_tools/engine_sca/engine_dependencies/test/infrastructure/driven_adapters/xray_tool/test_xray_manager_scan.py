@@ -4,6 +4,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.dr
 
 import pytest
 from unittest.mock import patch, Mock
+import os
 
 import subprocess
 
@@ -15,15 +16,16 @@ def xray_scan_instance():
 
 def test_install_tool_linux_success(xray_scan_instance):
     version = "2.52.8"
+    prefix = "jf"
     with patch("subprocess.run") as mock_subprocess, patch(
         "requests.get"
     ) as mock_requests:
         mock_subprocess.return_value.returncode = 1
         mock_requests.return_value.content = b"fake_binary_data"
-        xray_scan_instance.install_tool_linux(version)
+        xray_scan_instance.install_tool_linux(prefix, version)
 
         mock_subprocess.assert_called_with(
-            ["chmod", "+x", "./jf"], check=True, stdout=-1, stderr=-1
+            ["chmod", "+x", prefix], check=True, stdout=-1, stderr=-1
         )
         mock_requests.assert_called_with(
             f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-linux-amd64/jf",
@@ -33,6 +35,7 @@ def test_install_tool_linux_success(xray_scan_instance):
 
 def test_install_tool_linux_failure(xray_scan_instance):
     version = "2.52.8"
+    prefix = "jf"
     with patch("subprocess.run") as mock_subprocess, patch(
         "requests.get"
     ) as mock_requests, patch(
@@ -43,7 +46,7 @@ def test_install_tool_linux_failure(xray_scan_instance):
             subprocess.CalledProcessError(returncode=1, cmd="chmod"),
         ]
         mock_requests.return_value.content = b"fake_binary_data"
-        xray_scan_instance.install_tool_linux(version)
+        xray_scan_instance.install_tool_linux(prefix, version)
         mock_logger_error.assert_called_with(
             "Error during Jfrog Cli installation on Linux: Command 'chmod' returned non-zero exit status 1."
         )
@@ -51,7 +54,7 @@ def test_install_tool_linux_failure(xray_scan_instance):
 
 def test_install_tool_windows_success(xray_scan_instance):
     version = "2.52.8"
-
+    prefix = "jf"
     with patch("subprocess.run") as mock_subprocess, patch(
         "requests.get"
     ) as mock_requests:
@@ -59,7 +62,7 @@ def test_install_tool_windows_success(xray_scan_instance):
             returncode=1, cmd="chmod"
         )
         mock_requests.return_value.content = b"fake_binary_data"
-        xray_scan_instance.install_tool_windows(version)
+        xray_scan_instance.install_tool_windows(prefix, version)
 
         mock_requests.assert_called_with(
             f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-windows-amd64/jf.exe",
@@ -69,6 +72,7 @@ def test_install_tool_windows_success(xray_scan_instance):
 
 def test_install_tool_windows_failure(xray_scan_instance):
     version = "2.52.8"
+    prefix = "jf"
     with patch("subprocess.run") as mock_subprocess, patch(
         "requests.get"
     ) as mock_requests, patch(
@@ -80,7 +84,7 @@ def test_install_tool_windows_failure(xray_scan_instance):
         mock_requests.side_effect = subprocess.CalledProcessError(
             returncode=1, cmd="chmod"
         )
-        xray_scan_instance.install_tool_windows(version)
+        xray_scan_instance.install_tool_windows(prefix, version)
 
         mock_logger_error.assert_called_with(
             "Error while Jfrog Cli installation on Windows: Command 'chmod' returned non-zero exit status 1."
@@ -89,15 +93,16 @@ def test_install_tool_windows_failure(xray_scan_instance):
 
 def test_install_tool_darwin_success(xray_scan_instance):
     version = "2.52.8"
+    prefix = "jf"
     with patch("subprocess.run") as mock_subprocess, patch(
         "requests.get"
     ) as mock_requests:
         mock_subprocess.return_value.returncode = 1
         mock_requests.return_value.content = b"fake_binary_data"
-        xray_scan_instance.install_tool_darwin(version)
+        xray_scan_instance.install_tool_darwin(prefix, version)
 
         mock_subprocess.assert_called_with(
-            ["chmod", "+x", "./jf"], check=True, stdout=-1, stderr=-1
+            ["chmod", "+x", prefix], check=True, stdout=-1, stderr=-1
         )
         mock_requests.assert_called_with(
             f"https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/{version}/jfrog-cli-mac-386/jf",
@@ -107,6 +112,7 @@ def test_install_tool_darwin_success(xray_scan_instance):
 
 def test_install_tool_darwin_failure(xray_scan_instance):
     version = "2.52.8"
+    prefix = "jf"
     with patch("subprocess.run") as mock_subprocess, patch(
         "requests.get"
     ) as mock_requests, patch(
@@ -117,7 +123,7 @@ def test_install_tool_darwin_failure(xray_scan_instance):
             subprocess.CalledProcessError(returncode=1, cmd="chmod"),
         ]
         mock_requests.return_value.content = b"fake_binary_data"
-        xray_scan_instance.install_tool_darwin(version)
+        xray_scan_instance.install_tool_darwin(prefix, version)
         mock_logger_error.assert_called_with(
             "Error during Jfrog Cli installation on Darwin: Command 'chmod' returned non-zero exit status 1."
         )
@@ -171,16 +177,14 @@ def test_config_audit_scan(xray_scan_instance):
     ) as mock_pathexists, patch("os.chmod") as mock_chmod, patch(
         "shutil.move"
     ) as mock_move:
-        prefix = "jf"
         to_scan = "folder"
         mock_pathexists.side_effect = [True, False]
 
-        xray_scan_instance.config_audit_scan(prefix, to_scan)
+        xray_scan_instance.config_audit_scan(to_scan)
 
-        assert mock_pathjoin.call_count == 2
-        assert mock_pathexists.call_count == 2
+        assert mock_pathjoin.call_count == 1
+        assert mock_pathexists.call_count == 1
         mock_chmod.assert_called_once()
-        mock_move.assert_called_once()
 
 
 def test_scan_dependencies_success(xray_scan_instance):
@@ -231,7 +235,7 @@ def test_scan_dependencies_failure(xray_scan_instance):
         xray_scan_instance.scan_dependencies(prefix, cwd, mode, to_scan)
 
         mock_logger_error.assert_called_with(
-            "Error executing jf scan: Command 'xray scan' returned non-zero exit status 1."
+            "Error executing Xray scan: Command 'xray scan' returned non-zero exit status 1."
         )
 
 
@@ -251,6 +255,7 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
             "XRAY": {"CLI_VERSION": "1.0"},
         }
         dict_args = {"xray_mode": "audit"}
+        prefix = os.path.join("working_dir", "jf")
         to_scan = "working_dir"
         token = "token123"
         mock_system.return_value = "Linux"
@@ -264,12 +269,12 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
             token,
         )
 
-        mock_install_tool.assert_called_with("1.0")
-        mock_config_server.assert_called_with("./jf", token)
+        mock_install_tool.assert_called_with(prefix, "1.0")
+        mock_config_server.assert_called_with(prefix, token)
         mock_getcwd.assert_any_call()
 
         mock_scan_dependencies.assert_called_with(
-            "./jf", "working_dir", dict_args["xray_mode"], ""
+            prefix, "working_dir", dict_args["xray_mode"], ""
         )
 
 
@@ -289,6 +294,7 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
             "XRAY": {"CLI_VERSION": "1.0"},
         }
         dict_args = {"xray_mode": "audit"}
+        prefix = os.path.join("working_dir", "jf.exe")
         to_scan = "working_dir"
         token = "token123"
         mock_system.return_value = "Windows"
@@ -302,12 +308,12 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
             token,
         )
 
-        mock_install_tool.assert_called_with("1.0")
-        mock_config_server.assert_called_with("./jf.exe", token)
+        mock_install_tool.assert_called_with(prefix, "1.0")
+        mock_config_server.assert_called_with(prefix, token)
         mock_getcwd.assert_any_call()
 
         mock_scan_dependencies.assert_called_with(
-            "./jf.exe", "working_dir", dict_args["xray_mode"], ""
+            prefix, "working_dir", dict_args["xray_mode"], ""
         )
 
 
@@ -327,6 +333,7 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
             "XRAY": {"CLI_VERSION": "1.0"},
         }
         dict_args = {"xray_mode": "audit"}
+        prefix = os.path.join("working_dir", "jf")
         to_scan = "working_dir"
         token = "token123"
         mock_system.return_value = "Darwin"
@@ -340,10 +347,10 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
             token,
         )
 
-        mock_install_tool.assert_called_with("1.0")
-        mock_config_server.assert_called_with("./jf", token)
+        mock_install_tool.assert_called_with(prefix, "1.0")
+        mock_config_server.assert_called_with(prefix, token)
         mock_getcwd.assert_any_call()
 
         mock_scan_dependencies.assert_called_with(
-            "./jf", "working_dir", dict_args["xray_mode"], ""
+            prefix, "working_dir", dict_args["xray_mode"], ""
         )
