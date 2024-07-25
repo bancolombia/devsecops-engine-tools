@@ -25,7 +25,7 @@ class ProductRestConsumer:
                 raise ApiError(response.json())
             products_object = ProductList.from_dict(response.json())
         except Exception as e:
-            logger.error(f"from dict product: {response.json()}")
+            logger.error(f"from dict product: {e}")
             raise ApiError(e)
         return products_object
 
