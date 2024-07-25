@@ -36,7 +36,7 @@ class S3Manager(MetricsManagerGateway):
             aws_session_token=temp_credentials["SessionToken"],
         )
         date = datetime.datetime.now()
-        path_bucket = f'{tool}/{date.strftime("%Y")}/{date.strftime("%m")}/{date.strftime("%d")}/{file_path.split("/")[-1]}'
+        path_bucket = f'engine_tools/{tool}/{date.strftime("%Y")}/{date.strftime("%m")}/{date.strftime("%d")}/{file_path.split("/")[-1]}'
 
         data = self._get_s3_data(
             client, config_tool["METRICS_MANAGER"]["AWS"]["BUCKET"], path_bucket
