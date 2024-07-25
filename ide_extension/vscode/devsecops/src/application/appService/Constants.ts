@@ -1,0 +1,1 @@
+export const VARIABLE_GROUPS_AD_BY_NAME: string = "https://dev.azure.com/{organization}/{project}/_apis/distributedtask/variablegroups?groupName={groupName}&api-version=7.1-preview.2";
