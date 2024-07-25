@@ -114,7 +114,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 def request_func():
                     return DefectDojo.send_import_scan(request)
 
-                response = self.retries_requests(
+                response = self._retries_requests(
                     request_func,
                     vulnerability_management.config_tool["VULNERABILITY_MANAGER"][
                         "DEFECT_DOJO"
@@ -137,12 +137,6 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     ex
                 )
             )
-
-    def import_scan_retry(self, request, max_retries):
-        def request_func():
-            return DefectDojo.send_import_scan(request)
-
-        return self.retries_requests(request_func, max_retries, retry_delay=5)
 
     def get_findings_excepted(self, service, dict_args, secret_tool, config_tool):
         try:
@@ -258,9 +252,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 session=session_manager, service=service, **query_params
             ).results
 
-        return self.retries_requests(request_func, max_retries, retry_delay=5)
+        return self._retries_requests(request_func, max_retries, retry_delay=5)
 
-    def retries_requests(self, request_func, max_retries, retry_delay):
+    def _retries_requests(self, request_func, max_retries, retry_delay):
         for attempt in range(max_retries):
             try:
                 return request_func()

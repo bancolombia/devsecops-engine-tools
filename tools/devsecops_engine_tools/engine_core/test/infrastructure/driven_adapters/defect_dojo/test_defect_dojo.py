@@ -286,6 +286,41 @@ class TestDefectDojoPlatform(unittest.TestCase):
         ]
         self.assertEqual(result, expected_result)
 
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.SessionManager"
+    )
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Finding.get_finding"
+    )
+    def test_get_findings_excepted_retry(self, mock_finding, mock_session_manager):
+
+        service = "test"
+        dict_args = {
+            "tool": "engine_dependencies",
+            "token_vulnerability_management": "token1",
+        }
+        secret_tool = {"token_defect_dojo": "token2"}
+        config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "LIMITS_QUERY": 80,
+                    "MAX_RETRIES_QUERY": 2
+                }
+            }
+        }
+
+        mock_session_manager.return_value = MagicMock()
+        mock_finding.side_effect = Exception("Simulated error")
+
+        with unittest.TestCase().assertRaises(Exception) as context:
+            self.defect_dojo.get_findings_excepted(service, dict_args, secret_tool, config_tool)
+        
+        assert (
+            "Error getting excepted findings with the following error:"
+            in str(context.exception)
+        )
+
     def test_get_findings_excepted_exception(self):
 
         service = "test"
