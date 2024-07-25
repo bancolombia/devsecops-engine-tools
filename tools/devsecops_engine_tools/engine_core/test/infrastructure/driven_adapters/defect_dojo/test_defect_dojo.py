@@ -39,6 +39,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_CMDB": "cmdb_host",
                     "REGEX_EXPRESSION_CMDB": "regex",
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "MAX_RETRIES_QUERY": 5
                 },
             }
         }
@@ -124,6 +125,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "MAX_RETRIES_QUERY": 5
                 }
             }
         }
@@ -213,6 +215,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "MAX_RETRIES_QUERY": 5
                 }
             }
         }
@@ -317,6 +320,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "MAX_RETRIES_QUERY": 5
                 }
             }
         }

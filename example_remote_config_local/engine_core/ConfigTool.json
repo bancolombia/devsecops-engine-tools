@@ -14,7 +14,8 @@
             "HOST_CMDB": "",
             "HOST_DEFECT_DOJO": "",
             "REGEX_EXPRESSION_CMDB": "",
-            "LIMITS_QUERY": 100
+            "LIMITS_QUERY": 100,
+            "MAX_RETRIES_QUERY": 5
         }
     },
     "METRICS_MANAGER": {
