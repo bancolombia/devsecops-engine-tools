@@ -24,7 +24,7 @@ class BaseEnum(Enum):
 class SystemVariables(BaseEnum):
     github_access_token = "github.access.token"
     github_workspace = "github.workspace"
-    build = "build"
+    github_job = "github.job"
     github_server_url = "github.server.url"
     github_repository = "github.repository"
     github_event_number = "github.event.number"
