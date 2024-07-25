@@ -1,7 +1,4 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import {exec} from 'child_process';
 import { Scanner } from './infraestructure/drivenAdapter/Scanner';
 
 function removeAnsiEscapeCodes(text: string): string {
@@ -12,14 +9,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	console.log('DevSecOpse IDE Extension active');
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
 	const disposable = vscode.commands.registerCommand('devsecops.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World');
-		
 	});
 
 	const iacScanDisposable = vscode.commands.registerCommand('devsecops.iacScan', async () => {
