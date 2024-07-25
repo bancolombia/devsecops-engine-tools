@@ -24,6 +24,12 @@ from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
 )
 from functools import partial
 
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
+import time
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
+
 
 @dataclass
 class DefectDojoPlatform(VulnerabilityManagementGateway):
@@ -56,7 +62,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "TRUFFLEHOG": "Trufflehog Scan",
                 "TRIVY": "Trivy Scan",
                 "KUBESCAPE": "Kubescape Scanner",
-                "KICS": "KICS Scanner"
+                "KICS": "KICS Scanner",
             }
 
             if any(
@@ -64,7 +70,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 for branch in vulnerability_management.config_tool[
                     "VULNERABILITY_MANAGER"
                 ]["BRANCH_FILTER"].split(",")
-            ) or (vulnerability_management.dict_args["tool"] == 'engine_secret'):
+            ) or (vulnerability_management.dict_args["tool"] == "engine_secret"):
                 request: ImportScanRequest = Connect.cmdb(
                     cmdb_mapping={
                         "product_type_name": "nombreevc",
@@ -105,7 +111,17 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     tags=vulnerability_management.dict_args["tool"],
                 )
 
-                response = DefectDojo.send_import_scan(request)
+                def request_func():
+                    return DefectDojo.send_import_scan(request)
+
+                response = self.retries_requests(
+                    request_func,
+                    vulnerability_management.config_tool["VULNERABILITY_MANAGER"][
+                        "DEFECT_DOJO"
+                    ]["MAX_RETRIES_QUERY"],
+                    retry_delay=5,
+                )
+
                 if hasattr(response, "url"):
                     url_parts = response.url.split("//")
                     test_string = "//".join([url_parts[0] + "/", url_parts[1]])
@@ -122,13 +138,25 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 )
             )
 
+    def import_scan_retry(self, request, max_retries):
+        def request_func():
+            return DefectDojo.send_import_scan(request)
+
+        return self.retries_requests(request_func, max_retries, retry_delay=5)
+
     def get_findings_excepted(self, service, dict_args, secret_tool, config_tool):
         try:
-            session_manager = self._get_session_manager(dict_args, secret_tool, config_tool)
+            session_manager = self._get_session_manager(
+                dict_args, secret_tool, config_tool
+            )
 
             dd_limits_query = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
                 "LIMITS_QUERY"
             ]
+            dd_max_retries = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                "MAX_RETRIES_QUERY"
+            ]
+
             tool = dict_args["tool"]
 
             risk_accepted_query_params = {
@@ -145,6 +173,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             exclusions_risk_accepted = self._get_findings_with_exclusions(
                 session_manager,
                 service,
+                dd_max_retries,
                 risk_accepted_query_params,
                 tool,
                 self._format_date_to_dd_format,
@@ -154,6 +183,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             exclusions_false_positive = self._get_findings_with_exclusions(
                 session_manager,
                 service,
+                dd_max_retries,
                 false_positive_query_params,
                 tool,
                 self._format_date_to_dd_format,
@@ -168,23 +198,29 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 )
             )
 
-    def get_all_findings(
-        self, service, dict_args, secret_tool, config_tool
-    ):
+    def get_all_findings(self, service, dict_args, secret_tool, config_tool):
         try:
             all_findings_query_params = {
-                "limit": config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["LIMITS_QUERY"]
+                "limit": config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                    "LIMITS_QUERY"
+                ]
             }
+            max_retries = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                "MAX_RETRIES_QUERY"
+            ]
 
             findings = self._get_findings(
                 self._get_session_manager(dict_args, secret_tool, config_tool),
-                service, 
-                all_findings_query_params
+                service,
+                max_retries,
+                all_findings_query_params,
             )
 
             maped_list = list(
                 map(
-                    partial(self._create_report, date_fn=self._format_date_to_dd_format),
+                    partial(
+                        self._create_report, date_fn=self._format_date_to_dd_format
+                    ),
                     findings,
                 )
             )
@@ -193,33 +229,49 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
         except Exception as ex:
             raise ExceptionGettingFindings(
-                "Error getting all findings with the following error: {0} ".format(
-                    ex
-                )
+                "Error getting all findings with the following error: {0} ".format(ex)
             )
 
     def _get_session_manager(self, dict_args, secret_tool, config_tool):
-        token_dd = dict_args.get(
-                "token_vulnerability_management"
-            ) or secret_tool.get("token_defect_dojo")
+        token_dd = dict_args.get("token_vulnerability_management") or secret_tool.get(
+            "token_defect_dojo"
+        )
         return SessionManager(
             token_dd,
             config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"],
         )
 
     def _get_findings_with_exclusions(
-        self, session_manager, service, query_params, tool, date_fn, reason
+        self, session_manager, service, max_retries, query_params, tool, date_fn, reason
     ):
-        findings = self._get_findings(session_manager, service, query_params)
+        findings = self._get_findings(
+            session_manager, service, max_retries, query_params
+        )
         return map(
             partial(self._create_exclusion, date_fn=date_fn, tool=tool, reason=reason),
             findings,
         )
 
-    def _get_findings(self, session_manager, service, query_params):
-        return Finding.get_finding(
-            session=session_manager, service=service, **query_params
-        ).results
+    def _get_findings(self, session_manager, service, max_retries, query_params):
+        def request_func():
+            return Finding.get_finding(
+                session=session_manager, service=service, **query_params
+            ).results
+
+        return self.retries_requests(request_func, max_retries, retry_delay=5)
+
+    def retries_requests(self, request_func, max_retries, retry_delay):
+        for attempt in range(max_retries):
+            try:
+                return request_func()
+            except Exception as e:
+                logger.error(f"Error making the request: {e}")
+                if attempt < max_retries - 1:
+                    logger.warning(f"Retry in {retry_delay} seconds...")
+                    time.sleep(retry_delay)
+                else:
+                    logger.error("Maximum number of retries reached, aborting.")
+                    raise e
 
     def _create_exclusion(self, finding, date_fn, tool, reason):
         return Exclusions(
@@ -241,9 +293,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
     def _create_report(self, finding, date_fn):
         return Report(
             id=finding.vuln_id_from_tool,
-            date=date_fn(
-                finding.date
-            ),
+            date=date_fn(finding.date),
             status=finding.display_status,
             where=self._get_where_report(finding),
             tags=finding.tags,
@@ -257,7 +307,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             if date_string
             else None
         )
-    
+
     def _get_where_report(self, finding):
         for tag in finding.tags:
             return self._get_where(finding, tag)
