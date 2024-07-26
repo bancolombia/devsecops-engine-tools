@@ -1,25 +1,5 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-<!--    <id>com.github.bancolombia.devsecops-engine-tools</id>-->
-
-<!--    &lt;!&ndash; Public plugin name should be written in Title Case.-->
-<!--         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name &ndash;&gt;-->
-<!--    <name>Devsecops-engine-tools</name>-->
-
-<!--    &lt;!&ndash; A displayed Vendor name or Organization ID displayed on the Plugins Page. &ndash;&gt;-->
-<!--    <vendor email="support@yourcompany.com" url="https://www.yourcompany.com">YourCompany</vendor>-->
-
-<!--    &lt;!&ndash; Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.-->
-<!--         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.-->
-<!--         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description &ndash;&gt;-->
-<!--    <description><![CDATA[-->
-<!--    Enter short description for your plugin here.<br>-->
-<!--    <em>most HTML tags may be used</em>-->
-<!--  ]]></description>-->
-
-    <!-- Product and plugin compatibility requirements.
-         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
 
     <resource-bundle>DevSecOpsPluginBundle</resource-bundle>

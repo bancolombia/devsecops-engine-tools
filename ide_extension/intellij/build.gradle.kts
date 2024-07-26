@@ -1,13 +1,22 @@
+import org.jetbrains.changelog.Changelog
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+
+fun properties(key: String) = providers.gradleProperty(key)
+fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
     id("java")
     id("jacoco")
-    id("org.sonarqube") version "5.1.0.4882"
-    id("org.jetbrains.intellij.platform") version "2.0.0-rc1"
+    alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
+    alias(libs.plugins.changelog) // Gradle Changelog Plugin
+//    alias(libs.plugins.qodana) // Gradle Qodana Plugin
+//    alias(libs.plugins.kover) // Gradle kover Plugin
+    alias(libs.plugins.sonar) // Gradle Sonar Plugin
 }
 
-group = "com.github.bancolombia"
+group = properties("pluginGroup").get()
+version = properties("pluginVersion").get()
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -22,20 +31,30 @@ repositories {
 }
 
 dependencies {
+    testImplementation(libs.junit)
+
+    // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
-        intellijIdeaCommunity("2024.1.4")
+        create(properties("platformType"), properties("platformVersion"))
+
+        // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
+        bundledPlugins(properties("platformBundledPlugins").map { it.split(',') })
+
+        // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
+        plugins(properties("platformPlugins").map { it.split(',') })
+
+        instrumentationTools()
         pluginVerifier()
         zipSigner()
-        instrumentationTools()
-        testFramework(TestFrameworkType.Plugin.Java)
-        bundledPlugins(
-            "com.intellij.java",
-            "com.intellij.gradle",
-            "org.jetbrains.plugins.gradle",
-            "org.intellij.groovy",
-            "com.intellij.properties",
-            "org.jetbrains.plugins.terminal"
-        )
+        testFramework(TestFrameworkType.Platform)
+//        bundledPlugins(
+//            "com.intellij.java",
+//            "com.intellij.gradle",
+//            "org.jetbrains.plugins.gradle",
+//            "org.intellij.groovy",
+//            "com.intellij.properties",
+//            "org.jetbrains.plugins.terminal"
+//        )
     }
 
     implementation("com.squareup.okhttp3:okhttp")
@@ -46,68 +65,125 @@ dependencies {
 
     testCompileOnly("org.projectlombok:lombok:1.18.32")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
-//
-//    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.3")
-//    testImplementation("org.mockito:mockito-junit-jupiter:5.12.0")
 
-    testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:5.12.0")
 
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
 }
 
-tasks.test {
-    useJUnit()
-    finalizedBy(tasks.jacocoTestReport)
+intellijPlatform {
+    pluginConfiguration {
+        version = properties("pluginVersion")
+        id = properties("pluginId")
+        name = properties("pluginName")
+        description = properties("pluginDescription")
+
+        val changelog = project.changelog // local variable for configuration cache compatibility
+        // Get the latest available change notes from the changelog file
+        changeNotes = properties("pluginVersion").map { pluginVersion ->
+            with(changelog) {
+                renderItem(
+                    (getOrNull(pluginVersion) ?: getUnreleased())
+                        .withHeader(false)
+                        .withEmptySections(false),
+                    Changelog.OutputType.HTML,
+                )
+            }
+        }
+
+        ideaVersion {
+            sinceBuild = properties("pluginSinceBuild")
+            untilBuild = properties("pluginUntilBuild")
+        }
+
+        vendor {
+            name = properties("pluginVendorName")
+            url = properties("pluginRepositoryUrl")
+        }
+    }
+
+    signing {
+        certificateChain = environment("CERTIFICATE_CHAIN")
+        privateKey = environment("PRIVATE_KEY")
+        password = environment("PRIVATE_KEY_PASSWORD")
+    }
+
+    publishing {
+        token = environment("PUBLISH_TOKEN")
+        // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
+        // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
+        // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
+        channels = properties("pluginVersion").map {
+            listOf(
+                it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" })
+        }
+    }
+
+    verifyPlugin {
+        ides {
+            recommended()
+        }
+    }
 }
+
+// Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
+changelog {
+    groups.empty()
+    repositoryUrl = properties("pluginRepositoryUrl")
+}
+
+// Configure Gradle Jacoco Plugin
 
 jacoco {
     toolVersion = "0.8.12"
 }
 
-tasks.jacocoTestReport {
-    dependsOn(tasks.test)
-    reports {
-        xml.required.set(true)
-        xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco.xml"))
-        html.required.set(true)
-        html.outputLocation.set(layout.buildDirectory.dir("reports/jacocoHtml"))
+tasks {
+    test {
+        useJUnit()
+        finalizedBy(jacocoTestReport)
+    }
+
+    jacocoTestReport {
+        dependsOn(test)
+        reports {
+            xml.required.set(true)
+            xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco.xml"))
+            html.required.set(true)
+            html.outputLocation.set(layout.buildDirectory.dir("reports/jacocoHtml"))
+        }
+    }
+
+    wrapper {
+        gradleVersion = properties("gradleVersion").get()
+    }
+
+    publishPlugin {
+        dependsOn(patchChangelog)
     }
 }
 
-intellijPlatform {
-    pluginConfiguration {
-        id.set("com.github.bancolombia.devsecops-engine-tools")
-        name.set("DevSecOps Engine Tools")
-        version.set("1.0-SNAPSHOT")
-        description.set("DevSecOps Engine Tools")
-
-        ideaVersion {
-            sinceBuild.set("241")
-            untilBuild.set("242.*")
-        }
-
-        vendor {
-            name.set("Bancolombia")
-            url.set("https://www.grupobancolombia.com/")
+val runIdeForUiTests by intellijPlatformTesting.runIde.registering {
+    task {
+        jvmArgumentProviders += CommandLineArgumentProvider {
+            listOf(
+                "-Drobot-server.port=8082",
+                "-Dide.mac.message.dialogs.as.sheets=false",
+                "-Djb.privacy.policy.text=<!--999.999-->",
+                "-Djb.consents.confirmation.enabled=false",
+            )
         }
     }
 
-    publishing {
-        token.set(System.getenv("PUBLISH_TOKEN"))
-    }
-
-    signing {
-        certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
-        privateKey.set(System.getenv("PRIVATE_KEY"))
-        password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
+    plugins {
+        robotServerPlugin(Constraints.LATEST_VERSION)
     }
 }
 
 sonar {
     properties {
         property("sonar.sourceEncoding", "UTF-8")
-        property("sonar.projectKey", "bancolombia_devsecops-engine-tool-ide-extension-intellij")
+        property("sonar.projectKey", "bancolombia_devsecops-engine-tool-intellij")
         property("sonar.organization", "grupo-bancolombia")
         property("sonar.host.url", "https://sonarcloud.io/")
         property("sonar.sources", "src/main")
@@ -115,11 +191,7 @@ sonar {
         property("sonar.java.binaries", "build/classes")
         property("sonar.junit.reportPaths", "build/test-results/test")
         property("sonar.java.coveragePlugin", "jacoco")
-        property("sonar.coverage.jacoco.xmlReportPaths", "${rootDir}/build/reports/jacoco/jacoco.xml")
+        property("sonar.coverage.jacoco.xmlReportPaths", "${rootDir}/build/reports/jacoco.xml")
         property("sonar.exclusions", ".github/**")
     }
-}
-
-tasks.wrapper {
-    gradleVersion = "8.9"
 }

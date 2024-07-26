@@ -39,5 +39,3 @@ bin/
 ### Mac OS ###
 .DS_Store
 .intellijPlatform
-
-.run
