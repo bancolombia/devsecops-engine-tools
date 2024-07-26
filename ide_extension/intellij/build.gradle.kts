@@ -10,8 +10,6 @@ plugins {
     id("jacoco")
     alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
-//    alias(libs.plugins.qodana) // Gradle Qodana Plugin
-//    alias(libs.plugins.kover) // Gradle kover Plugin
     alias(libs.plugins.sonar) // Gradle Sonar Plugin
 }
 
@@ -47,14 +45,6 @@ dependencies {
         pluginVerifier()
         zipSigner()
         testFramework(TestFrameworkType.Platform)
-//        bundledPlugins(
-//            "com.intellij.java",
-//            "com.intellij.gradle",
-//            "org.jetbrains.plugins.gradle",
-//            "org.intellij.groovy",
-//            "com.intellij.properties",
-//            "org.jetbrains.plugins.terminal"
-//        )
     }
 
     implementation("com.squareup.okhttp3:okhttp")
