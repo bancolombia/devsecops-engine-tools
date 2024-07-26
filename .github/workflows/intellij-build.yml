@@ -130,7 +130,7 @@ jobs:
       # Run tests
       - name: Run Tests
         working-directory: ./ide_extension/intellij
-        run: ./gradlew check sonar
+        run: ./gradlew check sonar -Dsonar.token=${{ secrets.SONAR_TOKEN_INTELLIJ }}
 
       # Collect Tests Result of failed tests
       - name: Collect Tests Result
