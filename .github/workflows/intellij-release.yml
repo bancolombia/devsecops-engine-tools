@@ -65,7 +65,7 @@ jobs:
           issues: true
           issuesWoLabels: true
           stripGeneratorNotice: true
-          include-labels: 'intellij'
+          includeLabels: 'intellij'
           output: ide_extension/intellij/CHANGELOG.md
           # base: './ide_extension/intellij'
           excludeTagsRegex: '^(?!.*\bintellij\b).*'
