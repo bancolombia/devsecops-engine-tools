@@ -20,6 +20,7 @@ class ContainerScaScan:
         tool_deseralizator: DeseralizatorGateway,
         build_id,
         token,
+        image_to_scan,
     ):
         self.tool_run = tool_run
         self.remote_config = remote_config
@@ -27,15 +28,16 @@ class ContainerScaScan:
         self.tool_deseralizator = tool_deseralizator
         self.build_id = build_id
         self.token = token
+        self.image_to_scan=image_to_scan
 
-    def get_latest_image(self):
+    def get_image(self, image_to_scan):
         """
         Process the list of images.
 
         Returns:
             list: List of processed images.
         """
-        return self.tool_images.list_images()
+        return self.tool_images.list_images(image_to_scan)
 
     def get_images_already_scanned(self):
         """
@@ -62,7 +64,7 @@ class ContainerScaScan:
         Returns:
             string: file scanning results name.
         """
-        latest_image = self.get_latest_image()
+        latest_image = self.get_image(self.image_to_scan)
         image_name = latest_image.tags[0]
         image_scanned = None
         if str(self.build_id) in image_name:
