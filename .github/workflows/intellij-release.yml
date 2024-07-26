@@ -87,7 +87,9 @@ jobs:
           issues: true
           issuesWoLabels: true
           stripGeneratorNotice: true
-          base: './ide_extension/intellij'
+          include-labels: 'intellij'
+          output: ide_extension/intellij/CHANGELOG.md
+          # base: './ide_extension/intellij'
           excludeTagsRegex: '^(?!.*\bintellij\b).*'
 
       - name: Save version
