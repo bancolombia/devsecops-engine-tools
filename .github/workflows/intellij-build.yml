@@ -17,25 +17,28 @@ on:
   # Trigger the workflow on pushes to only the 'main' branch (this avoids duplicate checks being run e.g., for dependabot pull requests)
   push:
     branches:
-      - trunk
+      - feature/ide-plugin-intellj
       - feature/*
     paths:
-      - 'ide_extension/intellij/**'
-      - '.github/workflows/intellij-build.yml'
-      - '.github/workflows/intellij-release.yml'
+      - "ide_extension/intellij/**"
+      - ".github/workflows/intellij-build.yml"
+      - ".github/workflows/intellij-release.yml"
   # Trigger the workflow on any pull request
   pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-  
-jobs:
 
+jobs:
   # Prepare environment and build the plugin
   build:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     name: Build
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     outputs:
       version: ${{ steps.properties.outputs.version }}
       changelog: ${{ steps.properties.outputs.changelog }}
@@ -43,8 +46,13 @@ jobs:
     steps:
 
       # Check out the current repository
-      - name: Fetch Sources
-        uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Verify Conventional Commits
+        uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017 # v5.5.3
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Validate wrapper
       - name: Gradle Wrapper Validation
@@ -75,7 +83,7 @@ jobs:
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "pluginVerifierHomeDir=~/.pluginVerifier" >> $GITHUB_OUTPUT
-          
+
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -106,10 +114,9 @@ jobs:
   # Run tests and upload a code coverage report
   test:
     name: Test
-    needs: [ build ]
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
-
       # Check out the current repository
       - name: Fetch Sources
         uses: actions/checkout@v4
@@ -149,10 +156,9 @@ jobs:
   # Run plugin structure verification along with IntelliJ Plugin Verifier
   verify:
     name: Verify plugin
-    needs: [ build ]
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
-
       # Free GitHub Actions Environment Disk Space
       - name: Maximize Build Space
         uses: jlumbroso/free-disk-space@main
@@ -201,35 +207,62 @@ jobs:
   # If accepted and published, release workflow would be triggered
   releaseDraft:
     name: Release draft
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/feature/ide-plugin-intellj'
     needs: [ build, test, verify ]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      # Generate a token of Github APP only for the truk branch
+      - name: Generate a token of Github APP
+        id: generate_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        with:
+          app_id: ${{ secrets.APP_ID_ADMIN_GITHUB }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY_ADMIN_GITHUB }}
 
       # Check out the current repository
-      - name: Fetch Sources
-        uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
 
-      # Remove old release drafts by using the curl request for the available releases with a draft flag
-      - name: Remove Old Release Drafts
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh api repos/{owner}/{repo}/releases \
-            --jq '.[] | select(.draft == true) | .id' \
-            | xargs -I '{}' gh api -X DELETE repos/{owner}/{repo}/releases/{}
+      - name: Set up NodeJS
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        working-directory: ./ide_extension/intellij
+        with:
+          node-version-file: ".nvmrc"
 
-      # Create a new release draft which is not publicly visible and requires manual acceptance
-      - name: Create Release Draft
+      - name: Set up Semantic Release
+        working-directory: ./ide_extension/intellij
+        run: npm -g install @semantic-release/git semantic-release@23.0.0
+
+      - name: Semantic Release
+        working-directory: ./ide_extension/intellij
+        run: npx semantic-release@23.0.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create "v${{ needs.build.outputs.version }}" \
-            --draft \
-            --title "v${{ needs.build.outputs.version }}" \
-            --notes "$(cat << 'EOM'
-          ${{ needs.build.outputs.changelog }}
-          EOM
-          )"
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+      # # Check out the current repository
+      # - name: Fetch Sources
+      #   uses: actions/checkout@v4
+
+      # # Remove old release drafts by using the curl request for the available releases with a draft flag
+      # - name: Remove Old Release Drafts
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     gh api repos/{owner}/{repo}/releases \
+      #       --jq '.[] | select(.draft == true) | .id' \
+      #       | xargs -I '{}' gh api -X DELETE repos/{owner}/{repo}/releases/{}
+
+      # # Create a new release draft which is not publicly visible and requires manual acceptance
+      # - name: Create Release Draft
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     gh release create "intellij-v${{ needs.build.outputs.version }}" \
+      #       --draft \
+      #       --title "v${{ needs.build.outputs.version }}" \
+      #       --notes "$(cat << 'EOM'
+      #     ${{ needs.build.outputs.changelog }}
+      #     EOM
+      #     )"

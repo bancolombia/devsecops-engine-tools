@@ -20,11 +20,19 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      # Generate a token of Github APP
+      - name: Generate a token
+        id: generate_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        with:
+          app_id: ${{ secrets.APP_ID_ADMIN_GITHUB }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY_ADMIN_GITHUB }}
 
       # Check out the current repository
       - name: Fetch Sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
+          token: ${{ steps.generate_token.outputs.token }}
           ref: ${{ github.event.release.tag_name }}
 
       # Set up Java environment for the next steps
@@ -54,53 +62,50 @@ jobs:
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      # Update the Unreleased section with the current release note
-      - name: Patch Changelog
-        if: ${{ steps.properties.outputs.changelog != '' }}
-        env:
-          CHANGELOG: ${{ steps.properties.outputs.changelog }}
-        run: |
-          ./gradlew patchChangelog --release-note="$CHANGELOG"
+      # # Update the Unreleased section with the current release note
+      # - name: Patch Changelog
+      #   if: ${{ steps.properties.outputs.changelog != '' }}
+      #   env:
+      #     CHANGELOG: ${{ steps.properties.outputs.changelog }}
+      #   run: |
+      #     ./gradlew patchChangelog --release-note="$CHANGELOG"
+
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/intellij-v}" >> $GITHUB_ENV
+
+      - name: Upgrade Gradle.properties
+        run: sed -i 's/pluginVersion=.*/pluginVersion=${{ env.RELEASE_VERSION }}/g' gradle.properties
+
+      # Generate changelog
+      - name: Generate Changelog
+        uses: heinrichreimer/github-changelog-generator-action@v2.3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pullRequests: true
+          prWoLabels: true
+          issues: true
+          issuesWoLabels: true
+          stripGeneratorNotice: true
+          base: './ide_extension/intellij'
+          excludeTagsRegex: '^(?!.*\bintellij\b).*'
+
+      - name: Save version
+        uses: github-actions-x/commit@722d56b8968bf00ced78407bbe2ead81062d8baa # v2.9
+        with:
+          github-token: ${{ steps.generate_token.outputs.token }}
+          push-branch: "feature/ide-plugin-intellj"
+          commit-message: 'upgrade version to ${{ env.RELEASE_VERSION }} version [skip ci]'
+          force-add: "true"
+          force-push: "true"
+          files: ide_extension/intellij/CHANGELOG.md ide_extension/intellij/gradle.properties
+          name: Release Bot
+          email: release-bot@bancolombia.com.co
 
       # Publish the plugin to JetBrains Marketplace
-      - name: Publish Plugin
-        env:
-          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
-          CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
-        run: ./gradlew publishPlugin
-
-      # Upload artifact as a release asset
-      - name: Upload Release Asset
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ github.event.release.tag_name }} ./build/distributions/*
-
-      # Create a pull request
-      - name: Create Pull Request
-        if: ${{ steps.properties.outputs.changelog != '' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          VERSION="${{ github.event.release.tag_name }}"
-          BRANCH="changelog-update-$VERSION"
-          LABEL="release changelog"
-
-          git config user.email "action@github.com"
-          git config user.name "GitHub Action"
-
-          git checkout -b $BRANCH
-          git commit -am "Changelog update - $VERSION"
-          git push --set-upstream origin $BRANCH
-          
-          gh label create "$LABEL" \
-            --description "Pull requests with release changelog update" \
-            --force \
-            || true
-
-          gh pr create \
-            --title "Changelog update - \`$VERSION\`" \
-            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`$VERSION\` version." \
-            --label "$LABEL" \
-            --head $BRANCH
+      # - name: Publish Plugin
+      #   env:
+      #     PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+      #     CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
+      #     PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      #     PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
+      #   run: ./gradlew publishPlugin
