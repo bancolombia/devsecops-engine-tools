@@ -7,8 +7,6 @@ on:
   push:
     tags:
       - intellij-v*
-    # paths:
-    #   - 'ide_extension/intellij/**'
 
 jobs:
 
