@@ -75,6 +75,7 @@ jobs:
 
       - name: Upgrade Gradle.properties
         run: sed -i 's/pluginVersion=.*/pluginVersion=${{ env.RELEASE_VERSION }}/g' gradle.properties
+        working-directory: ./ide_extension/intellij
 
       # Generate changelog
       - name: Generate Changelog
