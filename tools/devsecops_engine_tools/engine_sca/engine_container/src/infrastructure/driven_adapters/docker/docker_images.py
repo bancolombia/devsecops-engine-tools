@@ -11,8 +11,9 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class DockerImages(ImagesGateway):
-    def list_images(self):
+    def list_images(self,image_to_scan):
         try:
+            print(image_to_scan)
             client = docker.from_env()
             images = client.images.list()
             images_sorted = sorted(

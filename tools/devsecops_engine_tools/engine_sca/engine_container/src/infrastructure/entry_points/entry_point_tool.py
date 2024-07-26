@@ -36,6 +36,7 @@ def init_engine_sca_rm(
     scan_flag = handle_remote_config_patterns.ignore_analysis_pattern()
     build_id = tool_remote.get_variable("build_id")
     stage = tool_remote.get_variable("stage")
+    image_to_scan = dict_args['image_to_scan']
     image_scanned = None
     deseralized = []
     input_core = SetInputCore(remote_config, exclusions, pipeline_name, tool, stage)
@@ -47,6 +48,7 @@ def init_engine_sca_rm(
             tool_deseralizator,
             build_id,
             token,
+            image_to_scan
         )
         image_scanned = container_sca_scan.process()
         if image_scanned:
