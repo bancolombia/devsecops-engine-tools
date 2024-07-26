@@ -21,6 +21,8 @@ on:
       - feature/*
     paths:
       - 'ide_extension/intellij/**'
+      - '.github/workflows/intellij-build.yml'
+      - '.github/workflows/intellij-release.yml'
   # Trigger the workflow on any pull request
   pull_request:
 
