@@ -5,6 +5,8 @@ on:
     branches:
       - trunk
       - feature/*
+    paths-ignore:
+      - 'ide_extension/**'
 
   pull_request:
     branches:
