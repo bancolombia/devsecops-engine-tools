@@ -67,7 +67,7 @@ class ContainerScaScan:
         latest_image = self.get_image(self.image_to_scan)
         image_name = latest_image.tags[0]
         image_scanned = None
-        if str(self.build_id) in image_name:
+        if image_name:
             result_file = image_name + "_scan_result.json"
             if result_file in self.get_images_already_scanned():
                 print(f"The image {image_name} has already been scanned previously.")
@@ -78,7 +78,7 @@ class ContainerScaScan:
             self.set_image_scanned(result_file)
         else:
             print(
-                f"'{image_name}' name does not contain build number '{self.build_id}'. Tool skipped."
+                f"'Not {image_name}' found'. Tool skipped."
             )
         return image_scanned
 
