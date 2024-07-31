@@ -77,6 +77,7 @@ def get_inputs_from_cli(args):
         choices=[
             "engine_iac",
             "engine_dast",
+            "engine_code",
             "engine_secret",
             "engine_dependencies",
             "engine_container",

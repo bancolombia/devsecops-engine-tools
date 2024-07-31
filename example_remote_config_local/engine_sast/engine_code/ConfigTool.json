@@ -1,0 +1,21 @@
+{
+    "IGNORE_SEARCH_PATTERN": [
+      "test"
+    ],
+    "MESSAGE_INFO_ENGINE_CODE": "test message",
+    "THRESHOLD": {
+        "VULNERABILITY": {
+            "Critical": 10,
+            "High": 8,
+            "Medium": 10,
+            "Low": 15
+        },
+        "COMPLIANCE": {
+            "Critical": 0
+        }
+    },
+    "BEARER": {
+      "EXCLUDE_PATH": []
+    },
+    "TARGET_BRANCHES": ["trunk", "develop"]
+}
