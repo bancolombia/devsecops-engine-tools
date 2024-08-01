@@ -296,6 +296,9 @@ class BreakBuild:
                     )
                     print(devops_platform_gateway.result_pipeline("failed"))
                     status = "failed"
+                else:
+                    if devops_platform_gateway.get_variable("stage") == "build":
+                        print(devops_platform_gateway.result_pipeline("succeeded_with_issues"))
                 scan_result["compliances"] = {
                     "threshold": {"critical": compliance_critical},
                     "status": status,

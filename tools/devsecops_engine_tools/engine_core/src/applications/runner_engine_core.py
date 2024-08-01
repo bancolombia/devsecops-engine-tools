@@ -31,26 +31,48 @@ from devsecops_engine_tools.version import version
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
+
 def parse_separated_list(value, choices):
-    values = value.split(',')
+    values = value.split(",")
     # Validar cada elemento de la lista
     for val in values:
         if val not in choices:
-            raise argparse.ArgumentTypeError(f"Invalid value: {val}. Valid values are: {', '.join(choices)}")
-    
+            raise argparse.ArgumentTypeError(
+                f"Invalid value: {val}. Valid values are: {', '.join(choices)}"
+            )
+
     return values
+
 
 def parse_choices(choices):
     def parse_with_choices(value):
         return parse_separated_list(value, choices)
+
     return parse_with_choices
+
 
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--version", action='version', version='{version}'.format(version=version))
-    parser.add_argument("-pd", "--platform_devops", choices=["azure", "github", "local"], type=str, required=True, help="Platform where is executed")
-    parser.add_argument("-rcf" ,"--remote_config_repo", type=str, required=True, help="Name or Folder Path of Config Repo")
-    parser.add_argument("-t",
+    parser.add_argument(
+        "-v", "--version", action="version", version="{version}".format(version=version)
+    )
+    parser.add_argument(
+        "-pd",
+        "--platform_devops",
+        choices=["azure", "github", "local"],
+        type=str,
+        required=True,
+        help="Platform where is executed",
+    )
+    parser.add_argument(
+        "-rcf",
+        "--remote_config_repo",
+        type=str,
+        required=True,
+        help="Name or Folder Path of Config Repo",
+    )
+    parser.add_argument(
+        "-t",
         "--tool",
         choices=[
             "engine_iac",
@@ -64,9 +86,20 @@ def get_inputs_from_cli(args):
         required=True,
         help="Tool to execute",
     )
-    parser.add_argument("-fp", "--folder_path", type=str, required=False, help="Folder Path to scan, only apply engine_iac tool")
-    parser.add_argument("-p",
-        "--platform", type=parse_choices({"all", "docker", "k8s", "cloudformation"}), required=False, default="all" ,help="Platform to scan, only apply engine_iac tool"
+    parser.add_argument(
+        "-fp",
+        "--folder_path",
+        type=str,
+        required=False,
+        help="Folder Path to scan, only apply engine_iac and engine_dependencies tools",
+    )
+    parser.add_argument(
+        "-p",
+        "--platform",
+        type=parse_choices({"all", "docker", "k8s", "cloudformation", "openapi"}),
+        required=False,
+        default="all",
+        help="Platform to scan, only apply engine_iac tool",
     )
     parser.add_argument(
         "--use_secrets_manager",
@@ -89,10 +122,31 @@ def get_inputs_from_cli(args):
         required=False,
         help="Enable or Disable the send metrics to the driven adapter metrics",
     )
-    parser.add_argument("--token_cmdb", required=False, help="Token to connect to the CMDB")
-    parser.add_argument("--token_vulnerability_management", required=False, help="Token to connect to the Vulnerability Management")
-    parser.add_argument("--token_engine_container", required=False, help="Token to execute engine_container if is necessary")
-    parser.add_argument("--token_engine_dependencies", required=False, help="Token to execute engine_dependencies if is necessary. If using xray as engine_dependencies tool, the token is the base64 of artifactory server config.")
+    parser.add_argument(
+        "--token_cmdb", required=False, help="Token to connect to the CMDB"
+    )
+    parser.add_argument(
+        "--token_vulnerability_management",
+        required=False,
+        help="Token to connect to the Vulnerability Management",
+    )
+    parser.add_argument(
+        "--token_engine_container",
+        required=False,
+        help="Token to execute engine_container if is necessary",
+    )
+    parser.add_argument(
+        "--token_engine_dependencies",
+        required=False,
+        help="Token to execute engine_dependencies if is necessary. If using xray as engine_dependencies tool, the token is the base64 of artifactory server config that can be obtain from jfrog cli with 'jf config export <ServerID>' command.",
+    )
+    parser.add_argument(
+        "--xray_mode",
+        choices=["scan", "audit"],
+        required=False,
+        default="scan",
+        help="Mode to execute xray, only apply engine_dependencies xray tool",
+    )
     args = parser.parse_args()
     return {
         "platform_devops": args.platform_devops,
@@ -107,7 +161,9 @@ def get_inputs_from_cli(args):
         "token_vulnerability_management": args.token_vulnerability_management,
         "token_engine_container": args.token_engine_container,
         "token_engine_dependencies": args.token_engine_dependencies,
+        "xray_mode": args.xray_mode,
     }
+
 
 def application_core():
     try:
@@ -120,18 +176,18 @@ def application_core():
         devops_platform_gateway = {
             "azure": AzureDevops(),
             "github": GithubActions(),
-            "local": RuntimeLocal()
+            "local": RuntimeLocal(),
         }.get(args["platform_devops"])
         printer_table_gateway = PrinterPrettyTable()
         metrics_manager_gateway = S3Manager()
-        
+
         init_engine_core(
             vulnerability_management_gateway,
             secrets_manager_gateway,
             devops_platform_gateway,
             printer_table_gateway,
             metrics_manager_gateway,
-            args
+            args,
         )
     except Exception as e:
         logger.error("Error engine_core: {0} ".format(str(e)))
@@ -141,6 +197,7 @@ def application_core():
             )
         )
         print(devops_platform_gateway.result_pipeline("failed"))
+
 
 if __name__ == "__main__":
     application_core()

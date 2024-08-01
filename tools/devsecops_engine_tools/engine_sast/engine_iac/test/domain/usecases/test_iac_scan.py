@@ -20,9 +20,9 @@ class TestIacScan(unittest.TestCase):
     def test_process(self):
         dict_args = {
             "remote_config_repo": "example_repo",
-            "folder_path": "example_folder",
+            "folder_path": ".",
             "environment": "test",
-            "platform": "eks",
+            "platform": "cloudformation",
         }
         secret_tool = "example_secret"
         tool = "CHECKOV"
@@ -35,6 +35,7 @@ class TestIacScan(unittest.TestCase):
             ],
             "EXCLUSIONS_PATH": "Exclusions.json",
             "MESSAGE_INFO_ENGINE_IAC": "message test",
+            "UPDATE_SERVICE_WITH_FILE_NAME_CFT": "True",
             "THRESHOLD": {
                 "VULNERABILITY": {
                     "Critical": 10,
@@ -73,7 +74,6 @@ class TestIacScan(unittest.TestCase):
         self.assertEqual(input_core.threshold_defined.vulnerability.critical, 10)
         self.assertEqual(input_core.path_file_results, "/path/to/results")
         self.assertEqual(input_core.custom_message_break_build, "message test")
-        self.assertEqual(input_core.scope_pipeline, "example_pipeline")
         self.assertEqual(input_core.stage_pipeline, "Release")
 
     def test_process_skip_search_folder(self):
@@ -95,6 +95,7 @@ class TestIacScan(unittest.TestCase):
                 ],
                 "EXCLUSIONS_PATH": "Exclusions.json",
                 "MESSAGE_INFO_ENGINE_IAC": "message test",
+                "UPDATE_SERVICE_WITH_FILE_NAME_CFT": "false",
                 "THRESHOLD": {
                     "VULNERABILITY": {
                         "Critical": 10,
