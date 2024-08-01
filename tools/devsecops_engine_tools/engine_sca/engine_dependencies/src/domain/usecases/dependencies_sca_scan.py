@@ -12,15 +12,19 @@ class DependenciesScan:
         tool_run: ToolGateway,
         tool_deserializator: DeserializatorGateway,
         remote_config,
-        file_to_scan,
-        bypass_limits_flag,
+        dict_args,
+        exclusions,
+        pipeline_name,
+        to_scan,
         token,
     ):
         self.tool_run = tool_run
         self.tool_deserializator = tool_deserializator
         self.remote_config = remote_config
-        self.file_to_scan = file_to_scan
-        self.bypass_limits_flag = bypass_limits_flag
+        self.exclusions = exclusions
+        self.pipeline_name = pipeline_name
+        self.dict_args = dict_args
+        self.to_scan = to_scan
         self.token = token
 
     def process(self):
@@ -31,8 +35,10 @@ class DependenciesScan:
         """
         return self.tool_run.run_tool_dependencies_sca(
             self.remote_config,
-            self.file_to_scan,
-            self.bypass_limits_flag,
+            self.dict_args,
+            self.exclusions,
+            self.pipeline_name,
+            self.to_scan,
             self.token,
         )
 
