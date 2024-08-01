@@ -8,6 +8,9 @@ from devsecops_engine_tools.engine_sast.engine_code.src.domain.model.gateways.to
 from devsecops_engine_tools.engine_sast.engine_code.src.infrastructure.driven_adapters.bearer.bearer_deserealizator import (
     BearerDeserealizator,
 )
+from devsecops_engine_tools.engine_sast.engine_code.src.infrastructure.driven_adapters.bearer.bearer_scan_file_maker import (
+    BearerScanFileMaker,
+)
 
 class BearerTool(ToolGateway):
 
@@ -70,7 +73,7 @@ class BearerTool(ToolGateway):
 
     def run_tool(self, folder_to_scan, pull_request_files, agent_work_folder, repository, list_exclusions):
         self.install_tool(agent_work_folder)
-        findings = []
+        findings, path_file_results = [], ""
         scan_result_path = f"{agent_work_folder}/bearer-scan.json"
         if folder_to_scan:
             self.create_config_file(agent_work_folder, [])
@@ -83,7 +86,9 @@ class BearerTool(ToolGateway):
                 shell=True
             )
             findings = BearerDeserealizator.get_list_finding(scan_result_path, agent_work_folder)
+            path_file_results = scan_result_path
         else:
+            scan_file_maker = BearerScanFileMaker()
             for pull_file in pull_request_files:
                 self.create_config_file(agent_work_folder, self.skip_rules_list(list_exclusions, pull_file))
                 command = f"{agent_work_folder}/bin/bearer scan {agent_work_folder}/{repository}/{pull_file} --config-file {agent_work_folder}/bearer.yml"
@@ -94,5 +99,7 @@ class BearerTool(ToolGateway):
                     stderr=subprocess.PIPE,
                     shell=True
                 )
+                scan_file_maker.add_vulnerabilities(scan_result_path)
                 findings.extend(BearerDeserealizator.get_list_finding(scan_result_path, agent_work_folder))
-        return findings
+            path_file_results = scan_file_maker.make_scan_file(agent_work_folder)
+        return findings, path_file_results

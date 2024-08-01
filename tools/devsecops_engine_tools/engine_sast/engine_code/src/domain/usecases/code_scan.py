@@ -87,18 +87,18 @@ class CodeScan:
     def process(self, dict_args, tool):
         config_tool = self.set_config_tool(dict_args, tool)
         list_exclusions, skip_tool = self.get_exclusions(dict_args, tool)
-        findings_list = []
+        findings_list, path_file_results = [], ""
 
         if not skip_tool:
             pull_request_files = []
             if dict_args["folder_path"] is None:
-                #pull_request_files = self.get_pull_request_files(config_tool.target_branches)
-                pull_request_files = ["web/ignora/directoryListingChallenge_4.ts", "web/static/codefixes/unionSqlInjectionChallenge_1.ts"]
-                pull_request_files = [pf for pf in pull_request_files if not self.apply_exclude_folder(config_tool.exclude_folder, pf)]
+                pull_request_files = self.get_pull_request_files(config_tool.target_branches)
+                pull_request_files = [pf for pf in pull_request_files 
+                                      if not self.apply_exclude_folder(config_tool.exclude_folder, pf)]
             else:
                 list_exclusions = []
                 
-            findings_list = self.tool_gateway.run_tool(
+            findings_list, path_file_results = self.tool_gateway.run_tool(
                 dict_args["folder_path"], 
                 pull_request_files,
                 self.devops_platform_gateway.get_variable("work_folder"),
@@ -113,7 +113,7 @@ class CodeScan:
         input_core = InputCore(
             totalized_exclusions=list_exclusions,
             threshold_defined=config_tool.threshold,
-            path_file_results="",
+            path_file_results=path_file_results,
             custom_message_break_build=config_tool.message_info_engine_code,
             scope_pipeline=config_tool.scope_pipeline,
             stage_pipeline=self.devops_platform_gateway.get_variable("stage").capitalize(),
