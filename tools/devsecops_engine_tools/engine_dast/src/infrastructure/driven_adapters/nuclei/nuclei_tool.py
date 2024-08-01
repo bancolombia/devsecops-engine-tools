@@ -80,7 +80,7 @@ class NucleiTool(ToolGateway):
 
     def run_tool(self, target_data, config_tool, token):
         nuclei_config = NucleiConfig(target_data)
-        checks_directory = self.configurate_external_checks(config_tool, token) #DATA PDN
+        checks_directory = self.configurate_external_checks(config_tool, token, ".") #DATA PDN
         nuclei_config.customize_templates(checks_directory)
         result_scans = self.execute(nuclei_config)
         nuclei_deserealizator = NucleiDesealizator()
@@ -88,5 +88,4 @@ class NucleiTool(ToolGateway):
         path_file_results = generate_file_from_tool(
             self.TOOL, result_scans, config_tool
         )
-
         return findings_list, path_file_results

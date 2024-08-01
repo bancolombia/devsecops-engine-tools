@@ -83,7 +83,7 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
         tool_run = NucleiTool()
 
     if any((k.lower() == "jwt") for k in config_tool["ENGINE_DAST"]["EXTRA_TOOLS"]) and \
-    any(isinstance(o.authentication_gateway, JwtObject) for o in data["operations"] ):
+    any(isinstance(operation.authentication_gateway, JwtObject) for operation in data["operations"] ):
         extra_tools.append(JwtTool(target_config))
 
     return init_engine_dast(

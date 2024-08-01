@@ -13,6 +13,7 @@ from devsecops_engine_tools.engine_dast.src.domain.model.gateways.authentication
 
 class JwtObject(AuthenticationGateway):
     def __init__(self, security_auth: dict):
+        self.type = "jwt"
         self.private_key: str = security_auth.get("jwt_private_key")
         self.algorithm: str = security_auth.get("jwt_algorithm")
         self.iss: str = security_auth.get("jwt_iss")
@@ -25,6 +26,8 @@ class JwtObject(AuthenticationGateway):
         self.header: dict = {}
         self.jwt_token: str = ""
         self.header_name: str = security_auth.get("jwt_header_name")
+        self.init_header()
+        self.init_payload()
 
     def init_header(self) -> None:
         self.header: dict = {"alg": self.algorithm}
@@ -41,6 +44,14 @@ class JwtObject(AuthenticationGateway):
         return self.payload
 
     def get_credentials(self) -> tuple:
+        """
+        Generates JWT using a file with the configuration
+
+        Returns:
+
+        tuple: header and jwt
+
+        """
         self.private_key = (
             self.private_key.replace(" ", "\n")
             .replace("-----BEGIN\nPRIVATE\nKEY-----", "-----BEGIN PRIVATE KEY-----")
