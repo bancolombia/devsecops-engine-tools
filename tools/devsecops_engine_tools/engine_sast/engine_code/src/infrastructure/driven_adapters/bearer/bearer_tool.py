@@ -64,7 +64,7 @@ class BearerTool(ToolGateway):
     def skip_rules_list(self, list_exclusions, pull_file):
         list_skip_rules = []
         for exclusion in list_exclusions:
-            if exclusion.where == pull_file:
+            if exclusion.where == pull_file or exclusion.where == "all":
                 list_skip_rules.append(exclusion.id)
         return list_skip_rules
 
