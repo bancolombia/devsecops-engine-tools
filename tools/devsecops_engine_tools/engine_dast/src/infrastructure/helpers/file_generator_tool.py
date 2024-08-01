@@ -50,8 +50,8 @@ def generate_file_from_tool(tool, result_list, rules_doc):
                         "resource_count", 0
                     )
                     + result_two.get("summary", {}).get("resource_count", 0),
-                    "checkov_version": result_one.get("summary", {}).get(
-                        "checkov_version", None
+                    "nuclei_version": result_one.get("summary", {}).get(
+                        "version", None
                     ),
                 },
             }
