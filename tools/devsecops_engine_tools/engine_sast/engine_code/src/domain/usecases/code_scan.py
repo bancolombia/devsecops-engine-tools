@@ -77,25 +77,33 @@ class CodeScan:
                         list_exclusions.append(exclusion)
         return list_exclusions, skip_tool
 
+    def apply_exclude_folder(self, exclude_folder, pull_request_file):
+        pull_file_list = pull_request_file.split("/")
+        for path in exclude_folder:
+            if path in pull_file_list:
+                return True
+        return False
+
     def process(self, dict_args, tool):
         config_tool = self.set_config_tool(dict_args, tool)
-
         list_exclusions, skip_tool = self.get_exclusions(dict_args, tool)
-
         findings_list = []
+
         if not skip_tool:
             pull_request_files = []
             if dict_args["folder_path"] is None:
-                pull_request_files = self.get_pull_request_files(config_tool.target_branches)
-                path_exclusions = [exc.where for exc in list_exclusions]
-                pull_request_files = [pf for pf in pull_request_files if pf not in path_exclusions]
+                #pull_request_files = self.get_pull_request_files(config_tool.target_branches)
+                pull_request_files = ["web/ignora/directoryListingChallenge_4.ts", "web/static/codefixes/unionSqlInjectionChallenge_1.ts"]
+                pull_request_files = [pf for pf in pull_request_files if not self.apply_exclude_folder(config_tool.exclude_folder, pf)]
+            else:
+                list_exclusions = []
                 
             findings_list = self.tool_gateway.run_tool(
                 dict_args["folder_path"], 
                 pull_request_files,
                 self.devops_platform_gateway.get_variable("work_folder"),
                 self.devops_platform_gateway.get_variable("repository"),
-                config_tool.exclude_path,
+                list_exclusions
             )
 
         else:

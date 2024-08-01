@@ -15,7 +15,7 @@
         }
     },
     "BEARER": {
-      "EXCLUDE_PATH": []
+      "EXCLUDE_FOLDER": []
     },
     "TARGET_BRANCHES": ["trunk", "develop"]
 }
