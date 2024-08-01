@@ -6,5 +6,5 @@ class ConfigTool:
         self.message_info_engine_code = json_data["MESSAGE_INFO_ENGINE_CODE"]
         self.threshold = Threshold(json_data["THRESHOLD"])
         self.target_branches = json_data["TARGET_BRANCHES"]
-        self.exclude_path = json_data[tool]["EXCLUDE_PATH"]
+        self.exclude_folder = json_data[tool]["EXCLUDE_FOLDER"]
         self.scope_pipeline = scope
