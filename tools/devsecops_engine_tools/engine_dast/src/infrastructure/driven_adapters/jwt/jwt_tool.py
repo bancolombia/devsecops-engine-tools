@@ -29,72 +29,52 @@ class JwtTool(ToolGateway):
     def verify_jwt_alg(self, token):
         "Evaluate JSON Web token's algorithm"
 
-        check_id = "ENGINE_JWT_001"
-        is_vulnerable = False
+        map_id = "JWT_ALGORITHM"
         alg = jwt.get_unverified_header(token)["alg"]
 
-        if alg in self.BAD_JWT_ALG:
-            is_vulnerable = True
-
-        return {
-            "check-id": check_id,
-            "cvss": "",
-            "matched-at": "",
-            "description": "msg",
-            "severity": "",
-            "remediation": ""
-            }
+        if alg in self.BAD_JWT_ALG: #Is vulnerable
+            return {
+                "map_id": map_id,
+                "description": "msg"
+                }
 
     def verify_jws_alg(self, token):
         """Evaluate JSON Web signature's algorithm"""
 
-        check_id = "ENGINE_JWT_002"
-        is_vulnerable = False
+        map_id = "JWS_ALGORITHM"
         alg = jwt.get_unverified_header(token)["alg"]
 
-        if alg in self.BAD_JWS_ALG:
-            is_vulnerable = True
-
-        return {
-            "check-id": check_id,
-            "cvss": "",
-            "matched-at": "",
-            "description": "msg",
-            "severity": "",
-            "remediation": ""
-            }
+        if alg in self.BAD_JWS_ALG:#Is vulnerable
+            return {
+                "map_id": map_id,
+                "description": "msg"
+                }
 
     def verify_jwe(self, token):
         """Evaluate JSON Web encryption's algorithm"""
 
-        check_id = "ENGINE_JWT_003"
+        map_id = "JWE_ALGORITHM"
         msg = ""
-        is_vulnerable = True
         enc = jwt.get_unverified_header(token)["enc"]
         alg = jwt.get_unverified_header(token)["alg"]
 
         if enc in self.GOOD_JWE_ENC:
-            if alg in self.GOOD_JWE_ALG:
-                is_vulnerable = False
-                msg = "Algoritmo: " + alg + " | Cifrado: " + enc
+            if alg in self.GOOD_JWE_ALG:# Is not vulnerable
+                return
             else:
-                msg = "Algoritmo: " + alg
+                msg = "Algorithm: " + alg
         else:
-            msg = "Cifrado: " + enc
+            msg = "Encryption: " + enc
 
         return {
-            "check-id": check_id,
-            "cvss": "",
-            "matched-at": "",
-            "description": msg,
-            "severity": "",
-            "remediation": ""
+            "map_id": map_id,
+            "description": msg
             }
-   
-    def check_token(self, token):
+
+    def check_token(self, token, jwt_details, config_tool):
         "Verify if token is JWT, JWS or JWE"
 
-        hed = jwt.get_unverified_header()
+        hed = jwt.get_unverified_header(token)
 
         if "enc" in hed.keys():
             result = self.verify_jwe(token)
@@ -103,23 +83,32 @@ class JwtTool(ToolGateway):
         else:
             result = self.verify_jws_alg(token)
 
-        return result
-
+        if result:
+            mapped_result = {
+                "check_id": config_tool.rules_data_type[result["map_id"]]["checkID"],
+                "cvss": config_tool["RULES"][result["map_id"]]["cvss"],
+                "matched-at": jwt_details["path"],
+                "description": result["msg"],
+                "severity": config_tool["RULES"][result["map_id"]]["severity"],
+                "remediation": result["remediation"]
+            }
+            return mapped_result
+        return None
     def configure_tool(self, target_data):
         """Method for create all tokens"""
         jwt_list = []
         for operation in target_data.operations:
-            if operation.authentication_gateway["type"].lower() == "jwt":
+            if operation.authentication_gateway.type.lower() == "jwt":
                 jwt_list.append(operation)
         return jwt_list
 
-    def execute(self, jwt_config):
+    def execute(self, jwt_config, config_tool):
         result_scans = []
         if len(jwt_config) > 0:
             for jwt_operation in jwt_config:
-                token = jwt_operation.authenticate()
-                result = self.check_token(token)
-                result_scans.append(result)
+                result = self.check_token(jwt_operation.credentials[1], jwt_operation.data["operation"], config_tool)
+                if result:
+                    result_scans.append(result)
         return result_scans
 
     def get_list_finding(
@@ -146,11 +135,11 @@ class JwtTool(ToolGateway):
 
     def run_tool(self, target_data, config_tool):
         jwt_config = self.configure_tool(target_data)
-        result_scans = self.execute(jwt_config)
-        finding_list = self.deserialize_results(result_scans)
-        path_file_results = generate_file_from_tool(
-            self.TOOL, result_scans, config_tool
-        )
-        return finding_list, path_file_results
-
-
+        result_scans = self.execute(jwt_config, config_tool)
+        if result_scans:
+            finding_list = self.deserialize_results(result_scans)
+            path_file_results = generate_file_from_tool(
+                self.TOOL, result_scans, config_tool
+            )
+            return finding_list
+        return []

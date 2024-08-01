@@ -79,14 +79,20 @@ class DastScan:
                 config_tool=config_tool,
                 token=dast_token,
             )
-            #Here exceute other tools and append to finding list
+            #Here execute other tools and append to finding list
             if len(self.other_tools) > 0:
-                extra_finding_list = self.other_tools[0].run_tool(
-                    target_data=data_target,
-                    config_tool=config_tool
-                )
-                if len(extra_finding_list) > 0:
-                    finding_list.extend(extra_finding_list)
+                for i in range(len(self.other_tools)):
+                    extra_config_tool, data_target = self.complete_config_tool(
+                    data_file_tool=init_config_tool,
+                    exclusions=exclusions,
+                    tool=self.other_tools[i].TOOL
+                    )
+                    extra_finding_list = self.other_tools[i].run_tool(
+                        target_data=data_target,
+                        config_tool=extra_config_tool
+                    )
+                    if len(extra_finding_list) > 0:
+                        finding_list.extend(extra_finding_list)
 
             totalized_exclusions = []
             (
