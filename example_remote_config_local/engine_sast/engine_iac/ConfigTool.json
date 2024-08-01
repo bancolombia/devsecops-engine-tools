@@ -17,6 +17,7 @@
             "Critical": 1
         }
     },
+    "UPDATE_SERVICE_WITH_FILE_NAME_CFT": "False",
     "CHECKOV": {
         "VERSION": "2.3.296",
         "USE_EXTERNAL_CHECKS_GIT": "False",
@@ -82,6 +83,37 @@
                     "category": "Vulnerability"
                 }
             }
+        }
+    },
+    "KUBESCAPE": {
+        "VERSION": "3.0.11",
+        "USE_EXTERNAL_CHECKS_GIT": "False",
+        "EXTERNAL_CHECKS_GIT": "",
+        "EXTERNAL_GIT_SSH_HOST": "",
+        "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "",
+        "USE_EXTERNAL_CHECKS_DIR": "",
+        "EXTERNAL_DIR_OWNER": "",
+        "EXTERNAL_DIR_REPOSITORY": "",
+        "RULES": {
+
+        }
+    },
+    "KICS": {
+        "VERSION": "2.1.0",
+        "USE_EXTERNAL_CHECKS_GIT": "False",
+        "EXTERNAL_CHECKS_GIT": "",
+        "EXTERNAL_GIT_SSH_HOST": "",
+        "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "",
+        "USE_EXTERNAL_CHECKS_DIR": "",
+        "EXTERNAL_DIR_OWNER": "",
+        "EXTERNAL_DIR_REPOSITORY": "",
+        "KICS_LINUX": "https://example.url/kics/bin/linux/kics.zip",
+        "KICS_WINDOWS": "https://example.url/kics/bin/windows/kics.zip",
+        "KICS_MAC": "https://example.url/kics/bin/mac/kics.zip",
+        "PATH_KICS": "./kics/kics",
+        "DOWNLOAD_KICS_ASSETS": false,
+        "RULES": {
+
         }
     }
 }

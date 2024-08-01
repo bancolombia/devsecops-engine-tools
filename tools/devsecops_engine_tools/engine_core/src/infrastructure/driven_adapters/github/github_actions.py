@@ -11,12 +11,12 @@ from devsecops_engine_tools.engine_utilities.github.models.GithubPredefinedVaria
 from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
     GithubApi,
 )
-import os
 
 
 @dataclass
 class GithubActions(DevopsPlatformGateway):
     OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
     FAIL = "\033[91m"
     ENDC = "\033[0m"
     ICON_FAIL = "\u2718"
@@ -49,7 +49,8 @@ class GithubActions(DevopsPlatformGateway):
     def result_pipeline(self, type):
         results = {
             "failed": f"{self.FAIL}{self.ICON_FAIL}Failed{self.ENDC}",
-            "succeeded": f"{self.OKGREEN}{self.ICON_SUCCESS}Succeeded{self.ENDC}"
+            "succeeded": f"{self.OKGREEN}{self.ICON_SUCCESS}Succeeded{self.ENDC}",
+            "succeeded_with_issues": f"{self.WARNING}{self.ICON_SUCCESS}Succeeded with issues{self.ENDC}"
         }
         return results.get(type)
 
@@ -77,10 +78,10 @@ class GithubActions(DevopsPlatformGateway):
             "repository": BuildVariables.github_repository,
             "pipeline_name": (
                 BuildVariables.github_workflow
-                if SystemVariables.build.value() == "build"
+                if SystemVariables.github_job.value() == "build"
                 else ReleaseVariables.github_workflow
             ),
-            "stage": SystemVariables.build,
+            "stage": SystemVariables.github_job,
             "path_directory": SystemVariables.github_workspace,
             "os": AgentVariables.runner_os,
             "work_folder": AgentVariables.github_workspace,
