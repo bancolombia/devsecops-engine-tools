@@ -98,6 +98,7 @@ def test_get_inputs_from_cli(mock_parse_args):
     mock_args.token_engine_container = None
     mock_args.token_engine_dependencies = None
     mock_args.xray_mode = "scan"
+    mock_args.image_to_scan = "image"
 
     # Mock the parse_args method
     mock_parse_args.return_value = mock_args
@@ -120,6 +121,7 @@ def test_get_inputs_from_cli(mock_parse_args):
         "token_engine_container": None,
         "token_engine_dependencies": None,
         "xray_mode": "scan",
+        "image_to_scan":"image",
     }
 
 
