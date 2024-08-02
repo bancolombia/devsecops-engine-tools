@@ -28,7 +28,7 @@ class ContainerScaScan:
         self.tool_deseralizator = tool_deseralizator
         self.build_id = build_id
         self.token = token
-        self.image_to_scan=image_to_scan
+        self.image_to_scan = image_to_scan
 
     def get_image(self, image_to_scan):
         """
@@ -77,9 +77,7 @@ class ContainerScaScan:
             )
             self.set_image_scanned(result_file)
         else:
-            print(
-                f"'Not image found for {self.image_to_scan}'. Tool skipped."
-            )
+            print(f"'Not image found for {self.image_to_scan}'. Tool skipped.")
         return image_scanned
 
     def deseralizator(self, image_scanned):
