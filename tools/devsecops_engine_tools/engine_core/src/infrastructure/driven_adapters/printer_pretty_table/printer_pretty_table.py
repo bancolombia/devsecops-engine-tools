@@ -63,12 +63,12 @@ class PrinterPrettyTable(PrinterTableGateway):
             print(sorted_table)
 
     def print_table_report(self, report_list: "list[Report]"):
-        headers = ["Severity", "ID", "Tag", "Where"]
+        headers = ["Severity", "ID", "Reporter", "Where"]
         table = PrettyTable(headers)
         for report in report_list:
             row_data = [
                 report.severity.lower(),
-                report.id,
+                report.vul_id if report.vul_id != "" else report.id,
                 report.tags,
                 report.where,
             ]

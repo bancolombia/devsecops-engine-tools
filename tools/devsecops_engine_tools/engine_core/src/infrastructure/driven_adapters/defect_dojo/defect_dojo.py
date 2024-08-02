@@ -291,6 +291,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             where=self._get_where_report(finding),
             tags=finding.tags,
             severity=finding.severity,
+            age=finding.age,
             active=finding.active,
             risk_status=finding.risk_status,
             created=date_fn(
@@ -303,6 +304,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 finding.last_status_update
             ),
             vul_id=finding.vulnerability_ids[0]['vulnerability_id'] if finding.vulnerability_ids else "",
+            epss_score=finding.epss_score,
+            epss_percentile=finding.epss_percentile,
             vul_description=finding.description,
         )
 
