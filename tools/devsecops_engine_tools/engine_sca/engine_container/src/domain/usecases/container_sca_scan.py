@@ -64,10 +64,10 @@ class ContainerScaScan:
         Returns:
             string: file scanning results name.
         """
-        latest_image = self.get_image(self.image_to_scan)
-        image_name = latest_image.tags[0]
+        matching_image = self.get_image(self.image_to_scan)
         image_scanned = None
-        if image_name:
+        if matching_image:
+            image_name = matching_image.tags[0]
             result_file = image_name + "_scan_result.json"
             if result_file in self.get_images_already_scanned():
                 print(f"The image {image_name} has already been scanned previously.")
@@ -78,7 +78,7 @@ class ContainerScaScan:
             self.set_image_scanned(result_file)
         else:
             print(
-                f"'Not {image_name}' found'. Tool skipped."
+                f"'Not image found for {self.image_to_scan}'. Tool skipped."
             )
         return image_scanned
 
