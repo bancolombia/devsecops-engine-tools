@@ -28,9 +28,7 @@ class DockerImages(ImagesGateway):
                 print("Tag matching image:", matching_image.tags)
                 print("Created date matching image:", matching_image.attrs["Created"])
                 return matching_image
-            else:
-                logger.warning(f"No matching image found for: {image_to_scan}")
-                return None
+
         except Exception as e:
             logger.error(
                 f"Error listing images, docker must be running and added to PATH: {e}"
