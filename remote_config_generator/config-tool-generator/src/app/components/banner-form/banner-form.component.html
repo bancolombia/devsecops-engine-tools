@@ -1,0 +1,42 @@
+<section class="container-banner-form">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">
+        <div class="d-flex bd-highlight">
+          <div class="w-100 bd-highlight">
+            Config Tool <span>| Banner</span>
+          </div>
+          <div class="flex-shrink-1 bd-highlight">
+            <app-tooltip
+              tooltipTitle="Configuration of the Banner"
+              fontSize="1rem"
+            ></app-tooltip>
+          </div>
+        </div>
+      </h5>
+      <form [formGroup]="parentForm" class="row g-3">
+        <div class="col-12">
+          <div class="mb-3">
+            <label for="banner" class="form-label"
+              >Banner:
+              <app-tooltip
+                tooltipTitle="Field to define the content of the banner that will be displayed during the scan"
+              ></app-tooltip
+            ></label>
+            <div class="input-group has-validation">
+              <input
+                formControlName="BANNER"
+                type="text"
+                class="form-control"
+                [ngClass]="parentForm | inputValidation : 'BANNER'"
+                [readonly]="false"
+                id="banner"
+              />
+              <div class="invalid-tooltip">The Banner is not valid.</div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
