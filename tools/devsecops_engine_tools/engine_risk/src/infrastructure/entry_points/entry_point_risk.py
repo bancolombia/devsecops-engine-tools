@@ -20,9 +20,7 @@ def init_engine_risk(devops_platform_gateway, print_table_gateway, dict_args, fi
     )
     findings_filtered = []
     if len(findings):
-        handle_filters = HandleFilters(
-            remote_config,
-        )
+        handle_filters = HandleFilters()
         findings_filtered = handle_filters.filter(findings)
         data_added = AddData(findings_filtered).add_data()
 
