@@ -9,9 +9,6 @@ from engine_utilities.azuredevops.models.AzurePredefinedVariables import (
     SystemVariables,
     BuildVariables
 )
-from engine_utilities.azuredevops.infrastructure.azure_devops_api import(
-    AzureDevopsApi
-)
 from engine_core.src.domain.model.gateway.vulnerability_management_gateway import(
     VulnerabilityManagementGateway
 )
