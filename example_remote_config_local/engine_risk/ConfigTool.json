@@ -1,10 +1,10 @@
 {
     "WEIGHTS": {
         "severity": {
-            "Critical": 10,
-            "High": 5,
-            "Medium": 3,
-            "Low": 1
+            "critical": 10,
+            "high": 5,
+            "medium": 3,
+            "low": 1
         },
         "tags": {
             "engine_iac": 1,

@@ -18,16 +18,18 @@ def init_engine_risk(devops_platform_gateway, print_table_gateway, dict_args, fi
     remote_config = devops_platform_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
     )
-    findings_filtered = []
-    if len(findings):
+    if findings:
         handle_filters = HandleFilters()
-        findings_filtered = handle_filters.filter(findings)
-        data_added = AddData(findings_filtered).add_data()
+        active_findings = handle_filters.filter(findings) if findings else []
+        if active_findings:
+            data_added = AddData(active_findings).add_data()
+            BreakBuild(devops_platform_gateway, print_table_gateway, remote_config).process(
+                data_added,
+            )
 
-        BreakBuild(devops_platform_gateway, print_table_gateway).process(
-            findings_filtered,
-        )
-
+        else:
+            print("No active findings found in Vulnerability Management Platform")
+            logger.info("No active findings found in Vulnerability Management Platform")
     else:
-        print("No Findings found in Vulnerability Management Platform")
-        logger.info("No Findings found in Vulnerability Management Platform")
+        print("No findings found in Vulnerability Management Platform")
+        logger.info("No findings found in Vulnerability Management Platform")
