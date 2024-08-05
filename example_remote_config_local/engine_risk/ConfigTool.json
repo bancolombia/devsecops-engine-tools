@@ -1,0 +1,18 @@
+{
+    "WEIGHTS": {
+        "severity": {
+            "Critical": 10,
+            "High": 5,
+            "Medium": 3,
+            "Low": 1
+        },
+        "tags": {
+            "engine_iac": 1,
+            "engine_secret": 1,
+            "engine_container": 1,
+            "engine_dependencies": 1
+        },
+        "age": 0.0333,
+        "epss_score": 100
+    }
+}
