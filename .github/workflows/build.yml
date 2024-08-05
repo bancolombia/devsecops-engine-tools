@@ -71,6 +71,13 @@ jobs:
           name: python-package-distributions
           path: tools/dist/
 
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and tag Docker image
+        run: |
+          docker build -t bancolombia/devsecops-engine-tools:latest -f docker/Dockerfile .
+
   deploy_dev:
     if: ${{ contains(github.event.head_commit.message, 'deploy dev') }}
     runs-on: ubuntu-latest
@@ -111,6 +118,19 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: tools/dist/
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Publish a Docker image to Dockerhub
+        uses: docker/build-push-action@v2
+        with:
+          token: ${{ secrets.DOCKER_TOKEN }}
+          repository: bancolombia/devsecops-engine-tools
+          tags: latest
   
   create_tag:
     needs:
