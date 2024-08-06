@@ -6,7 +6,7 @@ class HandleFilters:
         self.remote_config = remote_config
 
     def filter(self, findings):
-        severity_list = self.remote_config['SEVERITY_LIST']
+        severity_list = self.remote_config["SEVERITY_LIST"]
         return list(
             filter(
                 lambda finding: finding.active

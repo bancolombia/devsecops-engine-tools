@@ -27,11 +27,15 @@ class BreakBuild:
         if len(report_list):
             for report in report_list:
                 report.risk_score = round(
-                                    remote_config["WEIGHTS"]["severity"].get(report.severity.lower(), 1) + \
-                                    remote_config["WEIGHTS"]["epss_score"] * report.epss_score + \
-                                    remote_config["WEIGHTS"]["age"] * report.age + \
-                                    sum(remote_config["WEIGHTS"]["tags"].get(tag, 0) for tag in report.tags)
-                                , 4)
+                    remote_config["WEIGHTS"]["severity"].get(report.severity.lower(), 1)
+                    + remote_config["WEIGHTS"]["epss_score"] * report.epss_score
+                    + remote_config["WEIGHTS"]["age"] * report.age
+                    + sum(
+                        remote_config["WEIGHTS"]["tags"].get(tag, 0)
+                        for tag in report.tags
+                    ),
+                    4,
+                )
             print(
                 "Below are all vulnerabilities from Vulnerability Management Platform"
             )

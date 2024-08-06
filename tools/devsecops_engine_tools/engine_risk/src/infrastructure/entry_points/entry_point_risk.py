@@ -23,7 +23,9 @@ def init_engine_risk(devops_platform_gateway, print_table_gateway, dict_args, fi
         active_findings = handle_filters.filter(findings)
         if active_findings:
             data_added = AddData(active_findings).add_data()
-            BreakBuild(devops_platform_gateway, print_table_gateway, remote_config).process(
+            BreakBuild(
+                devops_platform_gateway, print_table_gateway, remote_config
+            ).process(
                 data_added,
             )
 

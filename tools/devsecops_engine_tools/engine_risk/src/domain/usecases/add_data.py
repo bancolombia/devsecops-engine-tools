@@ -9,6 +9,7 @@ from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
+
 class AddData:
     def __init__(
         self,
@@ -22,11 +23,11 @@ class AddData:
         date = datetime.datetime.now()
         attempts = 0
         while attempts < 2:
-            formatted_date = date.strftime('%Y-%m-%d')
+            formatted_date = date.strftime("%Y-%m-%d")
             url = base_url.format(formatted_date)
             response = requests.get(url)
             if response.status_code == 200:
-                with gzip.open(io.BytesIO(response.content), 'rt') as f:
+                with gzip.open(io.BytesIO(response.content), "rt") as f:
                     data = f.read()
                 logger.info(f"EPSS data downloaded for date: {formatted_date}")
                 return data
@@ -34,7 +35,9 @@ class AddData:
                 date -= datetime.timedelta(days=1)
                 attempts += 1
         print("Could not find EPSS data from de last 2 days. Skipping add EPS data...")
-        logger.error("Could not find EPSS data from de last 2 days. Skipping add EPS data...")
+        logger.error(
+            "Could not find EPSS data from de last 2 days. Skipping add EPS data..."
+        )
         return None
 
     def get_epss_dict(self, epss_data):
@@ -46,7 +49,10 @@ class AddData:
         return epss_dict
 
     def add_data(self):
-        needs_epss_update = any(finding.vul_id[:3] == "CVE" and finding.epss_score == 0 for finding in self.findings)
+        needs_epss_update = any(
+            finding.vul_id[:3] == "CVE" and finding.epss_score == 0
+            for finding in self.findings
+        )
         if needs_epss_update:
             epss_data = self.download_epss_data()
             if epss_data:
