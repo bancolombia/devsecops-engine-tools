@@ -12,6 +12,7 @@ class Report:
         self.active = kwargs.get("active", "")
         self.status = kwargs.get("status", "")
         self.risk_status = kwargs.get("risk_status", "")
+        self.risk_score = kwargs.get("risk_score", "")
         self.created = kwargs.get("created", "")
         self.last_reviewed = kwargs.get("last_reviewed", "")
         self.last_status_update = kwargs.get("last_status_update", "")

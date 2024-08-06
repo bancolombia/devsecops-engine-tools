@@ -7,7 +7,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.report import Report
 
 class TestHandleFilters(unittest.TestCase):
     def setUp(self):
-        self.remote_config = {"TAG_FILTER": ["tag3"]}
+        self.remote_config = {"SEVERITY_LIST": ["low"]}
         self.findings = [
             Report(
                 id="id2",
@@ -33,7 +33,7 @@ class TestHandleFilters(unittest.TestCase):
                 status="stat3",
                 where="path3",
                 tags=["tag3"],
-                severity="low",
+                severity="info",
                 active=True,
             ),
         ]
@@ -42,5 +42,4 @@ class TestHandleFilters(unittest.TestCase):
     def test_filter(self):
         result = self.handle_filters.filter(self.findings)
 
-        assert result[0].tags == self.remote_config["TAG_FILTER"]
         assert len(result) == 1

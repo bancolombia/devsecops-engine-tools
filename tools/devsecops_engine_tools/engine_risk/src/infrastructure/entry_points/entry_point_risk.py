@@ -19,8 +19,8 @@ def init_engine_risk(devops_platform_gateway, print_table_gateway, dict_args, fi
         dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
     )
     if findings:
-        handle_filters = HandleFilters()
-        active_findings = handle_filters.filter(findings) if findings else []
+        handle_filters = HandleFilters(remote_config)
+        active_findings = handle_filters.filter(findings)
         if active_findings:
             data_added = AddData(active_findings).add_data()
             BreakBuild(devops_platform_gateway, print_table_gateway, remote_config).process(
