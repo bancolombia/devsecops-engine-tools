@@ -1,4 +1,5 @@
 {
+    "SEVERITY_LIST": ["critical", "high", "medium", "low"],
     "WEIGHTS": {
         "severity": {
             "critical": 10,
