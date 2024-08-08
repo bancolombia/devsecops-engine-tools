@@ -27,7 +27,7 @@ class IacScan:
         self.devops_platform_gateway = devops_platform_gateway
 
     def process(self, dict_args, secret_tool, tool, env):
-        init_config_tool = self.devops_platform_gateway.get_remote_config(
+        config_tool_iac = self.devops_platform_gateway.get_remote_config(
             dict_args["remote_config_repo"], "engine_sast/engine_iac/ConfigTool.json"
         )
 
@@ -35,15 +35,15 @@ class IacScan:
             dict_args["remote_config_repo"], "engine_sast/engine_iac/Exclusions.json"
         )
 
-        config_tool, folders_to_scan, skip_tool = self.complete_config_tool(
-            init_config_tool, exclusions, tool, dict_args
+        config_tool_core, folders_to_scan, skip_tool = self.complete_config_tool(
+            config_tool_iac, exclusions, tool, dict_args
         )
 
 
         findings_list, path_file_results = [], None
         if skip_tool == "false":
             findings_list, path_file_results = self.tool_gateway.run_tool(
-                config_tool,
+                config_tool_iac,
                 folders_to_scan,
                 "pdn" if env not in ["dev","qa","pdn"] else env,
                 dict_args["platform"],
@@ -56,32 +56,32 @@ class IacScan:
         totalized_exclusions = []
         (
             totalized_exclusions.extend(
-                map(lambda elem: Exclusions(**elem), config_tool.exclusions_all)
+                map(lambda elem: Exclusions(**elem), config_tool_core.exclusions_all)
             )
-            if config_tool.exclusions_all is not None
+            if config_tool_core.exclusions_all is not None
             else None
         )
         (
             totalized_exclusions.extend(
-                map(lambda elem: Exclusions(**elem), config_tool.exclusions_scope)
+                map(lambda elem: Exclusions(**elem), config_tool_core.exclusions_scope)
             )
-            if config_tool.exclusions_scope is not None
+            if config_tool_core.exclusions_scope is not None
             else None
         )
 
         input_core = InputCore(
             totalized_exclusions=totalized_exclusions,
-            threshold_defined=config_tool.threshold,
+            threshold_defined=config_tool_core.threshold,
             path_file_results=path_file_results,
-            custom_message_break_build=config_tool.message_info_engine_iac,
-            scope_pipeline=config_tool.scope_pipeline,
+            custom_message_break_build=config_tool_core.message_info_engine_iac,
+            scope_pipeline=config_tool_core.scope_pipeline,
             stage_pipeline=self.devops_platform_gateway.get_variable("stage").capitalize(),
         )
 
         return findings_list, input_core
 
     def complete_config_tool(self, data_file_tool, exclusions, tool, dict_args):
-        config_tool = ConfigTool(json_data=data_file_tool, tool=tool)
+        config_tool = ConfigTool(json_data=data_file_tool)
         skip_tool = "false"
 
         config_tool.exclusions = exclusions
@@ -96,6 +96,7 @@ class IacScan:
                 config_tool.scope_pipeline
             ).get(tool)
             skip_tool = "true" if config_tool.exclusions.get(config_tool.scope_pipeline).get("SKIP_TOOL") else "false"
+            
         if(dict_args["folder_path"]):
             if config_tool.update_service_file_name_cft == "True" and "cloudformation" in dict_args["platform"]:
                 files = os.listdir(os.path.join(os.getcwd(), dict_args["folder_path"]))
