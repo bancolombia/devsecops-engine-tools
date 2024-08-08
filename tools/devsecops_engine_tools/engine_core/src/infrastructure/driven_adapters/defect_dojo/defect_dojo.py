@@ -286,7 +286,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
     def _create_report(self, finding, date_fn):
         return Report(
-            id=finding.vuln_id_from_tool,
+            id=finding.vulnerability_ids[0]['vulnerability_id'] if finding.vulnerability_ids else finding.vuln_id_from_tool,
             status=finding.display_status,
             where=self._get_where_report(finding),
             tags=finding.tags,
@@ -303,7 +303,6 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             last_status_update=date_fn(
                 finding.last_status_update
             ),
-            vul_id=finding.vulnerability_ids[0]['vulnerability_id'] if finding.vulnerability_ids else "",
             epss_score=finding.epss_score,
             epss_percentile=finding.epss_percentile,
             vul_description=finding.description,

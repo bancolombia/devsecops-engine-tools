@@ -50,7 +50,7 @@ class AddData:
 
     def add_data(self):
         needs_epss_update = any(
-            finding.vul_id[:3] == "CVE" and finding.epss_score == 0
+            finding.id[:3] == "CVE" and finding.epss_score == 0
             for finding in self.findings
         )
         if needs_epss_update:
@@ -58,6 +58,6 @@ class AddData:
             if epss_data:
                 epss_dict = self.get_epss_dict(epss_data)
                 for finding in self.findings:
-                    if finding.vul_id[:3] == "CVE" and finding.epss_score == 0:
-                        finding.epss_score = epss_dict.get(finding.vul_id, 0)
+                    if finding.id[:3] == "CVE" and finding.epss_score == 0:
+                        finding.epss_score = epss_dict.get(finding.id, 0)
         return self.findings

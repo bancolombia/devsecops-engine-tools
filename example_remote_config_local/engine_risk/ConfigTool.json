@@ -8,10 +8,10 @@
             "low": 1
         },
         "tags": {
-            "engine_iac": 1,
-            "engine_secret": 1,
-            "engine_container": 1,
-            "engine_dependencies": 1
+            "engine_iac": 0,
+            "engine_secret": 0,
+            "engine_container": 0,
+            "engine_dependencies": 0
         },
         "age": 0.0333,
         "epss_score": 100
