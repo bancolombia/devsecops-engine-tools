@@ -64,17 +64,6 @@ jobs:
           python -m pip install setuptools virtualenv wheel
           python setup.py sdist bdist_wheel
 
-      - name: Extract version from version.py
-        id: get-version
-        run: |
-          VERSION=$(grep -E "version" tools/devsecops_engine_tools/version.py | cut -d= -f2 | sed "s/[[:space:]']//g")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Build and tag Dock  er image
-        run: |
-          docker build -t bancolombia/devsecops-engine-tools:${{ env.VERSION }} -f docker/Dockerfile .
-          docker tag bancolombia/devsecops-engine-tools:${{ env.VERSION }} bancolombia/devsecops-engine-tools:${{ env.VERSION }}
-
       - name: Store the distribution packages
         if: contains(github.ref,'refs/heads/trunk') || contains(github.event.head_commit.message, 'deploy dev')
         uses: actions/upload-artifact@v4
@@ -121,20 +110,20 @@ jobs:
           name: python-package-distributions
           path: tools/dist/
 
+      - name: Publish a Python distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: tools/dist/
+
       - name: Extract version from version.py
         id: get-version
         run: |
           VERSION=$(grep -E "version" tools/devsecops_engine_tools/version.py | cut -d= -f2 | sed "s/[[:space:]']//g")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Publish a Python distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: tools/dist/
-
       - name: Build and tag Docker image
         run: |
-          docker build -t bancolombia/devsecops-engine-tools:${{ env.VERSION }} -f docker/Dockerfile .
+          docker build --build-arg VERSION=${{ env.VERSION }} -t bancolombia/devsecops-engine-tools:${{ env.VERSION }} -f docker/Dockerfile .
           docker tag bancolombia/devsecops-engine-tools:${{ env.VERSION }} bancolombia/devsecops-engine-tools:${{ env.VERSION }}
 
       - name: Publish a Docker image to Dockerhub
