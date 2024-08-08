@@ -71,7 +71,6 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Build and tag Dock  er image
-        uses: actions/download-artifact@v4
         run: |
           docker build -t bancolombia/devsecops-engine-tools:${{ env.VERSION }} -f docker/Dockerfile .
           docker tag bancolombia/devsecops-engine-tools:${{ env.VERSION }} bancolombia/devsecops-engine-tools:${{ env.VERSION }}
