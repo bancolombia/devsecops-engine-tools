@@ -90,7 +90,7 @@ jobs:
           email: release-bot@bancolombia.com.co
 
       # Publish the plugin to JetBrains Marketplace
-      # - name: Publish Plugin
+      - name: Publish Plugin
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
       #     CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
