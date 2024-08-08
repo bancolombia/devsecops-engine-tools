@@ -73,9 +73,7 @@ intellijPlatform {
         changeNotes = properties("pluginVersion").map { pluginVersion ->
             with(changelog) {
                 renderItem(
-                    (getOrNull(pluginVersion) ?: getUnreleased())
-                        .withHeader(false)
-                        .withEmptySections(false),
+                    (getOrNull(pluginVersion) ?: getUnreleased()),
                     Changelog.OutputType.HTML,
                 )
             }
@@ -120,6 +118,7 @@ intellijPlatform {
 changelog {
     groups.empty()
     repositoryUrl = properties("pluginRepositoryUrl")
+    headerParserRegex = """## \[intellij-v(\d+\.\d+\.\d+)]\(https:\/\/github\.com\/bancolombia\/devsecops-engine-tools\/tree\/intellij-v\1\) \(\d{4}-\d{2}-\d{2}\)""".toRegex()
 }
 
 // Configure Gradle Jacoco Plugin
