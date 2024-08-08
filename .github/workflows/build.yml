@@ -64,6 +64,18 @@ jobs:
           python -m pip install setuptools virtualenv wheel
           python setup.py sdist bdist_wheel
 
+      - name: Extract version from version.py
+        id: get-version
+        run: |
+          VERSION=$(grep -E "version" tools/devsecops_engine_tools/version.py | cut -d= -f2 | sed "s/[[:space:]']//g")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Build and tag Dock  er image
+        uses: actions/download-artifact@v4
+        run: |
+          docker build -t bancolombia/devsecops-engine-tools:${{ env.VERSION }} -f docker/Dockerfile .
+          docker tag bancolombia/devsecops-engine-tools:${{ env.VERSION }} bancolombia/devsecops-engine-tools:${{ env.VERSION }}
+
       - name: Store the distribution packages
         if: contains(github.ref,'refs/heads/trunk') || contains(github.event.head_commit.message, 'deploy dev')
         uses: actions/upload-artifact@v4
@@ -110,6 +122,12 @@ jobs:
           name: python-package-distributions
           path: tools/dist/
 
+      - name: Extract version from version.py
+        id: get-version
+        run: |
+          VERSION=$(grep -E "version" tools/devsecops_engine_tools/version.py | cut -d= -f2 | sed "s/[[:space:]']//g")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Publish a Python distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
@@ -118,15 +136,15 @@ jobs:
       - name: Build and tag Docker image
         uses: actions/download-artifact@v4
         run: |
-          docker build -t bancolombia/devsecops-engine-tools:latest -f docker/Dockerfile .
-          docker tag bancolombia/devsecops-engine-tools:latest bancolombia/devsecops-engine-tools:latest
+          docker build -t bancolombia/devsecops-engine-tools:${{ env.VERSION }} -f docker/Dockerfile .
+          docker tag bancolombia/devsecops-engine-tools:${{ env.VERSION }} bancolombia/devsecops-engine-tools:${{ env.VERSION }}
 
       - name: Publish a Docker image to Dockerhub
         uses: docker/build-push-action@v2
         with:
           token: ${{ secrets.DOCKER_TOKEN }}
           repository: bancolombia/devsecops-engine-tools
-          tags: latest
+          tags: ${{ env.VERSION }}
 
   create_tag:
     needs:
