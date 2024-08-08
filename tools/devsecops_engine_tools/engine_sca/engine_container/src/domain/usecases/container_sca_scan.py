@@ -68,7 +68,7 @@ class ContainerScaScan:
         image_scanned = None
         if matching_image:
             image_name = matching_image.tags[0]
-            result_file = image_name + "_scan_result.json"
+            result_file = image_name.replace("/","_") + "_scan_result.json"
             if result_file in self.get_images_already_scanned():
                 print(f"The image {image_name} has already been scanned previously.")
                 return image_scanned
