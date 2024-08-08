@@ -1,6 +1,10 @@
 FROM alpine@sha256:77726ef6b57ddf65bb551896826ec38bc3e53f75cdde31354fbffb4f25238ebd
 WORKDIR /app
 
+# Received args
+ARG VERSION
+ENV APP_VERSION=$VERSION
+
 ENV DET_PIPELINE_NAME="" \
     DET_PATH_DIRECTORY="." \
     DET_OS="Linux" \
@@ -25,10 +29,9 @@ ENV DET_PIPELINE_NAME="" \
     DET_REPOSITORY=""
 
 # Container remote config creation
-COPY /example_remote_config_local/ /app/example_remote_config_local/
+COPY /docker /app/docker_remote_config_local/
 COPY .envdetlocal /app/.env
 
-# Install dependencies for building Python
 RUN apk update && \
     apk add --no-cache \
     docker \
@@ -47,7 +50,6 @@ RUN apk update && \
 # Enable and start Docker service
 RUN rc-update add docker boot
 
-# Download and install Python 3.11.8
 RUN apk add python3
 RUN apk add py-pip
 
@@ -58,6 +60,6 @@ RUN ln -s /usr/local/bin/python3 /usr/local/bin/python3 && \
 RUN python3 -m venv venv
 RUN source venv/bin/activate
 
-RUN python3 -m pip install --break-system-packages -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple devsecops-engine-tools==1.7.35
+RUN python3 -m pip install --break-system-packages -i https://pypi.org/simple devsecops-engine-tools==$APP_VERSION
 
 CMD ["sh", "-c", "dockerd & while ! docker info > /dev/null 2>&1; do sleep 1; done; sh"]
