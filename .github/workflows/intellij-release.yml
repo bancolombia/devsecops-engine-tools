@@ -53,20 +53,29 @@ jobs:
         run: sed -i 's/pluginVersion=.*/pluginVersion=${{ env.RELEASE_VERSION }}/g' gradle.properties
         working-directory: ./ide_extension/intellij
 
-      # Generate changelog
-      - name: Generate Changelog
-        uses: heinrichreimer/github-changelog-generator-action@v2.3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          pullRequests: true
-          prWoLabels: true
-          issues: true
-          issuesWoLabels: true
-          stripGeneratorNotice: true
-          includeLabels: 'intellij'
-          output: ide_extension/intellij/CHANGELOG.md
-          # base: './ide_extension/intellij'
-          excludeTagsRegex: '^(?!.*\bintellij\b).*'
+      - name: Export Properties
+        id: properties
+        working-directory: ./ide_extension/intellij
+        shell: bash
+        run: |
+          CHANGELOG="$(cat << 'EOM' | sed -e 's/^[[:space:]]*$//g' -e '/./,$!d'
+          ${{ github.event.release.body }}
+          EOM
+          )"
+          
+          CHANGELOG="${CHANGELOG//'%'/'%25'}"
+          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+
+          echo "::set-output name=changelog::$CHANGELOG"
+
+      - name: Patch Changelog
+        if: ${{ steps.properties.outputs.changelog != '' }}
+        working-directory: ./ide_extension/intellij
+        env:
+          CHANGELOG: ${{ steps.properties.outputs.changelog }}
+        run: |
+          ./gradlew patchChangelog --release-note="$CHANGELOG"
 
       - name: Save version
         uses: github-actions-x/commit@722d56b8968bf00ced78407bbe2ead81062d8baa # v2.9
@@ -87,4 +96,4 @@ jobs:
       #     CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
       #     PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       #     PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
-      #   run: ./gradlew publishPlugin
+        # run: ./gradlew publishPlugin
