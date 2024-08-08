@@ -40,6 +40,17 @@ jobs:
           python -m coverage report -m
           python -m coverage xml
 
+      - name: Extract version from version.py
+        id: get-version
+        run: |
+          VERSION=$(grep -E "version" tools/devsecops_engine_tools/version.py | cut -d= -f2 | sed "s/[[:space:]']//g")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Build and tag Docker image
+        run: |
+          docker build --build-arg VERSION=${{ env.VERSION }} -t bancolombia/devsecops-engine-tools:${{ env.VERSION }} -f docker/Dockerfile .
+          docker tag bancolombia/devsecops-engine-tools:${{ env.VERSION }} bancolombia/devsecops-engine-tools:${{ env.VERSION }}
+
       - name: Run analysis on SonarQube
         uses: SonarSource/sonarqube-scan-action@v2
         env:
