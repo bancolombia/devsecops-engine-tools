@@ -27,7 +27,7 @@ jobs:
           python -m pip install virtualenv
           sudo apt-get update
           sudo apt-get install openssh-client -y
-          
+
       - name: Run Unit Test
         run: |
           cd tools/
@@ -133,7 +133,6 @@ jobs:
           packages-dir: tools/dist/
 
       - name: Build and tag Docker image
-        uses: actions/download-artifact@v4
         run: |
           docker build -t bancolombia/devsecops-engine-tools:${{ env.VERSION }} -f docker/Dockerfile .
           docker tag bancolombia/devsecops-engine-tools:${{ env.VERSION }} bancolombia/devsecops-engine-tools:${{ env.VERSION }}
