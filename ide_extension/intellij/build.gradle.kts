@@ -101,10 +101,11 @@ intellijPlatform {
         // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels = properties("pluginVersion").map {
-            listOf(
-                it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" })
-        }
+//        channels = properties("pluginVersion").map {
+//            listOf(
+//                it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" })
+//        }
+        channels = listOf("beta")
     }
 
     verifyPlugin {
@@ -118,7 +119,6 @@ intellijPlatform {
 changelog {
     groups.empty()
     repositoryUrl = properties("pluginRepositoryUrl")
-    headerParserRegex = """## \[intellij-v(\d+\.\d+\.\d+)]\(https:\/\/github\.com\/bancolombia\/devsecops-engine-tools\/tree\/intellij-v\1\) \(\d{4}-\d{2}-\d{2}\)""".toRegex()
 }
 
 // Configure Gradle Jacoco Plugin
