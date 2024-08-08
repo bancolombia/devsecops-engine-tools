@@ -43,8 +43,8 @@ def test_add_data(mock_get_epss_dict, mock_download_epss_data):
     mock_get_epss_dict.return_value = {"CVE-2021-1234": "10"}
 
     findings = [
-        Mock(vul_id="CVE-2021-1234", epss_score=0),
-        Mock(vul_id="CVE-2021-1235", epss_score=0),
+        Mock(id="CVE-2021-1234", epss_score=0),
+        Mock(id="CVE-2021-1235", epss_score=0),
     ]
 
     updated_findings = AddData(findings).add_data()
