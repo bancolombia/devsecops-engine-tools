@@ -29,7 +29,13 @@ ENV DET_PIPELINE_NAME="" \
     DET_REPOSITORY=""
 
 # Container remote config creation
-COPY /docker /app/docker_remote_config_local/
+COPY /example_remote_config_local /app/example_remote_config_local
+COPY /docker/remoteConfigGeneration.sh /app/remoteConfigGeneration.sh
+
+RUN chmod +x /app/remoteConfigGeneration.sh
+RUN apk add --no-cache bash
+RUN ./remoteConfigGeneration.sh
+
 COPY .envdetlocal /app/.env
 
 RUN apk update && \
