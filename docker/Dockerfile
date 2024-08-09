@@ -1,7 +1,10 @@
 FROM alpine@sha256:77726ef6b57ddf65bb551896826ec38bc3e53f75cdde31354fbffb4f25238ebd
 WORKDIR /app
 
-# Setting environment variables
+# Received args
+ARG VERSION
+ENV APP_VERSION=$VERSION
+
 ENV DET_PIPELINE_NAME="" \
     DET_PATH_DIRECTORY="." \
     DET_OS="Linux" \
@@ -26,10 +29,15 @@ ENV DET_PIPELINE_NAME="" \
     DET_REPOSITORY=""
 
 # Container remote config creation
-COPY /example_remote_config_local/ /app/example_remote_config_local/
+COPY /example_remote_config_local /app/example_remote_config_local
+COPY /docker/remoteConfigGeneration.sh /app/remoteConfigGeneration.sh
+
+RUN chmod +x /app/remoteConfigGeneration.sh
+RUN apk add --no-cache bash
+RUN ./remoteConfigGeneration.sh
+
 COPY .envdetlocal /app/.env
 
-# Install dependencies for building Python
 RUN apk update && \
     apk add --no-cache \
     docker \
@@ -48,24 +56,16 @@ RUN apk update && \
 # Enable and start Docker service
 RUN rc-update add docker boot
 
-# Download and install Python 3.11.8
-RUN wget https://www.python.org/ftp/python/3.11.8/Python-3.11.8.tgz && \
-    tar -xzf Python-3.11.8.tgz && \
-    cd Python-3.11.8 && \
-    ./configure --enable-optimizations && \
-    make altinstall && \
-    cd .. && \
-    rm -rf Python-3.11.8 Python-3.11.8.tgz
+RUN apk add python3
+RUN apk add py-pip
 
 # Ensure python3 points to the new version
-RUN ln -s /usr/local/bin/python3.11 /usr/local/bin/python3 && \
-    ln -s /usr/local/bin/pip3.11 /usr/local/bin/pip3
+RUN ln -s /usr/local/bin/python3 /usr/local/bin/python3 && \
+    ln -s /usr/local/bin/pip3 /usr/local/bin/pip3
 
-# Create and activate virtual environment
-RUN /usr/local/bin/python3.11 -m venv venv
+RUN python3 -m venv venv
 RUN source venv/bin/activate
 
-# Install devsecops-engine-tools
-RUN /usr/local/bin/python3.11 -m pip install devsecops-engine-tools
+RUN python3 -m pip install --break-system-packages -i https://pypi.org/simple devsecops-engine-tools==$APP_VERSION
 
 CMD ["sh", "-c", "dockerd & while ! docker info > /dev/null 2>&1; do sleep 1; done; sh"]
