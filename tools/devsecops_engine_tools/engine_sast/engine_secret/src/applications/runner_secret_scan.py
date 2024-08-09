@@ -7,7 +7,7 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_deserealizator import (
     SecretScanDeserealizator
     )
-from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.git_cli.git_run import (
+from devsecops_engine_tools.engine_utilities.git_cli.infrastructure.git_run import (
     GitRun
     )
 

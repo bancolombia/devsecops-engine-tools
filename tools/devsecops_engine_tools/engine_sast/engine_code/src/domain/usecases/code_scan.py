@@ -4,8 +4,8 @@ from devsecops_engine_tools.engine_sast.engine_code.src.domain.model.gateways.to
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
-from devsecops_engine_tools.engine_sast.engine_code.src.domain.model.gateways.git_gateway import (
-    GitGateway,
+from devsecops_engine_tools.engine_utilities.git_cli.model.gateway.git_gateway import (
+    GitGateway
 )
 from devsecops_engine_tools.engine_sast.engine_code.src.domain.model.config_tool import (
     ConfigTool,

@@ -4,8 +4,8 @@ from devsecops_engine_tools.engine_sast.engine_code.src.infrastructure.entry_poi
 from devsecops_engine_tools.engine_sast.engine_code.src.infrastructure.driven_adapters.bearer.bearer_tool import (
     BearerTool
 )
-from devsecops_engine_tools.engine_sast.engine_code.src.infrastructure.driven_adapters.git_azure.git_azure import (
-    GitAzure
+from devsecops_engine_tools.engine_utilities.git_cli.infrastructure.git_run import (
+    GitRun
 )
 
 def runner_engine_code(dict_args, tool, devops_platform_gateway):
@@ -16,7 +16,7 @@ def runner_engine_code(dict_args, tool, devops_platform_gateway):
 
         git_gateway = None
         if (dict_args["platform_devops"] == "azure"):
-            git_gateway = GitAzure()
+            git_gateway = GitRun()
 
         return init_engine_sast_code(
             devops_platform_gateway=devops_platform_gateway,

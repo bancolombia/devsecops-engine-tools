@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import os
 import subprocess
 from urllib.parse import quote
-from devsecops_engine_tools.engine_sast.engine_code.src.domain.model.gateways.git_gateway import GitGateway
+from devsecops_engine_tools.engine_utilities.git_cli.model.gateway.git_gateway import GitGateway
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -10,7 +10,7 @@ from devsecops_engine_tools.engine_utilities import settings
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 @dataclass
-class GitAzure(GitGateway):
+class GitRun(GitGateway):
 
     def get_files_pull_request(self,
                                sys_working_dir,
