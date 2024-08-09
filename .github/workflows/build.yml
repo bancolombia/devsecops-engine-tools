@@ -27,7 +27,7 @@ jobs:
           python -m pip install virtualenv
           sudo apt-get update
           sudo apt-get install openssh-client -y
-          
+
       - name: Run Unit Test
         run: |
           cd tools/
@@ -111,7 +111,25 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: tools/dist/
-  
+
+      - name: Extract version from version.py
+        id: get-version
+        run: |
+          VERSION=$(grep -E "version" tools/devsecops_engine_tools/version.py | cut -d= -f2 | sed "s/[[:space:]']//g")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Build and tag Docker image
+        run: |
+          docker build --build-arg VERSION=${{ env.VERSION }} -t bancolombia/devsecops-engine-tools:${{ env.VERSION }} -f docker/Dockerfile .
+          docker tag bancolombia/devsecops-engine-tools:${{ env.VERSION }} bancolombia/devsecops-engine-tools:${{ env.VERSION }}
+
+      - name: Publish a Docker image to Dockerhub
+        uses: docker/build-push-action@v2
+        with:
+          token: ${{ secrets.DOCKER_TOKEN }}
+          repository: bancolombia/devsecops-engine-tools
+          tags: ${{ env.VERSION }}
+
   create_tag:
     needs:
       - deploy_prod
