@@ -108,7 +108,7 @@ jobs:
 
       - name: Log in to Docker Hub
         run: |
-          docker login -u bancolombia -p ${{ secrets.DOCKER_PASSWORD }}
+          docker login --username bancolombia --password ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Publish a Docker image to Dockerhub
         run: |
