@@ -107,10 +107,8 @@ jobs:
           docker tag bancolombia/devsecops-engine-tools:${{ env.VERSION }} bancolombia/devsecops-engine-tools:${{ env.VERSION }}
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-        with:
-          username: bancolombia
-          password: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          docker login -u bancolombia -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Publish a Docker image to Dockerhub
         run: |
