@@ -1,11 +1,11 @@
-requests==2.31.0
+requests==2.32.3
 # multipledispatch==0.6.0#test
-# PyYAML==6.0.1#test
-pyfiglet==0.7
-prettytable==3.8.0
-azure-devops==7.1.0b3
-marshmallow==3.19.0
-pytz==2023.3
+PyYAML==6.0.2
+pyfiglet==1.0.2
+prettytable==3.10.2
+azure-devops==7.1.0b4
+marshmallow==3.21.3
+pytz==2024.1
 python-decouple==3.8
 requests_toolbelt==1.0.0
 # python-dateutil==2.8.2#test
