@@ -11,6 +11,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsContexts;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,8 +22,8 @@ import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 
-public class ScanIacTask extends Task.Backgroundable {
-    public ScanIacTask(@Nullable Project project, @NlsContexts.ProgressTitle @NotNull String title) {
+public class ScanImageTask extends Task.Backgroundable {
+    public ScanImageTask(@Nullable Project project, @NlsContexts.ProgressTitle @NotNull String title) {
         super(project, title, false);
     }
 
@@ -32,11 +33,24 @@ public class ScanIacTask extends Task.Backgroundable {
             LogPanelLogger.clear();
             prepareFiles(requireNonNull(myProject));
             GlobalSettings settings = GlobalSettings.getInstance();
-            String command = settings.getScanIacCommand()
-                    .replace("{projectPath}", requireNonNull(myProject.getBasePath()))
-                    .replace("{image}", settings.getDevSecOpsImage());
-            LogPanelLogger.info("Running scan IaC command: " + command);
-            Commands.runCommand(command, LogPanelLogger.getAppender());
+            String scanCommand = settings.getScanImageCommand().replace("{image}", settings.getDevSecOpsImage());
+            ProjectSettings projectSettings = ProjectSettingsUtils.getProjectSettings(myProject);
+            String projectPath = myProject.getBasePath();
+            if (!StringUtils.isEmpty(projectSettings.getPreBuildScript())) {
+                LogPanelLogger.info("Running prebuild command: " + projectSettings.getPreBuildScript());
+                Commands.runCommandInDirectory(projectSettings.getPreBuildScript(), LogPanelLogger.getAppender(), projectPath);
+            }
+            if (!StringUtils.isEmpty(projectSettings.getDockerFilePath())) {
+                Path dockerFilePath = Path.of(myProject.getBasePath(), "build", "dev-sec-ops", "iac",
+                        projectSettings.getDockerFilePath());
+                LogPanelLogger.info("Running image build command with Dockerfile " + dockerFilePath);
+                String buildCommand = projectSettings.getBuildCommand()
+                        .replace("{dockerFilePath}", dockerFilePath.toString())
+                        .replace("{buildContextPath}", projectSettings.getBuildContextPath());
+                Commands.runCommandInDirectory(buildCommand, LogPanelLogger.getAppender(), projectPath);
+            }
+            LogPanelLogger.info("Running scan Image command: " + scanCommand);
+            Commands.runCommand(scanCommand, LogPanelLogger.getAppender());
         } catch (Exception ex) {
             LogPanelLogger.error("Error running scan IaC command: ", ex);
         }
@@ -45,8 +59,8 @@ public class ScanIacTask extends Task.Backgroundable {
     private void prepareFiles(Project project) throws IOException {
         String projectPath = project.getBasePath() != null ? project.getBasePath() : "";
         Path iacDestination = Path.of(projectPath, "build", "dev-sec-ops", "iac");
-        Files.createDirectories(iacDestination);
         FileUtils.deleteDirectory(iacDestination);
+        Files.createDirectories(iacDestination);
         ProjectSettings settings = ProjectSettingsUtils.getProjectSettings(project);
         for (String source : settings.getIacDirectory().split(",")) {
             Path iacSource = Path.of(projectPath, source);

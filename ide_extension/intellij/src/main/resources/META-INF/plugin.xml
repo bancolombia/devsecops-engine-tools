@@ -47,6 +47,10 @@
                     class="co.com.bancolombia.devsecopsenginetools.actions.ScanIacAction"
                     text="Scan IaC"
                     description="Scan your Dockerfile and k8s files"/>
+            <action id="DevSecOpsEngineTools.ScanImage"
+                    class="co.com.bancolombia.devsecopsenginetools.actions.ScanImageAction"
+                    text="Scan Image"
+                    description="Scan docker images"/>
             <action id="DevSecOpsEngineTools.GlobalConfiguration"
                     class="co.com.bancolombia.devsecopsenginetools.actions.GlobalConfigurationAction"
                     text="Settings"

@@ -37,7 +37,8 @@ public class CommandsTest {
         Commands.runCommand(command, appender, processBuilder);
         // Assert
         verify(appender).onNext(output);
-        verify(appender, times(2)).onNext(anyString());
+        verify(appender, times(1)).onNext(anyString());
+        verify(appender, times(1)).success(anyString());
     }
 
     @Test

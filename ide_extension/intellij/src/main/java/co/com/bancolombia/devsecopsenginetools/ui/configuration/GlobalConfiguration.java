@@ -4,7 +4,6 @@ import co.com.bancolombia.devsecopsenginetools.configuration.AzureCredentials;
 import co.com.bancolombia.devsecopsenginetools.configuration.GlobalSettings;
 import co.com.bancolombia.devsecopsenginetools.configuration.ProjectSettingsUtils;
 import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTabbedPane;
 import com.intellij.ui.components.JBTextField;
@@ -27,6 +26,10 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
 
     // Settings
     private JBTextField scanIacCommand;
+    private JButton resetIaCButton;
+    private JTextArea scanImageCommand;
+    private JButton resetImageButton;
+    private JBTextField dockerImage;
 
 
     public GlobalConfiguration() {
@@ -41,6 +44,8 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
         tabbedPane.add("Connection Details", connectionDetails);
         tabbedPane.add("Settings", settings);
         tabbedPane.setSelectedIndex(0);
+        resetIaCButton.addActionListener(e -> scanIacCommand.setText(GlobalSettings.DEFAULT_IAC_SCAN_COMMAND));
+        resetImageButton.addActionListener(e -> scanImageCommand.setText(GlobalSettings.DEFAULT_IMAGE_SCAN_COMMAND));
         return tabbedPane;
     }
 
@@ -66,15 +71,25 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
 
     private GlobalSettings createServerConfig() {
         GlobalSettings settings = new GlobalSettings();
+        // iac
         settings.setScanIacCommand(scanIacCommand.getText());
+        // image
+        settings.setDevSecOpsImage(dockerImage.getText());
+        settings.setScanImageCommand(scanImageCommand.getText());
+        // variables
         settings.setAzureDevOpsOrganization(azureOrganization.getText());
         settings.setAzureDevOpsProject(azureProject.getText());
         return settings;
     }
 
     @Override
-    public void apply() throws ConfigurationException {
+    public void apply() {
+        // iac
         globalSettings.setScanIacCommand(scanIacCommand.getText());
+        // image
+        globalSettings.setDevSecOpsImage(dockerImage.getText());
+        globalSettings.setScanImageCommand(scanImageCommand.getText());
+        // variables
         globalSettings.setAzureDevOpsOrganization(azureOrganization.getText());
         globalSettings.setAzureDevOpsProject(azureProject.getText());
         AzureCredentials credentials = new AzureCredentials(azureUserName.getText(), new String(azureAccessToken.getPassword()));
@@ -93,7 +108,10 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
 
         globalSettings = GlobalSettings.getInstance();
         if (globalSettings != null) {
+            dockerImage.setText(globalSettings.getDevSecOpsImage());
             scanIacCommand.setText(globalSettings.getScanIacCommand());
+            scanImageCommand.setText(globalSettings.getScanImageCommand());
+
             azureOrganization.setText(globalSettings.getAzureDevOpsOrganization());
             azureProject.setText(globalSettings.getAzureDevOpsProject());
             AzureCredentials credentials = ProjectSettingsUtils.getPassword("azure");

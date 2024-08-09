@@ -28,7 +28,8 @@ public class ProjectSettingsUtils {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> properties = new HashMap<>();
         List.of("iacDirectory", "replacePattern", "dotEnvFile", "azureDevOpsVariableGroups",
-                        "azureReleaseDefinitionId", "azureReleaseStageName")
+                        "azureReleaseDefinitionId", "azureReleaseStageName", "preBuildScript",
+                        "dockerFilePath", "buildContextPath", "buildCommand")
                 .forEach(key -> properties.put(key, propertiesComponent.getValue(key)));
         List.of("replaceTokens")
                 .forEach(key -> properties.put(key, propertiesComponent.getBoolean(key, false)));
