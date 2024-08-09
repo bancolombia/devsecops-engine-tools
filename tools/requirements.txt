@@ -6,7 +6,7 @@ prettytable==3.8.0
 azure-devops==7.1.0b3
 marshmallow==3.19.0
 pytz==2023.3
-# python-decouple==3.8#test
+python-decouple==3.8
 requests_toolbelt==1.0.0
 # python-dateutil==2.8.2#test
 pexpect==4.9.0
