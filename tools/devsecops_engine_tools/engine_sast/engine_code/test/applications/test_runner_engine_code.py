@@ -6,8 +6,8 @@ from devsecops_engine_tools.engine_sast.engine_code.src.applications.runner_engi
 from devsecops_engine_tools.engine_sast.engine_code.src.infrastructure.driven_adapters.bearer.bearer_tool import (
     BearerTool
 )
-from devsecops_engine_tools.engine_sast.engine_code.src.infrastructure.driven_adapters.git_azure.git_azure import (
-    GitAzure
+from devsecops_engine_tools.engine_utilities.git_cli.infrastructure.git_run import (
+    GitRun
 )
 
 @patch(
@@ -45,7 +45,7 @@ class TestRunnerEngineCode(unittest.TestCase):
         _, kwargs = mock_init_engine_sast_code.call_args
         mock_init_engine_sast_code.assert_called_once()
         self.assertEqual(kwargs["devops_platform_gateway"], devops_platform_gateway)
-        self.assertIsInstance(kwargs["git_gateway"], GitAzure)
+        self.assertIsInstance(kwargs["git_gateway"], GitRun)
         self.assertEqual(kwargs["dict_args"], dict_args)
         self.assertEqual(kwargs["tool"], tool)
 
@@ -62,7 +62,7 @@ class TestRunnerEngineCode(unittest.TestCase):
         _, kwargs = mock_init_engine_sast_code.call_args
         mock_init_engine_sast_code.assert_called_once()
         self.assertEqual(kwargs["devops_platform_gateway"], devops_platform_gateway)
-        self.assertIsInstance(kwargs["git_gateway"], GitAzure)
+        self.assertIsInstance(kwargs["git_gateway"], GitRun)
         self.assertEqual(kwargs["dict_args"], dict_args)
         self.assertEqual(kwargs["tool"], tool)
 
