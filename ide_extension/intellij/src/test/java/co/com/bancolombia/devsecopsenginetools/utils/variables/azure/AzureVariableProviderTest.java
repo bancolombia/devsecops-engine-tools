@@ -4,6 +4,7 @@ import co.com.bancolombia.devsecopsenginetools.configuration.ProjectSettings;
 import co.com.bancolombia.devsecopsenginetools.utils.http.HttpClient;
 import co.com.bancolombia.devsecopsenginetools.utils.variables.Variable;
 import co.com.bancolombia.devsecopsenginetools.utils.variables.VariableProvider;
+import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AzureVariableProviderTest {
@@ -28,12 +30,15 @@ public class AzureVariableProviderTest {
     private static final long GROUP_ID_ENV_2 = 54321L;
     @Mock
     private HttpClient httpClient;
+    @Mock
+    private Project project;
     private VariableProvider provider;
 
     @Before
     public void setUp() {
         ProjectSettings settings = new ProjectSettings();
-        settings.fillIfDefaults();
+        when(project.getBasePath()).thenReturn("");
+        settings.fillIfDefaults(project);
         settings.setDotEnvFile("build/.env");
         settings.setAzureDevOpsVariableGroups("group1");
         settings.setAzureReleaseDefinitionId("123");

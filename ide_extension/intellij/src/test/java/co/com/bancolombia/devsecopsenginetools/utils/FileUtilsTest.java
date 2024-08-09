@@ -73,9 +73,9 @@ public class FileUtilsTest {
 
         // Assert
         assertTrue(Files.exists(destination));
-        assertTrue(Files.exists(destination.resolve("dir2")));
-        assertTrue(Files.exists(destination.resolve("file1.txt")));
-        assertTrue(Files.exists(destination.resolve("dir2").resolve("file2.txt")));
+        assertTrue(Files.exists(destination.resolve("source").resolve("dir2")));
+        assertTrue(Files.exists(destination.resolve("source").resolve("file1.txt")));
+        assertTrue(Files.exists(destination.resolve("source").resolve("dir2").resolve("file2.txt")));
     }
 
     @Test

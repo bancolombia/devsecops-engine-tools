@@ -1,5 +1,6 @@
 package co.com.bancolombia.devsecopsenginetools.ui.tool;
 
+import co.com.bancolombia.devsecopsenginetools.utils.Commands;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -59,6 +60,25 @@ public class LogPanelLogger implements ToolWindowFactory, DumbAware {
 
     public static void clear() {
         info("\n######################################################################################################");
+    }
+
+    public static Commands.Appender getAppender() {
+        return new Commands.Appender() {
+            @Override
+            public void onNext(String text) {
+                LogPanelLogger.info(text);
+            }
+
+            @Override
+            public void success(String text) {
+                LogPanelLogger.success(text);
+            }
+
+            @Override
+            public void error(String text) {
+                LogPanelLogger.error(text);
+            }
+        };
     }
 
     private static void appendText(String string, String color) {

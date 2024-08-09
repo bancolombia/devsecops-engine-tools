@@ -1,8 +1,10 @@
 package co.com.bancolombia.devsecopsenginetools.utils;
 
+import it.unimi.dsi.fastutil.bytes.F;
 import lombok.experimental.UtilityClass;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,19 +18,25 @@ public class Commands {
         runCommand(command, appender, new ProcessBuilder());
     }
 
+    public static void runCommandInDirectory(String command, Appender appender, String directory) throws IOException, InterruptedException {
+        runCommand(command, appender, new ProcessBuilder().directory(new File(directory)));
+    }
+
     public static void runCommand(String command, Appender appender, ProcessBuilder processBuilder) throws IOException, InterruptedException {
         long start = System.currentTimeMillis();
-        String[] cmd = command.split(" ");
-        processBuilder.command(cmd);
-        Process process = processBuilder.start();
-        printOutput(appender, process.getInputStream());
-        printOutput(appender, process.getErrorStream());
-        int exitVal = process.waitFor();
-        if (exitVal != 0) {
-            throw new IOException("Error running command: " + command + ", exit code: " + exitVal);
+        for (String current : command.split("\n")) {
+            String[] cmd = current.split(" ");
+            processBuilder.command(cmd);
+            Process process = processBuilder.start();
+            printOutput(appender, process.getInputStream());
+            printOutput(appender, process.getErrorStream());
+            int exitVal = process.waitFor();
+            if (exitVal != 0) {
+                throw new IOException("Error running command: " + current + ", exit code: " + exitVal);
+            }
         }
         long duration = System.currentTimeMillis() - start;
-        appender.onNext("Command executed successfully in " + formatDuration(duration));
+        appender.success("Command executed successfully in " + formatDuration(duration));
     }
 
     private static void printOutput(Appender appender, InputStream is) throws IOException {
@@ -41,6 +49,8 @@ public class Commands {
 
     public interface Appender {
         void onNext(String text);
+        void success(String text);
+        void error(String text);
     }
 
     public static String formatDuration(long duration) {

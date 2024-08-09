@@ -4,6 +4,7 @@ import co.com.bancolombia.devsecopsenginetools.ui.tool.LogPanelLogger;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.io.file.PathUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -13,8 +14,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Function;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 @UtilityClass
 public class FileUtils {
@@ -24,7 +28,9 @@ public class FileUtils {
     }
 
     public static void copyDirectory(Path source, Path target) throws IOException {
-        PathUtils.copyDirectory(source, target);
+        Path finalTarget = Path.of(target.toString(), source.getFileName().toString());
+        Files.createDirectories(finalTarget);
+        PathUtils.copyDirectory(source, finalTarget, REPLACE_EXISTING);
     }
 
     public static void walkDirectory(Path start, Function<String, String> action) throws IOException {
@@ -50,7 +56,7 @@ public class FileUtils {
     }
 
     public static Map<String, String> readEnvFile(Path path) throws IOException {
-        if(!Files.exists(path)) {
+        if (!Files.exists(path)) {
             return new HashMap<>();
         }
         List<String> lines = Files.readAllLines(path);
@@ -81,5 +87,37 @@ public class FileUtils {
 
     public static ResourceBundle getProperties() {
         return ResourceBundle.getBundle("plugin");
+    }
+
+    public static String findDockerfile(String projectPath) {
+        String path = findDockerfile(new File(projectPath))
+                .map(File::getAbsolutePath).orElse("").replace(projectPath, "");
+        if(path.startsWith("/")){
+            return path.substring(1);
+        }
+        return path;
+    }
+
+    private static Optional<File> findDockerfile(File directory) {
+        // List files and directories in the current directory
+        File[] files = directory.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                // Check if the current file is Dockerfile
+                if (file.isFile() && file.getName().equals("Dockerfile")) {
+                    return Optional.of(file);
+                }
+
+                // If it's a directory, recursively search inside it
+                if (file.isDirectory()) {
+                    Optional<File> result = findDockerfile(file);
+                    if (result.isPresent()) {
+                        return result;
+                    }
+                }
+            }
+        }
+        return Optional.empty();
     }
 }
