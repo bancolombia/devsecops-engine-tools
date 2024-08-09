@@ -12,3 +12,4 @@ PyGithub==2.3.0
 distro==1.9.0
 boto3==1.34.157
 docker==7.1.0
+setuptools==72.1.0
