@@ -60,3 +60,6 @@ kics_assets/
 assets_compressed.zip
 kics_*.zip
 kubescape-macos-latest
+
+# Extensions
+out
