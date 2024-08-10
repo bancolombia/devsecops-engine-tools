@@ -19,7 +19,6 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
     generate_file_from_tool,
 )
-
 from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
     GithubApi,
 )
@@ -61,44 +60,39 @@ class CheckovTool(ToolGateway):
             yaml.dump(checkov_config.dict_confg_file, file)
             file.close()
 
-    def configurate_external_checks(self, config_tool, secret_tool):
+    def configurate_external_checks(self, config_tool, secret):
         agent_env = None
         try:
-            if secret_tool is None:
-                logger.warning(
-                    "Secrets manager is not enabled to configure external checks"
-                )
-            else:
-                if (
-                    config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_GIT"] == "True"
-                    and platform.system()
-                    in (
-                        "Linux",
-                        "Darwin",
-                    )
-                ):
-                    config_knowns_hosts(
-                        config_tool[self.TOOL_CHECKOV]["EXTERNAL_GIT_SSH_HOST"],
-                        config_tool[self.TOOL_CHECKOV]["EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT"],
-                    )
-                    ssh_key_content = decode_base64(
-                        secret_tool, "repository_ssh_private_key"
-                    )
-                    ssh_key_file_path = "/tmp/ssh_key_file"
-                    create_ssh_private_file(ssh_key_file_path, ssh_key_content)
-                    ssh_key_password = decode_base64(
-                        secret_tool, "repository_ssh_password"
-                    )
-                    agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
+            if secret is None:
+                logger.warning("The secret is not configured for external controls")
 
-                # Create configuration dir external checks
-                if config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_DIR"] == "True":
-                    github_api = GithubApi(secret_tool["github_token"])
-                    github_api.download_latest_release_assets(
-                        config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_OWNER"],
-                        config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_REPOSITORY"],
-                        "/tmp",
-                    )
+            # Create configuration git external checks
+            elif config_tool[self.TOOL_CHECKOV][
+                "USE_EXTERNAL_CHECKS_GIT"
+            ] == "True" and platform.system() in (
+                "Linux",
+                "Darwin",
+            ):
+                config_knowns_hosts(
+                    config_tool[self.TOOL_CHECKOV]["EXTERNAL_GIT_SSH_HOST"],
+                    config_tool[self.TOOL_CHECKOV][
+                        "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT"
+                    ],
+                )
+                ssh_key_content = decode_base64(secret["repository_ssh_private_key"])
+                ssh_key_file_path = "/tmp/ssh_key_file"
+                create_ssh_private_file(ssh_key_file_path, ssh_key_content)
+                ssh_key_password = decode_base64(secret["repository_ssh_password"])
+                agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
+
+            # Create configuration dir external checks
+            elif config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_DIR"] == "True":
+                github_api = GithubApi(secret["github_token"])
+                github_api.download_latest_release_assets(
+                    config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_OWNER"],
+                    config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_REPOSITORY"],
+                    "/tmp",
+                )
 
         except Exception as ex:
             logger.error(f"An error ocurred configuring external checks {ex}")
@@ -108,14 +102,16 @@ class CheckovTool(ToolGateway):
         MAX_RETRIES = 3
         RETRY_DELAY = 1  # in seconds
         INSTALL_SUCCESS_MSG = f"Installation of {package} successful"
-        INSTALL_RETRY_MSG = f"Retrying installation of {package} in {RETRY_DELAY} seconds..."
+        INSTALL_RETRY_MSG = (
+            f"Retrying installation of {package} in {RETRY_DELAY} seconds..."
+        )
 
         installed = subprocess.run(
             ["which", package],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        
+
         if installed.returncode == 0:
             return True
 
@@ -201,7 +197,9 @@ class CheckovTool(ToolGateway):
                         framework=self.framework_mapping[rule],
                         checks=[
                             key
-                            for key, value in config_tool[self.TOOL_CHECKOV]["RULES"][rule].items()
+                            for key, value in config_tool[self.TOOL_CHECKOV]["RULES"][
+                                rule
+                            ].items()
                             if value["environment"].get(environment)
                         ],
                         soft_fail=False,
@@ -210,7 +208,8 @@ class CheckovTool(ToolGateway):
                             [
                                 f"{config_tool[self.TOOL_CHECKOV]['EXTERNAL_CHECKS_GIT']}/{self.framework_mapping[rule]}"
                             ]
-                            if config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_GIT"] == "True"
+                            if config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_GIT"]
+                            == "True"
                             and agent_env is not None
                             and rule in self.framework_external_checks
                             else []
@@ -218,7 +217,8 @@ class CheckovTool(ToolGateway):
                         env=agent_env,
                         external_checks_dir=(
                             f"/tmp/rules/{self.framework_mapping[rule]}"
-                            if config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_DIR"] == "True"
+                            if config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_DIR"]
+                            == "True"
                             and rule in self.framework_external_checks
                             else []
                         ),
@@ -250,10 +250,35 @@ class CheckovTool(ToolGateway):
         environment,
         platform_to_scan,
         secret_tool,
+        secret_external_checks,
     ):
-        agent_env = self.configurate_external_checks(config_tool, secret_tool)
+        secret = None
+        if secret_tool is not None:
+            secret = secret_tool
+        elif secret_external_checks is not None:
+            secret = {
+                "github_token": (
+                    secret_external_checks.split("github:")[1]
+                    if "github" in secret_external_checks
+                    else None
+                ),
+                "repository_ssh_private_key": (
+                    secret_external_checks.split("ssh:")[1].split(":")[0]
+                    if "ssh" in secret_external_checks
+                    else None
+                ),
+                "repository_ssh_password": (
+                    secret_external_checks.split("ssh:")[1].split(":")[1]
+                    if "ssh" in secret_external_checks
+                    else None
+                ),
+            }
 
-        checkov_install = self.retryable_install_package("checkov", config_tool[self.TOOL_CHECKOV]["VERSION"])
+        agent_env = self.configurate_external_checks(config_tool, secret)
+
+        checkov_install = self.retryable_install_package(
+            "checkov", config_tool[self.TOOL_CHECKOV]["VERSION"]
+        )
 
         if checkov_install:
             result_scans, rules_run = self.scan_folders(

@@ -10,9 +10,7 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.config_tool 
     ConfigTool,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
-from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
-    InputCore
-)
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
@@ -39,15 +37,15 @@ class IacScan:
             config_tool_iac, exclusions, tool, dict_args
         )
 
-
         findings_list, path_file_results = [], None
         if skip_tool == "false":
             findings_list, path_file_results = self.tool_gateway.run_tool(
                 config_tool_iac,
                 folders_to_scan,
-                "pdn" if env not in ["dev","qa","pdn"] else env,
-                dict_args["platform"],
-                secret_tool,
+                environment="pdn" if env not in ["dev", "qa", "pdn"] else env,
+                platform_to_scan=dict_args["platform"],
+                secret_tool=secret_tool,
+                secret_external_checks=dict_args["token_external_checks"]
             )
         else:
             print(f"Tool skipped by DevSecOps policy")
@@ -75,7 +73,9 @@ class IacScan:
             path_file_results=path_file_results,
             custom_message_break_build=config_tool_core.message_info_engine_iac,
             scope_pipeline=config_tool_core.scope_pipeline,
-            stage_pipeline=self.devops_platform_gateway.get_variable("stage").capitalize(),
+            stage_pipeline=self.devops_platform_gateway.get_variable(
+                "stage"
+            ).capitalize(),
         )
 
         return findings_list, input_core
@@ -95,14 +95,25 @@ class IacScan:
             config_tool.exclusions_scope = config_tool.exclusions.get(
                 config_tool.scope_pipeline
             ).get(tool)
-            skip_tool = "true" if config_tool.exclusions.get(config_tool.scope_pipeline).get("SKIP_TOOL") else "false"
-            
-        if(dict_args["folder_path"]):
-            if config_tool.update_service_file_name_cft == "True" and "cloudformation" in dict_args["platform"]:
+            skip_tool = (
+                "true"
+                if config_tool.exclusions.get(config_tool.scope_pipeline).get(
+                    "SKIP_TOOL"
+                )
+                else "false"
+            )
+
+        if dict_args["folder_path"]:
+            if (
+                config_tool.update_service_file_name_cft == "True"
+                and "cloudformation" in dict_args["platform"]
+            ):
                 files = os.listdir(os.path.join(os.getcwd(), dict_args["folder_path"]))
                 if len(files) > 0:
                     name_file, _ = os.path.splitext(files[0])
-                    config_tool.scope_pipeline = f"{config_tool.scope_pipeline}_{name_file}"
+                    config_tool.scope_pipeline = (
+                        f"{config_tool.scope_pipeline}_{name_file}"
+                    )
 
             folders_to_scan = [dict_args["folder_path"]]
         else:
