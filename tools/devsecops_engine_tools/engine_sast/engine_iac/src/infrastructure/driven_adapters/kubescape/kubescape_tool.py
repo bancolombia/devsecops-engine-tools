@@ -96,7 +96,7 @@ class KubescapeTool(ToolGateway):
 
         self.execute_kubescape(folders_to_scan, command_prefix)
 
-    def run_tool(self, config_tool, folders_to_scan, environment, platform_to_scan, secret_tool):
+    def run_tool(self, config_tool, folders_to_scan, platform_to_scan, **kwargs):
 
         if folders_to_scan and "k8s" in platform_to_scan:
 

@@ -273,7 +273,7 @@ class TestCheckovTool(unittest.TestCase):
         self.checkov_tool.TOOL_CHECKOV = "CHECKOV"
 
         findings_list, file_from_tool = self.checkov_tool.run_tool(
-            config_tool, folders_to_scan, environment, platform, secret_tool
+            config_tool, folders_to_scan, environment, platform, secret_tool, secret_external_checks="github:token"
         )
 
         self.assertEqual(findings_list, [])

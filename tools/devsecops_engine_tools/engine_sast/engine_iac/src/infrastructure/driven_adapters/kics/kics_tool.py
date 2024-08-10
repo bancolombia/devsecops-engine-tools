@@ -111,7 +111,7 @@ class KicsTool(ToolGateway):
         github_api.unzip_file(name_zip, directory_assets)
 
     def run_tool(
-            self, config_tool, folders_to_scan, environment, platform_to_scan, secret_tool
+            self, config_tool, folders_to_scan, **kwargs
     ):
         kics_version = config_tool[self.TOOL_KICS]["VERSION"]
         path_kics = config_tool[self.TOOL_KICS]["PATH_KICS"]

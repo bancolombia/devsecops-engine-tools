@@ -283,7 +283,7 @@ class TestKicsTool(unittest.TestCase):
             }
         }
 
-        result, path = self.kics_tool.run_tool(mock_config_tool, ['folder1', 'folder2'], None, 'k8s', None)
+        result, path = self.kics_tool.run_tool(mock_config_tool, ['folder1', 'folder2'], platform_to_scan='k8s')
 
         mock_get_assets.assert_called_once_with('1.2.3')
         mock_select_os.assert_called_once_with('Linux', ['folder1', 'folder2'], mock_config_tool, 'mock/path/kics')
@@ -309,7 +309,7 @@ class TestKicsTool(unittest.TestCase):
             }
         }
 
-        result, path = self.kics_tool.run_tool(mock_config_tool, ['folder1', 'folder2'], None, 'k8s', None)
+        result, path = self.kics_tool.run_tool(mock_config_tool, ['folder1', 'folder2'], platform_to_scan='k8s')
 
         mock_get_assets.assert_called_once_with('1.2.3')
         mock_select_os.assert_called_once_with('Linux', ['folder1', 'folder2'], mock_config_tool, 'mock/path/kics')
