@@ -12,9 +12,7 @@ from devsecops_engine_tools.engine_utilities.ssh.managment_private_key import (
 
 
 def test_decode_base64():
-    secret_data = {"key1": "c2VjcmV0MQ==", "key2": "c2VjcmV0Mg=="}
-    key_name = "key1"
-    result = decode_base64(secret_data, key_name)
+    result = decode_base64("c2VjcmV0MQ==")
     assert result == "secret1"
 
 
