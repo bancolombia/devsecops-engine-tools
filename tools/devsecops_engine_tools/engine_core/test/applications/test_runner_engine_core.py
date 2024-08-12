@@ -97,6 +97,7 @@ def test_get_inputs_from_cli(mock_parse_args):
     mock_args.token_vulnerability_management = None
     mock_args.token_engine_container = None
     mock_args.token_engine_dependencies = None
+    mock_args.token_external_checks = None
     mock_args.xray_mode = "scan"
 
     # Mock the parse_args method
@@ -119,6 +120,7 @@ def test_get_inputs_from_cli(mock_parse_args):
         "token_vulnerability_management": None,
         "token_engine_container": None,
         "token_engine_dependencies": None,
+        "token_external_checks": None,
         "xray_mode": "scan",
     }
 
