@@ -1,4 +1,3 @@
-import subprocess
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.images_gateway import (
     ImagesGateway,
 )

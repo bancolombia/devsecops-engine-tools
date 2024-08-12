@@ -5,7 +5,6 @@ from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities.settings import SETTING_LOGGER
-from azure.devops.v7_1.git.models import GitVersionDescriptor
 
 logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 
