@@ -20,8 +20,6 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 def init_engine_dependencies(
     tool_run, tool_remote, tool_deserializator, dict_args, token, tool
 ):
-    sys.stdout.reconfigure(encoding="utf-8")
-
     remote_config = tool_remote.get_remote_config(
         dict_args["remote_config_repo"],
         "engine_sca/engine_dependencies/ConfigTool.json",

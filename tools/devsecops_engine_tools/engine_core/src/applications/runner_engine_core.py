@@ -142,6 +142,11 @@ def get_inputs_from_cli(args):
         help="Token to execute engine_dependencies if is necessary. If using xray as engine_dependencies tool, the token is the base64 of artifactory server config that can be obtain from jfrog cli with 'jf config export <ServerID>' command.",
     )
     parser.add_argument(
+        "--token_external_checks",
+        required=False,
+        help="Token for downloading external checks from engine_iac if is necessary. Ej: github:token, ssh:privatekey:pass",
+    )
+    parser.add_argument(
         "--xray_mode",
         choices=["scan", "audit"],
         required=False,
@@ -162,6 +167,7 @@ def get_inputs_from_cli(args):
         "token_vulnerability_management": args.token_vulnerability_management,
         "token_engine_container": args.token_engine_container,
         "token_engine_dependencies": args.token_engine_dependencies,
+        "token_external_checks": args.token_external_checks,
         "xray_mode": args.xray_mode,
     }
 
