@@ -6,9 +6,6 @@ import os
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
-from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.config_tool import (
-    ConfigTool,
-)
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_deserealizator import (
     KicsDeserealizator
 )
@@ -20,6 +17,7 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class KicsTool(ToolGateway):
+    TOOL_KICS = "KICS"
 
     def download(self, file, url):
         try:
@@ -83,19 +81,19 @@ class KicsTool(ToolGateway):
             logger.error(f"An error ocurred loading KICS results {ex}")
             return None
 
-    def select_operative_system(self, os_platform, folders_to_scan, config_tool: ConfigTool, path_kics):
+    def select_operative_system(self, os_platform, folders_to_scan, config_tool, path_kics):
         command_prefix = path_kics
         if os_platform == "Linux":
             kics_zip = "kics_linux.zip"
-            url_kics = config_tool.kics_linux
+            url_kics = config_tool[self.TOOL_KICS]["KICS_LINUX"]
             command_prefix = self.install_tool(kics_zip, url_kics, command_prefix)
         elif os_platform == "Windows":
             kics_zip = "kics_windows.zip"
-            url_kics = config_tool.kics_windows
+            url_kics = config_tool[self.TOOL_KICS]["KICS_WINDOWS"]
             command_prefix = self.install_tool_windows(kics_zip, url_kics, command_prefix)
         elif os_platform == "Darwin":
             kics_zip = "kics_macos.zip"
-            url_kics = config_tool.kics_mac
+            url_kics = config_tool[self.TOOL_KICS]["KICS_MAC"]
             command_prefix = self.install_tool(kics_zip, url_kics, command_prefix)
         else:
             logger.warning(f"{os_platform} is not supported.")
@@ -113,11 +111,11 @@ class KicsTool(ToolGateway):
         github_api.unzip_file(name_zip, directory_assets)
 
     def run_tool(
-            self, config_tool: ConfigTool, folders_to_scan, environment, platform_to_scan, secret_tool
+            self, config_tool, folders_to_scan, **kwargs
     ):
-        kics_version = config_tool.version
-        path_kics = config_tool.path_kics
-        download_kics_assets = config_tool.download_kics_assets
+        kics_version = config_tool[self.TOOL_KICS]["VERSION"]
+        path_kics = config_tool[self.TOOL_KICS]["PATH_KICS"]
+        download_kics_assets = config_tool[self.TOOL_KICS]["DOWNLOAD_KICS_ASSETS"]
         if download_kics_assets:
             self.get_assets(kics_version)
 
