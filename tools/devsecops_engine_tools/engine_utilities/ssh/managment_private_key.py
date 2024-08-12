@@ -3,9 +3,8 @@ import pexpect
 import base64
 
 
-def decode_base64(secret_data, key_name):
-    key_name_secret = secret_data[key_name]
-    return base64.b64decode(key_name_secret).decode("utf-8")
+def decode_base64(secret_data):
+    return base64.b64decode(secret_data).decode("utf-8")
 
 
 def config_knowns_hosts(host, ssh_key):

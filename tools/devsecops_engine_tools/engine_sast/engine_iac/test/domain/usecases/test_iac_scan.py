@@ -23,6 +23,7 @@ class TestIacScan(unittest.TestCase):
             "folder_path": ".",
             "environment": "test",
             "platform": "cloudformation",
+            "token_external_checks": "token",
         }
         secret_tool = "example_secret"
         tool = "CHECKOV"
