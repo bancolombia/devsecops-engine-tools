@@ -173,7 +173,7 @@ jobs:
 
   deploy_dockerhub:
     needs:
-      - create-tag
+      - create_tag
     if: ${{ contains(github.ref,'refs/heads/trunk') }}
     runs-on: ubuntu-latest
     environment: release
