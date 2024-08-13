@@ -171,3 +171,11 @@ jobs:
       - name: Publish a Docker image to Dockerhub
         run: |
           docker image push bancolombia/devsecops-engine-tools:${{ env.VERSION }}
+
+      - name: Update repo description
+        uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          repository: bancolombia/devsecops-engine-tools
+          readme-filepath: docker/README.md
