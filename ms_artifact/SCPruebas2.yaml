@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-deployment
+  namespace: namespace
+  labels:
+    app.bancolombia.com.co/env: env
+    app.bancolombia.com.co/cost-center: cost-center
+    app.bancolombia.com.co/application-code: application-code
+    app.bancolombia.com.co/project: project-name
+    app.bancolombia.com.co/pmo: pmo
+spec:
+  replicas: replicas
+  selector:
+    matchLabels:
+      pod: service-pod
+  template:
+    metadata:
+      labels:
+        app: project-name
+        pod: service-pod
+        app.bancolombia.com.co/project: project-name
+        app_type: camelservice
+        deploymentconfig: service
+    spec:
+      initContainers:
+        - image: image
+          name: certificates
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            runAsUser: eclipse-temurin_11_alpine-uid
+            runAsGroup: eclipse-temurin_11_alpine-gid
+            fsGroup: eclipse-temurin_11_alpine-gid
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          env:
+            - name: KEY_PASSWORD
+              value: 'key-store-password'
+            - name: KEY_TRUST_PASSWORD
+              value: 'key-store-password'
+          volumeMounts:
+            - mountPath: /app/keystore
+              name: keystore-volume
+            - mountPath: /app/truststore
+              name: keystore-volume
+            - mountPath: /app/secret-manager-keys.sh
+              name: service-keys-script-volume
+              subPath: 'secret-manager-keys.sh'
+          command:
+            - /bin/sh
+            - -c
+            - |
+              /app/secret-manager-keys.sh && /bin/sh /app/keys-configuration.sh
+      restartPolicy: Always
+      serviceAccountName: project-name-iam-sa
+      containers:
+        - name: service-container
+          image: image
+          resources:
+            requests:
+              cpu: "100Mi"
+              memory: "100M"
+            limits:
+              cpu: "100Mi"
+              memory: "100M"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: eclipse-temurin_11_alpine-uid
+            runAsGroup: eclipse-temurin_11_alpine-gid
+            capabilities:
+              drop:
+                - all
+              add:
+                - NET_BIND_SERVICE
+          volumeMounts:
+            - mountPath: /app/keystore
+              name: keystore-volume
+            - mountPath: /app/truststore
+              name: keystore-volume
+            - mountPath: /app/secret-manager-keys.sh
+              name: service-keys-script-volume
+              subPath: 'secret-manager-keys.sh'
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: container-port
+            periodSeconds: probe-period-startup
+            timeoutSeconds: probe-period-startup
+            failureThreshold: probe-period-startup-failures
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: container-port
+              scheme: HTTP
+            timeoutSeconds: probe-period-liveness
+            periodSeconds: probe-period-liveness
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: container-port
+              scheme: HTTP
+            timeoutSeconds: probe-period-readiness
+            periodSeconds: probe-period-readiness
+          # resources:
+          #   requests:
+          #     cpu: "100Mi"
+          #     memory: "100M"
+          #   limits:
+          #     cpu: "100Mi"
+          #     memory: "100M"
+          ports:
+            - containerPort: container-port
+      volumes:
+        - name: keystore-volume
+          emptyDir: { }
+        - configMap:
+            defaultMode: 0777
+            name: service-keys-script
+          name: service-keys-script-volume
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              pod: service-pod

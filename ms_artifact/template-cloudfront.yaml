@@ -1,0 +1,2024 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Archivo para el despliegue del CloudFront
+
+# Definicion de parametros
+Parameters:
+  #Generales
+  project:
+    Description: Nombre del proyecto.
+    Type: String
+  environment:
+    Description: Ambiente donde se despliega.
+    Type: String
+  applicationcode:
+    Description: Codigo AW de la aplicacion.
+    Type: String
+  pmo:
+    Description: PMO del proyecto de la aplicacion
+    Type: String
+  costcenter:
+    Description: Centro de costos
+    Type: String
+  businessservice:
+    Description: Nombre del componente mayor al que pertenece la aplicacion
+    Type: String
+  channelname:
+    Description: Nombre del Canal
+    Type: String
+
+  DeployCloudFrontEdin:
+    Description: Define si se despliega CloudFront (si/no)
+    Type: String
+  DeployCloudFrontBetaEdin:
+    Description: Define si se despliega el CloudFront Beta (si/no)
+    Type: String
+  ActiveCloudFrontStagingEdin:
+    Description: Define si se activa el modo Despliegue Continuo para CloudFront Stanging (si/no)
+    Type: String
+  DeployValidationCaptchaEdin:
+    Description: Define si se despliega el Bucket para el validation captcha (si/no)
+    Type: String
+
+  # CloudFront
+  domainname:
+    Description: Dominio del sitio web
+    Type: String
+  domainnamestaging:
+    Description: Dominio del sitio web beta
+    Type: String
+  firstDomainname:
+    Description: Primer Dominio del sitio web registrado
+    Type: String
+  buckets3:
+    Description: Nombre del bucket donde se almacena el contenido estatico del sitio web SVI
+    Type: String
+  bucketcaptchas3:
+    Description: Nombre del bucket donde se almacena el contenido estatico del sitio web Captcha
+    Type: String
+  acmcertificatearn:
+    Description: ARN del certificado digital (para ambiente de produccion)
+    Type: String
+  FrontInterno:
+    Description: Define si el front que se va a desplegar es interno (si/no)
+    Type: String
+  PublicHZ:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: lz_PublicHZ
+  PrivateHZ:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: lz_PrivateHZ
+  ReglaRedesBanco:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: lz_ReglaRedesBanco
+  CFParadocApiDomainName:
+    Description: Dominio del servicio rest de Paradoc para el origen del CloudFront
+    Type: String
+  CFCanalEdinApiDomainName:
+    Description: Dominio del servicio rest del canal para el origen del CloudFront
+    Type: String
+  CFStagingCanalEdinApiDomainName:
+    Description: Dominio del servicio rest del canal para el origen del CloudFront Staging
+    Type: String
+  # Tags de clasificacion de la informacion
+  TagsSeguridad:
+    Description: Lista de valores para los tags de seguridad
+    Type: String
+  CFWafBlock:
+    Description: WAF asociado a la distribución de CloudFront posibles valores Global-Block1 , Global-Block2 , Global-Block3
+    Type: String
+  #EKS
+  namespace:
+    Description: nombre del namespace para el proyecto
+    Type: String
+  clusterid:
+    Description: Id Cluster de Kubernetes
+    Type: String
+  EmailHealthcheckCF:
+    Description: Email donde llegaran las alarmas al equipo FS
+    Type: String
+  buckets3staging:
+    Description: Email donde llegaran las alarmas al equipo FS
+    Type: String
+
+# Definicion de condiciones
+Conditions:
+  # Ambiente
+  envPdn:
+    Fn::Equals: [Ref: environment, "pdn"]
+  envDev:
+    Fn::Equals: [Ref: environment, "dev"]
+  envQa:
+    Fn::Equals: [Ref: environment, "qa"]
+  envDevQa:
+    Fn::Or:
+      - Fn::Equals: [Ref: environment, "dev"]
+      - Fn::Equals: [Ref: environment, "qa"]
+
+  EmailHealth:
+    Fn::Equals: [Ref: EmailHealthcheckCF, ""]
+
+  # Conditions CloudFront
+  DepCloudFrontEdin:
+    Fn::Equals: [Ref: DeployCloudFrontEdin, "si"]
+
+  DepValidationCaptchaEdin:
+    Fn::Equals: [Ref: DeployValidationCaptchaEdin, "si"]
+
+  DepCloudFrontBetaEdin:
+    Fn::And:
+      #- Condition: envQa
+      - Condition: envDev
+      - Fn::Equals: [Ref: DeployCloudFrontBetaEdin, "si"]
+  ActCloudFrontStagingEdin:
+    Fn::And:
+      - Condition: DepCloudFrontBetaEdin
+      - Fn::Equals: [Ref: ActiveCloudFrontStagingEdin, "si"]
+
+  CrearCertificadoEdin:
+    Fn::And:
+      - Condition: DepCloudFrontEdin
+      - Fn::Equals: [Ref: acmcertificatearn, ""]
+  CrearCertificadoStagingEdin:
+    Fn::And:
+      - Condition: DepCloudFrontBetaEdin
+      - Fn::Not:
+          - Condition: ActCloudFrontStagingEdin
+  ConCertificadoEdin:
+    Fn::And:
+      - Condition: DepCloudFrontEdin
+      - Fn::Not:
+          - Fn::Equals: [Ref: acmcertificatearn, ""]
+  CloudFrontInternoEdin:
+    Fn::Equals: [Ref: FrontInterno, "si"]
+  CrearBucketLoggingEdin:
+    Fn::And:
+      - Condition: envPdn
+      - Condition: DepCloudFrontEdin
+  CrearBucketLoggingDevQaEdin:
+    Fn::And:
+      - Condition: DepCloudFrontEdin
+      - Fn::Not:
+          - Condition: envPdn
+  CrearBucketLoggingBetaEdin:
+    Fn::And:
+      - Condition: DepCloudFrontBetaEdin
+      - Fn::Not:
+          - Condition: envPdn
+
+  #ACL
+  ACLConCertificadoProvistoPdnEdin:
+    Fn::And:
+      - Condition: envPdn
+      - Condition: ConCertificadoEdin
+
+  NoDeployCloudFrontEmptyDistributionEdin:
+    Fn::Equals: ["no", "si"]
+  # Fin Conditions CloudFront
+
+Resources:
+  # Inicio Despliegue de: CloudFront
+  #KMS key For Secret - CloudFrontSecretKey
+  CloudFrontSecretKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Enabled: true
+      EnableKeyRotation: true
+      PendingWindowInDays: "30"
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: Permite a la cuenta tener acceso sobre la llave
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::Join:
+                  ["", ["arn:aws:iam::", Ref: "AWS::AccountId", ":root"]]
+            Action:
+              - "kms:*"
+            Resource: "*"
+          - Sid: Permite al rol que crea el stack de cloudformation, administrar la llave
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::Sub: "arn:aws:iam::${AWS::AccountId}:role/cloudformation-service-deployment-role-vsts"
+            Action:
+              - kms:Describe*
+              - kms:Put*
+              - kms:Create*
+              - kms:Update*
+              - kms:Enable*
+              - kms:Revoke*
+              - kms:List*
+              - kms:Disable*
+              - kms:Get*
+              - kms:Delete*
+              - kms:ScheduleKeyDeletion
+              - kms:CancelKeyDeletion
+            Resource: "*"
+          - Sid: Deniega al rol que crea el stack de cloudformation, administrar la llave
+            Effect: Deny
+            Principal:
+              AWS:
+                Fn::Sub: "arn:aws:iam::${AWS::AccountId}:role/cloudformation-service-deployment-role-vsts"
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:GenerateDatakey
+            Resource: "*"
+            Condition:
+              StringNotEquals:
+                "aws:SourceAccount":
+                  Ref: "AWS::AccountId"
+                "kms:ViaService":
+                  - "elasticache.us-east-1.amazonaws.com"
+                  - "secretsmanager.us-east-1.amazonaws.com"
+          - Sid: Permite el uso de la llave
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::Join:
+                  ["", ["arn:aws:iam::", Ref: "AWS::AccountId", ":root"]]
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - "kms:DescribeKey"
+            Resource: "*"
+          - Sid: Permite el uso de la llave a rol devops-daticalsecrets
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::Sub: "arn:aws:iam::${AWS::AccountId}:role/devops-daticalsecrets"
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:DescribeKey
+            Resource: "*"
+          - Sid: Permite el uso de la llave a los recursos de la aplicación
+            Effect: Allow
+            Principal: "*"
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:DescribeKey
+            Resource: "*"
+            Condition:
+              StringEquals:
+                "aws:SourceAccount":
+                  Ref: "AWS::AccountId"
+                "kms:ViaService":
+                  - "sqs.us-east-1.amazonaws.com"
+                  - "s3.us-east-1.amazonaws.com"
+                  - "s3.amazonaws.com"
+          - Sid: Allow the Macie service-linked role to use the key
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-service-role/macie.amazonaws.com/AWSServiceRoleForAmazonMacie"
+            Action:
+              - kms:Decrypt
+            Resource: "*"
+      Tags:
+        - Key: "key-use"
+          Value: "rds"
+
+  CloudFrontSecretKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName:
+        Fn::Join:
+          [
+            "/",
+            [
+              "alias",
+              Ref: applicationcode,
+              Ref: project,
+              Ref: environment,
+              "cloudfront",
+            ],
+          ]
+      TargetKeyId:
+        Ref: CloudFrontSecretKey
+
+  # BUCKET CAPTCHA
+  S3BucketCaptchaEdin:
+    Type: AWS::S3::Bucket
+    Condition: DepValidationCaptchaEdin
+    Properties:
+      BucketName:
+        Ref: bucketcaptchas3
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+      VersioningConfiguration:
+        Status: Enabled
+      AccessControl: PublicRead
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        ## Etiquetas de seguridad
+        - Key: "bancolombia:clasificacion-confidencialidad"
+          Value: "interna"
+        - Key: "bancolombia:clasificacion-integridad"
+          Value: "sin impacto"
+        - Key: "bancolombia:clasificacion-disponibilidad"
+          Value: "sin impacto"
+        - Key: "bancolombia:dominio-informacion"
+          Value: "no"
+        - Key: "bancolombia:datos-personales"
+          Value: "no"
+        - Key: "bancolombia:cumplimiento"
+          Value: "no"
+  # POLITICA DEL BUCKET CAPTCHA
+  BucketPolicyCaptchaEdin:
+    Type: AWS::S3::BucketPolicy
+    Condition: DepValidationCaptchaEdin
+    Properties:
+      Bucket:
+        Ref: bucketcaptchas3
+      PolicyDocument:
+        Statement:
+          - Sid: "AccessonlyforCloudfrontOrigin"
+            Action: s3:GetObject
+            Effect: Allow
+            Resource:
+              Fn::Join: ["", ["arn:aws:s3:::", Ref: "bucketcaptchas3", /*]]
+            Principal:
+              AWS:
+                Fn::Join:
+                  [
+                    "",
+                    [
+                      "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ",
+                      Ref: "TheCloudFrontOriginAccessIdentityEdin",
+                    ],
+                  ]
+          - Sid: "AllowSSLRequestsOnly"
+            Action: s3:*
+            Effect: Deny
+            Resource:
+              Fn::Join: ["", ["arn:aws:s3:::", Ref: "bucketcaptchas3", /*]]
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+            Principal: "*"
+          
+  # BUCKET SVI
+  S3BucketEdin:
+    Type: AWS::S3::Bucket
+    Condition: DepCloudFrontEdin
+    Properties:
+      BucketName:
+        Ref: buckets3
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+              # SSEAlgorithm: aws:kms
+              # KMSMasterKeyID: !Ref CloudFrontSecretKey
+      VersioningConfiguration:
+        Status: Enabled
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        ## Etiquetas de seguridad
+        - Key: "bancolombia:clasificacion-confidencialidad"
+          Value: "interna"
+        - Key: "bancolombia:clasificacion-integridad"
+          Value: "sin impacto"
+        - Key: "bancolombia:clasificacion-disponibilidad"
+          Value: "sin impacto"
+        - Key: "bancolombia:dominio-informacion"
+          Value: "no"
+        - Key: "bancolombia:datos-personales"
+          Value: "no"
+        - Key: "bancolombia:cumplimiento"
+          Value: "no"
+  # POLITICA DEL BUCKET
+  BucketPolicyEdin:
+    Type: AWS::S3::BucketPolicy
+    Condition: DepCloudFrontEdin
+    Properties:
+      Bucket:
+        Ref: buckets3
+      PolicyDocument:
+        Statement:
+          - Sid: "AccessonlyforCloudfrontOrigin"
+            Action: s3:GetObject
+            Effect: Allow
+            Resource:
+              Fn::Join: ["", ["arn:aws:s3:::", Ref: "buckets3", /*]]
+            Principal:
+              AWS:
+                Fn::Join:
+                  [
+                    "",
+                    [
+                      "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ",
+                      Ref: "TheCloudFrontOriginAccessIdentityEdin",
+                    ],
+                  ]
+          - Sid: "AllowSSLRequestsOnly"
+            Action: s3:*
+            Effect: Deny
+            Resource:
+              Fn::Join: ["", ["arn:aws:s3:::", Ref: "buckets3", /*]]
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+            Principal: "*"
+  # BUCKET S3
+  S3BucketLoggingCloudFrontEdin:
+    Type: AWS::S3::Bucket
+    Condition: CrearBucketLoggingEdin
+    Properties:
+      BucketName:
+        Fn::Join:
+          [
+            "-",
+            [
+              Ref: applicationcode,
+              Ref: project,
+              Ref: environment,
+              s3-logging-cf,
+            ],
+          ]
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        ## Etiquetas de seguridad
+        - Key: "bancolombia:clasificacion-confidencialidad"
+          Value: "interna"
+        - Key: "bancolombia:clasificacion-integridad"
+          Value: "sin impacto"
+        - Key: "bancolombia:clasificacion-disponibilidad"
+          Value: "sin impacto"
+        - Key: "bancolombia:dominio-informacion"
+          Value: "no"
+        - Key: "bancolombia:datos-personales"
+          Value: "no"
+        - Key: "bancolombia:cumplimiento"
+          Value: "no"
+
+  S3BucketLoggingDevQaCloudFrontEdin:
+    Type: AWS::S3::Bucket
+    Condition: CrearBucketLoggingDevQaEdin
+    Properties:
+      BucketName:
+        Fn::Join:
+          [
+            "-",
+            [
+              Ref: applicationcode,
+              Ref: project,
+              Ref: environment,
+              s3-logging-cf,
+            ],
+          ]
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref CloudFrontSecretKey
+      VersioningConfiguration:
+        Status: Enabled
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        ## Etiquetas de seguridad
+        - Key: "bancolombia:clasificacion-confidencialidad"
+          Value: "interna"
+        - Key: "bancolombia:clasificacion-integridad"
+          Value: "sin impacto"
+        - Key: "bancolombia:clasificacion-disponibilidad"
+          Value: "sin impacto"
+        - Key: "bancolombia:dominio-informacion"
+          Value: "no"
+        - Key: "bancolombia:datos-personales"
+          Value: "no"
+        - Key: "bancolombia:cumplimiento"
+          Value: "no"
+
+  # Certificado Digital
+  CertificateEdin:
+    Type: Custom::Certificate
+    Condition: CrearCertificadoEdin
+    Properties:
+      DomainName: !Ref firstDomainname
+      ValidationMethod: DNS
+      ServiceToken:
+        Fn::Sub: "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-certificate-provider"
+
+  CertificateDNSRecordEdin:
+    Type: Custom::CertificateDNSRecord
+    Condition: CrearCertificadoEdin
+    DependsOn: CertificateEdin
+    Properties:
+      CertificateArn:
+        Ref: CertificateEdin
+      DomainName: !Ref firstDomainname
+      ServiceToken:
+        Fn::Sub: "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-certificate-provider"
+
+  DomainValidationRecordEdin:
+    Type: Custom::CreateRecordSet
+    Condition: CrearCertificadoEdin
+    DependsOn: CertificateDNSRecordEdin
+    Properties:
+      ServiceToken:
+        Fn::Sub: "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-resource-route53"
+      HostedZoneId:
+        Ref: PublicHZ
+      Name:
+        Fn::Sub: "${CertificateDNSRecordEdin.Name}"
+      Type:
+        Fn::Sub: "${CertificateDNSRecordEdin.Type}"
+      TTL: "60"
+      Weight: 1
+      SetIdentifier: !Ref firstDomainname
+      ResourceRecords:
+        Fn::Sub: "${CertificateDNSRecordEdin.Value}"
+
+  IssuedCertificateEdin:
+    Type: Custom::IssuedCertificate
+    Condition: CrearCertificadoEdin
+    DependsOn: DomainValidationRecordEdin
+    Properties:
+      CertificateArn:
+        Ref: CertificateEdin
+      ServiceToken:
+        Fn::Sub: "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-certificate-provider"
+  #Fin - Certificado Digital
+
+  # CLOUDFRONT
+  # CloudFront señuelo para la validación de la plantilla, no se despliega
+  TheCloudFrontEmptyDistributionEdin:
+    Type: AWS::CloudFront::Distribution
+    Condition: NoDeployCloudFrontEmptyDistributionEdin
+    Properties:
+      DistributionConfig:
+        Logging:
+          Bucket:
+            Fn::Join:
+              [
+                "",
+                [Ref: S3BucketLoggingDevQaCloudFrontEdin, ".s3.amazonaws.com"],
+              ]
+          IncludeCookies: false
+        Origins:
+          # Origin S3 Bucket
+          - DomainName:
+              Fn::Join: ["", [Ref: buckets3, ".s3.amazonaws.com"]]
+            Id: the-s3-bucket
+            S3OriginConfig:
+              OriginAccessIdentity:
+                Fn::Join:
+                  [
+                    "",
+                    [
+                      "origin-access-identity/cloudfront/",
+                      Ref: TheCloudFrontOriginAccessIdentityEdin,
+                    ],
+                  ]
+        Enabled: "true"
+        HttpVersion: http2
+        DefaultRootObject: index.html
+        CustomErrorResponses:
+          - ErrorCachingMinTTL: 300
+            ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        Aliases:
+          Fn::Split:
+            - ","
+            - Ref: domainname
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - HEAD
+            - GET
+          Compress: true
+          ForwardedValues:
+            QueryString: false
+          TargetOriginId: the-s3-bucket
+          ViewerProtocolPolicy: redirect-to-https
+          FunctionAssociations:
+            - EventType: viewer-response
+              FunctionARN: !GetAtt CloudFrontFunctionEdin.FunctionMetadata.FunctionARN
+        #Fin CacheBehaviors para CaptchaEdin, Edge-Service y Security-Filter
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertificateEdin
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+      Tags:
+        - Key: "FrontInterno"
+          Value:
+            Ref: FrontInterno
+        - Key: "bancolombia:front-interno"
+          Value:
+            Ref: FrontInterno
+        - Key: "bancolombia:clasificacion-confidencialidad"
+          Value: "interna"
+        - Key: "bancolombia:clasificacion-integridad"
+          Value: "impacto critico"
+        - Key: "bancolombia:clasificacion-disponibilidad"
+          Value: "impacto critico"
+        - Key: "bancolombia:dominio-informacion"
+          Value: "canales"
+        - Key: "bancolombia:datos-personales"
+          Value: "no"
+        - Key: "bancolombia:cumplimiento"
+          Value: "pci-bia"
+  AlarmDDoSCertificadoGeneradoCloudFrontEmptyEdin:
+    Type: AWS::CloudWatch::Alarm
+    Condition: NoDeployCloudFrontEmptyDistributionEdin
+    DependsOn: [TheCloudFrontEmptyDistributionEdin, AlarmSNSTopicEdin]
+    Properties:
+      AlarmDescription: DDoSAttack
+      AlarmName:
+        Fn::Join: ["-", ["DDoSAttackCF", Ref: applicationcode]]
+      Namespace: AWS/DDoSProtection
+      MetricName: DDoSDetected
+      Dimensions:
+        - Name: CloudfrontArn
+          Value:
+            Fn::Sub:
+              - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CFDistribution}"
+              - CFDistribution:
+                  Ref: TheCloudFrontEmptyDistributionEdin
+      ComparisonOperator: GreaterThanThreshold
+      Period: "60"
+      EvaluationPeriods: "2"
+      Statistic: Maximum
+      Threshold: "0.0"
+      AlarmActions:
+        - Ref: AlarmSNSTopicEdin
+
+  setCustomACLUpdateDevQaCertificadoCloudFrontEmptyEdin:
+    Type: 'Custom::customaclupdate'
+    Condition: NoDeployCloudFrontEmptyDistributionEdin
+    DependsOn: TheCloudFrontEmptyDistributionEdin
+    Properties:
+      ServiceToken: 'arn:aws:sns:us-east-1:831688958710:Antiddos-ACLUpdate-sns'
+      resource_arn: !Join ['',[ 'arn:aws:cloudfront::', !Ref AWS::AccountId,':distribution/',!Ref TheCloudFrontEmptyDistributionEdin]]
+      scope: CLOUDFRONT
+      Kinesis_arn: !Sub 'arn:aws:firehose:${AWS::Region}:${AWS::AccountId}:deliverystream/aws-waf-logs-devqa-${AWS::AccountId}'
+      ipset_interno:
+        Fn::If:
+          - CloudFrontInternoEdin
+          - IPSetInterno
+          - Ref: AWS::NoValue
+      change_webacl: true
+      waf_name:
+        Fn::If:
+          - CloudFrontInternoEdin
+          - Global-Block-Interna
+          - Ref: CFWafBlock
+  #Fin CloudFront señuelo
+  ParadocCachePolicy:
+    Condition: DepCloudFrontEdin
+    Type: 'AWS::CloudFront::CachePolicy'
+    Properties:
+      CachePolicyConfig:
+        DefaultTTL: 0
+        MaxTTL: 0
+        MinTTL: 0
+        Name: !Sub cache-policy-CloudFront-Paradoc-${project}-${environment}
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingBrotli: false
+          EnableAcceptEncodingGzip: false
+          CookiesConfig:
+            CookieBehavior: 'none'
+          HeadersConfig:
+            HeaderBehavior: 'none'
+          QueryStringsConfig:
+            QueryStringBehavior: 'none'
+  
+  ParadocOriginRequestPolicy:
+    Condition: DepCloudFrontEdin
+    Type: 'AWS::CloudFront::OriginRequestPolicy'
+    Properties:
+      OriginRequestPolicyConfig:
+        Name: !Sub origin-request-policy-CloudFront-Paradoc-${project}-${environment}
+        CookiesConfig: 
+          CookieBehavior: 'none'
+        HeadersConfig: 
+          HeaderBehavior: 'none'
+        QueryStringsConfig: 
+          QueryStringBehavior: 'all'
+          
+  # Con Certificado Generado
+  TheCloudFrontDistributionEdin:
+    Type: AWS::CloudFront::Distribution
+    Condition: CrearCertificadoEdin
+    DependsOn:
+      - CloudFrontFunctionEdin
+      - IssuedCertificateEdin
+      - S3BucketLoggingDevQaCloudFrontEdin
+    Properties:
+      DistributionConfig:
+        Logging:
+          Bucket:
+            Fn::Join:
+              [
+                "",
+                [Ref: S3BucketLoggingDevQaCloudFrontEdin, ".s3.amazonaws.com"],
+              ]
+          IncludeCookies: false
+        Origins:
+          # Origin S3 Bucket CaptchaEdin
+          - DomainName:
+              Fn::Join: ["", [Ref: bucketcaptchas3, ".s3.amazonaws.com"]]
+            Id: the-s3-bucket-captcha
+            S3OriginConfig:
+              OriginAccessIdentity:
+                Fn::Join:
+                  [
+                    "",
+                    [
+                      "origin-access-identity/cloudfront/",
+                      Ref: TheCloudFrontOriginAccessIdentityEdin,
+                    ],
+                  ]
+          # Origin S3 Bucket
+          - DomainName:
+              Fn::Join: ["", [Ref: buckets3, ".s3.amazonaws.com"]]
+            Id: the-s3-bucket
+            S3OriginConfig:
+              OriginAccessIdentity:
+                Fn::Join:
+                  [
+                    "",
+                    [
+                      "origin-access-identity/cloudfront/",
+                      Ref: TheCloudFrontOriginAccessIdentityEdin,
+                    ],
+                  ]
+          # Origin ELB Api Service
+          - DomainName:
+              Fn::Join: ["", [Ref: CFCanalEdinApiDomainName, ""]]
+            Id: the-elb-api-service
+            CustomOriginConfig:
+              HTTPSPort: "443"
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.2
+          # Origin Paradoc
+          - DomainName:
+              Fn::Join: ["", [Ref: CFParadocApiDomainName, ""]]
+            Id: the-paradoc
+            CustomOriginConfig:
+              HTTPSPort: "443"
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.2
+            #OriginPath: '/edin'
+        Enabled: "true"
+        # ContinuousDeploymentPolicyId: !If
+        #     - ActCloudFrontStagingEdin
+        #     - !Ref CloudFrontStagingContinuousDeploymentPolicyEdin
+        #     - !Ref AWS::NoValue
+        HttpVersion: http2
+        DefaultRootObject: index.html
+        CustomErrorResponses:
+          - ErrorCachingMinTTL: 300
+            ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        Aliases:
+          Fn::Split:
+            - ","
+            - Ref: domainname
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - DELETE
+            - GET
+            - HEAD
+            - OPTIONS
+            - PATCH
+            - POST
+            - PUT
+          Compress: true
+          ForwardedValues:
+            QueryString: false
+          TargetOriginId: the-s3-bucket
+          ViewerProtocolPolicy: redirect-to-https
+          FunctionAssociations:
+            - EventType: viewer-response
+              FunctionARN: !GetAtt CloudFrontFunctionEdin.FunctionMetadata.FunctionARN
+        #CacheBehaviors para Edge-Service y Security-Filter
+        CacheBehaviors:
+          - PathPattern: "/ParadocBridge/*"
+            AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            CachePolicyId: !Ref ParadocCachePolicy # 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # !Ref ParadocCachePolicy
+            OriginRequestPolicyId: !Ref ParadocOriginRequestPolicy
+            Compress: true
+            TargetOriginId: the-paradoc
+            ViewerProtocolPolicy: redirect-to-https
+            FunctionAssociations:
+              - !Ref AWS::NoValue
+          - PathPattern: "/edin/api/*"
+            AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            Compress: true
+            ForwardedValues:
+              QueryString: false
+            TargetOriginId: the-elb-api-service
+            ViewerProtocolPolicy: redirect-to-https
+            FunctionAssociations:
+              - EventType: viewer-response
+                FunctionARN: !GetAtt CloudFrontFunctionEdin.FunctionMetadata.FunctionARN
+          - PathPattern: "/edin/edge-service/*"
+            AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            Compress: true
+            ForwardedValues:
+              QueryString: false
+            TargetOriginId: the-elb-api-service
+            ViewerProtocolPolicy: redirect-to-https
+            FunctionAssociations:
+              - EventType: viewer-response
+                FunctionARN: !GetAtt CloudFrontFunctionEdin.FunctionMetadata.FunctionARN
+          - PathPattern: "/CaptchaEdin/*"
+            AllowedMethods:
+              - HEAD
+              - GET
+            Compress: true
+            ForwardedValues:
+              QueryString: false
+            TargetOriginId: the-s3-bucket-captcha
+            ViewerProtocolPolicy: redirect-to-https
+        #Fin CacheBehaviors para CaptchaEdin, Edge-Service y Security-Filter
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertificateEdin
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+      Tags:
+        - Key: "FrontInterno"
+          Value:
+            Ref: FrontInterno
+        - Key: "bancolombia:front-interno"
+          Value:
+            Ref: FrontInterno
+        - Key: "bancolombia:clasificacion-confidencialidad"
+          Value: "interna"
+        - Key: "bancolombia:clasificacion-integridad"
+          Value: "impacto critico"
+        - Key: "bancolombia:clasificacion-disponibilidad"
+          Value: "impacto critico"
+        - Key: "bancolombia:dominio-informacion"
+          Value: "canales"
+        - Key: "bancolombia:datos-personales"
+          Value: "no"
+        - Key: "bancolombia:cumplimiento"
+          Value: "pci-bia"
+
+  # Con certificado provisto
+  TheCloudFrontDistributionCertificadoEdin:
+    Type: AWS::CloudFront::Distribution
+    Condition: ConCertificadoEdin
+    DependsOn:
+      - CloudFrontFunctionEdin
+      - S3BucketLoggingCloudFrontEdin
+    Properties:
+      DistributionConfig:
+        Logging:
+          Bucket:
+            Fn::Join:
+              ["", [Ref: S3BucketLoggingCloudFrontEdin, ".s3.amazonaws.com"]]
+        Origins:
+          # Origin S3 Bucket CaptchaEdin
+          - DomainName:
+              Fn::Join: ["", [Ref: bucketcaptchas3, ".s3.amazonaws.com"]]
+            Id: the-s3-bucket-captcha
+            S3OriginConfig:
+              OriginAccessIdentity:
+                Fn::Join:
+                  [
+                    "",
+                    [
+                      "origin-access-identity/cloudfront/",
+                      Ref: TheCloudFrontOriginAccessIdentityEdin,
+                    ],
+                  ]
+          # Origin S3 Bucket
+          - DomainName:
+              Fn::Join: ["", [Ref: buckets3, ".s3.amazonaws.com"]]
+            Id: the-s3-bucket
+            S3OriginConfig:
+              OriginAccessIdentity:
+                Fn::Join:
+                  [
+                    "",
+                    [
+                      "origin-access-identity/cloudfront/",
+                      Ref: TheCloudFrontOriginAccessIdentityEdin,
+                    ],
+                  ]
+          # Origin ELB Api Service
+          - DomainName:
+              Fn::Join: ["", [Ref: CFCanalEdinApiDomainName, ""]]
+            Id: the-elb-api-service
+            CustomOriginConfig:
+              HTTPSPort: "443"
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.2
+          # Origin Paradoc
+          - DomainName:
+              Fn::Join: ["", [Ref: CFParadocApiDomainName, ""]]
+            Id: the-paradoc
+            CustomOriginConfig:
+              HTTPSPort: "443"
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.2
+        Enabled: "true"
+        HttpVersion: http2
+        DefaultRootObject: index.html
+        CustomErrorResponses:
+          - ErrorCachingMinTTL: 300
+            ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        Aliases:
+          Fn::Split:
+            - ","
+            - Ref: domainname
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - DELETE
+            - GET
+            - HEAD
+            - OPTIONS
+            - PATCH
+            - POST
+            - PUT
+          Compress: true
+          ForwardedValues:
+            QueryString: false
+          TargetOriginId: the-s3-bucket
+          ViewerProtocolPolicy: redirect-to-https
+          FunctionAssociations:
+            - EventType: viewer-response
+              FunctionARN: !GetAtt CloudFrontFunctionEdin.FunctionMetadata.FunctionARN
+        #CacheBehaviors para CaptchaEdin, Edge-Service y Security-Filter
+        CacheBehaviors:
+          - PathPattern: "/ParadocBridge/*"
+            AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            CachePolicyId: !Ref ParadocCachePolicy # 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # !Ref ParadocCachePolicy
+            OriginRequestPolicyId: !Ref ParadocOriginRequestPolicy
+            Compress: true
+            TargetOriginId: the-paradoc
+            ViewerProtocolPolicy: redirect-to-https
+            FunctionAssociations:
+              - !Ref AWS::NoValue
+          - PathPattern: "/edin/api/*"
+            AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            Compress: true
+            ForwardedValues:
+              QueryString: false
+            TargetOriginId: the-elb-api-service
+            ViewerProtocolPolicy: redirect-to-https
+            FunctionAssociations:
+              - EventType: viewer-response
+                FunctionARN: !GetAtt CloudFrontFunctionEdin.FunctionMetadata.FunctionARN
+          - PathPattern: "/edin/edge-service/*"
+            AllowedMethods:
+              - DELETE
+              - GET
+              - HEAD
+              - OPTIONS
+              - PATCH
+              - POST
+              - PUT
+            Compress: true
+            ForwardedValues:
+              QueryString: false
+            TargetOriginId: the-elb-api-service
+            ViewerProtocolPolicy: redirect-to-https
+            FunctionAssociations:
+              - EventType: viewer-response
+                FunctionARN: !GetAtt CloudFrontFunctionEdin.FunctionMetadata.FunctionARN
+          - PathPattern: "/CaptchaEdin/*"
+            AllowedMethods:
+              - HEAD
+              - GET
+            Compress: true
+            ForwardedValues:
+              QueryString: false
+            TargetOriginId: the-s3-bucket-captcha
+            ViewerProtocolPolicy: redirect-to-https
+        #Fin CacheBehaviors para CaptchaEdin, Edge-Service y Security-Filter
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: !Ref acmcertificatearn
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+      Tags:
+        - Key: "FrontInterno"
+          Value:
+            Ref: FrontInterno
+        - Key: "bancolombia:clasificacion-confidencialidad"
+          Value: "interna"
+        - Key: "bancolombia:clasificacion-integridad"
+          Value: "impacto critico"
+        - Key: "bancolombia:clasificacion-disponibilidad"
+          Value: "impacto critico"
+        - Key: "bancolombia:dominio-informacion"
+          Value: "canales"
+        - Key: "bancolombia:datos-personales"
+          Value: "no"
+        - Key: "bancolombia:cumplimiento"
+          Value: "pci-bia"
+
+  #ORIGIN ACCESS IDENTITY
+  TheCloudFrontOriginAccessIdentityEdin:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Condition: DepCloudFrontEdin
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment:
+          Fn::Sub: "CloudFront OAI for ${firstDomainname}"
+  
+  # TheCloudFrontStagingOriginAccessIdentityEdin:
+  #   Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+  #   Condition: DepCloudFrontBetaEdin
+  #   Properties:
+  #     CloudFrontOriginAccessIdentityConfig:
+  #       Comment:
+  #         Fn::Sub: "CloudFront OAI for ${domainnamestaging}"
+
+  # ALIAS EN ROUTE 53
+  CreateAliasEdin:
+    Type: Custom::CreateAlias
+    DependsOn: TheCloudFrontDistributionEdin
+    Condition: CrearCertificadoEdin
+    Properties:
+      ServiceToken:
+        Fn::Sub: "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-create-cloudfront-alias"
+      PublicHostedZoneId:
+        Ref: PublicHZ
+      PrivateHostedZoneId:
+        Ref: PrivateHZ
+      Name: !Ref firstDomainname
+      Type: "A"
+      DNSName:
+        Fn::GetAtt: [TheCloudFrontDistributionEdin, DomainName]
+  CreateAliasConCertificadoEdin:
+    Type: Custom::CreateAlias
+    DependsOn: TheCloudFrontDistributionCertificadoEdin
+    Condition: ConCertificadoEdin
+    Properties:
+      ServiceToken:
+        Fn::Sub: "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-create-cloudfront-alias"
+      PublicHostedZoneId:
+        Ref: PublicHZ
+      PrivateHostedZoneId:
+        Ref: PrivateHZ
+      Name: !Ref firstDomainname
+      Type: "A"
+      DNSName:
+        Fn::GetAtt: [TheCloudFrontDistributionCertificadoEdin, DomainName]
+
+  # Configuracion para engagement proactivo de shield advanced
+  # Health Check para distribucion de CF con certificado provisto
+  myHealthCheckCFCertificadoProvistoEdin:
+    Type: "AWS::Route53::HealthCheck"
+    Condition: ConCertificadoEdin
+    DependsOn: TheCloudFrontDistributionCertificadoEdin
+    Properties:
+      HealthCheckConfig:
+        FullyQualifiedDomainName:
+          Fn::GetAtt: [TheCloudFrontDistributionCertificadoEdin, DomainName] ###dominio nativo del cloudfront
+        Port: 443
+        Type: HTTPS
+        RequestInterval: 30
+        FailureThreshold: 3
+      HealthCheckTags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              [
+                "-",
+                [
+                  Ref: applicationcode,
+                  Ref: project,
+                  Ref: environment,
+                  Ref: TheCloudFrontDistributionCertificadoEdin,
+                ],
+              ]
+
+  # Health Check para distribucion de CF con certificado generado
+  myHealthCheckCFCertificadoGeneradoEdin:
+    Type: "AWS::Route53::HealthCheck"
+    Condition: CrearCertificadoEdin
+    DependsOn: TheCloudFrontDistributionEdin
+    Properties:
+      HealthCheckConfig:
+        FullyQualifiedDomainName:
+          Fn::GetAtt: [TheCloudFrontDistributionEdin, DomainName]
+        Port: 443
+        Type: HTTPS
+        RequestInterval: 30
+        FailureThreshold: 3
+      HealthCheckTags:
+        - Key: Name
+          Value:
+            Fn::Join:
+              [
+                "-",
+                [
+                  Ref: applicationcode,
+                  Ref: project,
+                  Ref: environment,
+                  Ref: TheCloudFrontDistributionEdin,
+                ],
+              ]
+
+  # Alarma vinculada al Cloudfront con certificado provisto
+  AlarmHealthCheckCFCertificadoProvistoEdin:
+    Type: AWS::CloudWatch::Alarm
+    Condition: ConCertificadoEdin
+    DependsOn: [myHealthCheckCFCertificadoProvistoEdin, AlarmSNSTopicEdin]
+    Properties:
+      AlarmDescription: Health Check Alarm
+      AlarmName:
+        Fn::Join: ["-", ["HealthCheckAlarmCF", Ref: applicationcode]]
+      Namespace: AWS/Route53
+      MetricName: HealthCheckStatus
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: HealthCheckId
+          Value:
+            Ref: myHealthCheckCFCertificadoProvistoEdin
+      ComparisonOperator: LessThanThreshold
+      Period: "60"
+      EvaluationPeriods: "5"
+      Statistic: Minimum
+      Threshold: "1.0"
+      AlarmActions:
+        - Ref: AlarmSNSTopicEdin
+
+  # Alarma vinculada al Cloudfront con certificado generado
+  AlarmHealthCheckCFCertificadoGeneradoEdin:
+    Type: AWS::CloudWatch::Alarm
+    Condition: CrearCertificadoEdin
+    DependsOn: [myHealthCheckCFCertificadoGeneradoEdin, AlarmSNSTopicEdin]
+    Properties:
+      AlarmDescription: Health Check Alarm
+      AlarmName:
+        Fn::Join: ["-", ["HealthCheckAlarmCF", Ref: applicationcode]]
+      Namespace: AWS/Route53
+      MetricName: HealthCheckStatus
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: HealthCheckId
+          Value:
+            Ref: myHealthCheckCFCertificadoGeneradoEdin
+      ComparisonOperator: LessThanThreshold
+      Period: "60"
+      EvaluationPeriods: "5"
+      Statistic: Minimum
+      Threshold: "1.0"
+      AlarmActions:
+        - Ref: AlarmSNSTopicEdin
+
+  AlarmACLblockEdin:
+    Type: AWS::CloudWatch::Alarm
+    Condition: DepCloudFrontEdin
+    DependsOn: AlarmSNSTopicEdin
+    Properties:
+      AlarmDescription: ACL Block
+      AlarmName:
+        Fn::Join: ["-", ["ACLblockAlarmCF", Ref: applicationcode]]
+      Namespace: AWS/WAFV2
+      MetricName: BlockedRequests
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: Rule
+          Value: RateBasedRuleBlock
+        - Name: Region
+          Value:
+            Ref: "AWS::Region"
+        - Name: WebACL
+          Value:
+            Ref: "AWS::StackName"
+      ComparisonOperator: GreaterThanThreshold
+      Period: "60"
+      DatapointsToAlarm: "1"
+      EvaluationPeriods: "1"
+      Statistic: Sum
+      Threshold: "0"
+      AlarmActions:
+        - Ref: AlarmSNSTopicEdin
+
+  AlarmACLCountEdin:
+    Type: AWS::CloudWatch::Alarm
+    Condition: DepCloudFrontEdin
+    DependsOn: AlarmSNSTopicEdin
+    Properties:
+      AlarmDescription: ACL Count
+      AlarmName:
+        Fn::Join: ["-", ["ACLCountAlarmCF", Ref: applicationcode]]
+      Namespace: AWS/WAFV2
+      MetricName: CountedRequests
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: Rule
+          Value: RateBasedRuleCount
+        - Name: WebACL
+          Value:
+            Ref: "AWS::StackName"
+      ComparisonOperator: GreaterThanThreshold
+      Period: "60"
+      DatapointsToAlarm: "1"
+      EvaluationPeriods: "1"
+      Statistic: Sum
+      Threshold: "0"
+      AlarmActions:
+        - Ref: AlarmSNSTopicEdin
+
+  AlarmDDoSCFCertificadoProvistoEdin:
+    Type: AWS::CloudWatch::Alarm
+    Condition: ConCertificadoEdin
+    DependsOn: [TheCloudFrontDistributionCertificadoEdin, AlarmSNSTopicEdin]
+    Properties:
+      AlarmDescription: DDoSAttack
+      AlarmName:
+        Fn::Join: ["-", ["DDoSAttackCF", Ref: applicationcode]]
+      Namespace: AWS/DDoSProtection
+      MetricName: DDoSDetected
+      Dimensions:
+        - Name: CloudfrontArn
+          Value:
+            Fn::Sub:
+              - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CFDistribution}"
+              - CFDistribution:
+                  Ref: TheCloudFrontDistributionCertificadoEdin
+      ComparisonOperator: GreaterThanThreshold
+      Period: "60"
+      EvaluationPeriods: "2"
+      Statistic: Maximum
+      Threshold: "0.0"
+      AlarmActions:
+        - Ref: AlarmSNSTopicEdin
+
+  AlarmDDoSCertificadoGeneradoEdin:
+    Type: AWS::CloudWatch::Alarm
+    Condition: CrearCertificadoEdin
+    DependsOn: [TheCloudFrontDistributionEdin, AlarmSNSTopicEdin]
+    Properties:
+      AlarmDescription: DDoSAttack
+      AlarmName:
+        Fn::Join: ["-", ["DDoSAttackCF", Ref: applicationcode]]
+      Namespace: AWS/DDoSProtection
+      MetricName: DDoSDetected
+      Dimensions:
+        - Name: CloudfrontArn
+          Value:
+            Fn::Sub:
+              - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CFDistribution}"
+              - CFDistribution:
+                  Ref: TheCloudFrontDistributionEdin
+      ComparisonOperator: GreaterThanThreshold
+      Period: "60"
+      EvaluationPeriods: "2"
+      Statistic: Maximum
+      Threshold: "0.0"
+      AlarmActions:
+        - Ref: AlarmSNSTopicEdin
+
+  AlarmSNSTopicEdin:
+    Type: AWS::SNS::Topic
+    Condition: DepCloudFrontEdin
+    Properties:
+      KmsMasterKeyId: !Ref CloudFrontSecretKey
+      Subscription:
+        - Endpoint: OPC05Capacidadestransversales@bancolombia.onmicrosoft.com
+          Protocol: email
+        - Endpoint: Gestion_AntiDDoS@bancolombia.com.co
+          Protocol: email
+        - Endpoint:
+            Fn::If:
+              - EmailHealth
+              - Fn::Join: ["", ["", Gestion_AntiDDoS@bancolombia.com.co, ""]]
+              - Fn::Join: ["", ["", Ref: EmailHealthcheckCF, ""]]
+          Protocol: email
+      Tags:
+      ## Etiquetas de seguridad
+        - Key: "bancolombia:clasificacion-confidencialidad"
+          Value: "interna"
+        - Key: "bancolombia:clasificacion-integridad"
+          Value: "sin impacto"
+        - Key: "bancolombia:clasificacion-disponibilidad"
+          Value: "sin impacto"
+        - Key: "bancolombia:dominio-informacion"
+          Value: "no"
+        - Key: "bancolombia:datos-personales"
+          Value: "no"
+        - Key: "bancolombia:cumplimiento"
+          Value: "no"
+
+  AnomalyDetectorOnBlockedRequestEdin:
+    Type: "AWS::CloudWatch::AnomalyDetector"
+    Condition: DepCloudFrontEdin
+    DeletionPolicy: Delete
+    Properties:
+      MetricName: BlockedRequests
+      Namespace: AWS/WAFV2
+      Stat: Sum
+      Dimensions:
+        - Name: Rule
+          Value: ALL
+        - Name: Region
+          Value:
+            Ref: "AWS::Region"
+        - Name: WebACL
+          Value:
+            Ref: "AWS::StackName"
+
+  # Alarma para control de la anomalia por request bloqueadas debido a aumento o disminucion
+  AlarmAnomalyDetectorEdin:
+    Type: AWS::CloudWatch::Alarm
+    Condition: DepCloudFrontEdin
+    DependsOn: AlarmSNSTopicEdin
+    Properties:
+      AlarmDescription: Anomaly Dectector Alarm
+      AlarmName:
+        Fn::Join: ["-", ["AnomalyDectectorAlarm", Ref: applicationcode]]
+      ComparisonOperator: LessThanLowerOrGreaterThanUpperThreshold
+      EvaluationPeriods: "2"
+      Metrics:
+        - Expression: ANOMALY_DETECTION_BAND(m1, 2)
+          Id: ad1
+        - Id: m1
+          MetricStat:
+            Metric:
+              MetricName: BlockedRequests
+              Namespace: AWS/WAFV2
+            Period: 60
+            Stat: Sum
+      ThresholdMetricId: ad1
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - Ref: AlarmSNSTopicEdin
+
+  # Custom resource para Cloudfront con certificado provisto
+  setProactiveEngagementCFCertificadoProvistoEdin:
+    Type: "Custom::wafsetloggingCloudfront"
+    Condition: ConCertificadoEdin
+    DependsOn:
+      [
+        TheCloudFrontDistributionCertificadoEdin,
+        myHealthCheckCFCertificadoProvistoEdin,
+      ]
+    Properties:
+      ServiceToken: "arn:aws:sns:us-east-1:831688958710:Antiddos-engagement-sns"
+      protectArn:
+        Fn::Sub:
+          - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CFDistribution}"
+          - CFDistribution:
+              Ref: TheCloudFrontDistributionCertificadoEdin
+      healthcheckarn:
+        Fn::Join:
+          [
+            "",
+            [
+              "arn:aws:route53::",
+              ":healthcheck/",
+              Ref: myHealthCheckCFCertificadoProvistoEdin,
+            ],
+          ]
+
+  # Custom resource para Cloudfront con certificado generado
+  setProactiveEngagementCFCertificadoGeneradoEdin:
+    Type: "Custom::wafsetloggingCloudfront"
+    Condition: CrearCertificadoEdin
+    DependsOn:
+      [TheCloudFrontDistributionEdin, myHealthCheckCFCertificadoGeneradoEdin]
+    Properties:
+      ServiceToken: "arn:aws:sns:us-east-1:831688958710:Antiddos-engagement-sns"
+      protectArn:
+        Fn::Sub:
+          - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CFDistribution}"
+          - CFDistribution:
+              Ref: TheCloudFrontDistributionEdin
+      healthcheckarn:
+        Fn::Join:
+          [
+            "",
+            [
+              "arn:aws:route53::",
+              ":healthcheck/",
+              Ref: myHealthCheckCFCertificadoGeneradoEdin,
+            ],
+          ]
+
+  ### recursos adicionales
+
+  setCustomACLUpdatePdnCertificadoProvistoEdin:
+    Type: "Custom::customaclupdate"
+    Condition: ACLConCertificadoProvistoPdnEdin
+    DependsOn: TheCloudFrontDistributionCertificadoEdin
+    Properties:
+      ServiceToken: "arn:aws:sns:us-east-1:831688958710:Antiddos-ACLUpdate-sns"
+      resource_arn:
+        Fn::Sub:
+          - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CFDistribution}"
+          - CFDistribution:
+              Ref: TheCloudFrontDistributionCertificadoEdin
+      scope: CLOUDFRONT
+      Kinesis_arn:
+        Fn::Sub: "arn:aws:firehose:${AWS::Region}:${AWS::AccountId}:deliverystream/aws-waf-logs-pdn-${AWS::AccountId}"
+      change_webacl: true
+      ipset_interno:
+        Fn::If:
+          - CloudFrontInternoEdin
+          - IPSetInterno
+          - Ref: AWS::NoValue
+      waf_name:
+        Fn::If:
+          - CloudFrontInternoEdin
+          - Global-Block-Interna
+          - Ref: CFWafBlock
+
+#Fin Despliegue de: CloudFront
+
+  ## Creación de CloudFront Function
+  #Configure Origin Response CloudFront
+  CloudFrontFunctionEdin:
+    Type: AWS::CloudFront::Function
+    Condition: DepCloudFrontEdin
+    Properties:
+      AutoPublish: true
+      FunctionCode: !Sub |
+        function handler(event) {
+          //Get contents of response
+          //CloudFront Function no soporta tipo Const, let y exports - Soporte ES 5.1
+          var response = event.response;
+          var headers = response.headers;
+          //Set new headers
+          //Se debe adicionar las reglas correspondientes al proyecto para la cabecera Content Security Policy
+          headers['content-security-policy'] = { value: "default-src * https://library-sdb.apps.bancolombia.com; script-src * 'unsafe-eval' 'unsafe-inline' https://library-sdb.apps.bancolombia.com; style-src 'self' 'unsafe-inline' https://library-sdb.apps.bancolombia.com; img-src 'self' https://library-sdb.apps.bancolombia.com data: https://www.google-analytics.com https://s3-api.us-geo.objectstorage.softlayer.net; frame-ancestors 'self' https://sucursalempresas.transaccionesbancolombia.com https://sucursalvirtualinversiones.grupobancolombia.com https://${firstDomainname} https://${CFParadocApiDomainName} https://sucursalvirtualpyme.bancolombia.com; upgrade-insecure-requests" };
+          headers['strict-transport-security'] = { value: 'max-age=63072000; preload' };
+          headers['x-content-type-options'] = { value: 'nosniff' };
+          headers['x-xss-protection'] = { value: '1; mode=block' };
+          headers['referrer-policy'] = { value: 'strict-origin-when-cross-origin' };
+          headers['accept-language'] = { value: 'es, es-co, en' };
+          headers['access-control-allow-origin'] = { value: 'https://${firstDomainname}' };
+          headers['x-permitted-cross-domain-policies'] = { value: 'master-only' };
+          headers['cache-control'] = { value: 'private, no-cache, no-store, max-age=0, no-transform' };
+          headers['pragma'] = { value: 'no-cache' };
+          headers['x-frame-options'] = { value: 'DENY' };
+          headers['expires'] = { value: '0' };
+          headers['server'] = { value: '' };
+          // Return modified response
+          return response;
+        }
+      FunctionConfig:
+        Comment: Security Headers Injection
+        Runtime: cloudfront-js-1.0
+      Name: !Sub cloudfront-headers-${applicationcode}-${project}-${environment}
+  ## Fin - Creación CloudFront Function
+
+#   # Inicio Despliegue de: CloudFront Staging
+#   # Certificado Digital  
+#   CertificateStagingEdin:
+#     Type: Custom::Certificate
+#     Condition: CrearCertificadoStagingEdin
+#     Properties:
+#       DomainName: !Ref domainnamestaging
+#       ValidationMethod: DNS
+#       ServiceToken:
+#         Fn::Sub: "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-certificate-provider"
+
+#   CertificateDNSRecordStagingEdin:
+#     Type: Custom::CertificateDNSRecord
+#     Condition: CrearCertificadoStagingEdin
+#     DependsOn: CertificateStagingEdin
+#     Properties:
+#       CertificateArn:
+#         Ref: CertificateStagingEdin
+#       DomainName: !Ref domainnamestaging
+#       ServiceToken:
+#         Fn::Sub: "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-certificate-provider"
+
+#   DomainValidationRecordStagingEdin:
+#     Type: Custom::CreateRecordSet
+#     Condition: CrearCertificadoStagingEdin
+#     DependsOn: CertificateDNSRecordStagingEdin
+#     Properties:
+#       ServiceToken:
+#         Fn::Sub: "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-resource-route53"
+#       HostedZoneId:
+#         Ref: PublicHZ
+#       Name:
+#         Fn::Sub: "${CertificateDNSRecordStagingEdin.Name}"
+#       Type:
+#         Fn::Sub: "${CertificateDNSRecordStagingEdin.Type}"
+#       TTL: "60"
+#       Weight: 1
+#       SetIdentifier: !Ref domainnamestaging
+#       ResourceRecords:
+#         Fn::Sub: "${CertificateDNSRecordStagingEdin.Value}"
+
+#   IssuedCertificateStagingEdin:
+#     Type: Custom::IssuedCertificate
+#     Condition: CrearCertificadoStagingEdin
+#     DependsOn: DomainValidationRecordStagingEdin
+#     Properties:
+#       CertificateArn:
+#         Ref: CertificateStagingEdin
+#       ServiceToken:
+#         Fn::Sub: "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-certificate-provider"
+#   #Fin - Certificado Digital
+#   # BUCKET SVI
+#   S3BucketStagingEdin:
+#     Type: AWS::S3::Bucket
+#     Condition: DepCloudFrontBetaEdin
+#     Properties:
+#       BucketName:
+#         Ref: buckets3staging
+#       BucketEncryption:
+#         ServerSideEncryptionConfiguration:
+#           - ServerSideEncryptionByDefault:
+#               SSEAlgorithm: AES256
+#       VersioningConfiguration:
+#         Status: Enabled
+#       AccessControl: Private
+#       PublicAccessBlockConfiguration:
+#         BlockPublicAcls: true
+#         BlockPublicPolicy: true
+#         IgnorePublicAcls: true
+#         RestrictPublicBuckets: true
+#       Tags:
+#         ## Etiquetas de seguridad
+#         - Key: "bancolombia:clasificacion-confidencialidad"
+#           Value: "interna"
+#         - Key: "bancolombia:clasificacion-integridad"
+#           Value: "sin impacto"
+#         - Key: "bancolombia:clasificacion-disponibilidad"
+#           Value: "sin impacto"
+#         - Key: "bancolombia:dominio-informacion"
+#           Value: "no"
+#         - Key: "bancolombia:datos-personales"
+#           Value: "no"
+#         - Key: "bancolombia:cumplimiento"
+#           Value: "no"
+#   # POLITICA DEL BUCKET
+#   BucketStagingPolicyEdin:
+#     Type: AWS::S3::BucketPolicy
+#     Condition: DepCloudFrontBetaEdin
+#     Properties:
+#       Bucket:
+#         Ref: buckets3staging
+#       PolicyDocument:
+#         Statement:
+#           - Sid: "AccessonlyforCloudfrontOrigin"
+#             Action: s3:GetObject
+#             Effect: Allow
+#             Resource:
+#               Fn::Join: ["", ["arn:aws:s3:::", Ref: "buckets3staging", /*]]
+#             Principal:
+#               AWS:
+#                 Fn::Join:
+#                   [
+#                     "",
+#                     [
+#                       "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ",
+#                       Ref: "TheCloudFrontStagingOriginAccessIdentityEdin",
+#                     ],
+#                   ]
+#           - Sid: "AllowSSLRequestsOnly"
+#             Action: s3:*
+#             Effect: Deny
+#             Resource:
+#               Fn::Join: ["", ["arn:aws:s3:::", Ref: "buckets3staging", /*]]
+#             Condition:
+#               Bool:
+#                 aws:SecureTransport: "false"
+#             Principal: "*"
+#   # CLOUDFRONT
+#   TheCloudFrontStagingDistributionEdin:
+#     Type: AWS::CloudFront::Distribution
+#     DependsOn: 
+#       - CloudFrontFunctionEdin
+#       - IssuedCertificateStagingEdin
+#       - S3BucketLoggingDevQaCloudFrontEdin
+#     Condition: DepCloudFrontBetaEdin
+#     Properties:
+#       DistributionConfig:
+#         Logging:
+#           Bucket:
+#             Fn::Join:
+#               [
+#                 "",
+#                 [Ref: S3BucketLoggingDevQaCloudFrontEdin, ".s3.amazonaws.com"],
+#               ]
+#           IncludeCookies: false
+#         Origins:
+#         # Origin S3 Bucket CaptchaEdin
+#           - DomainName:
+#               Fn::Join: ["", [Ref: bucketcaptchas3, ".s3.amazonaws.com"]]
+#             Id: the-s3-bucket-captcha
+#             S3OriginConfig:
+#               OriginAccessIdentity:
+#                 Fn::Join:
+#                   [
+#                     "",
+#                     [
+#                       "origin-access-identity/cloudfront/",
+#                       Ref: TheCloudFrontStagingOriginAccessIdentityEdin,
+#                     ],
+#                   ]
+#           # Origin S3 Bucket
+#           - DomainName:
+#               Fn::Join: ["", [Ref: buckets3staging, ".s3.amazonaws.com"]]
+#             Id: the-s3-bucket
+#             S3OriginConfig:
+#               OriginAccessIdentity:
+#                 Fn::Join:
+#                   [
+#                     "",
+#                     [
+#                       "origin-access-identity/cloudfront/",
+#                       Ref: TheCloudFrontStagingOriginAccessIdentityEdin,
+#                     ],
+#                   ]
+#           # Origin ELB Api Service
+#           - DomainName:
+#               Fn::Join: ["", [Ref: CFStagingCanalEdinApiDomainName, ""]]
+#             Id: the-elb-api-service
+#             CustomOriginConfig:
+#               HTTPSPort: "443"
+#               OriginProtocolPolicy: https-only
+#               OriginSSLProtocols:
+#                 - TLSv1.2
+#           # Origin Paradoc
+#           - DomainName:
+#               Fn::Join: ["", [Ref: CFParadocApiDomainName, ""]]
+#             Id: the-paradoc
+#             CustomOriginConfig:
+#               HTTPSPort: "443"
+#               OriginProtocolPolicy: https-only
+#               OriginSSLProtocols:
+#                 - TLSv1.2
+#             #OriginPath: '/edin'
+#         Enabled: true
+#         HttpVersion: http2
+#         DefaultRootObject: index.html
+#         CustomErrorResponses:
+#           - ErrorCachingMinTTL: 300
+#             ErrorCode: 403
+#             ResponseCode: 200
+#             ResponsePagePath: /index.html
+#         Aliases: !If
+#           - ActCloudFrontStagingEdin
+#           - - !Ref AWS::NoValue
+#           - Fn::Split:
+#               - ","
+#               - Ref: domainnamestaging
+#         Staging: !If
+#           - ActCloudFrontStagingEdin
+#           - True
+#           - False
+#         DefaultCacheBehavior:
+#           AllowedMethods:
+#             - DELETE
+#             - GET
+#             - HEAD
+#             - OPTIONS
+#             - PATCH
+#             - POST
+#             - PUT
+#           Compress: true
+#           ForwardedValues:
+#             QueryString: false
+#           TargetOriginId: the-s3-bucket
+#           ViewerProtocolPolicy: redirect-to-https
+#           FunctionAssociations:
+#             - EventType: viewer-response
+#               FunctionARN: !GetAtt CloudFrontFunctionEdin.FunctionMetadata.FunctionARN
+#         #CacheBehaviors para Edge-Service y Security-Filter
+#         CacheBehaviors:
+#           - PathPattern: "/ParadocBridge/*"
+#             AllowedMethods:
+#               - DELETE
+#               - GET
+#               - HEAD
+#               - OPTIONS
+#               - PATCH
+#               - POST
+#               - PUT
+#             CachePolicyId: !Ref ParadocCachePolicy # 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # !Ref ParadocCachePolicy
+#             OriginRequestPolicyId: !Ref ParadocOriginRequestPolicy
+#             Compress: true
+#             TargetOriginId: the-paradoc
+#             ViewerProtocolPolicy: redirect-to-https
+#             FunctionAssociations:
+#               - !Ref AWS::NoValue
+#           - PathPattern: "/edin/api/*"
+#             AllowedMethods:
+#               - DELETE
+#               - GET
+#               - HEAD
+#               - OPTIONS
+#               - PATCH
+#               - POST
+#               - PUT
+#             Compress: true
+#             ForwardedValues:
+#               QueryString: false
+#             TargetOriginId: the-elb-api-service
+#             ViewerProtocolPolicy: redirect-to-https
+#             FunctionAssociations:
+#               - EventType: viewer-response
+#                 FunctionARN: !GetAtt CloudFrontFunctionEdin.FunctionMetadata.FunctionARN
+#           - PathPattern: "/edin/edge-service/*"
+#             AllowedMethods:
+#               - DELETE
+#               - GET
+#               - HEAD
+#               - OPTIONS
+#               - PATCH
+#               - POST
+#               - PUT
+#             Compress: true
+#             ForwardedValues:
+#               QueryString: false
+#             TargetOriginId: the-elb-api-service
+#             ViewerProtocolPolicy: redirect-to-https
+#             FunctionAssociations:
+#               - EventType: viewer-response
+#                 FunctionARN: !GetAtt CloudFrontFunctionEdin.FunctionMetadata.FunctionARN
+#           - PathPattern: "/CaptchaEdin/*"
+#             AllowedMethods:
+#               - HEAD
+#               - GET
+#             Compress: true
+#             ForwardedValues:
+#               QueryString: false
+#             TargetOriginId: the-s3-bucket-captcha
+#             ViewerProtocolPolicy: redirect-to-https
+#         #Fin CacheBehaviors para CaptchaEdin, Edge-Service y Security-Filter
+#         PriceClass: PriceClass_100
+#         ViewerCertificate: !If
+#           - ActCloudFrontStagingEdin
+#           - CloudFrontDefaultCertificate: "true"
+#           - AcmCertificateArn: !Ref CertificateStagingEdin
+#             MinimumProtocolVersion: TLSv1.2_2021
+#             SslSupportMethod: sni-only
+#       Tags:
+#         - Key: "FrontInterno"
+#           Value:
+#             Ref: FrontInterno
+#         - Key: "bancolombia:clasificacion-confidencialidad"
+#           Value: "interna"
+#         - Key: "bancolombia:clasificacion-integridad"
+#           Value: "impacto critico"
+#         - Key: "bancolombia:clasificacion-disponibilidad"
+#           Value: "impacto critico"
+#         - Key: "bancolombia:dominio-informacion"
+#           Value: "canales"
+#         - Key: "bancolombia:datos-personales"
+#           Value: "no"
+#         - Key: "bancolombia:cumplimiento"
+#           Value: "pci-bia"
+
+#   CloudFrontStagingContinuousDeploymentPolicyEdin:
+#     Type: AWS::CloudFront::ContinuousDeploymentPolicy
+#     Condition: ActCloudFrontStagingEdin
+#     Properties: 
+#       ContinuousDeploymentPolicyConfig: 
+#         Enabled: true
+#         StagingDistributionDnsNames:
+#           - Fn::GetAtt: TheCloudFrontStagingDistributionEdin.DomainName
+#         TrafficConfig:
+#           SingleWeightConfig:
+#             Weight: 0.10
+#           Type: "SingleWeight"
+
+#   CreateAliasStagingEdin:
+#     Type: Custom::CreateAlias
+#     DependsOn: TheCloudFrontStagingDistributionEdin
+#     Condition: CrearCertificadoStagingEdin
+#     Properties:
+#       ServiceToken:
+#         Fn::Sub: "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:cfn-create-cloudfront-alias"
+#       PublicHostedZoneId:
+#         Ref: PublicHZ
+#       PrivateHostedZoneId:
+#         Ref: PrivateHZ
+#       Name: !Ref domainnamestaging
+#       Type: "A"
+#       DNSName:
+#         Fn::GetAtt: [TheCloudFrontStagingDistributionEdin, DomainName]
+#   # Health Check para distribucion de CF con certificado generado
+#   myHealthCheckCFStagingEdin:
+#     Type: "AWS::Route53::HealthCheck"
+#     Condition: CrearCertificadoStagingEdin
+#     DependsOn: TheCloudFrontStagingDistributionEdin
+#     Properties:
+#       HealthCheckConfig:
+#         FullyQualifiedDomainName:
+#           Fn::GetAtt: [TheCloudFrontStagingDistributionEdin, DomainName]
+#         Port: 443
+#         Type: HTTPS
+#         RequestInterval: 30
+#         FailureThreshold: 3
+#       HealthCheckTags:
+#         - Key: Name
+#           Value:
+#             Fn::Join:
+#               [
+#                 "-",
+#                 [
+#                   Ref: applicationcode,
+#                   Ref: project,
+#                   Ref: environment,
+#                   Ref: TheCloudFrontStagingDistributionEdin,
+#                 ],
+#               ]
+#   # Alarma vinculada al Cloudfront con certificado generado
+#   AlarmHealthCheckCFStagingEdin:
+#     Type: AWS::CloudWatch::Alarm
+#     Condition: CrearCertificadoStagingEdin
+#     DependsOn: [myHealthCheckCFStagingEdin, AlarmSNSTopicEdin]
+#     Properties:
+#       AlarmDescription: Health Check Alarm Staging
+#       AlarmName:
+#         Fn::Join: ["-", ["HealthCheckAlarmCFStaging", Ref: applicationcode]]
+#       Namespace: AWS/Route53
+#       MetricName: HealthCheckStatus
+#       TreatMissingData: notBreaching
+#       Dimensions:
+#         - Name: HealthCheckId
+#           Value:
+#             Ref: myHealthCheckCFStagingEdin
+#       ComparisonOperator: LessThanThreshold
+#       Period: "60"
+#       EvaluationPeriods: "5"
+#       Statistic: Minimum
+#       Threshold: "1.0"
+#       AlarmActions:
+#         - Ref: AlarmSNSTopicEdin
+  
+#   AlarmDDoSStagingEdin:
+#     Type: AWS::CloudWatch::Alarm
+#     Condition: CrearCertificadoStagingEdin
+#     DependsOn: [TheCloudFrontStagingDistributionEdin, AlarmSNSTopicEdin]
+#     Properties:
+#       AlarmDescription: DDoSAttack
+#       AlarmName:
+#         Fn::Join: ["-", ["DDoSAttackCFStaging", Ref: applicationcode]]
+#       Namespace: AWS/DDoSProtection
+#       MetricName: DDoSDetected
+#       Dimensions:
+#         - Name: CloudfrontArn
+#           Value:
+#             Fn::Sub:
+#               - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CFDistribution}"
+#               - CFDistribution:
+#                   Ref: TheCloudFrontStagingDistributionEdin
+#       ComparisonOperator: GreaterThanThreshold
+#       Period: "60"
+#       EvaluationPeriods: "2"
+#       Statistic: Maximum
+#       Threshold: "0.0"
+#       AlarmActions:
+#         - Ref: AlarmSNSTopicEdin
+
+#   # Custom resource para Cloudfront con certificado generado
+#   setProactiveEngagementCFStagingEdin:
+#     Type: "Custom::wafsetloggingCloudfront"
+#     Condition: CrearCertificadoStagingEdin
+#     DependsOn:
+#       [TheCloudFrontStagingDistributionEdin, myHealthCheckCFStagingEdin]
+#     Properties:
+#       ServiceToken: "arn:aws:sns:us-east-1:831688958710:Antiddos-engagement-sns"
+#       protectArn:
+#         Fn::Sub:
+#           - "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CFDistribution}"
+#           - CFDistribution:
+#               Ref: TheCloudFrontStagingDistributionEdin
+#       healthcheckarn:
+#         Fn::Join:
+#           [
+#             "",
+#             [
+#               "arn:aws:route53::",
+#               ":healthcheck/",
+#               Ref: myHealthCheckCFStagingEdin,
+#             ],
+#           ]
+# #Fin Despliegue de: CloudFront Staging
+
+# Definicion de salidas
+Outputs:
+  # CloudFront
+  # ID del Cloudfront ambientes no productivos
+  CloudFrontIdNonPdnEdin:
+      Description: ID del Cloudfront ambientes no productivos
+      Condition: CrearCertificadoEdin
+      Value:
+          Ref: TheCloudFrontDistributionEdin
+  # ID del Cloudfront ambiente productivo
+  CloudFrontIdPdnEdin:
+      Description: ID del Cloudfront ambiente productivo
+      Condition: ConCertificadoEdin
+      Value:
+          Ref: TheCloudFrontDistributionCertificadoEdin        
+  # Nombre del bucket S3 SVI
+  CloudFrontS3NameEdin:
+      Description: Nombre del bucket S3 para almacenar el contenido del front
+      Condition: DepCloudFrontEdin
+      Value:
+          Fn::GetAtt: S3BucketEdin.DomainName
+
+  # Nombre del bucket S3 Validate Captcha
+  CloudFrontCaptchaS3NameEdin:
+      Description: Nombre del bucket S3 para almacenar el contenido del validate captcha
+      Condition: DepCloudFrontEdin
+      Value:
+          Fn::GetAtt: S3BucketCaptchaEdin.DomainName
+
+  # Nombre del dominio en Route53
+  CloudFrontDomainNameEdin:
+      Description: Nombre del dominio en Route53
+      Condition: DepCloudFrontEdin
+      Value: !Ref firstDomainname
+
+  # Nombre del bucket S3 de logging PDN
+  S3BucketLoggingCloudFrontEdin:
+      Description: Nombre del bucket S3 de logging PDN
+      Condition: CrearBucketLoggingEdin
+      Value:
+          Fn::GetAtt: S3BucketLoggingCloudFrontEdin.DomainName
+  
+  # Nombre del bucket S3 de logging PDN
+  S3BucketLoggingDevQaCloudFrontEdin:
+      Description: Nombre del bucket S3 de logging Dev/Qa
+      Condition: CrearBucketLoggingDevQaEdin
+      Value:
+          Fn::GetAtt: S3BucketLoggingDevQaCloudFrontEdin.DomainName
