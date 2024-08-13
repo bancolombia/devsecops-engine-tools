@@ -143,7 +143,6 @@ jobs:
   deploy_dockerhub:
     needs:
       - deploy_dev
-    if: ${{ contains(github.ref,'refs/heads/trunk') }}
     runs-on: ubuntu-latest
     environment: release
     permissions:
