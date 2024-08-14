@@ -1,0 +1,101 @@
+/* You can add global styles to this file, and also import other style files */
+@import "./assets/scss/theme.scss";
+
+
+//* ********** Reset Styles ********** *//
+html {
+    box-sizing: border-box;
+    color-scheme: var(--color-scheme);
+    font-family: var(--font);
+    font-size: 16px;
+    scroll-behavior: smooth
+}
+
+*,
+*::after,
+*::before {
+    box-sizing: inherit;
+}
+
+body {
+    background-color: var(--theme-color);
+    color: var(--text-color);
+    margin: 0;
+    overflow-x: hidden;
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--link-hover-color);
+    text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-titles);
+}
+
+//* ********** Styles ********** *//
+
+#main {
+    margin-top: 60px;
+    padding: 20px 30px;
+    transition: all 0.3s;
+}
+
+.card {
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0px 0 30px rgba(1, 41, 112, 0.1);
+    margin-bottom: 30px;
+}
+
+.card-title {
+    color: var(--color_1);
+    font-family: var(--font-family_1);
+    font-size: 18px;
+    font-weight: 500;
+    padding: 20px 0 15px 0;
+    span {
+        color: var(--color_6);
+        font-size: 14px;
+        font-weight: 400;
+    }
+}
+
+.card-body {
+    padding: 0 20px 20px 20px;
+}
+
+
+.btn-primary {
+    background-color: var(--background-color_18) !important;
+    border-color: var(--border-color_18) !important;
+    color: var(--color_2);
+    &:hover {
+        background-color: var(--background-color_18);
+        opacity: 0.8;
+    }
+}
+
+.cursor-pointer {
+  cursor: pointer !important
+}
+
+.center-anything {
+  display: grid;
+  place-items: center;
+}
+
+.form-check-input:checked {
+  background-color: var(--color_1);
+  border-color: var(--color_1);
+}
