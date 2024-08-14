@@ -37,7 +37,7 @@ pip3 install devsecops-engine-tools
 ### Scan running - flags (CLI)
 
 ```bash
-devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["k8s","cloudformation","docker", "openapi"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] 
+devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["k8s","cloudformation","docker", "openapi"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] --xray_mode ["scan", "audit"]
 ```
 
 ### Structure Remote Config
@@ -127,9 +127,42 @@ $ set +a
 devsecops-engine-tools --platform_devops local --remote_config_repo DevSecOps_Remote_Config --tool engine_iac
 
 ```
-### Scan result sample (CLI)
 
-![Dashboard Grafana](docs/demo_session.svg)
+![Demo CLI Local](docs/demo_session.svg)
+
+
+### Scan running sample - Azure Pipelines
+
+The remote config should be in a Azure Devops repository.
+
+Note: By default the tool gets the token from the SYSTEM_ACCESSTOKEN variable to get the remote configuration repository. You must ensure that this token has permission to access this resource.
+
+```yaml
+name: $(Build.SourceBranchName).$(date:yyyyMMdd)$(rev:.r)
+
+trigger:
+  branches:
+    include:
+      - trunk
+      - feature/*
+
+stages:
+  - stage: engine_tools
+    displayName: Example Engine Tools
+    jobs:
+      - job: engine_tools
+        pool:
+          name: Azure Pipelines
+        steps:
+          - script: |
+              # Install devsecops-engine-tools
+              pip3 install -q devsecops-engine-tools
+              devsecops-engine-tools --platform_devops azure --remote_config_repo remote_config --tool engine_iac
+            displayName: "Engine Tools"
+        env:
+          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+```
 
 ### Scan running sample - Github Actions
 
@@ -144,7 +177,7 @@ For more information, refer to [Automatic token authentication](https://docs.git
 
 1. Create a personal access token with the necessary permissions to access the repository.
 2. Add the token as a secret in the GitHub repository.
-    ![Dashboard Grafana](docs/secret_token.png)
+    ![Demo Github](docs/secret_token.png)
 
 3. Configure the yml file containing the workflow using the created secret.
 
@@ -187,6 +220,12 @@ jobs:
 With the flag **--send_metrics true** and the configuration of the AWS-METRICS_MANAGER driven adapter in ConfigTool.json of the engine_core the tool will send the report to bucket s3. In the [metrics](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/metrics/) folder you will find the base of the cloud formation template to deploy the infra and dashboard in grafana.
 
 ![Dashboard Grafana](docs/metrics.png)
+
+# Config Tool Generator
+
+To generate the ConfigTool.json file in a simple way, a web interface was created where you can configure each necessary parameter individually or use a base template that you want to modify. In the [config tool generator](https://github.com/bancolombia/devsecops-engine-tools/tree/trunk/remote_config_generator/config-tool-generator) folder you will find the code for the SPA created in Angular to run it local environment.
+
+![Config Tool Generator](docs/config_tool_generator.gif)
 
 # How can I help?
 

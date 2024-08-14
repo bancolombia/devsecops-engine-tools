@@ -39,7 +39,7 @@ prueba.py
 main.py
 common_devsecops_lib/sheckov_scan.json
 _core_test*
-results.json
+results*.json
 RULES_DOCKERcheckov_config.yaml
 RULES_K8Scheckov_config.yaml
 RULES_CLOUDFORMATIONcheckov_config.yaml
@@ -55,3 +55,11 @@ target
 dependencies_to_scan
 node_modules
 DevSecOps_Remote_Config
+kics/
+kics_assets/
+assets_compressed.zip
+kics_*.zip
+kubescape-macos-latest
+
+# Extensions
+out

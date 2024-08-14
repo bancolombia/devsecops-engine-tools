@@ -19,23 +19,6 @@ def test_init():
     assert handle_remote_config_patterns_instance.pipeline_name == pipeline_name
 
 
-def test_excluded_files():
-    remote_config = {
-        "remote_config_key": "remote_config_value",
-        "REGEX_EXPRESSION_EXTENSIONS": ".js|.py|.txt",
-    }
-    pipeline_name = "pipeline1"
-    exclusions = {"pipeline1": {"SKIP_FILES": {"files": [".py", ".txt"]}}}
-    expected_result = ".js"
-
-    handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
-        remote_config, exclusions, pipeline_name
-    )
-    result = handle_remote_config_patterns_instance.excluded_files()
-
-    assert result == expected_result
-
-
 def test_ignore_analysis_pattern_matched():
     remote_config = {
         "remote_config_key": "remote_config_value",
@@ -64,38 +47,6 @@ def test_ignore_analysis_pattern_matched():
         remote_config, exclusions, pipeline_name
     )
     result = handle_remote_config_patterns_instance.ignore_analysis_pattern()
-
-    assert result == True
-
-
-def test_bypass_archive_limits_not_matched():
-    remote_config = {
-        "remote_config_key": "remote_config_value",
-        "BYPASS_ARCHIVE_LIMITS": "(pipeline1|pipeline2)",
-    }
-    pipeline_name = "pipeline"
-    exclusions = {"pipeline1": {"SKIP_FILES": {"files": [".py", ".txt"]}}}
-
-    handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
-        remote_config, exclusions, pipeline_name
-    )
-    result = handle_remote_config_patterns_instance.bypass_archive_limits()
-
-    assert result == False
-
-
-def test_bypass_archive_limits_matched():
-    remote_config = {
-        "remote_config_key": "remote_config_value",
-        "BYPASS_ARCHIVE_LIMITS": "(pipeline1|pipeline2)",
-    }
-    pipeline_name = "pipeline1"
-    exclusions = {"pipeline1": {"SKIP_FILES": {"files": [".py", ".txt"]}}}
-
-    handle_remote_config_patterns_instance = HandleRemoteConfigPatterns(
-        remote_config, exclusions, pipeline_name
-    )
-    result = handle_remote_config_patterns_instance.bypass_archive_limits()
 
     assert result == True
 

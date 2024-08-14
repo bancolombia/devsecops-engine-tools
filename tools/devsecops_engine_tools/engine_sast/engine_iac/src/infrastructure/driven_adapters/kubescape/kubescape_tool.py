@@ -7,9 +7,6 @@ import os
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
-from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.config_tool import (
-    ConfigTool,
-)
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_deserealizator import (
     KubescapeDeserealizator,
 )
@@ -99,11 +96,11 @@ class KubescapeTool(ToolGateway):
 
         self.execute_kubescape(folders_to_scan, command_prefix)
 
-    def run_tool(self, config_tool: ConfigTool, folders_to_scan, environment, platform_to_scan, secret_tool):
+    def run_tool(self, config_tool, folders_to_scan, platform_to_scan, **kwargs):
 
         if folders_to_scan and "k8s" in platform_to_scan:
 
-            kubescape_version = config_tool.version
+            kubescape_version = config_tool["KUBESCAPE"]["VERSION"]
             os_platform = platform.system()
             base_url = f"https://github.com/kubescape/kubescape/releases/download/v{kubescape_version}/"
             self.select_operative_system(os_platform, folders_to_scan, base_url)
