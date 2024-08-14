@@ -36,29 +36,58 @@ class HandleRisk:
         self.devops_platform_gateway = devops_platform_gateway
         self.print_table_gateway = print_table_gateway
 
-    def get_finding_list(self, dict_args, secret_tool, remote_config):
+    def _get_finding_list(self, dict_args, secret_tool, remote_config, service):
         try:
             findigs_list = self.vulnerability_management.get_all_findings(
-                self.devops_platform_gateway.get_variable("pipeline_name"),
+                service,
                 dict_args,
                 secret_tool,
                 remote_config,
             )
             return findigs_list
         except ExceptionGettingFindings as e:
-            logger.error("Error getting finding list in handle risk: {0}".format(str(e)))
-
+            logger.error(
+                "Error getting finding list in handle risk: {0}".format(str(e))
+            )
 
     def process(self, dict_args: any, remote_config: any):
         secret_tool = None
         if dict_args["use_secrets_manager"] == "true":
             secret_tool = self.secrets_manager_gateway.get_secret(remote_config)
 
-        findigs_list = self.get_finding_list(dict_args, secret_tool, remote_config)
+        risk_config = self.devops_platform_gateway.get_remote_config(
+            dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
+        )
+
+        service = self.devops_platform_gateway.get_variable("pipeline_name")
+        parent_identifier = risk_config["PARENT_ANALYSIS"]["PARENT_IDENTIFIER"]
+
+        if (
+            risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true"
+            and parent_identifier in service
+        ):
+            parent_service = service.split(parent_identifier)[0] + parent_identifier
+            print(f"Generating report for {parent_service}")
+            logger.info(f"Generating report for {parent_service}")
+            parent_findings = self._get_finding_list(
+                dict_args, secret_tool, remote_config, parent_service
+            )
+            runner_engine_risk(
+                dict_args,
+                parent_findings,
+                self.devops_platform_gateway,
+                self.print_table_gateway,
+            )
+
+        print(f"Generating report for {service}")
+        logger.info(f"Generating report for {service}")
+        findigs_list = self._get_finding_list(
+            dict_args, secret_tool, remote_config, service
+        )
 
         runner_engine_risk(
             dict_args,
             findigs_list,
             self.devops_platform_gateway,
-            self.print_table_gateway
+            self.print_table_gateway,
         )

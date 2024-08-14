@@ -1,5 +1,9 @@
 {
-    "SEVERITY_LIST": ["critical", "high", "medium", "low"],
+    "IGNORE_ANALYSIS_PATTERN": "(.*_test|test_.*)",
+    "PARENT_ANALYSIS": {
+        "ENABLED": "false",
+        "PARENT_IDENTIFIER": "_id"
+    },
     "WEIGHTS": {
         "severity": {
             "critical": 10,
