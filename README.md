@@ -37,7 +37,7 @@ pip3 install devsecops-engine-tools
 ### Scan running - flags (CLI)
 
 ```bash
-devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["k8s","cloudformation","docker", "openapi"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] --xray_mode ["scan", "audit"]
+devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container", "engine_code"] --folder_path ["Folder path scan engine_iac and engine_code"] --platform ["k8s","cloudformation","docker", "openapi"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] --xray_mode ["scan", "audit"]
 ```
 
 ### Structure Remote Config
@@ -52,6 +52,9 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
    ┃   ┗ 📜Exclusions.json
    ┃ ┗ 📂engine_secret
    ┃   ┗ 📜ConfigTool.json
+   ┃ ┗ 📂engine_code
+   ┃   ┗ 📜ConfigTool.json
+   ┃   ┗ 📜Exclusions.json
    ┣ 📂engine_sca
    ┃ ┗ 📂engine_container
    ┃   ┗ 📜ConfigTool.json
@@ -106,6 +109,11 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
     <td>ENGINE_DEPENDENCIES</td>
     <td><a href="https://jfrog.com/help/r/get-started-with-the-jfrog-platform/jfrog-xray">XRAY</a></td>
     <td>Paid</td>
+  </tr>
+  <tr>
+    <td>ENGINE_CODE</td>
+    <td><a href="https://jfrog.com/help/r/get-started-with-the-jfrog-platform/jfrog-xray">BEARER</a></td>
+    <td>Free</td>
   </tr>
 </table>
 
