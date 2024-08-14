@@ -27,7 +27,7 @@ class BreakBuild:
         if len(report_list):
             for report in report_list:
                 report.risk_score = round(
-                    remote_config["WEIGHTS"]["severity"].get(report.severity.lower(), 1)
+                    remote_config["WEIGHTS"]["severity"].get(report.severity.lower(), 0)
                     + remote_config["WEIGHTS"]["epss_score"] * report.epss_score
                     + remote_config["WEIGHTS"]["age"] * report.age
                     + sum(

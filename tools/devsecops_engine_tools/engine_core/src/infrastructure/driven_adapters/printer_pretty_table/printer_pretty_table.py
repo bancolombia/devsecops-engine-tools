@@ -69,7 +69,7 @@ class PrinterPrettyTable(PrinterTableGateway):
             row_data = [
                 report.risk_score,
                 report.severity.lower(),
-                report.id,
+                report.vul_id_tool,
                 report.tags,
                 report.where,
             ]
