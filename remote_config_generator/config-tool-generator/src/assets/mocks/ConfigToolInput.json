@@ -1,0 +1,65 @@
+{
+  "BANNER": "",
+  "SECRET_MANAGER": {
+    "AWS": {
+      "SECRET_NAME": "",
+      "ROLE_ARN": "",
+      "REGION_NAME": ""
+    }
+  },
+  "VULNERABILITY_MANAGER": {
+    "BRANCH_FILTER": "",
+    "DEFECT_DOJO": {
+      "CMDB_MAPPING_PATH": "",
+      "HOST_CMDB": "",
+      "HOST_DEFECT_DOJO": "",
+      "REGEX_EXPRESSION_CMDB": "",
+      "LIMITS_QUERY": 0
+    }
+  },
+  "METRICS_MANAGER": {
+    "AWS": {
+      "BUCKET": "",
+      "ROLE_ARN": "",
+      "REGION_NAME": ""
+    }
+  },
+  "ENGINE_LIST": [
+    {
+      "ENGINE_NAME": "ENGINE_IAC",
+      "TOOLS": [
+        "NONE",
+        "CHECKOV"
+      ]
+    },
+    {
+      "ENGINE_NAME": "ENGINE_DAST",
+      "TOOLS": [
+        "NONE",
+        "NUCLEI"
+      ]
+    },
+    {
+      "ENGINE_NAME": "ENGINE_SECRET",
+      "TOOLS": [
+        "NONE",
+        "TRUFFLEHOG"
+      ]
+    },
+    {
+      "ENGINE_NAME": "ENGINE_DEPENDENCIES",
+      "TOOLS": [
+        "NONE",
+        "XRAY"
+      ]
+    },
+    {
+      "ENGINE_NAME": "ENGINE_CONTAINER",
+      "TOOLS": [
+        "NONE",
+        "PRISMA",
+        "TRYVY"
+      ]
+    }
+  ]
+}
