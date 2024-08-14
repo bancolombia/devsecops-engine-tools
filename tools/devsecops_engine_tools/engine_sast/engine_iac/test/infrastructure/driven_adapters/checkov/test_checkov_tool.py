@@ -5,10 +5,6 @@ from queue import Queue
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_tool import (
     CheckovTool,
 )
-from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.config_tool import (
-    ConfigTool,
-)
-from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import GithubApi
 import os
 
 
@@ -61,7 +57,6 @@ class TestCheckovTool(unittest.TestCase):
                 "RULES": "",
             },
         }
-        mock_config_tool = ConfigTool(json_data, "CHECKOV")
         mock_secret_tool = {
             "repository_ssh_private_key": "cmVwb3NpdG9yeV9zc2hfcHJpdmF0ZV9rZXkK",
             "repository_ssh_password": "cmVwb3NpdG9yeV9zc2hfcGFzc3dvcmQK",
@@ -69,7 +64,7 @@ class TestCheckovTool(unittest.TestCase):
 
         # Llamar al método que se está probando
         result = self.checkov_tool.configurate_external_checks(
-            mock_config_tool, mock_secret_tool
+            json_data, mock_secret_tool
         )
 
         # Verificar que el resultado es el esperado
@@ -109,9 +104,8 @@ class TestCheckovTool(unittest.TestCase):
                 "EXTERNAL_DIR_REPOSITORY": "repository",
                 "EXTERNAL_DIR_ASSET_NAME": "rules",
                 "RULES": "",
-            }
+            },
         }
-        mock_config_tool = ConfigTool(json_data, "CHECKOV")
         mock_secret_tool = {
             "github_token": "mock_github_token",
             "repository_ssh_host": "repository_ssh_host",
@@ -123,7 +117,7 @@ class TestCheckovTool(unittest.TestCase):
 
         # Llamar al método que se está probando
         result = self.checkov_tool.configurate_external_checks(
-            mock_config_tool, mock_secret_tool
+            json_data, mock_secret_tool
         )
 
         # Verificar que el resultado es el esperado
@@ -169,9 +163,8 @@ class TestCheckovTool(unittest.TestCase):
                 "EXTERNAL_DIR_OWNER": "test",
                 "EXTERNAL_DIR_REPOSITORY": "repository",
                 "RULES": "",
-            }
+            },
         }
-        mock_config_tool = ConfigTool(json_data, "CHECKOV")
         mock_secret_tool = {
             "github_token": "mock_github_token",
             "repository_ssh_host": "repository_ssh_host",
@@ -182,11 +175,21 @@ class TestCheckovTool(unittest.TestCase):
 
         # Llamar al método que se está probando
         result = self.checkov_tool.configurate_external_checks(
-            mock_config_tool, mock_secret_tool
+            json_data, mock_secret_tool
         )
 
         # Verificar que el resultado es el esperado
         self.assertIsNone(result)
+
+    def test_retryable_install_package(self):
+        subprocess_mock = MagicMock()
+        subprocess_mock.run.return_value.returncode = 1
+
+        with mock.patch("subprocess.run", return_value=subprocess_mock) as mock_run:
+            response = self.checkov_tool.retryable_install_package("checkov", "2.3.96")
+
+            mock_run.assert_called()
+            self.assertEqual(response, False)
 
     def test_execute(self):
         checkov_config = MagicMock()
@@ -228,9 +231,18 @@ class TestCheckovTool(unittest.TestCase):
     def test_scan_folders(self):
         folders_to_scan = ["/path/to/folder"]
         config_tool = MagicMock()
-        config_tool.rules_data_type = {
-            "RULES_DOCKER": {"rule1": {"environment": {"dev": True}}},
-            "RULES_K8S": {"rule2": {"environment": {"prod": True}}},
+        config_tool = {
+            "CHECKOV": {
+                "USE_EXTERNAL_CHECKS_GIT": "False",
+                "USE_EXTERNAL_CHECKS_DIR": "True",
+                "EXTERNAL_DIR_OWNER": "test",
+                "EXTERNAL_DIR_REPOSITORY": "repository",
+                "EXTERNAL_CHECKS_GIT": "rules",
+                "RULES": {
+                    "RULES_DOCKER": {"rule1": {"environment": {"dev": True}}},
+                    "RULES_K8S": {"rule2": {"environment": {"prod": True}}},
+                }
+            }
         }
         agent_env = MagicMock()
         environment = "dev"
@@ -241,7 +253,7 @@ class TestCheckovTool(unittest.TestCase):
         with mock.patch.object(
             self.checkov_tool, "async_scan", side_effect=output_queue.put
         ):
-            result_scans = self.checkov_tool.scan_folders(
+            result_scans, rules_run = self.checkov_tool.scan_folders(
                 folders_to_scan, config_tool, agent_env, environment, "eks"
             )
 
@@ -257,12 +269,11 @@ class TestCheckovTool(unittest.TestCase):
         self.checkov_tool.configurate_external_checks = MagicMock(
             return_value="agent_env"
         )
-        self.checkov_tool.scan_folders = MagicMock(return_value=[{"key": "value"}])
-        self.checkov_tool.TOOL = "CHECKOV"
+        self.checkov_tool.scan_folders = MagicMock(return_value=[{"key": "value"}, []])
+        self.checkov_tool.TOOL_CHECKOV = "CHECKOV"
 
         findings_list, file_from_tool = self.checkov_tool.run_tool(
-            config_tool, folders_to_scan, environment, platform, secret_tool
+            config_tool, folders_to_scan, environment, platform, secret_tool, secret_external_checks="github:token"
         )
 
         self.assertEqual(findings_list, [])
-        assert "results.json" in file_from_tool

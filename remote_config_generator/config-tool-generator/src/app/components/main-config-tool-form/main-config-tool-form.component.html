@@ -1,0 +1,35 @@
+<form [formGroup]="mainForm" (ngSubmit)="onSubmit()">
+  <div class="row">
+    <app-file-upload-form
+      (configToolEngineForm)="configToolEngineFormEvent($event)"
+    ></app-file-upload-form>
+    <div class="col-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 col-xxl-6">
+      <app-banner-form [parentForm]="mainForm"></app-banner-form>
+      <app-secret-manager-form
+        [parentForm]="getFormGroup('SECRET_MANAGER')"
+      ></app-secret-manager-form>
+      <app-metrics-manager-form
+        [parentForm]="getFormGroup('METRICS_MANAGER')"
+      ></app-metrics-manager-form>
+    </div>
+    <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 col-xxl-6">
+      <app-vulnerability-manager-form
+        [parentForm]="getFormGroup('VULNERABILITY_MANAGER')"
+      ></app-vulnerability-manager-form>
+      <app-engine-list-form [parentForm]="mainForm"></app-engine-list-form>
+    </div>
+  </div>
+  <button
+    type="submit"
+    class="btn btn-primary mb-3"
+  >
+    Download
+  </button>
+  <a
+    #downloadFile
+    class="d-none"
+    [href]="downloadConfigTool()"
+    [download]="fileName + '.json'"
+    >Download</a
+  >
+</form>
