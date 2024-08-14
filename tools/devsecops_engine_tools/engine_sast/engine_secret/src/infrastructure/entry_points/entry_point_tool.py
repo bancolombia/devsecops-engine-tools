@@ -5,7 +5,6 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.set_in
 )
 
 def engine_secret_scan(devops_platform_gateway, tool_gateway, dict_args, tool, tool_deserealizator, git_gateway):
-    sys.stdout.reconfigure(encoding='utf-8')
     exclusions = devops_platform_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_sast/engine_secret/Exclusions.json"
     )

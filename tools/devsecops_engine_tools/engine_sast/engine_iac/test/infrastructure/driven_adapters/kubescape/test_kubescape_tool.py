@@ -218,12 +218,10 @@ class TestKubescapeTool(unittest.TestCase):
     def test_run_tool_empty_folders(self):
         config_tool = MagicMock()
         folders_to_scan = []
-        environment = "dev"
-        platform = "eks"
-        secret_tool = MagicMock()
+        platform_to_scan = "eks"
 
         findings_list, file_from_tool = self.kubescape_tool.run_tool(
-            config_tool, folders_to_scan, environment, platform, secret_tool
+            config_tool, folders_to_scan, platform_to_scan
         )
         
         self.assertEqual(findings_list, [])
