@@ -217,6 +217,12 @@ With the flag **--send_metrics true** and the configuration of the AWS-METRICS_M
 
 ![Dashboard Grafana](docs/metrics.png)
 
+# Config Tool Generator
+
+To generate the ConfigTool.json file in a simple way, a web interface was created where you can configure each necessary parameter individually or use a base template that you want to modify. In the [config tool generator](https://github.com/bancolombia/devsecops-engine-tools/tree/trunk/remote_config_generator/config-tool-generator) folder you will find the code for the SPA created in Angular to run it local environment.
+
+![Config Tool Generator](docs/config_tool_generator.gif)
+
 # How can I help?
 
 Review the issues, we hear new ideas. Read more [Contributing](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/docs/CONTRIBUTING.md)
