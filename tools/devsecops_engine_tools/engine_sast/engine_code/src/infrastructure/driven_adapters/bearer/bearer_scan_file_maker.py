@@ -12,6 +12,8 @@ class BearerScanFileMaker:
                 for sev in severity:
                     if sev not in self.vulnerabilities.keys(): 
                         self.vulnerabilities[sev] = []
+                    for vul in data[sev]:
+                        if "snippet" not in vul.keys(): vul["snippet"] = ""
                     self.vulnerabilities[sev].extend(data[sev])
             except:
                 pass
@@ -24,4 +26,5 @@ class BearerScanFileMaker:
             json.dump(self.vulnerabilities, file)
             file.close()
         return f"{agent_work_folder}/bearer-scan-vul-man.json"
+    
         
