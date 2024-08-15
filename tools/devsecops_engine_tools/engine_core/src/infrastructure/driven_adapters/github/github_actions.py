@@ -82,11 +82,9 @@ class GithubActions(DevopsPlatformGateway):
                 else ReleaseVariables.github_workflow
             ),
             "stage": SystemVariables.github_job,
-            "path_directory": SystemVariables.github_workspace,
             "os": AgentVariables.runner_os,
             "work_folder": AgentVariables.github_workspace,
             "temp_directory": AgentVariables.runner_tool_cache,
-            "agent_directory": AgentVariables.runner_workspace,
             "target_branch": SystemVariables.github_event_base_ref,
             "source_branch": SystemVariables.github_ref,
             "repository_provider": BuildVariables.GitHub,
