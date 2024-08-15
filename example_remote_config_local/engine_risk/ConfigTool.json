@@ -4,6 +4,13 @@
         "ENABLED": "false",
         "PARENT_IDENTIFIER": "_id_included"
     },
+    "EXCLUSIONS_PATHS": {
+        "engine_code": "engine_sast/engine_code/Exclusions.json",
+        "engine_iac": "engine_sast/engine_iac/Exclusions.json",
+        "engine_secret": "engine_sast/engine_secret/Exclusions.json",
+        "engine_container": "engine_sca/engine_container/Exclusions.json",
+        "engine_dependencies": "engine_sca/engine_dependencies/Exclusions.json"
+    },
     "WEIGHTS": {
         "severity": {
             "critical": 10,

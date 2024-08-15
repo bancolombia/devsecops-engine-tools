@@ -7,6 +7,9 @@ from devsecops_engine_tools.engine_risk.src.domain.usecases.break_build import (
 from devsecops_engine_tools.engine_risk.src.domain.usecases.add_data import (
     AddData,
 )
+from devsecops_engine_tools.engine_risk.src.domain.usecases.get_exclusions import (
+    GetExclusions,
+)
 
 import re
 
@@ -20,16 +23,16 @@ def init_engine_risk(devops_platform_gateway, print_table_gateway, dict_args, fi
     remote_config = devops_platform_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
     )
-    exclusions = devops_platform_gateway.get_remote_config(
+    risk_exclusions = devops_platform_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_risk/Exclusions.json"
     )
     pipeline_name = devops_platform_gateway.get_variable("pipeline_name")
-    if should_skip_analysis(remote_config, pipeline_name, exclusions):
+    if should_skip_analysis(remote_config, pipeline_name, risk_exclusions):
         print("Tool skipped by DevSecOps Policy.")
         logger.info("Tool skipped by DevSecOps Policy.")
     else:
         process_findings(
-            findings, remote_config, devops_platform_gateway, print_table_gateway
+            findings, dict_args, pipeline_name, risk_exclusions, remote_config, devops_platform_gateway, print_table_gateway
         )
 
 
@@ -41,7 +44,7 @@ def should_skip_analysis(remote_config, pipeline_name, exclusions):
 
 
 def process_findings(
-    findings, remote_config, devops_platform_gateway, print_table_gateway
+    findings, dict_args, pipeline_name, risk_exclusions, remote_config, devops_platform_gateway, print_table_gateway
 ):
     if not findings:
         print("No findings found in Vulnerability Management Platform")
@@ -56,6 +59,11 @@ def process_findings(
         return
 
     data_added = AddData(active_findings).add_data()
+    get_exclusions = GetExclusions(
+        devops_platform_gateway, dict_args, data_added, remote_config, risk_exclusions, pipeline_name
+    )
+    exclusions = get_exclusions.process()
+
     BreakBuild(devops_platform_gateway, print_table_gateway, remote_config).process(
         data_added
     )
