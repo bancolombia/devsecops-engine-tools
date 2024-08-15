@@ -48,7 +48,7 @@ def process_findings(
         logger.info("No findings found in Vulnerability Management Platform")
         return
 
-    handle_filters = HandleFilters(remote_config)
+    handle_filters = HandleFilters()
     active_findings = handle_filters.filter(findings)
     if not active_findings:
         print("No active findings found in Vulnerability Management Platform")

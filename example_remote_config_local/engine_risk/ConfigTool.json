@@ -2,7 +2,7 @@
     "IGNORE_ANALYSIS_PATTERN": "(.*_test|test_.*)",
     "PARENT_ANALYSIS": {
         "ENABLED": "false",
-        "PARENT_IDENTIFIER": "_id"
+        "PARENT_IDENTIFIER": "_id_included"
     },
     "WEIGHTS": {
         "severity": {

@@ -1,10 +1,4 @@
 class HandleFilters:
-    def __init__(
-        self,
-        remote_config: any,
-    ):
-        self.remote_config = remote_config
-
     def filter(self, findings):
         active_findings = self._get_active_findings(findings)
         self._get_priority_vulnerability(active_findings)
