@@ -108,7 +108,7 @@ intellijPlatform {
         channels = listOf("beta")
     }
 
-    verifyPlugin {
+    pluginVerification {
         ides {
             recommended()
         }
