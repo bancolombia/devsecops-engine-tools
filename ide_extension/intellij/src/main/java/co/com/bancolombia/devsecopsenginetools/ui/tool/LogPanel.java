@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 @Log4j2
 public class LogPanel extends JBPanel<LogPanel> {
-    private final StyledDocument doc;
+    private final transient StyledDocument doc;
     private final JTextPane textPane;
     private final Map<String, SimpleAttributeSet> ansiCodeToStyle;
 

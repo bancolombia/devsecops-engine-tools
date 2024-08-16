@@ -28,7 +28,7 @@ public class LogPanelLogger implements ToolWindowFactory, DumbAware {
     protected static final String TOOL_WINDOW_ID = "DevSecOps Engine Tools";
 
     @Setter(AccessLevel.PRIVATE)
-    protected static LogPanel logPanel;
+    protected static LogPanel logPanelInstance;
 
     public static void info(String string) {
         appendText(string, "37");
@@ -78,8 +78,8 @@ public class LogPanelLogger implements ToolWindowFactory, DumbAware {
     }
 
     private static void appendText(String string, String color) {
-        if (logPanel != null) {
-            logPanel.appendText(string, color);
+        if (logPanelInstance != null) {
+            logPanelInstance.appendText(string, color);
         }
     }
 
@@ -116,7 +116,7 @@ public class LogPanelLogger implements ToolWindowFactory, DumbAware {
         toolWindow.getContentManager().addContent(content);
         logPanel.appendText("Welcome to the DevSecOps Engine Tools!", "37");
         logPanel.appendText("You can display your scan output here.", "37");
-        LogPanelLogger.setLogPanel(logPanel);
+        LogPanelLogger.setLogPanelInstance(logPanel);
     }
 
 }

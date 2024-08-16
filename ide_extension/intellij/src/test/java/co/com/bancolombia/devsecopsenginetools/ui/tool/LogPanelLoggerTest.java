@@ -42,56 +42,56 @@ public class LogPanelLoggerTest {
 
     @Test
     public void testInfo() {
-        LogPanelLogger.logPanel = mock(LogPanel.class);
+        LogPanelLogger.logPanelInstance = mock(LogPanel.class);
 
         LogPanelLogger.info("Info message");
 
-        verify(LogPanelLogger.logPanel).appendText("Info message", "37");
+        verify(LogPanelLogger.logPanelInstance).appendText("Info message", "37");
     }
 
     @Test
     public void testSuccess() {
-        LogPanelLogger.logPanel = mock(LogPanel.class);
+        LogPanelLogger.logPanelInstance = mock(LogPanel.class);
 
         LogPanelLogger.success("Success message");
 
-        verify(LogPanelLogger.logPanel).appendText("Success message", "32");
+        verify(LogPanelLogger.logPanelInstance).appendText("Success message", "32");
     }
 
     @Test
     public void testWarn() {
-        LogPanelLogger.logPanel = mock(LogPanel.class);
+        LogPanelLogger.logPanelInstance = mock(LogPanel.class);
 
         LogPanelLogger.warn("Warn message");
 
-        verify(LogPanelLogger.logPanel).appendText("Warn message", "33");
+        verify(LogPanelLogger.logPanelInstance).appendText("Warn message", "33");
     }
 
     @Test
     public void testError() {
-        LogPanelLogger.logPanel = mock(LogPanel.class);
+        LogPanelLogger.logPanelInstance = mock(LogPanel.class);
 
         LogPanelLogger.error("Error message");
 
-        verify(LogPanelLogger.logPanel).appendText("Error message", "31");
+        verify(LogPanelLogger.logPanelInstance).appendText("Error message", "31");
     }
 
     @Test
     public void testErrorWithException() {
-        LogPanelLogger.logPanel = mock(LogPanel.class);
+        LogPanelLogger.logPanelInstance = mock(LogPanel.class);
         Throwable throwable = new RuntimeException("Test exception");
 
         LogPanelLogger.error("Error message", throwable);
 
-        verify(LogPanelLogger.logPanel).appendText(contains("Error message"), contains("31"));
+        verify(LogPanelLogger.logPanelInstance).appendText(contains("Error message"), contains("31"));
     }
 
     @Test
     public void testClear() {
-        LogPanelLogger.logPanel = mock(LogPanel.class);
+        LogPanelLogger.logPanelInstance = mock(LogPanel.class);
 
         LogPanelLogger.clear();
 
-        verify(LogPanelLogger.logPanel).appendText(anyString(), eq("37"));
+        verify(LogPanelLogger.logPanelInstance).appendText(anyString(), eq("37"));
     }
 }
