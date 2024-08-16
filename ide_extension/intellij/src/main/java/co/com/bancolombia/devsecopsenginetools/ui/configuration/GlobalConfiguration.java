@@ -30,6 +30,7 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
     private JTextArea scanImageCommand;
     private JButton resetImageButton;
     private JBTextField dockerImage;
+    private JCheckBox checkForLatestImageCheckBox;
 
 
     public GlobalConfiguration() {
@@ -76,6 +77,7 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
         // image
         settings.setDevSecOpsImage(dockerImage.getText());
         settings.setScanImageCommand(scanImageCommand.getText());
+        settings.setCheckForLatestImage(checkForLatestImageCheckBox.isSelected());
         // variables
         settings.setAzureDevOpsOrganization(azureOrganization.getText());
         settings.setAzureDevOpsProject(azureProject.getText());
@@ -111,6 +113,7 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
             dockerImage.setText(globalSettings.getDevSecOpsImage());
             scanIacCommand.setText(globalSettings.getScanIacCommand());
             scanImageCommand.setText(globalSettings.getScanImageCommand());
+            checkForLatestImageCheckBox.setSelected(globalSettings.isCheckForLatestImage());
 
             azureOrganization.setText(globalSettings.getAzureDevOpsOrganization());
             azureProject.setText(globalSettings.getAzureDevOpsProject());

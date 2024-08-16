@@ -81,7 +81,7 @@ jobs:
         uses: github-actions-x/commit@722d56b8968bf00ced78407bbe2ead81062d8baa # v2.9
         with:
           github-token: ${{ steps.generate_token.outputs.token }}
-          push-branch: "feature/ide-plugin-intellj"
+          push-branch: "trunk"
           commit-message: 'upgrade version to ${{ env.RELEASE_VERSION }} version [skip ci]'
           force-add: "true"
           force-push: "true"

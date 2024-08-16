@@ -1,6 +1,6 @@
 {
     "branches": [
-        "feature/ide-plugin-intellj"
+        "trunk"
     ],
     "plugins": [
         "@semantic-release/commit-analyzer",

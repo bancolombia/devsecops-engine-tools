@@ -7,6 +7,8 @@ import co.com.bancolombia.devsecopsenginetools.ui.tool.LogPanelLogger;
 import co.com.bancolombia.devsecopsenginetools.utils.Commands;
 import co.com.bancolombia.devsecopsenginetools.utils.DataUtils;
 import co.com.bancolombia.devsecopsenginetools.utils.FileUtils;
+import co.com.bancolombia.devsecopsenginetools.utils.docker.DockerLatestImage;
+import co.com.bancolombia.devsecopsenginetools.utils.http.HttpClient;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
@@ -31,15 +33,24 @@ public class ScanIacTask extends Task.Backgroundable {
         try {
             LogPanelLogger.clear();
             prepareFiles(requireNonNull(myProject));
-            GlobalSettings settings = GlobalSettings.getInstance();
-            String command = settings.getScanIacCommand()
-                    .replace("{projectPath}", requireNonNull(myProject.getBasePath()))
-                    .replace("{image}", settings.getDevSecOpsImage());
+            String command = getCommand();
             LogPanelLogger.info("Running scan IaC command: " + command);
             Commands.runCommand(command, LogPanelLogger.getAppender());
         } catch (Exception ex) {
             LogPanelLogger.error("Error running scan IaC command: ", ex);
         }
+    }
+
+    private @NotNull String getCommand() {
+        GlobalSettings settings = GlobalSettings.getInstance();
+        String image = settings.getDevSecOpsImage();
+        if (settings.isCheckForLatestImage()) {
+            DockerLatestImage dockerLatestImage = new DockerLatestImage(settings, new HttpClient());
+            image = dockerLatestImage.getLatestImage();
+        }
+        return settings.getScanIacCommand()
+                .replace("{projectPath}", requireNonNull(myProject.getBasePath()))
+                .replace("{image}", image);
     }
 
     private void prepareFiles(Project project) throws IOException {

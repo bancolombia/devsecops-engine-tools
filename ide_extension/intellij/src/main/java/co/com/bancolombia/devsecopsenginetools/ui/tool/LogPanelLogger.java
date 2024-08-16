@@ -1,6 +1,11 @@
 package co.com.bancolombia.devsecopsenginetools.ui.tool;
 
+import co.com.bancolombia.devsecopsenginetools.actions.ScanIacAction;
+import co.com.bancolombia.devsecopsenginetools.actions.ScanImageAction;
 import co.com.bancolombia.devsecopsenginetools.utils.Commands;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -48,6 +53,10 @@ public class LogPanelLogger implements ToolWindowFactory, DumbAware {
 
     public static void warn(String string) {
         appendText(string, "33");
+    }
+
+    public static void warn(String string, Throwable throwable) {
+        warn(string + toString(throwable));
     }
 
     public static void error(String string) {
@@ -109,7 +118,14 @@ public class LogPanelLogger implements ToolWindowFactory, DumbAware {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+        DefaultActionGroup actionGroup = new DefaultActionGroup();
+        actionGroup.add(new ScanIacAction(true));
+        actionGroup.add(new ScanImageAction(true));
+        ActionToolbar actionToolbar = ActionManager.getInstance()
+                .createActionToolbar("LogPanelToolbar", actionGroup, false);
+
         logPanel = new LogPanel();
+        logPanel.add(actionToolbar.getComponent(), BorderLayout.WEST);
         ContentFactory contentFactory = ContentFactory.getInstance();
         Content content = contentFactory.createContent(logPanel, "Scan Output", false);
         toolWindow.getContentManager().addContent(content);

@@ -2,6 +2,7 @@ package co.com.bancolombia.devsecopsenginetools.actions;
 
 import co.com.bancolombia.devsecopsenginetools.tasks.ScanImageTask;
 import co.com.bancolombia.devsecopsenginetools.ui.tool.LogPanelLogger;
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressManager;
@@ -9,6 +10,12 @@ import com.intellij.openapi.project.Project;
 import lombok.SneakyThrows;
 
 public class ScanImageAction extends AnAction {
+    public ScanImageAction() {
+    }
+
+    public ScanImageAction(Boolean isRerun) {
+        super("Scan Image", "Run image scan", AllIcons.Actions.Rerun);
+    }
 
     @SneakyThrows
     @Override
