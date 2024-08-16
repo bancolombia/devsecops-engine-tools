@@ -93,7 +93,7 @@ public class AzureVariableProvider implements VariableProvider {
 
         List<String> groupsStr = groups.stream()
                 .map(String::valueOf)
-                .collect(Collectors.toList());
+                .toList();
 
         String groupIds = String.join(",", groupsStr);
 
