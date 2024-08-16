@@ -63,8 +63,8 @@ public class DataUtils {
     public static String urlEncode(String text) {
         if (!containsEncodedCharacters(text)) {
             return URLEncoder.encode(text, StandardCharsets.UTF_8)
-                    .replaceAll("\\+", "%20")
-                    .replaceAll("%2F", "/");
+                    .replace("+", "%20")
+                    .replace("%2F", "/");
         }
         return text;
     }

@@ -1,6 +1,5 @@
 package co.com.bancolombia.devsecopsenginetools.utils;
 
-import it.unimi.dsi.fastutil.bytes.F;
 import lombok.experimental.UtilityClass;
 
 import java.io.BufferedReader;
@@ -49,7 +48,9 @@ public class Commands {
 
     public interface Appender {
         void onNext(String text);
+
         void success(String text);
+
         void error(String text);
     }
 

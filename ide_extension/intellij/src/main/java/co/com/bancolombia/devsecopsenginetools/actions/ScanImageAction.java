@@ -7,14 +7,24 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.NlsActions;
 import lombok.SneakyThrows;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.*;
 
 public class ScanImageAction extends AnAction {
     public ScanImageAction() {
+        super();
     }
 
-    public ScanImageAction(Boolean isRerun) {
-        super("Scan Image", "Run image scan", AllIcons.Actions.Rerun);
+    public ScanImageAction(@Nullable @NlsActions.ActionText String text,
+                           @Nullable @NlsActions.ActionDescription String description, @Nullable Icon icon) {
+        super(text, description, icon);
+    }
+
+    public static ScanImageAction forUI() {
+        return new ScanImageAction("Scan Image", "Run image scan", AllIcons.Actions.Rerun);
     }
 
     @SneakyThrows

@@ -1,8 +1,11 @@
 package co.com.bancolombia.devsecopsenginetools.utils.variables;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@UtilityClass
 public class VariablePlaceholder {
     public static final String AZURE_PLACEHOLDER = "$(...)";
 

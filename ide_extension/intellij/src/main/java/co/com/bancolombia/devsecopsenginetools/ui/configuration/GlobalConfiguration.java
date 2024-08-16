@@ -12,11 +12,14 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
+import static co.com.bancolombia.devsecopsenginetools.utils.Constants.AZURE_CREDENTIALS;
+
 public class GlobalConfiguration implements Configurable, Configurable.NoScroll {
     private GlobalSettings globalSettings;
 
     // Tabs
-    private JPanel connectionDetails, settings;
+    private JPanel connectionDetails;
+    private JPanel settings;
 
     // Connection Details
     private JBPasswordField azureAccessToken;
@@ -64,24 +67,24 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
 
     @Override
     public boolean isModified() {
-        AzureCredentials credentials = ProjectSettingsUtils.getPassword("azure");
+        AzureCredentials credentials = ProjectSettingsUtils.getPassword(AZURE_CREDENTIALS);
         return !createServerConfig().equals(GlobalSettings.getInstance()) ||
                 !credentials.getAzureDevopsPassword().equals(new String(azureAccessToken.getPassword())) ||
                 !credentials.getAzureDevOpsUsername().equals(azureUserName.getText());
     }
 
     private GlobalSettings createServerConfig() {
-        GlobalSettings settings = new GlobalSettings();
+        GlobalSettings newGlobalSettings = new GlobalSettings();
         // iac
-        settings.setScanIacCommand(scanIacCommand.getText());
+        newGlobalSettings.setScanIacCommand(scanIacCommand.getText());
         // image
-        settings.setDevSecOpsImage(dockerImage.getText());
-        settings.setScanImageCommand(scanImageCommand.getText());
-        settings.setCheckForLatestImage(checkForLatestImageCheckBox.isSelected());
+        newGlobalSettings.setDevSecOpsImage(dockerImage.getText());
+        newGlobalSettings.setScanImageCommand(scanImageCommand.getText());
+        newGlobalSettings.setCheckForLatestImage(checkForLatestImageCheckBox.isSelected());
         // variables
-        settings.setAzureDevOpsOrganization(azureOrganization.getText());
-        settings.setAzureDevOpsProject(azureProject.getText());
-        return settings;
+        newGlobalSettings.setAzureDevOpsOrganization(azureOrganization.getText());
+        newGlobalSettings.setAzureDevOpsProject(azureProject.getText());
+        return newGlobalSettings;
     }
 
     @Override
@@ -95,7 +98,7 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
         globalSettings.setAzureDevOpsOrganization(azureOrganization.getText());
         globalSettings.setAzureDevOpsProject(azureProject.getText());
         AzureCredentials credentials = new AzureCredentials(azureUserName.getText(), new String(azureAccessToken.getPassword()));
-        ProjectSettingsUtils.savePassword("azure", credentials);
+        ProjectSettingsUtils.savePassword(AZURE_CREDENTIALS, credentials);
     }
 
     @Override
@@ -117,7 +120,7 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
 
             azureOrganization.setText(globalSettings.getAzureDevOpsOrganization());
             azureProject.setText(globalSettings.getAzureDevOpsProject());
-            AzureCredentials credentials = ProjectSettingsUtils.getPassword("azure");
+            AzureCredentials credentials = ProjectSettingsUtils.getPassword(AZURE_CREDENTIALS);
             azureUserName.setText(credentials.getAzureDevOpsUsername());
             azureAccessToken.setText(credentials.getAzureDevopsPassword());
         }
