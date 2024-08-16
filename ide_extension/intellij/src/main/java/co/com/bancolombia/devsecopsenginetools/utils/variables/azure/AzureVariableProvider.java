@@ -13,6 +13,7 @@ import co.com.bancolombia.devsecopsenginetools.utils.variables.Variable;
 import co.com.bancolombia.devsecopsenginetools.utils.variables.VariableProvider;
 import co.com.bancolombia.devsecopsenginetools.utils.variables.azure.AzureVariableGroupResponse.AzureVariableGroup;
 import co.com.bancolombia.devsecopsenginetools.utils.variables.azure.AzureVariableGroupResponse.AzureVariableGroup.AzureVariable;
+import co.com.bancolombia.devsecopsenginetools.utils.variables.azure.exceptions.VariableGroupNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -23,8 +24,15 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import static co.com.bancolombia.devsecopsenginetools.utils.Constants.AZURE_CREDENTIALS;
+import static co.com.bancolombia.devsecopsenginetools.utils.Constants.DEFAULT_URL_PATTERN;
+
 @RequiredArgsConstructor
 public class AzureVariableProvider implements VariableProvider {
+    public static final String ORGANIZATION = "organization";
+    public static final String PROJECT = "project";
+    public static final String FROM = "' from: ";
+    public static final String VARIABLE_GROUP = "Variable group '";
     private final ProjectSettings settings;
     private final HttpClient httpClient;
 
@@ -55,24 +63,24 @@ public class AzureVariableProvider implements VariableProvider {
 
     public List<AzureVariableGroup> getVariableGroupsByName(List<String> groups) {
         GlobalSettings globalSettings = GlobalSettings.getInstance();
-        AzureCredentials credentials = ProjectSettingsUtils.getPassword("azure");
+        AzureCredentials credentials = ProjectSettingsUtils.getPassword(AZURE_CREDENTIALS);
         AuthMethod auth = DataUtils.toBasicAuth(credentials.getAzureDevOpsUsername(), credentials.getAzureDevopsPassword());
 
         String endpoint = FileUtils.getProperties().getString("azure-group-by-name");
 
         return groups.stream().map(group -> {
-                    String url = DataUtils.replaceTokens(endpoint, "{...}",
-                            Map.of("organization", DataUtils.urlEncode(globalSettings.getAzureDevOpsOrganization()),
-                                    "project", DataUtils.urlEncode(globalSettings.getAzureDevOpsProject()),
+                    String url = DataUtils.replaceTokens(endpoint, DEFAULT_URL_PATTERN,
+                            Map.of(ORGANIZATION, DataUtils.urlEncode(globalSettings.getAzureDevOpsOrganization()),
+                                    PROJECT, DataUtils.urlEncode(globalSettings.getAzureDevOpsProject()),
                                     "groupName", group));
 
-                    LogPanelLogger.info("Downloading variable group '" + group + "' from: " + url);
+                    LogPanelLogger.info("Downloading variable group '" + group + FROM + url);
 
                     AzureVariableGroupResponse res = httpClient.get(url, AzureVariableGroupResponse.class, auth);
                     if (res.getValue().isEmpty()) {
-                        throw new RuntimeException("Variable group '" + group + "' not found");
+                        throw new VariableGroupNotFoundException(VARIABLE_GROUP + group + "' not found");
                     }
-                    LogPanelLogger.info("Variable group '" + group + "' downloaded");
+                    LogPanelLogger.info(VARIABLE_GROUP + group + "' downloaded");
                     return res.getValue().get(0);
                 })
                 .collect(Collectors.toList());
@@ -80,7 +88,7 @@ public class AzureVariableProvider implements VariableProvider {
 
     public List<AzureVariableGroup> getVariableGroupsById(List<Long> groups) {
         GlobalSettings globalSettings = GlobalSettings.getInstance();
-        AzureCredentials credentials = ProjectSettingsUtils.getPassword("azure");
+        AzureCredentials credentials = ProjectSettingsUtils.getPassword(AZURE_CREDENTIALS);
         AuthMethod auth = DataUtils.toBasicAuth(credentials.getAzureDevOpsUsername(), credentials.getAzureDevopsPassword());
 
         List<String> groupsStr = groups.stream()
@@ -91,38 +99,38 @@ public class AzureVariableProvider implements VariableProvider {
 
         String endpoint = FileUtils.getProperties().getString("azure-group-by-id");
 
-        String url = DataUtils.replaceTokens(endpoint, "{...}",
-                Map.of("organization", DataUtils.urlEncode(globalSettings.getAzureDevOpsOrganization()),
-                        "project", DataUtils.urlEncode(globalSettings.getAzureDevOpsProject()),
+        String url = DataUtils.replaceTokens(endpoint, DEFAULT_URL_PATTERN,
+                Map.of(ORGANIZATION, DataUtils.urlEncode(globalSettings.getAzureDevOpsOrganization()),
+                        PROJECT, DataUtils.urlEncode(globalSettings.getAzureDevOpsProject()),
                         "groupIds", groupIds));
 
-        LogPanelLogger.info("Downloading variable groups '" + groupIds + "' from: " + url);
+        LogPanelLogger.info("Downloading variable groups '" + groupIds + FROM + url);
 
         AzureVariableGroupResponse res = httpClient.get(url, AzureVariableGroupResponse.class, auth);
         if (res.getValue().isEmpty()) {
-            throw new RuntimeException("Variable group '" + groupIds + "' not found");
+            throw new VariableGroupNotFoundException(VARIABLE_GROUP + groupIds + "' not found");
         }
         return res.getValue().stream()
-                .peek(group -> LogPanelLogger.info("Variable group '" + group.getId() + "' downloaded"))
-                .collect(Collectors.toList());
+                .peek(group -> LogPanelLogger.info(VARIABLE_GROUP + group.getId() + "' downloaded"))
+                .toList();
     }
 
 
     public Map<String, AzureVariable> getVariablesFromReleaseAndStage(ProjectSettings projectSettings) {
         GlobalSettings globalSettings = GlobalSettings.getInstance();
-        AzureCredentials credentials = ProjectSettingsUtils.getPassword("azure");
+        AzureCredentials credentials = ProjectSettingsUtils.getPassword(AZURE_CREDENTIALS);
         AuthMethod auth = DataUtils.toBasicAuth(credentials.getAzureDevOpsUsername(), credentials.getAzureDevopsPassword());
 
         String endpoint = FileUtils.getProperties().getString("azure-release");
 
-        String url = DataUtils.replaceTokens(endpoint, "{...}",
-                Map.of("organization", DataUtils.urlEncode(globalSettings.getAzureDevOpsOrganization()),
-                        "project", DataUtils.urlEncode(globalSettings.getAzureDevOpsProject()),
+        String url = DataUtils.replaceTokens(endpoint, DEFAULT_URL_PATTERN,
+                Map.of(ORGANIZATION, DataUtils.urlEncode(globalSettings.getAzureDevOpsOrganization()),
+                        PROJECT, DataUtils.urlEncode(globalSettings.getAzureDevOpsProject()),
                         "definitionId", projectSettings.getAzureReleaseDefinitionId()));
 
         LogPanelLogger.info("Downloading variable groups from release '" +
                 projectSettings.getAzureReleaseDefinitionId() + "' and stage name '" +
-                projectSettings.getAzureReleaseStageName() + "' from: " + url);
+                projectSettings.getAzureReleaseStageName() + FROM + url);
 
         AzureReleaseDefinitionResponse res = httpClient.get(url, AzureReleaseDefinitionResponse.class, auth);
         AzureReleaseDefinitionResponse.Environment env = getEnvironment(projectSettings, res);
@@ -150,7 +158,7 @@ public class AzureVariableProvider implements VariableProvider {
             }
         }
         if (env == null) {
-            throw new RuntimeException("Stage '" + projectSettings.getAzureReleaseStageName() +
+            throw new VariableGroupNotFoundException("Stage '" + projectSettings.getAzureReleaseStageName() +
                     "' not found in release '" + projectSettings.getAzureReleaseDefinitionId() + "'");
         }
         return env;

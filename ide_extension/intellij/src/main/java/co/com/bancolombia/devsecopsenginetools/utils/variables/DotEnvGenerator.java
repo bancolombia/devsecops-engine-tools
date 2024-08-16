@@ -7,6 +7,7 @@ import co.com.bancolombia.devsecopsenginetools.utils.FileUtils;
 import co.com.bancolombia.devsecopsenginetools.utils.http.HttpClient;
 import co.com.bancolombia.devsecopsenginetools.utils.variables.azure.AzureVariableProvider;
 import com.intellij.openapi.project.Project;
+import lombok.experimental.UtilityClass;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -15,6 +16,7 @@ import java.util.Objects;
 
 import static co.com.bancolombia.devsecopsenginetools.utils.variables.VariablePlaceholder.AZURE_PLACEHOLDER;
 
+@UtilityClass
 public class DotEnvGenerator {
 
     public static String updateDotEnv(Project project) throws IOException {

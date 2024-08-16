@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -33,7 +33,7 @@ public class FileUtils {
         PathUtils.copyDirectory(source, finalTarget, REPLACE_EXISTING);
     }
 
-    public static void walkDirectory(Path start, Function<String, String> action) throws IOException {
+    public static void walkDirectory(Path start, UnaryOperator<String> action) throws IOException {
         Files.walkFileTree(start, new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
@@ -92,7 +92,7 @@ public class FileUtils {
     public static String findDockerfile(String projectPath) {
         String path = findDockerfile(new File(projectPath))
                 .map(File::getAbsolutePath).orElse("").replace(projectPath, "");
-        if(path.startsWith("/")){
+        if (path.startsWith("/")) {
             return path.substring(1);
         }
         return path;

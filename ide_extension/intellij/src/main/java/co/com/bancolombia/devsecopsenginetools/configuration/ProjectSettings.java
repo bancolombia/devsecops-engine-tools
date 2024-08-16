@@ -7,6 +7,8 @@ import lombok.Data;
 
 import java.nio.file.Paths;
 
+import static co.com.bancolombia.devsecopsenginetools.utils.Constants.DEFAULT_PATTERN;
+
 @Data
 public class ProjectSettings {
     // iac settings
@@ -29,7 +31,7 @@ public class ProjectSettings {
         if (isDefault()) {
             iacDirectory = "resources,deployment";
             replaceTokens = false;
-            replacePattern = "#{...}#";
+            replacePattern = DEFAULT_PATTERN;
             dotEnvFile = ".env";
             azureDevOpsVariableGroups = "";
             azureReleaseDefinitionId = "";

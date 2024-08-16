@@ -3,12 +3,9 @@ package co.com.bancolombia.devsecopsenginetools.ui.tool;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.mockito.Mockito.any;
@@ -45,7 +42,7 @@ public class LogPanelLoggerTest {
 
     @Test
     public void testInfo() {
-        LogPanelLogger.logPanel = mock(LogPanelLogger.LogPanel.class);
+        LogPanelLogger.logPanel = mock(LogPanel.class);
 
         LogPanelLogger.info("Info message");
 
@@ -54,7 +51,7 @@ public class LogPanelLoggerTest {
 
     @Test
     public void testSuccess() {
-        LogPanelLogger.logPanel = mock(LogPanelLogger.LogPanel.class);
+        LogPanelLogger.logPanel = mock(LogPanel.class);
 
         LogPanelLogger.success("Success message");
 
@@ -63,7 +60,7 @@ public class LogPanelLoggerTest {
 
     @Test
     public void testWarn() {
-        LogPanelLogger.logPanel = mock(LogPanelLogger.LogPanel.class);
+        LogPanelLogger.logPanel = mock(LogPanel.class);
 
         LogPanelLogger.warn("Warn message");
 
@@ -72,7 +69,7 @@ public class LogPanelLoggerTest {
 
     @Test
     public void testError() {
-        LogPanelLogger.logPanel = mock(LogPanelLogger.LogPanel.class);
+        LogPanelLogger.logPanel = mock(LogPanel.class);
 
         LogPanelLogger.error("Error message");
 
@@ -81,7 +78,7 @@ public class LogPanelLoggerTest {
 
     @Test
     public void testErrorWithException() {
-        LogPanelLogger.logPanel = mock(LogPanelLogger.LogPanel.class);
+        LogPanelLogger.logPanel = mock(LogPanel.class);
         Throwable throwable = new RuntimeException("Test exception");
 
         LogPanelLogger.error("Error message", throwable);
@@ -91,7 +88,7 @@ public class LogPanelLoggerTest {
 
     @Test
     public void testClear() {
-        LogPanelLogger.logPanel = mock(LogPanelLogger.LogPanel.class);
+        LogPanelLogger.logPanel = mock(LogPanel.class);
 
         LogPanelLogger.clear();
 
