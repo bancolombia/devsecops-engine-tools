@@ -133,14 +133,26 @@ tasks {
         finalizedBy(jacocoTestReport)
     }
 
+    withType<Test> {
+        configure<JacocoTaskExtension> {
+            isIncludeNoLocationClasses = true
+            excludes = listOf("jdk.internal.*")
+        }
+    }
+
     jacocoTestReport {
         dependsOn(test)
+        classDirectories.setFrom(instrumentCode)
         reports {
             xml.required.set(true)
             xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco.xml"))
             html.required.set(true)
             html.outputLocation.set(layout.buildDirectory.dir("reports/jacocoHtml"))
         }
+    }
+
+    jacocoTestCoverageVerification {
+        classDirectories.setFrom(instrumentCode)
     }
 
     wrapper {
