@@ -178,12 +178,18 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     MagicMock(
                         vuln_id_from_tool="id3",
                         file_path="path1",
-                        last_status_update="2024-01-10T00:00:00Z",
+                        transfer_finding= MagicMock(
+                            date= "2024-08-14",
+                            expiration_date= "2024-08-15T00:00:00Z",
+                        )
                     ),
                     MagicMock(
                         vuln_id_from_tool="id4",
                         file_path="path2",
-                        last_status_update="2024-01-10T00:00:00Z",
+                        transfer_finding= MagicMock(
+                            date= "2024-08-14",
+                            expiration_date= "2024-08-15T00:00:00Z",
+                        )
                     ),
                 ]
             ),
@@ -210,10 +216,10 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 id="id2", where="path2", create_date="10062024", expired_date=""
             ),
             Exclusions(
-                id="id3", where="pathq", create_date="10012024", expired_date="10012025"
+                id="id3", where="pathq", create_date="14082024", expired_date="15082024"
             ),
             Exclusions(
-                id="id4", where="path2", create_date="10012024", expired_date="10012025"
+                id="id4", where="path2", create_date="14082024", expired_date="15082024"
             ),
         ]
         self.assertEqual(result, expected_result)
@@ -294,7 +300,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
         expected_result = [
             Exclusions(id="id1", where="comp1:version1", create_date="21022024"),
-            Exclusions(id="id2", where="comp2:version2", create_date="21022024")
+            Exclusions(id="id2", where="comp2:version2", create_date="21022024"),
         ]
         self.assertEqual(result, expected_result)
 

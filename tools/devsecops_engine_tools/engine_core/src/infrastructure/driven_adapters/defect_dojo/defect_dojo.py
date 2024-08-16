@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_management_gateway import (
     VulnerabilityManagementGateway,
 )
@@ -289,9 +287,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             create_date = date_fn(finding.last_status_update)
             expired_date = date_fn(None)
         elif reason == "Transferred Finding":
-            create_date = date_fn(finding.last_status_update)
-            expired_delta =datetime.strptime(create_date, "%d%m%Y") + relativedelta(months=6)
-            expired_date = datetime.strftime(expired_delta, "%d%m%Y")
+            create_date = date_fn(finding.transfer_finding.date)
+            expired_date = date_fn(finding.transfer_finding.expiration_date)
         else:
             last_accepted_risk = finding.accepted_risks[-1]
             create_date = date_fn(last_accepted_risk["created"])
