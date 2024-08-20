@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="co.com.bancolombia.devsecopsenginetools.ui.configuration.ProjectConfiguration">
+  <tabbedpane id="7b91a">
+    <constraints>
+      <xy x="20" y="170" width="743" height="576"/>
+    </constraints>
+    <properties>
+      <autoscrolls value="false"/>
+      <doubleBuffered value="true"/>
+      <enabled value="true"/>
+      <minimumSize width="0" height="0"/>
+      <opaque value="true"/>
+      <preferredSize width="0" height="0"/>
+      <requestFocusEnabled value="false"/>
+      <tabLayoutPolicy value="0"/>
+      <tabPlacement value="1"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <grid id="b0c38" binding="variablesPanel" layout-manager="GridLayoutManager" row-count="9" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <tabbedpane title="Variables"/>
+        </constraints>
+        <properties>
+          <doubleBuffered value="true"/>
+          <minimumSize width="0" height="0"/>
+          <preferredSize width="0" height="0"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="b9995" class="com.intellij.ui.TitledSeparator">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Get variables from Azure"/>
+            </properties>
+          </component>
+          <component id="29b33" class="javax.swing.JCheckBox" binding="replaceTokens">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Replace Tokens"/>
+            </properties>
+          </component>
+          <component id="f1439" class="com.intellij.ui.components.JBTextField" binding="replaceTokensPattern">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="169" height="34"/>
+              </grid>
+            </constraints>
+            <properties>
+              <toolTipText value="Example: https://acme.bancolombia.io"/>
+            </properties>
+          </component>
+          <component id="710c0" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="139" height="17"/>
+              </grid>
+            </constraints>
+            <properties>
+              <text value="Pattern"/>
+            </properties>
+          </component>
+          <component id="8055b" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value=".env variables file"/>
+            </properties>
+          </component>
+          <component id="76a6d" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="dotEnvVariables">
+            <constraints>
+              <grid row="1" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="207" height="34"/>
+              </grid>
+            </constraints>
+            <properties>
+              <text value=""/>
+              <toolTipText value="Directory that contains multiple files like k8s yamls and Dockerfile"/>
+            </properties>
+          </component>
+          <component id="62866" class="javax.swing.JButton" binding="toDotEnv">
+            <constraints>
+              <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Variable groups to .env"/>
+            </properties>
+          </component>
+          <component id="95c94" class="javax.swing.JProgressBar" binding="processingGroups">
+            <constraints>
+              <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <indeterminate value="true"/>
+            </properties>
+          </component>
+          <component id="e94ca" class="javax.swing.JTextField" binding="variableGroups">
+            <constraints>
+              <grid row="5" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="-1"/>
+              </grid>
+            </constraints>
+            <properties>
+              <toolTipText value="Comma separated variable group names"/>
+            </properties>
+          </component>
+          <component id="9ee63" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Variable Groups"/>
+            </properties>
+          </component>
+          <component id="100c9" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Release Definition"/>
+            </properties>
+          </component>
+          <component id="6374a" class="javax.swing.JTextField" binding="releaseDefinition">
+            <constraints>
+              <grid row="3" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="-1"/>
+              </grid>
+            </constraints>
+            <properties>
+              <toolTipText value="Comma separated variable group names"/>
+            </properties>
+          </component>
+          <component id="ce9c0" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Stage Name"/>
+            </properties>
+          </component>
+          <component id="288d2" class="javax.swing.JTextField" binding="stageName">
+            <constraints>
+              <grid row="4" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="-1"/>
+              </grid>
+            </constraints>
+            <properties>
+              <text value=""/>
+              <toolTipText value="Comma separated variable group names"/>
+            </properties>
+          </component>
+          <component id="ddc63" class="javax.swing.JLabel" binding="dotEnvOutput">
+            <constraints>
+              <grid row="7" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="16"/>
+              </grid>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <text value="message"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="61f62" binding="iacPanel" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <tabbedpane title="IaC Scan"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="ba12c" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="IaC Directory"/>
+            </properties>
+          </component>
+          <vspacer id="862fd">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </vspacer>
+          <component id="5ce45" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="iacDirectory">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="207" height="34"/>
+              </grid>
+            </constraints>
+            <properties>
+              <text value=""/>
+              <toolTipText value="Directory that contains multiple files like k8s yamls and Dockerfile"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="df8f9" binding="imagePanel" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <tabbedpane title="Image Scan"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="c210c" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Dockerfile"/>
+            </properties>
+          </component>
+          <component id="4b729" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="dockerFilePath">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="207" height="34"/>
+              </grid>
+            </constraints>
+            <properties>
+              <text value=""/>
+              <toolTipText value="Directory that contains multiple files like k8s yamls and Dockerfile"/>
+            </properties>
+          </component>
+          <component id="19601" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Pre build script"/>
+            </properties>
+          </component>
+          <component id="bedcb" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="buildContextPath">
+            <constraints>
+              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="207" height="34"/>
+              </grid>
+            </constraints>
+            <properties>
+              <text value=""/>
+              <toolTipText value="Directory that contains multiple files like k8s yamls and Dockerfile"/>
+            </properties>
+          </component>
+          <component id="b4d07" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Build context"/>
+            </properties>
+          </component>
+          <component id="210d7" class="javax.swing.JTextArea" binding="preBuildScript">
+            <constraints>
+              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="50"/>
+              </grid>
+            </constraints>
+            <properties/>
+          </component>
+          <component id="beaed" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Build command"/>
+            </properties>
+          </component>
+          <component id="84020" class="javax.swing.JTextField" binding="buildCommand">
+            <constraints>
+              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="-1"/>
+              </grid>
+            </constraints>
+            <properties/>
+          </component>
+        </children>
+      </grid>
+    </children>
+  </tabbedpane>
+  <buttonGroups>
+    <group name="authenticationMethod">
+      <member id="6f374"/>
+      <member id="aff26"/>
+    </group>
+    <group name="policy">
+      <member id="6e971"/>
+      <member id="f6c62"/>
+      <member id="b204b"/>
+    </group>
+    <group name="credentialsType">
+      <member id="2f44e"/>
+      <member id="9138c"/>
+      <member id="4a8e4"/>
+      <member id="a8c73"/>
+    </group>
+    <group name="resourcesRepo">
+      <member id="2e24c"/>
+      <member id="25d51"/>
+    </group>
+  </buttonGroups>
+</form>
