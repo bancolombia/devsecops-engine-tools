@@ -37,11 +37,9 @@ public class ScanIacAction extends AnAction {
         Project project = e.getProject();
         LogPanelLogger.activate(project);
         if (project != null) {
-            LogPanelLogger.success("START");
             isTaskRunning = true;
             ScanIacTask task = new ScanIacTask(project, "Scanning iac", () -> isTaskRunning = false);
             ProgressManager.getInstance().run(task);
-            LogPanelLogger.success("END");
         }
     }
 
