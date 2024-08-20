@@ -2,8 +2,17 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
     Exclusions,
 )
 
+
 class GetExclusions:
-    def __init__(self, devops_platform_gateway, dict_args, findings, risk_config, risk_exclusions, pipeline_name):
+    def __init__(
+        self,
+        devops_platform_gateway,
+        dict_args,
+        findings,
+        risk_config,
+        risk_exclusions,
+        pipeline_name,
+    ):
         self.devops_platform_gateway = devops_platform_gateway
         self.dict_args = dict_args
         self.findings = findings
@@ -20,7 +29,11 @@ class GetExclusions:
         exclusions.extend(self._get_risk_exclusions())
         for key in self.risk_config["EXCLUSIONS_PATHS"].keys():
             if key in unique_tags:
-                exclusions.extend(self._get_exclusions_by_practice(core_config, key, self.risk_config["EXCLUSIONS_PATHS"][key]))
+                exclusions.extend(
+                    self._get_exclusions_by_practice(
+                        core_config, key, self.risk_config["EXCLUSIONS_PATHS"][key]
+                    )
+                )
 
         return exclusions
 

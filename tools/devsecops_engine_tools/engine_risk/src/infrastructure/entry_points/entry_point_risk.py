@@ -19,7 +19,9 @@ from devsecops_engine_tools.engine_utilities import settings
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
-def init_engine_risk(devops_platform_gateway, print_table_gateway, dict_args, findings):
+def init_engine_risk(
+    devops_platform_gateway, print_table_gateway, dict_args, parent_findings, findings
+):
     remote_config = devops_platform_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
     )
@@ -32,7 +34,14 @@ def init_engine_risk(devops_platform_gateway, print_table_gateway, dict_args, fi
         logger.info("Tool skipped by DevSecOps Policy.")
     else:
         process_findings(
-            findings, dict_args, pipeline_name, risk_exclusions, remote_config, devops_platform_gateway, print_table_gateway
+            parent_findings,
+            findings,
+            dict_args,
+            pipeline_name,
+            risk_exclusions,
+            remote_config,
+            devops_platform_gateway,
+            print_table_gateway,
         )
 
 
@@ -43,27 +52,74 @@ def should_skip_analysis(remote_config, pipeline_name, exclusions):
     )
 
 
-def process_findings(
-    findings, dict_args, pipeline_name, risk_exclusions, remote_config, devops_platform_gateway, print_table_gateway
+def process_active_findings(
+    active_findings,
+    total_findings,
+    devops_platform_gateway,
+    dict_args,
+    remote_config,
+    risk_exclusions,
+    pipeline_name,
+    print_table_gateway,
 ):
-    if not findings:
+    data_added = AddData(active_findings).add_data()
+    get_exclusions = GetExclusions(
+        devops_platform_gateway,
+        dict_args,
+        data_added,
+        remote_config,
+        risk_exclusions,
+        pipeline_name,
+    )
+    exclusions = get_exclusions.process()
+    BreakBuild(
+        devops_platform_gateway, print_table_gateway, remote_config, exclusions
+    ).process(total_findings, data_added)
+
+
+def process_findings(
+    parent_findings,
+    findings,
+    dict_args,
+    pipeline_name,
+    risk_exclusions,
+    remote_config,
+    devops_platform_gateway,
+    print_table_gateway,
+):
+    if not findings and not parent_findings:
         print("No findings found in Vulnerability Management Platform")
         logger.info("No findings found in Vulnerability Management Platform")
         return
 
     handle_filters = HandleFilters()
-    active_findings = handle_filters.filter(findings)
-    if not active_findings:
-        print("No active findings found in Vulnerability Management Platform")
-        logger.info("No active findings found in Vulnerability Management Platform")
-        return
 
-    data_added = AddData(active_findings).add_data()
-    get_exclusions = GetExclusions(
-        devops_platform_gateway, dict_args, data_added, remote_config, risk_exclusions, pipeline_name
-    )
-    exclusions = get_exclusions.process()
+    if parent_findings:
+        parent_identifier = remote_config["PARENT_ANALYSIS"]["PARENT_IDENTIFIER"]
+        parent_service = pipeline_name.split(parent_identifier)[0] + parent_identifier
+        print(f"Generating report for {parent_service}")
+        logger.info(f"Generating report for {parent_service}")
+        process_active_findings(
+            handle_filters.filter(parent_findings),
+            parent_findings,
+            devops_platform_gateway,
+            dict_args,
+            remote_config,
+            risk_exclusions,
+            pipeline_name,
+            print_table_gateway,
+        )
 
-    BreakBuild(devops_platform_gateway, print_table_gateway, remote_config).process(
-        data_added
-    )
+    if findings:
+        print(f"Generating report for {pipeline_name}")
+        logger.info(f"Generating report for {pipeline_name}")
+        process_active_findings(
+            handle_filters.filter(findings),
+            findings,
+            devops_platform_gateway,
+            dict_args,
+            remote_config,
+            risk_exclusions,
+            pipeline_name,
+            print_table_gateway,
+        )

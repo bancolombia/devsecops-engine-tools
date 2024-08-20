@@ -19,4 +19,5 @@ class Report:
         self.last_status_update = kwargs.get("last_status_update", "")
         self.epss_score = kwargs.get("epss_score", "")
         self.epss_percentile = kwargs.get("epss_percentile", "")
+        self.mitigated = kwargs.get("mitigated", "")
         self.vul_description = kwargs.get("vul_description", "")

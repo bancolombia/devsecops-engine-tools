@@ -62,31 +62,23 @@ class HandleRisk:
         service = self.devops_platform_gateway.get_variable("pipeline_name")
         parent_identifier = risk_config["PARENT_ANALYSIS"]["PARENT_IDENTIFIER"]
 
+        parent_findings = []
         if (
             risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true"
             and parent_identifier in service
         ):
             parent_service = service.split(parent_identifier)[0] + parent_identifier
-            print(f"Generating report for {parent_service}")
-            logger.info(f"Generating report for {parent_service}")
             parent_findings = self._get_finding_list(
                 dict_args, secret_tool, remote_config, parent_service
             )
-            runner_engine_risk(
-                dict_args,
-                parent_findings,
-                self.devops_platform_gateway,
-                self.print_table_gateway,
-            )
 
-        print(f"Generating report for {service}")
-        logger.info(f"Generating report for {service}")
         findigs_list = self._get_finding_list(
             dict_args, secret_tool, remote_config, service
         )
 
         runner_engine_risk(
             dict_args,
+            parent_findings,
             findigs_list,
             self.devops_platform_gateway,
             self.print_table_gateway,

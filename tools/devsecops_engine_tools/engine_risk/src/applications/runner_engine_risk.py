@@ -10,11 +10,12 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 def runner_engine_risk(
-    dict_args, findings, devops_platform_gateway, print_table_gateway
+    dict_args, parent_findings, findings, devops_platform_gateway, print_table_gateway
 ):
     init_engine_risk(
         devops_platform_gateway,
         print_table_gateway,
         dict_args,
+        parent_findings,
         findings,
     )
