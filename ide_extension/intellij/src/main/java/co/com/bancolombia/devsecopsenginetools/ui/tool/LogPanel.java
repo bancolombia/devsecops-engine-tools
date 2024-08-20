@@ -3,6 +3,7 @@ package co.com.bancolombia.devsecopsenginetools.ui.tool;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
 import javax.swing.*;
@@ -25,6 +26,7 @@ import java.util.regex.Pattern;
 public class LogPanel extends JBPanel<LogPanel> {
     private final transient StyledDocument doc;
     private final JTextPane textPane;
+    private final JPopupMenu contextMenu;
     private final Map<String, SimpleAttributeSet> ansiCodeToStyle;
 
     public LogPanel() {
@@ -36,6 +38,11 @@ public class LogPanel extends JBPanel<LogPanel> {
         textPane.setContentType("text/html"); // Enable HTML support
         textPane.setBackground(JBColor.WHITE);
         doc = textPane.getStyledDocument();
+
+        contextMenu = new JPopupMenu();
+        JMenuItem clearItem = new JMenuItem("Clear");
+        clearItem.addActionListener(e -> clear());
+        contextMenu.add(clearItem);
 
         ansiCodeToStyle = createAnsiCodeToStyleMap();
 
@@ -51,6 +58,11 @@ public class LogPanel extends JBPanel<LogPanel> {
         } catch (BadLocationException e) {
             log.warn("Error appending text", e);
         }
+    }
+
+    @SneakyThrows
+    private void clear() {
+        doc.remove(0, doc.getLength());
     }
 
     private void parseAndAppend(String log) throws BadLocationException {
@@ -145,6 +157,20 @@ public class LogPanel extends JBPanel<LogPanel> {
             }
         }
 
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                showContextMenu(e);
+            }
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                showContextMenu(e);
+            }
+        }
+
         private String getText(Element element) {
             try {
                 return textPane.getDocument().getText(element.getStartOffset(),
@@ -161,6 +187,10 @@ public class LogPanel extends JBPanel<LogPanel> {
             } catch (Exception e) {
                 log.warn("Error opening link: {}", link, e);
             }
+        }
+
+        private void showContextMenu(MouseEvent e) {
+            contextMenu.show(e.getComponent(), e.getX(), e.getY());
         }
     }
 }

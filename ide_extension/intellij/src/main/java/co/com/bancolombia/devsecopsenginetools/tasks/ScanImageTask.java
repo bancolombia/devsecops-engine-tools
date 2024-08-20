@@ -23,8 +23,12 @@ import java.util.Map;
 import static java.util.Objects.requireNonNull;
 
 public class ScanImageTask extends Task.Backgroundable {
-    public ScanImageTask(@Nullable Project project, @NlsContexts.ProgressTitle @NotNull String title) {
+    private final Completable completable;
+
+    public ScanImageTask(@Nullable Project project, @NlsContexts.ProgressTitle @NotNull String title,
+                         Completable completable) {
         super(project, title, false);
+        this.completable = completable;
     }
 
     @Override
@@ -54,6 +58,7 @@ public class ScanImageTask extends Task.Backgroundable {
         } catch (Exception ex) {
             LogPanelLogger.error("Error running scan IaC command: ", ex);
         }
+        completable.complete();
     }
 
     private void prepareFiles(Project project) throws IOException {
