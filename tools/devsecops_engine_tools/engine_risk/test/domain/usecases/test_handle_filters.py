@@ -10,7 +10,10 @@ class TestHandleFilters(unittest.TestCase):
     def setUp(self):
         self.findings = [
             Report(
-                id=[{"vulnerability_id": "CVE-2021-1234"}, {"vulnerability_id": "vuln_id"}],
+                id=[
+                    {"vulnerability_id": "CVE-2021-1234"},
+                    {"vulnerability_id": "vuln_id"},
+                ],
                 date="21022024",
                 status="stat2",
                 where="path",
@@ -19,7 +22,10 @@ class TestHandleFilters(unittest.TestCase):
                 active=True,
             ),
             Report(
-                id=[{"vulnerability_id": "CVE-2021-1234"}, {"vulnerability_id": "vuln_id"}],
+                id=[
+                    {"vulnerability_id": "CVE-2021-1234"},
+                    {"vulnerability_id": "vuln_id"},
+                ],
                 date="21022024",
                 status="stat2",
                 where="path2",
@@ -51,14 +57,14 @@ class TestHandleFilters(unittest.TestCase):
         result = self.handle_filters.filter(self.findings)
 
         assert len(result) == 2
-    
+
     def test__get_active_findings(self):
         result = self.handle_filters._get_active_findings(self.findings)
 
         assert len(result) == 2
 
     def test__get_priority_vulnerability(self):
-        expected_findings  = [
+        expected_findings = [
             Report(
                 id="CVE-2021-1234",
                 date="21022024",

@@ -26,5 +26,8 @@
         },
         "age": 0.0333,
         "epss_score": 100
+    },
+    "THRESHOLDS": {
+        "RISK_MANAGEMENT": 0.0
     }
 }

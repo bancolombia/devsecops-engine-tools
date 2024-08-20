@@ -306,6 +306,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             ),
             epss_score=finding.epss_score,
             epss_percentile=finding.epss_percentile,
+            mitigated=finding.is_mitigated,
             vul_description=finding.description,
         )
 
