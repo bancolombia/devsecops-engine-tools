@@ -24,7 +24,7 @@ public class Commands {
     public static void runCommand(String command, Appender appender, ProcessBuilder processBuilder) throws IOException, InterruptedException {
         long start = System.currentTimeMillis();
         for (String current : command.split("\n")) {
-            String[] cmd = current.split(" ");
+            String[] cmd = DataUtils.splitCommand(current);
             processBuilder.command(cmd);
             Process process = processBuilder.start();
             printOutput(appender, process.getInputStream());

@@ -30,7 +30,7 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
     // Settings
     private JBTextField scanIacCommand;
     private JButton resetIaCButton;
-    private JTextArea scanImageCommand;
+    private JBTextField scanImageCommand;
     private JButton resetImageButton;
     private JBTextField dockerImage;
     private JCheckBox checkForLatestImageCheckBox;

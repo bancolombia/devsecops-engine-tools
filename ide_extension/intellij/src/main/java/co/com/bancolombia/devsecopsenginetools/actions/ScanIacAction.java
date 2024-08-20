@@ -2,18 +2,21 @@ package co.com.bancolombia.devsecopsenginetools.actions;
 
 import co.com.bancolombia.devsecopsenginetools.tasks.ScanIacTask;
 import co.com.bancolombia.devsecopsenginetools.ui.tool.LogPanelLogger;
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsActions;
+import icons.DevSecOpsIcons;
 import lombok.SneakyThrows;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
 public class ScanIacAction extends AnAction {
+    private boolean isTaskRunning = false;
 
     public ScanIacAction() {
         super();
@@ -25,7 +28,7 @@ public class ScanIacAction extends AnAction {
     }
 
     public static ScanIacAction forUI() {
-        return new ScanIacAction("Scan IaC", "Run iac scan", AllIcons.Actions.Execute);
+        return new ScanIacAction("Scan IaC", "Run iac scan", DevSecOpsIcons.ScanIaC);
     }
 
     @SneakyThrows
@@ -34,8 +37,15 @@ public class ScanIacAction extends AnAction {
         Project project = e.getProject();
         LogPanelLogger.activate(project);
         if (project != null) {
-            ScanIacTask task = new ScanIacTask(project, "Scanning iac");
+            isTaskRunning = true;
+            ScanIacTask task = new ScanIacTask(project, "Scanning iac", () -> isTaskRunning = false);
             ProgressManager.getInstance().run(task);
         }
+    }
+
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+        Presentation presentation = e.getPresentation();
+        presentation.setEnabled(!isTaskRunning);
     }
 }
