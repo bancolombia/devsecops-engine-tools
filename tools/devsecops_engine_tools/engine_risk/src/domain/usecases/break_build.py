@@ -11,6 +11,8 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
     Exclusions,
 )
 
+from collections import Counter
+
 
 class BreakBuild:
     def __init__(
@@ -48,23 +50,43 @@ class BreakBuild:
             )
             print(devops_platform_gateway.result_pipeline("failed"))
 
+    def _get_applied_exclusion(self, report: Report):
+        for exclusion in self.exclusions:
+            if exclusion.id and (report.id == exclusion.id):
+                return exclusion
+            elif exclusion.id and (report.vul_id_tool == exclusion.id):
+                return exclusion
+        return None
+
+    def _map_applied_exclusion(self, exclusions: "list[Exclusions]"):
+        return [
+            {
+                "severity": exclusion.severity,
+                "id": exclusion.id,
+                "where": exclusion.where,
+                "create_date": exclusion.create_date,
+                "expired_date": exclusion.expired_date,
+                "reason": exclusion.reason,
+            }
+            for exclusion in exclusions
+        ]
+
     def _apply_exclusions(self, report_list: "list[Report]"):
+        new_report_list = []
         applied_exclusions = []
         exclusions_ids = {exclusion.id for exclusion in self.exclusions if exclusion.id}
 
-        for report in report_list[:]:
+        for report in report_list:
             if report.id and (report.id in exclusions_ids):
-                applied_exclusions.append(report)
-                report_list.remove(report)
+                applied_exclusions.append(self._get_applied_exclusion(report))
             elif report.vul_id_tool and (report.vul_id_tool in exclusions_ids):
-                applied_exclusions.append(report)
-                report_list.remove(report)
+                applied_exclusions.append(self._get_applied_exclusion(report))
+            else:
+                new_report_list.append(report)
 
-        return applied_exclusions
+        return new_report_list, self._map_applied_exclusion(applied_exclusions)
 
     def _risk_score_control(self, report_list: "list[Report]"):
-        devops_platform_gateway = self.devops_platform_gateway
-        printer_table_gateway = self.printer_table_gateway
         remote_config = self.remote_config
         if report_list:
             for report in report_list:
@@ -81,20 +103,35 @@ class BreakBuild:
             print(
                 "Below are all vulnerabilities from Vulnerability Management Platform"
             )
-            printer_table_gateway.print_table_report(
+            self.printer_table_gateway.print_table_report(
                 report_list,
             )
         else:
             print(
-                devops_platform_gateway.message(
+                self.devops_platform_gateway.message(
                     "succeeded", "There are no vulnerabilities"
                 )
             )
+
+    def _print_exclusions(self, applied_exclusions: "list[Exclusions]"):
+        if applied_exclusions:
+            print(
+                self.devops_platform_gateway.message(
+                    "warning", "Bellow are all findings that were excepted."
+                )
+            )
+            self.printer_table_gateway.print_table_exclusions(applied_exclusions)
+            for reason, total in Counter(
+                map(lambda x: x["reason"], applied_exclusions)
+            ).items():
+                print("{0} findings count: {1}".format(reason, total))
 
     def process(self, all_report: "list[Report]", report_list: "list[Report]"):
 
         self._risk_management_control(all_report)
 
-        applied_exclusions = self._apply_exclusions(report_list)
+        new_report_list, applied_exclusions = self._apply_exclusions(report_list)
 
-        self._risk_score_control(report_list)
+        self._risk_score_control(new_report_list)
+
+        self._print_exclusions(applied_exclusions)
