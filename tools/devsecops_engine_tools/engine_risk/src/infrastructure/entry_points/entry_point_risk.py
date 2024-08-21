@@ -97,7 +97,7 @@ def process_findings(
     if parent_findings:
         parent_identifier = remote_config["PARENT_ANALYSIS"]["PARENT_IDENTIFIER"]
         parent_service = pipeline_name.split(parent_identifier)[0] + parent_identifier
-        print(f"Generating report for {parent_service}")
+        print(f"\nGenerating report for {parent_service}")
         logger.info(f"Generating report for {parent_service}")
         process_active_findings(
             handle_filters.filter(parent_findings),
@@ -111,7 +111,7 @@ def process_findings(
         )
 
     if findings:
-        print(f"Generating report for {pipeline_name}")
+        print(f"\nGenerating report for {pipeline_name}")
         logger.info(f"Generating report for {pipeline_name}")
         process_active_findings(
             handle_filters.filter(findings),
