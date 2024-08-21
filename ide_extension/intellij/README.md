@@ -27,3 +27,18 @@ You can install the plugin from the [JetBrains Plugin Repository](https://plugin
 
 You can have IaC templates with some placeholders that can be replaced by the plugin with values stored on an `.env` file.
 The `.env` file can be generated from values of the Azure DevOps (pipeline, release and stage) variables.
+
+## Known Issues
+
+### Binary not found
+
+When running scans you may encounter the following error:
+
+```
+Error running scan IaC command: java.io.IOException: Cannot run program "docker": error=2, No such file or directory
+	at java.base/java.lang.ProcessBuilder.start(ProcessBuilder.java:1143)
+    ...
+```
+
+In this case we recommend you to run the scan after a command that loads your env, for example if you use zsh, you can 
+change the command to `zsh -c "source ~/.zshrc && <scan command here>"`.
