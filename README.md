@@ -112,7 +112,7 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
   </tr>
   <tr>
     <td>ENGINE_CODE</td>
-    <td><a href="https://jfrog.com/help/r/get-started-with-the-jfrog-platform/jfrog-xray">BEARER</a></td>
+    <td><a href="https://docs.bearer.com/quickstart/">BEARER</a></td>
     <td>Free</td>
   </tr>
 </table>
