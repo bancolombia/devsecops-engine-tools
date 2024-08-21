@@ -98,7 +98,7 @@ docker run --rm -v ./folder_to_analyze:/folder_to_analyze -v ./custom_remote_con
 ### Scan running sample (CLI) - Local
 
 ```bash
-docker run --rm -v ./folder_to_analyze:/folder_to_analyze bancolombia/devsecops-engine-tools:1.7.35 devsecops-engine-tools --platform_devops local --remote_config_repo docker_default_remote_config --tool engine_iac --folder_path /ms_artifact
+docker run --rm -v ./folder_to_analyze:/folder_to_analyze bancolombia/devsecops-engine-tools:1.7.35 devsecops-engine-tools --platform_devops local --remote_config_repo docker_default_remote_config --tool engine_iac --folder_path /folder_to_analyze
 ```
 
 # Metrics
