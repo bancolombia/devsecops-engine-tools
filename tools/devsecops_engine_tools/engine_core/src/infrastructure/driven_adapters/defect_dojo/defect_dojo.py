@@ -298,6 +298,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             created=date_fn(
                 finding.created
             ),
+            publish_date=date_fn(
+                finding.publish_date
+            ),
             last_reviewed=date_fn(
                 finding.last_reviewed
             ),

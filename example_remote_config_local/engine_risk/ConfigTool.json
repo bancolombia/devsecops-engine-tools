@@ -27,7 +27,9 @@
         "age": 0.0333,
         "epss_score": 100
     },
-    "THRESHOLDS": {
-        "RISK_MANAGEMENT": 0.0
+    "THRESHOLD": {
+        "RISK_MANAGEMENT": 0.5,
+        "TAG_BLACKLIST": ["tag1", "tag2"],
+        "TAG_AGE": 999
     }
 }
