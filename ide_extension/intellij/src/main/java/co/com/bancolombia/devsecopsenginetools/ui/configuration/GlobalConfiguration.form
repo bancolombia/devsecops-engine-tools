@@ -277,16 +277,6 @@
               <grid row="11" column="1" row-span="1" col-span="2" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
-          <component id="f44d7" class="javax.swing.JTextArea" binding="scanImageCommand">
-            <constraints>
-              <grid row="8" column="1" row-span="3" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                <preferred-size width="150" height="50"/>
-              </grid>
-            </constraints>
-            <properties>
-              <text value=""/>
-            </properties>
-          </component>
           <component id="4cafd" class="javax.swing.JLabel">
             <constraints>
               <grid row="8" column="0" row-span="3" col-span="1" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false">
@@ -340,6 +330,17 @@
             </constraints>
             <properties>
               <text value="Reset"/>
+            </properties>
+          </component>
+          <component id="6c4e2" class="com.intellij.ui.components.JBTextField" binding="scanImageCommand">
+            <constraints>
+              <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="30"/>
+              </grid>
+            </constraints>
+            <properties>
+              <text value=""/>
+              <toolTipText value="Name of the Artifactory project. Used for context to Xray scanning."/>
             </properties>
           </component>
         </children>

@@ -6,6 +6,8 @@ import lombok.experimental.UtilityClass;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,6 +69,35 @@ public class DataUtils {
                     .replace("%2F", "/");
         }
         return text;
+    }
+
+    public static String[] splitCommand(String command) {
+        List<String> args = new ArrayList<>();
+        StringBuilder currentArg = new StringBuilder();
+        boolean insideQuotes = false;
+
+        for (char c : command.toCharArray()) {
+            if (c == '"' || c == '\'') {
+                insideQuotes = !insideQuotes;
+                if (!insideQuotes && !currentArg.isEmpty()) {
+                    args.add(currentArg.toString());
+                    currentArg.setLength(0);
+                }
+            } else if (c == ' ' && !insideQuotes) {
+                if (!currentArg.isEmpty()) {
+                    args.add(currentArg.toString());
+                    currentArg.setLength(0);
+                }
+            } else {
+                currentArg.append(c);
+            }
+        }
+
+        if (!currentArg.isEmpty()) {
+            args.add(currentArg.toString());
+        }
+
+        return args.toArray(new String[0]);
     }
 
     private static boolean containsEncodedCharacters(String text) {

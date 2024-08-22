@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 
@@ -64,5 +65,15 @@ public class DataUtilsTest {
         String result = DataUtils.urlEncode(value);
         // Assert
         assertEquals("Group%2FName", result);
+    }
+
+    @Test
+    public void shouldSplitCommand() {
+        // Arrange
+        String value = "zsh -c 'echo sample && echo another'";
+        // Act
+        String[] result = DataUtils.splitCommand(value);
+        // Assert
+        assertArrayEquals(new String[]{"zsh", "-c", "echo sample && echo another"}, result);
     }
 }
