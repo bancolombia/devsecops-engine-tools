@@ -152,6 +152,11 @@ def get_inputs_from_cli(args):
         default="scan",
         help="Mode to execute xray, only apply engine_dependencies xray tool",
     )
+    parser.add_argument(
+        "--image_to_scan",
+        required=False,
+        help="Name of image to scan for engine_container",
+    )
     args = parser.parse_args()
     return {
         "platform_devops": args.platform_devops,
@@ -168,6 +173,7 @@ def get_inputs_from_cli(args):
         "token_engine_dependencies": args.token_engine_dependencies,
         "token_external_checks": args.token_external_checks,
         "xray_mode": args.xray_mode,
+        "image_to_scan": args.image_to_scan
     }
 
 
