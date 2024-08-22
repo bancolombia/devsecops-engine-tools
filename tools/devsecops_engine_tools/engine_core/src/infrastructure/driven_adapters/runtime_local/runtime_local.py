@@ -59,6 +59,7 @@ class RuntimeLocal(DevopsPlatformGateway):
             "repository" : "DET_REPOSITORY",
             "pipeline_name" : "DET_PIPELINE_NAME",
             "stage" : "DET_STAGE",
+            "path_directory" : "DET_PATH_DIRECTORY",
             "os" : "DET_OS",
             "work_folder" : "DET_WORK_FOLDER",
             "temp_directory" : "DET_TEMP_DIRECTORY",
