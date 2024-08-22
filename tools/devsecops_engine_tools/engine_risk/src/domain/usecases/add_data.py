@@ -59,5 +59,5 @@ class AddData:
                 epss_dict = self.get_epss_dict(epss_data)
                 for finding in self.findings:
                     if finding.id[:3] == "CVE" and finding.epss_score == 0:
-                        finding.epss_score = epss_dict.get(finding.id, 0)
+                        finding.epss_score = float(epss_dict.get(finding.id, 0))
         return self.findings
