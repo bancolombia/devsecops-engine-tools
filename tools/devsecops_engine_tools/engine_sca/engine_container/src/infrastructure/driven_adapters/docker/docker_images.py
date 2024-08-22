@@ -10,18 +10,23 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class DockerImages(ImagesGateway):
-    def list_images(self):
+    def list_images(self, image_to_scan):
         try:
             client = docker.from_env()
             images = client.images.list()
-            images_sorted = sorted(
-                images, key=lambda x: x.attrs["Created"], reverse=True
-            )
-            latest_image = images_sorted[0]
-            print("ID last image:", latest_image.id)
-            print("Tag last image:", latest_image.tags)
-            print("Created date last image:", latest_image.attrs["Created"])
-            return latest_image
+
+            matching_image = None
+            for image in images:
+                if image_to_scan in image.tags:
+                    matching_image = image
+                    break
+
+            if matching_image:
+                print("ID matching image:", matching_image.id)
+                print("Tag matching image:", matching_image.tags)
+                print("Created date matching image:", matching_image.attrs["Created"])
+                return matching_image
+
         except Exception as e:
             logger.error(
                 f"Error listing images, docker must be running and added to PATH: {e}"
