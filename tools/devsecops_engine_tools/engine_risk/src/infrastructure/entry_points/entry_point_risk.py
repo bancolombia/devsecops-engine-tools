@@ -20,7 +20,12 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 def init_engine_risk(
-    add_epss_gateway, devops_platform_gateway, print_table_gateway, dict_args, parent_findings, findings
+    add_epss_gateway,
+    devops_platform_gateway,
+    print_table_gateway,
+    dict_args,
+    parent_findings,
+    findings,
 ):
     remote_config = devops_platform_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
@@ -73,10 +78,16 @@ def process_active_findings(
         risk_exclusions,
         pipeline_name,
     )
+    vm_exclusions = get_exclusions.get_vm_exclusions(total_findings)
     exclusions = get_exclusions.process()
-    BreakBuild(
-        devops_platform_gateway, print_table_gateway, remote_config, exclusions
-    ).process(total_findings, data_added)
+    break_build = BreakBuild(
+        devops_platform_gateway,
+        print_table_gateway,
+        remote_config,
+        exclusions,
+        vm_exclusions,
+    )
+    return break_build.process(total_findings, data_added)
 
 
 def process_findings(
@@ -97,12 +108,17 @@ def process_findings(
 
     handle_filters = HandleFilters()
 
+    parent_warning = False
+    parent_failed = False
+    warning = False
+    failed = False
+
     if parent_findings:
         parent_identifier = remote_config["PARENT_ANALYSIS"]["PARENT_IDENTIFIER"]
         parent_service = pipeline_name.split(parent_identifier)[0] + parent_identifier
         print(f"\nGenerating report for {parent_service}")
         logger.info(f"Generating report for {parent_service}")
-        process_active_findings(
+        parent_warning, parent_failed = process_active_findings(
             handle_filters.filter(parent_findings),
             parent_findings,
             devops_platform_gateway,
@@ -117,7 +133,7 @@ def process_findings(
     if findings:
         print(f"\nGenerating report for {pipeline_name}")
         logger.info(f"Generating report for {pipeline_name}")
-        process_active_findings(
+        warning, failed = process_active_findings(
             handle_filters.filter(findings),
             findings,
             devops_platform_gateway,
@@ -128,3 +144,7 @@ def process_findings(
             add_epss_gateway,
             print_table_gateway,
         )
+
+    break_build = BreakBuild(devops_platform_gateway, None, None, [], [])
+
+    break_build.break_build_status(parent_warning, parent_failed, warning, failed)

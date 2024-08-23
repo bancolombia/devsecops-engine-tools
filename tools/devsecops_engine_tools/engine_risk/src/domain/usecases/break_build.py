@@ -21,46 +21,70 @@ class BreakBuild:
         printer_table_gateway: PrinterTableGateway,
         remote_config: any,
         exclusions: "list[Exclusions]",
+        vm_exclusions: "list[Exclusions]",
     ):
         self.devops_platform_gateway = devops_platform_gateway
         self.printer_table_gateway = printer_table_gateway
         self.remote_config = remote_config
         self.exclusions = exclusions
+        self.vm_exclusions = vm_exclusions
         self.break_build = False
+        self.warning_build = False
 
     def process(self, all_report: "list[Report]", report_list: "list[Report]"):
         self._risk_management_control(all_report)
         new_report_list, applied_exclusions = self._apply_exclusions(report_list)
         self._tag_blacklist_control(new_report_list)
         self._risk_score_control(new_report_list)
-        self._print_exclusions(applied_exclusions)
+        self._print_exclusions(
+            self._map_applied_exclusion(self.vm_exclusions + applied_exclusions)
+        )
 
-        if self.break_build:
+        return self.warning_build, self.break_build
+
+    def break_build_status(self, parent_warning, parent_failed, warning, failed):
+        if parent_failed or failed:
             print(self.devops_platform_gateway.result_pipeline("failed"))
+        elif parent_warning or warning:
+            print(self.devops_platform_gateway.result_pipeline("succeeded_with_issues"))
         else:
             print(self.devops_platform_gateway.result_pipeline("succeeded"))
 
     def _risk_management_control(self, all_report: "list[Report]"):
         remote_config = self.remote_config
-        risk_management_value = (
-            sum(1 for report in all_report if report.mitigated)
-        ) / len(all_report)
+        risk_management_value = self._get_percentage(
+            (sum(1 for report in all_report if report.mitigated)) / len(all_report)
+        )
+        risk_threshold = self._get_percentage(
+            remote_config["THRESHOLD"]["RISK_MANAGEMENT"]
+        )
 
-        if risk_management_value >= remote_config["THRESHOLD"]["RISK_MANAGEMENT"]:
+        if risk_management_value >= (risk_threshold + 5):
             print(
                 self.devops_platform_gateway.message(
                     "succeeded",
-                    f"Risk Management {risk_management_value*100}% is greater than {remote_config['THRESHOLD']['RISK_MANAGEMENT']*100}%.",
+                    f"Risk Management {risk_management_value}% is greater than {risk_threshold}%.",
                 )
             )
+        elif risk_management_value >= risk_threshold:
+            print(
+                self.devops_platform_gateway.message(
+                    "warning",
+                    f"Risk Management {risk_management_value}% is grather than and close to {risk_threshold}%.",
+                )
+            )
+            self.warning_build = True
         else:
             print(
                 self.devops_platform_gateway.message(
                     "error",
-                    f"Risk Management {risk_management_value*100}% is less than {remote_config['THRESHOLD']['RISK_MANAGEMENT']*100}%.",
+                    f"Risk Management {risk_management_value}% is less than {risk_threshold}%.",
                 )
             )
             self.break_build = True
+
+    def _get_percentage(self, decimal):
+        return round(decimal * 100, 3)
 
     def _get_applied_exclusion(self, report: Report):
         for exclusion in self.exclusions:
@@ -96,7 +120,7 @@ class BreakBuild:
             else:
                 new_report_list.append(report)
 
-        return new_report_list, self._map_applied_exclusion(applied_exclusions)
+        return new_report_list, applied_exclusions
 
     def _tag_blacklist_control(self, report_list: "list[Report]"):
         remote_config = self.remote_config

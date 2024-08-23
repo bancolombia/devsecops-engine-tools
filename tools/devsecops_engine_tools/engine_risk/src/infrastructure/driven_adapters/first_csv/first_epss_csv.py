@@ -47,8 +47,7 @@ class FirstCsv(AddEpssGateway):
 
     def add_epss_data(self, findings):
         needs_epss_update = any(
-            finding.id[:3] == "CVE" and finding.epss_score == 0
-            for finding in findings
+            finding.id[:3] == "CVE" and finding.epss_score == 0 for finding in findings
         )
         if needs_epss_update:
             epss_data = self.download_epss_data()

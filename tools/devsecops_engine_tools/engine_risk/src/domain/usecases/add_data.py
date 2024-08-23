@@ -2,12 +2,6 @@ from devsecops_engine_tools.engine_risk.src.domain.model.gateways.add_epss_gatew
     AddEpssGateway,
 )
 
-import requests
-import datetime
-import io
-import gzip
-import csv
-
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
