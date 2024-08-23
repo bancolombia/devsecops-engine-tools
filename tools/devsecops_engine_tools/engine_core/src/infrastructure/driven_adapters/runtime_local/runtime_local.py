@@ -61,7 +61,6 @@ class RuntimeLocal(DevopsPlatformGateway):
             "stage" : "DET_STAGE",
             "path_directory" : "DET_PATH_DIRECTORY",
             "os" : "DET_OS",
-            "work_folder" : "DET_WORK_FOLDER",
             "temp_directory" : "DET_TEMP_DIRECTORY",
             "target_branch" : "DET_TARGET_BRANCH",
             "source_branch" : "DET_SOURCE_BRANCH",

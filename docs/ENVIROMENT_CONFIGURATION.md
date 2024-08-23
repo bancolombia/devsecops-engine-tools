@@ -79,7 +79,6 @@ PYTHONPATH=tools/
                 "DET_PIPELINE_NAME": "[DET_PIPELINE_NAME]",
                 "DET_PATH_DIRECTORY": "[DET_PATH_DIRECTORY]",
                 "DET_OS": "[DET_OS]",
-                "DET_WORK_FOLDER": "[DET_WORK_FOLDER]",
                 "DET_TEMP_DIRECTORY": "/tmp",
                 "DET_BRANCH_NAME": "trunk",
                 "DET_SOURCE_CODE_MANAGEMENT_URI": "[DET_SOURCE_CODE_MANAGEMENT_URI]",
