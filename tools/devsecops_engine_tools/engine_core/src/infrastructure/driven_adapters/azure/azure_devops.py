@@ -90,7 +90,6 @@ class AzureDevops(DevopsPlatformGateway):
                 "stage": SystemVariables.System_HostType,
                 "path_directory": SystemVariables.System_DefaultWorkingDirectory,
                 "os": AgentVariables.Agent_OS,
-                "work_folder": AgentVariables.Agent_WorkFolder,
                 "temp_directory": AgentVariables.Agent_TempDirectory,
                 "agent_directory": AgentVariables.Agent_BuildDirectory,
                 "target_branch": SystemVariables.System_TargetBranchName,
