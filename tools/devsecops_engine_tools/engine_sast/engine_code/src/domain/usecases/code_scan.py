@@ -40,7 +40,7 @@ class CodeScan:
     
     def get_pull_request_files(self, target_branches):
         files_pullrequest = self.git_gateway.get_files_pull_request(
-            self.devops_platform_gateway.get_variable("work_folder"),
+            self.devops_platform_gateway.get_variable("path_directory"),
             self.devops_platform_gateway.get_variable("target_branch"),
             target_branches,
             self.devops_platform_gateway.get_variable("source_branch"),
@@ -101,7 +101,7 @@ class CodeScan:
             findings_list, path_file_results = self.tool_gateway.run_tool(
                 dict_args["folder_path"], 
                 pull_request_files,
-                self.devops_platform_gateway.get_variable("work_folder"),
+                self.devops_platform_gateway.get_variable("path_directory"),
                 self.devops_platform_gateway.get_variable("repository"),
                 list_exclusions
             )
