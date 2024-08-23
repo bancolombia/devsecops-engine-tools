@@ -21,6 +21,8 @@
     "DEPENDENCY_CHECK": {
         "CLI_VERSION": "10.0.2",
         "NVD_API_KEY": "api-key",
-        "UPDATE_NVD": false
+        "UPDATE_NVD": false,
+        "REGEX_EXPRESSION_EXTENSIONS": "\\.(jar|ear|war)$",
+        "PACKAGES_TO_SCAN": ["node_modules", "site-packages"]
     }
 }

@@ -16,16 +16,13 @@ class DependencyCheckDeserialize(DeserializatorGateway):
         for dependency in dependencies_scanned_file.get("dependencies", []):
             for package in dependency.get("packages", []):
                 where = package.get("id")
-
             for vulnerability in dependency.get("vulnerabilities", []):
-                description = vulnerability["name"]
-                severity = vulnerability["severity"]
                 finding_open = Finding(
-                    id = "DEPENDENCY-CHECK",
-                    cvss = None,
+                    id = vulnerability["name"],
+                    cvss = str(vulnerability["cvssv3"]),
                     where = where,
-                    description = description,
-                    severity = severity.lower(),
+                    description = vulnerability["description"][:170],
+                    severity = vulnerability["severity"].lower(),
                     identification_date=datetime.now().strftime("%d%m%Y"),
                     published_date_cve=None,
                     module="engine_dependencies",
