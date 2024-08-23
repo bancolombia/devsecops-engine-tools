@@ -64,7 +64,7 @@ class TestCodeScan(unittest.TestCase):
         files = self.code_scan.get_pull_request_files(["trunk", "develop"])
 
         # Assert
-        self.mock_devops_platform_gateway.get_variable.assert_any_call("work_folder")
+        self.mock_devops_platform_gateway.get_variable.assert_any_call("path_directory")
         self.mock_git_gateway.get_files_pull_request.assert_called_once_with(
             "work_folder_value", "target_branch_value", ["trunk", "develop"], "source_branch_value",
             "access_token_value", "organization_value", "project_name_value", "repository_value",
