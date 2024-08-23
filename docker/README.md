@@ -93,6 +93,11 @@ docker run --rm -v ./folder_to_analyze:/folder_to_analyze -v ./custom_remote_con
     <td><a href="https://jfrog.com/help/r/get-started-with-the-jfrog-platform/jfrog-xray">XRAY</a></td>
     <td>Paid</td>
   </tr>
+  <tr>
+    <td>ENGINE_CODE</td>
+    <td><a href="https://docs.bearer.com/quickstart/">BEARER</a></td>
+    <td>Free</td>
+  </tr>
 </table>
 
 ### Scan running sample (CLI) - Local
