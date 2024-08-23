@@ -24,6 +24,21 @@ class GitRun(GitGateway):
                                repository_provider):
         try:
             if repository_provider == 'GitHub' or target_branch not in config_target_branch:
+                os.chdir(sys_working_dir)
+                subprocess.run(['git', 'checkout', '-b', source_branch, f'origin/{source_branch}'], capture_output=True, text=True)
+                env = os.environ.copy()
+                env["GIT_COMMITTER_NAME"] = "Your Name"
+                env["GIT_COMMITTER_EMAIL"] = "your.email@example.com"
+                env["GIT_AUTHOR_NAME"] = "Your Name"
+                env["GIT_AUTHOR_EMAIL"] = "your.email@example.com"
+                command = ["git", "rebase", f"origin/{target_branch}", "-X", "theirs"]
+                subprocess.run(command, env=env, capture_output=True, text=True)
+
+                diff = subprocess.run(['git', 'diff', f'origin/{target_branch}..{source_branch}', '--name-only'], capture_output=True, text=True)
+                if diff.returncode == 0:
+                    diff_files = diff.stdout.strip().split("\n")
+                    print("Pull Requests Associated Files:",diff_files)
+                    return diff_files
                 return []
             base_compact_url = (
             f"https://{collection_uri.rstrip('/').split('/')[-1].replace('.visualstudio.com','')}"
