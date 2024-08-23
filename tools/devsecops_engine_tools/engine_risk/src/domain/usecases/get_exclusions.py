@@ -37,6 +37,27 @@ class GetExclusions:
 
         return exclusions
 
+    def get_vm_exclusions(self, total_findings):
+        exclusions = []
+        for finding in total_findings:
+            if finding.risk_accepted:
+                exclusions.append(
+                    Exclusions(
+                        id=finding.id,
+                        risk_status=finding.risk_status,
+                        risk_score=finding.risk_score,
+                        risk_accepted=finding.risk_accepted,
+                    )
+                )
+        return exclusions
+
+    def _create_exclusion(self, finding, reason):
+        return Exclusions(
+            id=finding.vul_id_tool if finding.vul_id_tool else finding.id,
+            where=finding.where,
+            create_date=finding.created,
+        )
+
     def _get_risk_exclusions(self):
         return self._get_exclusions(self.risk_exclusions, "RISK")
 

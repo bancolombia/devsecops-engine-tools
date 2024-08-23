@@ -307,10 +307,13 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             last_status_update=date_fn(
                 finding.last_status_update
             ),
+            accepted_risks=finding.accepted_risks,
             epss_score=finding.epss_score,
             epss_percentile=finding.epss_percentile,
             mitigated=finding.is_mitigated,
             vul_description=finding.description,
+            risk_accepted=finding.risk_accepted,
+            false_p=finding.false_p,
         )
 
     def _format_date_to_dd_format(self, date_string):

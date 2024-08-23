@@ -20,7 +20,7 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 def init_engine_risk(
-    devops_platform_gateway, print_table_gateway, dict_args, parent_findings, findings
+    add_epss_gateway, devops_platform_gateway, print_table_gateway, dict_args, parent_findings, findings
 ):
     remote_config = devops_platform_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
@@ -40,6 +40,7 @@ def init_engine_risk(
             pipeline_name,
             risk_exclusions,
             remote_config,
+            add_epss_gateway,
             devops_platform_gateway,
             print_table_gateway,
         )
@@ -60,9 +61,10 @@ def process_active_findings(
     remote_config,
     risk_exclusions,
     pipeline_name,
+    add_epss_gateway,
     print_table_gateway,
 ):
-    data_added = AddData(active_findings).add_data()
+    data_added = AddData(add_epss_gateway, active_findings).process()
     get_exclusions = GetExclusions(
         devops_platform_gateway,
         dict_args,
@@ -84,6 +86,7 @@ def process_findings(
     pipeline_name,
     risk_exclusions,
     remote_config,
+    add_epss_gateway,
     devops_platform_gateway,
     print_table_gateway,
 ):
@@ -107,6 +110,7 @@ def process_findings(
             remote_config,
             risk_exclusions,
             pipeline_name,
+            add_epss_gateway,
             print_table_gateway,
         )
 
@@ -121,5 +125,6 @@ def process_findings(
             remote_config,
             risk_exclusions,
             pipeline_name,
+            add_epss_gateway,
             print_table_gateway,
         )
