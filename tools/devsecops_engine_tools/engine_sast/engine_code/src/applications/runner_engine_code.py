@@ -11,12 +11,9 @@ from devsecops_engine_tools.engine_utilities.git_cli.infrastructure.git_run impo
 def runner_engine_code(dict_args, tool, devops_platform_gateway):
     try:
         tool_gateway = None
+        git_gateway = GitRun()
         if (tool == "BEARER"):
             tool_gateway = BearerTool()
-
-        git_gateway = None
-        if (dict_args["platform_devops"] == "azure"):
-            git_gateway = GitRun()
 
         return init_engine_sast_code(
             devops_platform_gateway=devops_platform_gateway,
