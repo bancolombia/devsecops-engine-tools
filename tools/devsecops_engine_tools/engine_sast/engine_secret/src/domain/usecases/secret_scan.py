@@ -34,7 +34,7 @@ class SecretScan:
         if skip_tool == False:
             self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("os"), self.devops_platform_gateway.get_variable("temp_directory"))
             files_pullrequest = self.git_gateway.get_files_pull_request(
-                self.devops_platform_gateway.get_variable("work_folder"),
+                self.devops_platform_gateway.get_variable("path_directory"),
                 self.devops_platform_gateway.get_variable("target_branch"),
                 config_tool.target_branches,
                 self.devops_platform_gateway.get_variable("source_branch"),
@@ -47,14 +47,14 @@ class SecretScan:
                     files_pullrequest,
                     config_tool.exclude_path,
                     self.devops_platform_gateway.get_variable("os"),
-                    self.devops_platform_gateway.get_variable("work_folder"),
+                    self.devops_platform_gateway.get_variable("path_directory"),
                     config_tool.number_threads,
                     self.devops_platform_gateway.get_variable("repository")
                     )
             finding_list = self.tool_deserialize.get_list_vulnerability(
                 findings,
                 self.devops_platform_gateway.get_variable("os"),
-                self.devops_platform_gateway.get_variable("work_folder")
+                self.devops_platform_gateway.get_variable("path_directory")
                 )
         return finding_list, file_path_findings
     
