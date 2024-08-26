@@ -30,23 +30,30 @@ class BreakBuild:
         self.vm_exclusions = vm_exclusions
         self.break_build = False
         self.warning_build = False
+        self.report_breaker = []
+        self.scan_result = {
+            "findings_excluded": [],
+            "vulnerabilities": {},
+            "compliances": {},
+        }
 
     def process(self, all_report: "list[Report]", report_list: "list[Report]"):
         self._risk_management_control(all_report)
         new_report_list, applied_exclusions = self._apply_exclusions(report_list)
+        if self.break_build:
+            self.report_breaker.extend(new_report_list)
         self._tag_blacklist_control(new_report_list)
         self._risk_score_control(new_report_list)
+        all_exclusions = self.vm_exclusions + applied_exclusions
         self._print_exclusions(
-            self._map_applied_exclusion(self.vm_exclusions + applied_exclusions)
+            self._map_applied_exclusion(all_exclusions)
         )
 
-        return self.warning_build, self.break_build
+        return self.break_build, self.report_breaker, all_exclusions
 
-    def break_build_status(self, parent_warning, parent_failed, warning, failed):
-        if parent_failed or failed:
+    def break_build_status(self, failed, report, exclusions):
+        if failed:
             print(self.devops_platform_gateway.result_pipeline("failed"))
-        elif parent_warning or warning:
-            print(self.devops_platform_gateway.result_pipeline("succeeded_with_issues"))
         else:
             print(self.devops_platform_gateway.result_pipeline("succeeded"))
 
@@ -63,14 +70,14 @@ class BreakBuild:
             print(
                 self.devops_platform_gateway.message(
                     "succeeded",
-                    f"Risk Management {risk_management_value}% is greater than {risk_threshold}%.",
+                    f"Risk Management {risk_management_value}% is greater than {risk_threshold}%",
                 )
             )
         elif risk_management_value >= risk_threshold:
             print(
                 self.devops_platform_gateway.message(
                     "warning",
-                    f"Risk Management {risk_management_value}% is grather than and close to {risk_threshold}%.",
+                    f"Risk Management {risk_management_value}% is grather than and close to {risk_threshold}%",
                 )
             )
             self.warning_build = True
@@ -78,10 +85,11 @@ class BreakBuild:
             print(
                 self.devops_platform_gateway.message(
                     "error",
-                    f"Risk Management {risk_management_value}% is less than {risk_threshold}%.",
+                    f"Risk Management {risk_management_value}% is less than {risk_threshold}%",
                 )
             )
             self.break_build = True
+
 
     def _get_percentage(self, decimal):
         return round(decimal * 100, 3)
@@ -126,7 +134,7 @@ class BreakBuild:
         remote_config = self.remote_config
         if report_list:
             tag_blacklist = set(remote_config["THRESHOLD"]["TAG_BLACKLIST"])
-            tag_age_threshold = remote_config["THRESHOLD"]["TAG_AGE"]
+            tag_age_threshold = remote_config["THRESHOLD"]["TAG_MAX_AGE"]
 
             filtered_reports_above_threshold = [
                 (report, tag)
@@ -160,9 +168,12 @@ class BreakBuild:
 
             if filtered_reports_above_threshold:
                 self.break_build = True
+                self.report_breaker.extend([report for report, _ in filtered_reports_above_threshold])
 
     def _risk_score_control(self, report_list: "list[Report]"):
         remote_config = self.remote_config
+        risk_score_threshold = remote_config["THRESHOLD"]["RISK_SCORE"]
+        break_build = False
         if report_list:
             for report in report_list:
                 report.risk_score = round(
@@ -175,12 +186,31 @@ class BreakBuild:
                     ),
                     4,
                 )
+                if report.risk_score >= risk_score_threshold:
+                    break_build = True
+                    self.report_breaker.append(report)
             print(
                 "Below are all vulnerabilities from Vulnerability Management Platform"
             )
             self.printer_table_gateway.print_table_report(
                 report_list,
             )
+            if break_build:
+                self.break_build = True
+                print(
+                    self.devops_platform_gateway.message(
+                        "error",
+                        f"There are findings with risk score greater than {risk_score_threshold}",
+                    )
+                )
+            else:
+                print(
+                    self.devops_platform_gateway.message(
+                        "succeeded", 
+                        f"There are no findings with risk score greater than {risk_score_threshold}",
+                    )
+                )
+
         else:
             print(
                 self.devops_platform_gateway.message(

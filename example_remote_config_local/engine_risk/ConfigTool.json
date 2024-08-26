@@ -29,7 +29,8 @@
     },
     "THRESHOLD": {
         "RISK_MANAGEMENT": 0.5,
+        "RISK_SCORE": 10,
         "TAG_BLACKLIST": ["tag1", "tag2"],
-        "TAG_AGE": 999
+        "TAG_MAX_AGE": 999
     }
 }
