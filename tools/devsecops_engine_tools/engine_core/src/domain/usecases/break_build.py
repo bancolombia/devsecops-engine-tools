@@ -333,7 +333,7 @@ class BreakBuild:
                                 (
                                     elem.create_date
                                     for elem in exclusions
-                                    if elem.id == item.id and elem.where in item.where
+                                    if elem.id == item.id and elem.where in item.where or "all" in elem.where
                                 ),
                                 None,
                             ),
@@ -341,7 +341,7 @@ class BreakBuild:
                                 (
                                     elem.expired_date
                                     for elem in exclusions
-                                    if elem.id == item.id and elem.where in item.where
+                                    if elem.id == item.id and elem.where in item.where or "all" in elem.where
                                 ),
                                 None,
                             ),
@@ -349,7 +349,7 @@ class BreakBuild:
                                 (
                                     elem.reason
                                     for elem in exclusions
-                                    if elem.id == item.id and elem.where in item.where
+                                    if elem.id == item.id and elem.where in item.where or "all" in elem.where
                                 ),
                                 None,
                             ),
