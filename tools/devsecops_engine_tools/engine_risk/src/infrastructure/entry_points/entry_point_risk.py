@@ -112,13 +112,15 @@ def process_findings(
     parent_failed = False
     warning = False
     failed = False
+    parent_report = []
+    parent_exclusions = []
 
     if parent_findings:
         parent_identifier = remote_config["PARENT_ANALYSIS"]["PARENT_IDENTIFIER"]
         parent_service = pipeline_name.split(parent_identifier)[0] + parent_identifier
         print(f"\nGenerating report for {parent_service}")
         logger.info(f"Generating report for {parent_service}")
-        parent_warning, parent_failed = process_active_findings(
+        parent_failed, parent_report, parent_exclusions = process_active_findings(
             handle_filters.filter(parent_findings),
             parent_findings,
             devops_platform_gateway,
@@ -133,7 +135,7 @@ def process_findings(
     if findings:
         print(f"\nGenerating report for {pipeline_name}")
         logger.info(f"Generating report for {pipeline_name}")
-        warning, failed = process_active_findings(
+        failed, report, exclusions = process_active_findings(
             handle_filters.filter(findings),
             findings,
             devops_platform_gateway,
@@ -147,4 +149,4 @@ def process_findings(
 
     break_build = BreakBuild(devops_platform_gateway, None, None, [], [])
 
-    break_build.break_build_status(parent_warning, parent_failed, warning, failed)
+    break_build.break_build_status(parent_failed or failed, report + parent_report, exclusions + parent_exclusions)
