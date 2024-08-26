@@ -62,7 +62,6 @@ class RuntimeLocal(DevopsPlatformGateway):
             "path_directory" : "DET_PATH_DIRECTORY",
             "os" : "DET_OS",
             "temp_directory" : "DET_TEMP_DIRECTORY",
-            "agent_directory" : "DET_AGENT_DIRECTORY",
             "target_branch" : "DET_TARGET_BRANCH",
             "source_branch" : "DET_SOURCE_BRANCH",
             "repository_provider" : "DET_REPOSITORY_PROVIDER"
