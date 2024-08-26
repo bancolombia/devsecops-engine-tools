@@ -69,13 +69,13 @@ class ContainerScaScan:
         if matching_image:
             image_name = matching_image.tags[0]
             result_file = image_name.replace("/","_") + "_scan_result.json"
-            if result_file in self.get_images_already_scanned():
+            if image_name in self.get_images_already_scanned():
                 print(f"The image {image_name} has already been scanned previously.")
                 return image_scanned
             image_scanned = self.tool_run.run_tool_container_sca(
                 self.remote_config, self.token, image_name, result_file
             )
-            self.set_image_scanned(result_file)
+            self.set_image_scanned(image_name)
         else:
             print(f"'Not image found for {self.image_to_scan}'. Tool skipped.")
         return image_scanned
