@@ -16,11 +16,9 @@ def test_list_images(mock_docker_client):
     docker_images = DockerImages()
     image_to_scan = "test_image:latest"
 
-    # Mock the Docker client and su método images.list
     mock_client = MagicMock()
     mock_docker_client.return_value = mock_client
 
-    # Crea varias imágenes mock con múltiples tags
     mock_image1 = MagicMock()
     mock_image1.tags = ["non_matching_image:latest", "other_tag:v1"]
     mock_image1.id = "non_matching_id_1"
@@ -36,7 +34,6 @@ def test_list_images(mock_docker_client):
     mock_image3.id = "test_id"
     mock_image3.attrs = {"Created": "2023-08-02T12:34:56.789Z"}
 
-    # Añade las imágenes mock al retorno de images.list
     mock_client.images.list.return_value = [mock_image1, mock_image2, mock_image3]
 
     # Act
