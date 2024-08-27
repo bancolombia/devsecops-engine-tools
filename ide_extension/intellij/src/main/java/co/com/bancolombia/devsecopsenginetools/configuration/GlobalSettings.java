@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 public class GlobalSettings implements PersistentStateComponent<GlobalSettings> {
     public static final String DEFAULT_IAC_SCAN_COMMAND = "docker run --rm -v {projectPath}/dev-sec-ops/iac:/iac {image} devsecops-engine-tools --platform_devops local --remote_config_repo docker_default_remote_config --tool engine_iac --folder_path /iac";
     public static final String DEFAULT_IMAGE_SCAN_COMMAND = "echo \"coming soon\"";
-    public static final String DEFAULT_IMAGE = "bancolombia/devsecops-engine-tools:1.7.41";
+    public static final String DEFAULT_IMAGE = "bancolombia/devsecops-engine-tools:1.8.6";
 
     private String scanIacCommand;
     private String scanImageCommand;

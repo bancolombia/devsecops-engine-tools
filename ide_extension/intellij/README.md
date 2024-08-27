@@ -42,3 +42,8 @@ Error running scan IaC command: java.io.IOException: Cannot run program "docker"
 
 In this case we recommend you to run the scan after a command that loads your env, for example if you use zsh, you can 
 change the command to `zsh -c "source ~/.zshrc && <scan command here>"`.
+
+## Devs
+
+- [Developing a Plugin](https://plugins.jetbrains.com/docs/intellij/developing-plugins.html)
+- [IntelliJ Platform Icons](https://intellij-icons.jetbrains.design/)
