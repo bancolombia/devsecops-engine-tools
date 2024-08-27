@@ -74,7 +74,7 @@ def test_process_image_already_scanned(container_sca_scan):
     container_sca_scan.get_image = MagicMock()
     container_sca_scan.get_image.return_value = mock_image
     container_sca_scan.get_images_already_scanned.return_value = [
-        "my_image:1234_scan_result.json"
+        "my_image:1234"
     ]
     assert container_sca_scan.process() == None
 
