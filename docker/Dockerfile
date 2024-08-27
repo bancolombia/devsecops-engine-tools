@@ -1,7 +1,6 @@
 FROM debian@sha256:aadf411dc9ed5199bc7dab48b3e6ce18f8bbee4f170127f5ff1b75cd8035eb36
 WORKDIR /app
 
-# Received args
 ARG VERSION
 ENV APP_VERSION=$VERSION
 
@@ -46,7 +45,6 @@ RUN apt-get update && \
     python3-venv \
     python3-pip
 
-# Ensure python3 points to the new version
 RUN ln -s /usr/bin/python3 /usr/local/bin/python3 && \
     ln -s /usr/bin/pip3 /usr/local/bin/pip3
 
