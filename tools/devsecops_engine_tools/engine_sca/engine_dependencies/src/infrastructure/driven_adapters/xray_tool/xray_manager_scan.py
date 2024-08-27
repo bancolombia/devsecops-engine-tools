@@ -204,7 +204,7 @@ class XrayScan(ToolGateway):
         result = subprocess.run(
             command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
-        if result.returncode == 0:
+        if result.stdout:
             scan_result = json.loads(result.stdout)
             file_result = os.path.join(os.getcwd(), "scan_result.json")
             with open(file_result, "w") as file:
