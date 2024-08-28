@@ -48,11 +48,10 @@ class BreakBuild:
         self._print_exclusions(
             self._map_applied_exclusion(all_exclusions)
         )
+        self._breaker()
 
-        return self.break_build, self.report_breaker, all_exclusions
-
-    def break_build_status(self, failed, report, exclusions):
-        if failed:
+    def _breaker(self):
+        if self.break_build:
             print(self.devops_platform_gateway.result_pipeline("failed"))
         else:
             print(self.devops_platform_gateway.result_pipeline("succeeded"))
@@ -190,7 +189,7 @@ class BreakBuild:
                     break_build = True
                     self.report_breaker.append(report)
             print(
-                "Below are all vulnerabilities from Vulnerability Management Platform"
+                "Below are open vulnerabilities from Vulnerability Management Platform"
             )
             self.printer_table_gateway.print_table_report(
                 report_list,

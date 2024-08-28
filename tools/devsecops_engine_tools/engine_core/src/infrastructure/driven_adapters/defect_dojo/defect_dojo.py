@@ -286,7 +286,6 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
     def _create_report(self, finding, date_fn):
         return Report(
-            vm_id=finding.id,
             id=finding.vulnerability_ids,
             vul_id_tool=finding.vuln_id_from_tool,
             status=finding.display_status,
@@ -315,6 +314,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             vul_description=finding.description,
             risk_accepted=finding.risk_accepted,
             false_p=finding.false_p,
+            service=finding.service,
         )
 
     def _format_date_to_dd_format(self, date_string):
