@@ -1,5 +1,6 @@
 package co.com.bancolombia.devsecopsenginetools.utils;
 
+import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 
 import java.io.BufferedReader;
@@ -27,9 +28,11 @@ public class Commands {
             String[] cmd = DataUtils.splitCommand(current);
             processBuilder.command(cmd);
             Process process = processBuilder.start();
-            printOutput(appender, process.getInputStream());
-            printOutput(appender, process.getErrorStream());
+            Thread infoLog = printOutputAsync(appender, process.getInputStream());
+            Thread errorLog = printOutputAsync(appender, process.getErrorStream());
             int exitVal = process.waitFor();
+            infoLog.join();
+            errorLog.join();
             if (exitVal != 0) {
                 throw new IOException("Error running command: " + current + ", exit code: " + exitVal);
             }
@@ -38,7 +41,14 @@ public class Commands {
         appender.success("Command executed successfully in " + formatDuration(duration));
     }
 
-    private static void printOutput(Appender appender, InputStream is) throws IOException {
+    private static Thread printOutputAsync(Appender appender, InputStream is) throws InterruptedException {
+        Thread thread = new Thread(() -> printOutput(appender, is));
+        thread.start();
+        return thread;
+    }
+
+    @SneakyThrows
+    private static void printOutput(Appender appender, InputStream is) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         String line;
         while ((line = reader.readLine()) != null) {
