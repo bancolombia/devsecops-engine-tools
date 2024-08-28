@@ -94,6 +94,7 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
         // image
         globalSettings.setDevSecOpsImage(dockerImage.getText());
         globalSettings.setScanImageCommand(scanImageCommand.getText());
+        globalSettings.setCheckForLatestImage(checkForLatestImageCheckBox.isSelected());
         // variables
         globalSettings.setAzureDevOpsOrganization(azureOrganization.getText());
         globalSettings.setAzureDevOpsProject(azureProject.getText());
@@ -113,8 +114,9 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
 
         globalSettings = GlobalSettings.getInstance();
         if (globalSettings != null) {
-            dockerImage.setText(globalSettings.getDevSecOpsImage());
             scanIacCommand.setText(globalSettings.getScanIacCommand());
+
+            dockerImage.setText(globalSettings.getDevSecOpsImage());
             scanImageCommand.setText(globalSettings.getScanImageCommand());
             checkForLatestImageCheckBox.setSelected(globalSettings.isCheckForLatestImage());
 
