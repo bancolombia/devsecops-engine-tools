@@ -72,14 +72,15 @@ class HandleRisk:
                 dict_args, secret_tool, remote_config, parent_service
             )
 
-        findigs_list = self._get_finding_list(
+        findings = self._get_finding_list(
             dict_args, secret_tool, remote_config, service
         )
 
+        findings_list = parent_findings + findings
+
         runner_engine_risk(
             dict_args,
-            parent_findings,
-            findigs_list,
+            findings_list,
             self.devops_platform_gateway,
             self.print_table_gateway,
         )
