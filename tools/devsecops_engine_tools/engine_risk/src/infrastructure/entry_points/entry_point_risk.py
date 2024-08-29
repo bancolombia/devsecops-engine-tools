@@ -11,6 +11,7 @@ from devsecops_engine_tools.engine_risk.src.domain.usecases.get_exclusions impor
     GetExclusions,
 )
 
+
 import re
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
@@ -36,17 +37,18 @@ def init_engine_risk(
     if should_skip_analysis(remote_config, pipeline_name, risk_exclusions):
         print("Tool skipped by DevSecOps Policy.")
         logger.info("Tool skipped by DevSecOps Policy.")
-    else:
-        process_findings(
-            findings,
-            dict_args,
-            pipeline_name,
-            risk_exclusions,
-            remote_config,
-            add_epss_gateway,
-            devops_platform_gateway,
-            print_table_gateway,
-        )
+        return
+
+    return process_findings(
+        findings,
+        dict_args,
+        pipeline_name,
+        risk_exclusions,
+        remote_config,
+        add_epss_gateway,
+        devops_platform_gateway,
+        print_table_gateway,
+    )
 
 
 def should_skip_analysis(remote_config, pipeline_name, exclusions):
@@ -54,6 +56,7 @@ def should_skip_analysis(remote_config, pipeline_name, exclusions):
     return re.match(ignore_pattern, pipeline_name, re.IGNORECASE) or (
         pipeline_name in exclusions and exclusions[pipeline_name].get("SKIP_TOOL", 0)
     )
+
 
 def process_findings(
     findings,
@@ -72,7 +75,7 @@ def process_findings(
 
     handle_filters = HandleFilters()
 
-    process_active_findings(
+    return process_active_findings(
         handle_filters.filter(findings),
         findings,
         devops_platform_gateway,
@@ -114,4 +117,5 @@ def process_active_findings(
         exclusions,
         vm_exclusions,
     )
+
     return break_build.process(total_findings, data_added)
