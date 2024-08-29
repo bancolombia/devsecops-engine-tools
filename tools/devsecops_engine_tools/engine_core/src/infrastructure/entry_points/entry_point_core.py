@@ -30,12 +30,13 @@ def init_engine_core(
 
     if config_tool[args["tool"].upper()]["ENABLED"] == "true":
         if args["tool"] == "engine_risk":
-            HandleRisk(
+            result, input_core = HandleRisk(
                 vulnerability_management_gateway,
                 secrets_manager_gateway,
                 devops_platform_gateway,
                 print_table_gateway,
             ).process(args, config_tool)
+
         else:
             findings_list, input_core = HandleScan(
                 vulnerability_management_gateway,

@@ -17,7 +17,7 @@ def runner_engine_risk(
 ):
     add_epss_gateway = FirstCsv()
 
-    init_engine_risk(
+    return init_engine_risk(
         add_epss_gateway,
         devops_platform_gateway,
         print_table_gateway,

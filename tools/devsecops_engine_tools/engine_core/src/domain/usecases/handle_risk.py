@@ -16,6 +16,12 @@ from devsecops_engine_tools.engine_risk.src.applications.runner_engine_risk impo
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionGettingFindings,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
+    InputCore
+)
+from devsecops_engine_tools.engine_core.src.domain.model.threshold import (
+    Threshold
+)
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -78,9 +84,18 @@ class HandleRisk:
 
         findings_list = parent_findings + findings
 
-        runner_engine_risk(
+        result = runner_engine_risk(
             dict_args,
             findings_list,
             self.devops_platform_gateway,
             self.print_table_gateway,
         )
+        input_core = InputCore(
+            [],
+            {},
+            "",
+            "",
+            service,
+            "Release",
+        )
+        return result, input_core

@@ -12,6 +12,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
 )
 
 from collections import Counter
+import copy
 
 
 class BreakBuild:
@@ -31,28 +32,72 @@ class BreakBuild:
         self.break_build = False
         self.warning_build = False
         self.report_breaker = []
+        self.risk_management = 0
+        self.blacklisted = 0
+        self.max_risk_score = 0
+        self.status = "succeeded"
         self.scan_result = {
             "findings_excluded": [],
             "vulnerabilities": {},
             "compliances": {},
+            "risk": {},
         }
 
     def process(self, all_report: "list[Report]", report_list: "list[Report]"):
         self._risk_management_control(all_report)
         new_report_list, applied_exclusions = self._apply_exclusions(report_list)
         if self.break_build:
-            self.report_breaker.extend(new_report_list)
+            self.report_breaker.extend(copy.deepcopy(new_report_list))
         self._tag_blacklist_control(new_report_list)
         self._risk_score_control(new_report_list)
         all_exclusions = self.vm_exclusions + applied_exclusions
-        self._print_exclusions(
-            self._map_applied_exclusion(all_exclusions)
+        self._print_exclusions(self._map_applied_exclusion(all_exclusions))
+
+        self.max_risk_score = (
+            max(report.risk_score for report in new_report_list)
+            if new_report_list
+            else 0
         )
+
         self._breaker()
+
+        self.scan_result["findings_excluded"] = list(
+            map(
+                lambda item: {
+                    "severity": item.severity,
+                    "id": item.id,
+                    "category": item.reason,
+                },
+                all_exclusions,
+            )
+        )
+
+        self.scan_result["risk"] = {
+            "risk_control": {
+                "risk_management": self.risk_management,
+                "blacklisted": self.blacklisted,
+                "max_risk_score": self.max_risk_score,
+            },
+            "status": self.status,
+            "found": list(
+                map(
+                    lambda item: {
+                        "id": item.vul_id_tool if item.vul_id_tool else item.id,
+                        "severity": item.severity,
+                        "risk_score": item.risk_score,
+                        "reason": item.reason,
+                    },
+                    self.report_breaker,
+                )
+            ),
+        }
+
+        return self.scan_result
 
     def _breaker(self):
         if self.break_build:
             print(self.devops_platform_gateway.result_pipeline("failed"))
+            self.status = "failed"
         else:
             print(self.devops_platform_gateway.result_pipeline("succeeded"))
 
@@ -61,9 +106,8 @@ class BreakBuild:
         risk_management_value = self._get_percentage(
             (sum(1 for report in all_report if report.mitigated)) / len(all_report)
         )
-        risk_threshold = self._get_percentage(
-            remote_config["THRESHOLD"]["RISK_MANAGEMENT"]
-        )
+        risk_threshold = remote_config["THRESHOLD"]["RISK_MANAGEMENT"]
+        self.risk_management = risk_management_value
 
         if risk_management_value >= (risk_threshold + 5):
             print(
@@ -76,7 +120,7 @@ class BreakBuild:
             print(
                 self.devops_platform_gateway.message(
                     "warning",
-                    f"Risk Management {risk_management_value}% is grather than and close to {risk_threshold}%",
+                    f"Risk Management {risk_management_value}% is close to {risk_threshold}%",
                 )
             )
             self.warning_build = True
@@ -88,7 +132,6 @@ class BreakBuild:
                 )
             )
             self.break_build = True
-
 
     def _get_percentage(self, decimal):
         return round(decimal * 100, 3)
@@ -125,6 +168,7 @@ class BreakBuild:
             elif report.id and (report.id in exclusions_ids):
                 applied_exclusions.append(self._get_applied_exclusion(report))
             else:
+                report.reason = "Risk Management"
                 new_report_list.append(report)
 
         return new_report_list, applied_exclusions
@@ -150,6 +194,7 @@ class BreakBuild:
             ]
 
             for report, tag in filtered_reports_above_threshold:
+                report.reason = "Blacklisted"
                 print(
                     self.devops_platform_gateway.message(
                         "error",
@@ -167,7 +212,12 @@ class BreakBuild:
 
             if filtered_reports_above_threshold:
                 self.break_build = True
-                self.report_breaker.extend([report for report, _ in filtered_reports_above_threshold])
+                self.blacklisted = len(filtered_reports_above_threshold)
+                self.report_breaker.extend(
+                    copy.deepcopy(
+                        [report for report, _ in filtered_reports_above_threshold]
+                    )
+                )
 
     def _risk_score_control(self, report_list: "list[Report]"):
         remote_config = self.remote_config
@@ -187,7 +237,8 @@ class BreakBuild:
                 )
                 if report.risk_score >= risk_score_threshold:
                     break_build = True
-                    self.report_breaker.append(report)
+                    report.reason = "Risk Score"
+                    self.report_breaker.append(copy.deepcopy(report))
             print(
                 "Below are open vulnerabilities from Vulnerability Management Platform"
             )
@@ -205,10 +256,11 @@ class BreakBuild:
             else:
                 print(
                     self.devops_platform_gateway.message(
-                        "succeeded", 
+                        "succeeded",
                         f"There are no findings with risk score greater than {risk_score_threshold}",
                     )
                 )
+            print(f"Findings count: {len(report_list)}")
 
         else:
             print(
