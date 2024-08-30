@@ -208,7 +208,10 @@ class XrayScan(ToolGateway):
             word in result.stderr
             for word in ["Technology", "WorkingDirectory", "Descriptors"]
         ):
-            scan_result = json.loads(result.stdout)
+            if result.stdout:
+                scan_result = json.loads(result.stdout)
+            else:
+                scan_result = {}
             file_result = os.path.join(os.getcwd(), "scan_result.json")
             with open(file_result, "w") as file:
                 json.dump(scan_result, file, indent=4)
