@@ -30,7 +30,7 @@ def init_engine_core(
 
     if config_tool[args["tool"].upper()]["ENABLED"] == "true":
         if args["tool"] == "engine_risk":
-            result, input_core = HandleRisk(
+            results, input_core = HandleRisk(
                 vulnerability_management_gateway,
                 secrets_manager_gateway,
                 devops_platform_gateway,
@@ -44,15 +44,15 @@ def init_engine_core(
                 devops_platform_gateway,
             ).process(args, config_tool)
 
-            scan_result = BreakBuild(devops_platform_gateway, print_table_gateway).process(
+            results = BreakBuild(devops_platform_gateway, print_table_gateway).process(
                 findings_list,
                 input_core,
                 args
             )
-            if args["send_metrics"] == "true":
-                MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(
-                    config_tool, input_core, args, scan_result
-                )
+        if args["send_metrics"] == "true":
+            MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(
+                config_tool, input_core, args, results
+            )
     else:
         print(
             devops_platform_gateway.message(
