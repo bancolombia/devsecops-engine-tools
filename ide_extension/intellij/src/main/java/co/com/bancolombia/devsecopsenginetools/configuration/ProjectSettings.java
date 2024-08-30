@@ -40,7 +40,7 @@ public class ProjectSettings {
             // calculable values
             String projectPath = project.getBasePath() == null ? "" : project.getBasePath();
             if (Paths.get(projectPath, "build.gradle").toFile().exists()) {
-                preBuildScript = "gradle build";
+                preBuildScript = "gradlew build";
                 buildContextPath = "build/libs";
             } else {
                 preBuildScript = "";

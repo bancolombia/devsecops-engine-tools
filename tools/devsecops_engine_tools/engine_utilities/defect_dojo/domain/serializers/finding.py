@@ -63,7 +63,7 @@ class FindingSerializer(Schema):
     reviewers = fields.List(fields.Int, requerided=False)
     risk_accetance = fields.Int(requerided=False)
     risk_status = fields.Str(
-        required=False, validate=validate.OneOf(["Risk Pending", "Risk Rejected", "Risk Accepted", "Risk Active"])
+        required=False, validate=validate.OneOf(["Risk Pending", "Risk Rejected", "Risk Expired", "Risk Accepted", "Risk Active", "Transfer Pending", "Transfer Rejected", "Transfer Expired", "Transfer Accepted"])
     )
     risk_accepted = fields.Bool(requerided=False)
     sast_sink_object = fields.Str(requeride=False)

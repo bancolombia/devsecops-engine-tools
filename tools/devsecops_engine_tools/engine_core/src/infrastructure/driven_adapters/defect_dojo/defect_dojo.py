@@ -163,6 +163,11 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "tags": tool,
                 "limit": dd_limits_query,
             }
+            transfer_finding_query_params = {
+                "risk_status": "Transfer Accepted",
+                "tags": tool,
+                "limit": dd_limits_query,
+            }
 
             exclusions_risk_accepted = self._get_findings_with_exclusions(
                 session_manager,
@@ -184,7 +189,17 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "False Positive",
             )
 
-            return list(exclusions_risk_accepted) + list(exclusions_false_positive)
+            exclusions_transfer_finding = self._get_findings_with_exclusions(
+                session_manager,
+                service,
+                dd_max_retries,
+                transfer_finding_query_params,
+                tool,
+                self._format_date_to_dd_format,
+                "Transferred Finding",
+            )
+
+            return list(exclusions_risk_accepted) + list(exclusions_false_positive) + list(exclusions_transfer_finding)
         except Exception as ex:
             raise ExceptionFindingsExcepted(
                 "Error getting excepted findings with the following error: {0} ".format(
@@ -268,19 +283,22 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     raise e
 
     def _create_exclusion(self, finding, date_fn, tool, reason):
+        if reason == "False Positive":
+            create_date = date_fn(finding.last_status_update)
+            expired_date = date_fn(None)
+        elif reason == "Transferred Finding":
+            create_date = date_fn(finding.transfer_finding.date)
+            expired_date = date_fn(finding.transfer_finding.expiration_date)
+        else:
+            last_accepted_risk = finding.accepted_risks[-1]
+            create_date = date_fn(last_accepted_risk["created"])
+            expired_date = date_fn(last_accepted_risk["expiration_date"])
+        
         return Exclusions(
             id=finding.vuln_id_from_tool,
             where=self._get_where(finding, tool),
-            create_date=date_fn(
-                finding.last_status_update
-                if reason == "False Positive"
-                else finding.accepted_risks[-1]["created"]
-            ),
-            expired_date=date_fn(
-                None
-                if reason == "False Positive"
-                else finding.accepted_risks[-1]["expiration_date"]
-            ),
+            create_date=create_date,
+            expired_date=expired_date,
             reason=reason,
         )
 

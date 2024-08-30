@@ -5,7 +5,6 @@ import co.com.bancolombia.devsecopsenginetools.configuration.ProjectSettings;
 import co.com.bancolombia.devsecopsenginetools.configuration.ProjectSettingsUtils;
 import co.com.bancolombia.devsecopsenginetools.ui.tool.LogPanelLogger;
 import co.com.bancolombia.devsecopsenginetools.utils.Commands;
-import co.com.bancolombia.devsecopsenginetools.utils.DataUtils;
 import co.com.bancolombia.devsecopsenginetools.utils.FileUtils;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
@@ -15,10 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 
@@ -35,7 +31,7 @@ public class ScanImageTask extends Task.Backgroundable {
     public void run(@NotNull ProgressIndicator progressIndicator) {
         try {
             LogPanelLogger.clear();
-            prepareFiles(requireNonNull(myProject));
+            FileUtils.copyIaCFiles(requireNonNull(myProject));
             GlobalSettings settings = GlobalSettings.getInstance();
             String scanCommand = settings.getScanImageCommand().replace("{image}", settings.getDevSecOpsImage());
             ProjectSettings projectSettings = ProjectSettingsUtils.getProjectSettings(myProject);
@@ -56,27 +52,8 @@ public class ScanImageTask extends Task.Backgroundable {
             LogPanelLogger.info("Running scan Image command: " + scanCommand);
             Commands.runCommand(scanCommand, LogPanelLogger.getAppender());
         } catch (Exception ex) {
-            LogPanelLogger.error("Error running scan IaC command: ", ex);
+            LogPanelLogger.error("Error running scan Image command: ", ex);
         }
         completable.complete();
-    }
-
-    private void prepareFiles(Project project) throws IOException {
-        String projectPath = project.getBasePath() != null ? project.getBasePath() : "";
-        Path iacDestination = Path.of(projectPath, "build", "dev-sec-ops", "iac");
-        FileUtils.deleteDirectory(iacDestination);
-        Files.createDirectories(iacDestination);
-        ProjectSettings settings = ProjectSettingsUtils.getProjectSettings(project);
-        for (String source : settings.getIacDirectory().split(",")) {
-            Path iacSource = Path.of(projectPath, source);
-            LogPanelLogger.info("Copying IaC files from " + iacSource + " to " + iacDestination);
-            FileUtils.copyDirectory(iacSource, iacDestination);
-        }
-        if (settings.isReplaceTokens()) {
-            LogPanelLogger.info("Replacing tokens in IaC files");
-            Map<String, String> env = FileUtils.readEnvFile(Path.of(projectPath, settings.getDotEnvFile()));
-            FileUtils.walkDirectory(iacDestination, content ->
-                    DataUtils.replaceTokens(content, settings.getReplacePattern(), env));
-        }
     }
 }

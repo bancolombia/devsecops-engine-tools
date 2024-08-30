@@ -1,6 +1,9 @@
 package co.com.bancolombia.devsecopsenginetools.utils;
 
+import co.com.bancolombia.devsecopsenginetools.configuration.ProjectSettings;
+import co.com.bancolombia.devsecopsenginetools.configuration.ProjectSettingsUtils;
 import co.com.bancolombia.devsecopsenginetools.ui.tool.LogPanelLogger;
+import com.intellij.openapi.project.Project;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.io.file.PathUtils;
 
@@ -87,6 +90,25 @@ public class FileUtils {
 
     public static ResourceBundle getProperties() {
         return ResourceBundle.getBundle("plugin");
+    }
+
+    public static void copyIaCFiles(Project project) throws IOException {
+        String projectPath = project.getBasePath() != null ? project.getBasePath() : "";
+        Path iacDestination = Path.of(projectPath, "build", "dev-sec-ops", "iac");
+        Files.createDirectories(iacDestination);
+        FileUtils.deleteDirectory(iacDestination);
+        ProjectSettings settings = ProjectSettingsUtils.getProjectSettings(project);
+        for (String source : settings.getIacDirectory().split(",")) {
+            Path iacSource = Path.of(projectPath, source);
+            LogPanelLogger.info("Copying IaC files from " + iacSource + " to " + iacDestination);
+            FileUtils.copyDirectory(iacSource, iacDestination);
+        }
+        if (settings.isReplaceTokens()) {
+            LogPanelLogger.info("Replacing tokens in IaC files");
+            Map<String, String> env = FileUtils.readEnvFile(Path.of(projectPath, settings.getDotEnvFile()));
+            FileUtils.walkDirectory(iacDestination, content ->
+                    DataUtils.replaceTokens(content, settings.getReplacePattern(), env));
+        }
     }
 
     public static String findDockerfile(String projectPath) {
