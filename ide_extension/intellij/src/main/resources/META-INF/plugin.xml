@@ -7,7 +7,6 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <systemProperty value="true" id="name"/>
         <groupConfigurable id="DevSecOpsEngineTools.GroupConfiguration"
                            parentId="tools"
                            displayNameKey="devsecops-engine-tools.plugin.settings.displayName"
@@ -32,6 +31,7 @@
                     icon="/icons/logo.svg"
                     factoryClass="co.com.bancolombia.devsecopsenginetools.ui.tool.LogPanelLogger"/>
 
+        <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
     </extensions>
 
     <actions>
