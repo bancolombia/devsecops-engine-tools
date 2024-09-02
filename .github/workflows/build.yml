@@ -5,6 +5,10 @@ on:
     branches:
       - trunk
       - feature/*
+    paths-ignore:
+      - 'ide_extension/**'
+      - '.github/workflows/intellij-build.yml'
+      - '.github/workflows/intellij-release.yml'
 
   pull_request:
     branches:

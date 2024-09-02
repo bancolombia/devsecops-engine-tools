@@ -2,6 +2,11 @@ import dataclasses
 from typing import List
 from devsecops_engine_tools.engine_utilities.utils.dataclass_classmethod import FromDictMixin
 
+@dataclasses.dataclass
+class TransferFinding(FromDictMixin):
+    id: int = 0
+    date : str = ""
+    expiration_date: str = ""
 
 @dataclasses.dataclass
 class Finding(FromDictMixin):
@@ -10,6 +15,7 @@ class Finding(FromDictMixin):
     request_response = None
     req_resp: List[None] = dataclasses.field(default_factory=list)
     accepted_risks: List[None] = dataclasses.field(default_factory=list)
+    transfer_finding: TransferFinding = None
     push_to_jira: bool = False
     age: int = 0
     sla_days_remaining: int = 0
