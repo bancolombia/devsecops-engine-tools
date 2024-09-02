@@ -212,12 +212,18 @@ class XrayScan(ToolGateway):
                 scan_result = json.loads(result.stdout)
             else:
                 scan_result = {}
-            file_result = os.path.join(os.getcwd(), "scan_result.json")
-            with open(file_result, "w") as file:
-                json.dump(scan_result, file, indent=4)
+                if any(
+                    word in result.stderr
+                    for word in ["What went wrong", "Caused by"]
+                ):
+                    logger.error(f"Error executing Xray scan: {result.stderr}")
+                    return None
             if result.stdout == "null\n":
                 logger.warning(f"Xray scan returned null: {result.stderr}")
                 return None
+            file_result = os.path.join(os.getcwd(), "scan_result.json")
+            with open(file_result, "w") as file:
+                json.dump(scan_result, file, indent=4)
             return file_result
         else:
             logger.error(f"Error executing Xray scan: {result.stderr}")
