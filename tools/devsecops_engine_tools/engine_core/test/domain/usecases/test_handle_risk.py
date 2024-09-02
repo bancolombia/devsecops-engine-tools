@@ -7,6 +7,9 @@ from devsecops_engine_tools.engine_core.src.domain.usecases.handle_risk import (
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionGettingFindings,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
+    InputCore
+)
 
 
 class TestHandleRisk(unittest.TestCase):
@@ -39,15 +42,20 @@ class TestHandleRisk(unittest.TestCase):
             "PARENT_ANALYSIS": {"ENABLED": "true", "PARENT_IDENTIFIER": "id"},
         }
         self.devops_platform_gateway.get_variable.return_value = "pipeline_name_id_test"
+        mock_runner_engine_risk.return_value = {"result": "result"}
 
         # Call the process method
-        self.handle_risk.process(dict_args, config_tool)
+        result, input_core = self.handle_risk.process(dict_args, config_tool)
 
         # Assert the expected values
         assert mock_get_finding_list.call_count == 2
-        assert mock_runner_engine_risk.call_count == 2
+        assert mock_runner_engine_risk.call_count == 1
+        assert result == {"result": "result"}
+        assert input_core == InputCore(
+            [], {}, "", "", "pipeline_name_id_test", "Release"
+        )
 
-    def test_get_finding_list(self):
+    def test__get_finding_list(self):
         dict_args = {
             "use_secrets_manager": "true",
             "tool": "engine_risk",

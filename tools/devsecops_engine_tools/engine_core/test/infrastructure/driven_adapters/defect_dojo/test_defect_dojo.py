@@ -356,12 +356,15 @@ class TestDefectDojoPlatform(unittest.TestCase):
         )
 
     @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.DefectDojoPlatform._format_date_to_dd_format"
+    )
+    @patch(
         "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.SessionManager"
     )
     @patch(
         "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Finding.get_finding"
     )
-    def test_get_all_findings(self, mock_finding, mock_session_manager):
+    def test_get_all_findings(self, mock_finding, mock_session_manager, mock_format_date):
         service = "test"
         dict_args = {
             "tool": "engine_risk",

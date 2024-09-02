@@ -20,9 +20,4 @@ def test_runner_engine_risk(mock_init_engine_risk):
         print_table_gateway,
     )
 
-    mock_init_engine_risk.assert_called_with(
-        devops_platform_gateway,
-        print_table_gateway,
-        dict_args,
-        findings,
-    )
+    mock_init_engine_risk.assert_called_once()

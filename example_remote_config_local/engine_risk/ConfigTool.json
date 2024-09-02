@@ -1,4 +1,5 @@
 {
+    "MESSAGE_INFO": "Custom message",
     "IGNORE_ANALYSIS_PATTERN": "(.*_test|test_.*)",
     "PARENT_ANALYSIS": {
         "ENABLED": "false",

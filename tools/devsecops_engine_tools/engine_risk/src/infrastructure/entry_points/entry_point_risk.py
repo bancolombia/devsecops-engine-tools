@@ -116,6 +116,8 @@ def process_active_findings(
         remote_config,
         exclusions,
         vm_exclusions,
+        data_added,
+        total_findings,
     )
 
-    return break_build.process(total_findings, data_added)
+    return break_build.process()
