@@ -5,8 +5,23 @@ export class IacScanRequest {
 
     constructor(private iacScannerUseCase: IIacScanUseCase){}
 
-    makeScan(folderToScan: string, outputChannel: OutputChannel): any {
-        this.iacScannerUseCase.scan(folderToScan, outputChannel);
+    makeScan(
+        folderToScan: string,
+        organizationName: string,
+        projectName: string,
+        groupName: string,
+        adUserName: string,
+        adPersonalAccessToken: string,
+        outputChannel: OutputChannel
+        ): any {
+        this.iacScannerUseCase.scan(folderToScan,
+            organizationName,
+            projectName,
+            groupName,
+            adUserName,
+            adPersonalAccessToken,
+            outputChannel
+        );
     }
 
 }
