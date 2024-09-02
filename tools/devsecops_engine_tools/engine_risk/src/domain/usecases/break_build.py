@@ -23,12 +23,16 @@ class BreakBuild:
         remote_config: any,
         exclusions: "list[Exclusions]",
         vm_exclusions: "list[Exclusions]",
+        report_list: "list[Report]",
+        all_report: "list[Report]",
     ):
         self.devops_platform_gateway = devops_platform_gateway
         self.printer_table_gateway = printer_table_gateway
         self.remote_config = remote_config
         self.exclusions = exclusions
         self.vm_exclusions = vm_exclusions
+        self.report_list = report_list
+        self.all_report = all_report
         self.break_build = False
         self.warning_build = False
         self.report_breaker = []
@@ -43,14 +47,14 @@ class BreakBuild:
             "risk": {},
         }
 
-    def process(self, all_report: "list[Report]", report_list: "list[Report]"):
-        self._risk_management_control(all_report)
-        new_report_list, applied_exclusions = self._apply_exclusions(report_list)
+    def process(self):
+        self._risk_management_control(self.all_report)
+        new_report_list, applied_exclusions = self._apply_exclusions(self.report_list)
         if self.break_build:
             self.report_breaker.extend(copy.deepcopy(new_report_list))
         self._tag_blacklist_control(new_report_list)
         self._risk_score_control(new_report_list)
-        all_exclusions = self.vm_exclusions + applied_exclusions
+        all_exclusions = list(self.vm_exclusions) + list(applied_exclusions)
         self._print_exclusions(self._map_applied_exclusion(all_exclusions))
 
         self.max_risk_score = (
@@ -91,6 +95,13 @@ class BreakBuild:
                 )
             ),
         }
+
+        print(
+            self.devops_platform_gateway.message(
+                "info",
+                self.remote_config["MESSAGE_INFO"],
+            )
+        )
 
         return self.scan_result
 

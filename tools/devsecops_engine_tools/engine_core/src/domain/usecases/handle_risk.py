@@ -19,9 +19,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore
 )
-from devsecops_engine_tools.engine_core.src.domain.model.threshold import (
-    Threshold
-)
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
