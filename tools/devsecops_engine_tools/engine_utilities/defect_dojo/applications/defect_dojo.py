@@ -34,7 +34,6 @@ class DefectDojo:
                 rest_scan_configuration,
                 rest_engagement=rest_engagement,
             )
-            response = uc.execute(request)
-            return response
+            return uc.execute(request)
         except ApiError as e:
-            return e
+            raise e

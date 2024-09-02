@@ -7,9 +7,6 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.s
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.handle_remote_config_patterns import (
     HandleRemoteConfigPatterns,
 )
-from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.find_artifacts import (
-    FindArtifacts,
-)
 
 import os
 import sys
@@ -23,8 +20,6 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 def init_engine_dependencies(
     tool_run, tool_remote, tool_deserializator, dict_args, token, tool
 ):
-    sys.stdout.reconfigure(encoding="utf-8")
-
     remote_config = tool_remote.get_remote_config(
         dict_args["remote_config_repo"],
         "engine_sca/engine_dependencies/ConfigTool.json",
@@ -46,24 +41,26 @@ def init_engine_dependencies(
     input_core = SetInputCore(remote_config, exclusions, pipeline_name, tool)
 
     if scan_flag and not (skip_flag):
-        bypass_limits_flag = handle_remote_config_patterns.bypass_archive_limits()
-        pattern = handle_remote_config_patterns.excluded_files()
-
-        find_artifacts = FindArtifacts(
-            os.getcwd(), pattern, remote_config["PACKAGES_TO_SCAN"]
-        )
-        file_to_scan = find_artifacts.find_artifacts()
-        if file_to_scan:
+        to_scan = dict_args["folder_path"] if dict_args["folder_path"] else os.getcwd()
+        if os.path.exists(to_scan):
             dependencies_sca_scan = DependenciesScan(
                 tool_run,
                 tool_deserializator,
                 remote_config,
-                file_to_scan,
-                bypass_limits_flag,
+                dict_args,
+                exclusions,
+                pipeline_name,
+                to_scan,
                 token,
             )
             dependencies_scanned = dependencies_sca_scan.process()
-            deserialized = dependencies_sca_scan.deserializator(dependencies_scanned)
+            deserialized = (
+                dependencies_sca_scan.deserializator(dependencies_scanned)
+                if dependencies_scanned is not None
+                else []
+            )
+        else:
+            logger.error(f"Path {to_scan} does not exist")
     else:
         print(f"Tool skipped by DevSecOps policy")
         logger.info(f"Tool skipped by DevSecOps policy")

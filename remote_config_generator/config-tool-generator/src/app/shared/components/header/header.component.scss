@@ -1,0 +1,95 @@
+.header {
+  background-color: var(--background-color_9);
+  box-shadow: 0px 2px 20px rgba(1, 41, 112, 0.1);
+  height: 60px;
+  padding-left: 20px;
+  transition: all 0.5s;
+  z-index: 997;
+  .logo {
+      line-height: 1;
+      img {
+          margin-right: 6px;
+          max-height: 40px;
+      }
+      span {
+          color: var(--color_1);
+          font-family: var(--font-family_2);
+          font-size: 20px;
+          font-weight: 700;
+      }
+  }
+  .toggle-sidebar-btn {
+      color: var(--color_1);
+      cursor: pointer;
+      font-size: 22px;
+      padding-right: 10px;
+  }
+  .search-bar {
+      min-width: 360px;
+      padding: 0 20px;
+  }
+  .search-form {
+      width: 100%;
+      input {
+          border: 0;
+          border: 1px solid rgba(1, 41, 112, 0.2);
+          border-radius: 3px;
+          color: var(--color_1);
+          font-size: 14px;
+          padding: 7px 38px 7px 8px;
+          transition: 0.3s;
+          width: 100%;
+          &:focus {
+              border: 1px solid rgba(1, 41, 112, 0.3);
+              box-shadow: 0 0 10px 0 rgba(1, 41, 112, 0.15);
+              outline: none;
+          }
+          &:hover {
+              border: 1px solid rgba(1, 41, 112, 0.3);
+              box-shadow: 0 0 10px 0 rgba(1, 41, 112, 0.15);
+              outline: none;
+          }
+      }
+      button {
+          background-color: none;
+          border: 0;
+          margin-left: -30px;
+          padding: 0;
+          i {
+              color: var(--color_1);
+          }
+      }
+  }
+  .header-nav {
+      ul {
+          list-style: none;
+      }
+      >ul {
+          margin: 0;
+          padding: 0;
+      }
+      .nav-item {
+          transition: all 0.3s ease-out;
+          &:hover {
+              background-color: var(--background-color_9);
+          }
+      }
+      .nav-link {
+          border: none;
+          color: var(--color_1);
+          margin: 0 0.5rem;
+          margin-bottom: -2px;
+          &:hover {
+              color: var(--color_7);
+          }
+          &:focus {
+              color: var(--color_7);
+          }
+      }
+      .nav-link.active {
+          background-color: var(--background-color_9);
+          border-bottom: 2px solid #4154f1;
+          color: var(--color_7);
+      }
+  }
+}

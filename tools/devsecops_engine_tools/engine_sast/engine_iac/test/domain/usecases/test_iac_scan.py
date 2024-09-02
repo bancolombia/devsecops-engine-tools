@@ -23,6 +23,7 @@ class TestIacScan(unittest.TestCase):
             "folder_path": ".",
             "environment": "test",
             "platform": "cloudformation",
+            "token_external_checks": "token",
         }
         secret_tool = "example_secret"
         tool = "CHECKOV"
@@ -74,7 +75,6 @@ class TestIacScan(unittest.TestCase):
         self.assertEqual(input_core.threshold_defined.vulnerability.critical, 10)
         self.assertEqual(input_core.path_file_results, "/path/to/results")
         self.assertEqual(input_core.custom_message_break_build, "message test")
-        self.assertEqual(input_core.scope_pipeline, "example_pipeline_devsecops_engine_tools")
         self.assertEqual(input_core.stage_pipeline, "Release")
 
     def test_process_skip_search_folder(self):
