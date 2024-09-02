@@ -1,6 +1,6 @@
 {
     "XRAY": {
-        "CLI_VERSION": "2.52.8",
+        "CLI_VERSION": "2.55.0",
         "REGEX_EXPRESSION_EXTENSIONS": "\\.(jar|ear|war)$",
         "PACKAGES_TO_SCAN": ["node_modules", "site-packages"]
     },
