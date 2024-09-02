@@ -1,13 +1,17 @@
 import { IRestClientGateway } from "../../domain/model/gateways/IRestClientGateway";
+import { AuthEncoder } from "../helper/AuthEncoder";
 
-class RestClient implements IRestClientGateway {
+export class RestClient implements IRestClientGateway {
 
-    async get(url: string): Promise<any> {
+    constructor(){}
+
+    async get(url: string, token: string): Promise<any> {
         try{
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${token}`
                 }
             });
             const data = await response.json();
