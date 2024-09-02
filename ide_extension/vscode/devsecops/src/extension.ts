@@ -22,9 +22,9 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 		if (selectedFolder && selectedFolder.length > 0) {
 			let folderPath = selectedFolder[0].fsPath;
-			
+
 			folderPath = folderPath.replace(/^file:\/\//, '');
-		
+
 			vscode.window.showInformationMessage(`Devsecops Scanning: ${folderPath}`);
 
 			const scanner = new Scanner();
