@@ -1,5 +1,6 @@
 {
   "name": "devsecops",
+  "icon": "resources/logo.png",
   "displayName": "devsecops",
   "description": "",
   "version": "0.0.1",
@@ -12,6 +13,54 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "devsecops",
+          "title": "DevSecOps IDE Extension",
+          "icon": "resources/logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "devsecops": [
+        {
+          "id": "devsecops",
+          "name": "DevSecOps IDE Extension",
+          "icon": "resources/logo.svg"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "DevSecOps",
+      "properties": {
+        "devsecops.organizationName": {
+          "type": "string",
+          "default": "GrupoBancolombia",
+          "description": "Organization Name"
+        },
+        "devsecops.projectName": {
+          "type": "string",
+          "default": "Vicepresidencia Servicios de Tecnología",
+          "description": "Project Name"
+        },
+        "devsecops.groupName": {
+          "type": "string",
+          "default": "NU0429001_devsecops_engine_backend_dev",
+          "description": "Variables group name"
+        },
+        "devsecops.username": {
+          "type": "string",
+          "default": "",
+          "description": "Set your azure devops username"
+        },
+        "devsecops.personalAccessToken": {
+          "type": "string",
+          "default": "",
+          "description": "Set your user personal access token generated at azure devops"
+        }
+      }
+    },
     "commands": [
       {
         "command": "devsecops.helloWorld",
