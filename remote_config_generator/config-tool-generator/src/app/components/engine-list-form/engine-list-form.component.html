@@ -1,0 +1,53 @@
+@if(configToolEngineList){
+<section class="">
+  <div class="card">
+    <div class="card-body pb-0">
+      <h5 class="card-title">
+        <div class="d-flex bd-highlight">
+          <div class="w-100 bd-highlight">
+            Config Tool <span>| Engine List</span>
+          </div>
+          <div class="flex-shrink-1 bd-highlight">
+            <app-tooltip
+              tooltipTitle="Configuration of the tools used for scans"
+              fontSize="1rem"
+            ></app-tooltip>
+          </div>
+        </div>
+      </h5>
+      <div id="config-tool-engine-list">
+        <form [formGroup]="parentForm" class="row mb-3">
+          @for (engine of configToolEngineList.ENGINE_LIST; track
+          engine.ENGINE_NAME) {
+          <div class="col-6 col-sm-4 col-md-12 col-lg-6 col-xl-6 col-xxl-3">
+            <label [for]="engine.ENGINE_NAME"
+              >• {{ engine.ENGINE_NAME.replaceAll("_", " ") | titlecase }}:
+              <app-tooltip
+                [tooltipTitle]="'Field to define the tool ' + engine.ENGINE_NAME"
+              ></app-tooltip>
+            </label>
+            @for (tool of engine.TOOLS; track tool) {
+            <div class="form-check ms-4">
+              <input
+                [formControlName]="engine.ENGINE_NAME"
+                [name]="engine.ENGINE_NAME"
+                [value]="tool"
+                class="form-check-input"
+                type="radio"
+                [id]="engine.ENGINE_NAME + tool"
+                checked
+              />
+              <label class="form-check-label" [for]="engine.ENGINE_NAME + tool">
+                {{ tool | titlecase }}
+              </label>
+            </div>
+            } @empty { Empty list of tools }
+          </div>
+          } @empty { Empty list of engines }
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+} @else { No Engine List Data Available }
+

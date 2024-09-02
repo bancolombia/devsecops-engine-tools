@@ -1,0 +1,61 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <depends>com.intellij.modules.platform</depends>
+
+    <resource-bundle>DevSecOpsPluginBundle</resource-bundle>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <groupConfigurable id="DevSecOpsEngineTools.GroupConfiguration"
+                           parentId="tools"
+                           displayNameKey="devsecops-engine-tools.plugin.settings.displayName"
+                           descriptionKey="devsecops-engine-tools.plugin.settings.description">
+        </groupConfigurable>
+        <applicationConfigurable id="DevSecOpsEngineTools.GlobalConfiguration"
+                                 parentId="DevSecOpsEngineTools.GroupConfiguration"
+                                 displayName="Global Configuration"
+                                 instance="co.com.bancolombia.devsecopsenginetools.ui.configuration.GlobalConfiguration"/>
+
+
+        <projectConfigurable id="DevSecOpsEngineTools.ProjectConfiguration"
+                             parentId="DevSecOpsEngineTools.GroupConfiguration"
+                             displayName="Project Configuration"
+                             instance="co.com.bancolombia.devsecopsenginetools.ui.configuration.ProjectConfiguration"/>
+
+        <applicationService
+                serviceImplementation="co.com.bancolombia.devsecopsenginetools.configuration.GlobalSettings"/>
+
+        <toolWindow id="DevSecOps Engine Tools"
+                    anchor="bottom"
+                    icon="/icons/logo.svg"
+                    factoryClass="co.com.bancolombia.devsecopsenginetools.ui.tool.LogPanelLogger"/>
+
+        <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
+    </extensions>
+
+    <actions>
+        <group id="DevSecOpsEngineTools.Menu"
+               text="DevSecOps Engine Tools"
+               popup="true"
+               description="DevSecOps engine tools menu">
+            <add-to-group group-id="CodeMenu"
+                          anchor="after"
+                          relative-to-action="CodeCompletion"/>
+
+            <action id="DevSecOpsEngineTools.ScanIac"
+                    class="co.com.bancolombia.devsecopsenginetools.actions.ScanIacAction"
+                    text="Scan IaC"
+                    description="Scan your Dockerfile and k8s files"/>
+            <action id="DevSecOpsEngineTools.ScanImage"
+                    class="co.com.bancolombia.devsecopsenginetools.actions.ScanImageAction"
+                    text="Scan Image"
+                    description="Scan docker images"/>
+            <action id="DevSecOpsEngineTools.GlobalConfiguration"
+                    class="co.com.bancolombia.devsecopsenginetools.actions.GlobalConfigurationAction"
+                    text="Settings"
+                    description="Open global settings">
+            </action>
+        </group>
+    </actions>
+</idea-plugin>
