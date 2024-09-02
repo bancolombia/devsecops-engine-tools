@@ -20,6 +20,13 @@ export function activate(context: vscode.ExtensionContext) {
 			canSelectMany: false,
 			openLabel: 'Select Folder'
 		});
+
+		const organizationName: string = vscode.workspace.getConfiguration('devsecops').get('organizationName') || '';
+		const projectName: string = vscode.workspace.getConfiguration('devsecops').get('projectName') || '';
+		const groupName: string = vscode.workspace.getConfiguration('devsecops').get('groupName') || '';
+		const adUserName: string = vscode.workspace.getConfiguration('devsecops').get('username') || '';
+		const adPersonalAccessToken: string = vscode.workspace.getConfiguration('devsecops').get('personalAccessToken') || '';
+
 		if (selectedFolder && selectedFolder.length > 0) {
 			let folderPath = selectedFolder[0].fsPath;
 
@@ -29,7 +36,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 			const scanner = iacScanRequest();
 			const outputChannel = vscode.window.createOutputChannel('IaC Scan Results');
-			scanner.makeScan(folderPath, outputChannel);
+			scanner.makeScan(folderPath,
+				organizationName,
+				projectName,
+				groupName,
+				adUserName,
+				adPersonalAccessToken,
+				outputChannel
+			);
 		}
 	});
 
