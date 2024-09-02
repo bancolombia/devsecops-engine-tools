@@ -4,7 +4,7 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import lombok.SneakyThrows;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.java.Log;
 
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
@@ -19,10 +19,11 @@ import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Log4j2
+@Log
 public class LogPanel extends JBPanel<LogPanel> {
     private final transient StyledDocument doc;
     private final JTextPane textPane;
@@ -56,7 +57,7 @@ public class LogPanel extends JBPanel<LogPanel> {
         try {
             parseAndAppend("\033[" + color + "m" + message + "\033[0m\n");
         } catch (BadLocationException e) {
-            log.warn("Error appending text", e);
+            log.log(Level.WARNING, "Error appending text", e);
         }
     }
 
@@ -176,7 +177,7 @@ public class LogPanel extends JBPanel<LogPanel> {
                 return textPane.getDocument().getText(element.getStartOffset(),
                         element.getEndOffset() - element.getStartOffset()).trim();
             } catch (BadLocationException e) {
-                log.warn("Error getting text from element", e);
+                log.log(Level.WARNING, "Error getting text from element", e);
                 return null;
             }
         }
@@ -185,7 +186,7 @@ public class LogPanel extends JBPanel<LogPanel> {
             try {
                 Desktop.getDesktop().browse(new URI(link));
             } catch (Exception e) {
-                log.warn("Error opening link: {}", link, e);
+                log.log(Level.WARNING, "Error opening link: " + link, e);
             }
         }
 
