@@ -39,6 +39,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_CMDB": "cmdb_host",
                     "REGEX_EXPRESSION_CMDB": "regex",
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "MAX_RETRIES_QUERY": 5,
                 },
             }
         }
@@ -124,6 +125,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "MAX_RETRIES_QUERY": 5,
                 }
             }
         }
@@ -170,6 +172,27 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     ),
                 ]
             ),
+            # Findings Transferred Finding
+            MagicMock(
+                results=[
+                    MagicMock(
+                        vuln_id_from_tool="id3",
+                        file_path="path1",
+                        transfer_finding= MagicMock(
+                            date= "2024-08-14",
+                            expiration_date= "2024-08-15T00:00:00Z",
+                        )
+                    ),
+                    MagicMock(
+                        vuln_id_from_tool="id4",
+                        file_path="path2",
+                        transfer_finding= MagicMock(
+                            date= "2024-08-14",
+                            expiration_date= "2024-08-15T00:00:00Z",
+                        )
+                    ),
+                ]
+            ),
         ]
         mock_finding.side_effect = findings_list
 
@@ -192,6 +215,12 @@ class TestDefectDojoPlatform(unittest.TestCase):
             Exclusions(
                 id="id2", where="path2", create_date="10062024", expired_date=""
             ),
+            Exclusions(
+                id="id3", where="pathq", create_date="14082024", expired_date="15082024"
+            ),
+            Exclusions(
+                id="id4", where="path2", create_date="14082024", expired_date="15082024"
+            ),
         ]
         self.assertEqual(result, expected_result)
 
@@ -213,38 +242,48 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "MAX_RETRIES_QUERY": 5,
                 }
             }
         }
 
         mock_session_manager.return_value = MagicMock()
         findings_list = [
+            # Findings risk accepted
             MagicMock(
-                vuln_id_from_tool="id1",
-                component_name="comp1",
-                component_version="version1",
-                last_status_update="2024-02-21T00:00:00Z",
-                accepted_risks=[
-                    {
-                        "created": "2024-02-21T00:00:00Z",
-                        "expiration_date": "2024-02-29T00:00:00Z",
-                    }
-                ],
+                results=[
+                    MagicMock(
+                        vuln_id_from_tool="id1",
+                        component_name="comp1",
+                        component_version="version1",
+                        last_status_update="2024-02-21T00:00:00Z",
+                        accepted_risks=[
+                            {
+                                "created": "2024-02-21T00:00:00Z",
+                                "expiration_date": "2024-02-29T00:00:00Z",
+                            }
+                        ],
+                    ),
+                    MagicMock(
+                        vuln_id_from_tool="id2",
+                        component_name="comp2",
+                        component_version="version2",
+                        last_status_update="2024-02-21T00:00:00Z",
+                        accepted_risks=[
+                            {
+                                "created": "2024-02-21T00:00:00Z",
+                                "expiration_date": "2024-03-30T00:00:00Z",
+                            }
+                        ],
+                    ),
+                ]
             ),
-            MagicMock(
-                vuln_id_from_tool="id2",
-                component_name="comp2",
-                component_version="version2",
-                last_status_update="2024-02-21T00:00:00Z",
-                accepted_risks=[
-                    {
-                        "created": "2024-02-21T00:00:00Z",
-                        "expiration_date": "2024-03-30T00:00:00Z",
-                    }
-                ],
-            ),
+            # Findings false positive
+            MagicMock(results=[]),
+            # Findings Transferred Finding
+            MagicMock(results=[]),
         ]
-        mock_finding.return_value.results = findings_list
+        mock_finding.side_effect = findings_list
 
         result = self.defect_dojo.get_findings_excepted(
             service, dict_args, secret_tool, config_tool
@@ -254,34 +293,52 @@ class TestDefectDojoPlatform(unittest.TestCase):
         mock_finding.assert_called_with(
             session=mock_session_manager.return_value,
             service=service,
-            false_p=True,
+            risk_status="Transfer Accepted",
             tags="engine_dependencies",
             limit=80,
         )
 
         expected_result = [
-            Exclusions(
-                id="id1",
-                where="comp1:version1",
-                create_date="21022024"
-            ),
-            Exclusions(
-                id="id2",
-                where="comp2:version2",
-                create_date="21022024"
-            ),
-            Exclusions(
-                id="id2",
-                where="comp2:version2",
-                create_date="21022024"
-            ),
-            Exclusions(
-                id="id2",
-                where="comp2:version2",
-                create_date="21022024"
-            ),
+            Exclusions(id="id1", where="comp1:version1", create_date="21022024"),
+            Exclusions(id="id2", where="comp2:version2", create_date="21022024"),
         ]
         self.assertEqual(result, expected_result)
+
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.SessionManager"
+    )
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Finding.get_finding"
+    )
+    def test_get_findings_excepted_retry(self, mock_finding, mock_session_manager):
+
+        service = "test"
+        dict_args = {
+            "tool": "engine_dependencies",
+            "token_vulnerability_management": "token1",
+        }
+        secret_tool = {"token_defect_dojo": "token2"}
+        config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "LIMITS_QUERY": 80,
+                    "MAX_RETRIES_QUERY": 2,
+                }
+            }
+        }
+
+        mock_session_manager.return_value = MagicMock()
+        mock_finding.side_effect = Exception("Simulated error")
+
+        with unittest.TestCase().assertRaises(Exception) as context:
+            self.defect_dojo.get_findings_excepted(
+                service, dict_args, secret_tool, config_tool
+            )
+
+        assert "Error getting excepted findings with the following error:" in str(
+            context.exception
+        )
 
     def test_get_findings_excepted_exception(self):
 
@@ -294,9 +351,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
             self.defect_dojo.get_findings_excepted(
                 service, dict_args, secret_tool, config_tool
             )
-        assert (
-            "Error getting excepted findings with the following error:"
-            in str(context.exception)
+        assert "Error getting excepted findings with the following error:" in str(
+            context.exception
         )
 
     @patch(
@@ -317,6 +373,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "MAX_RETRIES_QUERY": 5,
                 }
             }
         }
@@ -410,7 +467,6 @@ class TestDefectDojoPlatform(unittest.TestCase):
             self.defect_dojo.get_all_findings(
                 service, dict_args, secret_tool, config_tool
             )
-        assert (
-            "Error getting all findings with the following error:"
-            in str(context.exception)
+        assert "Error getting all findings with the following error:" in str(
+            context.exception
         )

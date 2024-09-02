@@ -1,3 +1,4 @@
+import sys
 from dataclasses import dataclass
 from functools import reduce
 
@@ -52,6 +53,7 @@ class BreakBuild:
                         )
 
     def process(self, findings_list: "list[Finding]", input_core: InputCore, args: any):
+        sys.stdout.reconfigure(encoding='utf-8')
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
         threshold = input_core.threshold_defined
@@ -331,7 +333,7 @@ class BreakBuild:
                                 (
                                     elem.create_date
                                     for elem in exclusions
-                                    if elem.id == item.id
+                                    if elem.id == item.id and (elem.where in item.where or "all" in elem.where)
                                 ),
                                 None,
                             ),
@@ -339,7 +341,7 @@ class BreakBuild:
                                 (
                                     elem.expired_date
                                     for elem in exclusions
-                                    if elem.id == item.id
+                                    if elem.id == item.id and (elem.where in item.where or "all" in elem.where)
                                 ),
                                 None,
                             ),
@@ -347,7 +349,7 @@ class BreakBuild:
                                 (
                                     elem.reason
                                     for elem in exclusions
-                                    if elem.id == item.id
+                                    if elem.id == item.id and (elem.where in item.where or "all" in elem.where)
                                 ),
                                 None,
                             ),
