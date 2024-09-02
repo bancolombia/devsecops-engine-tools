@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Scanner } from './infraestructure/drivenAdapter/Scanner';
+import { iacScanRequest } from './application/InitEngineCore';
 
 function removeAnsiEscapeCodes(text: string): string {
     return text.replace(/\x1b\[[0-9;]*m/g, '');
@@ -27,9 +27,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 			vscode.window.showInformationMessage(`Devsecops Scanning: ${folderPath}`);
 
-			const scanner = new Scanner();
+			const scanner = iacScanRequest();
 			const outputChannel = vscode.window.createOutputChannel('IaC Scan Results');
-			scanner.iacScan(folderPath, outputChannel);
+			scanner.makeScan(folderPath, outputChannel);
 		}
 	});
 
