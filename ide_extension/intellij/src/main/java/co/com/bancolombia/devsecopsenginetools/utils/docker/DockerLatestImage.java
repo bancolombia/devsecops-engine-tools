@@ -5,11 +5,12 @@ import co.com.bancolombia.devsecopsenginetools.ui.tool.LogPanelLogger;
 import co.com.bancolombia.devsecopsenginetools.utils.FileUtils;
 import co.com.bancolombia.devsecopsenginetools.utils.http.HttpClient;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.java.Log;
 
 import java.util.Optional;
+import java.util.logging.Level;
 
-@Log4j2
+@Log
 @RequiredArgsConstructor
 public class DockerLatestImage {
     private final GlobalSettings settings;
@@ -39,7 +40,7 @@ public class DockerLatestImage {
                 return Optional.of(tags.getResults().get(0).getName());
             }
         } catch (Exception ex) {
-            log.info("Error getting latest image tag: ", ex);
+            log.log(Level.ALL, "Error getting latest image tag: ", ex);
             LogPanelLogger.warn("Error getting latest image, current will be used", ex);
         }
         return Optional.empty();
