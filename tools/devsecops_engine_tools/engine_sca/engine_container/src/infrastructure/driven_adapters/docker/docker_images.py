@@ -17,7 +17,7 @@ class DockerImages(ImagesGateway):
 
             matching_image = None
             for image in images:
-                if image_to_scan in image.tags:
+                if any(image_to_scan in tag for tag in image.tags):
                     matching_image = image
                     break
 

@@ -2,6 +2,7 @@ package co.com.bancolombia.devsecopsenginetools.actions;
 
 import co.com.bancolombia.devsecopsenginetools.tasks.ScanImageTask;
 import co.com.bancolombia.devsecopsenginetools.ui.tool.LogPanelLogger;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
@@ -14,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+
+import static com.intellij.openapi.actionSystem.ActionUpdateThread.BGT;
 
 public class ScanImageAction extends AnAction {
     private boolean isTaskRunning = false;
@@ -41,6 +44,11 @@ public class ScanImageAction extends AnAction {
             ScanImageTask task = new ScanImageTask(project, "Scanning image", () -> isTaskRunning = false);
             ProgressManager.getInstance().run(task);
         }
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return BGT;
     }
 
     @Override
