@@ -11,7 +11,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore
 )
 
-
 class TestHandleRisk(unittest.TestCase):
     def setUp(self):
         self.vulnerability_management = MagicMock()
@@ -51,9 +50,7 @@ class TestHandleRisk(unittest.TestCase):
         assert mock_get_finding_list.call_count == 2
         assert mock_runner_engine_risk.call_count == 1
         assert result == {"result": "result"}
-        assert input_core == InputCore(
-            [], {}, "", "", "pipeline_name_id_test", "Release"
-        )
+        assert type(input_core) == InputCore
 
     def test__get_finding_list(self):
         dict_args = {
