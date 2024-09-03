@@ -284,7 +284,7 @@ class BreakBuild:
         if applied_exclusions:
             print(
                 self.devops_platform_gateway.message(
-                    "warning", "Bellow are all findings that were excepted."
+                    "warning", "Bellow are all findings that were excepted"
                 )
             )
             self.printer_table_gateway.print_table_exclusions(applied_exclusions)

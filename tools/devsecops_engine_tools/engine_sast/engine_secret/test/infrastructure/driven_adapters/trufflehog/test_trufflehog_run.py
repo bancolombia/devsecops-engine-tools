@@ -2,6 +2,8 @@ import unittest
 from unittest.mock import patch, MagicMock
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run import TrufflehogRun
 
+import os
+
 class TestTrufflehogRun(unittest.TestCase):
        
     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run.subprocess.run')
@@ -76,7 +78,7 @@ class TestTrufflehogRun(unittest.TestCase):
             "Redacted": "https://admin:********@the-internet.herokuapp.com", "ExtraData": None,
             "StructuredData": None}]
         self.assertEqual(result, expected_result)
-        self.assertEqual(file_findings, '/usr/temp/secret_scan_result.json')
+        self.assertEqual(os.path.normpath(file_findings), os.path.normpath(os.path.join('/usr/temp/', 'secret_scan_result.json')))
 
     @patch('builtins.open', create=True)
     def test_config_include_path(self, mock_open):
