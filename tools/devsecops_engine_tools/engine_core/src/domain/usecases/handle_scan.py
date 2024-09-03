@@ -125,7 +125,7 @@ class HandleScan:
         elif "engine_dast" in dict_args["tool"]:
             findings_list, input_core = runner_engine_dast(
                 dict_args,
-                config_tool,
+                config_tool["ENGINE_DAST"],
                 secret_tool,
                 self.devops_platform_gateway
             )
