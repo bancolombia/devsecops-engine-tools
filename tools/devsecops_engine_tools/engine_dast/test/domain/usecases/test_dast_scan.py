@@ -80,4 +80,3 @@ class TestDastScan(unittest.TestCase):
         )
 
         self.assertEqual(result, finding_list )
-        #self.assertEqual(input_core, InputCoreMock)

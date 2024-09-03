@@ -5,6 +5,7 @@ from devsecops_engine_tools.engine_dast.src.applications.runner_dast_scan import
 )
 
 class TestRunnerEngineDast(unittest.TestCase):
+    DAST_FILE_PATH = "example_dast.json"
 
     @mock.patch('devsecops_engine_tools.engine_dast.src.applications.runner_dast_scan.load_json_file')
     @mock.patch('devsecops_engine_tools.engine_dast.src.applications.runner_dast_scan.init_engine_dast')
@@ -39,9 +40,9 @@ class TestRunnerEngineDast(unittest.TestCase):
         dict_args = {
             "use_secrets_manager": "true",
             "tool": "engine_dast",
-            "dast_file_path": "example_dast.json"
+            "dast_file_path": TestRunnerEngineDast.DAST_FILE_PATH
         }
-        config_tool = {"ENGINE_DAST": {"ENABLED": "true", "TOOL": "NUCLEI", "EXTRA_TOOLS": ["JWT"]}}
+        config_tool = {"ENABLED": "true", "TOOL": "NUCLEI", "EXTRA_TOOLS": ["JWT"]}
         secret_tool = {"github_token": "example_token"}
         devops_platform_gateway = mock.Mock()
 
@@ -90,7 +91,6 @@ class TestRunnerEngineDast(unittest.TestCase):
         }
         mock_nuclei_tool_instance = mock_nuclei_tool.return_value
         mock_init_engine_dast.return_value = (["finding1", "finding2"], "input_core_mock")
-        
         # Mock de ApiConfig
         mock_api_config_instance = mock_api_config.return_value
 
@@ -98,9 +98,9 @@ class TestRunnerEngineDast(unittest.TestCase):
         dict_args = {
             "use_secrets_manager": "true",
             "tool": "engine_dast",
-            "dast_file_path": "example_dast.json"
+            "dast_file_path": TestRunnerEngineDast.DAST_FILE_PATH
         }
-        config_tool = {"ENGINE_DAST": {"ENABLED": "true", "TOOL": "NUCLEI", "EXTRA_TOOLS": []}}
+        config_tool = {"ENABLED": "true", "TOOL": "NUCLEI", "EXTRA_TOOLS": []}
         secret_tool = {"github_token": "example_token"}
         devops_platform_gateway = mock.Mock()
 
@@ -136,9 +136,9 @@ class TestRunnerEngineDast(unittest.TestCase):
         dict_args = {
             "use_secrets_manager": "true",
             "tool": "engine_dast",
-            "dast_file_path": "example_dast.json"
+            "dast_file_path": TestRunnerEngineDast.DAST_FILE_PATH
         }
-        config_tool = {"ENGINE_DAST": {"ENABLED": "true", "TOOL": "NUCLEI", "EXTRA_TOOLS": []}}
+        config_tool = {"ENABLED": "true", "TOOL": "NUCLEI", "EXTRA_TOOLS": []}
         secret_tool = {"github_token": "example_token"}
         devops_platform_gateway = mock.Mock()
 

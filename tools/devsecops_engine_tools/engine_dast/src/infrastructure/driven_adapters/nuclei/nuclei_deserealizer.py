@@ -37,3 +37,4 @@ class NucleiDesealizator:
                 list_open_findings.append(finding_open)
 
         return list_open_findings
+
