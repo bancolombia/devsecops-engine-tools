@@ -141,5 +141,5 @@ class JwtTool(ToolGateway):
             path_file_results = generate_file_from_tool(
                 self.TOOL, result_scans, config_tool
             )
-            return finding_list
+            return finding_list, path_file_results
         return []

@@ -79,10 +79,10 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
     else:
         raise ValueError("Can't match if the target type is an api or a web application ")
 
-    if config_tool["ENGINE_DAST"]["TOOL"].lower() == "nuclei": # tool_gateway is the main Tool
+    if config_tool["TOOL"].lower() == "nuclei": # tool_gateway is the main Tool
         tool_run = NucleiTool()
 
-    if any((k.lower() == "jwt") for k in config_tool["ENGINE_DAST"]["EXTRA_TOOLS"]) and \
+    if any((k.lower() == "jwt") for k in config_tool["EXTRA_TOOLS"]) and \
     any(isinstance(operation.authentication_gateway, JwtObject) for operation in data["operations"] ):
         extra_tools.append(JwtTool(target_config))
 

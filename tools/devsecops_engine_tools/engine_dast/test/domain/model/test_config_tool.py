@@ -14,27 +14,25 @@ class TestConfigTool(unittest.TestCase):
                 "EXCLUSIONS_PATH": "/path/to/exclusions",
                 "USE_EXTERNAL_CHECKS_GIT": True,
                 "EXTERNAL_CHECKS_GIT": "git@example.com:repo.git",
-                "EXTERNAL_GIT_SSH_HOST": "ssh.example.com",
-                "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "fingerprint",
                 "USE_EXTERNAL_CHECKS_DIR": "True",
                 "EXTERNAL_DIR_OWNER": "owner",
                 "EXTERNAL_DIR_REPOSITORY": "repository",
                 "EXTERNAL_DIR_ASSET_NAME": "asset_name",
                 "EXTERNAL_CHECKS_PATH": "/path/to/external/checks",
-                "MESSAGE_INFO_DAST": "info",
-                "THRESHOLD": {
-                    "VULNERABILITY": {
+                "RULES": "rules_data_type"
+            },
+            "THRESHOLD": {
+                "VULNERABILITY": {
                     "Critical": 1,
                     "High": 5,
                     "Medium": 10,
-                    "Low": 20},
-                    "COMPLIANCE": {
-                        "Critical": 1
-                    }
-
+                    "Low": 20
+                    },
+                "COMPLIANCE": {
+                    "Critical": 1
+                }
                 },
-                "RULES": "rules_data_type"
-            }
+            "MESSAGE_INFO_DAST": "info"
         }
         self.tool = "NUCLEI"
         self.config_tool = ConfigTool(self.mock_json_data, self.tool)
@@ -44,8 +42,6 @@ class TestConfigTool(unittest.TestCase):
         self.assertEqual(self.config_tool.exclusions_path, "/path/to/exclusions")
         self.assertTrue(self.config_tool.use_external_checks_git)
         self.assertEqual(self.config_tool.external_checks_git, "git@example.com:repo.git")
-        self.assertEqual(self.config_tool.repository_ssh_host, "ssh.example.com")
-        self.assertEqual(self.config_tool.repository_public_key_fp, "fingerprint")
         self.assertEqual(self.config_tool.use_external_checks_dir, "True")
         self.assertEqual(self.config_tool.external_dir_owner, "owner")
         self.assertEqual(self.config_tool.external_dir_repository, "repository")
