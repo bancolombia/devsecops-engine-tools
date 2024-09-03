@@ -255,3 +255,212 @@ def test_map_applied_exclusion():
     result = break_build._map_applied_exclusion(exclusions)
 
     assert result == expected
+
+
+@patch(
+    "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._get_applied_exclusion"
+)
+def test_apply_exclusions_vul_id_tool(get_applied_exclusion):
+    report_list = [Report(vul_id_tool="id")]
+    exclusions = [Exclusions(id="id")]
+    break_build = BreakBuild(
+        MagicMock(),
+        MagicMock(),
+        {},
+        [],
+        [],
+        [],
+        [],
+    )
+    break_build.exclusions = exclusions
+
+    break_build._apply_exclusions(report_list)
+
+    get_applied_exclusion.assert_called_with(report_list[0])
+
+
+@patch(
+    "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._get_applied_exclusion"
+)
+def test_apply_exclusions_id(get_applied_exclusion):
+    report_list = [Report(id="id")]
+    exclusions = [Exclusions(id="id")]
+    break_build = BreakBuild(
+        MagicMock(),
+        MagicMock(),
+        {},
+        [],
+        [],
+        [],
+        [],
+    )
+    break_build.exclusions = exclusions
+
+    break_build._apply_exclusions(report_list)
+
+    get_applied_exclusion.assert_called_with(report_list[0])
+
+
+@patch(
+    "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._get_applied_exclusion"
+)
+def test_apply_exclusions_vul_id_tool(get_applied_exclusion):
+    report_list = [Report(id="id1")]
+    exclusions = [Exclusions(id="id")]
+    break_build = BreakBuild(
+        MagicMock(),
+        MagicMock(),
+        {},
+        [],
+        [],
+        [],
+        [],
+    )
+    break_build.exclusions = exclusions
+
+    break_build._apply_exclusions(report_list)
+
+    get_applied_exclusion.assert_not_called()
+
+
+def test_tag_blacklist_control_error():
+    report_list = [Report(vul_id_tool="id1", tags=["blacklisted"], age=10)]
+    remote_config = {
+        "THRESHOLD": {
+            "TAG_BLACKLIST": ["blacklisted"],
+            "TAG_MAX_AGE": 5,
+        }
+    }
+    tag_age_threshold = remote_config["THRESHOLD"]["TAG_MAX_AGE"]
+    devops_platform_gateway = MagicMock()
+    break_build = BreakBuild(
+        devops_platform_gateway,
+        MagicMock(),
+        remote_config,
+        [],
+        [],
+        [],
+        [],
+    )
+    break_build._tag_blacklist_control(report_list)
+
+    devops_platform_gateway.message.assert_called_once_with(
+        "error",
+        f"Report {report_list[0].vul_id_tool} with tag {report_list[0].tags[0]} is blacklisted and age {report_list[0].age} is above threshold {tag_age_threshold}",
+    )
+
+
+def test_tag_blacklist_control_warning():
+    report_list = [Report(vul_id_tool="id2", tags=["blacklisted"], age=3)]
+    remote_config = {
+        "THRESHOLD": {
+            "TAG_BLACKLIST": ["blacklisted"],
+            "TAG_MAX_AGE": 5,
+        }
+    }
+    tag_age_threshold = remote_config["THRESHOLD"]["TAG_MAX_AGE"]
+    devops_platform_gateway = MagicMock()
+    break_build = BreakBuild(
+        devops_platform_gateway,
+        MagicMock(),
+        remote_config,
+        [],
+        [],
+        [],
+        [],
+    )
+    break_build._tag_blacklist_control(report_list)
+
+    devops_platform_gateway.message.assert_called_once_with(
+        "warning",
+        f"Report {report_list[0].vul_id_tool} with tag {report_list[0].tags[0]} is blacklisted but age {report_list[0].age} is below threshold {tag_age_threshold}",
+    )
+
+
+def test_risk_score_control_break():
+    report_list = [Report(severity="high", epss_score=0, age=0, tags=["tag"])]
+    remote_config = {
+        "THRESHOLD": {"RISK_SCORE": 4},
+        "WEIGHTS": {
+            "severity": {"high": 5},
+            "epss_score": 1,
+            "age": 1,
+            "tags": {"tag": 1},
+        },
+    }
+    risk_score_threshold = remote_config["THRESHOLD"]["RISK_SCORE"]
+    devops_platform_gateway = MagicMock()
+    break_build = BreakBuild(
+        devops_platform_gateway,
+        MagicMock(),
+        remote_config,
+        [],
+        [],
+        [],
+        [],
+    )
+    break_build._risk_score_control(report_list)
+
+    devops_platform_gateway.message.assert_called_once_with(
+        "error",
+        f"There are findings with risk score greater than {risk_score_threshold}",
+    )
+
+
+def test_risk_score_control_not_break():
+    report_list = [Report(severity="low", epss_score=0, age=0, tags=["tag"])]
+    remote_config = {
+        "THRESHOLD": {"RISK_SCORE": 4},
+        "WEIGHTS": {
+            "severity": {"high": 1},
+            "epss_score": 1,
+            "age": 1,
+            "tags": {"tag": 1},
+        },
+    }
+    risk_score_threshold = remote_config["THRESHOLD"]["RISK_SCORE"]
+    devops_platform_gateway = MagicMock()
+    break_build = BreakBuild(
+        devops_platform_gateway,
+        MagicMock(),
+        remote_config,
+        [],
+        [],
+        [],
+        [],
+    )
+    break_build._risk_score_control(report_list)
+
+    devops_platform_gateway.message.assert_called_once_with(
+        "succeeded",
+        f"There are no findings with risk score greater than {risk_score_threshold}",
+    )
+
+
+def test_print_exclusions():
+    applied_exclusions = [
+        {
+            "severity": "severity",
+            "id": "id",
+            "where": "where",
+            "create_date": "create_date",
+            "expired_date": "expired_date",
+            "reason": "reason",
+        }
+    ]
+    devops_platform_gateway = MagicMock()
+    break_build = BreakBuild(
+        devops_platform_gateway,
+        MagicMock(),
+        {},
+        [],
+        [],
+        [],
+        [],
+    )
+    break_build._print_exclusions(applied_exclusions)
+
+    devops_platform_gateway.message.assert_called_once_with(
+        "warning",
+        "Bellow are all findings that were excepted",
+    )

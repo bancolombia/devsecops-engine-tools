@@ -15,7 +15,7 @@ def test_init_engine_risk_skip(mock_print, mock_skip):
     findings = ["finding1", "finding2"]
     mock_skip.return_value = True
 
-    init_engine_risk(MagicMock(), MagicMock(), dict_args, findings)
+    init_engine_risk(MagicMock(), MagicMock(), MagicMock(), dict_args, findings)
 
     mock_print.assert_called_once_with("Tool skipped by DevSecOps Policy.")
 
@@ -31,7 +31,7 @@ def test_init_engine_risk_process(mock_process, mock_skip):
     findings = ["finding1", "finding2"]
     mock_skip.return_value = False
 
-    init_engine_risk(MagicMock(), MagicMock(), dict_args, findings)
+    init_engine_risk(MagicMock(), MagicMock(), MagicMock(), dict_args, findings)
 
     mock_process.assert_called_once()
 
@@ -48,30 +48,48 @@ def test_should_skip_analysis():
 def test_process_findings_no_findings(mock_print):
     findings = []
 
-    process_findings(findings, MagicMock(), MagicMock(), MagicMock())
+    process_findings(
+        findings,
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+    )
 
     mock_print.assert_called_once_with(
         "No findings found in Vulnerability Management Platform"
     )
 
 
-@patch("builtins.print")
 @patch(
     "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.HandleFilters"
 )
-def test_process_findings_no_active_findings(mock_filters, mock_print):
+@patch(
+    "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.process_active_findings"
+)
+def test_process_findings(mock_process_active, mock_filters):
     findings = ["finding1", "finding2"]
     mock_filters.return_value.filter.return_value = []
 
-    process_findings(findings, MagicMock(), MagicMock(), MagicMock())
-
-    mock_print.assert_called_once_with(
-        "No active findings found in Vulnerability Management Platform"
+    process_findings(
+        findings,
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
     )
+
+    mock_process_active.assert_called_once()
 
 
 @patch(
-    "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.HandleFilters"
+    "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.GetExclusions"
 )
 @patch(
     "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.AddData"
@@ -79,12 +97,20 @@ def test_process_findings_no_active_findings(mock_filters, mock_print):
 @patch(
     "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.BreakBuild"
 )
-def test_process_findings(mock_break, mock_add, mock_filters):
-    findings = ["finding1", "finding2"]
-    active_findings = ["active1", "active2"]
-    mock_filters.return_value.filter.return_value = active_findings
+def test_process_active_findings(mock_break, mock_add, mock_exclusions):
 
-    process_findings(findings, MagicMock(), MagicMock(), MagicMock())
+    process_findings(
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+        MagicMock(),
+    )
 
-    mock_add.assert_called_once_with(active_findings)
-    mock_break.assert_called_once()
+    mock_add.return_value.process.assert_called_once()
+    mock_exclusions.return_value.get_vm_exclusions.assert_called_once()
+    mock_exclusions.return_value.process.assert_called_once()
+    mock_break.return_value.process.assert_called_once()
