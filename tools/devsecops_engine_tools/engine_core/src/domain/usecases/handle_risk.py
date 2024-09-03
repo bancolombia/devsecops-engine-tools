@@ -91,11 +91,11 @@ class HandleRisk:
             self.print_table_gateway,
         )
         input_core = InputCore(
-            [Exclusions()],
-            {"dummy": "dummy"},
-            "dummy",
-            "dummy",
+            [],
+            {},
+            "",
+            "",
             service,
-            "Release",
+            self.devops_platform_gateway.get_variable("stage").capitalize(),
         )
         return result, input_core
