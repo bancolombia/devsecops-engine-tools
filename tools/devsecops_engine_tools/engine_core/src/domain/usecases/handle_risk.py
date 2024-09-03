@@ -19,6 +19,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore
 )
+from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
+    Exclusions
+)
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -88,10 +91,10 @@ class HandleRisk:
             self.print_table_gateway,
         )
         input_core = InputCore(
-            [],
-            {},
-            "",
-            "",
+            [Exclusions()],
+            {"dummy": "dummy"},
+            "dummy",
+            "dummy",
             service,
             "Release",
         )
