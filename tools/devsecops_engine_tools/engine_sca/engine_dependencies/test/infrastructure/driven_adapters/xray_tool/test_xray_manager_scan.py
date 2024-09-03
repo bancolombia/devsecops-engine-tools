@@ -348,7 +348,9 @@ def test_scan_dependencies_failure(xray_scan_instance):
         mode = "scan"
         to_scan = "target_file.tar"
         mock_subprocess_run.return_value = Mock(
-            returncode=1, stderr="Command 'xray scan' returned non-zero exit status 1."
+            returncode=1,
+            stderr="Command 'xray scan' returned non-zero exit status 1.",
+            stdout="",
         )
 
         xray_scan_instance.scan_dependencies(prefix, cwd, mode, to_scan)

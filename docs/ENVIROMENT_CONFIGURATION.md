@@ -90,7 +90,6 @@ PYTHONPATH=tools/
                 "DET_COMMIT_HASH": "2d545969a76516156d76e1c88f8e699537e889bd",
                 "DET_ENVIRONMENT": "dev",
                 "DET_STAGE": "Release",
-                "DET_AGENT_DIRECTORY": "[DET_AGENT_DIRECTORY]",
                 "DET_REPOSITORY_PROVIDER": "AzureDevOps",
                 "DET_TARGET_BRANCH": "trunk",
                 "DET_SOURCE_BRANCH": "feature/test",
