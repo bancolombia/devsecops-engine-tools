@@ -72,7 +72,7 @@ def test_create_exclusion(mock_format_date_to_dd_format, mock_exclusions):
         "pipeline_name",
     )
     finding = MagicMock(
-        vul_id_tool="vul_id_tool",
+        vuln_id_from_tool="vuln_id_from_tool",
         id=[{"vulnerability_id": "vulnerability_id"}],
         where="where",
         severity="severity",
@@ -82,7 +82,7 @@ def test_create_exclusion(mock_format_date_to_dd_format, mock_exclusions):
     assert exclusion == mock_exclusions.return_value
     mock_format_date_to_dd_format.assert_called()
     mock_exclusions.assert_called_once_with(
-        id="vul_id_tool",
+        id="vuln_id_from_tool",
         where="where",
         create_date=mock_format_date_to_dd_format.return_value,
         expired_date=mock_format_date_to_dd_format.return_value,

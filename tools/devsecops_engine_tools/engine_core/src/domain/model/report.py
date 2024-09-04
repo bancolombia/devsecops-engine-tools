@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class Report:
     def __init__(self, **kwargs):
         self.id = kwargs.get("id", [])
-        self.vul_id_tool = kwargs.get("vul_id_tool", "")
+        self.vuln_id_from_tool = kwargs.get("vuln_id_from_tool", "")
         self.where = kwargs.get("where", "")
         self.tags = kwargs.get("tags", [])
         self.severity = kwargs.get("severity", "")
@@ -19,6 +19,7 @@ class Report:
         self.last_reviewed = kwargs.get("last_reviewed", "")
         self.last_status_update = kwargs.get("last_status_update", "")
         self.accepted_risks = kwargs.get("accepted_risks", "")
+        self.transfer_finding = kwargs.get("transfer_finding", "")
         self.epss_score = kwargs.get("epss_score", "")
         self.epss_percentile = kwargs.get("epss_percentile", "")
         self.mitigated = kwargs.get("mitigated", "")
@@ -27,3 +28,7 @@ class Report:
         self.false_p = kwargs.get("false_p", "")
         self.service = kwargs.get("service", "")
         self.reason = kwargs.get("reason", "")
+        self.component_name = kwargs.get("component_name", "")
+        self.component_version = kwargs.get("component_version", "")
+        self.file_path = kwargs.get("file_path", "")
+        self.endpoints = kwargs.get("endpoints", "")

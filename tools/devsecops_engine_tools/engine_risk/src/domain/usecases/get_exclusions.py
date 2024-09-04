@@ -40,41 +40,6 @@ class GetExclusions:
 
         return exclusions
 
-    def get_vm_exclusions(self, total_findings):
-        exclusions = []
-        for finding in total_findings:
-            if finding.risk_accepted:
-                exclusions.append(self._create_exclusion(finding, "Risk Accepted"))
-            elif finding.false_p:
-                exclusions.append(self._create_exclusion(finding, "False Positive"))
-        return exclusions
-
-    def _create_exclusion(self, finding, reason):
-        return Exclusions(
-            id=(
-                finding.vul_id_tool
-                if finding.vul_id_tool
-                else finding.id[0]["vulnerability_id"]
-            ),
-            where=finding.where,
-            create_date=(
-                finding.last_status_update
-                if reason == "False Positive"
-                else self._format_date_to_dd_format(
-                    finding.accepted_risks[-1]["created"]
-                )
-            ),
-            expired_date=(
-                None
-                if reason == "False Positive"
-                else self._format_date_to_dd_format(
-                    finding.accepted_risks[-1]["expiration_date"]
-                )
-            ),
-            severity=finding.severity,
-            reason=reason,
-        )
-
     def _format_date_to_dd_format(self, date_string):
         return (
             format_date(date_string.split("T")[0], "%Y-%m-%d", "%d%m%Y")

@@ -12,7 +12,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
 
 
 @patch(
-    "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._risk_management_control"
+    "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._remediation_rate_control"
 )
 @patch(
     "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._apply_exclusions"
@@ -41,7 +41,7 @@ def test_process(
     risk_score_control,
     tag_blacklist_control,
     apply_exclusions,
-    risk_management_control,
+    remediation_rate_control,
 ):
     report_list = [Report(risk_score=10)]
     exclusions = [Exclusions(severity="severity", id="id", reason="reason")]
@@ -60,7 +60,7 @@ def test_process(
     break_build.break_build = True
     result = break_build.process()
 
-    risk_management_control.assert_called_once()
+    remediation_rate_control.assert_called_once()
     apply_exclusions.assert_called_once()
     deepcopy.assert_called_once()
     tag_blacklist_control.assert_called_once()
@@ -104,15 +104,15 @@ def test_breaker_not_break():
     devops_platform_gateway.result_pipeline.assert_called_with("succeeded")
 
 
-def test_risk_management_control_greater():
+def test_remediation_rate_control_greater():
     all_report = [
         Report(mitigated=True),
         Report(mitigated=False),
         Report(mitigated=False),
     ]
-    risk_management_value = round((1 / 3) * 100, 3)
-    remote_config = {"THRESHOLD": {"RISK_MANAGEMENT": 10}}
-    risk_threshold = remote_config["THRESHOLD"]["RISK_MANAGEMENT"]
+    remediation_rate_value = round((1 / 3) * 100, 3)
+    remote_config = {"THRESHOLD": {"REMEDIATION_RATE": 10}}
+    risk_threshold = remote_config["THRESHOLD"]["REMEDIATION_RATE"]
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
         devops_platform_gateway,
@@ -123,23 +123,23 @@ def test_risk_management_control_greater():
         [],
         [],
     )
-    break_build._risk_management_control(all_report)
+    break_build._remediation_rate_control(all_report)
 
     devops_platform_gateway.message.assert_called_with(
         "succeeded",
-        f"Risk Management {risk_management_value}% is greater than {risk_threshold}%",
+        f"Remediation Rate {remediation_rate_value}% is greater than {risk_threshold}%",
     )
 
 
-def test_risk_management_control_close():
+def test_remediation_rate_control_close():
     all_report = [
         Report(mitigated=True),
         Report(mitigated=False),
         Report(mitigated=False),
     ]
-    risk_management_value = round((1 / 3) * 100, 3)
-    remote_config = {"THRESHOLD": {"RISK_MANAGEMENT": 30}}
-    risk_threshold = remote_config["THRESHOLD"]["RISK_MANAGEMENT"]
+    remediation_rate_value = round((1 / 3) * 100, 3)
+    remote_config = {"THRESHOLD": {"REMEDIATION_RATE": 30}}
+    risk_threshold = remote_config["THRESHOLD"]["REMEDIATION_RATE"]
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
         devops_platform_gateway,
@@ -150,23 +150,23 @@ def test_risk_management_control_close():
         [],
         [],
     )
-    break_build._risk_management_control(all_report)
+    break_build._remediation_rate_control(all_report)
 
     devops_platform_gateway.message.assert_called_with(
         "warning",
-        f"Risk Management {risk_management_value}% is close to {risk_threshold}%",
+        f"Remediation Rate {remediation_rate_value}% is close to {risk_threshold}%",
     )
 
 
-def test_risk_management_control_less():
+def test_remediation_rate_control_less():
     all_report = [
         Report(mitigated=True),
         Report(mitigated=False),
         Report(mitigated=False),
     ]
-    risk_management_value = round((1 / 3) * 100, 3)
-    remote_config = {"THRESHOLD": {"RISK_MANAGEMENT": 50}}
-    risk_threshold = remote_config["THRESHOLD"]["RISK_MANAGEMENT"]
+    remediation_rate_value = round((1 / 3) * 100, 3)
+    remote_config = {"THRESHOLD": {"REMEDIATION_RATE": 50}}
+    risk_threshold = remote_config["THRESHOLD"]["REMEDIATION_RATE"]
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
         devops_platform_gateway,
@@ -177,11 +177,11 @@ def test_risk_management_control_less():
         [],
         [],
     )
-    break_build._risk_management_control(all_report)
+    break_build._remediation_rate_control(all_report)
 
     devops_platform_gateway.message.assert_called_with(
         "error",
-        f"Risk Management {risk_management_value}% is less than {risk_threshold}%",
+        f"Remediation Rate {remediation_rate_value}% is less than {risk_threshold}%",
     )
 
 
@@ -203,8 +203,8 @@ def test_get_applied_exclusion_id():
     assert result == exclusion
 
 
-def test_get_applied_exclusion_vul_id_tool():
-    report = Report(vul_id_tool="id")
+def test_get_applied_exclusion_vuln_id_from_tool():
+    report = Report(vuln_id_from_tool="id")
     exclusion = Exclusions(id="id")
     break_build = BreakBuild(
         MagicMock(),
@@ -260,8 +260,8 @@ def test_map_applied_exclusion():
 @patch(
     "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._get_applied_exclusion"
 )
-def test_apply_exclusions_vul_id_tool(get_applied_exclusion):
-    report_list = [Report(vul_id_tool="id")]
+def test_apply_exclusions_vuln_id_from_tool(get_applied_exclusion):
+    report_list = [Report(vuln_id_from_tool="id")]
     exclusions = [Exclusions(id="id")]
     break_build = BreakBuild(
         MagicMock(),
@@ -304,7 +304,7 @@ def test_apply_exclusions_id(get_applied_exclusion):
 @patch(
     "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._get_applied_exclusion"
 )
-def test_apply_exclusions_vul_id_tool(get_applied_exclusion):
+def test_apply_exclusions_vuln_id_from_tool(get_applied_exclusion):
     report_list = [Report(id="id1")]
     exclusions = [Exclusions(id="id")]
     break_build = BreakBuild(
@@ -324,7 +324,7 @@ def test_apply_exclusions_vul_id_tool(get_applied_exclusion):
 
 
 def test_tag_blacklist_control_error():
-    report_list = [Report(vul_id_tool="id1", tags=["blacklisted"], age=10)]
+    report_list = [Report(vuln_id_from_tool="id1", tags=["blacklisted"], age=10)]
     remote_config = {
         "THRESHOLD": {
             "TAG_BLACKLIST": ["blacklisted"],
@@ -346,12 +346,12 @@ def test_tag_blacklist_control_error():
 
     devops_platform_gateway.message.assert_called_once_with(
         "error",
-        f"Report {report_list[0].vul_id_tool} with tag {report_list[0].tags[0]} is blacklisted and age {report_list[0].age} is above threshold {tag_age_threshold}",
+        f"Report {report_list[0].vuln_id_from_tool} with tag {report_list[0].tags[0]} is blacklisted and age {report_list[0].age} is above threshold {tag_age_threshold}",
     )
 
 
 def test_tag_blacklist_control_warning():
-    report_list = [Report(vul_id_tool="id2", tags=["blacklisted"], age=3)]
+    report_list = [Report(vuln_id_from_tool="id2", tags=["blacklisted"], age=3)]
     remote_config = {
         "THRESHOLD": {
             "TAG_BLACKLIST": ["blacklisted"],
@@ -373,7 +373,7 @@ def test_tag_blacklist_control_warning():
 
     devops_platform_gateway.message.assert_called_once_with(
         "warning",
-        f"Report {report_list[0].vul_id_tool} with tag {report_list[0].tags[0]} is blacklisted but age {report_list[0].age} is below threshold {tag_age_threshold}",
+        f"Report {report_list[0].vuln_id_from_tool} with tag {report_list[0].tags[0]} is blacklisted but age {report_list[0].age} is below threshold {tag_age_threshold}",
     )
 
 
