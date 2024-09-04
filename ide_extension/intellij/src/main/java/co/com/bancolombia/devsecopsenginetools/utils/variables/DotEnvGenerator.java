@@ -12,22 +12,25 @@ import lombok.experimental.UtilityClass;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Objects;
 
-import static co.com.bancolombia.devsecopsenginetools.utils.variables.VariablePlaceholder.AZURE_PLACEHOLDER;
+import static co.com.bancolombia.devsecopsenginetools.utils.Constants.AZURE_PLACEHOLDER;
 
 @UtilityClass
 public class DotEnvGenerator {
 
     public static String updateDotEnv(Project project) throws IOException {
         ProjectSettings settings = ProjectSettingsUtils.getProjectSettings(project);
-        String root = Objects.requireNonNull(project.getBasePath());
+        settings.fillIfDefaults(project);
+        AzureVariableProvider azureVariableProvider = new AzureVariableProvider(settings, new HttpClient());
+        return updateDotEnv(project.getBasePath(), settings, azureVariableProvider);
+    }
 
+    public static String updateDotEnv(String root, ProjectSettings settings, VariableProvider variableProvider)
+            throws IOException {
         Map<String, String> dotEnv = FileUtils.readEnvFile(Path.of(root, settings.getDotEnvFile()));
         LogPanelLogger.info(".env read with " + dotEnv.size() + " entries");
-        AzureVariableProvider azureVariableProvider = new AzureVariableProvider(settings, new HttpClient());
 
-        azureVariableProvider.getVariables()
+        variableProvider.getVariables()
                 .forEach(variable -> dotEnv.put(variable.getName(), variable.getValue()));
 
         Map<String, String> parsedDotEnv = VariablePlaceholder.resolvePlaceholders(dotEnv, AZURE_PLACEHOLDER);
