@@ -19,9 +19,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore
 )
-from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
-    Exclusions
-)
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -42,15 +39,14 @@ class HandleRisk:
         self.devops_platform_gateway = devops_platform_gateway
         self.print_table_gateway = print_table_gateway
 
-    def _get_finding_list(self, dict_args, secret_tool, remote_config, service):
+    def _get_all_from_vm(self, dict_args, secret_tool, remote_config, service):
         try:
-            findigs_list = self.vulnerability_management.get_all_findings(
+            return self.vulnerability_management.get_all(
                 service,
                 dict_args,
                 secret_tool,
                 remote_config,
             )
-            return findigs_list
         except ExceptionGettingFindings as e:
             logger.error(
                 "Error getting finding list in handle risk: {0}".format(str(e))
@@ -69,24 +65,28 @@ class HandleRisk:
         parent_identifier = risk_config["PARENT_ANALYSIS"]["PARENT_IDENTIFIER"]
 
         parent_findings = []
+        parent_exclusions = []
         if (
             risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true"
             and parent_identifier in service
         ):
             parent_service = service.split(parent_identifier)[0] + parent_identifier
-            parent_findings = self._get_finding_list(
+            parent_findings, parent_exclusions = self._get_all_from_vm(
                 dict_args, secret_tool, remote_config, parent_service
             )
 
-        findings = self._get_finding_list(
+        findings, exclusions = self._get_all_from_vm(
             dict_args, secret_tool, remote_config, service
         )
 
         findings_list = parent_findings + findings
 
+        exclusions_list = parent_exclusions + exclusions
+
         result = runner_engine_risk(
             dict_args,
             findings_list,
+            exclusions_list,
             self.devops_platform_gateway,
             self.print_table_gateway,
         )

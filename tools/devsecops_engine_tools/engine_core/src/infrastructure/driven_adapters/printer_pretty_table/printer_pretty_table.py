@@ -69,7 +69,7 @@ class PrinterPrettyTable(PrinterTableGateway):
             row_data = [
                 report.risk_score,
                 report.severity.lower(),
-                report.vul_id_tool if report.vul_id_tool else report.id,
+                report.vuln_id_from_tool if report.vuln_id_from_tool else report.id,
                 report.tags,
                 report.where,
                 report.service

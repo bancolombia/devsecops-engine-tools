@@ -36,7 +36,7 @@ class BreakBuild:
         self.break_build = False
         self.warning_build = False
         self.report_breaker = []
-        self.risk_management = 0
+        self.remediation_rate = 0
         self.blacklisted = 0
         self.max_risk_score = 0
         self.status = "succeeded"
@@ -48,7 +48,7 @@ class BreakBuild:
         }
 
     def process(self):
-        self._risk_management_control(self.all_report)
+        self._remediation_rate_control(self.all_report)
         new_report_list, applied_exclusions = self._apply_exclusions(self.report_list)
         if self.break_build:
             self.report_breaker.extend(copy.deepcopy(new_report_list))
@@ -78,7 +78,7 @@ class BreakBuild:
 
         self.scan_result["risk"] = {
             "risk_control": {
-                "risk_management": self.risk_management,
+                "remediation_rate": self.remediation_rate,
                 "blacklisted": self.blacklisted,
                 "max_risk_score": self.max_risk_score,
             },
@@ -86,7 +86,7 @@ class BreakBuild:
             "found": list(
                 map(
                     lambda item: {
-                        "id": item.vul_id_tool if item.vul_id_tool else item.id,
+                        "id": item.vuln_id_from_tool if item.vuln_id_from_tool else item.id,
                         "severity": item.severity,
                         "risk_score": item.risk_score,
                         "reason": item.reason,
@@ -112,26 +112,26 @@ class BreakBuild:
         else:
             print(self.devops_platform_gateway.result_pipeline("succeeded"))
 
-    def _risk_management_control(self, all_report: "list[Report]"):
+    def _remediation_rate_control(self, all_report: "list[Report]"):
         remote_config = self.remote_config
-        risk_management_value = self._get_percentage(
+        remediation_rate_value = self._get_percentage(
             (sum(1 for report in all_report if report.mitigated)) / len(all_report)
         )
-        risk_threshold = remote_config["THRESHOLD"]["RISK_MANAGEMENT"]
-        self.risk_management = risk_management_value
+        risk_threshold = remote_config["THRESHOLD"]["REMEDIATION_RATE"]
+        self.remediation_rate = remediation_rate_value
 
-        if risk_management_value >= (risk_threshold + 5):
+        if remediation_rate_value >= (risk_threshold + 5):
             print(
                 self.devops_platform_gateway.message(
                     "succeeded",
-                    f"Risk Management {risk_management_value}% is greater than {risk_threshold}%",
+                    f"Remediation Rate {remediation_rate_value}% is greater than {risk_threshold}%",
                 )
             )
-        elif risk_management_value >= risk_threshold:
+        elif remediation_rate_value >= risk_threshold:
             print(
                 self.devops_platform_gateway.message(
                     "warning",
-                    f"Risk Management {risk_management_value}% is close to {risk_threshold}%",
+                    f"Remediation Rate {remediation_rate_value}% is close to {risk_threshold}%",
                 )
             )
             self.warning_build = True
@@ -139,7 +139,7 @@ class BreakBuild:
             print(
                 self.devops_platform_gateway.message(
                     "error",
-                    f"Risk Management {risk_management_value}% is less than {risk_threshold}%",
+                    f"Remediation Rate {remediation_rate_value}% is less than {risk_threshold}%",
                 )
             )
             self.break_build = True
@@ -151,7 +151,7 @@ class BreakBuild:
         for exclusion in self.exclusions:
             if exclusion.id and (report.id == exclusion.id):
                 return exclusion
-            elif exclusion.id and (report.vul_id_tool == exclusion.id):
+            elif exclusion.id and (report.vuln_id_from_tool == exclusion.id):
                 return exclusion
         return None
 
@@ -174,12 +174,12 @@ class BreakBuild:
         exclusions_ids = {exclusion.id for exclusion in self.exclusions if exclusion.id}
 
         for report in report_list:
-            if report.vul_id_tool and (report.vul_id_tool in exclusions_ids):
+            if report.vuln_id_from_tool and (report.vuln_id_from_tool in exclusions_ids):
                 applied_exclusions.append(self._get_applied_exclusion(report))
             elif report.id and (report.id in exclusions_ids):
                 applied_exclusions.append(self._get_applied_exclusion(report))
             else:
-                report.reason = "Risk Management"
+                report.reason = "Remediation Rate"
                 new_report_list.append(report)
 
         return new_report_list, applied_exclusions
@@ -209,7 +209,7 @@ class BreakBuild:
                 print(
                     self.devops_platform_gateway.message(
                         "error",
-                        f"Report {report.vul_id_tool if report.vul_id_tool else report.id} with tag {tag} is blacklisted and age {report.age} is above threshold {tag_age_threshold}",
+                        f"Report {report.vuln_id_from_tool if report.vuln_id_from_tool else report.id} with tag {tag} is blacklisted and age {report.age} is above threshold {tag_age_threshold}",
                     )
                 )
 
@@ -217,7 +217,7 @@ class BreakBuild:
                 print(
                     self.devops_platform_gateway.message(
                         "warning",
-                        f"Report {report.vul_id_tool if report.vul_id_tool else report.id} with tag {tag} is blacklisted but age {report.age} is below threshold {tag_age_threshold}",
+                        f"Report {report.vuln_id_from_tool if report.vuln_id_from_tool else report.id} with tag {tag} is blacklisted but age {report.age} is below threshold {tag_age_threshold}",
                     )
                 )
 

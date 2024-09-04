@@ -26,6 +26,7 @@ def init_engine_risk(
     print_table_gateway,
     dict_args,
     findings,
+    vm_exclusions,
 ):
     remote_config = devops_platform_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
@@ -41,6 +42,7 @@ def init_engine_risk(
 
     return process_findings(
         findings,
+        vm_exclusions,
         dict_args,
         pipeline_name,
         risk_exclusions,
@@ -60,6 +62,7 @@ def should_skip_analysis(remote_config, pipeline_name, exclusions):
 
 def process_findings(
     findings,
+    vm_exclusions,
     dict_args,
     pipeline_name,
     risk_exclusions,
@@ -78,6 +81,7 @@ def process_findings(
     return process_active_findings(
         handle_filters.filter(findings),
         findings,
+        vm_exclusions,
         devops_platform_gateway,
         dict_args,
         remote_config,
@@ -91,6 +95,7 @@ def process_findings(
 def process_active_findings(
     active_findings,
     total_findings,
+    vm_exclusions,
     devops_platform_gateway,
     dict_args,
     remote_config,
@@ -108,7 +113,6 @@ def process_active_findings(
         risk_exclusions,
         pipeline_name,
     )
-    vm_exclusions = get_exclusions.get_vm_exclusions(total_findings)
     exclusions = get_exclusions.process()
     break_build = BreakBuild(
         devops_platform_gateway,
