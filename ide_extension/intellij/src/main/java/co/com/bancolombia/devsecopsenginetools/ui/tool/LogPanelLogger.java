@@ -24,11 +24,12 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.logging.Level;
 
+import static co.com.bancolombia.devsecopsenginetools.utils.Constants.TOOL_WINDOW_ID;
+
 @Log
 public class LogPanelLogger implements ToolWindowFactory, DumbAware {
-    protected static final String TOOL_WINDOW_ID = "DevSecOps Engine Tools";
 
-    @Setter(AccessLevel.PRIVATE)
+    @Setter(AccessLevel.PROTECTED)
     protected static LogPanel logPanelInstance;
 
     public static void info(String string) {

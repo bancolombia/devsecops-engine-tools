@@ -3,6 +3,8 @@ package co.com.bancolombia.devsecopsenginetools.ui.tool;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
@@ -24,6 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Log
+@Getter(AccessLevel.PROTECTED)
 public class LogPanel extends JBPanel<LogPanel> {
     private final transient StyledDocument doc;
     private final JTextPane textPane;
@@ -31,9 +34,13 @@ public class LogPanel extends JBPanel<LogPanel> {
     private final Map<String, SimpleAttributeSet> ansiCodeToStyle;
 
     public LogPanel() {
+        this(new JTextPane());
+    }
+
+    public LogPanel(JTextPane textPane) {
         super();
         setLayout(new BorderLayout());
-        textPane = new JTextPane();
+        this.textPane = textPane;
         textPane.setEditable(false);
         textPane.setFont(new Font("Monospaced", Font.PLAIN, 12));
         textPane.setContentType("text/html"); // Enable HTML support
@@ -62,7 +69,7 @@ public class LogPanel extends JBPanel<LogPanel> {
     }
 
     @SneakyThrows
-    private void clear() {
+    protected void clear() {
         doc.remove(0, doc.getLength());
     }
 
@@ -143,7 +150,7 @@ public class LogPanel extends JBPanel<LogPanel> {
         return style;
     }
 
-    private class LinkMouseListener extends MouseAdapter {
+    protected class LinkMouseListener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
             int offset = textPane.viewToModel2D(e.getPoint());
