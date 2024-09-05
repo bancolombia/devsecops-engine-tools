@@ -65,7 +65,7 @@ class TestNucleiTool(unittest.TestCase):
                       mock_customize_templates):
         findings_list, path_file_results = self.nuclei_tool.run_tool(self.target_config, self.config_tool, self.token)
 
-        mock_configurate_external_checks.assert_called_once_with(self.config_tool, self.token, "tmp")
+        mock_configurate_external_checks.assert_called_once_with(self.config_tool, self.token, "/tmp")
         mock_customize_templates.assert_called_once_with("dummy_directory")
         mock_execute.assert_called_once()
         mock_get_list_finding.assert_called_once_with({"key": "value"})
