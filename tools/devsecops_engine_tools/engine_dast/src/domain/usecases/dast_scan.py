@@ -71,7 +71,7 @@ class DastScan:
             config_tool, data_target = self.complete_config_tool(
                 data_file_tool=init_config_tool,
                 exclusions=exclusions,
-                tool=config_tool["ENGINE_DAST"]["TOOL"],
+                tool=config_tool["TOOL"],
             )
 
             finding_list, path_file_results = self.tool_gateway.run_tool(
