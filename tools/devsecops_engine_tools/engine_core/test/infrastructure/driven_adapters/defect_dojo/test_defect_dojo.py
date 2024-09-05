@@ -178,18 +178,18 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     MagicMock(
                         vuln_id_from_tool="id3",
                         file_path="path1",
-                        transfer_finding= MagicMock(
-                            date= "2024-08-14",
-                            expiration_date= "2024-08-15T00:00:00Z",
-                        )
+                        transfer_finding=MagicMock(
+                            date="2024-08-14",
+                            expiration_date="2024-08-15T00:00:00Z",
+                        ),
                     ),
                     MagicMock(
                         vuln_id_from_tool="id4",
                         file_path="path2",
-                        transfer_finding= MagicMock(
-                            date= "2024-08-14",
-                            expiration_date= "2024-08-15T00:00:00Z",
-                        )
+                        transfer_finding=MagicMock(
+                            date="2024-08-14",
+                            expiration_date="2024-08-15T00:00:00Z",
+                        ),
                     ),
                 ]
             ),
@@ -364,7 +364,12 @@ class TestDefectDojoPlatform(unittest.TestCase):
     @patch(
         "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Finding.get_finding"
     )
-    def test_get_all_findings(self, mock_finding, mock_session_manager, mock_format_date):
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.DefectDojoPlatform._get_report_exclusions"
+    )
+    def test_get_all(
+        self, mock_exclusions, mock_finding, mock_session_manager, mock_format_date
+    ):
         service = "test"
         dict_args = {
             "tool": "engine_risk",
@@ -436,18 +441,6 @@ class TestDefectDojoPlatform(unittest.TestCase):
             ),
         ]
         mock_finding.return_value.results = findings_list
-
-        result = self.defect_dojo.get_all_findings(
-            service, dict_args, secret_tool, config_tool
-        )
-
-        mock_session_manager.assert_called_with("token1", "host_defect_dojo")
-        mock_finding.assert_called_with(
-            session=mock_session_manager.return_value,
-            service=service,
-            limit=80,
-        )
-
         expected_result = [
             Report(
                 id="id2",
@@ -477,6 +470,19 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 active=True,
             ),
         ]
+
+        result, exclusions = self.defect_dojo.get_all(
+            service, dict_args, secret_tool, config_tool
+        )
+
+        mock_session_manager.assert_called_with("token1", "host_defect_dojo")
+        mock_finding.assert_called_with(
+            session=mock_session_manager.return_value,
+            service=service,
+            limit=80,
+        )
+        mock_exclusions.assert_called_once()
+        assert exclusions == mock_exclusions.return_value
         self.assertEqual(result, expected_result)
 
     def test_get_all_findings_exception(self):
@@ -487,9 +493,36 @@ class TestDefectDojoPlatform(unittest.TestCase):
         config_tool = {"VULNERABILITY_MANAGER": {}}
 
         with unittest.TestCase().assertRaises(Exception) as context:
-            self.defect_dojo.get_all_findings(
-                service, dict_args, secret_tool, config_tool
-            )
+            self.defect_dojo.get_all(service, dict_args, secret_tool, config_tool)
         assert "Error getting all findings with the following error:" in str(
             context.exception
         )
+
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.DefectDojoPlatform._create_exclusion"
+    )
+    def test_get_report_exclusions(self, mock_create_exclusion):
+        total_findings = [
+            MagicMock(
+                risk_accepted=True,
+            ),
+            MagicMock(
+                risk_accepted=None,
+                false_p=True,
+            ),
+            MagicMock(
+                risk_accepted=None,
+                false_p=None,
+                risk_status="Transfer Accepted",
+            ),
+            MagicMock(
+                risk_accepted=None,
+                false_p=None,
+                risk_status=None,
+            ),
+        ]
+        date_fn = MagicMock()
+
+        exclusions = self.defect_dojo._get_report_exclusions(total_findings, date_fn)
+
+        assert len(exclusions) == 3

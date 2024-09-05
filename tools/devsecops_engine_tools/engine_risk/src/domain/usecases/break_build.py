@@ -86,7 +86,11 @@ class BreakBuild:
             "found": list(
                 map(
                     lambda item: {
-                        "id": item.vuln_id_from_tool if item.vuln_id_from_tool else item.id,
+                        "id": (
+                            item.vuln_id_from_tool
+                            if item.vuln_id_from_tool
+                            else item.id
+                        ),
                         "severity": item.severity,
                         "risk_score": item.risk_score,
                         "reason": item.reason,
@@ -174,7 +178,9 @@ class BreakBuild:
         exclusions_ids = {exclusion.id for exclusion in self.exclusions if exclusion.id}
 
         for report in report_list:
-            if report.vuln_id_from_tool and (report.vuln_id_from_tool in exclusions_ids):
+            if report.vuln_id_from_tool and (
+                report.vuln_id_from_tool in exclusions_ids
+            ):
                 applied_exclusions.append(self._get_applied_exclusion(report))
             elif report.id and (report.id in exclusions_ids):
                 applied_exclusions.append(self._get_applied_exclusion(report))
