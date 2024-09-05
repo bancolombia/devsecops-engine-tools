@@ -23,5 +23,5 @@ def runner_engine_risk(
         print_table_gateway,
         dict_args,
         findings,
-        vm_exclusions
+        vm_exclusions,
     )

@@ -1,9 +1,6 @@
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
     Exclusions,
 )
-from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
-    format_date,
-)
 
 
 class GetExclusions:
@@ -39,13 +36,6 @@ class GetExclusions:
                 )
 
         return exclusions
-
-    def _format_date_to_dd_format(self, date_string):
-        return (
-            format_date(date_string.split("T")[0], "%Y-%m-%d", "%d%m%Y")
-            if date_string
-            else None
-        )
 
     def _get_risk_exclusions(self):
         return self._get_exclusions(self.risk_exclusions, "RISK")
