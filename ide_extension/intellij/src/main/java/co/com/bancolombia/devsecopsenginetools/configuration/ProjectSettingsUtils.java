@@ -14,9 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static co.com.bancolombia.devsecopsenginetools.utils.Constants.SERVICE_NAME;
+
 @UtilityClass
 public class ProjectSettingsUtils {
-    private static final String SERVICE_NAME = "co.com.bancolombia.devsecopsenginetools";
     private static final Logger log = LoggerFactory.getLogger(ProjectSettingsUtils.class);
 
     public static ProjectSettings getProjectSettings(Project project) {
