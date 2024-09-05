@@ -32,7 +32,8 @@ from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.json_handler 
 )
 
 def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
-    devops_platform_gateway = devops_platform
+    if config_tool["TOOL"].lower() == "nuclei": # tool_gateway is the main Tool
+        tool_run = NucleiTool()
     extra_tools = []
     target_config = None
 
@@ -79,15 +80,12 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
     else:
         raise ValueError("Can't match if the target type is an api or a web application ")
 
-    if config_tool["TOOL"].lower() == "nuclei": # tool_gateway is the main Tool
-        tool_run = NucleiTool()
-
     if any((k.lower() == "jwt") for k in config_tool["EXTRA_TOOLS"]) and \
     any(isinstance(operation.authentication_gateway, JwtObject) for operation in data["operations"] ):
         extra_tools.append(JwtTool(target_config))
 
     return init_engine_dast(
-        devops_platform_gateway=devops_platform_gateway,
+        devops_platform_gateway=devops_platform,
         tool_gateway=tool_run,
         dict_args=dict_args,
         checks_token=secret_tool["github_token"] if secret_tool else os.environ["GITHUB_TOKEN"],

@@ -33,7 +33,7 @@ class NucleiTool(ToolGateway):
         self.debug: str = os.environ.get("DEBUG", "false")
 
     def configurate_external_checks(
-        self, config_tool: ConfigTool, github_token: str, output_dir: str = "tmp"
+        self, config_tool: ConfigTool, github_token: str, output_dir: str = "/tmp"
     ):
         # Create configuration dir external checks
         if config_tool.use_external_checks_dir == "True":
@@ -80,7 +80,7 @@ class NucleiTool(ToolGateway):
 
     def run_tool(self, target_data, config_tool, token):
         nuclei_config = NucleiConfig(target_data)
-        checks_directory = self.configurate_external_checks(config_tool, token, ".") #DATA PDN
+        checks_directory = self.configurate_external_checks(config_tool, token, "/tmp") #DATA PDN
         nuclei_config.customize_templates(checks_directory)
         result_scans = self.execute(nuclei_config)
         nuclei_deserealizator = NucleiDesealizator()
