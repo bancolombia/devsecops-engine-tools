@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static co.com.bancolombia.devsecopsenginetools.utils.Constants.TOOL_WINDOW_ID;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.contains;
@@ -31,7 +32,7 @@ public class LogPanelLoggerTest {
     @Test
     public void testActivateToolWindow() {
         when(mockProject.getService(ToolWindowManager.class)).thenReturn(mockToolWindowManager);
-        when(mockToolWindowManager.getToolWindow(LogPanelLogger.TOOL_WINDOW_ID)).thenReturn(mockToolWindow);
+        when(mockToolWindowManager.getToolWindow(TOOL_WINDOW_ID)).thenReturn(mockToolWindow);
         when(mockToolWindow.isAvailable()).thenReturn(true);
         when(mockToolWindow.isActive()).thenReturn(false);
 
