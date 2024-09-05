@@ -14,13 +14,11 @@ class DependencyCheckDeserialize(DeserializatorGateway):
     def get_list_findings(self, dependencies_scanned_file) -> "list[Finding]":
         list_open_vulnerabilities = []
         for dependency in dependencies_scanned_file.get("dependencies", []):
-            for package in dependency.get("packages", []):
-                where = package.get("id")
             for vulnerability in dependency.get("vulnerabilities", []):
                 finding_open = Finding(
-                    id = vulnerability["name"],
-                    cvss = str(vulnerability["cvssv3"]),
-                    where = where,
+                    id = vulnerability["name"][:20],
+                    cvss = str(vulnerability.get("cvssv3", {})),
+                    where = dependency.get("fileName").split(':')[-1].strip(),
                     description = vulnerability["description"][:170],
                     severity = vulnerability["severity"].lower(),
                     identification_date=datetime.now().strftime("%d%m%Y"),
