@@ -19,6 +19,19 @@ devsecops_engine_tools
 |                   entry_points
 |                   utils.
 |
+├───engine_risk -> Vulnerability management plaform report.
+|           test
+|           src
+|               applications
+|               deployment
+|               domain
+|                   model
+|                   usecases
+|               infraestructure
+|                   driven_adapters
+|                   entry_points
+|                   utils.
+|
 ├───engine_dast -> DAST Practice
 |           test
 |           src
