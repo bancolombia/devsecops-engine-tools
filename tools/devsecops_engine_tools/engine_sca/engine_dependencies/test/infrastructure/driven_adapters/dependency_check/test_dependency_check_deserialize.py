@@ -14,7 +14,7 @@ def json_data():
     return {
         "dependencies": [
             {
-                "packages": [{"id": "package1"}],
+                "fileName": "path/to/package1:1.0",
                 "vulnerabilities": [
                     {
                         "name": "CVE-1234",
