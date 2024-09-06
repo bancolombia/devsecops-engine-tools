@@ -54,6 +54,3 @@ class TestGenericOauth(unittest.TestCase):
             'POST', 'example.comoauth2/token', headers={'content-type': 'application/x-www-form-urlencoded', 'accept': 'application/json'}, data={'client_id': 'dummy-id', 'client_secret': 'dummy-secret', 'grant_type': 'client_credentials', 'scope': 'TermExample:read:user'}, timeout=5
         )
         self.assertEqual(token, ('Authorization', 'Bearer dummy_access_token'))
-
-if __name__ == "__main__":
-    unittest.main()
