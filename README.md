@@ -77,7 +77,7 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
   </tr>
     <tr>
     <td>ENGINE_RISK</td>
-    <td><a href="https://www.defectdojo.org/">DEFECTDOJO</a></td>
+    <td><a href="https://defectdojo.com/">DEFECTDOJO</a></td>
     <td>Free</td>
   </tr>
   <tr>
