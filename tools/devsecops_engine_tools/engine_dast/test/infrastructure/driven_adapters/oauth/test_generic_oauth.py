@@ -90,3 +90,6 @@ class TestGenericOauth(unittest.TestCase):
             timeout=5
         )
         self.assertEqual(token, "dummy_access_token")
+
+if __name__ == "__main__":
+    unittest.main()
