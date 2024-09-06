@@ -1,0 +1,35 @@
+{
+  "All": {
+    "RISK": [
+      {
+        "id": "XRAY-ID",
+        "cve_id": "CVE-2023-35116",
+        "where": "all",
+        "create_date": "24012023",
+        "expired_date": "22092023",
+        "hu": "345345",
+        "reason": "False Positive"
+      },
+      {
+        "id": "CKV_K8S_ID",
+        "where": "all",
+        "cve_id": "N.A",
+        "create_date": "05122023",
+        "expired_date": "01082024",
+        "severity": "critical",
+        "hu": "345345"
+      }
+    ]
+  },
+  "Pipeline_Test": {
+    "RISK": [
+      {
+        "id": "CVE-ID",
+        "cve_id": "CVE-ID",
+        "expired_date": "21092024",
+        "create_date": "24012023",
+        "hu": "345345"
+      }
+    ]
+  }
+}
