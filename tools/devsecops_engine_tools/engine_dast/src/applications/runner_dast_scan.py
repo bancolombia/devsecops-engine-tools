@@ -56,7 +56,8 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
                     ApiOperation(
                         elem,
                         GenericOauth(
-                            elem["operation"]["security_auth"]
+                            elem["operation"]["security_auth"],
+                            elem["endpoint"]
                         )
                     )
                 )
