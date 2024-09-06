@@ -7,7 +7,6 @@ import java.util.Map;
 
 @UtilityClass
 public class VariablePlaceholder {
-    public static final String AZURE_PLACEHOLDER = "$(...)";
 
     public static Map<String, String> resolvePlaceholders(Map<String, String> map, String pattern) {
         String[] parts = pattern.split("\\.\\.\\.");

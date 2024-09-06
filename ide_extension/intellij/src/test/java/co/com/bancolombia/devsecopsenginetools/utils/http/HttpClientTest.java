@@ -17,6 +17,7 @@ import java.io.IOException;
 import static okhttp3.MediaType.get;
 import static okhttp3.Protocol.HTTP_1_1;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -46,14 +47,41 @@ public class HttpClientTest {
         when(client.newCall(any())).thenReturn(call);
         when(call.execute()).thenReturn(mockResponse);
         // Act
-        Sample response = httpClient.get("https://sampleurl", Sample.class, new BasicAuthMethod("test", "test"));
+        SampleModelTest response = httpClient.get("https://sampleurl", SampleModelTest.class,
+                new BasicAuthMethod("test", "test"));
         // Assert
         assertEquals("name", response.getName());
         assertEquals(20, response.getAge());
     }
 
+
+    @Test
+    public void shouldGetNullWhenResponseFailed() throws IOException {
+        Response mockResponse = new Response.Builder()
+                .request(new Request.Builder().url("https://sampleurl").build())
+                .protocol(HTTP_1_1)
+                .code(400)
+                .message("Bad Request")
+                .body(ResponseBody.create("{\"error\":\"some\"}", get("application/json")))
+                .build();
+        // Arrange
+        when(client.newCall(any())).thenReturn(call);
+        when(call.execute()).thenReturn(mockResponse);
+        // Act
+        SampleModelTest response = httpClient.get("https://sampleurl", SampleModelTest.class);
+        // Assert
+        assertNull(response);
+    }
+
+
+    @Test(expected = IOException.class)
+    public void shouldHandleError() {
+        HttpClient realClient = new HttpClient();
+        realClient.get("http://localhost:8080", SampleModelTest.class);
+    }
+
     @Data
-    public static class Sample {
+    public static class SampleModelTest {
         private String name;
         private int age;
     }
