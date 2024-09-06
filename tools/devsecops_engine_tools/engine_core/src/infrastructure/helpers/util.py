@@ -11,5 +11,5 @@ def define_env(variable_env, branch):
     return (
         "pdn"
         if branch in ["trunk", "master"]
-        else "qa" if branch in "release" else "dev"
+        else "qa" if branch=="release" else "dev"
     )
