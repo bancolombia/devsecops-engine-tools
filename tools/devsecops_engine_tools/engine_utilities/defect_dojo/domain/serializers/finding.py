@@ -6,6 +6,8 @@ class FindingSerializer(Schema):
     component_name = fields.Str(requeride=False)
     component_version = fields.Str(requeride=False)
     created = fields.Str(requeride=False)
+    epss_score: fields.Int(requeride=False)
+    epss_percentile: fields.Int(requeride=False)
     cvssv3 = fields.Str(requeride=False)
     cvssv3_score = fields.Int(requeride=False)
     cwe = fields.List(fields.Int, requeride=False)
