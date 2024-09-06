@@ -63,22 +63,23 @@ class PrinterPrettyTable(PrinterTableGateway):
             print(sorted_table)
 
     def print_table_report(self, report_list: "list[Report]"):
-        headers = ["Severity", "ID", "Tag", "Where"]
+        headers = ["Risk Score", "Severity", "ID", "Tags", "Where", "Service"]
         table = PrettyTable(headers)
         for report in report_list:
             row_data = [
+                report.risk_score,
                 report.severity.lower(),
-                report.id,
+                report.vuln_id_from_tool if report.vuln_id_from_tool else report.id,
                 report.tags,
                 report.where,
+                report.service
             ]
             table.add_row(row_data)
 
-        severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
         sorted_table = PrettyTable()
         sorted_table.field_names = table.field_names
         sorted_table.add_rows(
-            sorted(table._rows, key=lambda row: severity_order[row[0]])
+            sorted(table._rows, key=lambda row: row[0], reverse=True)
         )
 
         for column in table.field_names:
