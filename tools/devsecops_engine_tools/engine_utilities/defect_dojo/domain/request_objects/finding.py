@@ -7,6 +7,8 @@ class FindingRequest:
     component_name: str = ""
     component_version: str = ""
     created: str = ""
+    epss_score: float = 0.0
+    epss_percentile: float = 0.0
     cvssv3: str = ""
     cvssv3_score: float = 0.0
     cwe = None

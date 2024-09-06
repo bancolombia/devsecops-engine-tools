@@ -20,6 +20,8 @@
     "date": "2023-06-10",
     "sla_start_date": null,
     "cwe": 0,
+    "epss_score": null,
+    "epss_percentile": null,
     "cvssv3": null,
     "cvssv3_score": null,
     "url": null,

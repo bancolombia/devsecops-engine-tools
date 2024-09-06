@@ -15,19 +15,21 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import lombok.AccessLevel;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.java.Log;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.logging.Level;
 
-@Log4j2
+import static co.com.bancolombia.devsecopsenginetools.utils.Constants.TOOL_WINDOW_ID;
+
+@Log
 public class LogPanelLogger implements ToolWindowFactory, DumbAware {
-    protected static final String TOOL_WINDOW_ID = "DevSecOps Engine Tools";
 
-    @Setter(AccessLevel.PRIVATE)
+    @Setter(AccessLevel.PROTECTED)
     protected static LogPanel logPanelInstance;
 
     public static void info(String string) {
@@ -96,7 +98,7 @@ public class LogPanelLogger implements ToolWindowFactory, DumbAware {
                 toolWindow.activate(() -> {
                 }, true, true);
             } catch (Exception e) {
-                log.warn("Error activating tool window", e);
+                log.log(Level.WARNING, "Error activating tool window", e);
             }
         }
     }
@@ -110,6 +112,7 @@ public class LogPanelLogger implements ToolWindowFactory, DumbAware {
                 .createActionToolbar("LogPanelToolbar", actionGroup, false);
 
         LogPanel logPanel = new LogPanel();
+        actionToolbar.setTargetComponent(logPanel);
         logPanel.add(actionToolbar.getComponent(), BorderLayout.WEST);
         ContentFactory contentFactory = ContentFactory.getInstance();
         Content content = contentFactory.createContent(logPanel, "Scan Output", false);

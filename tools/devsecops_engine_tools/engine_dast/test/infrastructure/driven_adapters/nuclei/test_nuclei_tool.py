@@ -3,7 +3,8 @@ from unittest.mock import Mock, patch, mock_open
 from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nuclei.nuclei_tool import (
     NucleiTool,
     NucleiConfig,
-    ConfigTool)
+    ConfigTool
+    )
 
 class TestNucleiTool(unittest.TestCase):
 
