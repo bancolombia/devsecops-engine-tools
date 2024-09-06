@@ -25,8 +25,8 @@ class GenericOauth(AuthenticationGateway):
     def get_access_token(self):
         auth_config = self.process_data()
 
-        if auth_config["grant_type"].lower() "client_credentials":
-            return self.get_access_token_resource_owner()
+        if auth_config["grant_type"].lower() == "client_credentials":
+            return self.get_access_token_client_credentials()
         else:
             raise ValueError("OAuth: Grant type is not supported yet")
 
@@ -44,7 +44,7 @@ class GenericOauth(AuthenticationGateway):
                 "client_id": self.config["client_id"],
                 "client_secret": self.config["client_secret"],
                 "grant_type": "client_credentials",
-                "scope": self.config["scope"],
+                "scope": self.config["scope"]
             }
 
             url = self.endpoint + self.config["path"]
@@ -54,7 +54,7 @@ class GenericOauth(AuthenticationGateway):
             )
             if 200 <= response.status_code < 300:
                 result = response.json()["access_token"]
-                return (,f"Bearer {result}")
+                return ("Authorization",f"Bearer {result}")
             else:
                 print(
                     "OAuth: Can't obtain access token"
