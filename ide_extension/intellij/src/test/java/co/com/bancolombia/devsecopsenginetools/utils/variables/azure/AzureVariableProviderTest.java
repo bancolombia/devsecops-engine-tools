@@ -4,6 +4,9 @@ import co.com.bancolombia.devsecopsenginetools.configuration.ProjectSettings;
 import co.com.bancolombia.devsecopsenginetools.utils.http.HttpClient;
 import co.com.bancolombia.devsecopsenginetools.utils.variables.Variable;
 import co.com.bancolombia.devsecopsenginetools.utils.variables.VariableProvider;
+import co.com.bancolombia.devsecopsenginetools.utils.variables.azure.AzureVariableGroupResponse.AzureVariableGroup;
+import co.com.bancolombia.devsecopsenginetools.utils.variables.azure.AzureVariableGroupResponse.AzureVariableGroup.AzureVariable;
+import co.com.bancolombia.devsecopsenginetools.utils.variables.azure.exceptions.VariableGroupNotFoundException;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
@@ -46,6 +49,60 @@ public class AzureVariableProviderTest {
         provider = new AzureVariableProvider(settings, httpClient);
     }
 
+    // Assert
+    @Test(expected = VariableGroupNotFoundException.class)
+    public void shouldFailGettingVariableGroupByName() {
+        // Arrange
+        doAnswer(invocation -> {
+            String url = invocation.getArgument(0, String.class);
+            if (url.contains("group1")) {
+                return getAzureVariableGroupResponseMock(0, 0);
+            }
+            throw new RuntimeException("Unexpected URL");
+        }).when(httpClient).get(anyString(), any(), any());
+        // Act
+        provider.getVariables();
+    }
+
+    // Assert
+    @Test(expected = VariableGroupNotFoundException.class)
+    public void shouldFailGettingVariableGroupById() {
+        // Arrange
+        doAnswer(invocation -> {
+            String url = invocation.getArgument(0, String.class);
+            if (url.contains("group1")) {
+                return getAzureVariableGroupResponseMock(1, 1);
+            }
+            if (url.contains("release")) {
+                return getAzureReleaseDefinitionResponseMock(true);
+            }
+            if (url.contains("groupIds")) {
+                return getAzureVariableGroupResponseMock(0, 7);
+            }
+            throw new RuntimeException("Unexpected URL");
+        }).when(httpClient).get(anyString(), any(), any());
+        // Act
+        provider.getVariables();
+    }
+
+    // Assert
+    @Test(expected = VariableGroupNotFoundException.class)
+    public void shouldFailGettingVariablesWhenNoStageExists() {
+        // Arrange
+        doAnswer(invocation -> {
+            String url = invocation.getArgument(0, String.class);
+            if (url.contains("group1")) {
+                return getAzureVariableGroupResponseMock(1, 1);
+            }
+            if (url.contains("release")) {
+                return getAzureReleaseDefinitionResponseMock(false);
+            }
+            throw new RuntimeException("Unexpected URL");
+        }).when(httpClient).get(anyString(), any(), any());
+        // Act
+        provider.getVariables();
+    }
+
     @Test
     public void shouldGetVariables() {
         // Arrange
@@ -55,7 +112,7 @@ public class AzureVariableProviderTest {
                 return getAzureVariableGroupResponseMock(1, 1);
             }
             if (url.contains("release")) {
-                return getAzureReleaseDefinitionResponseMock();
+                return getAzureReleaseDefinitionResponseMock(true);
             }
             if (url.contains("groupIds")) {
                 return getAzureVariableGroupResponseMock(4, 7);
@@ -73,14 +130,9 @@ public class AzureVariableProviderTest {
         azureVariableGroupResponse.setValue(new ArrayList<>());
         for (int i = 0; i < groups; i++) {
             long current = idx + (i * 2L);
-            long currentNext = current + 1;
-            AzureVariableGroupResponse.AzureVariableGroup.AzureVariable variable1 = new AzureVariableGroupResponse.AzureVariableGroup.AzureVariable();
-            variable1.setValue("value" + current);
-            AzureVariableGroupResponse.AzureVariableGroup.AzureVariable variable2 = new AzureVariableGroupResponse.AzureVariableGroup.AzureVariable();
-            variable2.setValue("value" + currentNext);
-            Map<String, AzureVariableGroupResponse.AzureVariableGroup.AzureVariable> variables = Map.of("variable" + current, variable1, "variable" + currentNext, variable2);
+            Map<String, AzureVariable> variables = getStringAzureVariableMap(current);
 
-            AzureVariableGroupResponse.AzureVariableGroup variableGroup = new AzureVariableGroupResponse.AzureVariableGroup();
+            AzureVariableGroup variableGroup = new AzureVariableGroup();
             variableGroup.setName("group" + current);
             variableGroup.setId(idx);
             variableGroup.setVariables(variables);
@@ -90,23 +142,36 @@ public class AzureVariableProviderTest {
         return azureVariableGroupResponse;
     }
 
-    private static @NotNull AzureReleaseDefinitionResponse getAzureReleaseDefinitionResponseMock() {
-        AzureVariableGroupResponse.AzureVariableGroup.AzureVariable variable3 = new AzureVariableGroupResponse.AzureVariableGroup.AzureVariable();
-        variable3.setValue("value3");
-        AzureVariableGroupResponse.AzureVariableGroup.AzureVariable variable4 = new AzureVariableGroupResponse.AzureVariableGroup.AzureVariable();
-        variable4.setValue("value4");
-        Map<String, AzureVariableGroupResponse.AzureVariableGroup.AzureVariable> variables = Map.of("variable3", variable3, "variable4", variable4);
+    private static @NotNull Map<String, AzureVariable> getStringAzureVariableMap(long current) {
+        long currentNext = current + 1;
+        AzureVariable variable1 = new AzureVariable();
+        variable1.setValue("value" + current);
+        AzureVariable variable2 = new AzureVariable();
+        variable2.setValue("value" + currentNext);
+        return Map.of("variable" + current, variable1, "variable" + currentNext, variable2);
+    }
 
-        AzureVariableGroupResponse.AzureVariableGroup.AzureVariable variable5 = new AzureVariableGroupResponse.AzureVariableGroup.AzureVariable();
+    private static @NotNull AzureReleaseDefinitionResponse getAzureReleaseDefinitionResponseMock(boolean existing) {
+        AzureVariable variable3 = new AzureVariable();
+        variable3.setValue("value3");
+        AzureVariable variable4 = new AzureVariable();
+        variable4.setValue("value4");
+        Map<String, AzureVariable> variables = Map.of("variable3", variable3, "variable4", variable4);
+
+        AzureVariable variable5 = new AzureVariable();
         variable3.setValue("value5");
-        AzureVariableGroupResponse.AzureVariableGroup.AzureVariable variable6 = new AzureVariableGroupResponse.AzureVariableGroup.AzureVariable();
+        AzureVariable variable6 = new AzureVariable();
         variable4.setValue("value6");
-        Map<String, AzureVariableGroupResponse.AzureVariableGroup.AzureVariable> variablesEnv = Map.of("variable5", variable5, "variable6", variable6);
+        Map<String, AzureVariable> variablesEnv = Map.of("variable5", variable5, "variable6", variable6);
 
         AzureReleaseDefinitionResponse.Environment environment = new AzureReleaseDefinitionResponse.Environment();
         environment.setVariables(variablesEnv);
         environment.setVariableGroups(List.of(GROUP_ID_ENV_1, GROUP_ID_ENV_2));
-        environment.setName("stage1");
+        if (existing) {
+            environment.setName("stage1");
+        } else {
+            environment.setName("stage2");
+        }
 
         AzureReleaseDefinitionResponse azureReleaseDefinitionResponse = new AzureReleaseDefinitionResponse();
         azureReleaseDefinitionResponse.setVariableGroups(List.of(GROUP_ID_RELEASE_1, GROUP_ID_RELEASE_2));

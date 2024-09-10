@@ -13,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 import static co.com.bancolombia.devsecopsenginetools.utils.Constants.AZURE_CREDENTIALS;
+import static co.com.bancolombia.devsecopsenginetools.utils.Constants.DEFAULT_IAC_SCAN_COMMAND;
+import static co.com.bancolombia.devsecopsenginetools.utils.Constants.DEFAULT_IMAGE_SCAN_COMMAND;
 
 public class GlobalConfiguration implements Configurable, Configurable.NoScroll {
     private GlobalSettings globalSettings;
@@ -48,8 +50,8 @@ public class GlobalConfiguration implements Configurable, Configurable.NoScroll 
         tabbedPane.add("Connection Details", connectionDetails);
         tabbedPane.add("Settings", settings);
         tabbedPane.setSelectedIndex(0);
-        resetIaCButton.addActionListener(e -> scanIacCommand.setText(GlobalSettings.DEFAULT_IAC_SCAN_COMMAND));
-        resetImageButton.addActionListener(e -> scanImageCommand.setText(GlobalSettings.DEFAULT_IMAGE_SCAN_COMMAND));
+        resetIaCButton.addActionListener(e -> scanIacCommand.setText(DEFAULT_IAC_SCAN_COMMAND));
+        resetImageButton.addActionListener(e -> scanImageCommand.setText(DEFAULT_IMAGE_SCAN_COMMAND));
         return tabbedPane;
     }
 

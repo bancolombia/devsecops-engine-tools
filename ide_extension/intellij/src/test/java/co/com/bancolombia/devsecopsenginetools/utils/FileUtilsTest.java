@@ -1,5 +1,7 @@
 package co.com.bancolombia.devsecopsenginetools.utils;
 
+import com.intellij.ide.util.PropertiesComponent;
+import com.intellij.openapi.project.Project;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,6 +16,10 @@ import java.util.ResourceBundle;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class FileUtilsTest {
     @Rule
@@ -138,5 +144,57 @@ public class FileUtilsTest {
         // Assert
         assertEquals("https://dev.azure.com/{organization}/{project}/_apis/distributedtask/variablegroups?groupIds={groupIds}&api-version=7.1-preview.2",
                 bundle.getString("azure-group-by-id"));
+    }
+
+    @Test
+    public void shouldCopyIaCFiles() throws IOException {
+        // Arrange
+        Project project = mock(Project.class);
+        PropertiesComponent propertiesComponent = mock(PropertiesComponent.class);
+        when(project.getBasePath()).thenReturn(tempDir.toString());
+        when(project.getService(PropertiesComponent.class)).thenReturn(propertiesComponent);
+        when(propertiesComponent.getValue("iacDirectory")).thenReturn("source");
+        when(propertiesComponent.getValue("dotEnvFile")).thenReturn(".env");
+        when(propertiesComponent.getValue("replacePattern")).thenReturn("#{...}#");
+        when(propertiesComponent.getBoolean(anyString(), anyBoolean())).thenReturn(true);
+
+        Path source = tempDir.resolve("source");
+        Path destination = tempDir.resolve("build").resolve("dev-sec-ops").resolve("iac");
+        Path dotEnv = tempDir.resolve(".env");
+        Files.write(dotEnv, "KEY1=VALUE1\nKEY2=VALUE2\n#COMMENT\nKEY3=VALUE3".getBytes());
+
+        Path subDir = source.resolve("dir2");
+        Files.createDirectories(subDir);
+
+        Path file1 = source.resolve("file1.txt");
+        Path file2 = subDir.resolve("file2.txt");
+        Files.createFile(file1);
+        Files.createFile(file2);
+
+        assertTrue(Files.exists(source));
+        assertTrue(Files.exists(subDir));
+        assertTrue(Files.exists(file1));
+        assertTrue(Files.exists(file2));
+
+        // Act
+        FileUtils.copyIaCFiles(project);
+        // Assert
+        assertTrue(Files.exists(destination));
+        assertTrue(Files.exists(destination.resolve("source").resolve("dir2")));
+        assertTrue(Files.exists(destination.resolve("source").resolve("file1.txt")));
+        assertTrue(Files.exists(destination.resolve("source").resolve("dir2").resolve("file2.txt")));
+    }
+
+    @Test
+    public void shouldFindDockerFile() throws IOException {
+        // Arrange
+        Path dir = tempDir.resolve("cloud").resolve("docker");
+        Path dockerfile = dir.resolve("Dockerfile");
+        Files.createDirectories(dir);
+        Files.write(dockerfile, "FROM sample".getBytes());
+        // Act
+        String path = FileUtils.findDockerfile(tempDir.toString());
+        // Assert
+        assertEquals("cloud/docker/Dockerfile", path);
     }
 }
