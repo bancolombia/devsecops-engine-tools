@@ -31,6 +31,8 @@ class Finding(FromDictMixin):
     date: str = ""
     sla_start_date = None
     cwe: int = 0
+    epss_score: int = 0
+    epss_percentile: int = 0
     cvssv3 = None
     cvssv3_score = None
     url: str = ""
@@ -66,6 +68,7 @@ class Finding(FromDictMixin):
     static_finding: bool = None
     dynamic_finding: bool = None
     created: str = ""
+    service: str = ""
     scanner_confidence = None
     unique_id_from_tool: str = ""
     vuln_id_from_tool: str = ""
@@ -75,7 +78,6 @@ class Finding(FromDictMixin):
     sast_source_file_path = None
     nb_occurences = None
     publish_date = None
-    service = None
     planned_remediation_date = None
     planned_remediation_version = None
     effort_for_fixing = None

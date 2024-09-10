@@ -39,7 +39,7 @@ pip3 install devsecops-engine-tools
 ### Scan running - flags (CLI)
 
 ```bash
-devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container", "engine_code"] --folder_path ["Folder path scan engine_iac and engine_code"] --platform ["k8s","cloudformation","docker", "openapi"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] --token_external_checks ["token_external_checks"] --xray_mode ["scan", "audit"] --image_to_scan ["image_to_scan"]
+devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container", "engine_risk", "engine_code"] --folder_path ["Folder path scan engine_iac and engine_code"] --platform ["k8s","cloudformation","docker", "openapi"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] --token_external_checks ["token_external_checks"] --xray_mode ["scan", "audit"] --image_to_scan ["image_to_scan"]
 ```
 
 ### Structure Remote Config
@@ -48,6 +48,9 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
 📦Remote_Config
    ┣ 📂engine_core
    ┃ ┗ 📜ConfigTool.json
+   ┣ 📂engine_risk
+   ┃ ┗ 📜ConfigTool.json
+   ┃ ┗ 📜Exclusions.json
    ┣ 📂engine_sast
    ┃ ┗ 📂engine_iac
    ┃   ┗ 📜ConfigTool.json
@@ -74,6 +77,11 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
     <th>Module</th>
     <th>Tool</th>
     <th>Type</th>
+  </tr>
+    <tr>
+    <td>ENGINE_RISK</td>
+    <td><a href="https://defectdojo.com/">DEFECTDOJO</a></td>
+    <td>Free</td>
   </tr>
   <tr>
     <td rowspan="3">ENGINE_IAC</td>
