@@ -63,6 +63,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "TRIVY": "Trivy Scan",
                 "KUBESCAPE": "Kubescape Scanner",
                 "KICS": "KICS Scanner",
+                "NUCLEI": "Nuclei Scan"
             }
 
             if any(
