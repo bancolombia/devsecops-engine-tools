@@ -64,29 +64,28 @@ class HandleRisk:
         service = self.devops_platform_gateway.get_variable("pipeline_name")
         parent_identifier = risk_config["PARENT_ANALYSIS"]["PARENT_IDENTIFIER"]
 
-        parent_findings = []
-        parent_exclusions = []
+        engagement_list = [service]
+
         if (
             risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true"
             and parent_identifier in service
         ):
             parent_service = service.split(parent_identifier)[0] + parent_identifier
-            parent_findings, parent_exclusions = self._get_all_from_vm(
-                dict_args, secret_tool, remote_config, parent_service
+            engagement_list += [parent_service]
+
+        findings = []
+        exclusions = []
+        for service in engagement_list:
+            findings_list, exclusions_list = self._get_all_from_vm(
+                dict_args, secret_tool, remote_config, service
             )
-
-        findings, exclusions = self._get_all_from_vm(
-            dict_args, secret_tool, remote_config, service
-        )
-
-        findings_list = parent_findings + findings
-
-        exclusions_list = parent_exclusions + exclusions
+            findings += findings_list
+            exclusions += exclusions_list
 
         result = runner_engine_risk(
             dict_args,
-            findings_list,
-            exclusions_list,
+            findings,
+            exclusions,
             self.devops_platform_gateway,
             self.print_table_gateway,
         )
