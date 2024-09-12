@@ -23,6 +23,14 @@ class FindingRestConsumer:
         if response.status_code != 200:
             raise ApiError(response.json())
         findings = FindingList.from_dict(response.json())
+        if findings.count > request['limit']:
+            pages = int(findings.count / request['limit'])
+            for offset in range(1, pages + 1):
+                request['offset'] = offset * request['limit']
+                response = self.__session.get(url, headers=headers, data={}, params=request, verify=VERIFY_CERTIFICATE)
+                if response.status_code != 200:
+                    raise ApiError(response.json())
+                findings.results += FindingList.from_dict(response.json()).results
         return findings
 
     def close(self, request, id):
