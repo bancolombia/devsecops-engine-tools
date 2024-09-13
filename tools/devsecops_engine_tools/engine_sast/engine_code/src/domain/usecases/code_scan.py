@@ -103,7 +103,8 @@ class CodeScan:
                 pull_request_files,
                 self.devops_platform_gateway.get_variable("path_directory"),
                 self.devops_platform_gateway.get_variable("repository"),
-                list_exclusions
+                list_exclusions,
+                config_tool.rules
             )
 
         else:

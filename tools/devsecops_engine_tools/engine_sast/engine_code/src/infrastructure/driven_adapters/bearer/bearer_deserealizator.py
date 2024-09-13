@@ -28,7 +28,7 @@ class BearerDeserealizator:
                 for vul in vulnerabilities:
                     description = re.search(description_pattern, vul["description"], flags=re.DOTALL).group(1).strip()
                     chunks = [description[i : i + 70] for i in range(0, len(description), 70)]
-                    formatted_description = "\n".join(chunks)
+                    formatted_description = "\n".join(chunks) + "\n"
 
                     finding = Finding(
                         id=vul["id"],

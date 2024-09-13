@@ -36,7 +36,7 @@ class BearerTool(ToolGateway):
                 shell=True
             )
 
-    def config_data(self, agent_work_folder, list_skip_rules):
+    def config_data(self, agent_work_folder, list_skip_rules, list_rules):
         data = {
             "report": {
                 "output": f"{agent_work_folder}/bearer-scan.json",
@@ -54,14 +54,16 @@ class BearerTool(ToolGateway):
                 "skip-rule": list_skip_rules
             }
         }
+        if list_rules != "All":
+            data["rule"]["only-rule"] = list_rules
         return data
 
-    def create_config_file(self, agent_work_folder, list_skip_rules):
+    def create_config_file(self, agent_work_folder, list_skip_rules=[], list_rules="All"):
         with open(
             f"{agent_work_folder}/bearer.yml",
             "w",
         ) as file:
-            yaml.dump(self.config_data(agent_work_folder, list_skip_rules), file, default_flow_style=False)
+            yaml.dump(self.config_data(agent_work_folder, list_skip_rules, list_rules), file, default_flow_style=False)
             file.close()
 
     def skip_rules_list(self, list_exclusions, pull_file):
@@ -71,12 +73,12 @@ class BearerTool(ToolGateway):
                 list_skip_rules.append(exclusion.id)
         return list_skip_rules
 
-    def run_tool(self, folder_to_scan, pull_request_files, agent_work_folder, repository, list_exclusions):
+    def run_tool(self, folder_to_scan, pull_request_files, agent_work_folder, repository, list_exclusions, list_rules):
         self.install_tool(agent_work_folder)
         findings, path_file_results = [], ""
         scan_result_path = f"{agent_work_folder}/bearer-scan.json"
         if folder_to_scan:
-            self.create_config_file(agent_work_folder, [])
+            self.create_config_file(agent_work_folder)
             command = f"{agent_work_folder}/bin/bearer scan {folder_to_scan} --config-file {agent_work_folder}/bearer.yml"
             subprocess.run(
                 command,
@@ -90,7 +92,7 @@ class BearerTool(ToolGateway):
         else:
             scan_file_maker = BearerScanFileMaker()
             for pull_file in pull_request_files:
-                self.create_config_file(agent_work_folder, self.skip_rules_list(list_exclusions, pull_file))
+                self.create_config_file(agent_work_folder, list_skip_rules=self.skip_rules_list(list_exclusions, pull_file), list_rules=list_rules)
                 command = f"{agent_work_folder}/bin/bearer scan {agent_work_folder}/{repository}/{pull_file} --config-file {agent_work_folder}/bearer.yml"
                 subprocess.run(
                     command,

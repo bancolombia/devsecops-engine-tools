@@ -186,7 +186,7 @@ class TestCodeScan(unittest.TestCase):
     )
     def test_process(self, mock_input_core):
         # Arrange
-        self.code_scan.set_config_tool = Mock(return_value=Mock(scope_pipeline="test_scope"))
+        self.code_scan.set_config_tool = Mock(return_value=Mock(scope_pipeline="test_scope", rules=["rule1", "rule2"]))
         self.code_scan.get_exclusions = Mock(return_value=(["exclusion1"], False))
         self.code_scan.get_pull_request_files = Mock(return_value=["file1.js", "file2.js"])
         self.code_scan.apply_exclude_folder = Mock(return_value=False)
@@ -201,7 +201,7 @@ class TestCodeScan(unittest.TestCase):
         self.code_scan.get_exclusions.assert_called_once()
         self.code_scan.get_pull_request_files.assert_called_once()
         self.mock_tool_gateway.run_tool.assert_called_once_with(
-            None, ["file1.js", "file2.js"], "test_work_folder", "test_repo", ["exclusion1"]
+            None, ["file1.js", "file2.js"], "test_work_folder", "test_repo", ["exclusion1"], ["rule1", "rule2"]
         )
         mock_input_core.assert_called_once_with(
             totalized_exclusions=["exclusion1"], threshold_defined=self.code_scan.set_config_tool.return_value.threshold,

@@ -46,6 +46,7 @@ class TestBearerTool(unittest.TestCase):
         tool = BearerTool()
         agent_work_folder = "/agent/work/folder"
         list_skip_rules = ["vul_id1", "vul_id2"]
+        list_rules = ["rule1", "rule2"]
 
         expected_data = {
             "report": {
@@ -61,12 +62,13 @@ class TestBearerTool(unittest.TestCase):
                 "scanner": ["sast"]
             },
             "rule": {
-                "skip-rule": list_skip_rules
+                "skip-rule": list_skip_rules,
+                "only-rule": list_rules
             }
         }
 
         # Act
-        result = tool.config_data(agent_work_folder, list_skip_rules)
+        result = tool.config_data(agent_work_folder, list_skip_rules, list_rules)
 
         # Assert
         self.assertEqual(result, expected_data)
@@ -82,14 +84,15 @@ class TestBearerTool(unittest.TestCase):
         tool = BearerTool()
         agent_work_folder = "/agent/work/folder"
         list_skip_rules = ["vul_id1", "vul_id2"]
+        list_rules = ["rule1", "rule2"]
 
         # Act
-        tool.create_config_file(agent_work_folder, list_skip_rules)
+        tool.create_config_file(agent_work_folder, list_skip_rules, list_rules)
 
         # Assert
         mock_open.assert_called_once_with(f"{agent_work_folder}/bearer.yml", "w")
         mock_yaml_dump.assert_called_once_with(
-            tool.config_data(agent_work_folder, list_skip_rules),
+            tool.config_data(agent_work_folder, list_skip_rules, list_rules),
             mock_open(),
             default_flow_style=False
         )
@@ -125,6 +128,7 @@ class TestBearerTool(unittest.TestCase):
         folder_to_scan = "/path/to/scan"
         agent_work_folder = "/agent/work/folder"
         repository = "test_repo"
+        list_rules = ["rule1", "rule2"]
         mock_get_list_finding.return_value = ["finding1", "finding2"]
 
         # Act
@@ -133,12 +137,13 @@ class TestBearerTool(unittest.TestCase):
             pull_request_files,
             agent_work_folder,
             repository,
-            list_exclusions
+            list_exclusions,
+            list_rules
         )
 
         # Assert
         mock_install_tool.assert_called_once_with(agent_work_folder)
-        mock_create_config_file.assert_called_once_with(agent_work_folder, [])
+        mock_create_config_file.assert_called_once_with(agent_work_folder)
         expected_command = f"{agent_work_folder}/bin/bearer scan {folder_to_scan} --config-file {agent_work_folder}/bearer.yml"
         mock_subprocess.assert_called_once_with(expected_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         mock_get_list_finding.assert_called_once_with(f"{agent_work_folder}/bearer-scan.json", agent_work_folder)
@@ -171,6 +176,7 @@ class TestBearerTool(unittest.TestCase):
         agent_work_folder = "/agent/work/folder"
         repository = "test_repo"
         list_exclusions = [Mock(where="file_test.js", id="vul_id1")]
+        list_rules = ["rule1", "rule2"]
         mock_get_list_finding.side_effect = [["finding1"], ["finding2"]]
 
         # Act
@@ -179,14 +185,15 @@ class TestBearerTool(unittest.TestCase):
             pull_request_files,
             agent_work_folder,
             repository,
-            list_exclusions
+            list_exclusions,
+            list_rules
         )
 
         # Assert
         mock_install_tool.assert_called_once_with(agent_work_folder)
         mock_create_config_file.assert_has_calls([
-                call(agent_work_folder, tool.skip_rules_list(list_exclusions, "file1.js")),
-                call(agent_work_folder, tool.skip_rules_list(list_exclusions, "file2.js"))
+                call(agent_work_folder, list_skip_rules=tool.skip_rules_list(list_exclusions, "file1.js"), list_rules=list_rules),
+                call(agent_work_folder, list_skip_rules=tool.skip_rules_list(list_exclusions, "file2.js"), list_rules=list_rules)
             ]     
         )
         expected_command_file1 = f"{agent_work_folder}/bin/bearer scan {agent_work_folder}/{repository}/file1.js --config-file {agent_work_folder}/bearer.yml"
