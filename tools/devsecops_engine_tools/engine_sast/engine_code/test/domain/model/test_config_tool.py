@@ -28,7 +28,8 @@ class TestConfigTool(unittest.TestCase):
                 }
             },
             "TOOL_NAME": {
-                "EXCLUDE_FOLDER": ["test"]
+                "EXCLUDE_FOLDER": ["test"],
+                "RULES": ["test_rule"]
             },
             "TARGET_BRANCHES": ["trunk", "develop"]
         }
@@ -45,4 +46,5 @@ class TestConfigTool(unittest.TestCase):
         mock_threshold.assert_called_once_with(mock_json_data["THRESHOLD"])
         self.assertEqual(config_tool.target_branches, ["trunk", "develop"])
         self.assertEqual(config_tool.exclude_folder, ["test"])
+        self.assertEqual(config_tool.rules, ["test_rule"])
         self.assertEqual(config_tool.scope_pipeline, "pipeline")

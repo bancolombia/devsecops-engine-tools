@@ -7,4 +7,5 @@ class ConfigTool:
         self.threshold = Threshold(json_data["THRESHOLD"])
         self.target_branches = json_data["TARGET_BRANCHES"]
         self.exclude_folder = json_data[tool]["EXCLUDE_FOLDER"]
+        self.rules = json_data[tool]["RULES"]
         self.scope_pipeline = scope

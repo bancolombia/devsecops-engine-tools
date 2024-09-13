@@ -15,7 +15,10 @@
         }
     },
     "BEARER": {
-      "EXCLUDE_FOLDER": []
+      "EXCLUDE_FOLDER": [],
+      "RULES": [
+        "javascript_lang_logger_leak"
+      ]
     },
     "TARGET_BRANCHES": ["trunk", "develop"]
 }
