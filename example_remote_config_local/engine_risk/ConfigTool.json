@@ -1,9 +1,21 @@
 {
     "MESSAGE_INFO": "Custom message",
     "IGNORE_ANALYSIS_PATTERN": "(.*_test|test_.*)",
+    "HANDLE_SERVICE_NAME": {
+        "ENABLED": "false",
+        "ERASE_SERVICE_ENDING": [
+            "_ending_to_erase1",
+            "_ending_to_erase2"
+        ],
+        "REGEX_SERVICE_CODE": "[^_]+",
+        "ADD_WORD_TO_CHECK": [
+            "word-to-check"
+        ],
+        "REGEX_ADD_SERVICE": "-include$"
+    },
     "PARENT_ANALYSIS": {
         "ENABLED": "false",
-        "PARENT_IDENTIFIER": "_id_included"
+        "REGEX_PARENT": "^.*?_id_included"
     },
     "EXCLUSIONS_PATHS": {
         "engine_code": "engine_sast/engine_code/Exclusions.json",
@@ -31,7 +43,10 @@
     "THRESHOLD": {
         "REMEDIATION_RATE": 50,
         "RISK_SCORE": 10,
-        "TAG_BLACKLIST": ["tag1", "tag2"],
+        "TAG_BLACKLIST": [
+            "tag1",
+            "tag2"
+        ],
         "TAG_MAX_AGE": 999
     }
 }

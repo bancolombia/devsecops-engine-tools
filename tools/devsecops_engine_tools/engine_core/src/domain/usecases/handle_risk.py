@@ -19,6 +19,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore
 )
+import re
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -52,6 +53,18 @@ class HandleRisk:
                 "Error getting finding list in handle risk: {0}".format(str(e))
             )
 
+    def _filter_engagements(self, engagements, service, risk_config):
+        filtered_engagements = []
+        words = [word for word in service.split('_') if len(word) > 3]
+        words += risk_config["HANDLE_SERVICE_NAME"]["ADD_WORD_TO_CHECK"]
+        add_service_regex = risk_config["HANDLE_SERVICE_NAME"]["REGEX_ADD_SERVICE"]
+        for engagement in engagements:
+            if service.lower() in engagement.name.lower():
+                filtered_engagements += [engagement.name]
+            elif re.search(add_service_regex, engagement.name.lower()) and (sum(1 for word in words if word.lower() in engagement.name.lower()) >= 2):
+                filtered_engagements += [engagement.name]
+        return filtered_engagements
+
     def process(self, dict_args: any, remote_config: any):
         secret_tool = None
         if dict_args["use_secrets_manager"] == "true":
@@ -61,17 +74,38 @@ class HandleRisk:
             dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
         )
 
-        service = self.devops_platform_gateway.get_variable("pipeline_name")
-        parent_identifier = risk_config["PARENT_ANALYSIS"]["PARENT_IDENTIFIER"]
+        pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
+        service = pipeline_name
+        engagement_list = []
 
-        engagement_list = [service]
+        if risk_config["HANDLE_SERVICE_NAME"]["ENABLED"].lower() == "true":
+            service = next((pipeline_name.replace(ending, "") for ending in risk_config["HANDLE_SERVICE_NAME"]["ERASE_SERVICE_ENDING"] if pipeline_name.endswith(ending)), pipeline_name)
+            match_service_code = re.match(risk_config["HANDLE_SERVICE_NAME"]["REGEX_SERVICE_CODE"], service)
+            if match_service_code:
+                engagements = self.vulnerability_management.get_active_engagements(
+                    match_service_code.group(0),
+                    dict_args,
+                    secret_tool,
+                    remote_config
+                )
+                engagement_list += self._filter_engagements(
+                    engagements, service, risk_config
+                )
 
+        engagement_list += [service]
+
+        match_parent = re.match(risk_config["PARENT_ANALYSIS"]["REGEX_PARENT"], service)
         if (
             risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true"
-            and parent_identifier in service
+            and match_parent
         ):
-            parent_service = service.split(parent_identifier)[0] + parent_identifier
-            engagement_list += [parent_service]
+            parent_service = match_parent.group(0)
+            if parent_service not in engagement_list:
+                engagement_list += [parent_service]
+
+        engagement_list = list(set(engagement_list))
+        print(f"Services to analyze: {engagement_list}")
+        logger.info(f"Services to analyze: {engagement_list}")
 
         findings = []
         exclusions = []
@@ -94,7 +128,7 @@ class HandleRisk:
             {},
             "",
             "",
-            service,
+            pipeline_name,
             self.devops_platform_gateway.get_variable("stage").capitalize(),
         )
         return result, input_core
