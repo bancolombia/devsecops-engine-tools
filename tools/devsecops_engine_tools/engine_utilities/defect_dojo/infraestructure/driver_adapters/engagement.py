@@ -18,18 +18,30 @@ class EngagementRestConsumer:
         self.__session = session._instance
 
     def get_engagements(self, engagement_name):
-        url = f"{self.__host}/api/v2/engagements/?name={engagement_name}"
+        request = {"name": engagement_name}
+        return self.get_engagements_by_request(request)
 
+    def get_engagements_by_request(self, request):
+        url = f"{self.__host}/api/v2/engagements/"
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
         try:
-            response = self.__session.get(url=url, headers=headers, verify=VERIFY_CERTIFICATE)
+            response = self.__session.get(url=url, headers=headers, params=request, verify=VERIFY_CERTIFICATE)
             if response.status_code != 200:
                 logger.error(response.json())
                 raise ApiError(response.json())
-            response = EngagementList().from_dict(response.json())
+            engagements = EngagementList().from_dict(response.json())
+            if ('limit' in request) and (engagements.count > request['limit']):
+                pages = int(engagements.count / request['limit'])
+                for offset in range(1, pages + 1):
+                    request['offset'] = offset * request['limit']
+                    response = self.__session.get(url, headers=headers, data={}, params=request, verify=VERIFY_CERTIFICATE)
+                    if response.status_code != 200:
+                        raise ApiError(response.json())
+                    engagements.results += EngagementList().from_dict(response.json()).results
         except Exception as e:
             raise ApiError(e)
-        return response
+        return engagements
+
 
     def post_engagement(self, engagement_name, product_id):
         url = f"{self.__host}/api/v2/engagements/"
