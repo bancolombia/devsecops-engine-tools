@@ -30,7 +30,13 @@ class TestHandleRisk(unittest.TestCase):
     @mock.patch(
         "devsecops_engine_tools.engine_core.src.domain.usecases.handle_risk.HandleRisk._get_all_from_vm"
     )
-    def test_process(self, mock_get_all_from_vm, mock_runner_engine_risk):
+    @mock.patch(
+        "devsecops_engine_tools.engine_core.src.domain.usecases.handle_risk.HandleRisk._filter_engagements"
+    )
+    @mock.patch(
+        "re.match"
+    )
+    def test_process(self, mock_match, mock_filter_engagements, mock_get_all_from_vm, mock_runner_engine_risk):
         dict_args = {
             "use_secrets_manager": "true",
             "tool": "engine_risk",
@@ -38,20 +44,52 @@ class TestHandleRisk(unittest.TestCase):
         }
         config_tool = {"ENGINE_RISK": {"ENABLED": "true"}}
         self.devops_platform_gateway.get_remote_config.return_value = {
-            "PARENT_ANALYSIS": {"ENABLED": "true", "PARENT_IDENTIFIER": "id"},
+            "PARENT_ANALYSIS": {"ENABLED": "true", "REGEX_GET_PARENT": "^.*?_id"},
+            "HANDLE_SERVICE_NAME": {"ENABLED": "true", "ADD_SERVICES": ["service1", "service2"], "ERASE_SERVICE_ENDING": ["_ending"], "REGEX_GET_SERVICE_CODE": "[^_]+"},
         }
-        self.devops_platform_gateway.get_variable.return_value = "pipeline_name_id_test"
+        self.devops_platform_gateway.get_variable.return_value = "code_pipeline_name_id_test"
         mock_runner_engine_risk.return_value = {"result": "result"}
         mock_get_all_from_vm.return_value = ([], [])
+        mock_filter_engagements.return_value = ["service1", "service2"]
+        mock_match.side_effect = [MagicMock(group=MagicMock(return_value="code_pipeline_name_id_test")), MagicMock(group=MagicMock(return_value="code_pipeline_name_id_test"))]
 
         # Call the process method
         result, input_core = self.handle_risk.process(dict_args, config_tool)
 
         # Assert the expected values
-        assert mock_get_all_from_vm.call_count == 2
+        assert mock_filter_engagements.call_count == 1
+        assert mock_match.call_count == 2
+        assert mock_get_all_from_vm.call_count == 3
         assert mock_runner_engine_risk.call_count == 1
         assert result == {"result": "result"}
         assert type(input_core) == InputCore
+
+    @mock.patch(
+        "re.search"
+    )
+    def test_filter_engagements(self, mock_search):
+        engagements = [
+            MagicMock(name="code_service_id_1"),
+            MagicMock(name="code_service_id_2"),
+            MagicMock(name="code_service_test_word1_ending"),
+            MagicMock(name="code_service_test_word2-ending"),
+            MagicMock(name="code_another_service_1"),
+            MagicMock(name="code_another_service_2"),
+        ]
+        service = "code_service_id"
+        risk_config = {
+            "HANDLE_SERVICE_NAME": {
+                "REGEX_GET_WORDS": "[_-]",
+                "REGEX_CHECK_WORDS": "(-ending$|_ending$)"
+            }
+        }
+
+        # Call the process method
+        self.handle_risk._filter_engagements(engagements, service, risk_config)
+
+        # Assert the expected values
+        mock_search.assert_called()
+
 
     def test_get_all_from_vm(self):
         dict_args = {

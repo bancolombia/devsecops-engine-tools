@@ -1,9 +1,16 @@
 import json
 from devsecops_engine_tools.engine_utilities.utils.api_error import ApiError
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
-from devsecops_engine_tools.engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
-from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import VERIFY_CERTIFICATE
-from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.engagement import Engagement, EngagementList
+from devsecops_engine_tools.engine_utilities.defect_dojo.domain.request_objects.import_scan import (
+    ImportScanRequest,
+)
+from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.settings.settings import (
+    VERIFY_CERTIFICATE,
+)
+from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.engagement import (
+    Engagement,
+    EngagementList,
+)
 from devsecops_engine_tools.engine_utilities.utils.session_manager import SessionManager
 from datetime import datetime
 from devsecops_engine_tools.engine_utilities.settings import SETTING_LOGGER
@@ -23,25 +30,37 @@ class EngagementRestConsumer:
 
     def get_engagements_by_request(self, request):
         url = f"{self.__host}/api/v2/engagements/"
-        headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
+        headers = {
+            "Authorization": f"Token {self.__token}",
+            "Content-Type": "application/json",
+        }
         try:
-            response = self.__session.get(url=url, headers=headers, params=request, verify=VERIFY_CERTIFICATE)
+            response = self.__session.get(
+                url=url, headers=headers, params=request, verify=VERIFY_CERTIFICATE
+            )
             if response.status_code != 200:
                 logger.error(response.json())
                 raise ApiError(response.json())
             engagements = EngagementList().from_dict(response.json())
-            if ('limit' in request) and (engagements.count > request['limit']):
-                pages = int(engagements.count / request['limit'])
+            if ("limit" in request) and (engagements.count > request["limit"]):
+                pages = int(engagements.count / request["limit"])
                 for offset in range(1, pages + 1):
-                    request['offset'] = offset * request['limit']
-                    response = self.__session.get(url, headers=headers, data={}, params=request, verify=VERIFY_CERTIFICATE)
+                    request["offset"] = offset * request["limit"]
+                    response = self.__session.get(
+                        url,
+                        headers=headers,
+                        data={},
+                        params=request,
+                        verify=VERIFY_CERTIFICATE,
+                    )
                     if response.status_code != 200:
                         raise ApiError(response.json())
-                    engagements.results += EngagementList().from_dict(response.json()).results
+                    engagements.results += (
+                        EngagementList().from_dict(response.json()).results
+                    )
         except Exception as e:
             raise ApiError(e)
         return engagements
-
 
     def post_engagement(self, engagement_name, product_id):
         url = f"{self.__host}/api/v2/engagements/"
@@ -55,9 +74,14 @@ class EngagementRestConsumer:
                 "status": "In Progress",
             }
         )
-        headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
+        headers = {
+            "Authorization": f"Token {self.__token}",
+            "Content-Type": "application/json",
+        }
         try:
-            response = self.__session.post(url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
+            response = self.__session.post(
+                url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE
+            )
             if response.status_code != 201:
                 logger.error(response.json())
                 raise ApiError(response.json())

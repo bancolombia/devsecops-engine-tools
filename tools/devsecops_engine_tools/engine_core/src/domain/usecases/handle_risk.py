@@ -16,9 +16,7 @@ from devsecops_engine_tools.engine_risk.src.applications.runner_engine_risk impo
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionGettingFindings,
 )
-from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
-    InputCore
-)
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 import re
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
@@ -55,13 +53,20 @@ class HandleRisk:
 
     def _filter_engagements(self, engagements, service, risk_config):
         filtered_engagements = []
-        words = [word for word in service.split('_') if len(word) > 3]
-        words += risk_config["HANDLE_SERVICE_NAME"]["ADD_WORD_TO_CHECK"]
-        add_service_regex = risk_config["HANDLE_SERVICE_NAME"]["REGEX_ADD_SERVICE"]
+        words = [
+            word
+            for word in re.split(
+                risk_config["HANDLE_SERVICE_NAME"]["REGEX_GET_WORDS"], service
+            )
+            if len(word) > 3
+        ]
+        check_words_regex = risk_config["HANDLE_SERVICE_NAME"]["REGEX_CHECK_WORDS"]
         for engagement in engagements:
             if service.lower() in engagement.name.lower():
                 filtered_engagements += [engagement.name]
-            elif re.search(add_service_regex, engagement.name.lower()) and (sum(1 for word in words if word.lower() in engagement.name.lower()) >= 2):
+            elif re.search(check_words_regex, engagement.name.lower()) and (
+                sum(1 for word in words if word.lower() in engagement.name.lower()) >= 3
+            ):
                 filtered_engagements += [engagement.name]
         return filtered_engagements
 
@@ -79,14 +84,27 @@ class HandleRisk:
         engagement_list = []
 
         if risk_config["HANDLE_SERVICE_NAME"]["ENABLED"].lower() == "true":
-            service = next((pipeline_name.replace(ending, "") for ending in risk_config["HANDLE_SERVICE_NAME"]["ERASE_SERVICE_ENDING"] if pipeline_name.endswith(ending)), pipeline_name)
-            match_service_code = re.match(risk_config["HANDLE_SERVICE_NAME"]["REGEX_SERVICE_CODE"], service)
+            service = next(
+                (
+                    pipeline_name.replace(ending, "")
+                    for ending in risk_config["HANDLE_SERVICE_NAME"][
+                        "ERASE_SERVICE_ENDING"
+                    ]
+                    if pipeline_name.endswith(ending)
+                ),
+                pipeline_name,
+            )
+            match_service_code = re.match(
+                risk_config["HANDLE_SERVICE_NAME"]["REGEX_GET_SERVICE_CODE"], service
+            )
             if match_service_code:
+                service_code = match_service_code.group(0)
+                engagement_list += [
+                    service.format(service_code=service_code)
+                    for service in risk_config["HANDLE_SERVICE_NAME"]["ADD_SERVICES"]
+                ]
                 engagements = self.vulnerability_management.get_active_engagements(
-                    match_service_code.group(0),
-                    dict_args,
-                    secret_tool,
-                    remote_config
+                    service_code, dict_args, secret_tool, remote_config
                 )
                 engagement_list += self._filter_engagements(
                     engagements, service, risk_config
@@ -94,14 +112,10 @@ class HandleRisk:
 
         engagement_list += [service]
 
-        match_parent = re.match(risk_config["PARENT_ANALYSIS"]["REGEX_PARENT"], service)
-        if (
-            risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true"
-            and match_parent
-        ):
+        match_parent = re.match(risk_config["PARENT_ANALYSIS"]["REGEX_GET_PARENT"], service)
+        if risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true" and match_parent:
             parent_service = match_parent.group(0)
-            if parent_service not in engagement_list:
-                engagement_list += [parent_service]
+            engagement_list += [parent_service]
 
         engagement_list = list(set(engagement_list))
         print(f"Services to analyze: {engagement_list}")
