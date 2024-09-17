@@ -36,7 +36,7 @@ class BearerTool(ToolGateway):
                 shell=True
             )
 
-    def config_data(self, agent_work_folder, list_skip_rules, list_rules):
+    def config_data(self, agent_work_folder, list_skip_rules):
         data = {
             "report": {
                 "output": f"{agent_work_folder}/bearer-scan.json",
@@ -54,16 +54,14 @@ class BearerTool(ToolGateway):
                 "skip-rule": list_skip_rules
             }
         }
-        if list_rules != "All":
-            data["rule"]["only-rule"] = list_rules
         return data
 
-    def create_config_file(self, agent_work_folder, list_skip_rules=[], list_rules="All"):
+    def create_config_file(self, agent_work_folder, list_skip_rules=[]):
         with open(
             f"{agent_work_folder}/bearer.yml",
             "w",
         ) as file:
-            yaml.dump(self.config_data(agent_work_folder, list_skip_rules, list_rules), file, default_flow_style=False)
+            yaml.dump(self.config_data(agent_work_folder, list_skip_rules), file, default_flow_style=False)
             file.close()
 
     def skip_rules_list(self, list_exclusions, pull_file):
@@ -87,12 +85,14 @@ class BearerTool(ToolGateway):
                 stderr=subprocess.PIPE,
                 shell=True
             )
-            findings = BearerDeserealizator.get_list_finding(scan_result_path, agent_work_folder)
+            findings = BearerDeserealizator.get_list_finding(
+                scan_result_path, agent_work_folder
+            )
             path_file_results = scan_result_path
         else:
             scan_file_maker = BearerScanFileMaker()
             for pull_file in pull_request_files:
-                self.create_config_file(agent_work_folder, list_skip_rules=self.skip_rules_list(list_exclusions, pull_file), list_rules=list_rules)
+                self.create_config_file(agent_work_folder, list_skip_rules=self.skip_rules_list(list_exclusions, pull_file))
                 command = f"{agent_work_folder}/bin/bearer scan {agent_work_folder}/{repository}/{pull_file} --config-file {agent_work_folder}/bearer.yml"
                 subprocess.run(
                     command,
@@ -102,6 +102,8 @@ class BearerTool(ToolGateway):
                     shell=True
                 )
                 scan_file_maker.add_vulnerabilities(scan_result_path)
-                findings.extend(BearerDeserealizator.get_list_finding(scan_result_path, agent_work_folder))
+                findings.extend(
+                    BearerDeserealizator.get_list_finding(scan_result_path, agent_work_folder, list_rules=list_rules)
+                )
             path_file_results = scan_file_maker.make_scan_file(agent_work_folder)
         return findings, path_file_results
