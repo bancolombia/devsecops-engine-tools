@@ -65,10 +65,25 @@ class HandleRisk:
             if service.lower() in engagement.name.lower():
                 filtered_engagements += [engagement.name]
             elif re.search(check_words_regex, engagement.name.lower()) and (
-                sum(1 for word in words if word.lower() in engagement.name.lower()) >= 3
+                sum(1 for word in words if word.lower() in engagement.name.lower()) >= 2
             ):
                 filtered_engagements += [engagement.name]
         return filtered_engagements
+
+    def _exclude_services(self, dict_args, pipeline_name, service_list):
+        risk_exclusions = self.devops_platform_gateway.get_remote_config(
+            dict_args["remote_config_repo"], "engine_risk/Exclusions.json"
+        )
+        if pipeline_name in risk_exclusions and risk_exclusions[pipeline_name].get("SKIP_SERVICE", 0) and "services" in risk_exclusions[pipeline_name]["SKIP_SERVICE"]:
+            services_to_exclude = risk_exclusions[pipeline_name]["SKIP_SERVICE"].get("services", [])
+            service_excluded = []
+            for service in service_list:
+                if service in services_to_exclude:
+                    service_list.remove(service)
+                    service_excluded += [service]
+            print(f"Services to exclude: {service_excluded}")
+            logger.info(f"Services to exclude: {service_excluded}")
+        return service_list
 
     def process(self, dict_args: any, remote_config: any):
         secret_tool = None
@@ -81,7 +96,7 @@ class HandleRisk:
 
         pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
         service = pipeline_name
-        engagement_list = []
+        service_list = []
 
         if risk_config["HANDLE_SERVICE_NAME"]["ENABLED"].lower() == "true":
             service = next(
@@ -99,31 +114,33 @@ class HandleRisk:
             )
             if match_service_code:
                 service_code = match_service_code.group(0)
-                engagement_list += [
+                service_list += [
                     service.format(service_code=service_code)
                     for service in risk_config["HANDLE_SERVICE_NAME"]["ADD_SERVICES"]
                 ]
                 engagements = self.vulnerability_management.get_active_engagements(
                     service_code, dict_args, secret_tool, remote_config
                 )
-                engagement_list += self._filter_engagements(
+                service_list += self._filter_engagements(
                     engagements, service, risk_config
                 )
 
-        engagement_list += [service]
+        service_list += [service]
 
         match_parent = re.match(risk_config["PARENT_ANALYSIS"]["REGEX_GET_PARENT"], service)
         if risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true" and match_parent:
             parent_service = match_parent.group(0)
-            engagement_list += [parent_service]
+            service_list += [parent_service]
 
-        engagement_list = list(set(engagement_list))
-        print(f"Services to analyze: {engagement_list}")
-        logger.info(f"Services to analyze: {engagement_list}")
+        service_list = list(set(service_list))
+        new_service_list = self._exclude_services(dict_args, pipeline_name, service_list)
+
+        print(f"Services to analyze: {new_service_list}")
+        logger.info(f"Services to analyze: {new_service_list}")
 
         findings = []
         exclusions = []
-        for service in engagement_list:
+        for service in new_service_list:
             findings_list, exclusions_list = self._get_all_from_vm(
                 dict_args, secret_tool, remote_config, service
             )
