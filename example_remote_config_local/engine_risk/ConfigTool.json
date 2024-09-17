@@ -4,18 +4,20 @@
     "HANDLE_SERVICE_NAME": {
         "ENABLED": "false",
         "ERASE_SERVICE_ENDING": [
-            "_ending_to_erase1",
-            "_ending_to_erase2"
+            "_custom_ending1",
+            "_custom_ending2"
         ],
-        "REGEX_SERVICE_CODE": "[^_]+",
-        "ADD_WORD_TO_CHECK": [
-            "word-to-check"
+        "REGEX_GET_SERVICE_CODE": "[^_]+",
+        "REGEX_GET_WORDS": "[_-]",
+        "ADD_SERVICES": [
+            "{service_code}-custom_service",
+            "custom_service"
         ],
-        "REGEX_ADD_SERVICE": "-include$"
+        "REGEX_CHECK_WORDS": "-custom$"
     },
     "PARENT_ANALYSIS": {
         "ENABLED": "false",
-        "REGEX_PARENT": "^.*?_id_included"
+        "REGEX_GET_PARENT": "^.*?_parent_id"
     },
     "EXCLUSIONS_PATHS": {
         "engine_code": "engine_sast/engine_code/Exclusions.json",

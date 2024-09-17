@@ -19,6 +19,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
     ExceptionVulnerabilityManagement,
     ExceptionFindingsExcepted,
     ExceptionGettingFindings,
+    ExceptionGettingEngagements
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     format_date,
@@ -270,7 +271,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             return Engagement.get_engagements(request_is, request_active).results
 
         except Exception as ex:
-            raise ExceptionGettingFindings(
+            raise ExceptionGettingEngagements(
                 "Error getting engagements with the following error: {0} ".format(ex)
             )
 
