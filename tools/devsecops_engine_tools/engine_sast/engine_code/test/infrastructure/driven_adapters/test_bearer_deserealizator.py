@@ -64,7 +64,7 @@ class TestBearerDeserealizator(unittest.TestCase):
         ]
 
         # Act
-        findings = BearerDeserealizator.get_list_finding("test_path.json", "/agent/work/folder")
+        findings = BearerDeserealizator.get_list_finding("test_path.json", "/agent/work/folder", list_rules=["vul1", "vul2"])
         
         # Assert
         self.assertEqual(len(findings), 2)

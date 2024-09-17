@@ -12,7 +12,8 @@ class BearerDeserealizator:
     @classmethod
     def get_list_finding(cls,
                          scan_result_path,
-                         agent_work_folder) -> "list[Finding]":
+                         agent_work_folder,
+                         list_rules="All") -> "list[Finding]":
         findings = []
         with open(scan_result_path, encoding='utf-8') as arc:
             try:
@@ -29,6 +30,8 @@ class BearerDeserealizator:
                     description = re.search(description_pattern, vul["description"], flags=re.DOTALL).group(1).strip()
                     chunks = [description[i : i + 70] for i in range(0, len(description), 70)]
                     formatted_description = "\n".join(chunks) + "\n"
+                    if list_rules != "All":
+                        if vul["id"] not in list_rules: continue
 
                     finding = Finding(
                         id=vul["id"],

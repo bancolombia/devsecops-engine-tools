@@ -46,7 +46,6 @@ class TestBearerTool(unittest.TestCase):
         tool = BearerTool()
         agent_work_folder = "/agent/work/folder"
         list_skip_rules = ["vul_id1", "vul_id2"]
-        list_rules = ["rule1", "rule2"]
 
         expected_data = {
             "report": {
@@ -63,12 +62,11 @@ class TestBearerTool(unittest.TestCase):
             },
             "rule": {
                 "skip-rule": list_skip_rules,
-                "only-rule": list_rules
             }
         }
 
         # Act
-        result = tool.config_data(agent_work_folder, list_skip_rules, list_rules)
+        result = tool.config_data(agent_work_folder, list_skip_rules)
 
         # Assert
         self.assertEqual(result, expected_data)
@@ -84,15 +82,14 @@ class TestBearerTool(unittest.TestCase):
         tool = BearerTool()
         agent_work_folder = "/agent/work/folder"
         list_skip_rules = ["vul_id1", "vul_id2"]
-        list_rules = ["rule1", "rule2"]
 
         # Act
-        tool.create_config_file(agent_work_folder, list_skip_rules, list_rules)
+        tool.create_config_file(agent_work_folder, list_skip_rules)
 
         # Assert
         mock_open.assert_called_once_with(f"{agent_work_folder}/bearer.yml", "w")
         mock_yaml_dump.assert_called_once_with(
-            tool.config_data(agent_work_folder, list_skip_rules, list_rules),
+            tool.config_data(agent_work_folder, list_skip_rules),
             mock_open(),
             default_flow_style=False
         )
@@ -192,8 +189,8 @@ class TestBearerTool(unittest.TestCase):
         # Assert
         mock_install_tool.assert_called_once_with(agent_work_folder)
         mock_create_config_file.assert_has_calls([
-                call(agent_work_folder, list_skip_rules=tool.skip_rules_list(list_exclusions, "file1.js"), list_rules=list_rules),
-                call(agent_work_folder, list_skip_rules=tool.skip_rules_list(list_exclusions, "file2.js"), list_rules=list_rules)
+                call(agent_work_folder, list_skip_rules=tool.skip_rules_list(list_exclusions, "file1.js")),
+                call(agent_work_folder, list_skip_rules=tool.skip_rules_list(list_exclusions, "file2.js"))
             ]     
         )
         expected_command_file1 = f"{agent_work_folder}/bin/bearer scan {agent_work_folder}/{repository}/file1.js --config-file {agent_work_folder}/bearer.yml"
@@ -210,8 +207,8 @@ class TestBearerTool(unittest.TestCase):
         )
         mock_bearer_scan_file_maker_create.assert_called_once_with(agent_work_folder)
         mock_get_list_finding.assert_has_calls([
-                call(f"{agent_work_folder}/bearer-scan.json", agent_work_folder),
-                call(f"{agent_work_folder}/bearer-scan.json", agent_work_folder)
+                call(f"{agent_work_folder}/bearer-scan.json", agent_work_folder, list_rules=list_rules),
+                call(f"{agent_work_folder}/bearer-scan.json", agent_work_folder, list_rules=list_rules)
             ]     
         )
         self.assertEqual(findings, ["finding1", "finding2"])
