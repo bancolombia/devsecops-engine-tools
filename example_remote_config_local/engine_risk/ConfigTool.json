@@ -9,11 +9,13 @@
         ],
         "REGEX_GET_SERVICE_CODE": "[^_]+",
         "REGEX_GET_WORDS": "[_-]",
+        "MIN_WORD_LENGTH": 3,
+        "MIN_WORD_AMOUNT": 2,
+        "REGEX_CHECK_WORDS": "(a^)",
         "ADD_SERVICES": [
             "{service_code}-custom_service",
             "custom_service"
-        ],
-        "REGEX_CHECK_WORDS": "-custom$"
+        ]
     },
     "PARENT_ANALYSIS": {
         "ENABLED": "false",

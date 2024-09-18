@@ -53,19 +53,22 @@ class HandleRisk:
 
     def _filter_engagements(self, engagements, service, risk_config):
         filtered_engagements = []
+        min_word_length = risk_config["HANDLE_SERVICE_NAME"]["MIN_WORD_LENGTH"]
         words = [
             word
             for word in re.split(
                 risk_config["HANDLE_SERVICE_NAME"]["REGEX_GET_WORDS"], service
             )
-            if len(word) > 3
+            if len(word) > min_word_length
         ]
         check_words_regex = risk_config["HANDLE_SERVICE_NAME"]["REGEX_CHECK_WORDS"]
+        min_word_amount = risk_config["HANDLE_SERVICE_NAME"]["MIN_WORD_AMOUNT"]
         for engagement in engagements:
             if service.lower() in engagement.name.lower():
                 filtered_engagements += [engagement.name]
             elif re.search(check_words_regex, engagement.name.lower()) and (
-                sum(1 for word in words if word.lower() in engagement.name.lower()) >= 2
+                sum(1 for word in words if word.lower() in engagement.name.lower())
+                >= min_word_amount
             ):
                 filtered_engagements += [engagement.name]
         return filtered_engagements
@@ -74,8 +77,14 @@ class HandleRisk:
         risk_exclusions = self.devops_platform_gateway.get_remote_config(
             dict_args["remote_config_repo"], "engine_risk/Exclusions.json"
         )
-        if pipeline_name in risk_exclusions and risk_exclusions[pipeline_name].get("SKIP_SERVICE", 0) and "services" in risk_exclusions[pipeline_name]["SKIP_SERVICE"]:
-            services_to_exclude = risk_exclusions[pipeline_name]["SKIP_SERVICE"].get("services", [])
+        if (
+            pipeline_name in risk_exclusions
+            and risk_exclusions[pipeline_name].get("SKIP_SERVICE", 0)
+            and risk_exclusions[pipeline_name]["SKIP_SERVICE"].get("services", 0)
+        ):
+            services_to_exclude = risk_exclusions[pipeline_name]["SKIP_SERVICE"].get(
+                "services", []
+            )
             service_excluded = []
             for service in service_list:
                 if service in services_to_exclude:
@@ -127,13 +136,17 @@ class HandleRisk:
 
         service_list += [service]
 
-        match_parent = re.match(risk_config["PARENT_ANALYSIS"]["REGEX_GET_PARENT"], service)
+        match_parent = re.match(
+            risk_config["PARENT_ANALYSIS"]["REGEX_GET_PARENT"], service
+        )
         if risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true" and match_parent:
             parent_service = match_parent.group(0)
             service_list += [parent_service]
 
         service_list = list(set(service_list))
-        new_service_list = self._exclude_services(dict_args, pipeline_name, service_list)
+        new_service_list = self._exclude_services(
+            dict_args, pipeline_name, service_list
+        )
 
         print(f"Services to analyze: {new_service_list}")
         logger.info(f"Services to analyze: {new_service_list}")
