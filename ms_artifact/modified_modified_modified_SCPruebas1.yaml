@@ -1,0 +1,137 @@
+
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: bridge-mtx
+  namespace: mascara-transaccional-dev
+  labels:
+    app.bancolombia.com.co/env: dev
+    app.bancolombia.com.co/cost-center: PMO32182
+    app.bancolombia.com.co/application-code: nu0021001
+    app.bancolombia.com.co/project: mascara-transaccional
+    app.bancolombia.com.co/pmo: PMO31859
+spec:
+  selector:
+    app: mascara-transaccional
+    pod: bridge-mtx-pod
+  ports:
+    - name: http
+      targetPort: 8103
+      port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bridge-mtx-deployment
+  namespace: mascara-transaccional-dev
+  labels:
+    app.bancolombia.com.co/env: dev
+    app.bancolombia.com.co/cost-center: PMO32182
+    app.bancolombia.com.co/application-code: nu0021001
+    app.bancolombia.com.co/project: mascara-transaccional
+    app.bancolombia.com.co/pmo: PMO31859
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: bridge-mtx-pod
+  template:
+    metadata:
+      labels:
+        app: mascara-transaccional
+        pod: bridge-mtx-pod
+        version: trunk.20230627.1
+        app.bancolombia.com.co/project: mascara-transaccional
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      securityContext:
+        fsGroup: 10101
+        runAsUser: 100
+        runAsGroup: 10101
+        runAsNonRoot: true
+      serviceAccountName: mascara-transaccional-iam-sa
+      initContainers:
+        - name: init-certificates # Este contenedor crea la JKS a partir del secreto
+          image: artifactory.apps.bancolombia.com/evc/certificates/certificates-init-container:1.2.0
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          command:
+            [
+              "./certificates.sh",
+              "-snu0021001-mascara-transaccional-mq-certificate-dev", # Debe crear esta variable con el nombre del secreto, por ejemplo: nu0334001-sua-mq-certificate-dev
+              "-rus-east-1", # Debe crear esta variable con el valor: us-east-1
+              "-edev",
+            ]
+          volumeMounts:
+            - name: keystores
+              mountPath: "/config/keystores/"
+      containers:
+        - name: bridge-mtx-container
+          image: 927580206359.dkr.ecr.us-east-1.amazon***.com/nu0021001-mascara-transaccional-dev-ecr:nu0021001_mascara_transaccional_ms_bridge_mq-trunk.20230627.1
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - all
+          resources:
+            requests:
+              cpu: 200m
+              memory: 600Mi
+            limits:
+              cpu: 400m
+              memory: 1200Mi
+          ports:
+            - containerPort: 8103
+          volumeMounts:
+            - name: keystores
+              mountPath: /home/appuser/jks
+              readOnly: true
+            - name: configmap
+              mountPath: /app/config
+              readOnly: true
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              pod: bridge-mtx-pod
+      volumes:
+        - name: keystores
+          emptyDir: {}
+        - name: configmap
+          configMap:
+            name: bridge-mtx
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: bridge-mtx-hpa
+  namespace: mascara-transaccional-dev
+  labels:
+    app.bancolombia.com.co/env: dev
+    app.bancolombia.com.co/cost-center: PMO32182
+    app.bancolombia.com.co/application-code: nu0021001
+    app.bancolombia.com.co/project: mascara-transaccional
+    app.bancolombia.com.co/pmo: PMO31859
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: bridge-mtx-deployment
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 80
+status:
+  currentReplicas: 1
+  desiredReplicas: 1
