@@ -13,6 +13,13 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsWelcome": [
+      {
+        "view": "scm",
+        "contents": "Test",
+        "when": "devsecops.enabled"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -34,6 +41,11 @@
     "configuration": {
       "title": "DevSecOps",
       "properties": {
+        "devsecops.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/Disable DevSecOps IDE Extension"
+        },
         "devsecops.organizationName": {
           "type": "string",
           "default": "GrupoBancolombia",
@@ -43,6 +55,11 @@
           "type": "string",
           "default": "Vicepresidencia Servicios de Tecnología",
           "description": "Project Name"
+        },
+        "devsecops.variablePlaceholder": {
+          "type": "string",
+          "default": "#{ ... }#",
+          "description": "Characters to identify variables"
         },
         "devsecops.groupName": {
           "type": "string",
@@ -57,7 +74,8 @@
         "devsecops.personalAccessToken": {
           "type": "string",
           "default": "",
-          "description": "Set your user personal access token generated at azure devops"
+          "description": "Set your user personal access token generated at azure devops",
+          "format": "password"
         }
       }
     },
