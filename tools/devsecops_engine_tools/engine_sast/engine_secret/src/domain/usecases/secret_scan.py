@@ -36,7 +36,8 @@ class SecretScan:
             files_pullrequest = self.git_gateway.get_files_pull_request(
                 self.devops_platform_gateway.get_variable("path_directory"),
                 self.devops_platform_gateway.get_variable("target_branch"),
-                self.devops_platform_gateway.get_variable("source_branch"))
+                self.devops_platform_gateway.get_variable("source_branch"),
+                config_tool.message_info_engine_secret)
             findings, file_path_findings = self.tool_gateway.run_tool_secret_scan(
                     files_pullrequest,
                     config_tool.exclude_path,
