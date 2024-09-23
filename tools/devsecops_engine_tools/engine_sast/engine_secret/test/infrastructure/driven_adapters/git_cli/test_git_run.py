@@ -11,11 +11,12 @@ class TestGitRun(unittest.TestCase):
         sys_working_dir = "/azp/_work/1/s"
         target_branch = "trunk"
         source_branch = "refs/heads/feature/branch"
+        message_info_engine_secret = "message_info_engine_secret"
 
         mock_subprocess_run.side_effect = Exception("Simulated exception")
         
         git_run = GitRun()
-        files = git_run.get_files_pull_request(sys_working_dir, target_branch, source_branch)
+        files = git_run.get_files_pull_request(sys_working_dir, target_branch, source_branch, message_info_engine_secret)
         
         self.assertEqual(files, [])
         
@@ -25,14 +26,15 @@ class TestGitRun(unittest.TestCase):
         sys_working_dir = "/azp/_work/1/s"
         target_branch = "trunk"
         source_branch = "refs/heads/feature/branch"
+        message_info_engine_secret = "message_info_engine_secret"
    
         mock_subprocess_run.return_value = MagicMock(returncode=0, stdout="file1.py\nfile2.py")
         git_run = GitRun()
         
-        result = git_run.get_files_pull_request(sys_working_dir, target_branch, source_branch)
+        result = git_run.get_files_pull_request(sys_working_dir, target_branch, source_branch, message_info_engine_secret)
 
         mock_chdir.assert_called_once_with(sys_working_dir)
-        mock_subprocess_run.assert_any_call(['git', 'checkout', '-b', 'feature/branch', 'origin/feature/branch'], text=True)
+        mock_subprocess_run.assert_any_call(['git', 'checkout', '-b', 'feature/branch', 'origin/feature/branch'], text=True, capture_output=True, check=True)
         mock_subprocess_run.assert_any_call(['git', 'diff', 'origin/trunk..feature/branch', '--name-only'], capture_output=True, text=True)
 
         self.assertEqual(result, ['file1.py', 'file2.py'])
@@ -43,14 +45,15 @@ class TestGitRun(unittest.TestCase):
         sys_working_dir = "/azp/_work/1/s"
         target_branch = "trunk"
         source_branch = "refs/heads/feature/branch"
+        message_info_engine_secret = "message_info_engine_secret"
    
         mock_subprocess_run.return_value = MagicMock(returncode=1, stdout="")
         git_run = GitRun()
         
-        result = git_run.get_files_pull_request(sys_working_dir, target_branch, source_branch)
+        result = git_run.get_files_pull_request(sys_working_dir, target_branch, source_branch, message_info_engine_secret)
 
         mock_chdir.assert_called_once_with(sys_working_dir)
-        mock_subprocess_run.assert_any_call(['git', 'checkout', '-b', 'feature/branch', 'origin/feature/branch'], text=True)
+        mock_subprocess_run.assert_any_call(['git', 'checkout', '-b', 'feature/branch', 'origin/feature/branch'], text=True, capture_output=True, check=True)
         mock_subprocess_run.assert_any_call(['git', 'diff', 'origin/trunk..feature/branch', '--name-only'], capture_output=True, text=True)
 
         self.assertEqual(result, None)
