@@ -10,6 +10,7 @@ from devsecops_engine_tools.engine_utilities.defect_dojo import (
     ImportScanRequest,
     Connect,
     Finding,
+    Engagement,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_tools.engine_core.src.domain.model.report import Report
@@ -18,6 +19,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
     ExceptionVulnerabilityManagement,
     ExceptionFindingsExcepted,
     ExceptionGettingFindings,
+    ExceptionGettingEngagements
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     format_date,
@@ -245,6 +247,32 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         except Exception as ex:
             raise ExceptionGettingFindings(
                 "Error getting all findings with the following error: {0} ".format(ex)
+            )
+
+    def get_active_engagements(self, engagement_name, dict_args, secret_tool, config_tool):
+        try:
+            request_is = ImportScanRequest(
+                token_defect_dojo=dict_args.get("token_vulnerability_management")
+                or secret_tool.get("token_defect_dojo"),
+                host_defect_dojo=config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                    "HOST_DEFECT_DOJO"
+                ],
+                engagement_name=engagement_name,
+            )
+
+            request_active = {
+                "name": engagement_name,
+                "limit": config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                    "LIMITS_QUERY"
+                ],
+                "active": "true",
+            }
+
+            return Engagement.get_engagements(request_is, request_active).results
+
+        except Exception as ex:
+            raise ExceptionGettingEngagements(
+                "Error getting engagements with the following error: {0} ".format(ex)
             )
 
     def _get_session_manager(self, dict_args, secret_tool, config_tool):
