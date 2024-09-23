@@ -13,7 +13,7 @@ from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.finding i
 def test_get_finding_info_success():
     session_mock = session_manager_get(status_code=200, response_json_file="finding_list.json")
     rest_finding = FindingRestConsumer(session=session_mock)
-    finding_obj = rest_finding.get(request={"unique_id_from_tool": "id_finding"})
+    finding_obj = rest_finding.get(request={"unique_id_from_tool": "id_finding", 'limit': 1})
     # Verificar el resultado
     assert isinstance(finding_obj, FindingList)
     assert finding_obj.count == 2
