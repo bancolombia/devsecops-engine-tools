@@ -486,7 +486,6 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.assertEqual(result, expected_result)
 
     def test_get_all_findings_exception(self):
-
         service = "test"
         dict_args = {"token_vulnerability_management": "token1"}
         secret_tool = {"token_defect_dojo": "token2"}
@@ -495,6 +494,40 @@ class TestDefectDojoPlatform(unittest.TestCase):
         with unittest.TestCase().assertRaises(Exception) as context:
             self.defect_dojo.get_all(service, dict_args, secret_tool, config_tool)
         assert "Error getting all findings with the following error:" in str(
+            context.exception
+        )
+
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.ImportScanRequest"
+    )
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Engagement"
+    )
+    def test_get_active_engagements(self, mock_engagement, mock_import_scan_request):
+        dict_args = {"token_vulnerability_management": "token1"}
+        secret_tool = MagicMock()
+        config_tool = {"VULNERABILITY_MANAGER": {"DEFECT_DOJO": {"HOST_DEFECT_DOJO": "host_defect_dojo", "LIMITS_QUERY": 999}}}
+        engagement_name = "engagement_name"
+        mock_engagement.get_engagements.return_value = MagicMock()
+
+        self.defect_dojo.get_active_engagements(
+            engagement_name, dict_args, secret_tool, config_tool
+        )
+
+        mock_import_scan_request.assert_called_once()
+        mock_engagement.get_engagements.assert_called_once()
+
+    def test_get_active_engagements_exception(self):
+        dict_args = {"token_vulnerability_management": "token1"}
+        secret_tool = MagicMock()
+        config_tool = {"VULNERABILITY_MANAGER": {"DEFECT_DOJO": {"HOST_DEFECT_DOJO": "host_defect_dojo", "LIMITS_QUERY": 999}}}
+        engagement_name = "engagement_name"
+
+        with unittest.TestCase().assertRaises(Exception) as context:
+            self.defect_dojo.get_active_engagements(
+            engagement_name, dict_args, secret_tool, config_tool
+        )
+        assert "Error getting engagements with the following error:" in str(
             context.exception
         )
 
