@@ -1,0 +1,25 @@
+id: asp-server-header
+
+info:
+  name: Asp Server Header
+  author: devsecops
+  severity: low
+  classification:
+    cvss-score: 2.0
+  description: The HTTP headers of a response are evaluated to determine if the ASP.NET
+    server is insecure.
+  tags: api,wa,http
+
+http:
+- method: GET
+  path:
+  - '{{BaseURL}}/fact'
+  matchers:
+  - type: regex
+    regex:
+    - X-Aspnet-Version:\s*([0-9]+)\.([0-9]+)\.([0-9]+)
+    - X-Aspnetmvc-Version:\s*([0-9]+)\.([0-9]+)\.([0-9]+)
+    - X-Powered-By:\s*([0-9]+)\.([0-9]+)\.([0-9]+)
+    part: header
+  headers:
+    accept: application/json

@@ -1,0 +1,31 @@
+id: x-content-type-options-header
+
+info:
+  name: X Content Type Options Header
+  author: devsecops
+  severity: low
+  description: |
+    The server lacks the HTTP X-Content-Type-Options header.
+  metadata:
+    max-request: 1
+  tags: api,wa,http
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N/E:P/RL:O/RC:C
+    cvss-score: 4.3
+http:
+- method: GET
+  path:
+  - '{{BaseURL}}/fact'
+  host-redirects: true
+  max-redirects: 3
+
+  matchers-condition: or
+  matchers:
+  - type: dsl
+    name: missing-header
+    dsl:
+    - "!regex('(?i)x-content-type-options: nosniff', header)"
+    - status_code != 301 && status_code != 302
+    condition: and
+  headers:
+    accept: application/json

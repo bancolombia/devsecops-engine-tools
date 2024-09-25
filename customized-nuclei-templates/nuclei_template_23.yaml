@@ -1,0 +1,33 @@
+id: content-security-policy-header
+
+info:
+  name: Content Security Policy
+  author: devsecops
+  severity: low
+  description: |
+    The Content-Security-Policy header is missing from server responses:
+
+  metadata:
+    max-request: 1
+  tags: api,wa,http
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:N/E:P/RL:O/RC:C
+    cvss-score: 3.8
+
+http:
+- method: GET
+  path:
+  - '{{BaseURL}}/fact'
+  host-redirects: true
+  max-redirects: 3
+
+  matchers-condition: or
+  matchers:
+  - type: dsl
+    name: content-security-policy
+    dsl:
+    - "!contains(header, 'Content-Security-Policy: frame-ancestors \\'none\\'')"
+    - status_code != 301 && status_code != 302
+    condition: and
+  headers:
+    accept: application/json

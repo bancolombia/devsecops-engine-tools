@@ -1,0 +1,19 @@
+{
+    "endpoint": "https://catfact.ninja/",
+      "rate_limit":"100",
+    "operations": [
+        {
+          "operation": {
+            "security_auth": {
+              "type" : "none"
+             },
+            "method": "GET",
+            "path": "/fact",
+            "parm": {},
+            "headers": {
+              "accept": "application/json"
+            }
+          }
+        }
+      ]
+    }

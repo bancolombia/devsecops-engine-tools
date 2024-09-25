@@ -1,0 +1,25 @@
+id: tls-version-13
+
+info:
+  name: TLS Version 1.3
+  author: devsecops
+  severity: low
+  classification:
+    cvss-score: 2.0
+  description: check if the server has tls version 1.3 active
+  tags: api,wa,ssl
+
+ssl:
+- address: '{{Host}}:{{Port}}'
+
+  extractors:
+  - type: json
+    json:
+    - .tls_version
+
+  matchers:
+  - type: word
+    part: tls_version
+    words:
+    - tls13
+    negative: true

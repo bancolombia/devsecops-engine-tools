@@ -1,0 +1,38 @@
+id: tls-12-ciphers
+
+info:
+  name: Validates TLS 12 uses strong cipher algorithms
+  author: devsecops
+  severity: low
+  description: A weak cipher is defined as an encryption/decryption algorithm that
+    uses a key of insufficient length. Using an insufficient length for a key in an
+    encryption/decryption algorithm opens up the possibility (or probability) that
+    the encryption scheme could be broken.
+  reference:
+  - https://www.acunetix.com/vulnerabilities/web/tls-ssl-weak-cipher-suites/
+  - http://ciphersuite.info
+  classification:
+    cvss-metrics: CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N/E:F/RL:O
+    cvss-score: 2.9
+  metadata:
+    max-request: 4
+  tags: api,wa,ssl
+ssl:
+- address: '{{Host}}:{{Port}}'
+  min_version: tls12
+  max_version: tls12
+
+  extractors:
+  - type: dsl
+    dsl:
+    - tls_version, cipher
+  matchers:
+  - type: word
+    name: tls-1.2
+    part: cipher
+    negative: true
+    words:
+    - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+    - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+    - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+    - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
