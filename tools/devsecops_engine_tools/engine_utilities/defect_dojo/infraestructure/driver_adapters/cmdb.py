@@ -21,23 +21,24 @@ class CmdbRestConsumer:
         data = json.dumps({"codapp": request.code_app})
         headers = {"tokenkey": self.__token, "Content-Type": "application/json"}
         logger.info("Search info of name product")
-        try:
-            response = self.__session.post(self.__host, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
-            if response.status_code != 200:
-                logger.error(response)
-                raise ApiError(response.json()["Message"])
-
-            if response.json() == []:
-                e = f"Engagement: {request.code_app} not found"
-                logger.warning(e)
-                # Producto is Orphan
-                return Cmdb(
+        cmdb_object = Cmdb(
                     product_type_name="ORPHAN_PRODUCT_TYPE",
                     product_name=f"{request.code_app}_Product",
                     tag_product="ORPHAN",
                     product_description="Orphan Product Description",
                     codigo_app=str(request.code_app),
                 )
+        try:
+            response = self.__session.post(self.__host, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
+            if response.status_code != 200:
+                logger.error(response)
+                raise ApiError(f"Error querying cmdb {response.json()['message']}")
+
+            if response.json() == []:
+                e = f"Engagement: {request.code_app} not found"
+                logger.warning(e)
+                # Producto is Orphan
+                return cmdb_object
 
             data = response.json()[-1]
             data_map = self.mapping_cmdb(data)
@@ -45,7 +46,7 @@ class CmdbRestConsumer:
             cmdb_object = Cmdb.from_dict(data_map)
         except Exception as e:
             logger.error(e)
-            raise ApiError(e)
+            return cmdb_object
         return cmdb_object
 
     def mapping_cmdb(self, data):
