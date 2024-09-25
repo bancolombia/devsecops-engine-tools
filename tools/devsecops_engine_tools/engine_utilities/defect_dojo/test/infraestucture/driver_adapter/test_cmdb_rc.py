@@ -42,5 +42,6 @@ def test_get_product_info_failure():
         {"product_name": "name_cmdb", "product_type_name": "product_type_name_cmdb"},
         session_mock,
     )
-    with pytest.raises(ApiError):
-        consumer.get_product_info(request)
+
+    response = consumer.get_product_info(request)
+    assert response.product_type_name == "ORPHAN_PRODUCT_TYPE"
