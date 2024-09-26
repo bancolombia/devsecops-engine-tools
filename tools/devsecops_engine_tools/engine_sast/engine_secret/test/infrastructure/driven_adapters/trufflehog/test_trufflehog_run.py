@@ -61,11 +61,13 @@ class TestTrufflehogRun(unittest.TestCase):
         exclude_paths = ['.git', 'gradle']
         agent_os = 'Windows'
         agent_work_folder = '/usr/temp'
+        sys_working_dir = '/usr/local'
         num_threads = 4
+        repository_name = 'NU00000_Repo_Test'
 
         trufflehog_run = TrufflehogRun()
 
-        result, file_findings = trufflehog_run.run_tool_secret_scan(files_commits, exclude_paths, agent_os, agent_work_folder, num_threads)
+        result, file_findings = trufflehog_run.run_tool_secret_scan(files_commits, exclude_paths, agent_os, agent_work_folder, num_threads, repository_name)
 
         expected_result = [
             {"SourceMetadata": {"Data": {"Filesystem": {"file": "/usr/bin/local/file1.txt", "line": 1}}}, "SourceID": 1,
@@ -93,7 +95,7 @@ class TestTrufflehogRun(unittest.TestCase):
 
         trufflehog_run = TrufflehogRun()
 
-        result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt')
+        result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt', 'NU00000_Repo_Test')
 
         expected_result = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
         self.assertEqual(result, expected_result)
