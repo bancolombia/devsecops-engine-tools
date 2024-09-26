@@ -43,7 +43,8 @@ class TrufflehogRun(ToolGateway):
         exclude_paths,
         agent_os,
         agent_work_folder,
-        num_threads
+        num_threads,
+        repository_name,
     ):
         trufflehog_command = "trufflehog"
         if "Windows" in agent_os:
@@ -59,6 +60,7 @@ class TrufflehogRun(ToolGateway):
                 [agent_work_folder] * len(include_paths),
                 [exclude_path] * len(include_paths),
                 include_paths,
+                [repository_name] * len(include_paths),
             )
         findings, file_findings = self.create_file(self.decode_output(results), agent_work_folder)
         return  findings, file_findings
@@ -86,9 +88,10 @@ class TrufflehogRun(ToolGateway):
         trufflehog_command,
         agent_work_folder,
         exclude_path,
-        include_path
+        include_path,
+        repository_name,
     ):
-        command = f"{trufflehog_command} filesystem {agent_work_folder} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
+        command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
         result = subprocess.run(command, capture_output=True, shell=True, text=True)
         return result.stdout.strip()
 
