@@ -104,13 +104,8 @@ class HandleScan:
                 )
             return findings_list, input_core
         elif "engine_container" in dict_args["tool"]:
-            secret_sca = ""
-            if secret_tool is not None:
-                secret_sca = secret_tool["token_prisma_cloud"]
-            else:
-                secret_sca = dict_args["token_engine_container"]
             findings_list, input_core = runner_engine_container(
-                dict_args, config_tool["ENGINE_CONTAINER"]["TOOL"], secret_sca, self.devops_platform_gateway
+                dict_args, config_tool["ENGINE_CONTAINER"]["TOOL"], secret_tool, self.devops_platform_gateway
             )
             if (
                 dict_args["use_vulnerability_management"] == "true"
@@ -137,12 +132,8 @@ class HandleScan:
                 )
             return findings_list, input_core
         elif "engine_dependencies" in dict_args["tool"]:
-            if secret_tool is not None:
-                secret_sca = secret_tool["token_xray"]
-            else:
-                secret_sca = dict_args["token_engine_dependencies"]
             findings_list, input_core = runner_engine_dependencies(
-                dict_args, config_tool, secret_sca, self.devops_platform_gateway
+                dict_args, config_tool, secret_tool, self.devops_platform_gateway
             )
 
             if (

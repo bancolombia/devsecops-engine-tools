@@ -138,7 +138,7 @@ def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image):
 
         scan_manager = PrismaCloudManagerScan()
         result = scan_manager.run_tool_container_sca(
-            mock_remoteconfig, "prisma_secret_key", "image_name", "result.json"
+            mock_remoteconfig, {"token_prisma_cloud": "token"}, "token_container", "image_name", "result.json"
         )
 
         assert result == "result.json"
