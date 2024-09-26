@@ -230,7 +230,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
         mock_runner_engine_dependencies.assert_called_once_with(
-            dict_args, config_tool, secret_tool["token_xray"], self.devops_platform_gateway
+            dict_args, config_tool, secret_tool, self.devops_platform_gateway
         )
 
         

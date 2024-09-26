@@ -16,7 +16,7 @@ class DependenciesScan:
         exclusions,
         pipeline_name,
         to_scan,
-        token,
+        secret_tool,
     ):
         self.tool_run = tool_run
         self.tool_deserializator = tool_deserializator
@@ -25,7 +25,7 @@ class DependenciesScan:
         self.pipeline_name = pipeline_name
         self.dict_args = dict_args
         self.to_scan = to_scan
-        self.token = token
+        self.secret_tool = secret_tool
 
     def process(self):
         """
@@ -39,7 +39,8 @@ class DependenciesScan:
             self.exclusions,
             self.pipeline_name,
             self.to_scan,
-            self.token,
+            self.secret_tool,
+            self.dict_args["token_engine_dependencies"],
         )
 
     def deserializator(self, dependencies_scanned):
