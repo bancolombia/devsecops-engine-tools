@@ -31,7 +31,7 @@ class CmdbRestConsumer:
         try:
             response = self.__session.post(self.__host, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
             if response.status_code != 200:
-                logger.error(response)
+                logger.warning(response)
                 raise ApiError(f"Error querying cmdb: {response.reason}")
 
             if response.json() == []:
@@ -45,7 +45,7 @@ class CmdbRestConsumer:
             logger.info(data_map)
             cmdb_object = Cmdb.from_dict(data_map)
         except Exception as e:
-            logger.error(e)
+            logger.warning(e)
             return cmdb_object
         return cmdb_object
 

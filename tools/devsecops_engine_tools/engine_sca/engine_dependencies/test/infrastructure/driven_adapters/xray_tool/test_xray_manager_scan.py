@@ -380,7 +380,7 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
         dict_args = {"xray_mode": "audit"}
         prefix = os.path.join("user_path", "jf")
         to_scan = "working_dir"
-        token = "token123"
+        secret_tool = {"token_xray": "token123"}
         exclusion = {}
         pipeline_name = "pipeline"
         mock_system.return_value = "Linux"
@@ -393,11 +393,12 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
             exclusion,
             pipeline_name,
             to_scan,
-            token,
+            secret_tool,
+            None
         )
 
         mock_install_tool.assert_called_with(prefix, "1.0")
-        mock_config_server.assert_called_with(prefix, token)
+        mock_config_server.assert_called_with(prefix, "token123")
         mock_scan_dependencies.assert_called_with(
             prefix, "working_dir", dict_args["xray_mode"], ""
         )
@@ -423,7 +424,7 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
         dict_args = {"xray_mode": "audit"}
         prefix = os.path.join("user_path", "jf.exe")
         to_scan = "working_dir"
-        token = "token123"
+        secret_tool = {"token_xray" : "token123"}
         exclusion = {}
         pipeline_name = "pipeline"
         mock_system.return_value = "Windows"
@@ -436,11 +437,12 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
             exclusion,
             pipeline_name,
             to_scan,
-            token,
+            secret_tool,
+            None
         )
 
         mock_install_tool.assert_called_with(prefix, "1.0")
-        mock_config_server.assert_called_with(prefix, token)
+        mock_config_server.assert_called_with(prefix, "token123")
 
         mock_scan_dependencies.assert_called_with(
             prefix, "working_dir", dict_args["xray_mode"], ""
@@ -467,7 +469,7 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
         dict_args = {"xray_mode": "audit"}
         prefix = os.path.join("user_path", "jf")
         to_scan = "working_dir"
-        token = "token123"
+        token = None
         exclusion = {}
         pipeline_name = "pipeline"
         mock_system.return_value = "Darwin"
@@ -481,10 +483,11 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
             pipeline_name,
             to_scan,
             token,
+            "token_container"
         )
 
         mock_install_tool.assert_called_with(prefix, "1.0")
-        mock_config_server.assert_called_with(prefix, token)
+        mock_config_server.assert_called_with(prefix, "token_container")
 
         mock_scan_dependencies.assert_called_with(
             prefix, "working_dir", dict_args["xray_mode"], ""

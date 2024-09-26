@@ -19,7 +19,7 @@ def init_engine_sca_rm(
     tool_images,
     tool_deseralizator,
     dict_args,
-    token,
+    secret_tool,
     tool,
 ):
     remote_config = tool_remote.get_remote_config(
@@ -47,7 +47,8 @@ def init_engine_sca_rm(
             tool_images,
             tool_deseralizator,
             build_id,
-            token,
+            secret_tool,
+            dict_args["token_engine_container"],
             image_to_scan,
         )
         image_scanned = container_sca_scan.process()
