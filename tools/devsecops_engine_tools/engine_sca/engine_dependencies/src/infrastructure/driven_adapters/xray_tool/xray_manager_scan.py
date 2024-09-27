@@ -236,8 +236,10 @@ class XrayScan(ToolGateway):
         exclusion,
         pipeline_name,
         to_scan,
-        token,
+        secret_tool,
+        token_engine_dependencies
     ):
+        token = secret_tool["token_xray"] if secret_tool else token_engine_dependencies
         if dict_args["xray_mode"] == "scan":
             pattern = self.excluded_files(remote_config, pipeline_name, exclusion)
             to_scan = self.find_artifacts(

@@ -18,7 +18,7 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 def init_engine_dependencies(
-    tool_run, tool_remote, tool_deserializator, dict_args, token, tool
+    tool_run, tool_remote, tool_deserializator, dict_args, secret_tool, tool
 ):
     remote_config = tool_remote.get_remote_config(
         dict_args["remote_config_repo"],
@@ -51,7 +51,7 @@ def init_engine_dependencies(
                 exclusions,
                 pipeline_name,
                 to_scan,
-                token,
+                secret_tool,
             )
             dependencies_scanned = dependencies_sca_scan.process()
             deserialized = (
