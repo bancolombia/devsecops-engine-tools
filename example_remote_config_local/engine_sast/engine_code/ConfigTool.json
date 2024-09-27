@@ -2,6 +2,7 @@
     "IGNORE_SEARCH_PATTERN": [
       "test"
     ],
+    "EXCLUDE_FOLDER": [],
     "MESSAGE_INFO_ENGINE_CODE": "test message",
     "THRESHOLD": {
         "VULNERABILITY": {
@@ -15,9 +16,8 @@
         }
     },
     "BEARER": {
-      "EXCLUDE_FOLDER": [],
-      "RULES": [
-        "javascript_lang_logger_leak"
+      "EXCLUDED_RULES": [
+
       ]
     },
     "TARGET_BRANCHES": ["trunk", "develop"]

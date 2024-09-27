@@ -1,10 +1,9 @@
 from abc import ABCMeta, abstractmethod
+from devsecops_engine_tools.engine_sast.engine_code.src.domain.model.config_tool import (
+    ConfigTool,
+)
 
 class ToolGateway(metaclass=ABCMeta):
-    @abstractmethod
-    def install_tool(self, 
-                     agent_work_folder: str):
-        "install code scan tool"
 
     @abstractmethod
     def run_tool(self, 
@@ -12,5 +11,5 @@ class ToolGateway(metaclass=ABCMeta):
                  pull_request_files: list,
                  agent_work_folder: str,
                  repository: str,
-                 list_exclusions: list):
+                 config_tool: ConfigTool):
         "run code scan tool"

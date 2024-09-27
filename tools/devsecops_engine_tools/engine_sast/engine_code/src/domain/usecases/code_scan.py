@@ -1,3 +1,4 @@
+import re
 from devsecops_engine_tools.engine_sast.engine_code.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -28,7 +29,7 @@ class CodeScan:
         self.devops_platform_gateway = devops_platform_gateway
         self.git_gateway = git_gateway
 
-    def set_config_tool(self, dict_args, tool):
+    def set_config_tool(self, dict_args):
         init_config_tool = self.devops_platform_gateway.get_remote_config(
             dict_args["remote_config_repo"], 
             "engine_sast/engine_code/ConfigTool.json"
@@ -36,7 +37,7 @@ class CodeScan:
         scope_pipeline = self.devops_platform_gateway.get_variable(
             "pipeline_name"
         )
-        return ConfigTool(json_data=init_config_tool, tool=tool, scope=scope_pipeline)
+        return ConfigTool(json_data=init_config_tool, scope=scope_pipeline)
     
     def get_pull_request_files(self, target_branches):
         files_pullrequest = self.git_gateway.get_files_pull_request(
@@ -77,34 +78,33 @@ class CodeScan:
                         list_exclusions.append(exclusion)
         return list_exclusions, skip_tool
 
-    def apply_exclude_folder(self, exclude_folder, pull_request_file):
-        pull_file_list = pull_request_file.split("/")
-        for path in exclude_folder:
-            if path in pull_file_list:
+    def apply_exclude_folder(self, exclude_folder, ignore_search_pattern, pull_request_file):
+        patterns = ignore_search_pattern
+        patterns.extend([rf"/{re.escape(folder)}//*" for folder in exclude_folder])
+        
+        for pattern in patterns:
+            if re.search(pattern, pull_request_file):
                 return True
         return False
 
     def process(self, dict_args, tool):
-        config_tool = self.set_config_tool(dict_args, tool)
+        config_tool = self.set_config_tool(dict_args)
         list_exclusions, skip_tool = self.get_exclusions(dict_args, tool)
         findings_list, path_file_results = [], ""
 
         if not skip_tool:
             pull_request_files = []
-            if dict_args["folder_path"] is None:
+            if not dict_args["folder_path"]:
                 pull_request_files = self.get_pull_request_files(config_tool.target_branches)
                 pull_request_files = [pf for pf in pull_request_files 
-                                      if not self.apply_exclude_folder(config_tool.exclude_folder, pf)]
-            else:
-                list_exclusions = []
+                                      if not self.apply_exclude_folder(config_tool.exclude_folder, config_tool.ignore_search_pattern, pf)]
                 
             findings_list, path_file_results = self.tool_gateway.run_tool(
                 dict_args["folder_path"], 
                 pull_request_files,
                 self.devops_platform_gateway.get_variable("path_directory"),
                 self.devops_platform_gateway.get_variable("repository"),
-                list_exclusions,
-                config_tool.rules
+                config_tool
             )
 
         else:
