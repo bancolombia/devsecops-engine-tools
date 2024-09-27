@@ -92,7 +92,7 @@ def get_inputs_from_cli(args):
         "--folder_path",
         type=str,
         required=False,
-        help="Folder Path to scan, only apply engine_iac and engine_dependencies tools",
+        help="Folder Path to scan, only apply engine_iac, engine_code and engine_dependencies tools",
     )
     parser.add_argument(
         "-p",
