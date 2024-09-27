@@ -39,6 +39,7 @@ def container_sca_scan(
         mock_tool_deserializator,
         "1234",
         "token",
+        "token_engine_container",
         "image_to_scan"
     )
 
