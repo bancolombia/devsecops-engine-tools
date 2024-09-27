@@ -8,6 +8,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
 from dataclasses import dataclass
 from datetime import datetime
 
+
 @dataclass
 class DependencyCheckDeserialize(DeserializatorGateway):
 
@@ -15,18 +16,24 @@ class DependencyCheckDeserialize(DeserializatorGateway):
         list_open_vulnerabilities = []
         for dependency in dependencies_scanned_file.get("dependencies", []):
             for vulnerability in dependency.get("vulnerabilities", []):
+                fix = (
+                    vulnerability
+                    .get("vulnerableSoftware", [{}])[0]
+                    .get("software", {})
+                    .get("versionEndExcluding", None)
+                )
                 finding_open = Finding(
-                    id = vulnerability["name"][:20],
-                    cvss = str(vulnerability.get("cvssv3", {})),
-                    where = dependency.get("fileName").split(':')[-1].strip(),
-                    description = vulnerability["description"][:170],
-                    severity = vulnerability["severity"].lower(),
+                    id=vulnerability["name"][:20],
+                    cvss=str(vulnerability.get("cvssv3", {})),
+                    where=dependency.get("fileName").split(':')[-1].strip(),
+                    description=vulnerability["description"][:170],
+                    severity=vulnerability["severity"].lower(),
                     identification_date=datetime.now().strftime("%d%m%Y"),
                     published_date_cve=None,
                     module="engine_dependencies",
                     category=Category.VULNERABILITY,
-                    requirements=None,
-                    tool = "dependency-check"
+                    requirements=fix,
+                    tool="dependency-check"
                 )
                 list_open_vulnerabilities.append(finding_open)
 

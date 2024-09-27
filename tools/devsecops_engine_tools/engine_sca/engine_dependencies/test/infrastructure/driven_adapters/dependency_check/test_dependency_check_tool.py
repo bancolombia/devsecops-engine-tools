@@ -1,401 +1,297 @@
-from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool import (
-    DependencyCheckTool,
-)
+import unittest
 from unittest.mock import patch, mock_open, MagicMock
-from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import GithubApi
-from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.helpers.get_artifacts import GetArtifacts
-
-import pytest
-from unittest.mock import patch, Mock
 import os
-import json
+import shutil
 import subprocess
+from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool import DependencyCheckTool
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
-@pytest.fixture
-def dependency_check_scan_instance():
-    return DependencyCheckTool()
-
-@patch("builtins.open", new_callable=mock_open)
-@patch("requests.get")
-@patch.object(GithubApi, "unzip_file")
-def test_download_tool(mock_unzip_file, mock_requests_get, mock_open, dependency_check_scan_instance):
-    cli_version = "8.0.0"
-    expected_url = f"https://github.com/jeremylong/DependencyCheck/releases/download/v{cli_version}/dependency-check-{cli_version}-release.zip"
-    expected_zip_name = f"dependency_check_{cli_version}.zip"
+class TestDependencyCheckTool(unittest.TestCase):
     
-    mock_response = MagicMock()
-    mock_response.content = b"Fake content of the zip file"
-    mock_requests_get.return_value = mock_response
+    @patch('requests.get')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.Utils')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.open', new_callable=mock_open)
+    @patch('os.path.join')
+    @patch('os.path.expanduser')
+    def test_download_tool(self, mock_expanduser, mock_path_join, mock_open, mock_utils, mock_requests_get):
+        mock_expanduser.return_value = "/mock/home"
+        mock_path_join.return_value = "/mock/home/dependency_check_7.0.zip"
+        mock_requests_get.return_value.content = b"Fake Zip Content"
 
-    dependency_check_scan_instance.download_tool(cli_version)
+        tool = DependencyCheckTool()
 
-    mock_requests_get.assert_called_once_with(expected_url, allow_redirects=True)
+        tool.download_tool("7.0")
 
-    mock_open.assert_called_once_with(expected_zip_name, "wb")
+        mock_requests_get.assert_called_with("https://github.com/jeremylong/DependencyCheck/releases/download/v7.0/dependency-check-7.0-release.zip", allow_redirects=True)
 
-    mock_open().write.assert_called_once_with(b"Fake content of the zip file")
+        mock_expanduser.assert_called_once()
 
-    mock_unzip_file.assert_called_once_with(expected_zip_name, None)
+        mock_path_join.assert_called_with("/mock/home", "dependency_check_7.0.zip")
 
-    assert mock_unzip_file.call_count == 1
+        mock_open.assert_called_with("/mock/home/dependency_check_7.0.zip", "wb")
 
-@patch("subprocess.run")
-@patch("os.getcwd")
-@patch.object(DependencyCheckTool, "download_tool")
-def test_install_tool(mock_download_tool, mock_getcwd, mock_subprocess_run, dependency_check_scan_instance):
-    cli_version = "8.0.0"
-    current_route = "/fake/path"
-    bin_route = "dependency-check\\bin\\dependency-check.sh"
-    expected_command_prefix = os.path.join(current_route, bin_route)
+        mock_open().write.assert_called_once_with(b"Fake Zip Content")
 
-    mock_subprocess_run.side_effect = [
-        MagicMock(returncode=1),
-        MagicMock(returncode=1)
-    ]
+        mock_utils.return_value.unzip_file.assert_called_with("/mock/home/dependency_check_7.0.zip", "/mock/home")
 
-    mock_getcwd.return_value = current_route
+    @patch('shutil.which')
+    @patch('os.path.exists')
+    @patch('os.path.join')
+    @patch('os.path.expanduser')
+    @patch('subprocess.run')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.download_tool')
+    def test_install_tool_already_installed(self, mock_download_tool, mock_subprocess_run, mock_expanduser, mock_path_join, mock_exists, mock_which):
+        mock_which.return_value = "/mock/path/dependency-check.sh"
 
-    result = dependency_check_scan_instance.install_tool(cli_version)
+        tool = DependencyCheckTool()
 
-    mock_subprocess_run.assert_any_call(
-        ["which", "dependency-check.sh"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    mock_subprocess_run.assert_any_call(
-        ["which", expected_command_prefix],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+        result = tool.install_tool("7.0")
 
-    mock_getcwd.assert_called()
+        mock_download_tool.assert_not_called()
 
-    mock_download_tool.assert_called_once_with(cli_version)
+        self.assertEqual(result, "dependency-check.sh")
 
-    assert result == expected_command_prefix
+    @patch('shutil.which')
+    @patch('os.path.exists')
+    @patch('os.path.join')
+    @patch('os.path.expanduser')
+    @patch('subprocess.run')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.download_tool')
+    def test_install_tool_not_installed_linux(self, mock_download_tool, mock_subprocess_run, mock_expanduser, mock_path_join, mock_exists, mock_which):
+        mock_which.side_effect = [None, None]
+        mock_expanduser.return_value = "/mock/home"
+        mock_path_join.return_value = "/mock/home/dependency-check/bin/dependency-check.sh"
+        mock_exists.return_value = True
 
-@patch("subprocess.run")
-@patch("os.getcwd")
-def test_install_tool_already_installed(mock_getcwd, mock_subprocess_run, dependency_check_scan_instance):
-    command_prefix = "dependency-check.sh"
+        tool = DependencyCheckTool()
 
-    mock_subprocess_run.return_value = MagicMock(returncode=0)
+        result = tool.install_tool("7.0")
 
-    result = dependency_check_scan_instance.install_tool("8.0.0")
+        mock_download_tool.assert_called_once_with("7.0")
 
-    mock_subprocess_run.assert_called_once_with(
-        ["which", command_prefix],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+        mock_subprocess_run.assert_called_once_with(["chmod", "+x", "/mock/home/dependency-check/bin/dependency-check.sh"], check=True)
 
-    mock_getcwd.assert_not_called()
+        self.assertEqual(result, "/mock/home/dependency-check/bin/dependency-check.sh")
 
-    assert result == command_prefix
+    @patch('shutil.which')
+    @patch('os.path.exists')
+    @patch('os.path.join')
+    @patch('os.path.expanduser')
+    @patch('subprocess.run')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.download_tool')
+    def test_install_tool_windows(self, mock_download_tool, mock_subprocess_run, mock_expanduser, mock_path_join, mock_exists, mock_which):
+        mock_which.side_effect = [None, None]
+        mock_expanduser.return_value = "/mock/home"
+        mock_path_join.return_value = "/mock/home/dependency-check/bin/dependency-check.bat"
+        mock_exists.return_value = True
 
-@patch("subprocess.run")
-@patch.object(DependencyCheckTool, "download_tool")
-def test_install_tool_windows_first_try_success(mock_download_tool, mock_subprocess_run, dependency_check_scan_instance):
-    cli_version = "8.0.0"
-    command_prefix = "dependency-check.bat"
+        tool = DependencyCheckTool()
 
-    mock_subprocess_run.return_value = MagicMock()
+        result = tool.install_tool("7.0", is_windows=True)
 
-    result = dependency_check_scan_instance.install_tool_windows(cli_version)
+        mock_download_tool.assert_called_once_with("7.0")
 
-    mock_subprocess_run.assert_called_once_with(
-        [command_prefix, "--version"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+        mock_subprocess_run.assert_not_called()
 
-    mock_download_tool.assert_not_called()
+        self.assertEqual(result, "/mock/home/dependency-check/bin/dependency-check.bat")
 
-    assert result == command_prefix
+    @patch('shutil.which')
+    @patch('os.path.exists')
+    @patch('os.path.join')
+    @patch('os.path.expanduser')
+    @patch('subprocess.run')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.download_tool')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.logger.error')
+    def test_install_tool_error_handling(self, mock_logger_error, mock_download_tool, mock_subprocess_run, mock_expanduser, mock_path_join, mock_exists, mock_which):
+        mock_which.side_effect = [None, None]
+        mock_expanduser.return_value = "/mock/home"
+        mock_path_join.return_value = "/mock/home/dependency-check/bin/dependency-check.sh"
+        mock_exists.return_value = True
+        mock_subprocess_run.side_effect = Exception("chmod failed")
 
-@patch("subprocess.run")
-@patch("os.getcwd")
-@patch.object(DependencyCheckTool, "download_tool")
-def test_install_tool_windows_second_try_success(mock_download_tool, mock_getcwd, mock_subprocess_run, dependency_check_scan_instance):
-    cli_version = "8.0.0"
-    current_route = "C:\\fake\\path"
-    bin_route = "dependency-check\\bin\\dependency-check.bat"
-    expected_command_prefix = os.path.join(current_route, bin_route)
+        tool = DependencyCheckTool()
 
-    mock_subprocess_run.side_effect = [Exception(), MagicMock()]
+        result = tool.install_tool("7.0")
 
-    mock_getcwd.return_value = current_route
+        mock_download_tool.assert_called_once_with("7.0")
 
-    result = dependency_check_scan_instance.install_tool_windows(cli_version)
+        mock_logger_error.assert_called_once_with("Error installing OWASP dependency check: chmod failed")
 
-    mock_subprocess_run.assert_any_call(
-        [expected_command_prefix, "--version"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+        self.assertIsNone(result)
 
-    mock_download_tool.assert_not_called()
+    @patch('subprocess.run')
+    def test_scan_dependencies_success(self, mock_subprocess_run):
+        mock_subprocess_run.return_value = MagicMock()
 
-    assert result == expected_command_prefix
+        tool = DependencyCheckTool()
 
-@patch("subprocess.run")
-@patch("os.getcwd")
-@patch.object(DependencyCheckTool, "download_tool")
-def test_install_tool_windows_third_try_success(mock_download_tool, mock_getcwd, mock_subprocess_run, dependency_check_scan_instance):
-    cli_version = "8.0.0"
-    current_route = "C:\\fake\\path"
-    bin_route = "dependency-check\\bin\\dependency-check.bat"
-    expected_command_prefix = os.path.join(current_route, bin_route)
+        tool.scan_dependencies("dependency-check.sh", "mock_file_to_scan")
 
-    mock_subprocess_run.side_effect = [Exception(), Exception(), MagicMock()]
+        mock_subprocess_run.assert_called_once_with(
+            ["dependency-check.sh", "--scan", "mock_file_to_scan", "--format", "JSON"],
+            capture_output=True, 
+            check=True
+        )
 
-    mock_getcwd.return_value = current_route
+    @patch('subprocess.run')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.logger.error')
+    def test_scan_dependencies_failure(self, mock_logger_error, mock_subprocess_run):
+        mock_subprocess_run.side_effect = subprocess.CalledProcessError(
+            returncode=1, cmd="dependency-check.sh"
+        )
 
-    result = dependency_check_scan_instance.install_tool_windows(cli_version)
+        tool = DependencyCheckTool()
 
-    assert mock_subprocess_run.call_count == 2
+        tool.scan_dependencies("dependency-check.sh", "mock_file_to_scan")
 
-    mock_download_tool.assert_called_once_with(cli_version)
+        mock_logger_error.assert_called_once_with(
+            "Error executing OWASP dependency check scan: Command 'dependency-check.sh' returned non-zero exit status 1."
+        )
 
-    mock_subprocess_run.assert_called_with(
-        [expected_command_prefix, "--version"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+        mock_subprocess_run.assert_called_once_with(
+            ["dependency-check.sh", "--scan", "mock_file_to_scan", "--format", "JSON"],
+            capture_output=True, 
+            check=True
+        )
 
-    assert result == expected_command_prefix
+    @patch('platform.system')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.install_tool')
+    def test_select_operative_system_linux(self, mock_install_tool, mock_platform_system):
+        mock_platform_system.return_value = "Linux"
 
-@patch("subprocess.run")
-def test_scan_dependencies_without_update(mock_subprocess_run, dependency_check_scan_instance):
-    command_prefix = "dependency-check.sh"
-    file_to_scan = "sample_project"
-    nvd_api_key = "fake_api_key"
-    update_nvd = False
+        tool = DependencyCheckTool()
 
-    expected_command = [
-        command_prefix,
-        "--scan",
-        file_to_scan,
-        "--noupdate",
-        "--format",
-        "JSON"
-    ]
+        result = tool.select_operative_system("7.0")
 
-    dependency_check_scan_instance.scan_dependencies(command_prefix, file_to_scan, nvd_api_key, update_nvd)
+        mock_install_tool.assert_called_once_with("7.0", is_windows=False)
 
-    mock_subprocess_run.assert_called_once_with(expected_command, capture_output=True)
+        self.assertEqual(result, mock_install_tool.return_value)
 
-@patch("subprocess.run")
-def test_scan_dependencies_with_update(mock_subprocess_run, dependency_check_scan_instance):
-    command_prefix = "dependency-check.sh"
-    file_to_scan = "sample_project"
-    nvd_api_key = "fake_api_key"
-    update_nvd = True
+    @patch('platform.system')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.install_tool')
+    def test_select_operative_system_windows(self, mock_install_tool, mock_platform_system):
+        mock_platform_system.return_value = "Windows"
+        
+        tool = DependencyCheckTool()
 
-    expected_command = [
-        command_prefix,
-        "--scan",
-        file_to_scan,
-        "--nvdApiKey",
-        nvd_api_key,
-        "--format",
-        "JSON"
-    ]
+        tool.select_operative_system("7.0")
 
-    dependency_check_scan_instance.scan_dependencies(command_prefix, file_to_scan, nvd_api_key, update_nvd)
+        mock_install_tool.assert_called_once_with("7.0", is_windows=True)
 
-    mock_subprocess_run.assert_called_once_with(expected_command, capture_output=True)
+    @patch('platform.system')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.install_tool')
+    def test_select_operative_system_darwin(self, mock_install_tool, mock_platform_system):
+        mock_platform_system.return_value = "Darwin"
+        
+        tool = DependencyCheckTool()
 
-@patch("subprocess.run")
-def test_scan_dependencies_throws_exception(mock_subprocess_run, dependency_check_scan_instance, caplog):
-    command_prefix = "dependency-check.sh"
-    file_to_scan = "sample_project"
-    nvd_api_key = "fake_api_key"
-    update_nvd = False
+        tool.select_operative_system("7.0")
 
-    mock_subprocess_run.side_effect = subprocess.CalledProcessError(1, 'cmd')
+        mock_install_tool.assert_called_once_with("7.0", is_windows=False)
 
-    dependency_check_scan_instance.scan_dependencies(command_prefix, file_to_scan, nvd_api_key, update_nvd)
+    @patch('platform.system')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.logger.warning')
+    def test_select_operative_system_unsupported(self, mock_logger_warning, mock_platform_system):
+        mock_platform_system.return_value = "UnsupportedOS"
+        
+        tool = DependencyCheckTool()
 
-    assert "Error executing OWASP dependency check scan" in caplog.text
+        result = tool.select_operative_system("7.0")
 
-@patch("platform.system")
-@patch.object(DependencyCheckTool, "install_tool")
-@patch.object(DependencyCheckTool, "install_tool_windows")
-@patch.object(DependencyCheckTool, "scan_dependencies")
-def test_select_operative_system_linux(mock_scan_dependencies, mock_install_tool_windows, mock_install_tool, mock_platform_system, dependency_check_scan_instance):
-    cli_version = "8.0.0"
-    file_to_scan = "sample_project"
-    nvd_api_key = "fake_api_key"
-    update_nvd = False
+        mock_logger_warning.assert_called_once_with("UnsupportedOS is not supported.")
 
-    mock_platform_system.return_value = "Linux"
-    mock_install_tool.return_value = "/path/to/dependency-check.sh"
+        self.assertIsNone(result)
 
-    dependency_check_scan_instance.select_operative_system(cli_version, file_to_scan, nvd_api_key, update_nvd)
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.open', new_callable=mock_open, read_data='{"key": "value"}')
+    @patch('json.load')
+    def test_load_results_success(self, mock_json_load, mock_open_file):
+        mock_json_load.return_value = {"key": "value"}
 
-    mock_install_tool.assert_called_once_with(cli_version)
+        tool = DependencyCheckTool()
 
-    mock_install_tool_windows.assert_not_called()
+        result = tool.load_results()
 
-    mock_scan_dependencies.assert_called_once_with(
-        "/path/to/dependency-check.sh", file_to_scan, nvd_api_key, update_nvd
-    )
+        mock_open_file.assert_called_once_with('dependency-check-report.json')
 
-@patch("platform.system")
-@patch.object(DependencyCheckTool, "install_tool")
-@patch.object(DependencyCheckTool, "install_tool_windows")
-@patch.object(DependencyCheckTool, "scan_dependencies")
-def test_select_operative_system_windows(mock_scan_dependencies, mock_install_tool_windows, mock_install_tool, mock_platform_system, dependency_check_scan_instance):
-    cli_version = "8.0.0"
-    file_to_scan = "sample_project"
-    nvd_api_key = "fake_api_key"
-    update_nvd = False
+        mock_json_load.assert_called_once()
 
-    mock_platform_system.return_value = "Windows"
-    mock_install_tool_windows.return_value = "C:\\path\\to\\dependency-check.bat"
+        self.assertEqual(result, {"key": "value"})
 
-    dependency_check_scan_instance.select_operative_system(cli_version, file_to_scan, nvd_api_key, update_nvd)
+    
+    @patch('shutil.which')
+    def test_is_java_installed_found(self, mock_which):
+        mock_which.return_value = "/usr/bin/java"
 
-    mock_install_tool_windows.assert_called_once_with(cli_version)
+        tool = DependencyCheckTool()
 
-    mock_install_tool.assert_not_called()
+        result = tool.is_java_installed()
 
-    mock_scan_dependencies.assert_called_once_with(
-        "C:\\path\\to\\dependency-check.bat", file_to_scan, nvd_api_key, update_nvd
-    )
+        mock_which.assert_called_once_with("java")
 
-@patch("builtins.open", new_callable=mock_open, read_data='{"key": "value"}')
-@patch("json.load")
-def test_load_results_success(mock_json_load, mock_open_file, dependency_check_scan_instance):
-    mock_json_load.return_value = {"key": "value"}
+        self.assertTrue(result)
 
-    result = dependency_check_scan_instance.load_results()
+    @patch('shutil.which')
+    def test_is_java_installed_not_found(self, mock_which):
+        mock_which.return_value = None
 
-    mock_open_file.assert_called_once_with('dependency-check-report.json')
+        tool = DependencyCheckTool()
 
-    mock_json_load.assert_called_once()
+        result = tool.is_java_installed()
 
-    assert result == {"key": "value"}
-
-@patch("builtins.open", side_effect=FileNotFoundError)
-@patch("json.load")
-def test_load_results_file_not_found(mock_json_load, mock_open_file, dependency_check_scan_instance, caplog):
+        mock_which.assert_called_once_with("java")
 
-    result = dependency_check_scan_instance.load_results()
+        self.assertFalse(result)
 
-    mock_open_file.assert_called_once_with('dependency-check-report.json')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.is_java_installed')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.logger.error')
+    def test_run_tool_dependencies_sca_java_not_installed(self, mock_logger_error, mock_is_java_installed):
+        mock_is_java_installed.return_value = False
 
-    mock_json_load.assert_not_called()
+        tool = DependencyCheckTool()
 
-    assert "An error ocurred loading dependency-check results" in caplog.text
+        result = tool.run_tool_dependencies_sca({}, {}, {}, 'pipeline', 'to_scan', 'token')
 
-    assert result is None
+        mock_logger_error.assert_called_once_with("Java is not installed, please install it to run dependency check")
 
-@patch("builtins.open", new_callable=mock_open, read_data='{"key": "value"}')
-@patch("json.load", side_effect=json.JSONDecodeError("Expecting value", "", 0))
-def test_load_results_json_decode_error(mock_json_load, mock_open_file, dependency_check_scan_instance, caplog):
+        self.assertIsNone(result)
 
-    result = dependency_check_scan_instance.load_results()
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.is_java_installed')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.GetArtifacts')
+    def test_run_tool_dependencies_sca_no_artifacts_found(self, mock_get_artifacts, mock_is_java_installed):
+        mock_is_java_installed.return_value = True
 
-    mock_open_file.assert_called_once_with('dependency-check-report.json')
+        mock_get_artifacts.return_value.find_artifacts.return_value = []
 
-    mock_json_load.assert_called_once()
+        tool = DependencyCheckTool()
 
-    assert "An error ocurred loading dependency-check results" in caplog.text
+        remote_config = {"DEPENDENCY_CHECK": {"CLI_VERSION": "7.0", "PACKAGES_TO_SCAN": "packages"}}
 
-    assert result is None
+        result = tool.run_tool_dependencies_sca(remote_config, {}, {}, 'pipeline', 'to_scan', 'token')
 
-@patch.object(GetArtifacts, "excluded_files")
-@patch.object(GetArtifacts, "find_artifacts")
-@patch.object(DependencyCheckTool, "select_operative_system")
-@patch.object(DependencyCheckTool, "load_results")
-def test_run_tool_dependencies_sca_success(
-    mock_load_results,
-    mock_select_operative_system,
-    mock_find_artifacts,
-    mock_excluded_files,
-    dependency_check_scan_instance
-):
+        self.assertIsNone(result)
 
-    remote_config = {
-        "DEPENDENCY_CHECK": {
-            "CLI_VERSION": "8.0.0",
-            "NVD_API_KEY": "fake_api_key",
-            "UPDATE_NVD": True,
-            "PACKAGES_TO_SCAN": ["package1", "package2"]
-        }
-    }
-    dict_args = {}
-    exclusion = {}
-    pipeline_name = "test_pipeline"
-    to_scan = ["file1", "file2"]
-    token = "fake_token"
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.is_java_installed')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.select_operative_system')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.scan_dependencies')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.load_results')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.GetArtifacts')
+    def test_run_tool_dependencies_sca_success(self, mock_get_artifacts, mock_load_results, mock_scan_dependencies, mock_select_operative_system, mock_is_java_installed):
+        mock_is_java_installed.return_value = True
 
-    mock_excluded_files.return_value = ".js|.py"
-    mock_find_artifacts.return_value = ["filtered_file1", "filtered_file2"]
-    mock_load_results.return_value = {"key": "value"}
+        mock_get_artifacts.return_value.find_artifacts.return_value = ["artifact_to_scan"]
 
-    result = dependency_check_scan_instance.run_tool_dependencies_sca(
-        remote_config, dict_args, exclusion, pipeline_name, to_scan, token
-    )
+        mock_select_operative_system.return_value = "dependency-check.sh"
 
-    mock_excluded_files.assert_called_once_with(remote_config, pipeline_name, exclusion, "DEPENDENCY_CHECK")
+        mock_load_results.return_value = {"key": "value"}
 
-    mock_find_artifacts.assert_called_once_with(
-        to_scan, ".js|.py", remote_config["DEPENDENCY_CHECK"]["PACKAGES_TO_SCAN"]
-    )
+        tool = DependencyCheckTool()
 
-    mock_select_operative_system.assert_called_once_with(
-        "8.0.0", ["filtered_file1", "filtered_file2"], "fake_api_key", True
-    )
+        remote_config = {"DEPENDENCY_CHECK": {"CLI_VERSION": "7.0", "PACKAGES_TO_SCAN": "packages"}}
 
-    mock_load_results.assert_called_once()
-    assert result == {"key": "value"}
+        result = tool.run_tool_dependencies_sca(remote_config, {}, {}, 'pipeline', 'to_scan', 'token')
 
-@patch.object(GetArtifacts, "excluded_files")
-@patch.object(GetArtifacts, "find_artifacts")
-@patch.object(DependencyCheckTool, "select_operative_system")
-@patch.object(DependencyCheckTool, "load_results")
-def test_run_tool_dependencies_sca_no_results(
-    mock_load_results,
-    mock_select_operative_system,
-    mock_find_artifacts,
-    mock_excluded_files,
-    dependency_check_scan_instance
-):
-    remote_config = {
-        "DEPENDENCY_CHECK": {
-            "CLI_VERSION": "8.0.0",
-            "NVD_API_KEY": "fake_api_key",
-            "UPDATE_NVD": True,
-            "PACKAGES_TO_SCAN": ["package1", "package2"]
-        }
-    }
-    dict_args = {}
-    exclusion = {}
-    pipeline_name = "test_pipeline"
-    to_scan = ["file1", "file2"]
-    token = "fake_token"
+        mock_select_operative_system.assert_called_once_with("7.0")
 
-    mock_excluded_files.return_value = ".js|.py"
-    mock_find_artifacts.return_value = ["filtered_file1", "filtered_file2"]
+        mock_scan_dependencies.assert_called_once_with("dependency-check.sh", ["artifact_to_scan"])
 
-    mock_load_results.return_value = None
-
-    result = dependency_check_scan_instance.run_tool_dependencies_sca(
-        remote_config, dict_args, exclusion, pipeline_name, to_scan, token
-    )
-
-    mock_excluded_files.assert_called_once_with(remote_config, pipeline_name, exclusion, "DEPENDENCY_CHECK")
-
-    mock_find_artifacts.assert_called_once_with(
-        to_scan, ".js|.py", remote_config["DEPENDENCY_CHECK"]["PACKAGES_TO_SCAN"]
-    )
-
-    mock_select_operative_system.assert_called_once_with(
-        "8.0.0", ["filtered_file1", "filtered_file2"], "fake_api_key", True
-    )
-
-    mock_load_results.assert_called_once()
-    assert result is None
+        self.assertEqual(result, {"key": "value"})
