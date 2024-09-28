@@ -30,7 +30,6 @@ class NucleiTool(ToolGateway):
         self.target_config = target_config
         self.data_config_cli = data_config_cli
         self.TOOL: str = "NUCLEI"
-        self.debug: str = os.environ.get("DEBUG", "false")
 
     def configurate_external_checks(
         self, config_tool: ConfigTool, github_token: str, output_dir: str = "/tmp"
@@ -70,7 +69,7 @@ class NucleiTool(ToolGateway):
                 capture_output=True,
             )
             error = result.stderr
-            if (error is not None and error != "") and self.debug == "true":
+            if (error is not None and error != ""):
                 error = error.strip()
                 print(f"Error executing nuclei: {error}")
 

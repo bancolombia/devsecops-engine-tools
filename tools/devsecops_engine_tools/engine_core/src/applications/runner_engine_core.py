@@ -160,7 +160,8 @@ def get_inputs_from_cli(args):
     parser.add_argument(
         "--dast_file_path",
         required=False,
-        help="Engine DAST Api or Web Application configuration file path"
+        help="File path containing the configuration, structured according to the documentation, \
+        for the API or web application to be scanned by the DAST tool."
     )
     args = parser.parse_args()
     return {
