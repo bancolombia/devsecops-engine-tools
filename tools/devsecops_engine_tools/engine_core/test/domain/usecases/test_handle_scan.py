@@ -174,11 +174,11 @@ class TestHandleScan(unittest.TestCase):
         secret_tool = {"github_token": "example_token"}
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
         config_tool = {"ENGINE_DAST":{"ENABLED": "true", "TOOL": "NUCLEI"}}
-        # Simula lo que devolverá runner_engine_dast
+        # Simulates runner_engine_dast return
         mock_runner_engine_dast.return_value = (["finding1", "finding2"], "input_core_mock")
-        # Llama al método que deseas probar
+        # Call process method
         result_findings_list, result_input_core = self.handle_scan.process(dict_args, config_tool)
-        # Verifica que el mock se haya llamado correctamente
+        # Verifies mock have been called correctly
         mock_runner_engine_dast.assert_called_once_with(
             dict_args, config_tool["ENGINE_DAST"], secret_tool, self.devops_platform_gateway
         )
@@ -259,5 +259,5 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
         mock_runner_engine_dependencies.assert_called_once_with(
-            dict_args, config_tool, secret_tool["token_xray"], self.devops_platform_gateway
+            dict_args, config_tool, secret_tool, self.devops_platform_gateway
         )
