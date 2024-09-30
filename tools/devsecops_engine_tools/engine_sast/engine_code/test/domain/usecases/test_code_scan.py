@@ -39,7 +39,7 @@ class TestCodeScan(unittest.TestCase):
         self.mock_devops_platform_gateway.get_variable.return_value = "pipeline_test_name"
 
         # Act
-        self.code_scan.set_config_tool({"remote_config_repo": "test_repo"}, "TOOL_NAME")
+        self.code_scan.set_config_tool({"remote_config_repo": "test_repo"})
 
         # Assert
         self.mock_devops_platform_gateway.get_remote_config.assert_called_once_with(
@@ -48,7 +48,6 @@ class TestCodeScan(unittest.TestCase):
         self.mock_devops_platform_gateway.get_variable.assert_called_once_with("pipeline_name")
         mock_config_tool.assert_called_once_with(
             json_data={"test_key": "test_value"},
-            tool="TOOL_NAME",
             scope="pipeline_test_name"
         )
     
@@ -167,19 +166,28 @@ class TestCodeScan(unittest.TestCase):
         self.assertTrue(skip_tool)
         self.assertEqual(exclusions, [])
     
-    def test_apply_exclude_folder(self):
+    def test_apply_exclude_path(self):
         # Arrange
         exclude_folder_true = ["test_folder"]
         exclude_folder_false = ["folder"]
         path = "home/user/test_folder/test.txt"
+        
+        ignore_pattern_true = [r".*/test.txt"]
+        ignore_pattern_false = [r".*/test1.txt"]
+        path = "home/user/test_folder/test.txt"
 
         #Act
-        result_true = self.code_scan.apply_exclude_folder(exclude_folder_true, path)
-        result_false = self.code_scan.apply_exclude_folder(exclude_folder_false, path)
+        result_exclude_folder_true = self.code_scan.apply_exclude_path(exclude_folder_true, [], path)
+        result_exclude_folder_false = self.code_scan.apply_exclude_path(exclude_folder_false, [], path)
+        
+        result_ignore_pattern_true = self.code_scan.apply_exclude_path([], ignore_pattern_true, path)
+        result_ignore_pattern_false = self.code_scan.apply_exclude_path([], ignore_pattern_false, path)
 
         #Assert
-        self.assertTrue(result_true)
-        self.assertFalse(result_false)
+        self.assertTrue(result_exclude_folder_true)
+        self.assertFalse(result_exclude_folder_false)
+        self.assertTrue(result_ignore_pattern_true)
+        self.assertFalse(result_ignore_pattern_false)
 
     @patch(
         "devsecops_engine_tools.engine_sast.engine_code.src.domain.usecases.code_scan.InputCore"
@@ -189,8 +197,8 @@ class TestCodeScan(unittest.TestCase):
         self.code_scan.set_config_tool = Mock(return_value=Mock(scope_pipeline="test_scope", rules=["rule1", "rule2"]))
         self.code_scan.get_exclusions = Mock(return_value=(["exclusion1"], False))
         self.code_scan.get_pull_request_files = Mock(return_value=["file1.js", "file2.js"])
-        self.code_scan.apply_exclude_folder = Mock(return_value=False)
-        self.mock_tool_gateway.run_tool.return_value = (["finding1", "finding2"], "path/to/results")
+        self.code_scan.apply_exclude_path = Mock(return_value=False)
+        self.mock_tool_gateway.run_tool.return_value = (["finding1", "finding2"], "/path/to/results")
         self.mock_devops_platform_gateway.get_variable.side_effect = ["test_work_folder", "test_repo", "test_stage"]
 
         # Act
@@ -201,11 +209,11 @@ class TestCodeScan(unittest.TestCase):
         self.code_scan.get_exclusions.assert_called_once()
         self.code_scan.get_pull_request_files.assert_called_once()
         self.mock_tool_gateway.run_tool.assert_called_once_with(
-            None, ["file1.js", "file2.js"], "test_work_folder", "test_repo", ["exclusion1"], ["rule1", "rule2"]
+            None, ["file1.js", "file2.js"], "test_work_folder", "test_repo", self.code_scan.set_config_tool()
         )
         mock_input_core.assert_called_once_with(
             totalized_exclusions=["exclusion1"], threshold_defined=self.code_scan.set_config_tool.return_value.threshold,
-            path_file_results="path/to/results", custom_message_break_build=self.code_scan.set_config_tool.return_value.message_info_engine_code,
+            path_file_results="/path/to/results", custom_message_break_build=self.code_scan.set_config_tool.return_value.message_info_engine_code,
             scope_pipeline="test_scope", stage_pipeline="Test_stage"
         )
         self.assertEqual(findings_list, ["finding1", "finding2"])

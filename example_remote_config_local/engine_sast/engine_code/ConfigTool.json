@@ -1,6 +1,6 @@
 {
     "IGNORE_SEARCH_PATTERN": [
-      "test"
+      ".git"
     ],
     "EXCLUDE_FOLDER": [],
     "MESSAGE_INFO_ENGINE_CODE": "test message",
@@ -16,8 +16,9 @@
         }
     },
     "BEARER": {
+      "NUMBER_THREADS": 4,
       "EXCLUDED_RULES": [
-
+        "javascript_lang_path_traversal"
       ]
     },
     "TARGET_BRANCHES": ["trunk", "develop"]

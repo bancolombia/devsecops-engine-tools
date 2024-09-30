@@ -2,7 +2,7 @@
 	"All": {
 		"BEARER": [
 			{
-				"id": "javascript_express_exposed_dir_listing",
+				"id": "test_id",
 				"where": "all",
 				"create_date": "18112023",
 				"expired_date": "18032024",
