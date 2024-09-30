@@ -3,7 +3,7 @@
 1. In the root of the project execute the following commands:
  
 ```bash
-python -m pip install
+python -m pip install --upgrade pip
 ```
 ```bash
 python -m pip install setuptools virtualenv wheel
