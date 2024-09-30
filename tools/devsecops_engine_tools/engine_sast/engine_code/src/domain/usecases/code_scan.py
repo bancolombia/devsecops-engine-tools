@@ -78,7 +78,7 @@ class CodeScan:
                         list_exclusions.append(exclusion)
         return list_exclusions, skip_tool
 
-    def apply_exclude_folder(self, exclude_folder, ignore_search_pattern, pull_request_file):
+    def apply_exclude_path(self, exclude_folder, ignore_search_pattern, pull_request_file):
         patterns = ignore_search_pattern
         patterns.extend([rf"/{re.escape(folder)}//*" for folder in exclude_folder])
         
@@ -97,8 +97,8 @@ class CodeScan:
             if not dict_args["folder_path"]:
                 pull_request_files = self.get_pull_request_files(config_tool.target_branches)
                 pull_request_files = [pf for pf in pull_request_files 
-                                      if not self.apply_exclude_folder(config_tool.exclude_folder, config_tool.ignore_search_pattern, pf)]
-                
+                                      if not self.apply_exclude_path(config_tool.exclude_folder, config_tool.ignore_search_pattern, pf)]
+
             findings_list, path_file_results = self.tool_gateway.run_tool(
                 dict_args["folder_path"], 
                 pull_request_files,

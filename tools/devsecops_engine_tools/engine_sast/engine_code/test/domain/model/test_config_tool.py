@@ -15,6 +15,7 @@ class TestConfigTool(unittest.TestCase):
             "IGNORE_SEARCH_PATTERN": [
             "test"
             ],
+            "EXCLUDE_FOLDER": ["test"],
             "MESSAGE_INFO_ENGINE_CODE": "test message",
             "THRESHOLD": {
                 "VULNERABILITY": {
@@ -28,8 +29,8 @@ class TestConfigTool(unittest.TestCase):
                 }
             },
             "TOOL_NAME": {
-                "EXCLUDE_FOLDER": ["test"],
-                "RULES": ["test_rule"]
+                "NUMBER_THREADS": 4,
+                "EXCLUDED_RULES": ["test_rule"],
             },
             "TARGET_BRANCHES": ["trunk", "develop"]
         }
@@ -38,7 +39,7 @@ class TestConfigTool(unittest.TestCase):
         scope = "pipeline"
 
         # Act
-        config_tool = ConfigTool(mock_json_data, tool, scope)
+        config_tool = ConfigTool(mock_json_data, scope)
 
         # Assert
         self.assertEqual(config_tool.ignore_search_pattern, ["test"])
@@ -46,5 +47,6 @@ class TestConfigTool(unittest.TestCase):
         mock_threshold.assert_called_once_with(mock_json_data["THRESHOLD"])
         self.assertEqual(config_tool.target_branches, ["trunk", "develop"])
         self.assertEqual(config_tool.exclude_folder, ["test"])
-        self.assertEqual(config_tool.rules, ["test_rule"])
         self.assertEqual(config_tool.scope_pipeline, "pipeline")
+        self.assertEqual(config_tool.data[tool]["NUMBER_THREADS"], 4)
+        self.assertEqual(config_tool.data[tool]["EXCLUDED_RULES"], ["test_rule"])

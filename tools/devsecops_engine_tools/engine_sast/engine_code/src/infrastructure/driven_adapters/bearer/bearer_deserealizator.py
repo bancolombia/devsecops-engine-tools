@@ -33,7 +33,7 @@ class BearerDeserealizator:
                     finding = Finding(
                         id=vul["id"],
                         cvss="",
-                        where=vul["full_filename"].replace(agent_work_folder, ""),
+                        where=vul["full_filename"].replace(agent_work_folder, "").replace("/copy_files_bearer", ""),
                         description=formatted_description,
                         severity=sev.lower(),
                         identification_date=datetime.now().strftime("%d%m%Y"),
