@@ -24,9 +24,9 @@ class TestBearerTool(unittest.TestCase):
         tool.install_tool()
         
         # Assert
-        install_command = f"curl -sfL https://raw.githubusercontent.com/Bearer/bearer/main/contrib/install.sh | sh -s -- -b ."
+        install_command = f"curl -sfL https://raw.githubusercontent.com/Bearer/bearer/main/contrib/install.sh | sh -s -- -b /usr/local/bin"
         mock_subprocess.assert_has_calls([
-            call(f"./bearer version", capture_output=True, shell=True),
+            call(f"bearer version", capture_output=True, shell=True),
             call(install_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True),
             call(install_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True),
         ])
@@ -43,7 +43,7 @@ class TestBearerTool(unittest.TestCase):
         tool.install_tool()
         
         # Assert
-        mock_subprocess.assert_called_once_with("./bearer version", capture_output=True, shell=True)
+        mock_subprocess.assert_called_once_with("bearer version", capture_output=True, shell=True)
 
     def test_config_data(self):
         # Arrange
@@ -143,7 +143,7 @@ class TestBearerTool(unittest.TestCase):
 
         # Assert
         mock_run.assert_called_once_with(
-            f"./bearer scan {path} --config-file {agent_work_folder}/bearer.yml",
+            f"bearer scan {path} --config-file {agent_work_folder}/bearer.yml",
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
