@@ -40,7 +40,8 @@ main.py
 common_devsecops_lib/sheckov_scan.json
 _core_test*
 results.json
-bearer*
+bearer*.yml
+bearer*.json
 bin
 results*.json
 RULES_DOCKERcheckov_config.yaml

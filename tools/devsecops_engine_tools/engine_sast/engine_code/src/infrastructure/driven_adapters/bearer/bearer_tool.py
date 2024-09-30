@@ -17,7 +17,7 @@ class BearerTool(ToolGateway):
     MAX_RETRY = 5
 
     def install_tool(self):        
-        command = f"./bearer version"
+        command = f"bearer version"
         result = subprocess.run(
             command, 
             capture_output=True, 
@@ -25,7 +25,7 @@ class BearerTool(ToolGateway):
         )
 
         if result.returncode != 0:
-            command = f"curl -sfL https://raw.githubusercontent.com/Bearer/bearer/main/contrib/install.sh | sh -s -- -b ."
+            command = f"curl -sfL https://raw.githubusercontent.com/Bearer/bearer/main/contrib/install.sh | sh -s -- -b /usr/local/bin"
 
             for num_try in range(self.MAX_RETRY):
                 result = subprocess.run(
@@ -74,7 +74,7 @@ class BearerTool(ToolGateway):
         shutil.copy2(path, destination_path)
 
     def scan_path(self, path, agent_work_folder):
-        command = f"./bearer scan {path} --config-file {agent_work_folder}/bearer.yml"
+        command = f"bearer scan {path} --config-file {agent_work_folder}/bearer.yml"
         subprocess.run(
             command,
             check=True,
