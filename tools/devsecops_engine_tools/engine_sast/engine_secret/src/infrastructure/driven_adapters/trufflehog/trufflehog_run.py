@@ -43,20 +43,19 @@ class TrufflehogRun(ToolGateway):
     def run_tool_secret_scan(
         self,
         files_commits,
-        exclude_paths,
         agent_os,
         agent_work_folder,
-        num_threads,
         repository_name,
+        config_tool
     ):
         trufflehog_command = "trufflehog"
         if "Windows" in agent_os:
             trufflehog_command = "C:/Trufflehog/bin/trufflehog.exe"
         with open(f"{agent_work_folder}/excludedPath.txt", "w") as file:
-            file.write("\n".join(exclude_paths))
+            file.write("\n".join(config_tool.exclude_path))
         exclude_path = f"{agent_work_folder}/excludedPath.txt"
         include_paths = self.config_include_path(files_commits, agent_work_folder)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=config_tool.number_threads) as executor:
             results = executor.map(
                 self.run_trufflehog,
                 [trufflehog_command] * len(include_paths),
