@@ -9,3 +9,6 @@ class DeserializeConfigTool:
         self.exclude_path = json_data[tool]["EXCLUDE_PATH"]
         self.number_threads = json_data[tool]["NUMBER_THREADS"]
         self.target_branches = json_data["TARGET_BRANCHES"]
+        self.enable_custom_rules = json_data[tool]["ENABLE_CUSTOM_RULES"]
+        self.externar_dir_owner = json_data[tool]["EXTERNAL_DIR_OWNER"]
+        self.external_dir_repo = json_data[tool]["EXTERNAL_DIR_REPOSITORY"]
