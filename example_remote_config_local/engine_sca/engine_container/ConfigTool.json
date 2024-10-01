@@ -18,7 +18,7 @@
             "Low": 999
         },
         "CUSTOM_VULNERABILITY": {
-            "PATTERN_APPS": "^(?!App1$).*(App2.*|.*App3.*)",
+            "PATTERN_APPS": "^(?!(App1|Apptest)$).*(App2.*|.*App3.*|.*App.*)",
             "VULNERABILITY": {
                 "Critical": 0,
                 "High": 0,
