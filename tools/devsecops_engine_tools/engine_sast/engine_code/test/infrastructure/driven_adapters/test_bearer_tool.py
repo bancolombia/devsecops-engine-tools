@@ -49,7 +49,6 @@ class TestBearerTool(unittest.TestCase):
         # Arrange
         tool = BearerTool()
         agent_work_folder = "/agent/work/folder"
-        list_skip_rules = ["vul_id1", "vul_id2"]
 
         expected_data = {
             "report": {
@@ -63,14 +62,11 @@ class TestBearerTool(unittest.TestCase):
                 "domain-resolution-timeout": "3s",
                 "exit-code": 0,
                 "scanner": ["sast"]
-            },
-            "rule": {
-                "skip-rule": list_skip_rules,
             }
         }
 
         # Act
-        result = tool.config_data(agent_work_folder, list_skip_rules)
+        result = tool.config_data(agent_work_folder)
 
         # Assert
         self.assertEqual(result, expected_data)
@@ -85,15 +81,14 @@ class TestBearerTool(unittest.TestCase):
         # Arrange
         tool = BearerTool()
         agent_work_folder = "/agent/work/folder"
-        list_skip_rules = ["vul_id1", "vul_id2"]
 
         # Act
-        tool.create_config_file(agent_work_folder, list_skip_rules)
+        tool.create_config_file(agent_work_folder)
 
         # Assert
         mock_open.assert_called_once_with(f"{agent_work_folder}/bearer.yml", "w")
         mock_yaml_dump.assert_called_once_with(
-            tool.config_data(agent_work_folder, list_skip_rules),
+            tool.config_data(agent_work_folder),
             mock_open(),
             default_flow_style=False
         )
@@ -215,7 +210,6 @@ class TestBearerTool(unittest.TestCase):
         config_tool = MagicMock()
         config_tool.data = {
             tool.BEARER_TOOL: {
-                "EXCLUDED_RULES": ["rule1", "rule2"],
                 "NUMBER_THREADS": 4
             }
         }
@@ -227,7 +221,7 @@ class TestBearerTool(unittest.TestCase):
         
         # Assert
         mock_install_tool.assert_called_once()
-        mock_create_config_file.assert_called_once_with(agent_work_folder, ["rule1", "rule2"])
+        mock_create_config_file.assert_called_once_with(agent_work_folder)
         mock_scan_path.assert_called_once_with(folder_to_scan, agent_work_folder)
         mock_format_scan_file.assert_called_once_with(f"/agent/work/folder/bearer-scan.json", agent_work_folder)
         
@@ -278,7 +272,6 @@ class TestBearerTool(unittest.TestCase):
         config_tool = MagicMock()
         config_tool.data = {
             tool.BEARER_TOOL: {
-                "EXCLUDED_RULES": ["rule1", "rule2"],
                 "NUMBER_THREADS": 4
             }
         }
@@ -291,7 +284,7 @@ class TestBearerTool(unittest.TestCase):
         # Assert
         folder_copy_files = f"{agent_work_folder}/copy_files_bearer"
         mock_install_tool.assert_called_once()
-        mock_create_config_file.assert_called_once_with(agent_work_folder, ["rule1", "rule2"])
+        mock_create_config_file.assert_called_once_with(agent_work_folder)
         mock_makedirs.assert_called_once_with(folder_copy_files, exist_ok=True)
         mock_executor.submit.assert_any_call(tool.copy_file, "file1.txt", agent_work_folder, repository, folder_copy_files)
         mock_executor.submit.assert_any_call(tool.copy_file, "file2.txt", agent_work_folder, repository, folder_copy_files)

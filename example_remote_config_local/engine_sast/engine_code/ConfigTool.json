@@ -16,10 +16,7 @@
         }
     },
     "BEARER": {
-      "NUMBER_THREADS": 4,
-      "EXCLUDED_RULES": [
-        "javascript_lang_path_traversal"
-      ]
+      "NUMBER_THREADS": 4
     },
     "TARGET_BRANCHES": ["trunk", "develop"]
 }
