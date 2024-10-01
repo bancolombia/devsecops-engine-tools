@@ -13,12 +13,22 @@ on:
   pull_request:
     branches:
       - trunk
+    paths-ignore:
+      - 'ide_extension/**'
+      - '.github/workflows/intellij-build.yml'
+      - '.github/workflows/intellij-release.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Verify Conventional Commits
+        uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017 # v5.5.3
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
