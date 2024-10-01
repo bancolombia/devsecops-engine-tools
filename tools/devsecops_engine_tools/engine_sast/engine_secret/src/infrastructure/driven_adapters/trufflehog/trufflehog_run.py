@@ -7,6 +7,9 @@ import concurrent.futures
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway import (
     ToolGateway,
 )
+from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
+    GithubApi,
+)
 
 result = []
 
@@ -92,6 +95,15 @@ class TrufflehogRun(ToolGateway):
         repository_name,
     ):
         command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
+
+        # if config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_DIR"] == "True":
+        #     github_api = GithubApi(secret["github_token"])
+        #     github_api.download_latest_release_assets(
+        #         config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_OWNER"],
+        #         config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_REPOSITORY"],
+        #         "/tmp",
+        #     )
+
         result = subprocess.run(command, capture_output=True, shell=True, text=True)
         return result.stdout.strip()
 

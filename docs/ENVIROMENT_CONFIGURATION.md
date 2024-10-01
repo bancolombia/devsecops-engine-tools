@@ -42,7 +42,7 @@ PYTHONPATH=tools/
                 "--platform_devops",
                 "local",
                 "--remote_config_repo",
-                "DevSecOps_Remote_Config",
+                "example_remote_config_local",
                 "--tool",
                 "engine_iac",
                 "--use_secrets_manager",
