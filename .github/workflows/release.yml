@@ -6,10 +6,103 @@ on:
     - 'v*'
 
 jobs:
-  release:
+
+  update_version:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Release
-        uses: softprops/action-gh-release@v2
+      - name: Generate a token
+        id: generate_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        with:
+          app_id: ${{ secrets.APP_ID_ADMIN_GITHUB }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY_ADMIN_GITHUB }}
+      
+      # Check out the current repository
+      - name: Fetch Sources
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
+
+      - name: Upgrade python.version
+        run: sed -i "s/version = '.*'/version = '{{ env.RELEASE_VERSION }}'/" version.py
+        working-directory: ./tools/devsecops_engine_tools
+
+      - name: Save version
+        uses: github-actions-x/commit@722d56b8968bf00ced78407bbe2ead81062d8baa # v2.9
+        with:
+          github-token: ${{ steps.generate_token.outputs.token }}
+          push-branch: "trunk"
+          commit-message: 'upgrade version to ${{ env.RELEASE_VERSION }} version [skip ci]'
+          force-add: "true"
+          force-push: "true"
+          files: tools/devsecops_engine_tools/version.py
+          name: Release Bot
+          email: release-bot@bancolombia.com.co
+      
+  deploy_prod:
+    if: ${{ contains(github.ref,'refs/heads/trunk') }}
+    runs-on: ubuntu-latest
+    needs: update_version
+    environment: release
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build
+        run: |
+          cd tools/
+          python -m virtualenv _venv
+          source _venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install setuptools virtualenv wheel
+          python setup.py sdist bdist_wheel
+
+      - name: Publish a Python distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: tools/dist/
+
+  deploy_dockerhub:
+    needs:
+      - deploy_prod
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from version.py
+        id: get-version
+        run: |
+          VERSION=$(grep -E "version" tools/devsecops_engine_tools/version.py | cut -d= -f2 | sed "s/[[:space:]']//g")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Build and tag Docker image
+        run: |
+          docker build --build-arg VERSION=${{ env.VERSION }} -t bancolombia/devsecops-engine-tools:${{ env.VERSION }} -f docker/Dockerfile .
+          docker tag bancolombia/devsecops-engine-tools:${{ env.VERSION }} bancolombia/devsecops-engine-tools:${{ env.VERSION }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Publish a Docker image to Dockerhub
+        run: |
+          docker image push bancolombia/devsecops-engine-tools:${{ env.VERSION }}
