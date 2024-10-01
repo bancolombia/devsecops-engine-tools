@@ -90,7 +90,7 @@ class ImportScanUserCase:
 
         logger.debug(f"search Engagement name: {request.engagement_name}")
         engagement = self.__rest_engagement.get_engagements(request.engagement_name)
-        if engagement.results == []:
+        if engagement.results == [] or any(engagement.name == request.engagement_name for engagement in engagement.results):
             engagement = self.__rest_engagement.post_engagement(request.engagement_name, product_id)
             logger.debug(f"Egagement created: {engagement.name}")
         else:
