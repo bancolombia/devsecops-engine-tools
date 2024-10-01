@@ -1,7 +1,6 @@
 {
     "branches": [
-        "trunk",
-        "feature/semantic_release"
+        "trunk"
     ],
     "plugins": [
         "@semantic-release/commit-analyzer",
