@@ -28,7 +28,7 @@ class SecretScan:
         self.tool_deserialize = tool_deserialize
         self.git_gateway = git_gateway
 
-    def process(self, skip_tool, config_tool):
+    def process(self, skip_tool, config_tool, secret_tool):
         finding_list = []
         file_path_findings = ""
         if skip_tool == False:
@@ -48,7 +48,8 @@ class SecretScan:
                     self.devops_platform_gateway.get_variable("os"),
                     self.devops_platform_gateway.get_variable("path_directory"),
                     self.devops_platform_gateway.get_variable("repository"),
-                    config_tool)
+                    config_tool,
+                    secret_tool)
             finding_list = self.tool_deserialize.get_list_vulnerability(
                 findings,
                 self.devops_platform_gateway.get_variable("os"),

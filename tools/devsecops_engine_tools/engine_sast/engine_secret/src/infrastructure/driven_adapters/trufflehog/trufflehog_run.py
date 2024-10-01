@@ -10,6 +10,10 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.t
 from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
     GithubApi,
 )
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 result = []
 
@@ -46,7 +50,8 @@ class TrufflehogRun(ToolGateway):
         agent_os,
         agent_work_folder,
         repository_name,
-        config_tool
+        config_tool,
+        secret_tool
     ):
         trufflehog_command = "trufflehog"
         if "Windows" in agent_os:
@@ -55,6 +60,10 @@ class TrufflehogRun(ToolGateway):
             file.write("\n".join(config_tool.exclude_path))
         exclude_path = f"{agent_work_folder}/excludedPath.txt"
         include_paths = self.config_include_path(files_commits, agent_work_folder)
+        enable_custom_rules = config_tool.enable_custom_rules.lower()
+        if secret_tool is not None and enable_custom_rules == "true":
+            self.configurate_external_checks(config_tool, secret_tool)
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=config_tool.number_threads) as executor:
             results = executor.map(
                 self.run_trufflehog,
@@ -63,6 +72,7 @@ class TrufflehogRun(ToolGateway):
                 [exclude_path] * len(include_paths),
                 include_paths,
                 [repository_name] * len(include_paths),
+                enable_custom_rules
             )
         findings, file_findings = self.create_file(self.decode_output(results), agent_work_folder)
         return  findings, file_findings
@@ -92,16 +102,12 @@ class TrufflehogRun(ToolGateway):
         exclude_path,
         include_path,
         repository_name,
+        enable_custom_rules
     ):
         command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
 
-        # if config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_DIR"] == "True":
-        #     github_api = GithubApi(secret["github_token"])
-        #     github_api.download_latest_release_assets(
-        #         config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_OWNER"],
-        #         config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_REPOSITORY"],
-        #         "/tmp",
-        #     )
+        if enable_custom_rules == "true":
+            command.replace("--no-verification --json", "--config /tmp/rules/trufflehog/custom-rules.yaml --no-verification --json")
 
         result = subprocess.run(command, capture_output=True, shell=True, text=True)
         return result.stdout.strip()
@@ -127,3 +133,14 @@ class TrufflehogRun(ToolGateway):
                 json_str = json.dumps(find)
                 file.write(json_str + '\n')
         return findings, file_findings
+    
+    def configurate_external_checks(self, config_tool, secret_tool):
+        try:
+            github_api = GithubApi(secret_tool["github_token"])
+            github_api.download_latest_release_assets(
+                config_tool.external_dir_owner,
+                config_tool.external_dir_repo,
+                "/tmp",
+            )
+        except Exception as ex:
+            logger.error(f"An error ocurred download external checks {ex}")
