@@ -26,6 +26,12 @@ on:
       - ".github/workflows/intellij-release.yml"
   # Trigger the workflow on any pull request
   pull_request:
+    branches:
+      - trunk
+    paths:
+      - "ide_extension/intellij/**"
+      - ".github/workflows/intellij-build.yml"
+      - ".github/workflows/intellij-release.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
