@@ -39,7 +39,7 @@ class BearerTool(ToolGateway):
                 if num_try == self.MAX_RETRY - 1: 
                     raise Exception(f"Error installing Bearer tool.")
 
-    def config_data(self, agent_work_folder, excluded_rules):
+    def config_data(self, agent_work_folder):
         data = {
             "report": {
                 "output": f"{agent_work_folder}/bearer-scan.json",
@@ -53,18 +53,15 @@ class BearerTool(ToolGateway):
                 "exit-code": 0,
                 "scanner": ["sast"]
             },
-            "rule": {
-                "skip-rule": excluded_rules
-            }
         }
         return data
 
-    def create_config_file(self, agent_work_folder, excluded_rules):
+    def create_config_file(self, agent_work_folder):
         with open(
             f"{agent_work_folder}/bearer.yml",
             "w",
         ) as file:
-            yaml.dump(self.config_data(agent_work_folder, excluded_rules), file, default_flow_style=False)
+            yaml.dump(self.config_data(agent_work_folder), file, default_flow_style=False)
             file.close()
 
     def copy_file(self, pull_file, agent_work_folder, repository, path_to_scan):
@@ -107,10 +104,9 @@ class BearerTool(ToolGateway):
     def run_tool(self, folder_to_scan, pull_request_files, agent_work_folder, repository, config_tool):
         self.install_tool()
 
-        excluded_rules = config_tool.data[self.BEARER_TOOL]["EXCLUDED_RULES"]
         number_threads = config_tool.data[self.BEARER_TOOL]["NUMBER_THREADS"]
         scan_result_path = f"{agent_work_folder}/bearer-scan.json"
-        self.create_config_file(agent_work_folder, excluded_rules)
+        self.create_config_file(agent_work_folder)
 
         if folder_to_scan:
             path_to_scan = folder_to_scan
