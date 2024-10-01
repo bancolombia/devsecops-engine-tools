@@ -2,9 +2,7 @@
     "SEARCH_PATTERN": [
         "ms_"
     ],
-    "IGNORE_SEARCH_PATTERN": [
-        "test"
-    ],
+    "IGNORE_SEARCH_PATTERN": "(.*_test)",
     "MESSAGE_INFO_ENGINE_IAC": "message custom",
     "THRESHOLD": {
         "VULNERABILITY": {
