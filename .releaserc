@@ -1,6 +1,7 @@
 {
     "branches": [
-        "trunk"
+        "trunk",
+        "feature/custom_level_vulnerability"
     ],
     "plugins": [
         "@semantic-release/commit-analyzer",
