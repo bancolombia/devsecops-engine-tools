@@ -30,7 +30,7 @@ jobs:
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
 
       - name: Upgrade python.version
-        run: sed -i "s/version = '.*'/version = '{{ env.RELEASE_VERSION }}'/" version.py
+        run: sed -i '' "s/version = '.*'/version = '{{ env.RELEASE_VERSION }}'/" version.py
         working-directory: ./tools/devsecops_engine_tools
 
       - name: Save version
@@ -80,6 +80,7 @@ jobs:
     needs:
       - deploy_prod
     runs-on: ubuntu-latest
+    timeout-minutes: 1
     environment: release
     permissions:
       id-token: write
