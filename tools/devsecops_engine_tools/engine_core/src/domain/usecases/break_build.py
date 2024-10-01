@@ -1,4 +1,5 @@
 import sys
+import re
 from dataclasses import dataclass
 from functools import reduce
 
@@ -65,6 +66,9 @@ class BreakBuild:
             "vulnerabilities": {},
             "compliances": {},
         }
+
+        if threshold.custom_vulnerability and bool(re.match(threshold.custom_vulnerability.pattern_apps, input_core.scope_pipeline, re.IGNORECASE)):
+            threshold.vulnerability = threshold.custom_vulnerability.vulnerability
 
         if len(findings_list) != 0:
             self._apply_policie_exception_new_vulnerability_industry(
