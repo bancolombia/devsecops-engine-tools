@@ -26,29 +26,34 @@ class TestEngineSecretScan(unittest.TestCase):
             }
         }
         json_config = {
-            "IGNORE_SEARCH_PATTERN": [
-                "test"
-            ],
-            "MESSAGE_INFO_ENGINE_SECRET": "If you have doubts, visit url",
-            "THRESHOLD": {
-                "VULNERABILITY": {
-                    "Critical": 1,
-                    "High": 1,
-                    "Medium": 1,
-                    "Low": 1
+                "IGNORE_SEARCH_PATTERN": [
+                    "test",
+                    "NU0429001_DevSecOps_Remote_Config"
+                ],
+                "MESSAGE_INFO_ENGINE_SECRET": "If you have doubts, visit https://discuss.apps.bancolombia.com/t/evolucion-tarea-escaneo-de-secretos-devsecops-engine-tools/11091",
+                "THRESHOLD": {
+                    "VULNERABILITY": {
+                        "Critical": 1,
+                        "High": 1,
+                        "Medium": 1,
+                        "Low": 1
+                    },
+                    "COMPLIANCE": {
+                        "Critical": 0
+                    }
                 },
-                "COMPLIANCE": {
-                    "Critical": 0
+                "TARGET_BRANCHES": ["trunk", "develop", "main"],
+                "trufflehog": {
+                    "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
+                    "NUMBER_THREADS": 4,
+                    "ENABLE_CUSTOM_RULES" : "True",
+                    "EXTERNAL_DIR_OWNER": "BCSCode",
+                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks_IaC"
                 }
-            },
-            "TARGET_BRANCHES": ["trunk", "develop"],
-            "trufflehog": {
-                "EXCLUDE_PATH": [".git"],
-                "NUMBER_THREADS": 4
             }
-        }
         obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
         mock_devops_platform_gateway.get_remote_config.side_effect = [json_exclusion ,json_config, json_exclusion]
+        secret_tool = "secret"
         
         mock_secret_scan_instance = MockSecretScan.return_value
         mock_secret_scan_instance.complete_config_tool.return_value = obj_config_tool
@@ -64,7 +69,8 @@ class TestEngineSecretScan(unittest.TestCase):
             mock_dict_args,
             mock_tool,
             mock_tool_deserealizator,
-            mock_git_gateway
+            mock_git_gateway,
+            secret_tool
         )
         
         self.assertEqual(findings, [])
