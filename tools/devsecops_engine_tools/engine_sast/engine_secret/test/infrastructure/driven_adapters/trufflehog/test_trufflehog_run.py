@@ -63,18 +63,35 @@ class TestTrufflehogRun(unittest.TestCase):
         agent_os = 'Windows'
         agent_work_folder = '/usr/temp'
         repository_name = 'NU00000_Repo_Test'
-        json_string = """
+        json_config_tool = """
             {
+                "IGNORE_SEARCH_PATTERN": [
+                    "test",
+                    "NU0429001_DevSecOps_Remote_Config"
+                ],
+                "MESSAGE_INFO_ENGINE_SECRET": "If you have doubts, visit https://discuss.apps.bancolombia.com/t/evolucion-tarea-escaneo-de-secretos-devsecops-engine-tools/11091",
+                "THRESHOLD": {
+                    "VULNERABILITY": {
+                        "Critical": 1,
+                        "High": 1,
+                        "Medium": 1,
+                        "Low": 1
+                    },
+                    "COMPLIANCE": {
+                        "Critical": 0
+                    }
+                },
+                "TARGET_BRANCHES": ["trunk", "develop", "main"],
                 "trufflehog": {
-                    "EXCLUDE_PATH": [".git"],
+                    "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
                     "NUMBER_THREADS": 4,
-                    "ENABLE_CUSTOM_RULES": "True",
-                    "EXTERNAL_DIR_OWNER": "ExternalOrg",
-                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks"
+                    "ENABLE_CUSTOM_RULES" : "True",
+                    "EXTERNAL_DIR_OWNER": "BCSCode",
+                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks_IaC"
                 }
             }
-            """
-        init_config_tool = json.loads(json_string)
+        """
+        init_config_tool = json.loads(json_config_tool)
         config_tool = DeserializeConfigTool(json_data=init_config_tool, tool="TRUFFLEHOG")
         secret_tool = "secret"
 
