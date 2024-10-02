@@ -82,12 +82,13 @@ class IacScan:
 
     def complete_config_tool(self, data_file_tool, exclusions, tool, dict_args):
         config_tool = ConfigTool(json_data=data_file_tool)
-        skip_tool = False
 
         config_tool.exclusions = exclusions
         config_tool.scope_pipeline = self.devops_platform_gateway.get_variable(
             "pipeline_name"
         )
+
+        skip_tool = bool(re.match(config_tool.ignore_search_pattern, config_tool.scope_pipeline, re.IGNORECASE))
 
         if config_tool.exclusions.get("All") is not None:
             config_tool.exclusions_all = config_tool.exclusions.get("All").get(tool)
@@ -96,8 +97,6 @@ class IacScan:
                 config_tool.scope_pipeline
             ).get(tool)
             skip_tool = bool(config_tool.exclusions.get(config_tool.scope_pipeline).get("SKIP_TOOL"))
-        
-        skip_tool = bool(re.match(config_tool.ignore_search_pattern, config_tool.scope_pipeline, re.IGNORECASE))
 
         if dict_args["folder_path"]:
             if (
