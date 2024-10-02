@@ -7,11 +7,13 @@ on:
 
 jobs:
 
-  update_version:
+  release:
     runs-on: ubuntu-latest
+    environment: release
     permissions:
       contents: write
       pull-requests: write
+      id-token: write
     steps:
       - name: Generate a token
         id: generate_token
@@ -44,16 +46,6 @@ jobs:
           files: tools/devsecops_engine_tools/version.py
           name: Release Bot
           email: release-bot@bancolombia.com.co
-      
-  deploy_prod:
-    runs-on: ubuntu-latest
-    needs: update_version
-    environment: release
-    permissions:
-      id-token: write
-
-    steps:
-      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -81,27 +73,10 @@ jobs:
         with:
           packages-dir: tools/dist/
 
-  deploy_dockerhub:
-    needs:
-      - deploy_prod
-    runs-on: ubuntu-latest
-    timeout-minutes: 1
-    environment: release
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Extract version from version.py
-        id: get-version
-        run: |
-          VERSION=$(grep -E "version" tools/devsecops_engine_tools/version.py | cut -d= -f2 | sed "s/[[:space:]']//g")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
       - name: Build and tag Docker image
         run: |
-          docker build --build-arg VERSION=${{ env.VERSION }} -t bancolombia/devsecops-engine-tools:${{ env.VERSION }} -f docker/Dockerfile .
-          docker tag bancolombia/devsecops-engine-tools:${{ env.VERSION }} bancolombia/devsecops-engine-tools:${{ env.VERSION }}
+          docker build --build-arg VERSION=${{ env.RELEASE_VERSION }} -t bancolombia/devsecops-engine-tools:${{ env.RELEASE_VERSION }} -f docker/Dockerfile .
+          docker tag bancolombia/devsecops-engine-tools:${{ env.RELEASE_VERSION }} bancolombia/devsecops-engine-tools:${{ env.RELEASE_VERSION }}
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -111,4 +86,4 @@ jobs:
 
       - name: Publish a Docker image to Dockerhub
         run: |
-          docker image push bancolombia/devsecops-engine-tools:${{ env.VERSION }}
+          docker image push bancolombia/devsecops-engine-tools:${{ env.RELEASE_VERSION }}
