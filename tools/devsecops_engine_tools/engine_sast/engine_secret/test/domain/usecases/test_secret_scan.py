@@ -30,7 +30,10 @@ class TestSecretScan(unittest.TestCase):
             "TARGET_BRANCHES": ["trunk", "develop"],
             "trufflehog": {
                 "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
-                "NUMBER_THREADS": 4
+                "NUMBER_THREADS": 4,
+                "ENABLE_CUSTOM_RULES" : "True",
+                "EXTERNAL_DIR_OWNER": "ExternalOrg",
+                "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks"
             }
         }
 
@@ -53,6 +56,8 @@ class TestSecretScan(unittest.TestCase):
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
         mock_git_gateway_instance = mock_git_gateway.return_value
 
+        secret_tool = "secret"
+
         secret_scan = SecretScan(
             mock_tool_gateway_instance,
             mock_devops_gateway_instance,
@@ -72,7 +77,7 @@ class TestSecretScan(unittest.TestCase):
         )
 
         finding_list, file_path_findings = secret_scan.process(
-            False, obj_config_tool
+            False, obj_config_tool, secret_tool
         )
 
         self.assertEqual(finding_list, ["vulnerability_data"])
@@ -99,6 +104,8 @@ class TestSecretScan(unittest.TestCase):
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
         mock_git_gateway_instance = mock_git_gateway.return_value
 
+        secret_tool = "secret"
+
         secret_scan = SecretScan(
             mock_tool_gateway_instance,
             mock_devops_gateway_instance,
@@ -114,7 +121,7 @@ class TestSecretScan(unittest.TestCase):
         mock_tool_gateway_instance.run_tool_secret_scan.return_value = "", ""
 
         finding_list, file_path_findings = secret_scan.process(
-            False, obj_config_tool
+            False, obj_config_tool, secret_tool
         )
 
         self.assertEqual(finding_list, [])
