@@ -37,8 +37,8 @@ jobs:
         uses: github-actions-x/commit@722d56b8968bf00ced78407bbe2ead81062d8baa # v2.9
         with:
           github-token: ${{ steps.generate_token.outputs.token }}
-          push-branch: "feature/custom_level_vulnerability"
-          commit-message: 'upgrade version to ${{ env.RELEASE_VERSION }} version'
+          push-branch: "trunk"
+          commit-message: 'upgrade version to ${{ env.RELEASE_VERSION }} version [skip ci]'
           force-add: "true"
           force-push: "true"
           files: tools/devsecops_engine_tools/version.py
@@ -77,7 +77,6 @@ jobs:
           python setup.py sdist bdist_wheel
 
       - name: Publish a Python distribution to PyPI
-        if: ${{ contains(github.ref,'refs/heads/trunk') }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: tools/dist/

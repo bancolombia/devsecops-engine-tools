@@ -92,7 +92,7 @@ jobs:
 
   releaseDraft:
     name: Release draft
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/feature/custom_level_vulnerability'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/trunk'
     needs: build
     runs-on: ubuntu-latest
     permissions:
