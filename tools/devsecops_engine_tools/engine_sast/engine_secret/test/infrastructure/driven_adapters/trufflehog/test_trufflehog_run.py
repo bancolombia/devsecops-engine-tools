@@ -92,7 +92,7 @@ class TestTrufflehogRun(unittest.TestCase):
             }
         """
         init_config_tool = json.loads(json_config_tool)
-        config_tool = DeserializeConfigTool(json_data=init_config_tool, tool="TRUFFLEHOG")
+        config_tool = DeserializeConfigTool(json_data=init_config_tool, tool="trufflehog")
         secret_tool = "secret"
 
         trufflehog_run = TrufflehogRun()
