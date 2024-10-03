@@ -55,6 +55,9 @@ class TestSecretScan(unittest.TestCase):
         mock_devops_gateway_instance = mock_devops_gateway.return_value
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
         mock_git_gateway_instance = mock_git_gateway.return_value
+        mock_dict_args = {
+            "remote_config_repo": "fake_repo"
+        }
 
         secret_tool = "secret"
 
@@ -77,7 +80,7 @@ class TestSecretScan(unittest.TestCase):
         )
 
         finding_list, file_path_findings = secret_scan.process(
-            False, obj_config_tool, secret_tool
+            False, obj_config_tool, secret_tool, mock_dict_args
         )
 
         self.assertEqual(finding_list, ["vulnerability_data"])
@@ -103,6 +106,9 @@ class TestSecretScan(unittest.TestCase):
         mock_devops_gateway_instance = mock_devops_gateway.return_value
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
         mock_git_gateway_instance = mock_git_gateway.return_value
+        mock_dict_args = {
+            "remote_config_repo": "fake_repo"
+        }
 
         secret_tool = "secret"
 
@@ -121,7 +127,7 @@ class TestSecretScan(unittest.TestCase):
         mock_tool_gateway_instance.run_tool_secret_scan.return_value = "", ""
 
         finding_list, file_path_findings = secret_scan.process(
-            False, obj_config_tool, secret_tool
+            False, obj_config_tool, secret_tool, mock_dict_args
         )
 
         self.assertEqual(finding_list, [])

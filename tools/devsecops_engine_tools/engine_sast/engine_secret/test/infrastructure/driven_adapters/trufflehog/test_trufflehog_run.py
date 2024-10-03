@@ -63,6 +63,7 @@ class TestTrufflehogRun(unittest.TestCase):
         agent_os = 'Windows'
         agent_work_folder = '/usr/temp'
         repository_name = 'NU00000_Repo_Test'
+        secret_external_checks = "github:tokenFake"
         json_config_tool = {
                 "IGNORE_SEARCH_PATTERN": [
                     "test",
@@ -94,7 +95,7 @@ class TestTrufflehogRun(unittest.TestCase):
 
         trufflehog_run = TrufflehogRun()
 
-        result, file_findings = trufflehog_run.run_tool_secret_scan(files_commits, agent_os, agent_work_folder, repository_name, config_tool, secret_tool)
+        result, file_findings = trufflehog_run.run_tool_secret_scan(files_commits, agent_os, agent_work_folder, repository_name, config_tool, secret_tool, secret_external_checks)
 
         expected_result = [
             {"SourceMetadata": {"Data": {"Filesystem": {"file": "/usr/bin/local/file1.txt", "line": 1}}}, "SourceID": 1,

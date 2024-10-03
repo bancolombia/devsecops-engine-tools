@@ -51,7 +51,8 @@ class TrufflehogRun(ToolGateway):
         agent_work_folder,
         repository_name,
         config_tool,
-        secret_tool
+        secret_tool,
+        secret_external_checks
     ):
         trufflehog_command = "trufflehog"
         if "Windows" in agent_os:
@@ -61,8 +62,15 @@ class TrufflehogRun(ToolGateway):
         exclude_path = f"{agent_work_folder}/excludedPath.txt"
         include_paths = self.config_include_path(files_commits, agent_work_folder)
         enable_custom_rules = config_tool.enable_custom_rules.lower()
-        if secret_tool is not None and enable_custom_rules == "true":
-            self.configurate_external_checks(config_tool, secret_tool)
+        secret = None
+        
+        if secret_tool is not None:
+            secret = secret_tool["github_token"] if "github" in secret_tool else None
+        elif secret_external_checks is not None:
+            secret = secret_external_checks.split("github:")[1] if "github" in secret_external_checks else None            
+
+        if enable_custom_rules == "true":
+            self.configurate_external_checks(config_tool, secret)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=config_tool.number_threads) as executor:
             results = executor.map(
@@ -134,9 +142,9 @@ class TrufflehogRun(ToolGateway):
                 file.write(json_str + '\n')
         return findings, file_findings
     
-    def configurate_external_checks(self, config_tool, secret_tool):
+    def configurate_external_checks(self, config_tool, secret):
         try:
-            github_api = GithubApi(secret_tool["github_token"])
+            github_api = GithubApi(secret)
             github_api.download_latest_release_assets(
                 config_tool.external_dir_owner,
                 config_tool.external_dir_repo,
