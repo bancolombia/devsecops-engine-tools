@@ -201,22 +201,6 @@ class TestDependencyCheckTool(unittest.TestCase):
         mock_logger_warning.assert_called_once_with("UnsupportedOS is not supported.")
 
         self.assertIsNone(result)
-
-    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.open', new_callable=mock_open, read_data='{"key": "value"}')
-    @patch('json.load')
-    def test_load_results_success(self, mock_json_load, mock_open_file):
-        mock_json_load.return_value = {"key": "value"}
-
-        tool = DependencyCheckTool()
-
-        result = tool.load_results()
-
-        mock_open_file.assert_called_once_with('dependency-check-report.json')
-
-        mock_json_load.assert_called_once()
-
-        self.assertEqual(result, {"key": "value"})
-
     
     @patch('shutil.which')
     def test_is_java_installed_found(self, mock_which):
@@ -249,7 +233,7 @@ class TestDependencyCheckTool(unittest.TestCase):
 
         tool = DependencyCheckTool()
 
-        result = tool.run_tool_dependencies_sca({}, {}, {}, 'pipeline', 'to_scan', 'token')
+        result = tool.run_tool_dependencies_sca({}, {}, {}, 'pipeline', 'to_scan', 'token', 'token_engine_dependencies')
 
         mock_logger_error.assert_called_once_with("Java is not installed, please install it to run dependency check")
 
@@ -266,32 +250,33 @@ class TestDependencyCheckTool(unittest.TestCase):
 
         remote_config = {"DEPENDENCY_CHECK": {"CLI_VERSION": "7.0", "PACKAGES_TO_SCAN": "packages"}}
 
-        result = tool.run_tool_dependencies_sca(remote_config, {}, {}, 'pipeline', 'to_scan', 'token')
+        result = tool.run_tool_dependencies_sca(remote_config, {}, {}, 'pipeline', 'to_scan', 'token', 'token_engine_dependencies')
 
         self.assertIsNone(result)
 
     @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.is_java_installed')
     @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.select_operative_system')
     @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.scan_dependencies')
-    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.load_results')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckTool.search_result')
     @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.GetArtifacts')
-    def test_run_tool_dependencies_sca_success(self, mock_get_artifacts, mock_load_results, mock_scan_dependencies, mock_select_operative_system, mock_is_java_installed):
+    def test_run_tool_dependencies_sca_success(self, mock_get_artifacts, mock_search_result, mock_scan_dependencies, mock_select_operative_system, mock_is_java_installed):
         mock_is_java_installed.return_value = True
 
+        mock_get_artifacts.return_value.excluded_files.return_value = "some_pattern"
         mock_get_artifacts.return_value.find_artifacts.return_value = ["artifact_to_scan"]
 
         mock_select_operative_system.return_value = "dependency-check.sh"
 
-        mock_load_results.return_value = {"key": "value"}
+        mock_search_result.return_value = {"key": "value"}
 
         tool = DependencyCheckTool()
 
         remote_config = {"DEPENDENCY_CHECK": {"CLI_VERSION": "7.0", "PACKAGES_TO_SCAN": "packages"}}
 
-        result = tool.run_tool_dependencies_sca(remote_config, {}, {}, 'pipeline', 'to_scan', 'token')
+        result = tool.run_tool_dependencies_sca(remote_config, {}, {}, 'pipeline', 'to_scan', 'token', 'token_engine_dependencies')
 
         mock_select_operative_system.assert_called_once_with("7.0")
 
-        mock_scan_dependencies.assert_called_once_with("dependency-check.sh", ["artifact_to_scan"], 'token')
+        mock_scan_dependencies.assert_called_once_with("dependency-check.sh", ["artifact_to_scan"], 'token_engine_dependencies')
 
         self.assertEqual(result, {"key": "value"})
