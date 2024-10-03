@@ -8,9 +8,12 @@ fun environment(key: String) = providers.environmentVariable(key)
 plugins {
     id("java")
     id("jacoco")
-    alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
-    alias(libs.plugins.changelog) // Gradle Changelog Plugin
-    alias(libs.plugins.sonar) // Gradle Sonar Plugin
+    // IntelliJ Platform Gradle Plugin
+    id("org.jetbrains.intellij.platform") version "2.0.1"
+    // Gradle Changelog Plugin
+    id("org.jetbrains.changelog") version "2.2.1"
+    // Gradle Sonar Plugin
+    id("org.sonarqube") version "5.1.0.4882"
 }
 
 group = properties("pluginGroup").get()
@@ -29,7 +32,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation(libs.junit)
+    testImplementation("junit:junit:4.13.2")
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
