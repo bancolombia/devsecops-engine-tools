@@ -63,8 +63,7 @@ class TestTrufflehogRun(unittest.TestCase):
         agent_os = 'Windows'
         agent_work_folder = '/usr/temp'
         repository_name = 'NU00000_Repo_Test'
-        json_config_tool = """
-            {
+        json_config_tool = {
                 "IGNORE_SEARCH_PATTERN": [
                     "test",
                     "NU0429001_DevSecOps_Remote_Config"
@@ -90,9 +89,7 @@ class TestTrufflehogRun(unittest.TestCase):
                     "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks_IaC"
                 }
             }
-        """
-        init_config_tool = json.loads(json_config_tool)
-        config_tool = DeserializeConfigTool(json_data=init_config_tool, tool="trufflehog")
+        config_tool = DeserializeConfigTool(json_data=json_config_tool, tool="trufflehog")
         secret_tool = "secret"
 
         trufflehog_run = TrufflehogRun()
