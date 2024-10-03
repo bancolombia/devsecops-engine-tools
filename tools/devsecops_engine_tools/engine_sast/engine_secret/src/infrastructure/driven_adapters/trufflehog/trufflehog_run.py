@@ -69,7 +69,7 @@ class TrufflehogRun(ToolGateway):
         elif secret_external_checks is not None:
             secret = secret_external_checks.split("github:")[1] if "github" in secret_external_checks else None            
 
-        if enable_custom_rules == "true":
+        if enable_custom_rules == "true" and secret is not None:
             self.configurate_external_checks(config_tool, secret)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=config_tool.number_threads) as executor:
