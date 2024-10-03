@@ -9,7 +9,7 @@ plugins {
     id("java")
     id("jacoco")
     // IntelliJ Platform Gradle Plugin
-    id("org.jetbrains.intellij.platform") version "2.0.1"
+    id("org.jetbrains.intellij.platform") version "2.1.0"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.2.1"
     // Gradle Sonar Plugin
@@ -51,7 +51,7 @@ dependencies {
     }
 
     implementation("com.squareup.okhttp3:okhttp")
-    implementation("org.jetbrains:annotations:24.1.0")
+    implementation("org.jetbrains:annotations:25.0.0")
 
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
@@ -59,7 +59,7 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:1.18.34")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.34")
 
-    testImplementation("org.mockito:mockito-core:5.13.0")
+    testImplementation("org.mockito:mockito-core:5.14.1")
 
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
 }
