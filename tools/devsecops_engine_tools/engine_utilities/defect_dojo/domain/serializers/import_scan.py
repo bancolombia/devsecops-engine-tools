@@ -19,6 +19,7 @@ list_scan_type = [
     "AWS Security Hub Scan",
     "Azure Security Center Recommendations Scan",
     "Bandit Scan",
+    "Bearer CLI",
     "BlackDuck API",
     "Blackduck Component Risk",
     "Blackduck Hub Scan",

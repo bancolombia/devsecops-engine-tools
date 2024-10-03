@@ -75,8 +75,9 @@ class PrismaCloudManagerScan(ToolGateway):
             logger.error(f"Error during image scan of {image_name}: {e.stderr}")
 
     def run_tool_container_sca(
-        self, remoteconfig, prisma_secret_key, image_name, result_file
+        self, remoteconfig, secret_tool, token_engine_container, image_name, result_file
     ):
+        prisma_secret_key = secret_tool["token_prisma_cloud"] if secret_tool else token_engine_container
         file_path = os.path.join(
             os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
         )

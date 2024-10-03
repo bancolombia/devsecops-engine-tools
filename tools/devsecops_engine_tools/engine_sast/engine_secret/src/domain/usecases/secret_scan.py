@@ -11,7 +11,7 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.g
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway import (
+from devsecops_engine_tools.engine_utilities.git_cli.model.gateway.git_gateway import (
     GitGateway
 )
 

@@ -1,0 +1,26 @@
+{
+	"All": {
+		"BEARER": [
+			{
+				"id": "test_id",
+				"where": "all",
+				"create_date": "18112023",
+				"expired_date": "18032024",
+				"severity": "Low",
+				"hu": "0000000"
+			}
+		]
+	},
+	"Repository_Test": {
+		"BEARER": [
+			{
+				"id": "javascript_lang_logger_leak",
+				"where": "/repository_name/path/to/file.ts",
+				"create_date": "18112023",
+				"expired_date": "18032024",
+				"severity": "Low",
+				"hu": "0000000"
+			}
+		]
+	}
+}

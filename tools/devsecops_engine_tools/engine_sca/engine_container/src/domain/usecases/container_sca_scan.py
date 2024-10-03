@@ -19,7 +19,8 @@ class ContainerScaScan:
         tool_images: ImagesGateway,
         tool_deseralizator: DeseralizatorGateway,
         build_id,
-        token,
+        secret_tool,
+        token_engine_container,
         image_to_scan,
     ):
         self.tool_run = tool_run
@@ -27,7 +28,8 @@ class ContainerScaScan:
         self.tool_images = tool_images
         self.tool_deseralizator = tool_deseralizator
         self.build_id = build_id
-        self.token = token
+        self.secret_tool = secret_tool
+        self.token_engine_container = token_engine_container
         self.image_to_scan = image_to_scan
 
     def get_image(self, image_to_scan):
@@ -73,7 +75,7 @@ class ContainerScaScan:
                 print(f"The image {image_name} has already been scanned previously.")
                 return image_scanned
             image_scanned = self.tool_run.run_tool_container_sca(
-                self.remote_config, self.token, image_name, result_file
+                self.remote_config, self.secret_tool, self.token_engine_container, image_name, result_file
             )
             self.set_image_scanned(image_name)
         else:
