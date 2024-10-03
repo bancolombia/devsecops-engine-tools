@@ -11,7 +11,11 @@ class TestEngineSecretScan(unittest.TestCase):
         mock_devops_platform_gateway = Mock()
         mock_tool_gateway = Mock()
         mock_dict_args = {
-            "remote_config_repo": "fake_repo"
+            "remote_config_repo": "example_repo",
+            "folder_path": ".",
+            "environment": "test",
+            "platform": "local",
+            "token_external_checks": "fake_github_token",
         }
         mock_tool = "TRUFFLEHOG"
         mock_tool_deserealizator = Mock()
