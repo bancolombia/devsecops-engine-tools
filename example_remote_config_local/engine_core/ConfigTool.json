@@ -44,5 +44,9 @@
     "ENGINE_DEPENDENCIES": {
         "ENABLED": "true",
         "TOOL": "XRAY|DEPENDENCY_CHECK"
+    },
+    "ENGINE_CODE": {
+        "ENABLED": "true",
+        "TOOL": "BEARER"
     }
 }

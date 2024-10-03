@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.git_cli.git_run import GitRun
+from devsecops_engine_tools.engine_utilities.git_cli.infrastructure.git_run import GitRun
 
 class TestGitRun(unittest.TestCase):
     @patch('os.makedirs')

@@ -15,7 +15,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.en
 )
 
 
-def runner_engine_dependencies(dict_args, config_tool, token, devops_platform_gateway):
+def runner_engine_dependencies(dict_args, config_tool, secret_tool, devops_platform_gateway):
     try:
         tools_mapping = {
             "XRAY": {
@@ -38,7 +38,7 @@ def runner_engine_dependencies(dict_args, config_tool, token, devops_platform_ga
             devops_platform_gateway,
             tool_deserializator,
             dict_args,
-            token,
+            secret_tool,
             config_tool["ENGINE_DEPENDENCIES"]["TOOL"],
         )
 

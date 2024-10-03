@@ -1,9 +1,25 @@
 {
     "MESSAGE_INFO": "Custom message",
     "IGNORE_ANALYSIS_PATTERN": "(.*_test|test_.*)",
+    "HANDLE_SERVICE_NAME": {
+        "ENABLED": "false",
+        "ERASE_SERVICE_ENDING": [
+            "_custom_ending1",
+            "_custom_ending2"
+        ],
+        "REGEX_GET_SERVICE_CODE": "[^_]+",
+        "REGEX_GET_WORDS": "[_-]",
+        "MIN_WORD_LENGTH": 3,
+        "MIN_WORD_AMOUNT": 2,
+        "REGEX_CHECK_WORDS": "(a^)",
+        "ADD_SERVICES": [
+            "{service_code}-custom_service",
+            "custom_service"
+        ]
+    },
     "PARENT_ANALYSIS": {
         "ENABLED": "false",
-        "PARENT_IDENTIFIER": "_id_included"
+        "REGEX_GET_PARENT": "^.*?_parent_id"
     },
     "EXCLUSIONS_PATHS": {
         "engine_code": "engine_sast/engine_code/Exclusions.json",
@@ -31,7 +47,10 @@
     "THRESHOLD": {
         "REMEDIATION_RATE": 50,
         "RISK_SCORE": 10,
-        "TAG_BLACKLIST": ["tag1", "tag2"],
+        "TAG_BLACKLIST": [
+            "tag1",
+            "tag2"
+        ],
         "TAG_MAX_AGE": 999
     }
 }

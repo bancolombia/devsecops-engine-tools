@@ -23,16 +23,35 @@ class BreakBuildTests(unittest.TestCase):
     @patch("builtins.print")
     def test_process_no_findings(self, mock_print):
         findings_list = []
-        input_core = Mock()
-        input_core.threshold_defined = Mock()
+        input_core = InputCore
+        input_core.threshold_defined = Threshold(
+            {
+                "VULNERABILITY": {
+                    "Critical": 1,
+                    "High": 3,
+                    "Medium": 10,
+                    "Low": 15,
+                },
+                "CUSTOM_VULNERABILITY": {
+                    "PATTERN_APPS": "^(?!App1$).*(App2.*|.*App3.*)",
+                    "VULNERABILITY": {
+                        "Critical": 0,
+                        "High": 0,
+                        "Medium": 5,
+                        "Low": 10,
+                    },
+                },
+                "COMPLIANCE": {"Critical": 1},
+                "CVE": ["CKV_K8S_22"],
+            }
+        )
         input_core.totalized_exclusions = []
+        input_core.scope_pipeline = "App2"
         input_core.custom_message_break_build = "Custom message"
 
         self.devops_platform_gateway.message.return_value = "There are no findings"
 
-        args = {
-            "tool": "engine_iac"
-        }
+        args = {"tool": "engine_iac"}
 
         result = self.break_build.process(findings_list, input_core, args)
 
@@ -136,7 +155,7 @@ class BreakBuildTests(unittest.TestCase):
                         "Low": 15,
                     },
                     "COMPLIANCE": {"Critical": 1},
-                    "CVE": ["CKV_K8S_22"]
+                    "CVE": ["CKV_K8S_22"],
                 }
             ),
             path_file_results="results.json",
@@ -145,9 +164,7 @@ class BreakBuildTests(unittest.TestCase):
             stage_pipeline="Release",
         )
 
-        args = {
-            "tool": "engine_container"
-        }
+        args = {"tool": "engine_container"}
 
         result = self.break_build.process(findings_list, input_core, args)
 
@@ -224,7 +241,9 @@ class BreakBuildTests(unittest.TestCase):
             stage_pipeline="Release",
         )
 
-        result = self.break_build.process(findings_list, input_core , {"tool": "engine_iac"})
+        result = self.break_build.process(
+            findings_list, input_core, {"tool": "engine_iac"}
+        )
 
         result_compare = {
             "findings_excluded": [],
@@ -309,12 +328,14 @@ class BreakBuildTests(unittest.TestCase):
             stage_pipeline="Release",
         )
 
-        result = self.break_build.process(findings_list, input_core, {"tool": "engine_iac"})
+        result = self.break_build.process(
+            findings_list, input_core, {"tool": "engine_iac"}
+        )
 
         result_compare = {
             "findings_excluded": [
                 {"id": "CKV_DOCKER_3", "severity": "high", "category": "vulnerability"},
-                {"id": "CKV_K8S_20", "severity": "high", "category": "vulnerability"}
+                {"id": "CKV_K8S_20", "severity": "high", "category": "vulnerability"},
             ],
             "vulnerabilities": {},
             "compliances": {},
