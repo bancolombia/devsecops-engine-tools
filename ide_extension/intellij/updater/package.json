@@ -1,0 +1,24 @@
+{
+  "name": "updater",
+  "version": "1.0.0",
+  "description": "Automatic Dependencies Updater",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bancolombia/devsecops-engine-tools.git"
+  },
+  "keywords": [
+    "updater",
+    "ci",
+    "cd"
+  ],
+  "author": "juancgalvis",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bancolombia/devsecops-engine-tools/issues"
+  },
+  "homepage": "https://github.com/bancolombia/devsecops-engine-tools#readme"
+}
