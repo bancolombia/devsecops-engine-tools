@@ -56,7 +56,11 @@ class TestSecretScan(unittest.TestCase):
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
         mock_git_gateway_instance = mock_git_gateway.return_value
         mock_dict_args = {
-            "remote_config_repo": "fake_repo"
+            "remote_config_repo": "example_repo",
+            "folder_path": ".",
+            "environment": "test",
+            "platform": "local",
+            "token_external_checks": "fake_github_token",
         }
 
         secret_tool = "secret"
@@ -107,7 +111,11 @@ class TestSecretScan(unittest.TestCase):
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
         mock_git_gateway_instance = mock_git_gateway.return_value
         mock_dict_args = {
-            "remote_config_repo": "fake_repo"
+            "remote_config_repo": "example_repo",
+            "folder_path": ".",
+            "environment": "test",
+            "platform": "local",
+            "token_external_checks": "fake_github_token",
         }
 
         secret_tool = "secret"
