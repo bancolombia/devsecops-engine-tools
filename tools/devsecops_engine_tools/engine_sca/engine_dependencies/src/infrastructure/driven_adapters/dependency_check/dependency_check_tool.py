@@ -56,9 +56,13 @@ class DependencyCheckTool(ToolGateway):
             logger.error(f"Error installing OWASP dependency check: {e}")
             return None
 
-    def scan_dependencies(self, command_prefix, file_to_scan):
+    def scan_dependencies(self, command_prefix, file_to_scan, token):
         try:
-            command = [command_prefix, "--scan", file_to_scan, "--format", "JSON"]
+            command = [command_prefix,  "--format", "JSON", "--nvdApiKey", token, "--scan", file_to_scan,]
+
+            if not token:
+                print("¡¡Remember!!, it is recommended to use the API key for faster vulnerability database downloads.")
+                command = [command_prefix,  "--format", "JSON", "--scan", file_to_scan,]
 
             subprocess.run(command, capture_output=True, check=True)
         except subprocess.CalledProcessError as error:
@@ -113,6 +117,6 @@ class DependencyCheckTool(ToolGateway):
             return None
 
         command_prefix = self.select_operative_system(cli_version)
-        self.scan_dependencies(command_prefix, to_scan)
+        self.scan_dependencies(command_prefix, to_scan, token)
 
         return self.load_results()

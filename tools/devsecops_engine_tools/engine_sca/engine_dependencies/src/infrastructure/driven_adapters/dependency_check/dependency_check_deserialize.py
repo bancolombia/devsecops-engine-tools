@@ -16,17 +16,19 @@ class DependencyCheckDeserialize(DeserializatorGateway):
         list_open_vulnerabilities = []
         for dependency in dependencies_scanned_file.get("dependencies", []):
             for vulnerability in dependency.get("vulnerabilities", []):
+                vulnerable_software = vulnerability.get("vulnerableSoftware", [])
                 fix = (
-                    vulnerability
-                    .get("vulnerableSoftware", [{}])[0]
+                    vulnerable_software[0]
                     .get("software", {})
                     .get("versionEndExcluding", None)
+                    if vulnerable_software
+                    else None
                 )
                 finding_open = Finding(
                     id=vulnerability["name"][:20],
                     cvss=str(vulnerability.get("cvssv3", {})),
                     where=dependency.get("fileName").split(':')[-1].strip(),
-                    description=vulnerability["description"][:170],
+                    description=vulnerability["description"][:170].replace("\n\n", " "),
                     severity=vulnerability["severity"].lower(),
                     identification_date=datetime.now().strftime("%d%m%Y"),
                     published_date_cve=None,
