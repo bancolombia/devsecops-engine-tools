@@ -81,25 +81,23 @@ class KicsTool(ToolGateway):
             logger.error(f"An error ocurred loading KICS results {ex}")
             return None
 
-    def select_operative_system(self, os_platform, folders_to_scan, config_tool, path_kics):
+    def select_operative_system(self, os_platform, config_tool, path_kics):
         command_prefix = path_kics
         if os_platform == "Linux":
             kics_zip = "kics_linux.zip"
             url_kics = config_tool[self.TOOL_KICS]["KICS_LINUX"]
-            command_prefix = self.install_tool(kics_zip, url_kics, command_prefix)
+            return self.install_tool(kics_zip, url_kics, command_prefix)
         elif os_platform == "Windows":
             kics_zip = "kics_windows.zip"
             url_kics = config_tool[self.TOOL_KICS]["KICS_WINDOWS"]
-            command_prefix = self.install_tool_windows(kics_zip, url_kics, command_prefix)
+            return self.install_tool_windows(kics_zip, url_kics, command_prefix)
         elif os_platform == "Darwin":
             kics_zip = "kics_macos.zip"
             url_kics = config_tool[self.TOOL_KICS]["KICS_MAC"]
-            command_prefix = self.install_tool(kics_zip, url_kics, command_prefix)
+            return self.install_tool(kics_zip, url_kics, command_prefix)
         else:
             logger.warning(f"{os_platform} is not supported.")
             return [], None
-
-        self.execute_kics(folders_to_scan, command_prefix)
 
     def get_assets(self, kics_version):
         name_zip = "assets_compressed.zip"
@@ -120,7 +118,8 @@ class KicsTool(ToolGateway):
             self.get_assets(kics_version)
 
         os_platform = platform.system()
-        self.select_operative_system(os_platform, folders_to_scan, config_tool, path_kics)
+        command_prefix = self.select_operative_system(os_platform, config_tool, path_kics)
+        self.execute_kics(folders_to_scan, command_prefix)
 
         data = self.load_results()
         if data:

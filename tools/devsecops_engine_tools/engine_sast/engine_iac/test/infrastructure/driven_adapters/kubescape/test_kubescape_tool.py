@@ -230,40 +230,36 @@ class TestKubescapeTool(unittest.TestCase):
 
     @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.distro.name', return_value='Ubuntu')
     @patch.object(KubescapeTool, 'install_tool')
-    @patch.object(KubescapeTool, 'execute_kubescape', return_value=['result.json'])
-    def test_select_operative_system_linux_ubuntu(self, mock_execute_kubescape, mock_install_tool, mock_distro_name):
+    def test_select_operative_system_linux_ubuntu(self, mock_install_tool, mock_distro_name):
         executor = KubescapeTool()
         os_platform = 'Linux'
-        folders_to_scan = ['folder1']
         base_url = 'http://example.com/'
         
-        executor.select_operative_system(os_platform, folders_to_scan, base_url)
+        result = executor.select_operative_system(os_platform, base_url)
         
         mock_install_tool.assert_called_once_with('kubescape-ubuntu-latest', 'http://example.com/kubescape-ubuntu-latest')
-        mock_execute_kubescape.assert_called_once_with(folders_to_scan, './kubescape-ubuntu-latest')
+        self.assertEqual(result, './kubescape-ubuntu-latest')
 
     @patch.object(KubescapeTool, 'install_tool_windows')
     @patch.object(KubescapeTool, 'execute_kubescape', return_value=['result.json'])
     def test_select_operative_system_windows(self, mock_execute_kubescape, mock_install_tool_windows):
         executor = KubescapeTool()
         os_platform = 'Windows'
-        folders_to_scan = ['folder1']
         base_url = 'http://example.com/'
         
-        executor.select_operative_system(os_platform, folders_to_scan, base_url)
+        result = executor.select_operative_system(os_platform, base_url)
         
         mock_install_tool_windows.assert_called_once_with('kubescape-windows-latest.exe', 'http://example.com/kubescape-windows-latest.exe')
-        mock_execute_kubescape.assert_called_once_with(folders_to_scan, './kubescape-windows-latest.exe')
+        self.assertEqual(result, './kubescape-windows-latest.exe')
 
     @patch.object(KubescapeTool, 'install_tool')
     @patch.object(KubescapeTool, 'execute_kubescape', return_value=['result.json'])
     def test_select_operative_system_darwin(self, mock_execute_kubescape, mock_install_tool):
         executor = KubescapeTool()
         os_platform = 'Darwin'
-        folders_to_scan = ['folder1']
         base_url = 'http://example.com/'
         
-        executor.select_operative_system(os_platform, folders_to_scan, base_url)
+        result = executor.select_operative_system(os_platform, base_url)
         
         mock_install_tool.assert_called_once_with('kubescape-macos-latest', 'http://example.com/kubescape-macos-latest')
-        mock_execute_kubescape.assert_called_once_with(folders_to_scan, './kubescape-macos-latest')
+        self.assertEqual(result, './kubescape-macos-latest')
