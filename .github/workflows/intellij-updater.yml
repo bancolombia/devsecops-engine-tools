@@ -1,4 +1,4 @@
-name: updater
+name: IntelliJ Updater
 on:
   workflow_dispatch:
   schedule:
@@ -33,7 +33,7 @@ jobs:
           node-version: 'latest'
       - name: Check for updates
         working-directory: ./ide_extension/intellij
-        run: node ide_extension/intellij/updater/index.js
+        run: node updater/index.js
       - name: Check for changes
         id: git_changes
         run: |
