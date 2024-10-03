@@ -79,13 +79,12 @@ class DependencyCheckTool(ToolGateway):
             logger.warning(f"{os_platform} is not supported.")
             return None
 
-    def load_results(self):
+    def search_result(self):
         try:
-            with open('dependency-check-report.json') as f:
-                data = json.load(f)
-            return data
+            file_result = os.path.join(os.getcwd(), "dependency-check-report.json'")
+            return file_result
         except Exception as ex:
-            logger.error(f"An error ocurred loading dependency-check results {ex}")
+            logger.error(f"An error ocurred search dependency-check results {ex}")
             return None
         
     def is_java_installed(self):
@@ -99,6 +98,7 @@ class DependencyCheckTool(ToolGateway):
         pipeline_name,
         to_scan,
         token,
+        token_engine_dependencies
     ):
         if not self.is_java_installed():
             logger.error("Java is not installed, please install it to run dependency check")
@@ -117,6 +117,5 @@ class DependencyCheckTool(ToolGateway):
             return None
 
         command_prefix = self.select_operative_system(cli_version)
-        self.scan_dependencies(command_prefix, to_scan, token)
-
-        return self.load_results()
+        self.scan_dependencies(command_prefix, to_scan, token_engine_dependencies)
+        return self.search_result()

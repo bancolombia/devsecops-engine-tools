@@ -7,12 +7,17 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
 )
 from dataclasses import dataclass
 from datetime import datetime
+import json
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
 
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 @dataclass
 class DependencyCheckDeserialize(DeserializatorGateway):
 
     def get_list_findings(self, dependencies_scanned_file) -> "list[Finding]":
+        dependencies_scanned_file = self.load_results()
         list_open_vulnerabilities = []
         for dependency in dependencies_scanned_file.get("dependencies", []):
             for vulnerability in dependency.get("vulnerabilities", []):
@@ -40,3 +45,12 @@ class DependencyCheckDeserialize(DeserializatorGateway):
                 list_open_vulnerabilities.append(finding_open)
 
         return list_open_vulnerabilities
+    
+    def load_results(self):
+        try:
+            with open('dependency-check-report.json') as f:
+                data = json.load(f)
+            return data
+        except Exception as ex:
+            logger.error(f"An error ocurred loading dependency-check results {ex}")
+            return None
