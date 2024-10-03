@@ -125,10 +125,10 @@ class TestDependencyCheckTool(unittest.TestCase):
 
         tool = DependencyCheckTool()
 
-        tool.scan_dependencies("dependency-check.sh", "mock_file_to_scan")
+        tool.scan_dependencies("dependency-check.sh", "mock_file_to_scan", "token")
 
         mock_subprocess_run.assert_called_once_with(
-            ["dependency-check.sh", "--scan", "mock_file_to_scan", "--format", "JSON"],
+            ['dependency-check.sh', '--format', 'JSON', '--nvdApiKey', 'token', '--scan', 'mock_file_to_scan'],
             capture_output=True, 
             check=True
         )
@@ -142,14 +142,14 @@ class TestDependencyCheckTool(unittest.TestCase):
 
         tool = DependencyCheckTool()
 
-        tool.scan_dependencies("dependency-check.sh", "mock_file_to_scan")
+        tool.scan_dependencies("dependency-check.sh", "mock_file_to_scan", "token")
 
         mock_logger_error.assert_called_once_with(
             "Error executing OWASP dependency check scan: Command 'dependency-check.sh' returned non-zero exit status 1."
         )
 
         mock_subprocess_run.assert_called_once_with(
-            ["dependency-check.sh", "--scan", "mock_file_to_scan", "--format", "JSON"],
+            ['dependency-check.sh', '--format', 'JSON', '--nvdApiKey', 'token', '--scan', 'mock_file_to_scan'],
             capture_output=True, 
             check=True
         )
@@ -292,6 +292,6 @@ class TestDependencyCheckTool(unittest.TestCase):
 
         mock_select_operative_system.assert_called_once_with("7.0")
 
-        mock_scan_dependencies.assert_called_once_with("dependency-check.sh", ["artifact_to_scan"])
+        mock_scan_dependencies.assert_called_once_with("dependency-check.sh", ["artifact_to_scan"], 'token')
 
         self.assertEqual(result, {"key": "value"})
