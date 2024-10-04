@@ -3,7 +3,7 @@
 1. In the root of the project execute the following commands:
  
 ```bash
-python -m pip install
+python -m pip install --upgrade pip
 ```
 ```bash
 python -m pip install setuptools virtualenv wheel
@@ -42,7 +42,7 @@ PYTHONPATH=tools/
                 "--platform_devops",
                 "local",
                 "--remote_config_repo",
-                "DevSecOps_Remote_Config",
+                "example_remote_config_local",
                 "--tool",
                 "engine_iac",
                 "--use_secrets_manager",
