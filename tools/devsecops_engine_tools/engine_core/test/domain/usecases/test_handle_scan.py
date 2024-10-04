@@ -215,12 +215,14 @@ class TestHandleScan(unittest.TestCase):
     )
     def test_process_with_engine_secret(self, mock_runner_secret_scan):
         dict_args = {
-            "use_secrets_manager": "false",
+            "use_secrets_manager": "true",
             "tool": "engine_secret",
             "remote_config_repo": "test_repo",
             "use_vulnerability_management": "true",
         }
         config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
+        secret_tool = {"token_github_external_rules": "test"}
+        self.secrets_manager_gateway.get_secret.return_value = secret_tool
 
         # Mock the runner_engine_secret function and its return values
         findings_list = ["finding1", "finding2"]
@@ -243,9 +245,79 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_findings_list, findings_list)
         self.assertEqual(result_input_core, input_core)
         mock_runner_secret_scan.assert_called_once_with(
-            dict_args,
-            config_tool["ENGINE_SECRET"]["TOOL"],
-            self.devops_platform_gateway,
+            dict_args, config_tool["ENGINE_SECRET"]["TOOL"], self.devops_platform_gateway, secret_tool
+        )
+
+    @mock.patch("devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_secret_scan")
+    def test_process_with_engine_secret_without_secret_manager(self, mock_runner_secret_scan):
+        dict_args = {
+            "use_secrets_manager": "true",
+            "tool": "engine_secret",
+            "remote_config_repo": "test_repo",
+            "use_vulnerability_management": "true",
+        }
+        config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
+        secret_tool = None
+        self.secrets_manager_gateway.get_secret.return_value = secret_tool
+
+        # Mock the runner_engine_secret function and its return values
+        findings_list = ["finding1", "finding2"]
+        input_core = InputCore(
+            totalized_exclusions=[],
+            threshold_defined=self.threshold,
+            path_file_results="test/file",
+            custom_message_break_build="message",
+            scope_pipeline="pipeline",
+            stage_pipeline="Release",
+        )
+        mock_runner_secret_scan.return_value = findings_list, input_core
+
+        # Call the process method
+        result_findings_list, result_input_core = self.handle_scan.process(
+            dict_args, config_tool
+        )
+
+        # Assert the expected values
+        self.assertEqual(result_findings_list, findings_list)
+        self.assertEqual(result_input_core, input_core)
+        mock_runner_secret_scan.assert_called_once_with(
+            dict_args, config_tool["ENGINE_SECRET"]["TOOL"], self.devops_platform_gateway, secret_tool
+        )
+
+    @mock.patch("devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_secret_scan")
+    def test_process_with_engine_secret_without_secret_manager(self, mock_runner_secret_scan):
+        dict_args = {
+            "use_secrets_manager": "false",
+            "tool": "engine_secret",
+            "remote_config_repo": "test_repo",
+            "use_vulnerability_management": "true",
+        }
+        config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
+        secret_tool = None
+        self.secrets_manager_gateway.get_secret.return_value = secret_tool
+
+        # Mock the runner_engine_secret function and its return values
+        findings_list = ["finding1", "finding2"]
+        input_core = InputCore(
+            totalized_exclusions=[],
+            threshold_defined=self.threshold,
+            path_file_results="test/file",
+            custom_message_break_build="message",
+            scope_pipeline="pipeline",
+            stage_pipeline="Release",
+        )
+        mock_runner_secret_scan.return_value = findings_list, input_core
+
+        # Call the process method
+        result_findings_list, result_input_core = self.handle_scan.process(
+            dict_args, config_tool
+        )
+
+        # Assert the expected values
+        self.assertEqual(result_findings_list, findings_list)
+        self.assertEqual(result_input_core, input_core)
+        mock_runner_secret_scan.assert_called_once_with(
+            dict_args, config_tool["ENGINE_SECRET"]["TOOL"], self.devops_platform_gateway, secret_tool
         )
 
     @mock.patch(
