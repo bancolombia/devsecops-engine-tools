@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 from unittest import mock
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
@@ -186,7 +186,9 @@ class TestHandleScan(unittest.TestCase):
             stage_pipeline="Release",
         )
         mock_runner_engine_container.return_value = findings_list, input_core
-        self.vulnerability_management.get_product_type_service.side_effect = MagicMock(name="PT1")
+        mock_product_type = Mock()
+        mock_product_type.name = "PT1"
+        self.vulnerability_management.get_product_type_service.return_value = mock_product_type
 
         # Call the process method
         result_findings_list, result_input_core = self.handle_scan.process(
