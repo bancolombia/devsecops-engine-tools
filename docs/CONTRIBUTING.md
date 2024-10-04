@@ -58,6 +58,14 @@ Packages (directories) and modules (.py files) must be lowercase.
   </tbody>
 </table>
 
+# Standard commits - Semantic release
+
+We use the semantic release library to manage the release in the project. Please validate at the time of contribution that it complies with the standard commits - and Pull Request based on the library definition:
+
+- [Semantic Release](https://semantic-release.gitbook.io/semantic-release)
+
+- [Semantic Versioning](https://semver.org/)
+
 # GOVERNANCE
 
 Read more [Governance](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/docs/GOVERNANCE.md)
