@@ -116,9 +116,13 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
     <td>Free</td>
   </tr>
   <tr>
-    <td>ENGINE_DEPENDENCIES</td>
+    <td rowspan="2">ENGINE_DEPENDENCIES</td>
     <td><a href="https://jfrog.com/help/r/get-started-with-the-jfrog-platform/jfrog-xray">XRAY</a></td>
     <td>Paid</td>
+  </tr>
+  <tr>
+    <td><a href="https://owasp.org/www-project-dependency-check/">DEPENDENCY CHECK</a></td>
+    <td>Free</td>
   </tr>
   <tr>
     <td>ENGINE_CODE</td>
