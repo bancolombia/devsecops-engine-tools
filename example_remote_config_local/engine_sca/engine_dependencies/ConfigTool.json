@@ -19,7 +19,7 @@
         "CVE": ["CVE-123123"]
     },
     "DEPENDENCY_CHECK": {
-        "CLI_VERSION": "10.0.2",
+        "CLI_VERSION": "10.0.4",
         "REGEX_EXPRESSION_EXTENSIONS": "\\.(jar|ear|war)$",
         "PACKAGES_TO_SCAN": ["node_modules", "site-packages"]
     }

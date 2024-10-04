@@ -8,6 +8,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
 from dataclasses import dataclass
 from datetime import datetime
 import json
+import os
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
@@ -17,9 +18,14 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 class DependencyCheckDeserialize(DeserializatorGateway):
 
     def get_list_findings(self, dependencies_scanned_file) -> "list[Finding]":
-        dependencies_scanned_file = self.load_results()
+        filename, extension = os.path.splitext(dependencies_scanned_file)
+        if extension.lower() != ".json":
+            dependencies_scanned_file = f"{filename}.json"
+
+        data_result = self.load_results(dependencies_scanned_file)
+
         list_open_vulnerabilities = []
-        for dependency in dependencies_scanned_file.get("dependencies", []):
+        for dependency in data_result.get("dependencies", []):
             for vulnerability in dependency.get("vulnerabilities", []):
                 vulnerable_software = vulnerability.get("vulnerableSoftware", [])
                 fix = (
@@ -40,15 +46,15 @@ class DependencyCheckDeserialize(DeserializatorGateway):
                     module="engine_dependencies",
                     category=Category.VULNERABILITY,
                     requirements=fix,
-                    tool="dependency-check"
+                    tool="DEPENDENCY_CHECK"
                 )
                 list_open_vulnerabilities.append(finding_open)
 
         return list_open_vulnerabilities
     
-    def load_results(self):
+    def load_results(self, dependencies_scanned_file):
         try:
-            with open('dependency-check-report.json') as f:
+            with open(dependencies_scanned_file) as f:
                 data = json.load(f)
             return data
         except Exception as ex:

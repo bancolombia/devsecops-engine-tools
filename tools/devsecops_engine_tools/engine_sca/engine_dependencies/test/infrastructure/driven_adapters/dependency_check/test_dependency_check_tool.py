@@ -128,7 +128,7 @@ class TestDependencyCheckTool(unittest.TestCase):
         tool.scan_dependencies("dependency-check.sh", "mock_file_to_scan", "token")
 
         mock_subprocess_run.assert_called_once_with(
-            ['dependency-check.sh', '--format', 'JSON', '--nvdApiKey', 'token', '--scan', 'mock_file_to_scan'],
+            ['dependency-check.sh', '--format', 'JSON', '--format', 'XML', '--nvdApiKey', 'token', '--scan', 'mock_file_to_scan'],
             capture_output=True, 
             check=True
         )
@@ -149,7 +149,7 @@ class TestDependencyCheckTool(unittest.TestCase):
         )
 
         mock_subprocess_run.assert_called_once_with(
-            ['dependency-check.sh', '--format', 'JSON', '--nvdApiKey', 'token', '--scan', 'mock_file_to_scan'],
+            ['dependency-check.sh', '--format', 'JSON', '--format', 'XML', '--nvdApiKey', 'token', '--scan', 'mock_file_to_scan'],
             capture_output=True, 
             check=True
         )
