@@ -77,7 +77,7 @@ class TestTrufflehogRun(unittest.TestCase):
                         "Low": 1
                     },
                     "COMPLIANCE": {
-                        "Critical": 0
+                        "Critical": 1
                     }
                 },
                 "TARGET_BRANCHES": ["trunk", "develop", "main"],
