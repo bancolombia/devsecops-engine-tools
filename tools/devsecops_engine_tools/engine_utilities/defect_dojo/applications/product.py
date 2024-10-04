@@ -1,8 +1,6 @@
 from devsecops_engine_tools.engine_utilities.utils.api_error import ApiError
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.user_case.product import ProductUserCase
-from devsecops_engine_tools.engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.product import ProductRestConsumer
-from devsecops_engine_tools.engine_utilities.utils.session_manager import SessionManager
 
 class Product:
     @staticmethod
