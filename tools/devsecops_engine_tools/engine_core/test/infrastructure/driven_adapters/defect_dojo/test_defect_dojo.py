@@ -114,6 +114,57 @@ class TestDefectDojoPlatform(unittest.TestCase):
         "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.SessionManager"
     )
     @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Product.get_product"
+    )
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Connect.get_code_app"
+    )
+    def test_get_product_type_service(
+        self, cmdb_code, mock_product, mock_session_manager
+    ):
+        service = "test"
+        dict_args = {"token_vulnerability_management": "token1"}
+        secret_tool = None
+        config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "LIMITS_QUERY": 80,
+                    "MAX_RETRIES_QUERY": 5,
+                    "REGEX_EXPRESSION_CMDB": "regex",
+                }
+            }
+        }
+
+        mock_session_manager.return_value = MagicMock()
+
+        cmdb_code.return_value = "CodigoApp"
+
+        product_list = [
+            MagicMock(
+                results=[
+                    MagicMock(
+                        id=1,
+                        name="name1",
+                        prod_type=35,
+                    ),
+                ],
+                prefetch=MagicMock(),
+            )
+        ]
+        mock_product.side_effect = product_list
+
+        result = self.defect_dojo.get_product_type_service(
+            service, dict_args, secret_tool, config_tool
+        )
+
+        mock_session_manager.assert_called_with("token1", "host_defect_dojo")
+        self.assertIsNotNone(result)
+
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.SessionManager"
+    )
+    @patch(
         "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Finding.get_finding"
     )
     def test_get_findings_excepted(self, mock_finding, mock_session_manager):
@@ -506,7 +557,14 @@ class TestDefectDojoPlatform(unittest.TestCase):
     def test_get_active_engagements(self, mock_engagement, mock_import_scan_request):
         dict_args = {"token_vulnerability_management": "token1"}
         secret_tool = MagicMock()
-        config_tool = {"VULNERABILITY_MANAGER": {"DEFECT_DOJO": {"HOST_DEFECT_DOJO": "host_defect_dojo", "LIMITS_QUERY": 999}}}
+        config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "LIMITS_QUERY": 999,
+                }
+            }
+        }
         engagement_name = "engagement_name"
         mock_engagement.get_engagements.return_value = MagicMock()
 
@@ -520,13 +578,20 @@ class TestDefectDojoPlatform(unittest.TestCase):
     def test_get_active_engagements_exception(self):
         dict_args = {"token_vulnerability_management": "token1"}
         secret_tool = MagicMock()
-        config_tool = {"VULNERABILITY_MANAGER": {"DEFECT_DOJO": {"HOST_DEFECT_DOJO": "host_defect_dojo", "LIMITS_QUERY": 999}}}
+        config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "LIMITS_QUERY": 999,
+                }
+            }
+        }
         engagement_name = "engagement_name"
 
         with unittest.TestCase().assertRaises(Exception) as context:
             self.defect_dojo.get_active_engagements(
-            engagement_name, dict_args, secret_tool, config_tool
-        )
+                engagement_name, dict_args, secret_tool, config_tool
+            )
         assert "Error getting engagements with the following error:" in str(
             context.exception
         )
