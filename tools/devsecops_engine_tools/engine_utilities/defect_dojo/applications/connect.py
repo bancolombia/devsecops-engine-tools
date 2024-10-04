@@ -35,3 +35,7 @@ class Connect:
             return e
 
         return response
+    
+    def get_code_app(engagement_name, expression):
+        uc = CmdbUserCase(rest_consumer_cmdb=None, utils_azure=None, expression=expression)
+        return uc.get_code_app(engagement_name)

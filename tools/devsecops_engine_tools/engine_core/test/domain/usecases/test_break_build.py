@@ -32,15 +32,6 @@ class BreakBuildTests(unittest.TestCase):
                     "Medium": 10,
                     "Low": 15,
                 },
-                "CUSTOM_VULNERABILITY": {
-                    "PATTERN_APPS": "^(?!App1$).*(App2.*|.*App3.*)",
-                    "VULNERABILITY": {
-                        "Critical": 0,
-                        "High": 0,
-                        "Medium": 5,
-                        "Low": 10,
-                    },
-                },
                 "COMPLIANCE": {"Critical": 1},
                 "CVE": ["CKV_K8S_22"],
             }
