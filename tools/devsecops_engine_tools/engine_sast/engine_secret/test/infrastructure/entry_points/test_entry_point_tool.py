@@ -31,10 +31,9 @@ class TestEngineSecretScan(unittest.TestCase):
         }
         json_config = {
                 "IGNORE_SEARCH_PATTERN": [
-                    "test",
-                    "NU0429001_DevSecOps_Remote_Config"
+                    "test"
                 ],
-                "MESSAGE_INFO_ENGINE_SECRET": "If you have doubts, visit https://discuss.apps.bancolombia.com/t/evolucion-tarea-escaneo-de-secretos-devsecops-engine-tools/11091",
+                "MESSAGE_INFO_ENGINE_SECRET": "dummy message",
                 "THRESHOLD": {
                     "VULNERABILITY": {
                         "Critical": 1,
@@ -51,8 +50,8 @@ class TestEngineSecretScan(unittest.TestCase):
                     "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
                     "NUMBER_THREADS": 4,
                     "ENABLE_CUSTOM_RULES" : "True",
-                    "EXTERNAL_DIR_OWNER": "BCSCode",
-                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks_IaC"
+                    "EXTERNAL_DIR_OWNER": "External_Github",
+                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks"
                 }
             }
         obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
