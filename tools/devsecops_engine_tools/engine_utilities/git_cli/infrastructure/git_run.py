@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import os
 import subprocess
 from urllib.parse import quote
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway import GitGateway
+from devsecops_engine_tools.engine_utilities.git_cli.model.gateway.git_gateway import GitGateway
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
