@@ -37,7 +37,7 @@ class TestSecretScan(unittest.TestCase):
             }
         }
 
-    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway.GitGateway')
+    @patch('devsecops_engine_tools.engine_utilities.git_cli.model.gateway.git_gateway.GitGateway')
     @patch(
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
@@ -92,7 +92,7 @@ class TestSecretScan(unittest.TestCase):
         mock_tool_gateway_instance.install_tool.assert_called_once()
         mock_tool_gateway_instance.run_tool_secret_scan.assert_called_once()
 
-    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway.GitGateway')
+    @patch('devsecops_engine_tools.engine_utilities.git_cli.model.gateway.git_gateway.GitGateway')
     @patch(
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
@@ -143,7 +143,7 @@ class TestSecretScan(unittest.TestCase):
         mock_tool_gateway_instance.install_tool.assert_called_once()
         mock_tool_gateway_instance.run_tool_secret_scan.assert_called_once()
 
-    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway.GitGateway')
+    @patch('devsecops_engine_tools.engine_utilities.git_cli.model.gateway.git_gateway.GitGateway')
     @patch(
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
@@ -174,7 +174,7 @@ class TestSecretScan(unittest.TestCase):
         result = secret_scan.skip_from_exclusion(exclusions)
         self.assertTrue(result)
 
-    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway.GitGateway')
+    @patch('devsecops_engine_tools.engine_utilities.git_cli.model.gateway.git_gateway.GitGateway')
     @patch(
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
@@ -205,7 +205,7 @@ class TestSecretScan(unittest.TestCase):
         result = secret_scan.skip_from_exclusion(exclusions)
         self.assertFalse(result)
     
-    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.git_gateway.GitGateway')
+    @patch('devsecops_engine_tools.engine_utilities.git_cli.model.gateway.git_gateway.GitGateway')
     @patch(
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
@@ -239,3 +239,6 @@ class TestSecretScan(unittest.TestCase):
         )
 
         self.assertEqual(config_tool_instance.scope_pipeline, "example_pipeline")
+
+if __name__ == "__main__":
+    unittest.main()
