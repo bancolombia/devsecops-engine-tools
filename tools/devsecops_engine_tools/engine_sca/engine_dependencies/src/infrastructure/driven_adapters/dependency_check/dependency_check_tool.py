@@ -6,7 +6,6 @@ import requests
 import subprocess
 import os
 import platform
-import json
 import shutil
 
 from devsecops_engine_tools.engine_utilities.utils.utils import Utils
@@ -58,11 +57,11 @@ class DependencyCheckTool(ToolGateway):
 
     def scan_dependencies(self, command_prefix, file_to_scan, token):
         try:
-            command = [command_prefix,  "--format", "JSON", "--nvdApiKey", token, "--scan", file_to_scan,]
+            command = [command_prefix, "--format", "JSON", "--format", "XML", "--nvdApiKey", token, "--scan", file_to_scan,]
 
             if not token:
                 print("¡¡Remember!!, it is recommended to use the API key for faster vulnerability database downloads.")
-                command = [command_prefix,  "--format", "JSON", "--scan", file_to_scan,]
+                command = [command_prefix, "--format", "JSON", "--format", "XML", "--scan", file_to_scan,]
 
             subprocess.run(command, capture_output=True, check=True)
         except subprocess.CalledProcessError as error:
@@ -81,7 +80,7 @@ class DependencyCheckTool(ToolGateway):
 
     def search_result(self):
         try:
-            file_result = os.path.join(os.getcwd(), "dependency-check-report.json'")
+            file_result = os.path.join(os.getcwd(), "dependency-check-report.xml")
             return file_result
         except Exception as ex:
             logger.error(f"An error ocurred search dependency-check results {ex}")

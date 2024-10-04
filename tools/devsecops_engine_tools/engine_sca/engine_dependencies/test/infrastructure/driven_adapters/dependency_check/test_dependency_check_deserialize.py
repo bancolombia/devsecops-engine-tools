@@ -32,7 +32,7 @@ def json_data():
 def test_get_list_findings_valid(mock_load_results, deserializator, json_data):
     mock_load_results.return_value = json_data
 
-    result = deserializator.get_list_findings(None)
+    result = deserializator.get_list_findings("dummy_file.json")
 
     assert len(result) > 0
     assert result[0].id == "CVE-1234"

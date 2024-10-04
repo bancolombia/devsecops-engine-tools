@@ -7,7 +7,7 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
     KicsTool, 
     KicsDeserealizator
 )
-from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import GithubApi
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = logging.getLogger()
 logger.setLevel(logging.ERROR)
@@ -63,7 +63,7 @@ class TestKicsTool(unittest.TestCase):
 
     @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.subprocess.run')
     @patch.object(KicsTool, "download")
-    @patch.object(GithubApi, "unzip_file")
+    @patch.object(Utils, "unzip_file")
     def test_install_tool_not_installed(self, mock_unzip, mock_download, mock_subprocess):
         mock_subprocess.side_effect = [
             MagicMock(returncode=1),
@@ -101,7 +101,7 @@ class TestKicsTool(unittest.TestCase):
         mock_logger.error.assert_not_called()
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.subprocess.run", side_effect=Exception("Test exception"))
-    @patch.object(GithubApi, 'unzip_file')
+    @patch.object(Utils, 'unzip_file')
     @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.logger')
     @patch.object(KicsTool, "download")
     def test_install_tool_windows_not_installed(self, mock_download_tool, mock_logger, mock_unzip_file, mock_subprocess_run):
@@ -123,7 +123,7 @@ class TestKicsTool(unittest.TestCase):
         mock_unzip_file.assert_called_once_with(file, "kics")
         mock_logger.error.assert_not_called()
 
-    @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.GithubApi')
+    @patch('devsecops_engine_tools.engine_utilities.utils.utils.Utils')
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.subprocess.run", side_effect=Exception("Test exception"))
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.logger")
     @patch.object(KicsTool, "download", side_effect=Exception("Download exception"))
@@ -256,7 +256,7 @@ class TestKicsTool(unittest.TestCase):
         self.assertEqual(result, ([], None))
 
     @patch.object(KicsTool, 'download')
-    @patch.object(GithubApi, 'unzip_file')
+    @patch.object(Utils, 'unzip_file')
     def test_get_assets(self, mock_unzip_file, mock_download):
         kics_version = "1.2.3"
 
