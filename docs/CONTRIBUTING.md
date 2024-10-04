@@ -62,9 +62,22 @@ Packages (directories) and modules (.py files) must be lowercase.
 
 We use the semantic release library to manage the release in the project. Please validate at the time of contribution that it complies with the standard commits - and Pull Request based on the library definition:
 
-- [Semantic Release](https://semantic-release.gitbook.io/semantic-release)
+## [Semantic Release](https://semantic-release.gitbook.io/semantic-release)
 
-- [Semantic Versioning](https://semver.org/)
+Available types:
+ - feat: A new feature
+ - fix: A bug fix
+ - docs: Documentation only changes
+ - style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+ - refactor: A code change that neither fixes a bug nor adds a feature
+ - perf: A code change that improves performance
+ - test: Adding missing tests or correcting existing tests
+ - build: Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
+ - ci: Changes to our CI configuration files and scripts (example scopes: Travis, Circle, BrowserStack, SauceLabs)
+ - chore: Other changes that don't modify src or test files
+ - revert: Reverts a previous commit
+
+You can find out more here. [Semantic Versioning](https://semver.org/)
 
 # GOVERNANCE
 
