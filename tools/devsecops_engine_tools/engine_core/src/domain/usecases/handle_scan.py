@@ -189,6 +189,7 @@ class HandleScan:
                 dict_args,
                 config_tool["ENGINE_SECRET"]["TOOL"],
                 self.devops_platform_gateway,
+                secret_tool
             )
             if (
                 dict_args["use_vulnerability_management"] == "true"
