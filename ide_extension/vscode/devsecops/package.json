@@ -66,6 +66,10 @@
           "default": "NU0429001_devsecops_engine_backend_dev",
           "description": "Variables group name"
         },
+        "devsecops.releaseId": {
+          "type": "string",
+          "description": "Azure Release Definition ID"
+        },
         "devsecops.username": {
           "type": "string",
           "default": "",
@@ -87,8 +91,31 @@
       {
         "command": "devsecops.iacScan",
         "title": "Iac Scan"
+      },
+      {
+        "command": "devsecops.secretScan",
+        "title": "Secret Scan"
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "devsecops.helloWorld",
+          "when": "view == devsecopsView",
+          "group": "navigation"
+        },
+        {
+          "command": "devsecops.iacScan",
+          "when": "view == devsecopsView",
+          "group": "navigation"
+        },
+        {
+          "command": "devsecops.secretScan",
+          "when": "view == devsecopsView",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
