@@ -82,7 +82,7 @@ class TrufflehogRun(ToolGateway):
                 [exclude_path] * len(include_paths),
                 include_paths,
                 [repository_name] * len(include_paths),
-                [enable_custom_rules],
+                [enable_custom_rules] * len(include_paths),
             )
         findings, file_findings = self.create_file(self.decode_output(results), agent_work_folder)
         return  findings, file_findings
