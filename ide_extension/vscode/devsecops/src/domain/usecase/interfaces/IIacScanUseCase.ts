@@ -4,9 +4,10 @@ export interface IIacScanUseCase {
     scan(folderToScan: string,
         organizationName: string,
         projectName: string,
-        groupName: string,
+        definitionId: string,
         adUserName: string,
         adPersonalAccessToken: string,
+        environment: string,
         outputChannel: OutputChannel
     ): void;
 }

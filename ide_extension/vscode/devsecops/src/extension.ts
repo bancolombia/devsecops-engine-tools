@@ -69,7 +69,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const organizationName: string = vscode.workspace.getConfiguration('devsecops').get('organizationName') || '';
 		const projectName: string = vscode.workspace.getConfiguration('devsecops').get('projectName') || '';
-		const groupName: string = vscode.workspace.getConfiguration('devsecops').get('groupName') || '';
+		const definitionId: string = vscode.workspace.getConfiguration('devsecops').get('releaseId') || '';
+		const environment: string = vscode.workspace.getConfiguration('devsecops').get('environment') || '';
 		const adUserName: string = vscode.workspace.getConfiguration('devsecops').get('username') || '';
 		const adPersonalAccessToken: string = vscode.workspace.getConfiguration('devsecops').get('personalAccessToken') || '';
 
@@ -78,16 +79,17 @@ export function activate(context: vscode.ExtensionContext) {
 
 			folderPath = folderPath.replace(/^file:\/\//, '');
 
-			vscode.window.showInformationMessage(`Devsecops Iac Scanning: ${folderPath}`);
+			vscode.window.showInformationMessage(`DevSecOps Iac Scanning: ${folderPath}`);
 
 			const scanner = iacScanRequest();
 			const outputChannel = vscode.window.createOutputChannel('IaC Scan Results');
 			scanner.makeScan(folderPath,
 				organizationName,
 				projectName,
-				groupName,
+				definitionId,
 				adUserName,
 				adPersonalAccessToken,
+				environment,
 				outputChannel
 			);
 		}
