@@ -70,6 +70,12 @@
           "type": "string",
           "description": "Azure Release Definition ID"
         },
+        "devsecops.environment": {
+          "type": "string",
+          "default": "dev",
+          "enum": ["pdn", "cer", "qa", "dev"],
+          "description": "Environment to evaluate"
+        },
         "devsecops.username": {
           "type": "string",
           "default": "",
