@@ -3,7 +3,7 @@
 1. In the root of the project execute the following commands:
  
 ```bash
-python -m pip install
+python -m pip install --upgrade pip
 ```
 ```bash
 python -m pip install setuptools virtualenv wheel
@@ -42,7 +42,7 @@ PYTHONPATH=tools/
                 "--platform_devops",
                 "local",
                 "--remote_config_repo",
-                "DevSecOps_Remote_Config",
+                "example_remote_config_local",
                 "--tool",
                 "engine_iac",
                 "--use_secrets_manager",
@@ -79,7 +79,6 @@ PYTHONPATH=tools/
                 "DET_PIPELINE_NAME": "[DET_PIPELINE_NAME]",
                 "DET_PATH_DIRECTORY": "[DET_PATH_DIRECTORY]",
                 "DET_OS": "[DET_OS]",
-                "DET_WORK_FOLDER": "[DET_WORK_FOLDER]",
                 "DET_TEMP_DIRECTORY": "/tmp",
                 "DET_BRANCH_NAME": "trunk",
                 "DET_SOURCE_CODE_MANAGEMENT_URI": "[DET_SOURCE_CODE_MANAGEMENT_URI]",
@@ -91,7 +90,6 @@ PYTHONPATH=tools/
                 "DET_COMMIT_HASH": "2d545969a76516156d76e1c88f8e699537e889bd",
                 "DET_ENVIRONMENT": "dev",
                 "DET_STAGE": "Release",
-                "DET_AGENT_DIRECTORY": "[DET_AGENT_DIRECTORY]",
                 "DET_REPOSITORY_PROVIDER": "AzureDevOps",
                 "DET_TARGET_BRANCH": "trunk",
                 "DET_SOURCE_BRANCH": "feature/test",

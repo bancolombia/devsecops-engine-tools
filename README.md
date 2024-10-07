@@ -5,6 +5,8 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bancolombia_devsecops-engine-tools&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bancolombia_devsecops-engine-tools)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bancolombia_devsecops-engine-tools&metric=coverage)](https://sonarcloud.io/summary/new_code?id=bancolombia_devsecops-engine-tools)
 [![Python Version](https://img.shields.io/badge/python%20-%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20-blue)](#)
+[![Docker Pulls](https://img.shields.io/docker/pulls/bancolombia/devsecops-engine-tools
+)](https://hub.docker.com/r/bancolombia/devsecops-engine-tools)
 
 # Objective
 
@@ -37,7 +39,7 @@ pip3 install devsecops-engine-tools
 ### Scan running - flags (CLI)
 
 ```bash
-devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container"] --folder_path ["Folder path scan engine_iac"] --platform ["k8s","cloudformation","docker", "openapi"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] --xray_mode ["scan", "audit"]
+devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container", "engine_risk", "engine_code"] --folder_path ["Folder path scan engine_iac, engine_code and engine_dependencies"] --platform ["k8s","cloudformation","docker", "openapi"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] --token_external_checks ["token_external_checks"] --xray_mode ["scan", "audit"] --image_to_scan ["image_to_scan"]
 ```
 
 ### Structure Remote Config
@@ -46,12 +48,18 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
 📦Remote_Config
    ┣ 📂engine_core
    ┃ ┗ 📜ConfigTool.json
+   ┣ 📂engine_risk
+   ┃ ┗ 📜ConfigTool.json
+   ┃ ┗ 📜Exclusions.json
    ┣ 📂engine_sast
    ┃ ┗ 📂engine_iac
    ┃   ┗ 📜ConfigTool.json
    ┃   ┗ 📜Exclusions.json
    ┃ ┗ 📂engine_secret
    ┃   ┗ 📜ConfigTool.json
+   ┃ ┗ 📂engine_code
+   ┃   ┗ 📜ConfigTool.json
+   ┃   ┗ 📜Exclusions.json
    ┣ 📂engine_sca
    ┃ ┗ 📂engine_container
    ┃   ┗ 📜ConfigTool.json
@@ -69,6 +77,11 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
     <th>Module</th>
     <th>Tool</th>
     <th>Type</th>
+  </tr>
+    <tr>
+    <td>ENGINE_RISK</td>
+    <td><a href="https://defectdojo.com/">DEFECTDOJO</a></td>
+    <td>Free</td>
   </tr>
   <tr>
     <td rowspan="3">ENGINE_IAC</td>
@@ -103,9 +116,18 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
     <td>Free</td>
   </tr>
   <tr>
-    <td>ENGINE_DEPENDENCIES</td>
+    <td rowspan="2">ENGINE_DEPENDENCIES</td>
     <td><a href="https://jfrog.com/help/r/get-started-with-the-jfrog-platform/jfrog-xray">XRAY</a></td>
     <td>Paid</td>
+  </tr>
+  <tr>
+    <td><a href="https://owasp.org/www-project-dependency-check/">DEPENDENCY CHECK</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td>ENGINE_CODE</td>
+    <td><a href="https://docs.bearer.com/quickstart/">BEARER</a></td>
+    <td>Free</td>
   </tr>
 </table>
 
@@ -125,6 +147,23 @@ devsecops-engine-tools --platform_devops local --remote_config_repo DevSecOps_Re
 ```
 
 ![Demo CLI Local](docs/demo_session.svg)
+
+### Scan running sample (Docker)
+
+> Installation
+
+```bash
+docker pull bancolombia/devsecops-engine-tools
+```
+```bash
+docker run --rm -v ./folder_to_analyze:/folder_to_analyze bancolombia/devsecops-engine-tools:latest devsecops-engine-tools --platform_devops local --remote_config_repo docker_default_remote_config --tool engine_iac --folder_path /folder_to_analyze
+```
+
+The docker image have it own default remote config with basic configuration called docker_default_remote_config, but you can define your own config and pass it as volume
+
+```bash
+docker run --rm -v ./folder_to_analyze:/folder_to_analyze -v ./custom_remote_config:/custom_remote_config bancolombia/devsecops-engine-tools:latest devsecops-engine-tools --platform_devops local --remote_config_repo custom_remote_config --tool engine_iac --folder_path /folder_to_analyze
+```
 
 
 ### Scan running sample - Azure Pipelines
@@ -216,6 +255,12 @@ jobs:
 With the flag **--send_metrics true** and the configuration of the AWS-METRICS_MANAGER driven adapter in ConfigTool.json of the engine_core the tool will send the report to bucket s3. In the [metrics](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/metrics/) folder you will find the base of the cloud formation template to deploy the infra and dashboard in grafana.
 
 ![Dashboard Grafana](docs/metrics.png)
+
+# Config Tool Generator
+
+To generate the ConfigTool.json file in a simple way, a web interface was created where you can configure each necessary parameter individually or use a base template that you want to modify. In the [config tool generator](https://github.com/bancolombia/devsecops-engine-tools/tree/trunk/remote_config_generator/config-tool-generator) folder you will find the code for the SPA created in Angular to run it local environment.
+
+![Config Tool Generator](docs/config_tool_generator.gif)
 
 # How can I help?
 

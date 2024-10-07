@@ -5,16 +5,38 @@ on:
     branches:
       - trunk
       - feature/*
+    paths-ignore:
+      - 'ide_extension/**'
+      - '.github/workflows/intellij-build.yml'
+      - '.github/workflows/intellij-release.yml'
+      - '.github/workflows/intellij-updater.yml'
 
   pull_request:
     branches:
       - trunk
+    paths-ignore:
+      - 'ide_extension/**'
+      - '.github/workflows/intellij-build.yml'
+      - '.github/workflows/intellij-release.yml'
+      - '.github/workflows/intellij-updater.yml'
 
 jobs:
   build:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+      pull-requests: write
+      issues: write
     steps:
       - uses: actions/checkout@v4
+
+      - name: Verify Conventional Commits
+        uses: amannn/action-semantic-pull-request@0723387faaf9b38adef4775cd42cfd5155ed6017 # v5.5.3
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,7 +49,7 @@ jobs:
           python -m pip install virtualenv
           sudo apt-get update
           sudo apt-get install openssh-client -y
-          
+
       - name: Run Unit Test
         run: |
           cd tools/
@@ -57,85 +79,50 @@ jobs:
             -Dsonar.coverage.exclusions=**test_integrations_defect_dojo.py**,**/test/**,**/example/**,**setup.py**,**hello_world**,**Dockerfile/**,**/coverage/**
 
       - name: Build
-        if: contains(github.ref,'refs/heads/trunk') || contains(github.event.head_commit.message, 'deploy dev')
+        if: contains(github.event.head_commit.message, 'deploy dev')
         run: |
           cd tools/
           source _venv/bin/activate
           python -m pip install setuptools virtualenv wheel
           python setup.py sdist bdist_wheel
 
-      - name: Store the distribution packages
-        if: contains(github.ref,'refs/heads/trunk') || contains(github.event.head_commit.message, 'deploy dev')
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-package-distributions
-          path: tools/dist/
-
-  deploy_dev:
-    if: ${{ contains(github.event.head_commit.message, 'deploy dev') }}
-    runs-on: ubuntu-latest
-    needs: build
-    environment: release
-    permissions:
-      id-token: write
-
-    steps:
-      - name: Download the distribution packages
-        uses: actions/download-artifact@v4
-        with:
-          name: python-package-distributions
-          path: tools/dist/
-
       - name: Publish a Python distribution to PyPI Test
+        if: contains(github.event.head_commit.message, 'deploy dev')
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: tools/dist/
           repository-url: https://test.pypi.org/legacy/
 
-  deploy_prod:
-    if: ${{ contains(github.ref,'refs/heads/trunk') }}
-    runs-on: ubuntu-latest
+  releaseDraft:
+    name: Release draft
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/trunk'
     needs: build
-    environment: release
-    permissions:
-      id-token: write
-
-    steps:
-      - name: Download the distribution packages
-        uses: actions/download-artifact@v4
-        with:
-          name: python-package-distributions
-          path: tools/dist/
-
-      - name: Publish a Python distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: tools/dist/
-  
-  create_tag:
-    needs:
-      - deploy_prod
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
+      # Generate a token of Github APP only for the truk branch
       - name: Generate a token of Github APP
         id: generate_token
-        uses: tibdex/github-app-token@v1
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
         with:
           app_id: ${{ secrets.APP_ID_ADMIN_GITHUB }}
           private_key: ${{ secrets.APP_PRIVATE_KEY_ADMIN_GITHUB }}
-      - uses: actions/checkout@v4
+
+      # Check out the current repository
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           token: ${{ steps.generate_token.outputs.token }}
-      - name: Create new tag ${{ github.event.inputs.release_number }}
-        run: |
-          VERSION=$(grep -E "version" tools/devsecops_engine_tools/version.py | cut -d= -f2 | sed "s/[[:space:]']//g")
-          NEW_TAG="v$VERSION"
-          echo "New Tag: $NEW_TAG"
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git tag -a $NEW_TAG -m "[bot] release $NEW_TAG"
-      - name: Push tag
-        uses: ad-m/github-push-action@master
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
-          github_token: ${{ steps.generate_token.outputs.token }}
-          tags: true
+          node-version: "lts/*"
+
+      - name: Set up Semantic Release
+        run: npm -g install @semantic-release/git semantic-release@23.0.0
+
+      - name: Semantic Release
+        run: npx semantic-release@23.0.0
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}

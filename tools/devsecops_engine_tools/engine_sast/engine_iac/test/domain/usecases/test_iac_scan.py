@@ -23,6 +23,7 @@ class TestIacScan(unittest.TestCase):
             "folder_path": ".",
             "environment": "test",
             "platform": "cloudformation",
+            "token_external_checks": "token",
         }
         secret_tool = "example_secret"
         tool = "CHECKOV"
@@ -30,9 +31,7 @@ class TestIacScan(unittest.TestCase):
         # Mock the return values of the dependencies
         self.devops_platform_gateway.get_remote_config.return_value = {
             "SEARCH_PATTERN": ["AW", "NU"],
-            "IGNORE_SEARCH_PATTERN": [
-                "test",
-            ],
+            "IGNORE_SEARCH_PATTERN": "(.*_test)",
             "EXCLUSIONS_PATH": "Exclusions.json",
             "MESSAGE_INFO_ENGINE_IAC": "message test",
             "UPDATE_SERVICE_WITH_FILE_NAME_CFT": "True",
@@ -90,9 +89,7 @@ class TestIacScan(unittest.TestCase):
             # Resultado para el primer llamado (init_config_tool)
             {
                 "SEARCH_PATTERN": ["AW", "NU"],
-                "IGNORE_SEARCH_PATTERN": [
-                    "test",
-                ],
+                "IGNORE_SEARCH_PATTERN": "(.*example_pipeline)",
                 "EXCLUSIONS_PATH": "Exclusions.json",
                 "MESSAGE_INFO_ENGINE_IAC": "message test",
                 "UPDATE_SERVICE_WITH_FILE_NAME_CFT": "false",

@@ -1,6 +1,10 @@
+import json
 import unittest
 from unittest.mock import patch, MagicMock
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.DeserializeConfigTool import DeserializeConfigTool
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run import TrufflehogRun
+
+import os
 
 class TestTrufflehogRun(unittest.TestCase):
        
@@ -56,16 +60,41 @@ class TestTrufflehogRun(unittest.TestCase):
         mock_config_include_path.return_value = ['/usr/temp/includePath0.txt']
 
         files_commits = ['/usr/file1.py', '/usr/file2.py']
-        exclude_paths = ['.git', 'gradle']
         agent_os = 'Windows'
         agent_work_folder = '/usr/temp'
-        sys_working_dir = '/usr/local'
-        num_threads = 4
         repository_name = 'NU00000_Repo_Test'
+        secret_external_checks = "github:tokenFake"
+        json_config_tool = {
+                "IGNORE_SEARCH_PATTERN": [
+                    "test"
+                ],
+                "MESSAGE_INFO_ENGINE_SECRET": "dummy message",
+                "THRESHOLD": {
+                    "VULNERABILITY": {
+                        "Critical": 1,
+                        "High": 1,
+                        "Medium": 1,
+                        "Low": 1
+                    },
+                    "COMPLIANCE": {
+                        "Critical": 1
+                    }
+                },
+                "TARGET_BRANCHES": ["trunk", "develop", "main"],
+                "trufflehog": {
+                    "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
+                    "NUMBER_THREADS": 4,
+                    "ENABLE_CUSTOM_RULES" : "True",
+                    "EXTERNAL_DIR_OWNER": "External_Github",
+                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks"
+                }
+            }
+        config_tool = DeserializeConfigTool(json_data=json_config_tool, tool="trufflehog")
+        secret_tool = "secret"
 
         trufflehog_run = TrufflehogRun()
 
-        result, file_findings = trufflehog_run.run_tool_secret_scan(files_commits, exclude_paths, agent_os, agent_work_folder, num_threads, repository_name)
+        result, file_findings = trufflehog_run.run_tool_secret_scan(files_commits, agent_os, agent_work_folder, repository_name, config_tool, secret_tool, secret_external_checks)
 
         expected_result = [
             {"SourceMetadata": {"Data": {"Filesystem": {"file": "/usr/bin/local/file1.txt", "line": 1}}}, "SourceID": 1,
@@ -76,7 +105,7 @@ class TestTrufflehogRun(unittest.TestCase):
             "Redacted": "https://admin:********@the-internet.herokuapp.com", "ExtraData": None,
             "StructuredData": None}]
         self.assertEqual(result, expected_result)
-        self.assertEqual(file_findings, '/usr/temp/secret_scan_result.json')
+        self.assertEqual(os.path.normpath(file_findings), os.path.normpath(os.path.join('/usr/temp/', 'secret_scan_result.json')))
 
     @patch('builtins.open', create=True)
     def test_config_include_path(self, mock_open):
@@ -88,12 +117,23 @@ class TestTrufflehogRun(unittest.TestCase):
         self.assertEqual(result, expected_result)
 
     @patch('subprocess.run')
-    def test_run_trufflehog(self, mock_subprocess_run):
+    def test_run_trufflehog_enable_rules_false(self, mock_subprocess_run):
         mock_subprocess_run.return_value.stdout.strip.return_value = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
-
+        enable_custom_rules = "false"
         trufflehog_run = TrufflehogRun()
 
-        result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt', 'NU00000_Repo_Test')
+        result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt', 'NU00000_Repo_Test', enable_custom_rules)
+
+        expected_result = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
+        self.assertEqual(result, expected_result)
+
+    @patch('subprocess.run')
+    def test_run_trufflehog_enable_rules_true(self, mock_subprocess_run):
+        mock_subprocess_run.return_value.stdout.strip.return_value = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
+        enable_custom_rules = "true"
+        trufflehog_run = TrufflehogRun()
+
+        result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt', 'NU00000_Repo_Test', enable_custom_rules)
 
         expected_result = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
         self.assertEqual(result, expected_result)

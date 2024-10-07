@@ -83,7 +83,7 @@ class TestKubescapeDeserealizator(unittest.TestCase):
                 }
             ],
             "resources": [
-                {"resourceID": "res1", "source": {"path": "path/to/res1"}}
+                {"resourceID": "res1", "source": {"relativePath": "path/to/res1"}}
             ],
             "summaryDetails": {
                 "frameworks": [{"controls": {"ctrl1": {"scoreFactor": 5}}}]
