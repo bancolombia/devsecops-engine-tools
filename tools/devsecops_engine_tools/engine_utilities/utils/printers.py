@@ -10,7 +10,7 @@ logging.basicConfig(format="%(message)s", level=logging.INFO)
 class Printers:
     @staticmethod
     def print_logo_tool(banner: str):
-        print(pyfiglet.figlet_format(banner, font="slant"))
+        print(pyfiglet.figlet_format(banner, font="slant", width=200))
 
     @staticmethod
     def print_title(title: str):

@@ -118,6 +118,7 @@ class TestPrinterPrettyTable:
         # Arrange
         report_list = [
             Report(
+                risk_score=1,
                 id="id2",
                 date="21022024",
                 status="stat2",

@@ -1,3 +1,5 @@
+import sys
+import re
 from dataclasses import dataclass
 from functools import reduce
 
@@ -52,6 +54,7 @@ class BreakBuild:
                         )
 
     def process(self, findings_list: "list[Finding]", input_core: InputCore, args: any):
+        sys.stdout.reconfigure(encoding='utf-8')
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
         threshold = input_core.threshold_defined
@@ -63,6 +66,9 @@ class BreakBuild:
             "vulnerabilities": {},
             "compliances": {},
         }
+
+        if threshold.custom_vulnerability and bool(re.match(threshold.custom_vulnerability.pattern_apps, input_core.scope_pipeline, re.IGNORECASE)):
+            threshold.vulnerability = threshold.custom_vulnerability.vulnerability
 
         if len(findings_list) != 0:
             self._apply_policie_exception_new_vulnerability_industry(
@@ -331,7 +337,7 @@ class BreakBuild:
                                 (
                                     elem.create_date
                                     for elem in exclusions
-                                    if elem.id == item.id
+                                    if elem.id == item.id and (elem.where in item.where or "all" in elem.where)
                                 ),
                                 None,
                             ),
@@ -339,7 +345,7 @@ class BreakBuild:
                                 (
                                     elem.expired_date
                                     for elem in exclusions
-                                    if elem.id == item.id
+                                    if elem.id == item.id and (elem.where in item.where or "all" in elem.where)
                                 ),
                                 None,
                             ),
@@ -347,7 +353,7 @@ class BreakBuild:
                                 (
                                     elem.reason
                                     for elem in exclusions
-                                    if elem.id == item.id
+                                    if elem.id == item.id and (elem.where in item.where or "all" in elem.where)
                                 ),
                                 None,
                             ),

@@ -17,6 +17,9 @@
     "TARGET_BRANCHES": ["trunk", "develop"],
     "trufflehog": {
         "EXCLUDE_PATH": [".git"],
-        "NUMBER_THREADS": 4
+        "NUMBER_THREADS": 4,
+        "ENABLE_CUSTOM_RULES" : "True",
+        "EXTERNAL_DIR_OWNER": "ExternalOrg",
+        "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks"
     }
 }

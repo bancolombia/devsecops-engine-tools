@@ -11,7 +11,11 @@ class TestEngineSecretScan(unittest.TestCase):
         mock_devops_platform_gateway = Mock()
         mock_tool_gateway = Mock()
         mock_dict_args = {
-            "remote_config_repo": "fake_repo"
+            "remote_config_repo": "example_repo",
+            "folder_path": ".",
+            "environment": "test",
+            "platform": "local",
+            "token_external_checks": "fake_github_token",
         }
         mock_tool = "TRUFFLEHOG"
         mock_tool_deserealizator = Mock()
@@ -26,29 +30,33 @@ class TestEngineSecretScan(unittest.TestCase):
             }
         }
         json_config = {
-            "IGNORE_SEARCH_PATTERN": [
-                "test"
-            ],
-            "MESSAGE_INFO_ENGINE_SECRET": "If you have doubts, visit url",
-            "THRESHOLD": {
-                "VULNERABILITY": {
-                    "Critical": 1,
-                    "High": 1,
-                    "Medium": 1,
-                    "Low": 1
+                "IGNORE_SEARCH_PATTERN": [
+                    "test"
+                ],
+                "MESSAGE_INFO_ENGINE_SECRET": "dummy message",
+                "THRESHOLD": {
+                    "VULNERABILITY": {
+                        "Critical": 1,
+                        "High": 1,
+                        "Medium": 1,
+                        "Low": 1
+                    },
+                    "COMPLIANCE": {
+                        "Critical": 1
+                    }
                 },
-                "COMPLIANCE": {
-                    "Critical": 0
+                "TARGET_BRANCHES": ["trunk", "develop", "main"],
+                "trufflehog": {
+                    "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
+                    "NUMBER_THREADS": 4,
+                    "ENABLE_CUSTOM_RULES" : "True",
+                    "EXTERNAL_DIR_OWNER": "External_Github",
+                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks"
                 }
-            },
-            "TARGET_BRANCHES": ["trunk", "develop"],
-            "trufflehog": {
-                "EXCLUDE_PATH": [".git"],
-                "NUMBER_THREADS": 4
             }
-        }
         obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
         mock_devops_platform_gateway.get_remote_config.side_effect = [json_exclusion ,json_config, json_exclusion]
+        secret_tool = "secret"
         
         mock_secret_scan_instance = MockSecretScan.return_value
         mock_secret_scan_instance.complete_config_tool.return_value = obj_config_tool
@@ -64,7 +72,8 @@ class TestEngineSecretScan(unittest.TestCase):
             mock_dict_args,
             mock_tool,
             mock_tool_deserealizator,
-            mock_git_gateway
+            mock_git_gateway,
+            secret_tool
         )
         
         self.assertEqual(findings, [])

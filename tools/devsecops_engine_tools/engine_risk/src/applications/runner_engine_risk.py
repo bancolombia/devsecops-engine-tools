@@ -1,3 +1,6 @@
+from devsecops_engine_tools.engine_risk.src.infrastructure.driven_adapters.first_csv.first_epss_csv import (
+    FirstCsv,
+)
 from devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk import (
     init_engine_risk,
 )
@@ -10,11 +13,15 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 def runner_engine_risk(
-    dict_args, findings, devops_platform_gateway, print_table_gateway
+    dict_args, findings, vm_exclusions, devops_platform_gateway, print_table_gateway
 ):
-    init_engine_risk(
+    add_epss_gateway = FirstCsv()
+
+    return init_engine_risk(
+        add_epss_gateway,
         devops_platform_gateway,
         print_table_gateway,
         dict_args,
         findings,
+        vm_exclusions,
     )

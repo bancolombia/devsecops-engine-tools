@@ -78,21 +78,22 @@ class TrivyScan(ToolGateway):
         except Exception as e:
             logger.error(f"Error during image scan of {image_name}: {e}")
 
-    def run_tool_container_sca(self, remoteconfig, token, image_name, result_file):
+    def run_tool_container_sca(self, remoteconfig, secret_tool, token_engine_container, image_name, result_file):
         trivy_version = remoteconfig["TRIVY"]["TRIVY_VERSION"]
         os_platform = platform.system()
+        arch_platform = platform.architecture()[0]
         base_url = f"https://github.com/aquasecurity/trivy/releases/download/v{trivy_version}/"
 
         if os_platform == "Linux":
-            file=f"trivy_{trivy_version}_Linux-64bit.tar.gz"
+            file=f"trivy_{trivy_version}_Linux-{arch_platform}.tar.gz"
             self.install_tool(file, base_url+file)
             command_prefix = "./trivy"
         elif os_platform == "Darwin":
-            file=f"trivy_{trivy_version}_macOS-64bit.tar.gz"
+            file=f"trivy_{trivy_version}_macOS-{arch_platform}.tar.gz"
             self.install_tool(file, base_url+file)
             command_prefix = "./trivy"
         elif os_platform == "Windows":
-            file=f"trivy_{trivy_version}_windows-64bit.zip"
+            file=f"trivy_{trivy_version}_windows-{arch_platform}.zip"
             self.install_tool_windows(file, base_url+file)
             command_prefix = "./trivy.exe"
         else:
