@@ -77,6 +77,7 @@ def get_inputs_from_cli(args):
         choices=[
             "engine_iac",
             "engine_dast",
+            "engine_code",
             "engine_secret",
             "engine_dependencies",
             "engine_container",
@@ -91,7 +92,7 @@ def get_inputs_from_cli(args):
         "--folder_path",
         type=str,
         required=False,
-        help="Folder Path to scan, only apply engine_iac and engine_dependencies tools",
+        help="Folder Path to scan, only apply engine_iac, engine_code and engine_dependencies tools",
     )
     parser.add_argument(
         "-p",
@@ -143,7 +144,7 @@ def get_inputs_from_cli(args):
     parser.add_argument(
         "--token_external_checks",
         required=False,
-        help="Token for downloading external checks from engine_iac if is necessary. Ej: github:token, ssh:privatekey:pass",
+        help="Token for downloading external checks from engine_iac or engine_secret if is necessary. Ej: github:token, ssh:privatekey:pass",
     )
     parser.add_argument(
         "--xray_mode",
