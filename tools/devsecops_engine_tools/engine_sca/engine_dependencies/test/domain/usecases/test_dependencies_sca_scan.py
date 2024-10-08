@@ -66,7 +66,13 @@ def test_process():
         dependencies_scan_instance.process()
 
         mock_tool_gateway.run_tool_dependencies_sca.assert_called_once_with(
-            remote_config, dict_args, exclusion, pipeline_name, to_scan, secret_tool, None
+            remote_config,
+            dict_args,
+            exclusion,
+            pipeline_name,
+            to_scan,
+            secret_tool,
+            None,
         )
 
 
