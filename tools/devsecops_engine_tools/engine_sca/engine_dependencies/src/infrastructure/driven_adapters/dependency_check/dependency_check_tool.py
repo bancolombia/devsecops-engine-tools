@@ -9,7 +9,9 @@ import platform
 import shutil
 
 from devsecops_engine_tools.engine_utilities.utils.utils import Utils
-from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.helpers.get_artifacts import GetArtifacts
+from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.helpers.get_artifacts import (
+    GetArtifacts,
+)
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
@@ -22,7 +24,9 @@ class DependencyCheckTool(ToolGateway):
             url = f"https://github.com/jeremylong/DependencyCheck/releases/download/v{cli_version}/dependency-check-{cli_version}-release.zip"
             response = requests.get(url, allow_redirects=True)
             home_directory = os.path.expanduser("~")
-            zip_name = os.path.join(home_directory, f"dependency_check_{cli_version}.zip")
+            zip_name = os.path.join(
+                home_directory, f"dependency_check_{cli_version}.zip"
+            )
             with open(zip_name, "wb") as f:
                 f.write(response.content)
 
@@ -39,7 +43,9 @@ class DependencyCheckTool(ToolGateway):
             return command_prefix
 
         home_directory = os.path.expanduser("~")
-        bin_route = os.path.join(home_directory, f"dependency-check/bin/{command_prefix}")
+        bin_route = os.path.join(
+            home_directory, f"dependency-check/bin/{command_prefix}"
+        )
 
         if shutil.which(bin_route):
             return bin_route
@@ -50,18 +56,38 @@ class DependencyCheckTool(ToolGateway):
             if os.path.exists(bin_route):
                 if not is_windows:
                     subprocess.run(["chmod", "+x", bin_route], check=True)
-                return bin_route 
+                return bin_route
         except Exception as e:
             logger.error(f"Error installing OWASP dependency check: {e}")
             return None
 
     def scan_dependencies(self, command_prefix, file_to_scan, token):
         try:
-            command = [command_prefix, "--format", "JSON", "--format", "XML", "--nvdApiKey", token, "--scan", file_to_scan,]
+            command = [
+                command_prefix,
+                "--format",
+                "JSON",
+                "--format",
+                "XML",
+                "--nvdApiKey",
+                token,
+                "--scan",
+                file_to_scan,
+            ]
 
             if not token:
-                print("¡¡Remember!!, it is recommended to use the API key for faster vulnerability database downloads.")
-                command = [command_prefix, "--format", "JSON", "--format", "XML", "--scan", file_to_scan,]
+                print(
+                    "¡¡Remember!!, it is recommended to use the API key for faster vulnerability database downloads."
+                )
+                command = [
+                    command_prefix,
+                    "--format",
+                    "JSON",
+                    "--format",
+                    "XML",
+                    "--scan",
+                    file_to_scan,
+                ]
 
             subprocess.run(command, capture_output=True, check=True)
         except subprocess.CalledProcessError as error:
@@ -85,7 +111,7 @@ class DependencyCheckTool(ToolGateway):
         except Exception as ex:
             logger.error(f"An error ocurred search dependency-check results {ex}")
             return None
-        
+
     def is_java_installed(self):
         return shutil.which("java") is not None
 
@@ -97,17 +123,21 @@ class DependencyCheckTool(ToolGateway):
         pipeline_name,
         to_scan,
         token,
-        token_engine_dependencies
+        token_engine_dependencies,
     ):
         if not self.is_java_installed():
-            logger.error("Java is not installed, please install it to run dependency check")
+            logger.error(
+                "Java is not installed, please install it to run dependency check"
+            )
             return None
 
         cli_version = remote_config["DEPENDENCY_CHECK"]["CLI_VERSION"]
 
         get_artifacts = GetArtifacts()
 
-        pattern = get_artifacts.excluded_files(remote_config, pipeline_name, exclusion, "DEPENDENCY_CHECK")
+        pattern = get_artifacts.excluded_files(
+            remote_config, pipeline_name, exclusion, "DEPENDENCY_CHECK"
+        )
         to_scan = get_artifacts.find_artifacts(
             to_scan, pattern, remote_config["DEPENDENCY_CHECK"]["PACKAGES_TO_SCAN"]
         )

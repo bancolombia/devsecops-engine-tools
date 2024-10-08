@@ -14,6 +14,7 @@ from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
+
 @dataclass
 class DependencyCheckDeserialize(DeserializatorGateway):
 
@@ -38,7 +39,7 @@ class DependencyCheckDeserialize(DeserializatorGateway):
                 finding_open = Finding(
                     id=vulnerability["name"][:20],
                     cvss=str(vulnerability.get("cvssv3", {})),
-                    where=dependency.get("fileName").split(':')[-1].strip(),
+                    where=dependency.get("fileName").split(":")[-1].strip(),
                     description=vulnerability["description"][:170].replace("\n\n", " "),
                     severity=vulnerability["severity"].lower(),
                     identification_date=datetime.now().strftime("%d%m%Y"),
@@ -46,12 +47,12 @@ class DependencyCheckDeserialize(DeserializatorGateway):
                     module="engine_dependencies",
                     category=Category.VULNERABILITY,
                     requirements=fix,
-                    tool="DEPENDENCY_CHECK"
+                    tool="DEPENDENCY_CHECK",
                 )
                 list_open_vulnerabilities.append(finding_open)
 
         return list_open_vulnerabilities
-    
+
     def load_results(self, dependencies_scanned_file):
         try:
             with open(dependencies_scanned_file) as f:

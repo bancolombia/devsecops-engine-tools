@@ -9,7 +9,9 @@ import re
 import os
 import json
 
-from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.helpers.get_artifacts import GetArtifacts
+from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.helpers.get_artifacts import (
+    GetArtifacts,
+)
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
@@ -110,8 +112,7 @@ class XrayScan(ToolGateway):
             command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
         if result.stdout or all(
-            word in result.stderr
-            for word in config["XRAY"]["STDERR_EXPECTED_WORDS"]
+            word in result.stderr for word in config["XRAY"]["STDERR_EXPECTED_WORDS"]
         ):
             if result.stdout:
                 scan_result = json.loads(result.stdout)
@@ -147,12 +148,14 @@ class XrayScan(ToolGateway):
         pipeline_name,
         to_scan,
         secret_tool,
-        token_engine_dependencies
+        token_engine_dependencies,
     ):
         token = secret_tool["token_xray"] if secret_tool else token_engine_dependencies
         if dict_args["xray_mode"] == "scan":
             get_artifacts = GetArtifacts()
-            pattern = get_artifacts.excluded_files(remote_config, pipeline_name, exclusion, "XRAY")
+            pattern = get_artifacts.excluded_files(
+                remote_config, pipeline_name, exclusion, "XRAY"
+            )
             to_scan = get_artifacts.find_artifacts(
                 to_scan, pattern, remote_config["XRAY"]["PACKAGES_TO_SCAN"]
             )
