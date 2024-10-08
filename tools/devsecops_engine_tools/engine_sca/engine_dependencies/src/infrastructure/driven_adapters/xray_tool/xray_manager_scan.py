@@ -99,7 +99,7 @@ class XrayScan(ToolGateway):
         if os.path.exists(gradlew_path):
             os.chmod(gradlew_path, 0o755)
 
-    def scan_dependencies(self, prefix, cwd, mode, to_scan):
+    def scan_dependencies(self, prefix, cwd, config, mode, to_scan):
         command = [
             prefix,
             mode,
@@ -111,7 +111,7 @@ class XrayScan(ToolGateway):
         )
         if result.stdout or all(
             word in result.stderr
-            for word in ["Technology", "WorkingDirectory", "Descriptors"]
+            for word in config["XRAY"]["STDERR_EXPECTED_WORDS"]
         ):
             if result.stdout:
                 scan_result = json.loads(result.stdout)
@@ -119,7 +119,12 @@ class XrayScan(ToolGateway):
                 scan_result = {}
                 if any(
                     word in result.stderr
-                    for word in ["What went wrong", "Caused by"]
+                    for word in config["XRAY"]["STDERR_BREAK_ERRORS"]
+                ):
+                    raise Exception(f"Error executing Xray scan: {result.stderr}")
+                if any(
+                    word in result.stderr
+                    for word in config["XRAY"]["STDERR_ACCEPTED_ERRORS"]
                 ):
                     logger.error(f"Error executing Xray scan: {result.stderr}")
                     return None
@@ -180,6 +185,7 @@ class XrayScan(ToolGateway):
         results_file = self.scan_dependencies(
             command_prefix,
             cwd,
+            remote_config,
             dict_args["xray_mode"],
             to_scan,
         )
