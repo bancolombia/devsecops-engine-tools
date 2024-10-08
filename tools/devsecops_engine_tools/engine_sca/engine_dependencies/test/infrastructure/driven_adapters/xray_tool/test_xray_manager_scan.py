@@ -196,13 +196,21 @@ def test_scan_dependencies_success(xray_scan_instance):
         "os.path.join"
     ) as mock_path_join, patch(
         "os.getcwd"
-    ) as mock_os_getcwd:
+    ) as mock_os_getcwd, patch(
+        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.logger.error"
+    ) as mock_logger:
         prefix = "jf"
         cwd = "working_dir"
         mode = "scan"
         to_scan = "target_file.tar"
-        remote_config = {}
-        mock_subprocess_run.return_value = Mock(returncode=0)
+        remote_config = {
+            "XRAY": {
+                "STDERR_EXPECTED_WORDS": ["expected"],
+                "STDERR_BREAK_ERRORS": ["break"],
+                "STDERR_ACCEPTED_ERRORS": ["accepted"]
+            }
+        }
+        mock_subprocess_run.return_value = Mock(returncode=0, stdout="", stderr="expected, accepted")
         mock_os_getcwd.return_value = "working_dir"
 
         xray_scan_instance.scan_dependencies(prefix, cwd, remote_config, mode, to_scan)
@@ -218,6 +226,10 @@ def test_scan_dependencies_success(xray_scan_instance):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+        )
+
+        mock_logger.assert_called_with(
+            "Error executing Xray scan: expected, accepted"
         )
 
 
