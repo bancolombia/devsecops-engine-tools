@@ -1,0 +1,60 @@
+name: IntelliJ Updater
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 12 * * 1' # every Monday at 07:00 Colombia Time
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
+        with:
+          egress-policy: audit
+
+      - name: Generate a token
+        id: generate_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        with:
+          app_id: ${{ secrets.APP_ID_ADMIN_GITHUB }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY_ADMIN_GITHUB }}
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          ref: trunk
+          token: ${{ steps.generate_token.outputs.token }}
+      - name: Set up JDK 17
+        uses: actions/setup-java@2dfa2011c5b2a0f1489bf9e433881c92c1631f88 # v4.3.0
+        with:
+          distribution: 'temurin' 
+          java-version: 17
+      - name: Set up NodeJS Latest
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 #v4.0.4
+        with:
+          node-version: 'latest'
+      - name: Check for updates
+        working-directory: ./ide_extension/intellij
+        run: node updater/index.js
+      - name: Check for changes
+        id: git_changes
+        run: |
+          git diff --name-only
+          if [[ $(git diff --name-only) ]]; then
+            echo "Changes detected!"
+            echo "HAS_CHANGES=true" >> $GITHUB_ENV
+          else
+            echo "No changes detected!"
+            echo "HAS_CHANGES=false" >> $GITHUB_ENV
+          fi
+      - name: Create Pull Request
+        if: env.HAS_CHANGES == 'true'
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          committer: Dependencies Bot <release-bot@bancolombia.com.co>
+          commit-message: 'fix(deps): update dependencies'
+          title: 'fix(deps): update dependencies'
+          body: 'This PR updates dependencies to latest versions'
+          branch: 'feature/autoupdate-deps'
+          base: 'trunk'
+          labels: 'dependencies'
+          reviewers: 'juancgalvis'

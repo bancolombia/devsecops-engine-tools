@@ -7,7 +7,7 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
     KicsTool, 
     KicsDeserealizator
 )
-from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import GithubApi
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = logging.getLogger()
 logger.setLevel(logging.ERROR)
@@ -63,7 +63,7 @@ class TestKicsTool(unittest.TestCase):
 
     @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.subprocess.run')
     @patch.object(KicsTool, "download")
-    @patch.object(GithubApi, "unzip_file")
+    @patch.object(Utils, "unzip_file")
     def test_install_tool_not_installed(self, mock_unzip, mock_download, mock_subprocess):
         mock_subprocess.side_effect = [
             MagicMock(returncode=1),
@@ -101,7 +101,7 @@ class TestKicsTool(unittest.TestCase):
         mock_logger.error.assert_not_called()
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.subprocess.run", side_effect=Exception("Test exception"))
-    @patch.object(GithubApi, 'unzip_file')
+    @patch.object(Utils, 'unzip_file')
     @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.logger')
     @patch.object(KicsTool, "download")
     def test_install_tool_windows_not_installed(self, mock_download_tool, mock_logger, mock_unzip_file, mock_subprocess_run):
@@ -123,7 +123,7 @@ class TestKicsTool(unittest.TestCase):
         mock_unzip_file.assert_called_once_with(file, "kics")
         mock_logger.error.assert_not_called()
 
-    @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.GithubApi')
+    @patch('devsecops_engine_tools.engine_utilities.utils.utils.Utils')
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.subprocess.run", side_effect=Exception("Test exception"))
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.logger")
     @patch.object(KicsTool, "download", side_effect=Exception("Download exception"))
@@ -195,11 +195,10 @@ class TestKicsTool(unittest.TestCase):
 
         mock_install_tool.return_value = "kics"
 
-        self.kics_tool.select_operative_system("Linux", ["folder1", "folder2"], mock_config_tool, "kics")
+        self.kics_tool.select_operative_system("Linux", mock_config_tool, "kics")
 
         mock_install_tool.assert_called_once_with("kics_linux.zip", "http://example.com/kics_linux.zip", "kics")
         mock_install_tool_windows.assert_not_called()
-        mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "kics")
 
     @patch.object(KicsTool, 'install_tool')
     @patch.object(KicsTool, 'install_tool_windows')
@@ -214,11 +213,10 @@ class TestKicsTool(unittest.TestCase):
 
         mock_install_tool_windows.return_value = "kics"
 
-        self.kics_tool.select_operative_system("Windows", ["folder1", "folder2"], mock_config_tool, "kics")
+        self.kics_tool.select_operative_system("Windows", mock_config_tool, "kics")
 
         mock_install_tool_windows.assert_called_once_with("kics_windows.zip", "http://example.com/kics_windows.zip", "kics")
         mock_install_tool.assert_not_called()
-        mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "kics")
 
     @patch.object(KicsTool, 'install_tool')
     @patch.object(KicsTool, 'install_tool_windows')
@@ -233,11 +231,10 @@ class TestKicsTool(unittest.TestCase):
 
         mock_install_tool.return_value = "kics"
 
-        self.kics_tool.select_operative_system("Darwin", ["folder1", "folder2"], mock_config_tool, "kics")
+        self.kics_tool.select_operative_system("Darwin", mock_config_tool, "kics")
 
         mock_install_tool.assert_called_once_with("kics_macos.zip", "http://example.com/kics_mac.zip", "kics")
         mock_install_tool_windows.assert_not_called()
-        mock_execute_kics.assert_called_once_with(["folder1", "folder2"], "kics")
 
     @patch.object(KicsTool, 'install_tool')
     @patch.object(KicsTool, 'install_tool_windows')
@@ -250,7 +247,7 @@ class TestKicsTool(unittest.TestCase):
             }
         }
 
-        result = self.kics_tool.select_operative_system("UnsupportedOS", ["folder1", "folder2"], mock_config_tool, "kics")
+        result = self.kics_tool.select_operative_system("UnsupportedOS", mock_config_tool, "kics")
 
         mock_install_tool.assert_not_called()
         mock_install_tool_windows.assert_not_called()
@@ -259,7 +256,7 @@ class TestKicsTool(unittest.TestCase):
         self.assertEqual(result, ([], None))
 
     @patch.object(KicsTool, 'download')
-    @patch.object(GithubApi, 'unzip_file')
+    @patch.object(Utils, 'unzip_file')
     def test_get_assets(self, mock_unzip_file, mock_download):
         kics_version = "1.2.3"
 
@@ -274,7 +271,8 @@ class TestKicsTool(unittest.TestCase):
     @patch.object(KicsTool, 'select_operative_system')
     @patch.object(KicsTool, 'load_results', return_value={'data': 'results'})
     @patch.object(KicsDeserealizator, 'calculate_total_vulnerabilities', return_value=0)
-    def test_run_tool_no_vulnerabilities(self, mock_calc_vulns, mock_load_results, mock_select_os, mock_get_assets, mock_platform):
+    @patch.object(KicsTool, 'execute_kics')
+    def test_run_tool_no_vulnerabilities(self, mock_execute_kics, mock_calc_vulns, mock_load_results, mock_select_os, mock_get_assets, mock_platform):
         mock_config_tool = {
             "KICS": {
                 "VERSION": "1.2.3",
@@ -286,7 +284,7 @@ class TestKicsTool(unittest.TestCase):
         result, path = self.kics_tool.run_tool(mock_config_tool, ['folder1', 'folder2'], platform_to_scan='k8s')
 
         mock_get_assets.assert_called_once_with('1.2.3')
-        mock_select_os.assert_called_once_with('Linux', ['folder1', 'folder2'], mock_config_tool, 'mock/path/kics')
+        mock_select_os.assert_called_once_with('Linux', mock_config_tool, 'mock/path/kics')
         mock_load_results.assert_called_once()
         mock_calc_vulns.assert_called_once_with({'data': 'results'})
         
@@ -300,7 +298,8 @@ class TestKicsTool(unittest.TestCase):
     @patch.object(KicsDeserealizator, 'calculate_total_vulnerabilities', return_value=5)
     @patch.object(KicsDeserealizator, 'get_findings', return_value='filtered_results')
     @patch.object(KicsDeserealizator, 'get_list_finding', return_value=['finding1', 'finding2'])
-    def test_run_tool_with_vulnerabilities(self, mock_get_list_finding, mock_get_findings, mock_calc_vulns, mock_load_results, mock_select_os, mock_get_assets, mock_platform):
+    @patch.object(KicsTool, 'execute_kics')
+    def test_run_tool_with_vulnerabilities(self, mock_execute_kics, mock_get_list_finding, mock_get_findings, mock_calc_vulns, mock_load_results, mock_select_os, mock_get_assets, mock_platform):
         mock_config_tool = {
             "KICS": {
                 "VERSION": "1.2.3",
@@ -312,7 +311,7 @@ class TestKicsTool(unittest.TestCase):
         result, path = self.kics_tool.run_tool(mock_config_tool, ['folder1', 'folder2'], platform_to_scan='k8s')
 
         mock_get_assets.assert_called_once_with('1.2.3')
-        mock_select_os.assert_called_once_with('Linux', ['folder1', 'folder2'], mock_config_tool, 'mock/path/kics')
+        mock_select_os.assert_called_once_with('Linux', mock_config_tool, 'mock/path/kics')
         mock_load_results.assert_called_once()
         mock_calc_vulns.assert_called_once_with({'data': 'results'})
         mock_get_findings.assert_called_once_with({'data': 'results'})
