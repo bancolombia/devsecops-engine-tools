@@ -65,7 +65,7 @@ class TrufflehogRun(ToolGateway):
         secret = None
         
         if secret_tool is not None:
-            secret = secret_tool["github_token"] if "github" in secret_tool else None
+            secret = secret_tool["github_token"] if "github_token" in secret_tool else None
         elif secret_external_checks is not None:
             secret = secret_external_checks.split("github:")[1] if "github" in secret_external_checks else None            
 
