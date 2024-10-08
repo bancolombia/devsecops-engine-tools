@@ -65,14 +65,14 @@ class TrufflehogRun(ToolGateway):
         secret = None
         
         if secret_tool is not None:
-            secret = secret_tool["github_token"] if "github" in secret_tool else None
+            secret = secret_tool["github_token"] if "github_token" in secret_tool else None
         elif secret_external_checks is not None:
             secret = secret_external_checks.split("github:")[1] if "github" in secret_external_checks else None            
 
         if enable_custom_rules == "true" and secret is not None:
             self.configurate_external_checks(config_tool, secret)
         else: #In case that remote config from tool is enable but in the args dont send any type of secrets. So dont modified command
-            enable_custom_rules == "false"
+            enable_custom_rules = "false"
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=config_tool.number_threads) as executor:
             results = executor.map(
