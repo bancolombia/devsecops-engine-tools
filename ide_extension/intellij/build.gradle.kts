@@ -8,9 +8,12 @@ fun environment(key: String) = providers.environmentVariable(key)
 plugins {
     id("java")
     id("jacoco")
-    alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
-    alias(libs.plugins.changelog) // Gradle Changelog Plugin
-    alias(libs.plugins.sonar) // Gradle Sonar Plugin
+    // IntelliJ Platform Gradle Plugin
+    id("org.jetbrains.intellij.platform") version "2.1.0"
+    // Gradle Changelog Plugin
+    id("org.jetbrains.changelog") version "2.2.1"
+    // Gradle Sonar Plugin
+    id("org.sonarqube") version "5.1.0.4882"
 }
 
 group = properties("pluginGroup").get()
@@ -29,7 +32,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation(libs.junit)
+    testImplementation("junit:junit:4.13.2")
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
@@ -48,7 +51,7 @@ dependencies {
     }
 
     implementation("com.squareup.okhttp3:okhttp")
-    implementation("org.jetbrains:annotations:24.1.0")
+    implementation("org.jetbrains:annotations:25.0.0")
 
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
@@ -56,7 +59,7 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:1.18.34")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.34")
 
-    testImplementation("org.mockito:mockito-core:5.13.0")
+    testImplementation("org.mockito:mockito-core:5.14.1")
 
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
 }

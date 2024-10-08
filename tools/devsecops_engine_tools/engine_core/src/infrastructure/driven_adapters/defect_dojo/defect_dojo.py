@@ -65,6 +65,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "TRIVY": "Trivy Scan",
                 "KUBESCAPE": "Kubescape Scanner",
                 "KICS": "KICS Scanner",
+                "BEARER": "Bearer CLI",
+                "DEPENDENCY_CHECK": "Dependency Check Scan",
                 "NUCLEI": "Nuclei Scan"
             }
 

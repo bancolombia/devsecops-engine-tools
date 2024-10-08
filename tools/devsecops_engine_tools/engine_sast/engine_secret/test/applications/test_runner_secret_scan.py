@@ -26,10 +26,11 @@ def test_runner_secret_scan(mock_entry_point_tool):
     # Define the input arguments
     dict_args = {}
     tool = "TRUFFLEHOG"
+    secret_tool = "secret"
     devops_platform_gateway = None
 
     # Call the function
-    [] , input_output = runner_secret_scan(dict_args, tool, devops_platform_gateway)
+    [] , input_output = runner_secret_scan(dict_args, tool, devops_platform_gateway, secret_tool)
 
     # Assert the expected behavior
     assert input_output == input_core
@@ -39,6 +40,7 @@ def test_runner_secret_scan_exception(mock_entry_point_tool):
         # Arrange
         dict_args = {'arg1': 'value1', 'arg2': 'value2'}
         tool = 'TRUFFLEHOG'
+        secret_tool = "secret"
         devops_platform_gateway = None
         
         # Mock the necessary methods or properties to simulate an exception
@@ -46,7 +48,7 @@ def test_runner_secret_scan_exception(mock_entry_point_tool):
 
         # Act and Assert
         with unittest.TestCase().assertRaises(Exception) as context:
-            runner_secret_scan(dict_args, tool, devops_platform_gateway)
+            runner_secret_scan(dict_args, tool, devops_platform_gateway, secret_tool)
 
         # Optionally, you can check the exception message or other details
         assert str(context.exception) == "Error engine_secret : Simulated error"

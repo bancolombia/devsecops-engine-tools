@@ -11,7 +11,7 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
 )
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
-from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import GithubApi
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
@@ -28,7 +28,7 @@ class KicsTool(ToolGateway):
             logger.error(f"An error ocurred downloading {file} {ex}")
 
     def install_tool(self, file, url, command_prefix):
-        github_api = GithubApi()
+        utils = Utils()
         kics = f"./{command_prefix}/kics"
         installed = subprocess.run(
             ["which", command_prefix],
@@ -38,7 +38,7 @@ class KicsTool(ToolGateway):
         if installed.returncode == 1:
             try:
                 self.download(file, url)
-                github_api.unzip_file(file, command_prefix)
+                utils.unzip_file(file, command_prefix)
                 subprocess.run(["chmod", "+x", kics])
                 return kics
             except Exception as e:
@@ -56,9 +56,9 @@ class KicsTool(ToolGateway):
             return command_prefix
         except:
             try:
-                github_api = GithubApi()
+                utils = Utils()
                 self.download(file, url)
-                github_api.unzip_file(file, command_prefix)
+                utils.unzip_file(file, command_prefix)
                 return f"./{command_prefix}/kics"
 
             except Exception as e:
@@ -81,25 +81,23 @@ class KicsTool(ToolGateway):
             logger.error(f"An error ocurred loading KICS results {ex}")
             return None
 
-    def select_operative_system(self, os_platform, folders_to_scan, config_tool, path_kics):
+    def select_operative_system(self, os_platform, config_tool, path_kics):
         command_prefix = path_kics
         if os_platform == "Linux":
             kics_zip = "kics_linux.zip"
             url_kics = config_tool[self.TOOL_KICS]["KICS_LINUX"]
-            command_prefix = self.install_tool(kics_zip, url_kics, command_prefix)
+            return self.install_tool(kics_zip, url_kics, command_prefix)
         elif os_platform == "Windows":
             kics_zip = "kics_windows.zip"
             url_kics = config_tool[self.TOOL_KICS]["KICS_WINDOWS"]
-            command_prefix = self.install_tool_windows(kics_zip, url_kics, command_prefix)
+            return self.install_tool_windows(kics_zip, url_kics, command_prefix)
         elif os_platform == "Darwin":
             kics_zip = "kics_macos.zip"
             url_kics = config_tool[self.TOOL_KICS]["KICS_MAC"]
-            command_prefix = self.install_tool(kics_zip, url_kics, command_prefix)
+            return self.install_tool(kics_zip, url_kics, command_prefix)
         else:
             logger.warning(f"{os_platform} is not supported.")
             return [], None
-
-        self.execute_kics(folders_to_scan, command_prefix)
 
     def get_assets(self, kics_version):
         name_zip = "assets_compressed.zip"
@@ -107,8 +105,8 @@ class KicsTool(ToolGateway):
         self.download(name_zip, assets_url)
 
         directory_assets = "kics_assets"
-        github_api = GithubApi()
-        github_api.unzip_file(name_zip, directory_assets)
+        utils = Utils()
+        utils.unzip_file(name_zip, directory_assets)
 
     def run_tool(
             self, config_tool, folders_to_scan, **kwargs
@@ -120,7 +118,8 @@ class KicsTool(ToolGateway):
             self.get_assets(kics_version)
 
         os_platform = platform.system()
-        self.select_operative_system(os_platform, folders_to_scan, config_tool, path_kics)
+        command_prefix = self.select_operative_system(os_platform, config_tool, path_kics)
+        self.execute_kics(folders_to_scan, command_prefix)
 
         data = self.load_results()
         if data:

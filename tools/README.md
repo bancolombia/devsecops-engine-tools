@@ -68,6 +68,17 @@ devsecops_engine_tools
 |                   driven_adapters
 |                   entry_points
 |                   utils.
+|           engine_code -> Static Code Scanning
+|              src
+|               applications
+|               deployment
+|               domain
+|                   model
+|                   usecases
+|               infraestructure
+|                   driven_adapters
+|                   entry_points
+|                   utils.
 |
 ├───engine_sca -> SCA Practices
 |            engine_container -> Container Scanning
