@@ -2,6 +2,11 @@ import requests
 from devsecops_engine_tools.engine_dast.src.domain.model.gateways.authentication_method import (
     AuthenticationGateway
 )
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
+
 
 class GenericOauth(AuthenticationGateway):
     def __init__(self, data, endpoint):
@@ -62,4 +67,4 @@ class GenericOauth(AuthenticationGateway):
                     "code {0}: -> {1}".format(response.status_code, response.text)
                 )
         except (ConnectionError, ValueError, KeyError) as e:
-            print("OAuth: Can't obtain access token: {0}".format(e))
+            logger.warning("OAuth: Can't obtain access token: {0}".format(e))
