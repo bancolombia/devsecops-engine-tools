@@ -40,7 +40,7 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
 
     # Filling operations list with adapters
     data = load_json_file(dict_args["dast_file_path"])
-    
+
     try:
 
 
@@ -93,7 +93,7 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
             devops_platform_gateway=devops_platform,
             tool_gateway=tool_run,
             dict_args=dict_args,
-            checks_token=secret_tool["github_token"] if secret_tool else os.environ["GITHUB_TOKEN"],
+            secret_tool=secret_tool,
             config_tool=config_tool,
             extra_tools=extra_tools,
             target_data=target_config

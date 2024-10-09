@@ -56,7 +56,7 @@ class DastScan:
         return config_tool, data_target_config
 
     def process(
-        self, dict_args, dast_token, config_tool
+        self, dict_args, secret_tool, config_tool
     ) -> "Tuple[List, InputCore]":
         init_config_tool = self.devops_platform_gateway.get_remote_config(
             dict_args["remote_config_repo"], "engine_dast/ConfigTool.json"
@@ -76,7 +76,8 @@ class DastScan:
         finding_list, path_file_results = self.tool_gateway.run_tool(
             target_data=data_target,
             config_tool=config_tool,
-            secret_external_checks=dast_token,
+            secret_tool=secret_tool,
+            secret_external_checks=dict_args["token_external_checks"]
         )
         #Here execute other tools and append to finding list
         if len(self.other_tools) > 0:
