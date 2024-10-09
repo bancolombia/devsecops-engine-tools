@@ -32,14 +32,17 @@ from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.json_handler 
 )
 
 def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
-    try:
-        if config_tool["TOOL"].lower() == "nuclei": # tool_gateway is the main Tool
-            tool_run = NucleiTool()
-        extra_tools = []
-        target_config = None
 
-        # Filling operations list with adapters
-        data = load_json_file(dict_args["dast_file_path"])
+    if config_tool["TOOL"].lower() == "nuclei": # tool_gateway is the main Tool
+        tool_run = NucleiTool()
+    extra_tools = []
+    target_config = None
+
+    # Filling operations list with adapters
+    data = load_json_file(dict_args["dast_file_path"])
+    
+    try:
+
 
         if "operations" in data: # Api
             operations: List = []
