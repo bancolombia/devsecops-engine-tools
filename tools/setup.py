@@ -33,7 +33,8 @@ setup(
     packages=find_packages(exclude=["**test**"]),
     entry_points={
         'console_scripts': [
-            'devsecops-engine-tools=devsecops_engine_tools.engine_core.src.applications.runner_engine_core:application_core'
+            'devsecops-engine-tools=devsecops_engine_tools.engine_core.src.applications.runner_engine_core:application_core',
+            'devsecops-engine-tools.report-sonar=devsecops_engine_tools.engine_utilities.sonarqube.applications.runner_report_sonar:runner_report_sonar'
         ]
     },
     classifiers=[
