@@ -9,6 +9,7 @@ from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
+
 class GetArtifacts:
 
     def excluded_files(self, remote_config, pipeline_name, exclusions, tool):
@@ -29,7 +30,7 @@ class GetArtifacts:
                         pattern = pattern2
 
         return pattern
-    
+
     def find_packages(self, pattern, packages, working_dir):
         packages_list = []
         files_list = []
@@ -47,7 +48,7 @@ class GetArtifacts:
                     if extension_pattern.search(file):
                         files_list.append(os.path.join(root, file))
         return packages_list, files_list
-    
+
     def compress_and_mv(self, tar_path, package):
         try:
             with tarfile.open(tar_path, "w") as tar:
@@ -65,7 +66,7 @@ class GetArtifacts:
             target = os.path.join(dir_to_scan_path, os.path.basename(file))
             shutil.copy2(file, target)
             logger.debug(f"File to scan: {file}")
-    
+
     def find_artifacts(self, to_scan, pattern, packages):
         dir_to_scan_path = os.path.join(to_scan, "dependencies_to_scan")
         if os.path.exists(dir_to_scan_path):

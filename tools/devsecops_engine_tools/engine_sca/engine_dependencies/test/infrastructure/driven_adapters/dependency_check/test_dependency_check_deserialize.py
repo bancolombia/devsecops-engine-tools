@@ -4,6 +4,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.dr
 from unittest.mock import patch
 import pytest
 
+
 @pytest.fixture
 def deserializator():
     return DependencyCheckDeserialize()
@@ -20,15 +21,15 @@ def json_data():
                         "name": "CVE-1234",
                         "cvssv3": 7.5,
                         "description": "Una vulnerabilidad alta en package1.",
-                        "severity": "HIGH"
+                        "severity": "HIGH",
                     }
-                ]
+                ],
             }
         ]
     }
-    
 
-@patch.object(DependencyCheckDeserialize, 'load_results')
+
+@patch.object(DependencyCheckDeserialize, "load_results")
 def test_get_list_findings_valid(mock_load_results, deserializator, json_data):
     mock_load_results.return_value = json_data
 
