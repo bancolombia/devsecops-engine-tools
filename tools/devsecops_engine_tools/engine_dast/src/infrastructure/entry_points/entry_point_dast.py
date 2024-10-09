@@ -11,10 +11,10 @@ def init_engine_dast(
     devops_platform_gateway,
     tool_gateway,
     dict_args,
-    checks_token,
+    secret_tool,
     config_tool,
     extra_tools,
     target_data
 ):
     dast_scan = DastScan(tool_gateway, devops_platform_gateway, target_data, extra_tools)
-    return dast_scan.process(dict_args, checks_token, config_tool)
+    return dast_scan.process(dict_args, secret_tool, config_tool)
