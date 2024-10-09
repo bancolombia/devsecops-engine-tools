@@ -36,5 +36,5 @@ class SecretsManager(SecretsManagerGateway):
             secret_dict = json.loads(secret)
             return secret_dict
         except NoCredentialsError as e:
-            logger.error("Error getting secret: {e}")
+            logger.error(f"Error getting secret: {e}")
             return None
