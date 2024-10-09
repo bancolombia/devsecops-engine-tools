@@ -196,15 +196,24 @@ def test_scan_dependencies_success(xray_scan_instance):
         "os.path.join"
     ) as mock_path_join, patch(
         "os.getcwd"
-    ) as mock_os_getcwd:
+    ) as mock_os_getcwd, patch(
+        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.logger.error"
+    ) as mock_logger:
         prefix = "jf"
         cwd = "working_dir"
         mode = "scan"
         to_scan = "target_file.tar"
-        mock_subprocess_run.return_value = Mock(returncode=0)
+        remote_config = {
+            "XRAY": {
+                "STDERR_EXPECTED_WORDS": ["expected"],
+                "STDERR_BREAK_ERRORS": ["break"],
+                "STDERR_ACCEPTED_ERRORS": ["accepted"]
+            }
+        }
+        mock_subprocess_run.return_value = Mock(returncode=0, stdout="", stderr="expected, accepted")
         mock_os_getcwd.return_value = "working_dir"
 
-        xray_scan_instance.scan_dependencies(prefix, cwd, mode, to_scan)
+        xray_scan_instance.scan_dependencies(prefix, cwd, remote_config, mode, to_scan)
 
         mock_subprocess_run.assert_called_with(
             [
@@ -219,6 +228,10 @@ def test_scan_dependencies_success(xray_scan_instance):
             text=True,
         )
 
+        mock_logger.assert_called_with(
+            "Error executing Xray scan: expected, accepted"
+        )
+
 
 def test_scan_dependencies_failure(xray_scan_instance):
     with patch("subprocess.run") as mock_subprocess_run, patch(
@@ -226,6 +239,7 @@ def test_scan_dependencies_failure(xray_scan_instance):
     ) as mock_logger_error:
         prefix = "jf"
         cwd = "working_dir"
+        remote_config = {"XRAY": {"STDERR_EXPECTED_WORDS": ["error"]}}
         mode = "scan"
         to_scan = "target_file.tar"
         mock_subprocess_run.return_value = Mock(
@@ -234,7 +248,7 @@ def test_scan_dependencies_failure(xray_scan_instance):
             stdout="",
         )
 
-        xray_scan_instance.scan_dependencies(prefix, cwd, mode, to_scan)
+        xray_scan_instance.scan_dependencies(prefix, cwd, remote_config, mode, to_scan)
 
         mock_logger_error.assert_called_with(
             "Error executing Xray scan: Command 'xray scan' returned non-zero exit status 1."
@@ -275,13 +289,13 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
             pipeline_name,
             to_scan,
             secret_tool,
-            None
+            None,
         )
 
         mock_install_tool.assert_called_with(prefix, "1.0")
         mock_config_server.assert_called_with(prefix, "token123")
         mock_scan_dependencies.assert_called_with(
-            prefix, "working_dir", dict_args["xray_mode"], ""
+            prefix, "working_dir", remote_config, dict_args["xray_mode"], ""
         )
 
 
@@ -305,7 +319,7 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
         dict_args = {"xray_mode": "audit"}
         prefix = os.path.join("user_path", "jf.exe")
         to_scan = "working_dir"
-        secret_tool = {"token_xray" : "token123"}
+        secret_tool = {"token_xray": "token123"}
         exclusion = {}
         pipeline_name = "pipeline"
         mock_system.return_value = "Windows"
@@ -319,14 +333,14 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
             pipeline_name,
             to_scan,
             secret_tool,
-            None
+            None,
         )
 
         mock_install_tool.assert_called_with(prefix, "1.0")
         mock_config_server.assert_called_with(prefix, "token123")
 
         mock_scan_dependencies.assert_called_with(
-            prefix, "working_dir", dict_args["xray_mode"], ""
+            prefix, "working_dir", remote_config, dict_args["xray_mode"], ""
         )
 
 
@@ -364,12 +378,12 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
             pipeline_name,
             to_scan,
             token,
-            "token_container"
+            "token_container",
         )
 
         mock_install_tool.assert_called_with(prefix, "1.0")
         mock_config_server.assert_called_with(prefix, "token_container")
 
         mock_scan_dependencies.assert_called_with(
-            prefix, "working_dir", dict_args["xray_mode"], ""
+            prefix, "working_dir", remote_config, dict_args["xray_mode"], ""
         )

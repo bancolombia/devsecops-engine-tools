@@ -1,8 +1,11 @@
-from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.helpers.get_artifacts import GetArtifacts
+from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.helpers.get_artifacts import (
+    GetArtifacts,
+)
 
 import subprocess
 import pytest
 from unittest.mock import patch, Mock
+
 
 @pytest.fixture
 def get_artifacts_instance():
@@ -18,9 +21,12 @@ def test_excluded_files(get_artifacts_instance):
     exclusions = {"pipeline1": {"XRAY": [{"SKIP_FILES": {"files": [".py", ".txt"]}}]}}
     expected_result = ".js"
 
-    result = get_artifacts_instance.excluded_files(remote_config, pipeline_name, exclusions, "XRAY")
+    result = get_artifacts_instance.excluded_files(
+        remote_config, pipeline_name, exclusions, "XRAY"
+    )
 
     assert result == expected_result
+
 
 def test_find_packages(get_artifacts_instance):
     with patch("os.walk") as mock_walk, patch("os.path.join") as mock_join:
@@ -38,6 +44,7 @@ def test_find_packages(get_artifacts_instance):
 
         mock_join.assert_any_call
 
+
 def test_compress_and_mv_success(get_artifacts_instance):
     with patch("tarfile.open") as mock_tarfile_open:
         package = "/path/to/package"
@@ -46,6 +53,7 @@ def test_compress_and_mv_success(get_artifacts_instance):
         get_artifacts_instance.compress_and_mv(tar_path, package)
 
         mock_tarfile_open.assert_called_with(tar_path, "w")
+
 
 def test_compress_and_mv_failure(get_artifacts_instance):
     with patch("tarfile.open") as mock_tarfile_open, patch(
@@ -63,6 +71,7 @@ def test_compress_and_mv_failure(get_artifacts_instance):
 
         mock_logger_error.assert_any_call
 
+
 def test_move_files(get_artifacts_instance):
     with patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.helpers.get_artifacts.logger.debug"
@@ -79,6 +88,7 @@ def test_move_files(get_artifacts_instance):
         get_artifacts_instance.move_files(dir_to_scan_path, finded_files)
 
         mock_logger_debug.assert_any_call
+
 
 def test_find_artifacts(get_artifacts_instance):
     with patch("os.path.join") as mock_join, patch(
