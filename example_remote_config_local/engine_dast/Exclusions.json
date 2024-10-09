@@ -1,6 +1,6 @@
 {
 	"All": {
-		"NUCLEI": [
+		"JWT": [
 			{
 				"id": "ENGINE_JWT_001",
 				"where": "all",
