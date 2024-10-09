@@ -72,29 +72,27 @@ class KubescapeTool(ToolGateway):
             logger.error("The JSON result is empty.")
         return None
 
-    def select_operative_system(self, os_platform, folders_to_scan, base_url):
+    def select_operative_system(self, os_platform, base_url):
         if os_platform == "Linux":
             distro_name = distro.name()
             if distro_name == "Ubuntu":
                 file = "kubescape-ubuntu-latest"
                 self.install_tool(file, base_url + file)
-                command_prefix = f"./{file}"
+                return f"./{file}"
             else:
                 logger.warning(f"{distro_name} is not supported.")
                 return None
         elif os_platform == "Windows":
             file = "kubescape-windows-latest.exe"
             self.install_tool_windows(file, base_url + file)
-            command_prefix = f"./{file}"
+            return f"./{file}"
         elif os_platform == "Darwin":
             file = "kubescape-macos-latest"
             self.install_tool(file, base_url + file)
-            command_prefix = f"./{file}"
+            return f"./{file}"
         else:
             logger.warning(f"{os_platform} is not supported.")
             return [], None
-
-        self.execute_kubescape(folders_to_scan, command_prefix)
 
     def run_tool(self, config_tool, folders_to_scan, platform_to_scan, **kwargs):
 
@@ -103,7 +101,8 @@ class KubescapeTool(ToolGateway):
             kubescape_version = config_tool["KUBESCAPE"]["VERSION"]
             os_platform = platform.system()
             base_url = f"https://github.com/kubescape/kubescape/releases/download/v{kubescape_version}/"
-            self.select_operative_system(os_platform, folders_to_scan, base_url)
+            command_prefix = self.select_operative_system(os_platform, base_url)
+            self.execute_kubescape(folders_to_scan, command_prefix)
 
             json_name = "results_kubescape.json"
             data = self.load_json(json_name)

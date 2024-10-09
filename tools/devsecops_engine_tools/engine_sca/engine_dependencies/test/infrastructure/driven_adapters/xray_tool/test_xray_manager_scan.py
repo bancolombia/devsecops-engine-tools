@@ -14,125 +14,6 @@ def xray_scan_instance():
     return XrayScan()
 
 
-def test_excluded_files(xray_scan_instance):
-    remote_config = {
-        "remote_config_key": "remote_config_value",
-        "XRAY": {"REGEX_EXPRESSION_EXTENSIONS": ".js|.py|.txt"},
-    }
-    pipeline_name = "pipeline1"
-    exclusions = {"pipeline1": {"XRAY": [{"SKIP_FILES": {"files": [".py", ".txt"]}}]}}
-    expected_result = ".js"
-
-    result = xray_scan_instance.excluded_files(remote_config, pipeline_name, exclusions)
-
-    assert result == expected_result
-
-
-def test_find_packages(xray_scan_instance):
-    with patch("os.walk") as mock_walk, patch("os.path.join") as mock_join:
-        working_dir = "/path/to/working_dir"
-        mock_walk.return_value = [
-            (working_dir, ["dir1", "dir2"], ["file1.txt", "file2.json"]),
-            (working_dir, ["dir3"], ["file3.ear"]),
-            (working_dir, ["node_modules"], ["file4.war"]),
-            (working_dir, ["site-packages"], ["file5.jar"]),
-        ]
-        pattern = "\\.(jar|ear|war)$"
-        packages = ["package"]
-
-        xray_scan_instance.find_packages(pattern, packages, working_dir)
-
-        mock_join.assert_any_call
-
-
-def test_compress_and_mv_success(xray_scan_instance):
-    with patch("tarfile.open") as mock_tarfile_open:
-        package = "/path/to/package"
-        tar_path = "/path/to/target_dir/package.tar"
-
-        xray_scan_instance.compress_and_mv(tar_path, package)
-
-        mock_tarfile_open.assert_called_with(tar_path, "w")
-
-
-def test_compress_and_mv_failure(xray_scan_instance):
-    with patch("tarfile.open") as mock_tarfile_open, patch(
-        "os.path.basename"
-    ) as mock_basename, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.logger.error"
-    ) as mock_logger_error:
-        package = "/path/to/package"
-        tar_path = "/path/to/target_dir/package.tar"
-        mock_tarfile_open.side_effect = subprocess.CalledProcessError(
-            returncode=1, cmd="opentar"
-        )
-
-        xray_scan_instance.compress_and_mv(tar_path, package)
-
-        mock_logger_error.assert_any_call
-
-
-def test_move_files(xray_scan_instance):
-    with patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.logger.debug"
-    ) as mock_logger_debug, patch("os.path.join") as mock_path_join, patch(
-        "shutil.copy2"
-    ) as mock_copy:
-        dir_to_scan_path = "/dir/to/scan"
-        finded_files = [
-            "/path/to/file1.txt",
-            "/path/to/file2.txt",
-            "/path/to/file3.txt",
-        ]
-
-        xray_scan_instance.move_files(dir_to_scan_path, finded_files)
-
-        mock_logger_debug.assert_any_call
-
-
-def test_find_artifacts(xray_scan_instance):
-    with patch("os.path.join") as mock_join, patch(
-        "os.path.exists"
-    ) as mock_exists, patch("os.makedirs") as mock_makedirs, patch(
-        "shutil.rmtree"
-    ) as mock_rmtree, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.find_packages"
-    ) as mock_find_packages, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.compress_and_mv"
-    ) as mock_compress_and_mv, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.XrayScan.move_files"
-    ) as mock_move_files, patch(
-        "os.listdir"
-    ) as mock_listdir, patch(
-        "os.path.isfile"
-    ) as mock_isfile, patch(
-        "os.path.join"
-    ) as mock_path_join, patch(
-        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.logger.debug"
-    ) as mock_logger:
-        pattern = "\\.(jar|ear|war)$"
-        to_scan = "/path/to/working_dir"
-        packages = ["package"]
-        mock_join.side_effect = lambda *args: "/".join(args)
-        mock_exists.return_value = True
-        mock_find_packages.return_value = (
-            ["/path/to/node_modules"],
-            ["/path/to/file1"],
-        )
-        mock_listdir.return_value = ["package1"]
-        mock_isfile.return_value = True
-
-        xray_scan_instance.find_artifacts(to_scan, pattern, packages)
-
-        mock_rmtree.assert_called_once
-        mock_makedirs.assert_called_once
-        mock_find_packages.assert_called_once
-        mock_join.assert_any_call
-        mock_compress_and_mv.assert_any_call
-        mock_move_files.assert_called_once
-        mock_logger.assert_called_once
-
-
 def test_install_tool_linux_success(xray_scan_instance):
     version = "2.52.8"
     prefix = "jf"
@@ -315,15 +196,24 @@ def test_scan_dependencies_success(xray_scan_instance):
         "os.path.join"
     ) as mock_path_join, patch(
         "os.getcwd"
-    ) as mock_os_getcwd:
+    ) as mock_os_getcwd, patch(
+        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.xray_tool.xray_manager_scan.logger.error"
+    ) as mock_logger:
         prefix = "jf"
         cwd = "working_dir"
         mode = "scan"
         to_scan = "target_file.tar"
-        mock_subprocess_run.return_value = Mock(returncode=0)
+        remote_config = {
+            "XRAY": {
+                "STDERR_EXPECTED_WORDS": ["expected"],
+                "STDERR_BREAK_ERRORS": ["break"],
+                "STDERR_ACCEPTED_ERRORS": ["accepted"]
+            }
+        }
+        mock_subprocess_run.return_value = Mock(returncode=0, stdout="", stderr="expected, accepted")
         mock_os_getcwd.return_value = "working_dir"
 
-        xray_scan_instance.scan_dependencies(prefix, cwd, mode, to_scan)
+        xray_scan_instance.scan_dependencies(prefix, cwd, remote_config, mode, to_scan)
 
         mock_subprocess_run.assert_called_with(
             [
@@ -338,6 +228,10 @@ def test_scan_dependencies_success(xray_scan_instance):
             text=True,
         )
 
+        mock_logger.assert_called_with(
+            "Error executing Xray scan: expected, accepted"
+        )
+
 
 def test_scan_dependencies_failure(xray_scan_instance):
     with patch("subprocess.run") as mock_subprocess_run, patch(
@@ -345,6 +239,7 @@ def test_scan_dependencies_failure(xray_scan_instance):
     ) as mock_logger_error:
         prefix = "jf"
         cwd = "working_dir"
+        remote_config = {"XRAY": {"STDERR_EXPECTED_WORDS": ["error"]}}
         mode = "scan"
         to_scan = "target_file.tar"
         mock_subprocess_run.return_value = Mock(
@@ -353,7 +248,7 @@ def test_scan_dependencies_failure(xray_scan_instance):
             stdout="",
         )
 
-        xray_scan_instance.scan_dependencies(prefix, cwd, mode, to_scan)
+        xray_scan_instance.scan_dependencies(prefix, cwd, remote_config, mode, to_scan)
 
         mock_logger_error.assert_called_with(
             "Error executing Xray scan: Command 'xray scan' returned non-zero exit status 1."
@@ -394,13 +289,13 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
             pipeline_name,
             to_scan,
             secret_tool,
-            None
+            None,
         )
 
         mock_install_tool.assert_called_with(prefix, "1.0")
         mock_config_server.assert_called_with(prefix, "token123")
         mock_scan_dependencies.assert_called_with(
-            prefix, "working_dir", dict_args["xray_mode"], ""
+            prefix, "working_dir", remote_config, dict_args["xray_mode"], ""
         )
 
 
@@ -424,7 +319,7 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
         dict_args = {"xray_mode": "audit"}
         prefix = os.path.join("user_path", "jf.exe")
         to_scan = "working_dir"
-        secret_tool = {"token_xray" : "token123"}
+        secret_tool = {"token_xray": "token123"}
         exclusion = {}
         pipeline_name = "pipeline"
         mock_system.return_value = "Windows"
@@ -438,14 +333,14 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
             pipeline_name,
             to_scan,
             secret_tool,
-            None
+            None,
         )
 
         mock_install_tool.assert_called_with(prefix, "1.0")
         mock_config_server.assert_called_with(prefix, "token123")
 
         mock_scan_dependencies.assert_called_with(
-            prefix, "working_dir", dict_args["xray_mode"], ""
+            prefix, "working_dir", remote_config, dict_args["xray_mode"], ""
         )
 
 
@@ -483,12 +378,12 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
             pipeline_name,
             to_scan,
             token,
-            "token_container"
+            "token_container",
         )
 
         mock_install_tool.assert_called_with(prefix, "1.0")
         mock_config_server.assert_called_with(prefix, "token_container")
 
         mock_scan_dependencies.assert_called_with(
-            prefix, "working_dir", dict_args["xray_mode"], ""
+            prefix, "working_dir", remote_config, dict_args["xray_mode"], ""
         )
