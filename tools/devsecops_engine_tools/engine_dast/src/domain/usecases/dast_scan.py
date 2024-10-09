@@ -76,7 +76,7 @@ class DastScan:
         finding_list, path_file_results = self.tool_gateway.run_tool(
             target_data=data_target,
             config_tool=config_tool,
-            token=dast_token,
+            secret_external_checks=dast_token,
         )
         #Here execute other tools and append to finding list
         if len(self.other_tools) > 0:
