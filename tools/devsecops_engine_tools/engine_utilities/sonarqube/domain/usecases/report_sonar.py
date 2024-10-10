@@ -7,9 +7,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform
 from devsecops_engine_tools.engine_utilities.sonarqube.domain.model.gateways.vulnerability_management_gateway import (
     VulnerabilityManagementGateway
 )
-from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.sonar.report_sonar import (
-    SendReportSonar
-)
 from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.helpers.utils import (
     set_repository, 
     set_environment, 
@@ -52,7 +49,7 @@ class ReportSonar:
         )
         environment = set_environment(branch)
         
-        if self.secrets_manager_gateway: secret = self.secrets_manager_gateway.get_secret(config_tool)
+        if args["use_secrets_manager"] == "true": secret = self.secrets_manager_gateway.get_secret(config_tool)
         else: secret = args
 
         project_keys = self.sonar_gateway.get_project_keys(pipeline_name)
