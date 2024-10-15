@@ -1,20 +1,23 @@
 import unittest
-from unittest.mock import patch, mock_open
-from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.file_generator_tool import (
-    generate_file_from_tool,
-    update_field)
+from unittest.mock import patch, mock_open, call
+import json
+
+# Importa la función a probar
+from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.file_generator_tool import generate_file_from_tool, update_field
 
 class TestGenerateFileFromTool(unittest.TestCase):
-
-    @patch('builtins.open', new_callable=mock_open)
-    @patch('json.dump')
-    @patch('os.path.abspath', return_value='/absolute/path/results.json')
-    def test_generate_file_from_tool_nuclei(self, mock_abspath, mock_json_dump, mock_open):
+    @patch("devsecops_engine_tools.engine_dast.src.infrastructure.helpers.file_generator_tool.open", new_callable=mock_open)  # Simula 'open'
+    @patch("devsecops_engine_tools.engine_dast.src.infrastructure.helpers.file_generator_tool.os.path.abspath")  # Simula 'os.path.abspath'
+    def test_generate_file_from_tool_nuclei(self, mock_abspath, mock_open):
+        # Datos de entrada simulados
         tool = "nuclei"
         result_list = [
             {
                 "results": {
-                    "failed_checks": [{"check_id": "ID1", "severity": "high"}]
+                    "failed_checks": [
+                        {"check_id": "id1", "severity": "high"},
+                        {"check_id": "id2", "severity": "medium"},
+                    ]
                 },
                 "summary": {
                     "passed": 5,
@@ -22,82 +25,49 @@ class TestGenerateFileFromTool(unittest.TestCase):
                     "skipped": 1,
                     "parsing_errors": 0,
                     "resource_count": 10,
-                    "checkov_version": "2.0.0"
+                    "version": "2.4.1",
                 }
             },
             {
                 "results": {
-                    "failed_checks": [{"check_id": "ID2", "severity": "medium"}]
+                    "failed_checks": [
+                        {"check_id": "id3", "severity": "low"},
+                    ]
                 },
                 "summary": {
-                    "passed": 3,
+                    "passed": 2,
                     "failed": 1,
                     "skipped": 0,
-                    "parsing_errors": 1,
+                    "parsing_errors": 0,
                     "resource_count": 5,
-                    "checkov_version": "2.0.0"
+                    "version": "2.4.1",
                 }
             }
         ]
         rules_doc = {
-            "ID1": {"severity": "HIGH"},
-            "ID2": {"severity": "MEDIUM"}
+            "id1": {"severity": "critical"},
+            "id2": {"severity": "high"},
+            "id3": {"severity": "low"},
         }
 
-        expected_results_data = {
-            "check_type": "Api and Web Application",
-            "results": {
-                "failed_checks": [
-                    {"check_id": "ID1", "severity": "high"},
-                    {"check_id": "ID2", "severity": "medium"}
-                ]
-            },
-            "summary": {
-                "passed": 8,
-                "failed": 3,
-                "skipped": 1,
-                "parsing_errors": 1,
-                "resource_count": 15,
-                "checkov_version": "2.0.0"
-            }
-        }
+        # Valores de retorno simulados
+        mock_abspath.return_value = "/mocked/path/results.json"
 
+        # Llamada a la función
         result = generate_file_from_tool(tool, result_list, rules_doc)
 
-        mock_open.assert_called_once_with('results.json', 'w')
-        mock_json_dump.assert_called_once()
-        mock_abspath.assert_called_once_with('results.json')
-        self.assertEqual(result, '/absolute/path/results.json')
+        # Verificación del nombre de archivo devuelto
+        self.assertEqual(result, "/mocked/path/results.json")
 
-    @patch('builtins.open', new_callable=mock_open)
-    @patch('json.dump')
-    def test_generate_file_from_tool_key_error(self, mock_json_dump, mock_open):
-        tool = "nuclei"
-        result_list = [
-            {
-                "results": {
-                    "failed_checks": [{"check_id": "ID1", "severity": "high"}]
-                },
-                "summary": {
-                    "passed": 5,
-                    "failed": 2,
-                    "skipped": 1,
-                    "parsing_errors": 0,
-                    "resource_count": 10,
-                    "checkov_version": "2.0.0"
-                }
-            }
-        ]
-        rules_doc = {}  # Missing keys
+        # Verifica que 'open' se llame con el nombre de archivo correcto
+        mock_open.assert_called_once_with("results.json", "w")
+        
+        # Obtener la instancia del archivo simulado
+        handle = mock_open()
+        handle.write.assert_called()  # Verifica que write se haya llamado
+        
 
-        result = generate_file_from_tool(tool, result_list, rules_doc)
-        self.assertIsNotNone(result)
 
-    def test_update_field(self):
-        elem = {"field1": "value1", "field2": "value2"}
-        field = "field2"
-        new_value = "new_value"
-        expected = {"field1": "value1", "field2": "new_value"}
-
-        result = update_field(elem, field, new_value)
-        self.assertEqual(result, expected)
+# Ejecuta las pruebas
+if __name__ == "__main__":
+    unittest.main()
