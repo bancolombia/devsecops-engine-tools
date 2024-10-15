@@ -1,6 +1,6 @@
-import os
 import subprocess
 import json
+import re
 from devsecops_engine_tools.engine_dast.src.domain.model.config_tool import (
     ConfigTool,
 )
@@ -12,9 +12,6 @@ from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nucle
 )
 from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nuclei.nuclei_deserealizer import (
     NucleiDesealizator,
-)
-from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.file_generator_tool import (
-    generate_file_from_tool,
 )
 from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
     GithubApi
@@ -35,18 +32,65 @@ class NucleiTool(ToolGateway):
         self.data_config_cli = data_config_cli
         self.TOOL: str = "NUCLEI"
 
+    def check_install_tool(self) -> any:
+        command = "nuclei --version"
+        result = subprocess.run(command, capture_output=True, shell=True)
+        output = result.stderr.strip()
+        reg_exp = r"not found"
+        check_tool = re.search(reg_exp, output.decode("utf-8"))
+        if check_tool:
+            install_result = self.run_install()
+            if install_result != 0:
+                logger.error(f"{self.TOOL} can't installed")
+            return -1
+        return 0
+
+    def run_install(self):
+        download = subprocess.run(
+            "wget -q https://github.com/projectdiscovery/nuclei/releases/download/v3.3.4/nuclei_3.3.4_linux_amd64.zip -O nuclei.zip",
+            capture_output=True,
+            shell=True
+        )
+        if download.returncode != 0:
+            logger.error(f"Error downloading {self.TOOL} binary")
+            return -1
+
+        unzip = subprocess.run(
+            "unzip -o nuclei.zip -d /usr/local/bin/",
+            capture_output=True,
+            shell=True
+        )
+        if unzip.returncode != 0:
+            logger.error(f"Error Unzipping {self.TOOL} binary")
+            return -1
+
+        make_exe = subprocess.run(
+            "chmod +x /usr/local/bin/nuclei",
+            capture_output=True,
+            shell=True
+        )
+        if make_exe.returncode != 0:
+            logger.error(f"Error giving execution permissions to {self.TOOL}")
+            return -1
+        return 0
+
     def configurate_external_checks(
-        self, config_tool: ConfigTool, secret: str, output_dir: str = "/tmp"
+        self, config_tool: ConfigTool, secret, output_dir: str = "/tmp"
     ):
+        if secret is None:
+            logger.warning("The secret is not configured for external controls")
         # Create configuration dir external checks
-        if config_tool.use_external_checks_dir == "True":
+        elif config_tool.use_external_checks_dir == "True":
             github_api = GithubApi(secret["github_token"])
             github_api.download_latest_release_assets(
                 config_tool.external_dir_owner,
                 config_tool.external_dir_repository,
                 output_dir,
             )
-            return output_dir + config_tool.external_checks_save_path
+            return output_dir + config_tool.external_asset_name
+        else:
+            return None
+
 
     def execute(self, target_config: NucleiConfig) -> dict:
         """Interact with nuclei's core application"""
@@ -56,8 +100,7 @@ class NucleiTool(ToolGateway):
             + "-duc "  # disable automatic update check
             + "-u "  # target URLs/hosts to scan
             + target_config.url
-            + " -ud "  # custom directory to install / update nuclei-templates
-            + target_config.custom_templates_dir
+            + (f" -ud {target_config.custom_templates_dir}" if target_config.custom_templates_dir else "")
             + " -ni "  # disable interactsh server
             + "-dc "  # disable clustering of requests
             + "-tags " # Excute only templates with the especified tag
@@ -72,9 +115,8 @@ class NucleiTool(ToolGateway):
                 shell=True,
                 capture_output=True,
             )
-            error = result.stderr
-            if (error is not None and error != ""):
-                error = error.strip()
+            error = result.stderr.decode().strip() if result.stderr else ""
+            if result.returncode != 0:
                 logger.warning(
                     f"Error executing nuclei: {error}")
         with open(target_config.output_file, "r") as f:
@@ -98,10 +140,12 @@ class NucleiTool(ToolGateway):
                     else None
                 )
             }
-
+        if self.check_install_tool() != 0:
+            return None
         nuclei_config = NucleiConfig(target_data)
         checks_directory = self.configurate_external_checks(config_tool, secret, "/tmp") #DATA PDN
-        nuclei_config.customize_templates(checks_directory)
+        if checks_directory:
+            nuclei_config.customize_templates(checks_directory)
         result_scans = self.execute(nuclei_config)
         nuclei_deserealizator = NucleiDesealizator()
         findings_list = nuclei_deserealizator.get_list_finding(result_scans)
