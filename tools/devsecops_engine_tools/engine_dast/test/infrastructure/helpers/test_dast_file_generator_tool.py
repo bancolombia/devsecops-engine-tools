@@ -65,9 +65,3 @@ class TestGenerateFileFromTool(unittest.TestCase):
         # Obtener la instancia del archivo simulado
         handle = mock_open()
         handle.write.assert_called()  # Verifica que write se haya llamado
-        
-
-
-# Ejecuta las pruebas
-if __name__ == "__main__":
-    unittest.main()

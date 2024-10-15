@@ -58,7 +58,6 @@ class JwtTool(ToolGateway):
 
         map_id = "JWE_ALGORITHM"
         msg = ""
-        dec = jwt.decode(token, )
         enc = jwt.get_unverified_header(token)["enc"]
         alg = jwt.get_unverified_header(token)["alg"]
 
@@ -128,13 +127,14 @@ class JwtTool(ToolGateway):
                     id=scan.get("check-id"),
                     cvss=scan.get("cvss"),
                     where=scan.get("matched-at"),
-                    description=scan["info"].get("description"),
-                    severity=scan["info"].get("severity").lower(),
+                    description=scan.get("description"),
+                    severity=scan.get("severity").lower(),
                     identification_date=datetime.now().strftime("%d%m%Y"),
                     module="engine_dast",
                     category=Category("vulnerability"),
-                    requirements=scan["info"].get("remediation"),
+                    requirements=scan.get("remediation"),
                     tool="jwt",
+                    published_date_cve=scan.get("published-cve")
                 )
                 list_open_findings.append(finding_open)
         return list_open_findings
