@@ -7,9 +7,10 @@ from secrets import (
 from authlib.jose import (
     jwt
 )
-from devsecops_engine_tools.engine_dast.src.domain.model.gateways.authentication_method import (
+from devsecops_engine_tools.engine_dast.src.domain.model.gateways.authentication_gateway import (
     AuthenticationGateway,
 )
+
 
 class JwtObject(AuthenticationGateway):
     def __init__(self, security_auth: dict):

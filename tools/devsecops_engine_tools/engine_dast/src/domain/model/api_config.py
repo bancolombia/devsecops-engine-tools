@@ -1,6 +1,7 @@
 from typing import List
 from devsecops_engine_tools.engine_dast.src.domain.model.api_operation import ApiOperation
 
+
 class ApiConfig():
     def __init__(self, api_data: dict):
         try:
