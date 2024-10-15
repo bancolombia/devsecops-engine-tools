@@ -169,13 +169,23 @@ class TestHandleScan(unittest.TestCase):
         dict_args = {
             "use_secrets_manager": "true",
             "tool": "engine_dast",
-            "dast_file_path": "example_dast.json"
+            "dast_file_path": "example_dast.json",
+            "use_vulnerability_management": "true",
+            "remote_config_repo": "dummie_repo"
         }
         secret_tool = {"github_token": "example_token"}
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
         config_tool = {"ENGINE_DAST":{"ENABLED": "true", "TOOL": "NUCLEI"}}
+        input_core = InputCore(
+            totalized_exclusions=[],
+            threshold_defined=Threshold,
+            path_file_results="test/file",
+            custom_message_break_build="message",
+            scope_pipeline="pipeline",
+            stage_pipeline="Release",
+        )
         # Simulates runner_engine_dast return
-        mock_runner_engine_dast.return_value = (["finding1", "finding2"], "input_core_mock")
+        mock_runner_engine_dast.return_value = (["finding1", "finding2"], input_core)
         # Call process method
         result_findings_list, result_input_core = self.handle_scan.process(dict_args, config_tool)
         # Verifies mock have been called correctly
@@ -184,7 +194,7 @@ class TestHandleScan(unittest.TestCase):
         )
         # Verifica los resultados devueltos
         self.assertEqual(result_findings_list, ["finding1", "finding2"])
-        self.assertEqual(result_input_core, "input_core_mock")
+        self.assertEqual(result_input_core, input_core)
 
     @mock.patch("devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_secret_scan")
     def test_process_with_engine_secret(self, mock_runner_secret_scan):

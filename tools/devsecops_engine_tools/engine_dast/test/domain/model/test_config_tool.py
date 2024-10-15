@@ -12,8 +12,6 @@ class TestConfigTool(unittest.TestCase):
             "NUCLEI": {
                 "VERSION": "1.0",
                 "EXCLUSIONS_PATH": "/path/to/exclusions",
-                "USE_EXTERNAL_CHECKS_GIT": True,
-                "EXTERNAL_CHECKS_GIT": "git@example.com:repo.git",
                 "USE_EXTERNAL_CHECKS_DIR": "True",
                 "EXTERNAL_DIR_OWNER": "owner",
                 "EXTERNAL_DIR_REPOSITORY": "repository",
