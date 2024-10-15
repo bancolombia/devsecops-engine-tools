@@ -45,7 +45,7 @@ class TestNucleiTool(unittest.TestCase):
     @patch('devsecops_engine_tools.engine_dast.src.domain.model.config_tool')
     def test_run_tool(self, mock_config_tool):
         secret_external_checks = ("github", "dummy_token")
-        findings_list, path_file_results = self.nuclei_tool.run_tool(
+        _, path_file_results = self.nuclei_tool.run_tool(
             self.target_config, 
             mock_config_tool, 
             self.token, 
@@ -53,11 +53,3 @@ class TestNucleiTool(unittest.TestCase):
             )
 
         self.assertEqual(path_file_results, "result_dast_scan.json")
-
-        
-        
-
-
-# Ejecuta las pruebas
-if __name__ == "__main__":
-    unittest.main()
