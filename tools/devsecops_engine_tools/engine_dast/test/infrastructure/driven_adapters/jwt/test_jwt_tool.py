@@ -126,10 +126,3 @@ class TestJwtTool(unittest.TestCase):
                                   "severity": "low",
                                   "description": "weak alg"}], config_tool_mock
         )
-
-        
-
-
-# Ejecuta las pruebas
-if __name__ == "__main__":
-    unittest.main()
