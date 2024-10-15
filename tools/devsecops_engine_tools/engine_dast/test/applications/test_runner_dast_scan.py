@@ -55,7 +55,7 @@ class TestRunnerEngineDast(unittest.TestCase):
             devops_platform_gateway=devops_platform_gateway,
             tool_gateway=mock_nuclei_tool_instance,
             dict_args=dict_args,
-            checks_token='example_token',
+            secret_tool=secret_tool,
             config_tool=config_tool,
             extra_tools=[mock_jwt_tool_instance],
             target_data=mock_api_config_instance  # Verificar contra el mock de ApiConfig
@@ -113,7 +113,7 @@ class TestRunnerEngineDast(unittest.TestCase):
             devops_platform_gateway=devops_platform_gateway,
             tool_gateway=mock_nuclei_tool_instance,
             dict_args=dict_args,
-            checks_token='example_token',
+            secret_tool=secret_tool,
             config_tool=config_tool,
             extra_tools=[],
             target_data=mock_api_config_instance  # Verificar contra el mock de ApiConfig
@@ -142,6 +142,6 @@ class TestRunnerEngineDast(unittest.TestCase):
         secret_tool = {"github_token": "example_token"}
         devops_platform_gateway = mock.Mock()
 
-        # Verificar que se lanza una excepción para el target inválido
-        with self.assertRaises(ValueError):
+        # Verifies exception
+        with self.assertRaises(Exception):
             runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gateway)

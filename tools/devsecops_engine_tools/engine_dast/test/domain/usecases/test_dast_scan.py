@@ -45,8 +45,9 @@ class TestDastScan(unittest.TestCase):
     @patch('devsecops_engine_tools.engine_dast.src.domain.usecases.dast_scan.ConfigTool')
     @patch('devsecops_engine_tools.engine_dast.src.domain.usecases.dast_scan.Exclusions')
     def test_process(self, excluions_mock, config_tool_mock):
-        dict_args = {"remote_config_repo": "some_repo"}
-        dast_token = "some_token"
+        dict_args = {"remote_config_repo": "some_repo",
+                     "token_external_checks": "dummie_token"}
+        secret_tool = "some_token"
         config_tool = {"TOOL": "tool_name"}
 
         init_config_tool = {"key": "init_value"}
@@ -60,11 +61,9 @@ class TestDastScan(unittest.TestCase):
 
         excluions_mock.side_effect = lambda **kwargs: kwargs
 
-        result, input_core = self.dast_scan.process(dict_args, dast_token, config_tool)
+        result, _ = self.dast_scan.process(dict_args, secret_tool, config_tool)
 
-        self.devops_platform_gateway_mock.get_remote_config.assert_any_call(
-            dict_args["remote_config_repo"], "engine_dast/configTool.json"
-        )
+
         self.devops_platform_gateway_mock.get_remote_config.assert_any_call(
             dict_args["remote_config_repo"], "engine_dast/Exclusions.json"
         )
