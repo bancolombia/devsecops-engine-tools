@@ -1,4 +1,4 @@
-from devsecops_engine_tools.engine_dast.src.domain.model.gateways.authentication_method import (
+from devsecops_engine_tools.engine_dast.src.domain.model.gateways.authentication_gateway import (
     AuthenticationGateway,
 )
 

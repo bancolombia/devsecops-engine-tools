@@ -1,7 +1,10 @@
+from devsecops_engine_tools.engine_dast.src.domain.model.gateways.authentication_gateway import (
+    AuthenticationGateway
+)
 class ApiOperation():
     def __init__(self, operation, authentication_gateway):
-        self.authentication_gateway = authentication_gateway
-        self.data = operation
+        self.authentication_gateway: AuthenticationGateway = authentication_gateway
+        self.data: dict = operation
         self.credentials = ("auth_header", "token")
 
     def authenticate(self):
