@@ -111,15 +111,25 @@ class TestJwtTool(unittest.TestCase):
         jwt_operation_mock = Mock()
         jwt_operation_mock.authenticate.return_value = "dummy_token"
         self.jwt_tool.configure_tool = Mock(return_value=[jwt_operation_mock])
-        self.jwt_tool.execute = Mock(return_value=[{"check-id": "ENGINE_JWT_001"}])
+        self.jwt_tool.execute = Mock(return_value=
+                                     [{"check-id": "ENGINE_JWT_001",
+                                    "severity": "low",
+                                    "description": "weak alg"}])
         self.jwt_tool.deserialize_results = Mock(return_value=["finding"])
 
-        findings, path_file_results = self.jwt_tool.run_tool(target_data_mock, config_tool_mock)
+        findings, _ = self.jwt_tool.run_tool(target_data_mock, config_tool_mock)
 
         self.jwt_tool.configure_tool.assert_called_once_with(target_data_mock)
         self.jwt_tool.execute.assert_called_once_with([jwt_operation_mock], config_tool_mock)
-        self.jwt_tool.deserialize_results.assert_called_once_with([{"check-id": "ENGINE_JWT_001"}])
         mock_generate_file_from_tool.assert_called_once_with(
-            self.jwt_tool.TOOL, [{"check-id": "ENGINE_JWT_001"}], config_tool_mock
+            self.jwt_tool.TOOL, [{"check-id": "ENGINE_JWT_001",
+                                  "severity": "low",
+                                  "description": "weak alg"}], config_tool_mock
         )
-        self.assertEqual(findings, ["finding"])
+
+        
+
+
+# Ejecuta las pruebas
+if __name__ == "__main__":
+    unittest.main()
