@@ -2,8 +2,7 @@ import unittest
 from unittest.mock import Mock, patch, mock_open
 from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nuclei.nuclei_tool import (
     NucleiTool,
-    NucleiConfig,
-    ConfigTool
+    NucleiConfig
     )
 
 class TestNucleiTool(unittest.TestCase):
@@ -58,18 +57,15 @@ class TestNucleiTool(unittest.TestCase):
     @patch(
     'devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nuclei.nuclei_tool.NucleiDesealizator.get_list_finding',
     return_value=[Mock()])
-    @patch(
-    'devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nuclei.nuclei_tool.generate_file_from_tool',
-    return_value="dummy_path_file_results")
-    def test_run_tool(self, mock_generate_file, mock_get_list_finding,
+    def test_run_tool(self, mock_get_list_finding,
                       mock_execute, mock_configurate_external_checks,
                       mock_customize_templates):
-        findings_list, path_file_results = self.nuclei_tool.run_tool(self.target_config, self.config_tool, self.token)
+        secret_external_checks = ("github", "dummy_token")
+        findings_list, path_file_results = self.nuclei_tool.run_tool(self.target_config, self.config_tool, self.token, secret_external_checks)
 
         mock_configurate_external_checks.assert_called_once_with(self.config_tool, self.token, "/tmp")
         mock_customize_templates.assert_called_once_with("dummy_directory")
         mock_execute.assert_called_once()
         mock_get_list_finding.assert_called_once_with({"key": "value"})
-        mock_generate_file.assert_called_once_with("NUCLEI", {"key": "value"}, self.config_tool)
 
-        self.assertEqual(path_file_results, "dummy_path_file_results")
+        self.assertEqual(path_file_results, "result_dast_scan.json")
