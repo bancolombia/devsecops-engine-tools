@@ -1,11 +1,7 @@
-# STD libraries
-
-# 3RD party libraries
-
-# Local imports
 from devsecops_engine_tools.engine_dast.src.domain.usecases.dast_scan import (
     DastScan,
 )
+
 
 def init_engine_dast(
     devops_platform_gateway,
