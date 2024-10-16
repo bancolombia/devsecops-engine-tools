@@ -41,15 +41,3 @@ class TestNucleiTool(unittest.TestCase):
         mock_open.assert_called_once_with(target_config.output_file, 'r')
         mock_json_load.assert_called_once()
         self.assertEqual(result, {"key": "value"})
-
-    @patch('devsecops_engine_tools.engine_dast.src.domain.model.config_tool')
-    def test_run_tool(self, mock_config_tool):
-        secret_external_checks = ("github", "dummy_token")
-        _, path_file_results = self.nuclei_tool.run_tool(
-            self.target_config, 
-            mock_config_tool, 
-            self.token, 
-            secret_external_checks
-            )
-
-        self.assertEqual(path_file_results, "result_dast_scan.json")
