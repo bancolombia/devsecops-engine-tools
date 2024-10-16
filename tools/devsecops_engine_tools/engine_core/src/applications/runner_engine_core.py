@@ -158,6 +158,12 @@ def get_inputs_from_cli(args):
         required=False,
         help="Name of image to scan for engine_container",
     )
+    parser.add_argument(
+        "--dast_file_path",
+        required=False,
+        help="File path containing the configuration, structured according to the documentation, \
+        for the API or web application to be scanned by the DAST tool."
+    )
     args = parser.parse_args()
     return {
         "platform_devops": args.platform_devops,
@@ -174,7 +180,8 @@ def get_inputs_from_cli(args):
         "token_engine_dependencies": args.token_engine_dependencies,
         "token_external_checks": args.token_external_checks,
         "xray_mode": args.xray_mode,
-        "image_to_scan": args.image_to_scan
+        "image_to_scan": args.image_to_scan,
+        "dast_file_path": args.dast_file_path
     }
 
 

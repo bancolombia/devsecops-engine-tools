@@ -1,0 +1,35 @@
+{
+    "THRESHOLD": {
+        "VULNERABILITY": {
+            "Critical": 1, 
+            "High": 8, 
+            "Medium": 10, 
+            "Low": 15
+        },
+        "COMPLIANCE": {
+            "Critical": 1
+        }
+    },
+    "MESSAGE_INFO_DAST": "If you have doubts, visit https://forum.example",
+    "NUCLEI": {
+        "VERSION": "2.3.296",
+        "EXCLUSIONS_PATH": "/engine_dast/Exclusions.json",
+        "USE_EXTERNAL_CHECKS_DIR": "True",
+        "EXTERNAL_DIR_OWNER": "username",
+        "EXTERNAL_DIR_REPOSITORY": "example-repo-templates",
+        "EXTERNAL_DIR_ASSET_NAME": "path/templates",
+        "EXTERNAL_CHECKS_PATH": "/local-templates"
+    },
+    "JWT": {
+        "RULES": {
+                "JWT_ALGORITHM": {
+                    "checkID": "ENGINE_JWT_001",
+                    "environment": {"dev": "True", "pdn": "True", "qa": "True"},
+                    "guideline": "https://example.com/",
+                    "severity": "Low",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                }
+        }
+    }
+}
