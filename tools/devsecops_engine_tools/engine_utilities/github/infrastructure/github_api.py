@@ -1,51 +1,30 @@
 import requests
 import zipfile
 import json
-import jwt
-import time
 from github import Github, GithubIntegration
 from devsecops_engine_tools.engine_utilities.utils.api_error import ApiError
 
 
 class GithubApi:
-    def __init__(
-            self,
-            personal_access_token: str = ""
-    ):
-        self.__personal_access_token = personal_access_token
 
     def unzip_file(self, zip_file_path, extract_path):
         with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
             zip_ref.extractall(extract_path)
-
-    def generate_jwt(self):
-        payload = {
-            "iat": int(time.time()),
-            "exp": int(time.time()) + (10 * 60),
-            "iss": self.app_id,
-        }
-        token = jwt.encode(payload, self.personal_access_token, algorithm="RS256")
-        return token
-
-    def get_installation_access_token(self):
-        jwt_token = self.generate_jwt()
-        headers = {"Authorization": f"Bearer {jwt_token}", "Accept": "application/vnd.github+json"}
-        url = f"https://api.github.com/app/installations/{self.installation_id}/access_tokens"
-        response = requests.post(url, headers=headers)
-
-        if response.status_code == 201:
-            token_data = response.json()
-            return token_data["token"]
-        else:
-            raise Exception(f"Failed to get installation access token: {response.status_code} {response.text}")
+    
+    def get_installation_access_token(self,private_key):
+        private_key = private_key.replace("\\n", "\n")
+        integration = GithubIntegration("1014116", private_key)
+        access_token = integration.get_access_token("55523173")
+        return access_token.token
 
     def download_latest_release_assets(
-        self, owner, repository, download_path="."
+        self, owner, repository, token, download_path=".",
     ):
-        installation_token = self.get_installation_access_token()
-        url = f"https://api.github.com/repos/{owner}/{repository}/releases/latest"
+               
+        url = f"https://api.github.com/repos/grupobancolombia-innersource/DevSecOps_Checks/releases/latest"
+        # url = f"https://api.github.com/repos/{owner}/{repository}/releases/latest"
 
-        headers = {"Authorization": f"token {installation_token}", "Accept": "application/vnd.github+json"}
+        headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github+json"}
 
         response = requests.get(url, headers=headers)
 
@@ -75,9 +54,8 @@ class GithubApi:
                 f"Error getting the assets of the last release. Status code: {response.status_code}"
             )
 
-    def get_github_connection(self):
-        git_client = Github(self.__personal_access_token)
-
+    def get_github_connection(self,personal_access_token):
+        git_client = Github(personal_access_token)
         return git_client
 
     def get_remote_json_config(self, git_client: Github, owner, repository, path):

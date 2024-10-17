@@ -60,8 +60,40 @@ class CheckovTool(ToolGateway):
             yaml.dump(checkov_config.dict_confg_file, file)
             file.close()
 
-    def configurate_external_checks(self, config_tool, secret):
+    def configurate_external_checks(self, config_tool, secret_tool,secret_external_checks):
         agent_env = None
+        secret = None
+        github_token = None
+        github_api = GithubApi()
+        
+        if secret_tool is not None:
+            secret = secret_tool
+            github_token = github_api.get_installation_access_token(secret["github_token"])
+            
+        elif secret_external_checks is not None:
+            secret = {
+                "github_token": (
+                    secret_external_checks.split("github_token:")[1]
+                    if "github_token" in secret_external_checks
+                    else None
+                ),
+                "github_apps": (
+                    secret_external_checks.split("github_apps:")[1]
+                    if "github_apps" in secret_external_checks
+                    else None
+                ),
+                "repository_ssh_private_key": (
+                    secret_external_checks.split("ssh:")[1].split(":")[0]
+                    if "ssh" in secret_external_checks
+                    else None
+                ),
+                "repository_ssh_password": (
+                    secret_external_checks.split("ssh:")[1].split(":")[1]
+                    if "ssh" in secret_external_checks
+                    else None
+                ),
+            }
+            github_token = secret["github_token"] if secret["github_token"] else GithubApi.get_installation_access_token(secret["github_apps"])
         try:
             if secret is None:
                 logger.warning("The secret is not configured for external controls")
@@ -87,12 +119,12 @@ class CheckovTool(ToolGateway):
 
             # Create configuration dir external checks
             elif config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_DIR"] == "True":
-                github_api = GithubApi(secret["github_token"])
                 github_api.download_latest_release_assets(
                     config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_OWNER"],
                     config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_REPOSITORY"],
+                    github_token,
                     "/tmp",
-                )
+                    )
 
         except Exception as ex:
             logger.error(f"An error ocurred configuring external checks {ex}")
@@ -252,29 +284,8 @@ class CheckovTool(ToolGateway):
         secret_tool,
         secret_external_checks,
     ):
-        secret = None
-        if secret_tool is not None:
-            secret = secret_tool
-        elif secret_external_checks is not None:
-            secret = {
-                "github_token": (
-                    secret_external_checks.split("github:")[1]
-                    if "github" in secret_external_checks
-                    else None
-                ),
-                "repository_ssh_private_key": (
-                    secret_external_checks.split("ssh:")[1].split(":")[0]
-                    if "ssh" in secret_external_checks
-                    else None
-                ),
-                "repository_ssh_password": (
-                    secret_external_checks.split("ssh:")[1].split(":")[1]
-                    if "ssh" in secret_external_checks
-                    else None
-                ),
-            }
 
-        agent_env = self.configurate_external_checks(config_tool, secret)
+        agent_env = self.configurate_external_checks(config_tool, secret_tool,secret_external_checks)
 
         checkov_install = self.retryable_install_package(
             "checkov", config_tool[self.TOOL_CHECKOV]["VERSION"]
