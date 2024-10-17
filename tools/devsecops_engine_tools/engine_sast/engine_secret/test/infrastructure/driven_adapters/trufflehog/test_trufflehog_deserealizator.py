@@ -23,6 +23,21 @@ class TestSecretScanDeserealizator(unittest.TestCase):
                         }
                     },
                     "Raw": "secret"
+                },
+                {
+                    "DetectorName": "ExampleDetector",
+                    "SourceMetadata": {
+                        "Data": {
+                            "Filesystem": {
+                                "line": 20,
+                                "file": "/path/to/file.py"
+                            }
+                        }
+                    },
+                    "ExtraData": {
+                        "name" : "ActuatorRule"
+                    },
+                    "Raw": "management.endpoints.web.exposure.include=env,heapdump,threaddump,loggers"
                 }
             ]
             
@@ -30,19 +45,32 @@ class TestSecretScanDeserealizator(unittest.TestCase):
             vulnerabilities = self.deserealizator.get_list_vulnerability(results_scan_list, "Linux", "/path/to", )
 
             # Assertions
-            self.assertEqual(len(vulnerabilities), 1)
-            vulnerability = vulnerabilities[0]
-            self.assertIsInstance(vulnerability, Finding)
-            self.assertEqual(vulnerability.id, "SECRET_SCANNING")
-            self.assertIsNone(vulnerability.cvss)
-            self.assertEqual(vulnerability.where, "/file.py, Secret: sec*********ret")
-            self.assertEqual(vulnerability.description, "Sensitive information in source code")
-            self.assertEqual(vulnerability.severity, "critical")
-            self.assertEqual(vulnerability.identification_date, datetime.now().strftime("%d%m%Y"))
-            self.assertEqual(vulnerability.module, "engine_secret")
-            self.assertEqual(vulnerability.category, Category.VULNERABILITY)
-            self.assertEqual(vulnerability.requirements, "ExampleDetector")
-            self.assertEqual(vulnerability.tool, "Trufflehog")
+            self.assertEqual(len(vulnerabilities), 2)
+            vulnerabilitySecret = vulnerabilities[0]
+            self.assertIsInstance(vulnerabilitySecret, Finding)
+            self.assertEqual(vulnerabilitySecret.id, "SECRET_SCANNING")
+            self.assertIsNone(vulnerabilitySecret.cvss)
+            self.assertEqual(vulnerabilitySecret.where, "/file.py, Secret: sec*********ret")
+            self.assertEqual(vulnerabilitySecret.description, "Sensitive information in source code")
+            self.assertEqual(vulnerabilitySecret.severity, "critical")
+            self.assertEqual(vulnerabilitySecret.identification_date, datetime.now().strftime("%d%m%Y"))
+            self.assertEqual(vulnerabilitySecret.module, "engine_secret")
+            self.assertEqual(vulnerabilitySecret.category, Category.VULNERABILITY)
+            self.assertEqual(vulnerabilitySecret.requirements, "ExampleDetector")
+            self.assertEqual(vulnerabilitySecret.tool, "Trufflehog")
+            vulnerabilityActuator = vulnerabilities[1]
+            self.assertIsInstance(vulnerabilityActuator, Finding)
+            self.assertEqual(vulnerabilityActuator.id, "MISCONFIGURATION_SCANNING")
+            self.assertIsNone(vulnerabilityActuator.cvss)
+            self.assertEqual(vulnerabilityActuator.where, "/file.py, Misconfiguration: man*********ers")
+            self.assertEqual(vulnerabilityActuator.description, "Actuator misconfiguration can leak sensitive information")
+            self.assertEqual(vulnerabilityActuator.severity, "critical")
+            self.assertEqual(vulnerabilityActuator.identification_date, datetime.now().strftime("%d%m%Y"))
+            self.assertEqual(vulnerabilityActuator.module, "engine_secret")
+            self.assertEqual(vulnerabilityActuator.category, Category.VULNERABILITY)
+            self.assertEqual(vulnerabilityActuator.requirements, "ExampleDetector")
+            self.assertEqual(vulnerabilityActuator.tool, "Trufflehog")
+            
 
     def test_get_where_correctly_linux(self):
         with patch.dict('os.environ', {'AGENT_OS': 'Linux'}):
