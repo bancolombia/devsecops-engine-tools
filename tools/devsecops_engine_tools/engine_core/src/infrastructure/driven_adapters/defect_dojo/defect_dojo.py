@@ -11,6 +11,7 @@ from devsecops_engine_tools.engine_utilities.defect_dojo import (
     Connect,
     Finding,
     Engagement,
+    Product,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_tools.engine_core.src.domain.model.report import Report
@@ -19,7 +20,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions impo
     ExceptionVulnerabilityManagement,
     ExceptionFindingsExcepted,
     ExceptionGettingFindings,
-    ExceptionGettingEngagements
+    ExceptionGettingEngagements,
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     format_date,
@@ -142,6 +143,38 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 )
             )
 
+    def get_product_type_service(self, service, dict_args, secret_tool, config_tool):
+        try:
+            session_manager = self._get_session_manager(
+                dict_args, secret_tool, config_tool
+            )
+
+            dd_max_retries = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                "MAX_RETRIES_QUERY"
+            ]
+
+            def request_func():
+                response = Product.get_product(
+                    session=session_manager,
+                    request={
+                        "name": Connect.get_code_app(
+                            service,
+                            config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                                "REGEX_EXPRESSION_CMDB"
+                            ],
+                        ),
+                        "prefetch": "prod_type",
+                    },
+                )
+                return response.prefetch.prod_type[str(response.results[0].prod_type)] if response.prefetch else None
+
+            return self._retries_requests(request_func, dd_max_retries, retry_delay=5)
+
+        except Exception as ex:
+            raise ExceptionVulnerabilityManagement(
+                "Error getting product type with the following error: {0} ".format(ex)
+            )
+
     def get_findings_excepted(self, service, dict_args, secret_tool, config_tool):
         try:
             session_manager = self._get_session_manager(
@@ -251,7 +284,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "Error getting all findings with the following error: {0} ".format(ex)
             )
 
-    def get_active_engagements(self, engagement_name, dict_args, secret_tool, config_tool):
+    def get_active_engagements(
+        self, engagement_name, dict_args, secret_tool, config_tool
+    ):
         try:
             request_is = ImportScanRequest(
                 token_defect_dojo=dict_args.get("token_vulnerability_management")

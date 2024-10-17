@@ -17,13 +17,36 @@
             "Medium": 20,
             "Low": 999
         },
-        "CUSTOM_VULNERABILITY": {
-            "PATTERN_APPS": "^(?!(App1|Apptest)$).*(App2.*|.*App3.*|.*App.*)",
-            "VULNERABILITY": {
+        "QUALITY_VULNERABILITY_MANAGEMENT": {
+            "PTS": [
+                {
+                    "Product Type Name": {
+                        "APPS": [
+                            "CodeApp",
+                            "CodeApp1",
+                            "CodeApp12"
+                        ],
+                        "PROFILE": "STRONG"
+                    }
+                },
+                {
+                    "Product Type Name2": {
+                        "APPS": "ALL",
+                        "PROFILE": "MODERATE"
+                    }
+                }
+            ],
+            "STRONG": {
                 "Critical": 0,
                 "High": 0,
                 "Medium": 5,
-                "Low": 10
+                "Low": 15
+            },
+            "MODERATE": {
+                "Critical": 1,
+                "High": 3,
+                "Medium": 5,
+                "Low": 15
             }
         },
         "COMPLIANCE": {
