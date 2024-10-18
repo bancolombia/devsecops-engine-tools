@@ -10,6 +10,7 @@ class TestInitReportSonar(unittest.TestCase):
     def test_init_report_sonar_calls_process(self, mock_report_sonar):
         # Arrange
         mock_vulnerability_management_gateway = MagicMock()
+        mock_vulnerability_send_gateway = MagicMock()
         mock_secrets_manager_gateway = MagicMock()
         mock_devops_platform_gateway = MagicMock()
         mock_sonar_gateway = MagicMock()
@@ -18,6 +19,7 @@ class TestInitReportSonar(unittest.TestCase):
         # Act
         init_report_sonar(
             vulnerability_management_gateway=mock_vulnerability_management_gateway,
+            vulnerability_send_report_gateway=mock_vulnerability_send_gateway,
             secrets_manager_gateway=mock_secrets_manager_gateway,
             devops_platform_gateway=mock_devops_platform_gateway,
             sonar_gateway=mock_sonar_gateway,
@@ -27,6 +29,7 @@ class TestInitReportSonar(unittest.TestCase):
         # Assert
         mock_report_sonar.assert_called_once_with(
             mock_vulnerability_management_gateway,
+            mock_vulnerability_send_gateway,
             mock_secrets_manager_gateway,
             mock_devops_platform_gateway,
             mock_sonar_gateway,
