@@ -10,15 +10,29 @@ class SecretScanDeserealizator(DeseralizatorGateway):
 
     def get_list_vulnerability(self, results_scan_list: List[dict], os, path_directory) -> List[Finding]:
         list_open_vulnerabilities = []
+        current_date=datetime.now().strftime("%d%m%Y")
+
         for result in results_scan_list:
-            where_text, raw = self.get_where_correctly(result, os, path_directory)
+            where_text, raw_data = self.get_where_correctly(result, os, path_directory)
+            extra_data = result.get("ExtraData", {})
+            rule_name = extra_data.get("name") if extra_data else None
+
+            if rule_name and "Actuator" in rule_name:
+                description = "Actuator misconfiguration can leak sensitive information"
+                finding_id = "MISCONFIGURATION_SCANNING"
+                where = f"{where_text}, Misconfiguration: {raw_data}"
+            else:
+                description = "Sensitive information in source code"
+                finding_id = "SECRET_SCANNING"
+                where = f"{where_text}, Secret: {raw_data}"
+            
             vulnerability_open = Finding(
-                id="SECRET_SCANNING",
+                id=finding_id,
                 cvss=None,
-                where=f"{where_text}, Secret: {raw}",
-                description="Sensitive information in source code",
+                where=where,
+                description=description,
                 severity="critical",
-                identification_date=datetime.now().strftime("%d%m%Y"),
+                identification_date=current_date,
                 published_date_cve=None,
                 module="engine_secret",
                 category=Category.VULNERABILITY,
