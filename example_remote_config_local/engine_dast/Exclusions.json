@@ -1,0 +1,14 @@
+{
+	"All": {
+		"JWT": [
+			{
+				"id": "ENGINE_JWT_001",
+				"where": "all",
+				"create_date": "18112023",
+				"expired_date": "18032024",
+				"severity": "HIGH",
+				"hu": "4338704"
+			}
+		]
+	}
+}

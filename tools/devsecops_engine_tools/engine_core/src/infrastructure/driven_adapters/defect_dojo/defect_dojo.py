@@ -66,7 +66,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "KUBESCAPE": "Kubescape Scanner",
                 "KICS": "KICS Scanner",
                 "BEARER": "Bearer CLI",
-                "DEPENDENCY_CHECK": "Dependency Check Scan"
+                "DEPENDENCY_CHECK": "Dependency Check Scan",
+                "NUCLEI": "Nuclei Scan"
             }
 
             if any(

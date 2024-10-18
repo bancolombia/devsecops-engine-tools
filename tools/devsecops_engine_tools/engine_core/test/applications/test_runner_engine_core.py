@@ -28,6 +28,7 @@ def test_application_core(mock_get_inputs_from_cli, mock_entry_point_tool):
         "token_engine_container": None,
         "token_engine_dependencies": None,
         "xray_mode": "scan",
+        "dast_file_path": "dast_file_path",
     }
 
     # Mock the dependencies
@@ -100,6 +101,7 @@ def test_get_inputs_from_cli(mock_parse_args):
     mock_args.token_external_checks = None
     mock_args.xray_mode = "scan"
     mock_args.image_to_scan = "image"
+    mock_args.dast_file_path = "dast_file_path"
 
     # Mock the parse_args method
     mock_parse_args.return_value = mock_args
@@ -124,6 +126,7 @@ def test_get_inputs_from_cli(mock_parse_args):
         "token_external_checks": None,
         "xray_mode": "scan",
         "image_to_scan":"image",
+        "dast_file_path": "dast_file_path"
     }
 
 

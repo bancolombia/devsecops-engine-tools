@@ -13,3 +13,6 @@ distro==1.9.0
 boto3==1.34.157
 docker==7.1.0
 setuptools==72.1.0
+ruamel.yaml==0.18.6
+Authlib==1.3.2
+PyJWT==2.9.0
