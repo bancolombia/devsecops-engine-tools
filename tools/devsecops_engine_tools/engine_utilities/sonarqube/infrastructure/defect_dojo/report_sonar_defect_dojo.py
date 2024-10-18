@@ -20,12 +20,18 @@ class DefectDojoAdapter(VulnerabilityManagementGateway):
         compact_remote_config_url: str,
         source_code_management_uri: str,
         environment: str,
-        token_defect_dojo: str,
-        token_cmdb: str,
+        secret_tool: dict,
         config_tool: any,
         devops_platform_gateway: DevopsPlatformGateway,
         project_key: str
     ):
+        
+        token_defect_dojo = secret_tool.get(
+            "token_defect_dojo", 
+            secret_tool.get("token_vulnerability_management")
+        )
+        token_cmdb = secret_tool["token_cmdb"]
+
         request: ImportScanRequest = Connect.cmdb(
             cmdb_mapping={
                 "product_type_name": "nombreevc",

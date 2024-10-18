@@ -2,9 +2,10 @@ from devsecops_engine_tools.engine_utilities.sonarqube.domain.usecases.report_so
     ReportSonar
 )
 
-def init_report_sonar(vulnerability_management_gateway, secrets_manager_gateway, devops_platform_gateway, sonar_gateway, args):
+def init_report_sonar(vulnerability_management_gateway, vulnerability_send_report_gateway, secrets_manager_gateway, devops_platform_gateway, sonar_gateway, args):
     return ReportSonar(
-        vulnerability_management_gateway, 
+        vulnerability_management_gateway,
+        vulnerability_send_report_gateway,
         secrets_manager_gateway, 
         devops_platform_gateway, 
         sonar_gateway

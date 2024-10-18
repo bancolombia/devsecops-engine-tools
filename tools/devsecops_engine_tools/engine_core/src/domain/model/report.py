@@ -32,3 +32,4 @@ class Report:
         self.component_version = kwargs.get("component_version", "")
         self.file_path = kwargs.get("file_path", "")
         self.endpoints = kwargs.get("endpoints", "")
+        self.unique_id_from_tool = kwargs.get("unique_id_from_tool", "")

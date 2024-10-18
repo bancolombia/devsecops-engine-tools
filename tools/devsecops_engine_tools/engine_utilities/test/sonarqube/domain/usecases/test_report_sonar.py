@@ -16,6 +16,7 @@ class TestReportSonar(unittest.TestCase):
     def test_process_skipped_by_policy(self, mock_invalid_branch, mock_invalid_pipeline):
         # Arrange
         mock_vulnerability_gateway = MagicMock()
+        mock_vulnerability_send_gateway = MagicMock()
         mock_secrets_manager_gateway = MagicMock()
         mock_devops_platform_gateway = MagicMock()
         mock_sonar_gateway = MagicMock()
@@ -23,6 +24,7 @@ class TestReportSonar(unittest.TestCase):
         mock_invalid_branch.return_value = False
         report_sonar = ReportSonar(
             vulnerability_management_gateway=mock_vulnerability_gateway,
+            vulnerability_send_report_gateway=mock_vulnerability_send_gateway,
             secrets_manager_gateway=mock_secrets_manager_gateway,
             devops_platform_gateway=mock_devops_platform_gateway,
             sonar_gateway=mock_sonar_gateway,
@@ -51,6 +53,7 @@ class TestReportSonar(unittest.TestCase):
     def test_process_with_secrets_manager(self, mock_invalid_branch, mock_invalid_pipeline, mock_set_environment, mock_set_repository):
         # Arrange
         mock_vulnerability_gateway = MagicMock()
+        mock_vulnerability_send_gateway = MagicMock()
         mock_secrets_manager_gateway = MagicMock()
         mock_devops_platform_gateway = MagicMock()
         mock_sonar_gateway = MagicMock()
@@ -64,6 +67,7 @@ class TestReportSonar(unittest.TestCase):
         mock_sonar_gateway.get_project_keys.return_value = ["project_key_1"]
         report_sonar = ReportSonar(
             vulnerability_management_gateway=mock_vulnerability_gateway,
+            vulnerability_send_report_gateway=mock_vulnerability_send_gateway,
             secrets_manager_gateway=mock_secrets_manager_gateway,
             devops_platform_gateway=mock_devops_platform_gateway,
             sonar_gateway=mock_sonar_gateway,
@@ -75,12 +79,14 @@ class TestReportSonar(unittest.TestCase):
 
         # Assert
         mock_secrets_manager_gateway.get_secret.assert_called_once()
-        mock_vulnerability_gateway.send_report.assert_called_with(
+        mock_vulnerability_send_gateway.send_report.assert_called_with(
             mock.ANY,
             mock_set_repository.return_value,
             mock_set_environment.return_value, 
-            "dojo_token",
-            "cmdb_token",
+            {
+            "token_defect_dojo": "dojo_token",
+            "token_cmdb": "cmdb_token"
+            },
             mock.ANY,
             mock_devops_platform_gateway,
             "project_key_1" 
@@ -95,6 +101,7 @@ class TestReportSonar(unittest.TestCase):
     def test_process_without_secrets_manager(self, mock_invalid_branch, mock_invalid_pipeline):
         # Arrange
         mock_vulnerability_gateway = MagicMock()
+        mock_vulnerability_send_gateway = MagicMock()
         mock_secrets_manager_gateway = MagicMock()
         mock_devops_platform_gateway = MagicMock()
         mock_sonar_gateway = MagicMock()
@@ -104,6 +111,7 @@ class TestReportSonar(unittest.TestCase):
         mock_sonar_gateway.get_project_keys.return_value = ["project_key_1"]
         report_sonar = ReportSonar(
             vulnerability_management_gateway=mock_vulnerability_gateway,
+            vulnerability_send_report_gateway=mock_vulnerability_send_gateway,
             secrets_manager_gateway=mock_secrets_manager_gateway,
             devops_platform_gateway=mock_devops_platform_gateway,
             sonar_gateway=mock_sonar_gateway,
@@ -111,8 +119,6 @@ class TestReportSonar(unittest.TestCase):
         args = {
             "remote_config_repo": "some_repo", 
             "use_secrets_manager": "false", 
-            "token_defect_dojo": "dojo_token", 
-            "token_cmdb": "cmdb_token"
         }
 
         # Act
@@ -120,12 +126,11 @@ class TestReportSonar(unittest.TestCase):
 
         # Assert
         mock_secrets_manager_gateway.get_secret.assert_not_called()
-        mock_vulnerability_gateway.send_report.assert_called_once_with(
+        mock_vulnerability_send_gateway.send_report.assert_called_once_with(
             mock.ANY,
             mock.ANY, 
             mock.ANY,
-            "dojo_token",
-            "cmdb_token",
+            args,
             mock.ANY,
             mock_devops_platform_gateway, 
             "project_key_1"

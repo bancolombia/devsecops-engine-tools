@@ -1,12 +1,3 @@
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.secrets_manager_gateway import (
-    SecretsManagerGateway,
-)
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
-    DevopsPlatformGateway,
-)
-from devsecops_engine_tools.engine_utilities.sonarqube.domain.model.gateways.vulnerability_management_gateway import (
-    VulnerabilityManagementGateway
-)
 from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.helpers.utils import (
     set_repository, 
     set_environment, 
@@ -17,12 +8,14 @@ from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.helpers.ut
 class ReportSonar:
     def __init__(
         self,
-        vulnerability_management_gateway: VulnerabilityManagementGateway,
-        secrets_manager_gateway: SecretsManagerGateway,
-        devops_platform_gateway: DevopsPlatformGateway,
+        vulnerability_management_gateway,
+        vulnerability_send_report_gateway,
+        secrets_manager_gateway,
+        devops_platform_gateway,
         sonar_gateway
     ):
         self.vulnerability_management_gateway = vulnerability_management_gateway
+        self.vulnerability_send_report_gateway = vulnerability_send_report_gateway
         self.secrets_manager_gateway = secrets_manager_gateway
         self.devops_platform_gateway = devops_platform_gateway
         self.sonar_gateway = sonar_gateway
@@ -32,7 +25,7 @@ class ReportSonar:
         branch = self.devops_platform_gateway.get_variable("branch_name")
 
         if invalid_pipeline(pipeline_name) or invalid_branch(branch):
-            print("Send report sonar skipped by DevSecOps Policy.")
+            print("Report sonar sending was skipped by DevSecOps Policy.")
             print(self.devops_platform_gateway.result_pipeline("succeeded"))
             return
 
@@ -49,18 +42,58 @@ class ReportSonar:
         )
         environment = set_environment(branch)
         
-        if args["use_secrets_manager"] == "true": secret = self.secrets_manager_gateway.get_secret(config_tool)
-        else: secret = args
+        if args["use_secrets_manager"] == "true": 
+            secret = self.secrets_manager_gateway.get_secret(config_tool)
+        else: 
+            secret = args
 
         project_keys = self.sonar_gateway.get_project_keys(pipeline_name)
 
         for project_key in project_keys:
-            self.vulnerability_management_gateway.send_report(
+            try:
+                findings = self.vulnerability_management_gateway.get_all(
+                    service=project_key,
+                    dict_args=args,
+                    secret_tool=self.secrets_manager_gateway,
+                    config_tool=config_tool
+                )[0]
+                filtered_findings = self.sonar_gateway.filter_by_sonarqube_tag(findings)
+                sonar_vulnerabilities = self.sonar_gateway.get_vulnerabilities(
+                    args["sonar_url"],
+                    secret["token_sonar"],
+                    project_key
+                )
+
+                for finding in filtered_findings:
+                    related_vulnerability = self.sonar_gateway.find_issue_by_id(
+                        sonar_vulnerabilities, 
+                        finding.unique_id_from_tool
+                    )
+                    transition = None
+                    if related_vulnerability:
+                        if finding.active and related_vulnerability["status"] == "RESOLVED":
+                            transition = "reopen"
+                        elif finding.mitigated and related_vulnerability["status"] != "RESOLVED":
+                            if finding.false_p:
+                                transition = "falsepositive"
+                            else:
+                                transition = "resolve"
+
+                        if transition:
+                            self.sonar_gateway.change_issue_transition(
+                                args["sonar_url"],
+                                secret["token_sonar"],
+                                finding.unique_id_from_tool,
+                                transition
+                            )
+            except:
+                print("It was not possible to synchronize Sonar and Vulnerability Manager.")
+
+            self.vulnerability_send_report_gateway.send_report(
                 compact_remote_config_url,
                 source_code_management_uri,
                 environment,
-                secret["token_defect_dojo"],
-                secret["token_cmdb"],
+                secret,
                 config_tool,
                 self.devops_platform_gateway,
                 project_key

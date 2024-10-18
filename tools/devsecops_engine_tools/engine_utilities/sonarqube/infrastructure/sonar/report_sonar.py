@@ -1,5 +1,9 @@
+from devsecops_engine_tools.engine_utilities.utils.utils import (
+    Utils
+)
 import os
 import re
+import requests
 
 class SonarAdapter():
     def get_project_keys(self, pipeline_name):
@@ -44,3 +48,53 @@ class SonarAdapter():
             if len(split_line) > 1:
                 settings[split_line[0]] = '='.join(split_line[1:])
         return settings
+    
+    def filter_by_sonarqube_tag(self, findings):
+        return [finding for finding in findings if "sonarqube" in finding.tags]
+
+    def change_issue_transition(self, sonar_url, sonar_token, issue_id, transition):
+        endpoint = f"{sonar_url}/api/issues/do_transition"
+        try:
+            response = requests.post(
+                endpoint,
+                headers={
+                    "Authorization": f"Basic {Utils().encode_token_to_base64(sonar_token)}"
+                },
+                data={
+                    "issue": issue_id,
+                    "transition": transition
+                }
+            )
+            response.raise_for_status()
+            print(f'The state of the issue {issue_id} was changed.')
+        except:
+            pass
+    
+    def get_vulnerabilities(self, sonar_url, sonar_token, project_key):
+        endpoint = f"{sonar_url}/api/issues/search"
+        try:
+            response = requests.get(
+                endpoint,
+                headers={
+                    "Authorization": f"Basic {Utils().encode_token_to_base64(sonar_token)}"
+                },
+                params={
+                    "componentKeys": project_key,
+                    "types": "VULNERABILITY",
+                    "ps": 500,
+                    "s": "CREATION_DATE",
+                    "asc": "false"
+                }
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data["issues"]
+        except Exception as e:
+            print(f"It was not possible to obtain the vulnerabilities: {str(e)}")
+            return []
+
+    def find_issue_by_id(self, issues, issue_id):
+        for issue in issues:
+            if issue["key"] == issue_id:
+                return issue
+        return None
