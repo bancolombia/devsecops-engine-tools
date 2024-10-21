@@ -1,9 +1,7 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import sys
 import argparse
-# Importamos el código que se desea testear
-from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.entry_points.entry_point_report_sonar import init_report_sonar
 from devsecops_engine_tools.engine_utilities.sonarqube.applications.runner_report_sonar import runner_report_sonar, get_inputs_from_cli
 
 class TestRunnerReportSonar(unittest.TestCase):
