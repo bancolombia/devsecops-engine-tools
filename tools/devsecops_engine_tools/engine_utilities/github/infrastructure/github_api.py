@@ -12,7 +12,8 @@ class GithubApi:
             zip_ref.extractall(extract_path)
     
     def get_installation_access_token(self,private_key,app_id,instalation_id):
-        private_key = private_key.replace("\\n", "\n")
+        if private_key:
+            private_key = private_key.replace("\\n", "\n")
         integration = GithubIntegration(app_id, private_key)
         access_token = integration.get_access_token(instalation_id)
         return access_token.token
