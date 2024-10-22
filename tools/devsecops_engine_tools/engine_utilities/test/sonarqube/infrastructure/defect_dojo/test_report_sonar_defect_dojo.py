@@ -36,7 +36,8 @@ class TestDefectDojoAdapter(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_CMDB": "http://cmdb.example.com",
                     "REGEX_EXPRESSION_CMDB": ".*",
-                    "HOST_DEFECT_DOJO": "http://defectdojo.example.com"
+                    "HOST_DEFECT_DOJO": "http://defectdojo.example.com",
+                    "CMDB_MAPPING_PATH": ""
                 }
             }
         }
@@ -100,7 +101,8 @@ class TestDefectDojoAdapter(unittest.TestCase):
                         "DEFECT_DOJO": { 
                             "HOST_CMDB": "", 
                             "REGEX_EXPRESSION_CMDB": "", 
-                            "HOST_DEFECT_DOJO": ""
+                            "HOST_DEFECT_DOJO": "",
+                            "CMDB_MAPPING_PATH": ""
                         }
                     }
                 },
