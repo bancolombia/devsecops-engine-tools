@@ -7,7 +7,7 @@ import json
 class TestGithubApi(unittest.TestCase):
     def setUp(self):
         self.personal_access_token = "your_token"
-        self.github_api = GithubApi(personal_access_token=self.personal_access_token)
+        self.github_api = GithubApi()
 
     @patch('devsecops_engine_tools.engine_utilities.github.infrastructure.github_api.zipfile.ZipFile')
     def test_unzip_file(self, mock_zipfile):
@@ -61,9 +61,9 @@ class TestGithubApi(unittest.TestCase):
 
         test_token = "test_token"
 
-        github_api = GithubApi(test_token)
+        github_api = GithubApi()
 
-        result = github_api.get_github_connection()
+        result = github_api.get_github_connection(test_token)
 
         mock_github.assert_called_once_with(test_token)
 
@@ -86,7 +86,7 @@ class TestGithubApi(unittest.TestCase):
         mock_repo.get_contents.return_value = mock_file_content
         MockGithub.return_value = mock_github_instance
 
-        github_api = GithubApi("test_token")
+        github_api = GithubApi()
 
         result = github_api.get_remote_json_config(mock_github_instance, owner, repository, path)
 
@@ -106,7 +106,7 @@ class TestGithubApi(unittest.TestCase):
 
         MockGithub.return_value = mock_github_instance
 
-        github_api = GithubApi("test_token")
+        github_api = GithubApi()
 
         with self.assertRaises(ApiError) as context:
             github_api.get_remote_json_config(mock_github_instance, owner, repository, path)
