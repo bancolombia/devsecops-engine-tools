@@ -28,11 +28,8 @@ class GithubActions(DevopsPlatformGateway):
         split = github_repository.split("/")
         owner = split[0]
 
-        utils_github = GithubApi(
-            personal_access_token=SystemVariables.github_access_token.value()
-        )
-
-        git_client = utils_github.get_github_connection()
+        utils_github = GithubApi()
+        git_client = utils_github.get_github_connection(SystemVariables.github_access_token.value())
         json_config = utils_github.get_remote_json_config(git_client, owner, repository, path)
 
         return json_config
