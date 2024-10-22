@@ -56,7 +56,7 @@ class DefectDojoAdapter(VulnerabilityManagementGateway):
             commit_hash=devops_platform_gateway.get_variable("commit_hash"),
             environment=environment,
             branch_tag=devops_platform_gateway.get_variable("branch_name"),
-            service=devops_platform_gateway.get_variable("pipeline_name")
+            service=project_key
         )
         response = DefectDojo.send_import_scan(request)
         if hasattr(response, "url"):
