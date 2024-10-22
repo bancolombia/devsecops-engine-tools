@@ -55,6 +55,8 @@ class TestCheckovTool(unittest.TestCase):
                 "EXTERNAL_DIR_REPOSITORY": "repository",
                 "EXTERNAL_DIR_ASSET_NAME": "rules",
                 "RULES": "",
+                "APP_ID_GITHUB": "app_id",
+                "INSTALATION_ID_GITHUB": "installation_id"
             },
         }
         mock_secret_tool = {
@@ -64,7 +66,7 @@ class TestCheckovTool(unittest.TestCase):
 
         # Llamar al método que se está probando
         result = self.checkov_tool.configurate_external_checks(
-            json_data, mock_secret_tool
+            json_data, None ,mock_secret_tool
         )
 
         # Verificar que el resultado es el esperado
@@ -125,7 +127,7 @@ class TestCheckovTool(unittest.TestCase):
 
     def test_configurate_external_checks_secret_tool_None(self):
         # Llamar al método que se está probando
-        result = self.checkov_tool.configurate_external_checks(None, None)
+        result = self.checkov_tool.configurate_external_checks(None, None, None)
 
         # Verificar que el resultado es el esperado
         self.assertIsNone(result)
