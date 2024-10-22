@@ -69,7 +69,7 @@ class CheckovTool(ToolGateway):
         if secret_tool is not None:
             secret = secret_tool
             github_token = github_api.get_installation_access_token(
-                secret["github_apps"],
+                secret["github_token"],
                 config_tool[self.TOOL_CHECKOV]["APP_ID_GITHUB"],
                 config_tool[self.TOOL_CHECKOV]["INSTALATION_ID_GITHUB"]
             )
@@ -106,7 +106,7 @@ class CheckovTool(ToolGateway):
 
         if not secret.get("repository_ssh_private_key") and not secret.get("repository_ssh_password"):
             github_token = secret.get("github_token") or github_api.get_installation_access_token(
-                secret.get("github_apps"),
+                secret.get("github_token"),
                 config_tool[self.TOOL_CHECKOV]["APP_ID_GITHUB"],
                 config_tool[self.TOOL_CHECKOV]["INSTALATION_ID_GITHUB"]
             )
