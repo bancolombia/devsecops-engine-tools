@@ -77,7 +77,7 @@ class TestDefectDojoAdapter(unittest.TestCase):
             commit_hash="commit_hash_value",
             environment="production",
             branch_tag="branch_name_value",
-            service="pipeline_name_value"
+            service="project_key"
         )
         mock_send_import_scan.assert_called_once()
 
