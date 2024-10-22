@@ -24,7 +24,7 @@ class ReportSonar:
         pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
         branch = self.devops_platform_gateway.get_variable("branch_name")
 
-        if invalid_pipeline(pipeline_name) or invalid_branch(branch):
+        if invalid_pipeline(pipeline_name):# or invalid_branch(branch):
             print("Report sonar sending was skipped by DevSecOps Policy.")
             print(self.devops_platform_gateway.result_pipeline("succeeded"))
             return
