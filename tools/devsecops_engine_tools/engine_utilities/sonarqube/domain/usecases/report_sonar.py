@@ -76,8 +76,10 @@ class ReportSonar:
                         elif finding.mitigated and related_vulnerability["status"] != "RESOLVED":
                             if finding.false_p:
                                 transition = "falsepositive"
-                            else:
-                                transition = "resolve"
+                            elif finding.mitigated:
+                                transition = "resolved"
+                            elif finding.risk_accepted:
+                                transition = "closed"
 
                         if transition:
                             self.sonar_gateway.change_issue_transition(
