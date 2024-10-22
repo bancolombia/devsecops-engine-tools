@@ -100,14 +100,10 @@ class TestGithubApi(unittest.TestCase):
         owner = "test_owner"
         repository = "test_repo"
         path = "path/to/config.json"
-
         mock_github_instance = MagicMock()
         mock_github_instance.get_repo.side_effect = Exception("Test exception")
-
         MockGithub.return_value = mock_github_instance
-
         github_api = GithubApi()
-
         with self.assertRaises(ApiError) as context:
             github_api.get_remote_json_config(mock_github_instance, owner, repository, path)
 
