@@ -73,12 +73,12 @@ class ReportSonar:
                     if related_vulnerability:
                         if finding.active and related_vulnerability["status"] == "RESOLVED":
                             transition = "reopen"
-                        elif finding.mitigated and related_vulnerability["status"] != "RESOLVED":
+                        elif related_vulnerability["status"] != "RESOLVED":
                             if finding.false_p:
                                 transition = "falsepositive"
                             elif finding.risk_accepted:
                                 transition = "closed"
-                            else:
+                            elif finding.mitigated:
                                 transition = "resolved"
 
                         if transition:
