@@ -32,7 +32,7 @@ class SonarAdapter():
                     return None
                 try:
                     settings = self.create_task_report_from_string(file_content)
-                    return settings.get('projectKey')
+                    return settings.get("projectKey")
                 except Exception as err:
                     print(f"[SQ] Parse Task report error: {err}")
                     return None
