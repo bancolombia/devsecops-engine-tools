@@ -77,7 +77,7 @@ class ReportSonar:
                             if finding.false_p:
                                 transition = "falsepositive"
                             elif finding.risk_accepted:
-                                transition = "closed"
+                                transition = "close"
                             elif finding.mitigated:
                                 transition = "resolved"
 
