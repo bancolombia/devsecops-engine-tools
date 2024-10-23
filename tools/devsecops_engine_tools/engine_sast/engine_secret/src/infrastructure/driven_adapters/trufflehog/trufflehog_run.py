@@ -146,10 +146,11 @@ class TrufflehogRun(ToolGateway):
     
     def configurate_external_checks(self, config_tool, secret):
         try:
-            github_api = GithubApi(secret)
+            github_api = GithubApi()
             github_api.download_latest_release_assets(
                 config_tool.external_dir_owner,
                 config_tool.external_dir_repo,
+                secret,
                 "/tmp",
             )
         except Exception as ex:
