@@ -390,6 +390,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             risk_accepted=finding.risk_accepted,
             false_p=finding.false_p,
             service=finding.service,
+            unique_id_from_tool=finding.unique_id_from_tool
         )
 
     def _format_date_to_dd_format(self, date_string):
