@@ -68,7 +68,7 @@ class TestReportSonar(unittest.TestCase):
             "branch_name",
             "repository"
         ]
-        mock_devops_platform_gateway.get_source_code_management_uri.return_value = "repository_uri"
+        mock_set_repository.return_value = "repository_uri"
         mock_set_environment.return_value = "environment_name"
         mock_secrets_manager_gateway.get_secret.return_value = {
             "token_sonar": "sonar_token"

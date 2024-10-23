@@ -111,4 +111,4 @@ class TestDefectDojoAdapter(unittest.TestCase):
             )
 
         # Assert
-        #mock_print.assert_called_once_with("Error: Scan not sent")
+        mock_print.assert_called_once_with("Error: Scan not sent")

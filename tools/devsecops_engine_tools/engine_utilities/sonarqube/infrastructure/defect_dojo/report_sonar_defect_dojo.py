@@ -69,7 +69,6 @@ class DefectDojoAdapter(VulnerabilityManagementGateway):
                     test_string = test_string + elem
                 else:
                     test_string = test_string + elem + "/"
-            print("Report sent to Vultracker:", f"{test_string}?tags=sonarqube")
+            print("Report sent to Vulnerability Manager:", f"{test_string}?tags=sonarqube")
         else:
-            print("This is the response")
             print(response)

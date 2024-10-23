@@ -26,9 +26,9 @@ class SonarAdapter():
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 file_content = f.read()
-                print(f"[SQ] Parse Task report file: {file_content}")
+                print(f"[SQ] Parse Task report file:\n {file_content}")
                 if not file_content or len(file_content) <= 0:
-                    print(f"[SQ] Error reading file: {file_content}")
+                    print(f"[SQ] Error reading file")
                     return None
                 try:
                     settings = self.create_task_report_from_string(file_content)
