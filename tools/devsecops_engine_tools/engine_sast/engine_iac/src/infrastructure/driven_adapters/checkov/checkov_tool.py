@@ -71,7 +71,7 @@ class CheckovTool(ToolGateway):
             github_token = github_api.get_installation_access_token(
                 secret["github_token"],
                 config_tool[self.TOOL_CHECKOV]["APP_ID_GITHUB"],
-                config_tool[self.TOOL_CHECKOV]["INSTALATION_ID_GITHUB"]
+                config_tool[self.TOOL_CHECKOV]["INSTALLATION_ID_GITHUB"]
             )
 
         elif secret_external_checks is not None:
