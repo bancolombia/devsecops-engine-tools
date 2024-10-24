@@ -51,7 +51,7 @@ class TestHandleRisk(unittest.TestCase):
             "HANDLE_SERVICE_NAME": {
                 "ENABLED": "true",
                 "ADD_SERVICES": ["service1", "service2"],
-                "ERASE_SERVICE_ENDING": ["_ending"],
+                "EXCLUSIVE_ENDING": ["_ending"],
                 "REGEX_GET_SERVICE_CODE": "[^_]+",
             },
         }
@@ -88,6 +88,7 @@ class TestHandleRisk(unittest.TestCase):
             MagicMock(name="code_another_service_2"),
         ]
         service = "code_service_id"
+        endings_to_exclude = ["_id", "_ending"]
         risk_config = {
             "HANDLE_SERVICE_NAME": {
                 "REGEX_GET_WORDS": "[_-]",
@@ -98,7 +99,9 @@ class TestHandleRisk(unittest.TestCase):
         }
 
         # Call the process method
-        self.handle_risk._filter_engagements(engagements, service, risk_config)
+        self.handle_risk._filter_engagements(
+            engagements, service, endings_to_exclude, risk_config
+        )
 
         # Assert the expected values
         mock_search.assert_called()

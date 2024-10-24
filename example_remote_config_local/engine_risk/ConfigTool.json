@@ -3,9 +3,9 @@
     "IGNORE_ANALYSIS_PATTERN": "(.*_test|test_.*)",
     "HANDLE_SERVICE_NAME": {
         "ENABLED": "false",
-        "ERASE_SERVICE_ENDING": [
-            "_custom_ending1",
-            "_custom_ending2"
+        "EXCLUSIVE_ENDING": [
+            "_exclusive_ending1",
+            "_exclusive_ending2"
         ],
         "REGEX_GET_SERVICE_CODE": "[^_]+",
         "REGEX_GET_WORDS": "[_-]",

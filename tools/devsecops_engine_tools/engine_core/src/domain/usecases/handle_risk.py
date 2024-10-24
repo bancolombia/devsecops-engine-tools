@@ -51,7 +51,9 @@ class HandleRisk:
                 "Error getting finding list in handle risk: {0}".format(str(e))
             )
 
-    def _filter_engagements(self, engagements, service, risk_config):
+    def _filter_engagements(
+        self, engagements, service, endings_to_exclude, risk_config
+    ):
         filtered_engagements = []
         min_word_length = risk_config["HANDLE_SERVICE_NAME"]["MIN_WORD_LENGTH"]
         words = [
@@ -63,6 +65,7 @@ class HandleRisk:
         ]
         check_words_regex = risk_config["HANDLE_SERVICE_NAME"]["REGEX_CHECK_WORDS"]
         min_word_amount = risk_config["HANDLE_SERVICE_NAME"]["MIN_WORD_AMOUNT"]
+
         for engagement in engagements:
             if service.lower() in engagement.name.lower():
                 filtered_engagements += [engagement.name]
@@ -71,6 +74,13 @@ class HandleRisk:
                 >= min_word_amount
             ):
                 filtered_engagements += [engagement.name]
+        if endings_to_exclude:
+            filtered_engagements = [
+                engagement
+                for engagement in filtered_engagements
+                if not any(engagement.endswith(ending) for ending in endings_to_exclude)
+            ]
+
         return filtered_engagements
 
     def _exclude_services(self, dict_args, pipeline_name, service_list):
@@ -82,15 +92,17 @@ class HandleRisk:
             and risk_exclusions[pipeline_name].get("SKIP_SERVICE", 0)
             and risk_exclusions[pipeline_name]["SKIP_SERVICE"].get("services", 0)
         ):
-            services_to_exclude = set(risk_exclusions[pipeline_name]["SKIP_SERVICE"].get("services", []))
+            services_to_exclude = set(
+                risk_exclusions[pipeline_name]["SKIP_SERVICE"].get("services", [])
+            )
             service_set = set(service_list)
-            
+
             remaining_services = list(service_set - services_to_exclude)
             service_excluded = list(service_set & services_to_exclude)
-            
+
             print(f"Services to exclude: {service_excluded}")
             logger.info(f"Services to exclude: {service_excluded}")
-            
+
             return remaining_services
         return service_list
 
@@ -108,12 +120,16 @@ class HandleRisk:
         service_list = []
 
         if risk_config["HANDLE_SERVICE_NAME"]["ENABLED"].lower() == "true":
+            exclusive_endings = risk_config["HANDLE_SERVICE_NAME"]["EXCLUSIVE_ENDING"]
+            endings_to_exclude = [
+                ending
+                for ending in exclusive_endings
+                if not pipeline_name.endswith(ending)
+            ]
             service = next(
                 (
                     pipeline_name.replace(ending, "")
-                    for ending in risk_config["HANDLE_SERVICE_NAME"][
-                        "ERASE_SERVICE_ENDING"
-                    ]
+                    for ending in exclusive_endings
                     if pipeline_name.endswith(ending)
                 ),
                 pipeline_name,
@@ -131,7 +147,7 @@ class HandleRisk:
                     service_code, dict_args, secret_tool, remote_config
                 )
                 service_list += self._filter_engagements(
-                    engagements, service, risk_config
+                    engagements, service, endings_to_exclude, risk_config
                 )
 
         service_list += [service]
