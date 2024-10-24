@@ -140,6 +140,8 @@ class TrufflehogRun(ToolGateway):
                 original_where = original_where.replace("\\", "/")
                 where_text = original_where.replace(agent_work_folder, "")
                 find["SourceMetadata"]["Data"]["Filesystem"]["file"] = where_text
+                name = find["ExtraData"]["name"] if find["ExtraData"] != None else None
+                find["Id"] = "MISSCONFIGURATION_SCANNING" if name != None and "Actuator" in name else "SECRET_SCANNING"
                 json_str = json.dumps(find)
                 file.write(json_str + '\n')
         return findings, file_findings
