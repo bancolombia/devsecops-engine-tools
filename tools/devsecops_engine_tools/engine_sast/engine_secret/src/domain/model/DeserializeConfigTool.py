@@ -12,3 +12,5 @@ class DeserializeConfigTool:
         self.enable_custom_rules = json_data[tool]["ENABLE_CUSTOM_RULES"]
         self.external_dir_owner = json_data[tool]["EXTERNAL_DIR_OWNER"]
         self.external_dir_repo = json_data[tool]["EXTERNAL_DIR_REPOSITORY"]
+        self.app_id_github = json_data[tool]["APP_ID_GITHUB"]
+        self.installation_id_github = json_data[tool]["INSTALLATION_ID_GITHUB"]

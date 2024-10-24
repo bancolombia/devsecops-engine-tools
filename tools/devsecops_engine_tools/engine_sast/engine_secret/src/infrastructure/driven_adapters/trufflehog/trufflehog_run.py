@@ -63,9 +63,15 @@ class TrufflehogRun(ToolGateway):
         include_paths = self.config_include_path(files_commits, agent_work_folder)
         enable_custom_rules = config_tool.enable_custom_rules.lower()
         secret = None
-        
+        github_api = GithubApi()
+
         if secret_tool is not None:
-            secret = secret_tool["github_token"] if "github_token" in secret_tool else None
+            secret_tmp = secret_tool
+            secret = github_api.get_installation_access_token(
+                secret_tmp["github_token"],
+                config_tool.app_id_github,
+                config_tool.installation_id_github
+            )
         elif secret_external_checks is not None:
             secret = secret_external_checks.split("github:")[1] if "github" in secret_external_checks else None            
 
