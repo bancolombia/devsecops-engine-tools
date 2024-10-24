@@ -82,16 +82,16 @@ class HandleRisk:
             and risk_exclusions[pipeline_name].get("SKIP_SERVICE", 0)
             and risk_exclusions[pipeline_name]["SKIP_SERVICE"].get("services", 0)
         ):
-            services_to_exclude = risk_exclusions[pipeline_name]["SKIP_SERVICE"].get(
-                "services", []
-            )
-            service_excluded = []
-            for service in service_list:
-                if service in services_to_exclude:
-                    service_list.remove(service)
-                    service_excluded += [service]
+            services_to_exclude = set(risk_exclusions[pipeline_name]["SKIP_SERVICE"].get("services", []))
+            service_set = set(service_list)
+            
+            remaining_services = list(service_set - services_to_exclude)
+            service_excluded = list(service_set & services_to_exclude)
+            
             print(f"Services to exclude: {service_excluded}")
             logger.info(f"Services to exclude: {service_excluded}")
+            
+            return remaining_services
         return service_list
 
     def process(self, dict_args: any, remote_config: any):
