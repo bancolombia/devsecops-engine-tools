@@ -2,7 +2,10 @@
     "XRAY": {
         "CLI_VERSION": "2.55.0",
         "REGEX_EXPRESSION_EXTENSIONS": "\\.(jar|ear|war)$",
-        "PACKAGES_TO_SCAN": ["node_modules", "site-packages"]
+        "PACKAGES_TO_SCAN": ["node_modules", "site-packages"],
+        "STDERR_EXPECTED_WORDS": ["Technology", "WorkingDirectory", "Descriptors"],
+        "STDERR_BREAK_ERRORS": ["NoSuchFileException"],
+        "STDERR_ACCEPTED_ERRORS": ["What went wrong", "Caused by"]
     },
     "IGNORE_ANALYSIS_PATTERN": "(.*_test)",
     "MESSAGE_INFO_ENGINE_DEPENDENCIES": "message custom",
