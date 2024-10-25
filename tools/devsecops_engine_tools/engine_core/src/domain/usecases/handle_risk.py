@@ -106,16 +106,40 @@ class HandleRisk:
             return remaining_services
         return service_list
 
+    def _should_skip_analysis(self, remote_config, pipeline_name, exclusions):
+        ignore_pattern = remote_config["IGNORE_ANALYSIS_PATTERN"]
+        return re.match(ignore_pattern, pipeline_name, re.IGNORECASE) or (
+            pipeline_name in exclusions
+            and exclusions[pipeline_name].get("SKIP_TOOL", 0)
+        )
+
     def process(self, dict_args: any, remote_config: any):
+        risk_config = self.devops_platform_gateway.get_remote_config(
+            dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
+        )
+        risk_exclusions = self.devops_platform_gateway.get_remote_config(
+            dict_args["remote_config_repo"], "engine_risk/Exclusions.json"
+        )
+        pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
+
+        input_core = InputCore(
+            [],
+            {},
+            "",
+            "",
+            pipeline_name,
+            self.devops_platform_gateway.get_variable("stage").capitalize(),
+        )
+
+        if self._should_skip_analysis(risk_config, pipeline_name, risk_exclusions):
+            print("Tool skipped by DevSecOps Policy.")
+            logger.info("Tool skipped by DevSecOps Policy.")
+            return [], input_core
+
         secret_tool = None
         if dict_args["use_secrets_manager"] == "true":
             secret_tool = self.secrets_manager_gateway.get_secret(remote_config)
 
-        risk_config = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
-        )
-
-        pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
         service = pipeline_name
         service_list = []
 
@@ -180,15 +204,9 @@ class HandleRisk:
             dict_args,
             findings,
             exclusions,
+            new_service_list,
             self.devops_platform_gateway,
             self.print_table_gateway,
         )
-        input_core = InputCore(
-            [],
-            {},
-            "",
-            "",
-            pipeline_name,
-            self.devops_platform_gateway.get_variable("stage").capitalize(),
-        )
+
         return result, input_core

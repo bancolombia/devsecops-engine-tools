@@ -95,7 +95,7 @@ def test_get_exclusions(mock_exclusions):
         MagicMock(),
         MagicMock(),
         MagicMock(),
-        "pipeline_name",
+        ["service1", "service2"],
     )
     exclusions = get_exclusions._get_exclusions(config, "RISK")
 

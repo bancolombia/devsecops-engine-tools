@@ -181,9 +181,13 @@ class BreakBuild:
         for report in report_list:
             exclude = False
             for exclusion in self.exclusions:
-                if ((report.vuln_id_from_tool and report.vuln_id_from_tool == exclusion.id) or 
-                    (report.id and report.id == exclusion.id)) and \
-                    ((exclusion.where in report.where) or (exclusion.where == "all")):
+                if (
+                    (
+                        report.vuln_id_from_tool
+                        and report.vuln_id_from_tool == exclusion.id
+                    )
+                    or (report.id and report.id == exclusion.id)
+                ) and ((exclusion.where in report.where) or (exclusion.where == "all")):
                     exclude = True
                     applied_exclusions.append(self._get_applied_exclusion(report))
                     break
