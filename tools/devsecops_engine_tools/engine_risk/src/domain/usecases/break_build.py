@@ -153,14 +153,6 @@ class BreakBuild:
     def _get_percentage(self, decimal):
         return round(decimal * 100, 3)
 
-    def _get_applied_exclusion(self, report: Report):
-        for exclusion in self.exclusions:
-            if exclusion.id and (report.id == exclusion.id):
-                return exclusion
-            elif exclusion.id and (report.vuln_id_from_tool == exclusion.id):
-                return exclusion
-        return None
-
     def _map_applied_exclusion(self, exclusions: "list[Exclusions]"):
         return [
             {
@@ -189,7 +181,7 @@ class BreakBuild:
                     or (report.id and report.id == exclusion.id)
                 ) and ((exclusion.where in report.where) or (exclusion.where == "all")):
                     exclude = True
-                    applied_exclusions.append(self._get_applied_exclusion(report))
+                    applied_exclusions.append(exclusion)
                     break
             if not exclude:
                 report.reason = "Remediation Rate"
