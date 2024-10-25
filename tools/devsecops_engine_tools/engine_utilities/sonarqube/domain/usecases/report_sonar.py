@@ -1,8 +1,6 @@
 from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.helpers.utils import (
     set_repository, 
-    set_environment, 
-    invalid_pipeline,
-    invalid_branch
+    set_environment
 )
 
 class ReportSonar:
@@ -23,11 +21,6 @@ class ReportSonar:
     def process(self, args):
         pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
         branch = self.devops_platform_gateway.get_variable("branch_name")
-
-        if invalid_pipeline(pipeline_name) or invalid_branch(branch):
-            print("Report sonar sending was skipped by DevSecOps Policy.")
-            print(self.devops_platform_gateway.result_pipeline("succeeded"))
-            return
 
         compact_remote_config_url = self.devops_platform_gateway.get_base_compact_remote_config_url(
             args["remote_config_repo"]
