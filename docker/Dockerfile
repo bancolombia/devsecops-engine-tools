@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y dos2unix
 
 COPY ./example_remote_config_local /app/example_remote_config_local
 COPY ./docker/remoteConfigGeneration.sh /app/remoteConfigGeneration.sh
+COPY ./docker/Base_IAC_Config.json /app/example_remote_config_local/engine_sast/engine_iac/ConfigTool.json
 
 RUN dos2unix /app/remoteConfigGeneration.sh
 
