@@ -24,6 +24,9 @@ class TestHandleRisk(unittest.TestCase):
         )
 
     @mock.patch(
+        "devsecops_engine_tools.engine_core.src.domain.usecases.handle_risk.HandleRisk._should_skip_analysis"
+    )
+    @mock.patch(
         "devsecops_engine_tools.engine_core.src.domain.usecases.handle_risk.runner_engine_risk"
     )
     @mock.patch(
@@ -39,6 +42,7 @@ class TestHandleRisk(unittest.TestCase):
         mock_filter_engagements,
         mock_get_all_from_vm,
         mock_runner_engine_risk,
+        mock_should_skip_analysis,
     ):
         dict_args = {
             "use_secrets_manager": "true",
@@ -51,13 +55,14 @@ class TestHandleRisk(unittest.TestCase):
             "HANDLE_SERVICE_NAME": {
                 "ENABLED": "true",
                 "ADD_SERVICES": ["service1", "service2"],
-                "ERASE_SERVICE_ENDING": ["_ending"],
+                "EXCLUSIVE_ENDING": ["_ending"],
                 "REGEX_GET_SERVICE_CODE": "[^_]+",
             },
         }
         self.devops_platform_gateway.get_variable.return_value = (
             "code_pipeline_name_id_test"
         )
+        mock_should_skip_analysis.return_value = False
         mock_runner_engine_risk.return_value = {"result": "result"}
         mock_get_all_from_vm.return_value = ([], [])
         mock_filter_engagements.return_value = ["service1", "service2"]
@@ -88,6 +93,7 @@ class TestHandleRisk(unittest.TestCase):
             MagicMock(name="code_another_service_2"),
         ]
         service = "code_service_id"
+        endings_to_exclude = ["_id", "_ending"]
         risk_config = {
             "HANDLE_SERVICE_NAME": {
                 "REGEX_GET_WORDS": "[_-]",
@@ -98,7 +104,9 @@ class TestHandleRisk(unittest.TestCase):
         }
 
         # Call the process method
-        self.handle_risk._filter_engagements(engagements, service, risk_config)
+        self.handle_risk._filter_engagements(
+            engagements, service, endings_to_exclude, risk_config
+        )
 
         # Assert the expected values
         mock_search.assert_called()
@@ -166,3 +174,14 @@ class TestHandleRisk(unittest.TestCase):
 
         # Assert the expected values
         assert type(result) == list
+
+    def test_should_skip_analysis(self):
+        remote_config = {"IGNORE_ANALYSIS_PATTERN": "pattern"}
+        pipeline_name = "pipeline"
+        exclusions = {"pipeline": {"SKIP_TOOL": 1}}
+
+        result = self.handle_risk._should_skip_analysis(
+            remote_config, pipeline_name, exclusions
+        )
+
+        assert result == True

@@ -480,6 +480,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
             session=mock_session_manager.return_value,
             service=service,
             limit=80,
+            duplicate="false",
         )
         mock_exclusions.assert_called_once()
         assert exclusions == mock_exclusions.return_value

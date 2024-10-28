@@ -12,12 +12,14 @@ def test_runner_engine_risk(mock_init_engine_risk):
     print_table_gateway = "print_table_gateway"
     dict_args = {"key": "value"}
     findings = []
+    services = []
     vm_exclusions = []
 
     runner_engine_risk(
         dict_args,
         findings,
         vm_exclusions,
+        services,
         devops_platform_gateway,
         print_table_gateway,
     )
