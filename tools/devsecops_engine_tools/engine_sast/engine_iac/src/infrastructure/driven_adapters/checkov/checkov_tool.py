@@ -108,14 +108,14 @@ class CheckovTool(ToolGateway):
             github_token = secret.get("github_token") or github_api.get_installation_access_token(
                 secret.get("github_token"),
                 config_tool[self.TOOL_CHECKOV]["APP_ID_GITHUB"],
-                config_tool[self.TOOL_CHECKOV]["INSTALATION_ID_GITHUB"]
+                config_tool[self.TOOL_CHECKOV]["INSTALLATION_ID_GITHUB"]
             )
 
         try:
             if secret is None:
                 logger.warning("The secret is not configured for external controls")
 
-            # Crear configuración para external checks a través de Git
+            
             elif config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_GIT"] == "True" and platform.system() in (
                 "Linux", "Darwin",
             ):
