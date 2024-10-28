@@ -1,5 +1,4 @@
-import unittest
-from unittest.mock import MagicMock, patch, Mock
+from unittest.mock import MagicMock, patch
 from devsecops_engine_tools.engine_risk.src.domain.usecases.break_build import (
     BreakBuild,
 )
@@ -185,42 +184,6 @@ def test_remediation_rate_control_less():
     )
 
 
-def test_get_applied_exclusion_id():
-    report = Report(id="id")
-    exclusion = Exclusions(id="id")
-    break_build = BreakBuild(
-        MagicMock(),
-        MagicMock(),
-        {},
-        [],
-        [],
-        [],
-        [],
-    )
-    break_build.exclusions = [exclusion]
-    result = break_build._get_applied_exclusion(report)
-
-    assert result == exclusion
-
-
-def test_get_applied_exclusion_vuln_id_from_tool():
-    report = Report(vuln_id_from_tool="id")
-    exclusion = Exclusions(id="id")
-    break_build = BreakBuild(
-        MagicMock(),
-        MagicMock(),
-        {},
-        [],
-        [],
-        [],
-        [],
-    )
-    break_build.exclusions = [exclusion]
-    result = break_build._get_applied_exclusion(report)
-
-    assert result == exclusion
-
-
 def test_map_applied_exclusion():
     exclusions = [
         Exclusions(
@@ -257,12 +220,9 @@ def test_map_applied_exclusion():
     assert result == expected
 
 
-@patch(
-    "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._get_applied_exclusion"
-)
-def test_apply_exclusions_vuln_id_from_tool(get_applied_exclusion):
-    report_list = [Report(vuln_id_from_tool="id")]
-    exclusions = [Exclusions(id="id")]
+def test_apply_exclusions_vuln_id_from_tool():
+    report_list = [Report(vuln_id_from_tool="id", where="all")]
+    exclusions = [Exclusions(id="id", where="all")]
     break_build = BreakBuild(
         MagicMock(),
         MagicMock(),
@@ -274,17 +234,14 @@ def test_apply_exclusions_vuln_id_from_tool(get_applied_exclusion):
     )
     break_build.exclusions = exclusions
 
-    break_build._apply_exclusions(report_list)
+    result = break_build._apply_exclusions(report_list)
 
-    get_applied_exclusion.assert_called_with(report_list[0])
+    assert result == ([], exclusions)
 
 
-@patch(
-    "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._get_applied_exclusion"
-)
-def test_apply_exclusions_id(get_applied_exclusion):
-    report_list = [Report(id="id")]
-    exclusions = [Exclusions(id="id")]
+def test_apply_exclusions_id():
+    report_list = [Report(id="id", where="all")]
+    exclusions = [Exclusions(id="id", where="all")]
     break_build = BreakBuild(
         MagicMock(),
         MagicMock(),
@@ -296,31 +253,10 @@ def test_apply_exclusions_id(get_applied_exclusion):
     )
     break_build.exclusions = exclusions
 
-    break_build._apply_exclusions(report_list)
+    result = break_build._apply_exclusions(report_list)
 
-    get_applied_exclusion.assert_called_with(report_list[0])
+    assert result == ([], exclusions)
 
-
-@patch(
-    "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._get_applied_exclusion"
-)
-def test_apply_exclusions_vuln_id_from_tool(get_applied_exclusion):
-    report_list = [Report(id="id1")]
-    exclusions = [Exclusions(id="id")]
-    break_build = BreakBuild(
-        MagicMock(),
-        MagicMock(),
-        {},
-        [],
-        [],
-        [],
-        [],
-    )
-    break_build.exclusions = exclusions
-
-    break_build._apply_exclusions(report_list)
-
-    get_applied_exclusion.assert_not_called()
 
 
 def test_tag_blacklist_control_error():
