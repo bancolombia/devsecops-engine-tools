@@ -42,6 +42,7 @@
             "engine_dependencies": 0
         },
         "age": 0.0333,
+        "max_age": 12,
         "epss_score": 100
     },
     "THRESHOLD": {

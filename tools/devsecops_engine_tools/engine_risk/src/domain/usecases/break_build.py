@@ -244,7 +244,10 @@ class BreakBuild:
                 report.risk_score = round(
                     remote_config["WEIGHTS"]["severity"].get(report.severity.lower(), 0)
                     + remote_config["WEIGHTS"]["epss_score"] * report.epss_score
-                    + remote_config["WEIGHTS"]["age"] * report.age
+                    + min(
+                        remote_config["WEIGHTS"]["age"] * report.age,
+                        remote_config["WEIGHTS"]["max_age"],
+                    )
                     + sum(
                         remote_config["WEIGHTS"]["tags"].get(tag, 0)
                         for tag in report.tags
