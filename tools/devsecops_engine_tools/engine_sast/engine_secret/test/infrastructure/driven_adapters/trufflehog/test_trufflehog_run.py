@@ -53,7 +53,7 @@ class TestTrufflehogRun(unittest.TestCase):
     @patch.object(TrufflehogRun, 'config_include_path')
     def test_run_tool_secret_scan(self, mock_config_include_path, mock_thread_pool_executor, mock_open):
         mock_executor = MagicMock()
-        mock_executor_map_result = ['{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}\n']
+        mock_executor_map_result = ['{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null,"Id": "SECRET_SCANNING"}\n']
         mock_executor.map.return_value = mock_executor_map_result
         mock_thread_pool_executor.return_value.__enter__.return_value = mock_executor
 
@@ -103,7 +103,8 @@ class TestTrufflehogRun(unittest.TestCase):
             "Raw": "https://admin:admin@the-internet.herokuapp.com",
             "RawV2": "https://admin:admin@the-internet.herokuapp.com/basic_auth",
             "Redacted": "https://admin:********@the-internet.herokuapp.com", "ExtraData": None,
-            "StructuredData": None}]
+            "StructuredData": None,
+            "Id": "SECRET_SCANNING"}]
         self.assertEqual(result, expected_result)
         self.assertEqual(os.path.normpath(file_findings), os.path.normpath(os.path.join('/usr/temp/', 'secret_scan_result.json')))
 
