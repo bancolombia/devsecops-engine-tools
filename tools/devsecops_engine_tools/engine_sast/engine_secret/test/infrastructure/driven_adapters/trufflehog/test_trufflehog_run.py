@@ -86,11 +86,13 @@ class TestTrufflehogRun(unittest.TestCase):
                     "NUMBER_THREADS": 4,
                     "ENABLE_CUSTOM_RULES" : "True",
                     "EXTERNAL_DIR_OWNER": "External_Github",
-                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks"
+                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",
+                    "APP_ID_GITHUB":"123123",
+                    "INSTALLATION_ID_GITHUB":"234234"
                 }
             }
         config_tool = DeserializeConfigTool(json_data=json_config_tool, tool="trufflehog")
-        secret_tool = "secret"
+        secret_tool = None
 
         trufflehog_run = TrufflehogRun()
 
