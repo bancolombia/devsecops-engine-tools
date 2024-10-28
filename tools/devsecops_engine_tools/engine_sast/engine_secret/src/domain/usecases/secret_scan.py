@@ -1,3 +1,4 @@
+import re
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.DeserializeConfigTool import (
     DeserializeConfigTool,
@@ -66,18 +67,24 @@ class SecretScan:
         )
         config_tool = DeserializeConfigTool(json_data=init_config_tool, tool=tool)
         config_tool.scope_pipeline = self.devops_platform_gateway.get_variable("pipeline_name")
-        return config_tool
+
+        skip_tool = bool(re.match(config_tool.ignore_search_pattern, config_tool.scope_pipeline, re.IGNORECASE))
         
-    def skip_from_exclusion(self, exclusions):
+        return config_tool, skip_tool
+        
+    def skip_from_exclusion(self, exclusions, skip_tool_isp):
         """
         Handle skip tool.
 
         Return: bool: True -> skip tool, False -> not skip tool.
         """
-        pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
-        if (pipeline_name in exclusions) and (
-            exclusions[pipeline_name].get("SKIP_TOOL", 0)
-        ):
+        if(skip_tool_isp):
             return True
         else:
-            return False
+            pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
+            if (pipeline_name in exclusions) and (
+                exclusions[pipeline_name].get("SKIP_TOOL", 0)
+            ):
+                return True
+            else:
+                return False
