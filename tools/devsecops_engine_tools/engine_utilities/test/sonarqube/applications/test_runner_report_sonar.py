@@ -42,6 +42,7 @@ class TestRunnerReportSonar(unittest.TestCase):
         mock_parse_args.return_value = argparse.Namespace(
             remote_config_repo="test_repo",
             use_secrets_manager="false",
+            send_metrics="true",
             sonar_url="https://sonar.com/",
             token_cmdb="my_token_cmdb",
             token_vulnerability_management="my_token_vm",
@@ -51,6 +52,7 @@ class TestRunnerReportSonar(unittest.TestCase):
         expected_output = {
             "remote_config_repo": "test_repo",
             "use_secrets_manager": "false",
+            "send_metrics": "true",
             "sonar_url": "https://sonar.com/",
             "token_cmdb": "my_token_cmdb",
             "token_vulnerability_management": "my_token_vm",

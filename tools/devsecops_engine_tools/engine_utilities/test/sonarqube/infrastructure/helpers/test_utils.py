@@ -1,5 +1,5 @@
 import unittest
-from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.helpers.utils import set_repository, set_environment
+from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.helpers.utils import set_repository
 
 class TestSonarUtils(unittest.TestCase):
 
@@ -24,24 +24,3 @@ class TestSonarUtils(unittest.TestCase):
 
         # Assert
         self.assertEqual(result, "https://example.com/repo?path=/123")
-
-    def test_set_environment_production(self):
-        # Arrange
-        branchT = "trunk"
-        branchM = "master"
-        # Act
-        resultT = set_environment(branchT)
-        resultM = set_environment(branchM)
-        #Assert
-        self.assertEqual(resultT, "Production")
-        self.assertEqual(resultM, "Production")
-
-    def test_set_environment_development(self):
-        # Arrange
-        branch = "feature/some-feature"
-
-        # Act
-        result = set_environment(branch)
-
-        # Assert
-        self.assertEqual(result, "Development")

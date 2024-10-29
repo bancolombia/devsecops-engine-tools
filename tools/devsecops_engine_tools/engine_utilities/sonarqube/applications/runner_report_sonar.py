@@ -7,11 +7,11 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo import (
     DefectDojoPlatform
 )
-from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.defect_dojo.report_sonar_defect_dojo import(
-    DefectDojoAdapter
-)
-from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.sonar.report_sonar import(
+from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.driven_adapters.sonarqube.sonarqube_report import(
     SonarAdapter
+)
+from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.s3_manager import (
+    S3Manager,
 )
 from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.entry_points.entry_point_report_sonar import (
     init_report_sonar
@@ -40,6 +40,13 @@ def get_inputs_from_cli(args):
         help="Use Secrets Manager to get the tokens",
     )
     parser.add_argument(
+        "--send_metrics",
+        choices=["true", "false"],
+        type=str,
+        required=False,
+        help="Enable or Disable the send metrics to the driven adapter metrics",
+    )
+    parser.add_argument(
         "--sonar_url",
         required=False,
         help="Url to access sonar API",
@@ -64,6 +71,7 @@ def get_inputs_from_cli(args):
     return {
         "remote_config_repo": args.remote_config_repo,
         "use_secrets_manager": args.use_secrets_manager,
+        "send_metrics": args.send_metrics,
         "sonar_url": args.sonar_url,
         "token_cmdb": args.token_cmdb,
         "token_vulnerability_management": args.token_vulnerability_management,
@@ -73,18 +81,18 @@ def get_inputs_from_cli(args):
 def runner_report_sonar():
     try:
         vulnerability_management_gateway = DefectDojoPlatform()
-        vulnerability_send_report_gateway = DefectDojoAdapter()
         secrets_manager_gateway = SecretsManager()
         devops_platform_gateway = AzureDevops()
         sonar_gateway = SonarAdapter()
+        metrics_manager_gateway = S3Manager()
         args = get_inputs_from_cli(sys.argv[1:])
 
         init_report_sonar(
             vulnerability_management_gateway=vulnerability_management_gateway,
-            vulnerability_send_report_gateway=vulnerability_send_report_gateway,
             secrets_manager_gateway=secrets_manager_gateway,
             devops_platform_gateway=devops_platform_gateway,
             sonar_gateway=sonar_gateway,
+            metrics_manager_gateway=metrics_manager_gateway,
             args=args,
         )
 

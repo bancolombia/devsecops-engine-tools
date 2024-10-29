@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, mock_open, MagicMock
-from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.sonar.report_sonar import SonarAdapter
+from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.driven_adapters.sonarqube.sonarqube_report import SonarAdapter
 
 class TestSonarAdapter(unittest.TestCase):
 
@@ -107,7 +107,7 @@ class TestSonarAdapter(unittest.TestCase):
         "requests.post"
     )
     @patch(
-        "devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.sonar.report_sonar.Utils.encode_token_to_base64"
+        "devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.driven_adapters.sonarqube.sonarqube_report.Utils.encode_token_to_base64"
     ) 
     def test_change_issue_transition(self, mock_encode, mock_post):
         # Arrange
@@ -137,7 +137,7 @@ class TestSonarAdapter(unittest.TestCase):
         "requests.get"
     )
     @patch(
-        "devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.sonar.report_sonar.Utils.encode_token_to_base64"
+        "devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.driven_adapters.sonarqube.sonarqube_report.Utils.encode_token_to_base64"
     )
     def test_get_vulnerabilities(self, mock_encode, mock_get):
         # Arrange

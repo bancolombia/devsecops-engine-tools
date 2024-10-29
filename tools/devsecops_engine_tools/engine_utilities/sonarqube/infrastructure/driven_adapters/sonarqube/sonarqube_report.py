@@ -1,11 +1,18 @@
 from devsecops_engine_tools.engine_utilities.utils.utils import (
     Utils
 )
+from devsecops_engine_tools.engine_utilities.sonarqube.domain.model.gateways.sonar_gateway import (
+    SonarGateway
+)
 import os
 import re
 import requests
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
 
-class SonarAdapter():
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
+
+class SonarAdapter(SonarGateway):
     def get_project_keys(self, pipeline_name):
         project_keys = [pipeline_name]
         sonar_scanner_params = os.getenv("SONARQUBE_SCANNER_PARAMS", "")
@@ -28,16 +35,19 @@ class SonarAdapter():
                 file_content = f.read()
                 print(f"[SQ] Parse Task report file:\n {file_content}")
                 if not file_content or len(file_content) <= 0:
-                    print(f"[SQ] Error reading file")
+                    print("[SQ] Error reading file")
+                    logger.warning("[SQ] Error reading file")
                     return None
                 try:
                     settings = self.create_task_report_from_string(file_content)
                     return settings.get("projectKey")
                 except Exception as err:
                     print(f"[SQ] Parse Task report error: {err}")
+                    logger.warning(f"[SQ] Parse Task report error: {err}")
                     return None
         except Exception as err:
             print(f"[SQ] Error reading file: {str(err)}")
+            logger.warning(f"[SQ] Error reading file: {str(err)}")
             return None
 
     def create_task_report_from_string(self, file_content):
@@ -66,8 +76,9 @@ class SonarAdapter():
                 }
             )
             response.raise_for_status()
-            print(f'The state of the issue {issue_id} was changed.')
+            print(f"The state of the issue {issue_id} was changed.")
         except:
+            logger.warning(f"Unable to change the status of issue {issue_id}.")
             pass
     
     def get_vulnerabilities(self, sonar_url, sonar_token, project_key):
@@ -91,6 +102,7 @@ class SonarAdapter():
             return data["issues"]
         except Exception as e:
             print(f"It was not possible to obtain the vulnerabilities: {str(e)}")
+            logger.warning(f"It was not possible to obtain the vulnerabilities: {str(e)}")
             return []
 
     def find_issue_by_id(self, issues, issue_id):

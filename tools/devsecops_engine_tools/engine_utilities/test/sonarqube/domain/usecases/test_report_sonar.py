@@ -10,14 +10,13 @@ class TestReportSonar(unittest.TestCase):
         "devsecops_engine_tools.engine_utilities.sonarqube.domain.usecases.report_sonar.set_repository"
     )
     @patch(
-        "devsecops_engine_tools.engine_utilities.sonarqube.domain.usecases.report_sonar.set_environment"
+        "devsecops_engine_tools.engine_utilities.sonarqube.domain.usecases.report_sonar.define_env"
     )
     def test_process_valid(
-        self, mock_set_environment, mock_set_repository
+        self, mock_define_env, mock_set_repository
     ):
         # Arrange
         mock_vulnerability_gateway = MagicMock()
-        mock_vulnerability_send_gateway = MagicMock()
         mock_secrets_manager_gateway = MagicMock()
         mock_devops_platform_gateway = MagicMock()
         mock_sonar_gateway = MagicMock()
@@ -28,7 +27,7 @@ class TestReportSonar(unittest.TestCase):
             "repository"
         ]
         mock_set_repository.return_value = "repository_uri"
-        mock_set_environment.return_value = "environment_name"
+        mock_define_env.return_value = "environment_name"
         mock_secrets_manager_gateway.get_secret.return_value = {
             "token_sonar": "sonar_token"
         }
@@ -46,7 +45,6 @@ class TestReportSonar(unittest.TestCase):
 
         report_sonar = ReportSonar(
             vulnerability_management_gateway=mock_vulnerability_gateway,
-            vulnerability_send_report_gateway=mock_vulnerability_send_gateway,
             secrets_manager_gateway=mock_secrets_manager_gateway,
             devops_platform_gateway=mock_devops_platform_gateway,
             sonar_gateway=mock_sonar_gateway,
@@ -64,7 +62,7 @@ class TestReportSonar(unittest.TestCase):
         mock_sonar_gateway.change_issue_transition.assert_called_once_with(
             "sonar_url", "sonar_token", "123", "reopen"
         )
-        mock_vulnerability_send_gateway.send_report.assert_called_once_with(
+        mock_vulnerability_gateway.send_report.assert_called_once_with(
             mock.ANY,
             "repository_uri",
             "environment_name",

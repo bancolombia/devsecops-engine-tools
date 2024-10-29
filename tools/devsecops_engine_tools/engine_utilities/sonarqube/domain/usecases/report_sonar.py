@@ -1,19 +1,35 @@
 from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.helpers.utils import (
-    set_repository, 
-    set_environment
+    set_repository
 )
+from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
+    define_env
+)
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_management_gateway import (
+    VulnerabilityManagementGateway
+)
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.secrets_manager_gateway import (
+    SecretsManagerGateway
+)
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway
+)
+from devsecops_engine_tools.engine_utilities.sonarqube.domain.model.gateways.sonar_gateway import (
+    SonarGateway
+)
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class ReportSonar:
     def __init__(
         self,
-        vulnerability_management_gateway,
-        vulnerability_send_report_gateway,
-        secrets_manager_gateway,
-        devops_platform_gateway,
-        sonar_gateway
+        vulnerability_management_gateway: VulnerabilityManagementGateway,
+        secrets_manager_gateway: SecretsManagerGateway,
+        devops_platform_gateway: DevopsPlatformGateway,
+        sonar_gateway: SonarGateway
     ):
         self.vulnerability_management_gateway = vulnerability_management_gateway
-        self.vulnerability_send_report_gateway = vulnerability_send_report_gateway
         self.secrets_manager_gateway = secrets_manager_gateway
         self.devops_platform_gateway = devops_platform_gateway
         self.sonar_gateway = sonar_gateway
@@ -22,18 +38,16 @@ class ReportSonar:
         pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
         branch = self.devops_platform_gateway.get_variable("branch_name")
 
-        compact_remote_config_url = self.devops_platform_gateway.get_base_compact_remote_config_url(
-            args["remote_config_repo"]
-        )
+        compact_remote_config_url = self.devops_platform_gateway.get_source_code_management_uri()
         source_code_management_uri = set_repository(
             pipeline_name,
-            self.devops_platform_gateway.get_source_code_management_uri()
+            compact_remote_config_url
         )
         config_tool = self.devops_platform_gateway.get_remote_config(
             args["remote_config_repo"],
             "/engine_core/ConfigTool.json"
         )
-        environment = set_environment(branch)
+        environment = define_env(None, branch)
         
         if args["use_secrets_manager"] == "true": 
             secret = self.secrets_manager_gateway.get_secret(config_tool)
@@ -81,10 +95,11 @@ class ReportSonar:
                                 finding.unique_id_from_tool,
                                 transition
                             )
-            except:
-                print("It was not possible to synchronize Sonar and Vulnerability Manager.")
+            except Exception as e:
+                print(f"It was not possible to synchronize Sonar and Vulnerability Manager: {e}")
+                logger.warning(f"It was not possible to synchronize Sonar and Vulnerability Manager: {e}")
 
-            self.vulnerability_send_report_gateway.send_report(
+            self.vulnerability_management_gateway.send_report(
                 compact_remote_config_url,
                 source_code_management_uri,
                 environment,
