@@ -118,9 +118,11 @@ class BreakBuild:
 
     def _remediation_rate_control(self, all_report: "list[Report]"):
         remote_config = self.remote_config
-        remediation_rate_value = self._get_percentage(
-            (sum(1 for report in all_report if report.mitigated)) / len(all_report)
-        )
+        mitigated = sum(1 for report in all_report if report.mitigated)
+        total = len(all_report)
+        print(f"Mitigated count: {mitigated}   Total count: {total}")
+        remediation_rate_value = self._get_percentage(mitigated / total)
+
         risk_threshold = remote_config["THRESHOLD"]["REMEDIATION_RATE"]
         self.remediation_rate = remediation_rate_value
 
@@ -151,14 +153,6 @@ class BreakBuild:
     def _get_percentage(self, decimal):
         return round(decimal * 100, 3)
 
-    def _get_applied_exclusion(self, report: Report):
-        for exclusion in self.exclusions:
-            if exclusion.id and (report.id == exclusion.id):
-                return exclusion
-            elif exclusion.id and (report.vuln_id_from_tool == exclusion.id):
-                return exclusion
-        return None
-
     def _map_applied_exclusion(self, exclusions: "list[Exclusions]"):
         return [
             {
@@ -173,22 +167,27 @@ class BreakBuild:
         ]
 
     def _apply_exclusions(self, report_list: "list[Report]"):
-        new_report_list = []
+        filtered_reports = []
         applied_exclusions = []
-        exclusions_ids = {exclusion.id for exclusion in self.exclusions if exclusion.id}
 
         for report in report_list:
-            if report.vuln_id_from_tool and (
-                report.vuln_id_from_tool in exclusions_ids
-            ):
-                applied_exclusions.append(self._get_applied_exclusion(report))
-            elif report.id and (report.id in exclusions_ids):
-                applied_exclusions.append(self._get_applied_exclusion(report))
-            else:
+            exclude = False
+            for exclusion in self.exclusions:
+                if (
+                    (
+                        report.vuln_id_from_tool
+                        and report.vuln_id_from_tool == exclusion.id
+                    )
+                    or (report.id and report.id == exclusion.id)
+                ) and ((exclusion.where in report.where) or (exclusion.where == "all")):
+                    exclude = True
+                    applied_exclusions.append(exclusion)
+                    break
+            if not exclude:
                 report.reason = "Remediation Rate"
-                new_report_list.append(report)
+                filtered_reports.append(report)
 
-        return new_report_list, applied_exclusions
+        return filtered_reports, applied_exclusions
 
     def _tag_blacklist_control(self, report_list: "list[Report]"):
         remote_config = self.remote_config
@@ -245,7 +244,10 @@ class BreakBuild:
                 report.risk_score = round(
                     remote_config["WEIGHTS"]["severity"].get(report.severity.lower(), 0)
                     + remote_config["WEIGHTS"]["epss_score"] * report.epss_score
-                    + remote_config["WEIGHTS"]["age"] * report.age
+                    + min(
+                        remote_config["WEIGHTS"]["age"] * report.age,
+                        remote_config["WEIGHTS"]["max_age"],
+                    )
                     + sum(
                         remote_config["WEIGHTS"]["tags"].get(tag, 0)
                         for tag in report.tags

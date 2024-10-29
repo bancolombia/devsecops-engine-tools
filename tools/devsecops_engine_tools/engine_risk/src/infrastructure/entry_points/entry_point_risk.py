@@ -26,6 +26,7 @@ def init_engine_risk(
     print_table_gateway,
     dict_args,
     findings,
+    services,
     vm_exclusions,
 ):
     remote_config = devops_platform_gateway.get_remote_config(
@@ -34,17 +35,12 @@ def init_engine_risk(
     risk_exclusions = devops_platform_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_risk/Exclusions.json"
     )
-    pipeline_name = devops_platform_gateway.get_variable("pipeline_name")
-    if should_skip_analysis(remote_config, pipeline_name, risk_exclusions):
-        print("Tool skipped by DevSecOps Policy.")
-        logger.info("Tool skipped by DevSecOps Policy.")
-        return
 
     return process_findings(
         findings,
         vm_exclusions,
         dict_args,
-        pipeline_name,
+        services,
         risk_exclusions,
         remote_config,
         add_epss_gateway,
@@ -53,18 +49,11 @@ def init_engine_risk(
     )
 
 
-def should_skip_analysis(remote_config, pipeline_name, exclusions):
-    ignore_pattern = remote_config["IGNORE_ANALYSIS_PATTERN"]
-    return re.match(ignore_pattern, pipeline_name, re.IGNORECASE) or (
-        pipeline_name in exclusions and exclusions[pipeline_name].get("SKIP_TOOL", 0)
-    )
-
-
 def process_findings(
     findings,
     vm_exclusions,
     dict_args,
-    pipeline_name,
+    services,
     risk_exclusions,
     remote_config,
     add_epss_gateway,
@@ -86,7 +75,7 @@ def process_findings(
         dict_args,
         remote_config,
         risk_exclusions,
-        pipeline_name,
+        services,
         add_epss_gateway,
         print_table_gateway,
     )
@@ -100,7 +89,7 @@ def process_active_findings(
     dict_args,
     remote_config,
     risk_exclusions,
-    pipeline_name,
+    services,
     add_epss_gateway,
     print_table_gateway,
 ):
@@ -111,7 +100,7 @@ def process_active_findings(
         data_added,
         remote_config,
         risk_exclusions,
-        pipeline_name,
+        services,
     )
     exclusions = get_exclusions.process()
     break_build = BreakBuild(

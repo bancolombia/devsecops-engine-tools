@@ -63,14 +63,23 @@ class HandleRisk:
         ]
         check_words_regex = risk_config["HANDLE_SERVICE_NAME"]["REGEX_CHECK_WORDS"]
         min_word_amount = risk_config["HANDLE_SERVICE_NAME"]["MIN_WORD_AMOUNT"]
+        endings = risk_config["HANDLE_SERVICE_NAME"]["CHECK_ENDING"]
+
         for engagement in engagements:
-            if service.lower() in engagement.name.lower():
+            if service.lower() == engagement.name.lower():
                 filtered_engagements += [engagement.name]
             elif re.search(check_words_regex, engagement.name.lower()) and (
                 sum(1 for word in words if word.lower() in engagement.name.lower())
                 >= min_word_amount
             ):
                 filtered_engagements += [engagement.name]
+            elif endings:
+                if any(
+                    (service.lower() + ending.lower() == engagement.name.lower())
+                    for ending in endings
+                ):
+                    filtered_engagements += [engagement.name]
+
         return filtered_engagements
 
     def _exclude_services(self, dict_args, pipeline_name, service_list):
@@ -82,28 +91,54 @@ class HandleRisk:
             and risk_exclusions[pipeline_name].get("SKIP_SERVICE", 0)
             and risk_exclusions[pipeline_name]["SKIP_SERVICE"].get("services", 0)
         ):
-            services_to_exclude = risk_exclusions[pipeline_name]["SKIP_SERVICE"].get(
-                "services", []
+            services_to_exclude = set(
+                risk_exclusions[pipeline_name]["SKIP_SERVICE"].get("services", [])
             )
-            service_excluded = []
-            for service in service_list:
-                if service in services_to_exclude:
-                    service_list.remove(service)
-                    service_excluded += [service]
+            service_set = set(service_list)
+
+            remaining_services = list(service_set - services_to_exclude)
+            service_excluded = list(service_set & services_to_exclude)
+
             print(f"Services to exclude: {service_excluded}")
             logger.info(f"Services to exclude: {service_excluded}")
+
+            return remaining_services
         return service_list
 
+    def _should_skip_analysis(self, remote_config, pipeline_name, exclusions):
+        ignore_pattern = remote_config["IGNORE_ANALYSIS_PATTERN"]
+        return re.match(ignore_pattern, pipeline_name, re.IGNORECASE) or (
+            pipeline_name in exclusions
+            and exclusions[pipeline_name].get("SKIP_TOOL", 0)
+        )
+
     def process(self, dict_args: any, remote_config: any):
+        risk_config = self.devops_platform_gateway.get_remote_config(
+            dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
+        )
+        risk_exclusions = self.devops_platform_gateway.get_remote_config(
+            dict_args["remote_config_repo"], "engine_risk/Exclusions.json"
+        )
+        pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
+
+        input_core = InputCore(
+            [],
+            {},
+            "",
+            "",
+            pipeline_name,
+            self.devops_platform_gateway.get_variable("stage").capitalize(),
+        )
+
+        if self._should_skip_analysis(risk_config, pipeline_name, risk_exclusions):
+            print("Tool skipped by DevSecOps Policy.")
+            logger.info("Tool skipped by DevSecOps Policy.")
+            return [], input_core
+
         secret_tool = None
         if dict_args["use_secrets_manager"] == "true":
             secret_tool = self.secrets_manager_gateway.get_secret(remote_config)
 
-        risk_config = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
-        )
-
-        pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
         service = pipeline_name
         service_list = []
 
@@ -111,9 +146,7 @@ class HandleRisk:
             service = next(
                 (
                     pipeline_name.replace(ending, "")
-                    for ending in risk_config["HANDLE_SERVICE_NAME"][
-                        "ERASE_SERVICE_ENDING"
-                    ]
+                    for ending in risk_config["HANDLE_SERVICE_NAME"]["CHECK_ENDING"]
                     if pipeline_name.endswith(ending)
                 ),
                 pipeline_name,
@@ -164,15 +197,9 @@ class HandleRisk:
             dict_args,
             findings,
             exclusions,
+            new_service_list,
             self.devops_platform_gateway,
             self.print_table_gateway,
         )
-        input_core = InputCore(
-            [],
-            {},
-            "",
-            "",
-            pipeline_name,
-            self.devops_platform_gateway.get_variable("stage").capitalize(),
-        )
+
         return result, input_core

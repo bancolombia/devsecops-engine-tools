@@ -220,7 +220,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             all_findings_query_params = {
                 "limit": config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
                     "LIMITS_QUERY"
-                ]
+                ],
+                "duplicate": "false"
             }
             max_retries = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
                 "MAX_RETRIES_QUERY"
