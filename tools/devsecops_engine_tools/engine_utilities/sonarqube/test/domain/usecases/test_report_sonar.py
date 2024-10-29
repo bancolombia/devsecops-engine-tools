@@ -1,16 +1,16 @@
 import unittest
 from unittest import mock
 from unittest.mock import MagicMock, patch
-from devsecops_engine_tools.engine_utilities.sonarqube.domain.usecases.report_sonar import (
+from devsecops_engine_tools.engine_utilities.sonarqube.src.domain.usecases.report_sonar import (
     ReportSonar
 )
 
 class TestReportSonar(unittest.TestCase):
     @patch(
-        "devsecops_engine_tools.engine_utilities.sonarqube.domain.usecases.report_sonar.set_repository"
+        "devsecops_engine_tools.engine_utilities.sonarqube.src.domain.usecases.report_sonar.set_repository"
     )
     @patch(
-        "devsecops_engine_tools.engine_utilities.sonarqube.domain.usecases.report_sonar.define_env"
+        "devsecops_engine_tools.engine_utilities.sonarqube.src.domain.usecases.report_sonar.define_env"
     )
     def test_process_valid(
         self, mock_define_env, mock_set_repository

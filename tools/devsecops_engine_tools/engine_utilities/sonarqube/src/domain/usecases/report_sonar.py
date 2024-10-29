@@ -1,4 +1,4 @@
-from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.helpers.utils import (
+from devsecops_engine_tools.engine_utilities.sonarqube.src.infrastructure.helpers.utils import (
     set_repository
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
@@ -13,7 +13,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.secrets_manager
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway
 )
-from devsecops_engine_tools.engine_utilities.sonarqube.domain.model.gateways.sonar_gateway import (
+from devsecops_engine_tools.engine_utilities.sonarqube.src.domain.model.gateways.sonar_gateway import (
     SonarGateway
 )
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger

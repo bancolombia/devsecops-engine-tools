@@ -1,7 +1,7 @@
 from devsecops_engine_tools.engine_utilities.utils.utils import (
     Utils
 )
-from devsecops_engine_tools.engine_utilities.sonarqube.domain.model.gateways.sonar_gateway import (
+from devsecops_engine_tools.engine_utilities.sonarqube.src.domain.model.gateways.sonar_gateway import (
     SonarGateway
 )
 import os
@@ -83,30 +83,39 @@ class SonarAdapter(SonarGateway):
     
     def get_vulnerabilities(self, sonar_url, sonar_token, project_key):
         endpoint = f"{sonar_url}/api/issues/search"
+        vulnerabilities = []
+        page = 1
+        page_size = 500
+
         try:
-            response = requests.get(
-                endpoint,
-                headers={
-                    "Authorization": f"Basic {Utils().encode_token_to_base64(sonar_token)}"
-                },
-                params={
-                    "componentKeys": project_key,
-                    "types": "VULNERABILITY",
-                    "ps": 500,
-                    "s": "CREATION_DATE",
-                    "asc": "false"
-                }
-            )
-            response.raise_for_status()
-            data = response.json()
-            return data["issues"]
+            while True:
+                response = requests.get(
+                    endpoint,
+                    headers={
+                        "Authorization": f"Basic {Utils().encode_token_to_base64(sonar_token)}"
+                    },
+                    params={
+                        "componentKeys": project_key,
+                        "types": "VULNERABILITY",
+                        "ps": page_size,
+                        "p": page,
+                        "s": "CREATION_DATE",
+                        "asc": "false"
+                    }
+                )
+                response.raise_for_status()
+                data = response.json()
+
+                vulnerabilities.extend(data["issues"])
+                if len(data["issues"]) < page_size: break
+                page += 1
+
+            return vulnerabilities
+
         except Exception as e:
             print(f"It was not possible to obtain the vulnerabilities: {str(e)}")
             logger.warning(f"It was not possible to obtain the vulnerabilities: {str(e)}")
             return []
 
     def find_issue_by_id(self, issues, issue_id):
-        for issue in issues:
-            if issue["key"] == issue_id:
-                return issue
-        return None
+        return next((issue for issue in issues if issue["key"] == issue_id), None)

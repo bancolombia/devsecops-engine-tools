@@ -48,5 +48,8 @@
     "ENGINE_CODE": {
         "ENABLED": "true",
         "TOOL": "BEARER"
+    },
+    "REPORT_SONAR": {
+        "ENABLED": "true"
     }
 }

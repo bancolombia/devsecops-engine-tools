@@ -1,5 +1,5 @@
 import unittest
-from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.helpers.utils import set_repository
+from devsecops_engine_tools.engine_utilities.sonarqube.src.infrastructure.helpers.utils import set_repository
 
 class TestSonarUtils(unittest.TestCase):
 

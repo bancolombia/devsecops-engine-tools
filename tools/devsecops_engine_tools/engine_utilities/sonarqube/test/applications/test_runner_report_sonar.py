@@ -2,14 +2,14 @@ import unittest
 from unittest.mock import patch
 import sys
 import argparse
-from devsecops_engine_tools.engine_utilities.sonarqube.applications.runner_report_sonar import runner_report_sonar, get_inputs_from_cli
+from devsecops_engine_tools.engine_utilities.sonarqube.src.applications.runner_report_sonar import runner_report_sonar, get_inputs_from_cli
 
 class TestRunnerReportSonar(unittest.TestCase):
     @patch(
-        "devsecops_engine_tools.engine_utilities.sonarqube.applications.runner_report_sonar.get_inputs_from_cli"
+        "devsecops_engine_tools.engine_utilities.sonarqube.src.applications.runner_report_sonar.get_inputs_from_cli"
     )
     @patch(
-        "devsecops_engine_tools.engine_utilities.sonarqube.applications.runner_report_sonar.init_report_sonar"
+        "devsecops_engine_tools.engine_utilities.sonarqube.src.applications.runner_report_sonar.init_report_sonar"
     )
     def test_runner_report_sonar_success(self, mock_init_report_sonar, mock_get_inputs_from_cli):
         # Act
@@ -19,10 +19,10 @@ class TestRunnerReportSonar(unittest.TestCase):
         mock_init_report_sonar.assert_called_once()
 
     @patch(
-        "devsecops_engine_tools.engine_utilities.sonarqube.applications.runner_report_sonar.get_inputs_from_cli"
+        "devsecops_engine_tools.engine_utilities.sonarqube.src.applications.runner_report_sonar.get_inputs_from_cli"
     )
     @patch(
-        "devsecops_engine_tools.engine_utilities.sonarqube.applications.runner_report_sonar.logger"
+        "devsecops_engine_tools.engine_utilities.sonarqube.src.applications.runner_report_sonar.logger"
     )
     def test_runner_report_sonar_exception(self, mock_logger, mock_get_inputs_from_cli):
         # Arrange

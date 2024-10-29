@@ -7,13 +7,13 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo import (
     DefectDojoPlatform
 )
-from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.driven_adapters.sonarqube.sonarqube_report import(
+from devsecops_engine_tools.engine_utilities.sonarqube.src.infrastructure.driven_adapters.sonarqube.sonarqube_report import(
     SonarAdapter
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.s3_manager import (
     S3Manager,
 )
-from devsecops_engine_tools.engine_utilities.sonarqube.infrastructure.entry_points.entry_point_report_sonar import (
+from devsecops_engine_tools.engine_utilities.sonarqube.src.infrastructure.entry_points.entry_point_report_sonar import (
     init_report_sonar
 )
 import sys
