@@ -18,32 +18,15 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 @dataclass
 class SecretsManager(SecretsManagerGateway):
-    # def get_secret(self, config_tool):
-    #     temp_credentials = assume_role(config_tool["SECRET_MANAGER"]["AWS"]["ROLE_ARN"])
-    #     session = boto3.session.Session()
-    #     client = session.client(
-    #         service_name="secretsmanager",
-    #         region_name=config_tool["SECRET_MANAGER"]["AWS"]["REGION_NAME"],
-    #         aws_access_key_id=temp_credentials["AccessKeyId"],
-    #         aws_secret_access_key=temp_credentials["SecretAccessKey"],
-    #         aws_session_token=temp_credentials["SessionToken"],
-    #     )
-
-    #     try:
-    #         secret_name = config_tool["SECRET_MANAGER"]["AWS"]["SECRET_NAME"]
-    #         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-    #         secret = get_secret_value_response["SecretString"]
-    #         secret_dict = json.loads(secret)
-    #         return secret_dict
-    #     except NoCredentialsError as e:
-    #         logger.error(f"Error getting secret: {e}")
-    #         return None
-
     def get_secret(self, config_tool):
+        temp_credentials = assume_role(config_tool["SECRET_MANAGER"]["AWS"]["ROLE_ARN"])
         session = boto3.session.Session()
         client = session.client(
             service_name="secretsmanager",
-            region_name=config_tool["SECRET_MANAGER"]["AWS"]["REGION_NAME"]
+            region_name=config_tool["SECRET_MANAGER"]["AWS"]["REGION_NAME"],
+            aws_access_key_id=temp_credentials["AccessKeyId"],
+            aws_secret_access_key=temp_credentials["SecretAccessKey"],
+            aws_session_token=temp_credentials["SessionToken"],
         )
 
         try:
@@ -52,6 +35,6 @@ class SecretsManager(SecretsManagerGateway):
             secret = get_secret_value_response["SecretString"]
             secret_dict = json.loads(secret)
             return secret_dict
-        except client.exceptions.NoCredentialsError as e:
+        except NoCredentialsError as e:
             logger.error(f"Error getting secret: {e}")
             return None
