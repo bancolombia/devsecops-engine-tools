@@ -38,10 +38,10 @@ class ReportSonar:
         pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
         branch = self.devops_platform_gateway.get_variable("branch_name")
 
-        compact_remote_config_url = self.devops_platform_gateway.get_source_code_management_uri()
+        compact_remote_config_url = self.devops_platform_gateway.get_base_compact_remote_config_url(args["remote_config_repo"])
         source_code_management_uri = set_repository(
             pipeline_name,
-            compact_remote_config_url
+            self.devops_platform_gateway.get_source_code_management_uri()
         )
         config_tool = self.devops_platform_gateway.get_remote_config(
             args["remote_config_repo"],
