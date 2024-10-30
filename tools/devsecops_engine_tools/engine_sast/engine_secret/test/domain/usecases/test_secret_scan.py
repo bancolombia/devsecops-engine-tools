@@ -12,9 +12,7 @@ class TestSecretScan(unittest.TestCase):
     def setUp(self) -> None:
         global json_config
         json_config = {
-            "IGNORE_SEARCH_PATTERN": [
-                "test"
-            ],
+            "IGNORE_SEARCH_PATTERN": "(.*test.*)",
             "MESSAGE_INFO_ENGINE_SECRET": "If you have doubts, visit url",
             "THRESHOLD": {
                 "VULNERABILITY": {
@@ -165,13 +163,44 @@ class TestSecretScan(unittest.TestCase):
             mock_deserialize_gateway_instance,
             mock_git_gateway_instance
         )
-
+        skip_tool_isp = False
         mock_devops_gateway_instance = mock_devops_gateway.return_value
         mock_devops_gateway_instance.get_variable.return_value = "test_pipeline"
         exclusions = {
             "test_pipeline": {"SKIP_TOOL": 1}
         }
-        result = secret_scan.skip_from_exclusion(exclusions)
+        result = secret_scan.skip_from_exclusion(exclusions, skip_tool_isp)
+        self.assertTrue(result)
+
+    @patch('devsecops_engine_tools.engine_utilities.git_cli.model.gateway.git_gateway.GitGateway')
+    @patch(
+        "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
+    )
+    @patch(
+        "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator.DeseralizatorGateway"
+    )
+    @patch(
+        "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway.ToolGateway"
+    )
+    def test_skip_tool_true_isp(self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway, mock_git_gateway):
+        mock_tool_gateway_instance = mock_tool_gateway.return_value
+        mock_devops_gateway_instance = mock_devops_gateway.return_value
+        mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
+        mock_git_gateway_instance = mock_git_gateway.return_value
+    
+        secret_scan = SecretScan(
+            mock_tool_gateway_instance,
+            mock_devops_gateway_instance,
+            mock_deserialize_gateway_instance,
+            mock_git_gateway_instance
+        )
+        skip_tool_isp = True
+        mock_devops_gateway_instance = mock_devops_gateway.return_value
+        mock_devops_gateway_instance.get_variable.return_value = "test_pipeline"
+        exclusions = {
+            "test_pipeline": {"SKIP_TOOL": 1}
+        }
+        result = secret_scan.skip_from_exclusion(exclusions, skip_tool_isp)
         self.assertTrue(result)
 
     @patch('devsecops_engine_tools.engine_utilities.git_cli.model.gateway.git_gateway.GitGateway')
@@ -196,13 +225,13 @@ class TestSecretScan(unittest.TestCase):
             mock_deserialize_gateway_instance,
             mock_git_gateway_instance
         )
-
+        skip_tool_isp = False
         mock_devops_gateway_instance = mock_devops_gateway.return_value
         mock_devops_gateway_instance.get_variable.return_value = "other_pipeline"
         exclusions = {
             "test_pipeline": {"SKIP_TOOL": 1}
         }
-        result = secret_scan.skip_from_exclusion(exclusions)
+        result = secret_scan.skip_from_exclusion(exclusions, skip_tool_isp)
         self.assertFalse(result)
     
     @patch('devsecops_engine_tools.engine_utilities.git_cli.model.gateway.git_gateway.GitGateway')
@@ -234,7 +263,7 @@ class TestSecretScan(unittest.TestCase):
         mock_devops_gateway_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
 
-        config_tool_instance = secret_scan.complete_config_tool(
+        config_tool_instance, skip_tool_isp = secret_scan.complete_config_tool(
             {"remote_config_repo": "repository"}, "TRUFFLEHOG"
         )
 
