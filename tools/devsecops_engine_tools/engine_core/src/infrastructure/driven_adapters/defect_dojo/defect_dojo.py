@@ -408,5 +408,6 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         elif tool == "engine_risk":
             for tag in finding.tags:
                 return self._get_where(finding, tag)
+            return finding.file_path
         else:
             return finding.file_path
