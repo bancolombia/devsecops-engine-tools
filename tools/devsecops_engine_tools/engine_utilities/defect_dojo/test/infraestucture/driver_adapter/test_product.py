@@ -15,7 +15,7 @@ from devsecops_engine_tools.engine_utilities.defect_dojo.domain.request_objects.
 def test_get_product_info_success():
     session_mock = session_manager_get(status_code=200, response_json_file="product_list.json")
     request = ImportScanRequest()
-    rest_product = ProductRestConsumer(request, session_mock)
+    rest_product = ProductRestConsumer(session_mock)
     product_obj = rest_product.get_products(request)
     # Verificar el resultado
     assert isinstance(product_obj, ProductList)
@@ -29,14 +29,14 @@ def test_get_product_info_success():
 def test_get_product_info_failure():
     session_mock = session_manager_get(status_code=500, response_json_file="product_list.json")
     request = ImportScanRequest()
-    rest_product = ProductRestConsumer(ImportScanRequest(), session_mock)
+    rest_product = ProductRestConsumer(session_mock)
     with pytest.raises(ApiError):
         rest_product.get_products(request)
 
 
 def test_post_product_info_sucessfull():
     session_mock = session_manager_post(status_code=201, mock_response="product.json")
-    rest_product = ProductRestConsumer(ImportScanRequest(), session_mock)
+    rest_product = ProductRestConsumer(session_mock)
     request = ImportScanRequest()
     request.product_name = "NU0212001_product name test_NU0212001"
     response = rest_product.post_product(request, 278)
@@ -50,6 +50,6 @@ def test_post_product_info_sucessfull():
 
 def test_post_product_info_failure():
     session_mock = session_manager_post(status_code=500, mock_response="product.json")
-    rest_product_type = ProductRestConsumer(ImportScanRequest(), session_mock)
+    rest_product_type = ProductRestConsumer(session_mock)
     with pytest.raises(ApiError):
         rest_product_type.post_product(ImportScanRequest(), 278)

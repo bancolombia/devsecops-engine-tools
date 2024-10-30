@@ -1,7 +1,5 @@
 {
-    "IGNORE_SEARCH_PATTERN": [
-        "test"
-    ],
+    "IGNORE_SEARCH_PATTERN": "(.*test.*)",
     "MESSAGE_INFO_ENGINE_SECRET": "message custom",
     "THRESHOLD": {
         "VULNERABILITY": {

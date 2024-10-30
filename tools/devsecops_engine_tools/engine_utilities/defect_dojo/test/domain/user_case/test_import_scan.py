@@ -42,7 +42,7 @@ def test_user_case_creation():
     assert isinstance(request, ImportScanRequest)
     rest_import_scan = ImportScanRestConsumer(request, SessionManager())
     rest_product_type = ProductTypeRestConsumer(request, SessionManager())
-    rest_product = ProductRestConsumer(request, SessionManager())
+    rest_product = ProductRestConsumer(SessionManager())
     rest_scan_configuration = ScanConfigrationRestConsumer(request, SessionManager())
     rest_engagement = EngagementRestConsumer(request, SessionManager())
     uc = ImportScanUserCase(
