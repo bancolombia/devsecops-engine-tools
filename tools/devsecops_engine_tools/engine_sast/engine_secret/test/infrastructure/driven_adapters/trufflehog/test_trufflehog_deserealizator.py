@@ -22,7 +22,8 @@ class TestSecretScanDeserealizator(unittest.TestCase):
                             }
                         }
                     },
-                    "Raw": "secret"
+                    "Raw": "secret",
+                    "Id": "SECRET_SCANNING"
                 },
                 {
                     "DetectorName": "ExampleDetector",
@@ -37,7 +38,8 @@ class TestSecretScanDeserealizator(unittest.TestCase):
                     "ExtraData": {
                         "name" : "ActuatorRule"
                     },
-                    "Raw": "management.endpoints.web.exposure.include=env,heapdump,threaddump,loggers"
+                    "Raw": "management.endpoints.web.exposure.include=env,heapdump,threaddump,loggers",
+                    "Id": "MISCONFIGURATION_SCANNING"
                 }
             ]
             
