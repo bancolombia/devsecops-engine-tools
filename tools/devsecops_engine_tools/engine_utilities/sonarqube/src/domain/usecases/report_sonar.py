@@ -47,7 +47,9 @@ class ReportSonar:
             args["remote_config_repo"],
             "/engine_core/ConfigTool.json"
         )
-        environment = define_env(None, branch)
+        environment = {"dev": "Development",
+                       "qa": "Staging",
+                       "pdn": "Production"}.get(define_env(None, branch))
         
         if args["use_secrets_manager"] == "true": 
             secret = self.secrets_manager_gateway.get_secret(config_tool)

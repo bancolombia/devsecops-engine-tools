@@ -27,7 +27,7 @@ class TestReportSonar(unittest.TestCase):
             "repository"
         ]
         mock_set_repository.return_value = "repository_uri"
-        mock_define_env.return_value = "environment_name"
+        mock_define_env.return_value = "dev"
         mock_secrets_manager_gateway.get_secret.return_value = {
             "token_sonar": "sonar_token"
         }
@@ -69,7 +69,7 @@ class TestReportSonar(unittest.TestCase):
         mock_vulnerability_gateway.send_report.assert_called_once_with(
             mock.ANY,
             "repository_uri",
-            "environment_name",
+            "Development",
             {"token_sonar": "sonar_token"},
             mock.ANY,
             mock_devops_platform_gateway,

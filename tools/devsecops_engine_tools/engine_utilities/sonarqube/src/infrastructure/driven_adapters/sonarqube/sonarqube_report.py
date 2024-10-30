@@ -33,7 +33,7 @@ class SonarAdapter(SonarGateway):
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 file_content = f.read()
-                print(f"[SQ] Parse Task report file:\n {file_content}")
+                print(f"[SQ] Parse Task report file:\n{file_content}")
                 if not file_content or len(file_content) <= 0:
                     print("[SQ] Error reading file")
                     logger.warning("[SQ] Error reading file")
