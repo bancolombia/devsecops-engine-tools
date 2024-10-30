@@ -54,7 +54,17 @@ class ReportSonar:
         else: 
             secret = args
 
-        project_keys = self.sonar_gateway.get_project_keys(pipeline_name)
+        report_config_tool = self.devops_platform_gateway.get_remote_config(
+            args["remote_config_repo"],
+            "/report_sonar/ConfigTool.json"
+        )
+        get_components = report_config_tool["PIPELINE_COMPONENTS"].get(pipeline_name)
+        if get_components:
+            project_keys = [f"{pipeline_name}_{component}" for component in get_components]
+            print(f"Multiple project keys detected: {project_keys}")
+            logger.info(f"Multiple project keys detected: {project_keys}")
+        else:
+            project_keys = self.sonar_gateway.get_project_keys(pipeline_name)
 
         for project_key in project_keys:
             try:

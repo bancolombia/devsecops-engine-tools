@@ -31,6 +31,10 @@ class TestReportSonar(unittest.TestCase):
         mock_secrets_manager_gateway.get_secret.return_value = {
             "token_sonar": "sonar_token"
         }
+
+        mock_devops_platform_gateway.get_remote_config.return_value = {
+            "PIPELINE_COMPONENTS": {}
+        }
         
         mock_sonar_gateway.get_project_keys.return_value = ["project_key_1"]
         mock_sonar_gateway.filter_by_sonarqube_tag.return_value = [

@@ -54,7 +54,7 @@ class SonarGateway(metaclass=ABCMeta):
     @abstractmethod
     def find_issue_by_id(
         self,
-        issues: dict,
+        issues: list,
         issue_id: str
     ):
         "find an issue by id"
