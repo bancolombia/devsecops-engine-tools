@@ -68,15 +68,15 @@ class HandleScan:
             )
             if product_type:
                 pt_name = product_type.name
-                pt_qapt = next(
+                apply_qualitypt = next(
                     filter(
                         lambda qapt: pt_name in qapt,
                         quality_vulnerability_management["PTS"],
                     ),
                     None,
                 )
-                if pt_qapt:
-                    pt_info = pt_qapt[pt_name]
+                if apply_qualitypt:
+                    pt_info = apply_qualitypt[pt_name]
                     pt_profile = pt_info["PROFILE"]
                     pt_apps = pt_info["APPS"]
 

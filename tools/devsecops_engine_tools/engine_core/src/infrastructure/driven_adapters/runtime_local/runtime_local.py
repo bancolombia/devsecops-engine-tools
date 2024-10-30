@@ -42,7 +42,7 @@ class RuntimeLocal(DevopsPlatformGateway):
         return os.environ.get("DET_SOURCE_CODE_MANAGEMENT_URI")
 
     def get_base_compact_remote_config_url(self, remote_config_repo):
-        return os.environ.get("DET_BASE_COMPACT_REMOTE_CONFIG_URL")
+        return f"{os.environ.get("DET_BASE_COMPACT_REMOTE_CONFIG_URL")}?path=/"
 
     def get_variable(self, variable):
         env_variables = {
