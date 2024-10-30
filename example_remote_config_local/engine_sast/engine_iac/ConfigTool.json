@@ -25,6 +25,8 @@
         "USE_EXTERNAL_CHECKS_DIR": "False",
         "EXTERNAL_DIR_OWNER": "",
         "EXTERNAL_DIR_REPOSITORY": "",
+        "APP_ID_GITHUB":"",
+        "INSTALLATION_ID_GITHUB":"",
         "RULES": {
             "RULES_DOCKER": {
                 "CKV_DOCKER_1": {
