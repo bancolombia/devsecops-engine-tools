@@ -94,7 +94,7 @@ export class IacScanUseCase implements IIacScanUseCase {
             this.files = this.files.filter((value) => value !== file);
             i++;
         }
-        this.iacScanner.iacScan(folderToScan, outputChannel);
+        this.iacScanner.scan(folderToScan, outputChannel);
         await this.cleanFolder(folderToScan);
 
     }

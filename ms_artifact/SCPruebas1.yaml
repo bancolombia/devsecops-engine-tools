@@ -1,134 +1,1084 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: bridge-mtx
-  namespace: mascara-transaccional-dev
-  labels:
-    app.bancolombia.com.co/env: dev
-    app.bancolombia.com.co/cost-center: PMO32182
-    app.bancolombia.com.co/application-code: nu0021001
-    app.bancolombia.com.co/project: mascara-transaccional
-    app.bancolombia.com.co/pmo: PMO31859
-spec:
-  selector:
-    app: mascara-transaccional
-    pod: bridge-mtx-pod
-  ports:
-    - name: http
-      targetPort: 8103
-      port: 80
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: bridge-mtx-deployment
-  namespace: mascara-transaccional-dev
-  labels:
-    app.bancolombia.com.co/env: dev
-    app.bancolombia.com.co/cost-center: PMO32182
-    app.bancolombia.com.co/application-code: nu0021001
-    app.bancolombia.com.co/project: mascara-transaccional
-    app.bancolombia.com.co/pmo: PMO31859
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      pod: bridge-mtx-pod
-  template:
-    metadata:
-      labels:
-        app: mascara-transaccional
-        pod: bridge-mtx-pod
-        version: trunk.20230627.1
-        app.bancolombia.com.co/project: mascara-transaccional
-      annotations:
-        sidecar.istio.io/inject: "false"
-    spec:
-      securityContext:
-        fsGroup: 10101
-        runAsUser: 100
-        runAsGroup: 10101
-        runAsNonRoot: true
-      serviceAccountName: mascara-transaccional-iam-sa
-      initContainers:
-        - name: init-certificates # Este contenedor crea la JKS a partir del secreto
-          image: artifactory.apps.bancolombia.com/evc/certificates/certificates-init-container:1.2.0
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "250m"
-            limits:
-              memory: "128Mi"
-              cpu: "500m"
-          command:
-            [
-              "./certificates.sh",
-              "-snu0021001-mascara-transaccional-mq-certificate-dev", # Debe crear esta variable con el nombre del secreto, por ejemplo: nu0334001-sua-mq-certificate-dev
-              "-rus-east-1", # Debe crear esta variable con el valor: us-east-1
-              "-edev",
-            ]
-          volumeMounts:
-            - name: keystores
-              mountPath: "/config/keystores/"
-      containers:
-        - name: bridge-mtx-container
-          image: 927580206359.dkr.ecr.us-east-1.amazon***.com/nu0021001-mascara-transaccional-dev-ecr:nu0021001_mascara_transaccional_ms_bridge_mq-trunk.20230627.1
-          securityContext:
-            readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - all
-          resources:
-            requests:
-              cpu: 200m
-              memory: 600Mi
-            limits:
-              cpu: 400m
-              memory: 1200Mi
-          ports:
-            - containerPort: 8103
-          volumeMounts:
-            - name: keystores
-              mountPath: /home/appuser/jks
-              readOnly: true
-            - name: configmap
-              mountPath: /app/config
-              readOnly: true
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              pod: bridge-mtx-pod
-      volumes:
-        - name: keystores
-          emptyDir: {}
-        - name: configmap
-          configMap:
-            name: bridge-mtx
----
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
-metadata:
-  name: bridge-mtx-hpa
-  namespace: mascara-transaccional-dev
-  labels:
-    app.bancolombia.com.co/env: dev
-    app.bancolombia.com.co/cost-center: PMO32182
-    app.bancolombia.com.co/application-code: nu0021001
-    app.bancolombia.com.co/project: mascara-transaccional
-    app.bancolombia.com.co/pmo: PMO31859
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: bridge-mtx-deployment
-  minReplicas: 1
-  maxReplicas: 1
-  targetCPUUtilizationPercentage: 80
-status:
-  currentReplicas: 1
-  desiredReplicas: 1
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Archivo para el despliegue como codigo de la infraestructura de la arquitectura de referencia
+
+# Definicion de parametros
+Parameters:
+  #Despliegue de componentes
+  DeployRDS:
+    Description: Define si se despliega RDS (si/no)
+    Type: String
+  DeployEKS:
+    Description: Define si se despliega EKS (si/no)
+    Type: String
+  DeployCloudFront:
+    Description: Define si se despliega CloudFront (si/no)
+    Type: String
+  DeploySQS:
+    Description: Define si se desplegar SQS (si/no)
+    Type: String
+  DeployElasticCache:
+    Description: Define si se desplegar Elastic Cache (si/no)
+    Type: String
+  DeployAttachment:
+    Description: Define si se despliegan los attachment de los secretos hacia la RDS (si/no)
+    Type: String
+  DeployRDSDatical:
+    Description: Define si se despliega RDS de referencia Datical (si/no)
+    Type: String
+
+  #Generales
+  project:
+    Description: Nombre del proyecto.
+    Type: String
+  environment:
+    Description: Ambiente donde se despliega.
+    Type: String
+  applicationcode:
+    Description: Codigo AW de la aplicacion.
+    Type: String
+  pmo:
+    Description: PMO del proyecto de la aplicacion
+    Type: String
+  costcenter:
+    Description: Centro de costos
+    Type: String
+  businessservice:
+    Description: Nombre del componente mayor al que pertenece la aplicacion
+    Type: String
+
+  # RDS
+  DBName:
+    Description: Nombre de la base de datos.
+    Type: String
+  DBSnapshot:
+    Description: Snapshot para restauracion
+    Type: String
+  AllocatedStorage:
+    Description: Tamano del almacenamiento en GB.
+    Type: String
+  MaxAllocatedStorage:
+    Description: Tamano del almacenamiento en GB.
+    Type: String
+  UsuarioConexion:
+    Description: Nombre del usuario de conexion de la BD.
+    Type: String
+  Engine:
+    Description: El motor de base de datos que utiliza la instancia de base de datos.
+    Type: String
+  IpFluid:
+    Description: Ip que le permite el acceso a Fluid para pruebas.
+    Type: String
+  IpAdicional:
+    Description: Ip para permitir un acceso adicional
+    Type: String
+  ssmDBSGTransversal:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: lz_DbSgTransversal
+  PrivateBSubnetIds:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: PrivateBSubnetIds
+  DBNameDatical:
+    Description: Nombre de la base de datos de referencia para Datical.
+    Type: String
+  DBSnapshotDatical:
+    Description: Snapshot para restauracion de la instancia de referencia de Datical
+    Type: String
+  KeyAdminDBA:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: ops0001001-secretrds-admin-cmk
+  PortRDS:
+    Description: Puerto que utiliza la instancia de base de datos.
+    Type: String
+  EngineVersionRDS:
+    Description: La version del motor de base de datos que utiliza la instancia de base de datos.
+    Type: String
+  DBClusterParameterGroupNameRDS:
+    Description: Nombre del parameter group de la base de datos que utiliza El cluster de base de datos.
+    Type: String
+  DBParameterGroupNameRDS:
+    Description: Nombre del parameter group de base de datos que utiliza la instancia de base de datos.
+    Type: String
+  DBOptionGroupNameRDS:
+    Description: Nombre del option group de base de datos que utiliza la instancia de base de datos.
+    Type: String
+  InstanceClassRDS:
+    Description: Tipo de instancia para el recurso RDS
+    Type: String
+  RDSReplica:
+    Description: Define si va a usar una read replica.
+    Type: String
+  TagsScheduler:
+    Description: Valor para el tag de Instance scheduler en ambiente non-prod
+    Type: String
+  AutoMinorVersionUpgrade:
+    Description: Un valor que indica si las actualizaciones menores del motor se aplican automáticamente a la instancia de base de datos durante la ventana de mantenimiento.
+    Type: String
+  RDSTagBackupDiaryKey:
+    Description: Nombre de la llave o key que retorna el pipeline de operaciones Backups personalizados
+    Type: String
+  RDSTagBackupDiaryValue:
+    Description: Valor que retorna el pipeline de operaciones Backups personalizados
+    Type: String
+  RDSTagBackupMonthlyKey:
+    Description: Nombre de la llave o key que retorna el pipeline de operaciones Backups personalizados
+    Type: String
+  RDSTagBackupMonthlyValue:
+    Description: Valor que retorna el pipeline de operaciones Backups personalizados
+    Type: String
+  RDSNoAuroraIops:
+    Description: Indica el numero de operacionnes de E/S por segundo (IOPS) que aprovisiona las RDS No Aurora que usan GP3 para ciertos StorageSize
+    Type: String
+  RDSNoAuroraStorageThroughput:
+    Description: Indica el rendimiento de almacenamiento de las RDS No Aurora que usan GP3 para ciertos StorageSize
+    Type: String
+
+  # CloudFront
+  domainname:
+    Description: Dominio del sitio web
+    Type: String
+  buckets3:
+    Description: Nombre del bucket donde se almacena el contenido estatico del sitio web
+    Type: String
+  acmcertificatearn:
+    Description: ARN del certificado digital (para ambiente de produccion)
+    Type: String
+  FrontInterno:
+    Description: Define si el front que se va a desplegar es interno (si/no)
+    Type: String
+  PublicHZ:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: lz_PublicHZ
+  PrivateHZ:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: lz_PrivateHZ
+  ReglaRedesBanco:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: lz_ReglaRedesBanco
+  EmailHealthcheckCF:
+    Description: Email donde llegaran las alarmas al equipo FS
+    Type: String
+  CFWafBlock:
+    Description: WAF asociado a la distribución de CloudFront posibles valores Global-Block1 , Global-Block2 , Global-Block3
+    Type: String
+
+  # SQS
+  QueueName:
+    Description: Nombre de la cola de SQS
+    Type: String
+  QueueType:
+    Description: Tipo de la cola (fifo o estandard)
+    Type: String
+  DelaySeconds:
+    Description: tiempo en segundos durante el que se retrasa la entrega de todos los mensajes de la cola
+    Type: String
+  MessageRetentionPeriod:
+    Description: número de segundos durante los que Amazon SQS conserva un mensaje
+    Type: String
+  MaximumMessageSize:
+    Description: limite del número de bytes que puede contener un mensaje antes de Amazon SQS lo rechace
+    Type: String
+  DelayVisibility:
+    Description: El periodo de tiempo durante el cual un mensaje no estara disponible después de que se entregue un mensaje desde la cola
+    Type: String
+
+  # Elastic cache
+  CacheEngine:
+    Description: motor del cluster de elastic cache
+    Type: String
+  CacheNodes:
+    Description: cantidad de nodos para el cluster de elastic cache
+    Type: String
+  clusterid:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: clusterId
+  EksIdSecurityGroup:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: EksClusterIdSecurityGroup
+  DeployElasticCacheReplication:
+    Description: Define si se desplegar Elastic Cache Replication Group (si/no)
+    Type: String
+  ElasticCacheNodeType:
+    Description: La capacidad de cómputo y memoria de los nodos en el grupo de nodos
+    Type: String
+  ElasticCacheNodes:
+    Description: cantidad de grupos de nodos para este grupo de replicación
+    Type: String
+  ElasticCacheReplicasPerNode:
+    Description: número de nodos de réplica en cada grupo de nodos
+    Type: String
+
+  # Tags de clasificacion de la informacion
+  TagsSeguridad:
+    Description: Lista de valores para los tags de seguridad
+    Type: String
+
+  # Certificado ELB
+  CerPkiArn:
+    Description: ARN of the SNS topic used to request a PKI Certificate
+    Type: String
+    AllowedValues:
+      - arn:aws:sns:us-east-1:126174654303:pki-qa # DEV y QA
+      - arn:aws:sns:us-east-1:831688958710:pki-pdn # PDN
+  CerCommonName:
+    Description: Digital Certificate CommonName
+    Type: String
+
+  # Cross Stacks
+  KMSWebhook:
+    Description: Kms WebHook
+    Type: String
+  KMSProcess:
+    Description: Kms Process
+    Type: String
+  SecretProcess:
+    Description: Secret Process
+    Type: String
+  SecretCNXVultracker:
+    Description: SecretCNX Vultracker
+    Type: String
+  SecretRabbitMQUserVultracker:
+    Description: Secret RabbitMQ User Vultracker
+    Type: String
+  SecretRabbitMQAdminVultracker:
+    Description: Secret RabbitMQ Admin Vultracker
+    Type: String
+  SecretAppDDVultracker:
+    Description: Secret AppDD Vultracker
+    Type: String
+  DBSecurityGroupsVultracker:
+    Description: DB SecurityGroups Vultracker
+    Type: String
+
+  # Lambda Rotation
+  DurationRotate:
+    Description: Duracion en horas de la ventana del rotado
+    Type: String
+  ScheduleExpressionRotate:
+    Description: Calendarización del rotado de secretos
+    Type: String
+  PrivateBSubnetIdsLz:
+    Type: "AWS::SSM::Parameter::Value<CommaDelimitedList>"
+    Default: lz_PrivateBSubnetIds
+
+  # Secrets for devsecops engine tools
+  TokenVultracker:
+    Description: Vultracker secret token
+    Type: String
+    NoEcho: "true"
+  TokenVultrackerHC:
+    Description: Vultracker hacking continuo token
+    Type: String
+    NoEcho: "true"
+  TokenVultrackerRegulatorio:
+    Description: Vultracker regulatorio token
+    Type: String
+    NoEcho: "true"
+  TokenVultrackerC2C:
+    Description: Vultracker c2c token
+    Type: String
+    NoEcho: "true"
+  TokenCmdb:
+    Description: CMDB secret token
+    Type: String
+    NoEcho: "true"
+  RepositorySSHPrivateKey:
+    Description: Repository SSH Private Key
+    Type: String
+    NoEcho: "true"
+  RepositorySSHPassword:
+    Description: Repository SSH Password
+    Type: String
+    NoEcho: "true"
+  GithubToken:
+    Description: Github Token
+    Type: String
+    NoEcho: "true"
+  TokenPrisma:
+    Description: Prisma secret token
+    Type: String
+    NoEcho: "true"
+  SecretVultracker:
+    Description: Vultracker secret
+    Type: String
+  TokenXray:
+    Description: Xray secret
+    Type: String
+    NoEcho: "true"
+
+  RolesAllowedCrossAcount:
+    Description: Role Allowed assume role devsecops engine tools
+    Type: CommaDelimitedList
+  
+  # Parametro de bucket S3 Regulatorios
+  CiberReportsS3:
+    Description: Nombre de bucket S3 de reportes de regulatorio
+    Type: String
+
+#Definicion de mappings
+
+Mappings:
+  Fn::Transform:
+    Name: "AWS::Include"
+    Parameters:
+      Location: s3://cld0005001-arq-referencia-pdn-bucket/arquitecturas-referencia/native/v4/infra/include-arq-ref-mappings.yaml
+
+# Definicion de condiciones
+Conditions:
+  Fn::Transform:
+    Name: "AWS::Include"
+    Parameters:
+      Location: s3://cld0005001-arq-referencia-pdn-bucket/arquitecturas-referencia/native/v4/infra/include-arq-ref-conditions.yaml
+
+  # Control despliegue a ambiente Pdn
+  notEnvPdn: !Not [!Condition envPdn]
+
+  notEnvDev: !Not [!Condition envDev]
+
+  envDevPdn: !Or
+    - !Condition envDev
+    - !Condition envPdn
+
+  envQa:
+    Fn::Equals: [Ref: environment, "qa"]
+
+# Definicion de recursos
+Resources:
+  #Politica para el RootRole para asignar permisos a la aplicacion ejecutada en k8s
+  RootRolePolicy:
+    Type: AWS::IAM::Policy
+    Condition: DepEKS
+    Properties:
+      PolicyName:
+        Fn::Join: ["", [ekspolicy, Ref: project]]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          # Permisos para S3
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:DeleteObjectVersion
+              - s3:DeleteObject
+              - s3:GetObjectVersion
+              - s3:GetObjectACL
+              - s3:PutObjectACL
+              - s3:ListBucket
+            Resource:
+              - !Join ["", ["arn:aws:s3:::", Ref: CiberReportsS3]]
+              - !Join ["", ["arn:aws:s3:::", Ref: CiberReportsS3, "/*"]]
+              - !Join ["", ["arn:aws:s3:::", !Join ["-", [ !Ref applicationcode, !Ref project, !Ref environment, metrics-s3, ], ], ], ]
+              - !Join ["", ["arn:aws:s3:::", !Join ["-", [ !Ref applicationcode, !Ref project, !Ref environment, metrics-s3, ], ], /*, ], ]
+          # Permisos para SQS
+          - Effect: "Allow"
+            Action:
+              - sqs:DeleteMessage
+              - sqs:GetQueueUrl
+              - sqs:ChangeMessageVisibility
+              - sqs:DeleteMessageBatch
+              - sqs:SendMessageBatch
+              - sqs:ReceiveMessage
+              - sqs:SendMessage
+              - sqs:ChangeMessageVisibilityBatch
+            Resource:
+              - !GetAtt MyQueue.Arn
+              - !Join [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    "us-east-1:",
+                    !Ref AWS::AccountId,
+                    ":",
+                    !Join [
+                      "-",
+                      [!Ref project, !Ref environment, "sqs", "webhook"],
+                    ],
+                  ],
+                ]
+          # Permitir el uso de llaves
+          - Effect: Allow
+            Action:
+              - kms:DescribeKey
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+              - kms:CreateGrant
+            Resource:
+              - Fn::ImportValue:
+                  !Join [
+                    "-",
+                    [Ref: applicationcode, Ref: project, "project-key"],
+                  ]
+              - Fn::ImportValue:
+                  !Join [
+                    "-",
+                    [Ref: applicationcode, "vultracker", "project-key"],
+                  ]
+              - Ref: KMSWebhook
+              - Ref: KMSProcess
+          - Effect: "Allow"
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource:
+              - Ref: SecretProcess
+              - Ref: SecretVultracker
+              - Ref: SecretCNXVultracker
+              - Ref: SecretDevSecOpsEngineTool
+      Roles:
+        - Ref: RootRole
+
+  BucketPolicyCiberReports:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Sid: "Allow-S3-to-Send-Messages"
+            Effect: "Allow"
+            Principal:
+              Service: "s3.amazonaws.com"
+            Action: "sqs:SendMessage"
+            Resource: 
+              - !GetAtt MyQueue.Arn
+            Condition:
+              ArnLike:
+                aws:SourceArn: !Join ["", ["arn:aws:s3:::", Ref: CiberReportsS3]]
+          - Sid: "Allow-S3-kms"
+            Effect: "Allow"
+            Principal:
+              Service: "s3.amazonaws.com"
+            Action: 
+              - "kms:GenerateDataKey"
+              - "kms:Decrypt"
+            Resource: 
+              Fn::ImportValue:
+                Fn::Join:
+                  ["-", [Ref: applicationcode, Ref: project, "project-key"]]
+            Condition:
+              ArnLike:
+                aws:SourceArn: !Join ["", ["arn:aws:s3:::", Ref: CiberReportsS3]]
+      Queues:
+        - !Ref MyQueue
+
+  # Lambda headers - role
+  LambdaRole:
+    Type: "AWS::IAM::Role"
+    Condition: DepCloudFront
+    Properties:
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/Lz-Governance-Boundary
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+                - "edgelambda.amazonaws.com"
+            Action: "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
+  # Lambda headers - policy
+  LambdaPolicy:
+    Type: AWS::IAM::Policy
+    Condition: DepCloudFront
+    DependsOn:
+      - LambdaRole
+    Properties:
+      PolicyName: AWSLambdaEdgeExecutionRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:PutLogEvents
+              - logs:CreateLogStream
+              - logs:CreateLogGroup
+            Resource: arn:aws:logs:*:*:*
+      Roles:
+        - Ref: LambdaRole
+
+  CloudfrontFunction:
+    Type: AWS::Lambda::Function
+    Condition: DepCloudFront
+    DependsOn:
+      - LambdaRole
+    Properties:
+      Description: Funcion lambda que modifica las cabeceras de seguridad
+      Code:
+        ZipFile: !Sub |
+          'use strict';
+          exports.handler = (event, context, callback) => {      
+            //Get contents of response
+            const response = event.Records[0].cf.response;
+            const headers = response.headers;
+            //Set new headers
+                //Se debe adicionar las reglas correspondientes al proyecto para la cabecera Content Security Policy
+                //headers['content-security-policy'] = [{key: 'Content-Security-Policy', value: "default-src 'self'"}];
+                headers['strict-transport-security'] = [{key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubdomains; preload'}];
+                headers['x-content-type-options'] = [{key: 'X-Content-Type-Options', value: 'nosniff'}]; 
+                headers['x-xss-protection'] = [{key: 'X-XSS-Protection', value: '1; mode=block'}]; 
+                headers['referrer-policy'] = [{key: 'Referrer-Policy', value: 'same-origin'}];
+                headers['access-control-allow-origin'] = [{key: 'Access-Control-Allow-Origin', value: 'https://${domainname}'}];
+                headers['x-permitted-cross-domain-policies'] = [{key: 'X-Permitted-Cross-Domain-Policies', value: 'master-only'}];
+                headers['cache-control'] = [{key: 'Cache-Control', value: 'no-cache; must-revalidate; pre-check= 0; post-check= 0; max-age= 0; s-maxage= 0; no-store'}];
+                headers['pragma'] = [{key: 'Pragma', value: 'no-cache'}];
+                headers['x-frame-options'] = [{key: 'X-Frame-Options', value: 'DENY'}];
+                headers['expires'] = [{key: 'Expires', value : '0'}];
+                headers['server'] = [{key: 'Server', value : ''}];
+            //Return modified response
+            callback(null, response);
+          };
+      FunctionName:
+        Fn::Sub: lambda-headers-${project}-${environment}
+      Handler: index.handler
+      MemorySize: 128
+      Role:
+        Fn::GetAtt: LambdaRole.Arn
+      Runtime: nodejs18.x
+      Timeout: 3
+
+  # Lambda headers - Version
+  VersionedLambdaFunction:
+    Type: "AWS::Lambda::Version"
+    Condition: DepCloudFront
+    Properties:
+      FunctionName:
+        Ref: CloudfrontFunction
+
+  ########## Componentes compartidos DevSecOps #########################
+
+  #IAM Role send event Lambda
+  MetricsDevSecOpsLambdaRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/Lz-Governance-Boundary
+      RoleName:
+        !Join [
+          "-",
+          [!Ref applicationcode, !Ref project, !Ref environment, lambda-role],
+        ]
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+
+  #Lambda que obtiene eventos del S3 y envia la URl del objeto al SQS de Backend DevSecOps
+  MetricsDevSecOpsLambdaFunction:
+    Type: AWS::Lambda::Function
+    DependsOn:
+      - MetricsDevSecOpsLambdaRole
+    Properties:
+      KmsKeyArn:
+        Fn::ImportValue:
+          Fn::Join: ["-", [Ref: applicationcode, Ref: project, "project-key"]]
+      FunctionName:
+        !Join [
+          "-",
+          [
+            !Ref applicationcode,
+            !Ref project,
+            !Ref environment,
+            lambda-metrics,
+          ],
+        ]
+      Runtime: nodejs18.x
+      Handler: src/handler.main
+      MemorySize: 512
+      Timeout: 300
+      Role: !GetAtt MetricsDevSecOpsLambdaRole.Arn
+      Description: "Lambda function for send URL Endpoint from S3 bucket to SQS"
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref environment
+          ACCOUNT_ID: !Ref AWS::AccountId
+      Code:
+        S3Bucket: cld0002001-arq-despliegue-pdn-bucket
+        S3Key: lambdas/node.zip
+      Tags:
+        - Key: "bancolombia:clasificacion-confidencialidad"
+          Value: na
+        - Key: "bancolombia:clasificacion-integridad"
+          Value: impacto critico
+        - Key: "bancolombia:clasificacion-disponibilidad"
+          Value: impacto tolerable
+        - Key: "bancolombia:dominio-informacion"
+          Value: riesgos-seguridad
+        - Key: "bancolombia:datos-personales"
+          Value: "no"
+        - Key: "bancolombia:cumplimiento"
+          Value: "no"
+
+  MetricsDevSecOpsLambdaPolicy:
+    Type: "AWS::IAM::Policy"
+    DependsOn:
+      - MetricsDevSecOpsLambdaRole
+    Properties:
+      PolicyName:
+        Fn::Join: ["-", [Ref: "AWS::StackName", "policy-lambda-metrics"]]
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - "sqs:TagQueue"
+              - "sqs:SendMessage"
+              - "sqs:GetQueueUrl"
+            Resource: !GetAtt MyQueue.Arn
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:GetObjectTagging
+              - s3:DeleteObject
+            Resource:
+              !Join [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  !Join [
+                    "-",
+                    [
+                      !Ref applicationcode,
+                      !Ref project,
+                      !Ref environment,
+                      metrics-s3,
+                    ],
+                  ],
+                  /*,
+                ],
+              ]
+          - Effect: Allow
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+            Resource:
+              - "arn:aws:logs:*:*:*"
+          - Effect: "Allow"
+            Action:
+              - kms:DescribeKey
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:CreateGrant
+            Resource:
+              Fn::ImportValue:
+                Fn::Join:
+                  ["-", [Ref: applicationcode, Ref: project, "project-key"]]
+      Roles:
+        - !Ref MetricsDevSecOpsLambdaRole
+
+  ProcessingLambdaPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - MetricsDevSecOpsLambdaFunction
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref MetricsDevSecOpsLambdaFunction
+      Principal: s3.amazonaws.com
+      SourceArn:
+        !Join [
+          "",
+          [
+            "arn:aws:s3:::",
+            !Join [
+              "-",
+              [
+                !Ref applicationcode,
+                !Ref project,
+                !Ref environment,
+                metrics-s3,
+              ],
+            ],
+          ],
+        ]
+      SourceAccount: !Ref AWS::AccountId
+
+  # CertificadoInterno:
+  #   Type: Custom::InternalDigitalCertificate
+  #   Properties:
+  #     ServiceToken: !Ref CerPkiArn
+  #     common_name: !Ref CerCommonName
+  #     aws_service: ELB
+  #     key_type: RSA2048
+
+  LambdaExecutionRoleRotateSecrets:
+    Type: "AWS::IAM::Role"
+    Properties:
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/Lz-Governance-Boundary
+      RoleName:
+        !Join [
+          "-",
+          [
+            !Ref applicationcode,
+            !Ref project,
+            !Ref environment,
+            lambda-rotate-secrets-role,
+          ],
+        ]
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: AllowLoggingLambda
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - "arn:aws:logs:*:*:*"
+        - PolicyName: AllowCreateNetworkInterface
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ec2:CreateNetworkInterface"
+                  - "ec2:DescribeNetworkInterfaces"
+                  - "ec2:DeleteNetworkInterface"
+                  - "ec2:AssignPrivateIpAddresses"
+                  - "ec2:UnassignPrivateIpAddresses"
+                  - "ec2:DetachNetworkInterface"
+                Resource: "*"
+        - PolicyName: ReadWriteSecrect
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "secretsmanager:GetSecretValue"
+                  - "secretsmanager:PutSecretValue"
+                  - "secretsmanager:RotateSecret"
+                  - "secretsmanager:CancelRotateSecret"
+                  - "secretsmanager:UpdateSecret"
+                  - "secretsmanager:UpdateSecretVersionStage"
+                  - "secretsmanager:DescribeSecret"
+                Resource:
+                  - !Ref SecretCNXVultracker
+                  - !Ref SecretRabbitMQUserVultracker
+                  - !Ref SecretRabbitMQAdminVultracker
+                  - !Ref SecretAppDDVultracker
+                  - !Ref SecretDevSecOpsEngineTool
+        - PolicyName: AllowUseCMK
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "kms:Decrypt"
+                  - "kms:Encrypt"
+                  - "kms:GenerateDataKey"
+                Resource:
+                  - Fn::ImportValue:
+                      !Join [
+                        "-",
+                        [Ref: applicationcode, Ref: project, "project-key"],
+                      ]
+                  - Fn::ImportValue:
+                      !Join [
+                        "-",
+                        [Ref: applicationcode, "vultracker", "project-key"],
+                      ]
+
+  LambdaRotateSecrets:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code:
+        S3Bucket: cld0002001-arq-despliegue-pdn-bucket
+        S3Key: lambdas/python3.zip
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt
+        - LambdaExecutionRoleRotateSecrets
+        - Arn
+      Runtime: python3.9
+      FunctionName:
+        !Join [
+          "-",
+          [
+            !Ref applicationcode,
+            !Ref project,
+            !Ref environment,
+            lambda-rotate-secrets,
+          ],
+        ]
+      MemorySize: 128
+      Timeout: 60
+      Description: Lambda for secrets rotation
+      Environment:
+        Variables:
+          PYTHONPATH: /var/runtime:/var/runtime/packages:/var/task/packages
+          PATH: /var/lang/bin:/usr/local/bin:/usr/bin/:/bin:/opt/bin:/var/runtime/bin:/var/task/bin
+          ENVIRONMENT: !Ref environment
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DBSecurityGroupsVultracker
+        SubnetIds:
+          - !Select [0, !Ref PrivateBSubnetIdsLz]
+          - !Select [1, !Ref PrivateBSubnetIdsLz]
+      KmsKeyArn:
+        Fn::ImportValue:
+          Fn::Join: ["-", [Ref: applicationcode, Ref: project, "project-key"]]
+      Tags:
+        - Key: "bancolombia:clasificacion-confidencialidad"
+          Value: interna
+        - Key: "bancolombia:clasificacion-integridad"
+          Value: impacto critico
+        - Key: "bancolombia:clasificacion-disponibilidad"
+          Value: impacto tolerable
+        - Key: "bancolombia:dominio-informacion"
+          Value: riesgos-seguridad
+        - Key: "bancolombia:datos-personales"
+          Value: "no"
+        - Key: "bancolombia:cumplimiento"
+          Value: "no"
+
+  PolicyInvoke:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "lambda:InvokeFunction"
+            Resource: !GetAtt
+              - LambdaRotateSecrets
+              - Arn
+      PolicyName:
+        !Join [
+          "-",
+          [!Ref applicationcode, !Ref project, !Ref environment, invoke-policy],
+        ]
+      Roles:
+        - !Ref LambdaExecutionRoleRotateSecrets
+
+  LambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref LambdaRotateSecrets
+      Principal: secretsmanager.amazonaws.com
+
+  SecretRotationScheduleEngineTools:
+    Type: AWS::SecretsManager::RotationSchedule
+    DependsOn:
+      - LambdaRotateSecrets
+      - LambdaPermission
+    Properties:
+      SecretId: !Ref SecretDevSecOpsEngineTool
+      RotationLambdaARN: !GetAtt LambdaRotateSecrets.Arn
+      RotationRules:
+        Duration: !Ref DurationRotate
+        ScheduleExpression: !Ref ScheduleExpressionRotate
+
+  SecretDevSecOpsEngineTool:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "devsecops-${environment}-engine-tools"
+      Description: !Sub "DevSecOps Engine Tools secret in environment ${environment}"
+      SecretString: !Sub '{"token_defect_dojo": "${TokenVultracker}", "token_regulatorio_defect_dojo": "${TokenVultrackerRegulatorio}", "token_hc_defect_dojo": "${TokenVultrackerHC}", "token_c2c_defect_dojo": "${TokenVultrackerC2C}", "token_cmdb": "${TokenCmdb}", "repository_ssh_private_key": "${RepositorySSHPrivateKey}", "repository_ssh_password": "${RepositorySSHPassword}", "github_token": "${GithubToken}","token_prisma_cloud":"${TokenPrisma}", "token_xray": "${TokenXray}"}'
+      KmsKeyId:
+        Fn::ImportValue:
+          Fn::Join: ["-", [Ref: applicationcode, Ref: project, "project-key"]]
+  
+  SecretDevSecOpsEngineToolResourcePolicy:
+    Type: 'AWS::SecretsManager::ResourcePolicy'
+    DependsOn: SecretDevSecOpsEngineTool
+    Properties:
+      SecretId:
+        Ref: SecretDevSecOpsEngineTool
+      ResourcePolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Resource: !Ref SecretDevSecOpsEngineTool
+            Action:
+              - 'secretsmanager:GetSecretValue'
+            Principal:
+              AWS:
+                - !If
+                  - envDev
+                  - 'arn:aws:iam::126174654303:role/cyber-c2c-role-vultracker-integration-dev'
+                  - !Ref AWS::NoValue
+                - !If
+                  - envDev
+                  - 'arn:aws:iam::126174654303:role/cyber-c2c-role-close-findings-vultracker-dev'
+                  - !Ref AWS::NoValue
+                - !If
+                  - envQa
+                  - 'arn:aws:iam::394822897200:role/cyber-c2c-role-vultracker-integration-qa'
+                  - !Ref AWS::NoValue
+                - !If
+                  - envQa
+                  - 'arn:aws:iam::394822897200:role/cyber-c2c-role-close-findings-vultracker-qa'
+                  - !Ref AWS::NoValue
+                - !If
+                  - envPdn
+                  - 'arn:aws:iam::118593200616:role/cyber-c2c-role-vultracker-integration-pdn'
+                  - !Ref AWS::NoValue
+                - !If
+                  - envPdn
+                  - 'arn:aws:iam::118593200616:role/cyber-c2c-role-close-findings-vultracker-pdn'
+                  - !Ref AWS::NoValue
+          - Effect: Deny
+            Resource: "*"
+            Action:
+              - 'secretsmanager:GetSecretValue'
+            Principal:
+              AWS: "*"
+            Condition:
+              StringNotEquals:
+                aws:PrincipalArn:
+                  - Fn::Sub: 'arn:aws:iam::${AWS::AccountId}:role/eksrole-devsecops-engine-ou'
+                  - Fn::Sub: 'arn:aws:iam::${AWS::AccountId}:role/cloudformation-service-deployment-role-vsts'
+                  - Fn::Sub: 'arn:aws:iam::${AWS::AccountId}:role/nu0429001-devsecops-engine-${environment}-lambda-rotate-secrets-role'
+                  - Fn::Sub: 'arn:aws:iam::${AWS::AccountId}:role/IamRoleDevSecOpsEngineTools'
+                  - !If
+                    - envDev
+                    - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_BCO-FullStackDevRole_62ef7bf005443e85
+                    - !Ref AWS::NoValue
+                  - !If
+                    - envDev
+                    - 'arn:aws:iam::126174654303:role/cyber-c2c-role-vultracker-integration-dev'
+                    - !Ref AWS::NoValue
+                  - !If
+                    - envDev
+                    - 'arn:aws:iam::126174654303:role/cyber-c2c-role-close-findings-vultracker-dev'
+                    - !Ref AWS::NoValue
+                  - !If
+                    - envQa
+                    - 'arn:aws:iam::394822897200:role/cyber-c2c-role-vultracker-integration-qa'
+                    - !Ref AWS::NoValue
+                  - !If
+                    - envQa
+                    - 'arn:aws:iam::394822897200:role/cyber-c2c-role-close-findings-vultracker-qa'
+                    - !Ref AWS::NoValue
+                  - !If
+                    - envPdn
+                    - 'arn:aws:iam::118593200616:role/cyber-c2c-role-vultracker-integration-pdn'
+                    - !Ref AWS::NoValue
+                  - !If
+                    - envPdn
+                    - 'arn:aws:iam::118593200616:role/cyber-c2c-role-close-findings-vultracker-pdn'
+                    - !Ref AWS::NoValue
+
+  rIamRoleDevSecOpsEngineTools:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: IamRoleDevSecOpsEngineTools
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/Lz-Governance-Boundary
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !If
+                  - notEnvPdn
+                  - !Sub arn:aws:iam::${AWS::AccountId}:role/IamRolePoolDevSecOps
+                  - !Ref AWS::NoValue
+                - !If
+                  - envDevPdn
+                  - !Sub arn:aws:iam::${AWS::AccountId}:role/aw1192001DevopsRoleForSSMInstances
+                  - !Ref AWS::NoValue
+            Action: "sts:AssumeRole"
+          - !If
+            - envPdn
+            - Effect: Allow
+              Principal:
+                AWS: 
+                  Ref: RolesAllowedCrossAcount
+              Action: "sts:AssumeRole"
+            - !Ref AWS::NoValue
+      Policies:
+        - PolicyName: secret
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:DescribeKey
+                  - kms:Encrypt
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                  - kms:CreateGrant
+                Resource:
+                  Fn::ImportValue:
+                    Fn::Join:
+                      ["-", [Ref: applicationcode, Ref: project, "project-key"]]
+              - Effect: "Allow"
+                Action:
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:DescribeSecret
+                Resource:
+                  - !Ref SecretDevSecOpsEngineTool
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                  - s3:GetObject
+                  - s3:GetObjectTagging
+                Resource:
+                  - !Join [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      !Join [
+                        "-",
+                        [
+                          !Ref applicationcode,
+                          !Ref project,
+                          !Ref environment,
+                          metrics-s3,
+                        ],
+                      ],
+                    ],
+                  ]
+                  - !Join [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      !Join [
+                        "-",
+                        [
+                          !Ref applicationcode,
+                          !Ref project,
+                          !Ref environment,
+                          metrics-s3,
+                        ],
+                      ],
+                      /*,
+                    ],
+                  ]
+
+  # Despliegue de: ECR - RDS - CloudFront - EKS Role
+
+  Fn::Transform:
+    Name: "AWS::Include"
+    Parameters:
+      Location: s3://cld0005001-arq-referencia-pdn-bucket/arquitecturas-referencia/native/v4/infra/include-arq-ref-resources.yaml
+
+# Definicion de salidas
+
+Outputs:
+
+  Fn::Transform:
+    Name: "AWS::Include"
+    Parameters:
+      Location: s3://cld0005001-arq-referencia-pdn-bucket/arquitecturas-referencia/native/v4/infra/include-arq-ref-outputs.yaml

@@ -73,7 +73,12 @@
         "devsecops.environment": {
           "type": "string",
           "default": "dev",
-          "enum": ["pdn", "cer", "qa", "dev"],
+          "enum": [
+            "pdn",
+            "cer",
+            "qa",
+            "dev"
+          ],
           "description": "Environment to evaluate"
         },
         "devsecops.username": {
@@ -92,15 +97,15 @@
     "commands": [
       {
         "command": "devsecops.helloWorld",
-        "title": "Hello World"
+        "title": "HELLO WORLD"
       },
       {
         "command": "devsecops.iacScan",
-        "title": "Iac Scan"
+        "title": "IAC SCAN"
       },
       {
-        "command": "devsecops.secretScan",
-        "title": "Secret Scan"
+        "command": "devsecops.imageScan",
+        "title": "IMAGE SCAN"
       }
     ],
     "menus": {
@@ -114,11 +119,6 @@
           "command": "devsecops.iacScan",
           "when": "view == devsecopsView",
           "group": "navigation"
-        },
-        {
-          "command": "devsecops.secretScan",
-          "when": "view == devsecopsView",
-          "group": "navigation"
         }
       ]
     }
@@ -129,20 +129,22 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "deploy": "vsce publish --yarn"
   },
   "devDependencies": {
-    "@types/mocha": "^10.0.7",
+    "@types/mocha": "^10.0.9",
     "@types/node": "20.x",
     "@types/vscode": "^1.91.0",
     "@typescript-eslint/eslint-plugin": "^7.14.1",
     "@typescript-eslint/parser": "^7.11.0",
     "@vscode/test-cli": "^0.0.9",
-    "@vscode/test-electron": "^2.4.0",
+    "@vscode/test-electron": "^2.4.1",
     "eslint": "^8.57.0",
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "docker-cli-js": "^2.10.0",
     "keytar": "^7.9.0"
   }
 }

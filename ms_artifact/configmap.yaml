@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: #{service}#-configmap
+  namespace: #{namespace}#
+  labels:
+    app.bancolombia.com.co/env: #{env}#
+    app.bancolombia.com.co/cost-center: #{cost-center}#
+    app.bancolombia.com.co/application-code: #{application-code}#
+    app.bancolombia.com.co/project: #{project-name}#
+    app.bancolombia.com.co/pmo: #{pmo}#
+data:
+  PRISMA_URL: "#{prisma-url}#"
+  TENABLE_URL: "#{tenable-url}#"
+  ENVIRONMENT: "#{environment-prisma}#"
+  CIBER_REPORTS_BUCKET: "#{ciber-reports-bucket}#"
+  METRICS_BUCKET: "#{metrics-bucket}#"
+  METRICS_BATCH_SIZE: "#{metrics-batch-size}#"
+  PROVIDER_SECRET: "#{secret-name}#"
+  PRISMA_IMAGE_CRON: "#{prisma-image-cron}#"
+  PRISMA_SERVERLESS_CRON: "#{prisma-serverless-cron}#"
+  FINDINGS_VULTRACKER_CRON: "#{findings-vultracker-cron}#"
+  SCHEMA_FILE_PATH: "#{schema-file-path}#"
+  RESULT_FILE_PATH: "#{result-file-path}#"
+  DB_SECRET: "#{vultracker-db-secrets}#"
+  HEALTH_PATH: "#{health-path}#"
+  DEVSECOPS_REPORTER_ID: "#{devsecops-reporter-id}#"
+  HACKING_REPORTER_ID: "#{hacking-reporter-id}#"
+  C2C_REPORTER_ID: "#{c2c-reporter-id}#"
+  SCAN_CYCLE_REPORTER_ID: "#{scan-cycle-reporter-id}#"
