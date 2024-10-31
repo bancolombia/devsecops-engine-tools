@@ -67,11 +67,13 @@ def process_findings(
 
     handle_filters = HandleFilters()
 
-    unique_findings = handle_filters.filter_duplicated(findings)
+    active_findings = handle_filters.filter(findings)
+
+    unique_findings = handle_filters.filter_duplicated(active_findings)
 
     return process_active_findings(
-        handle_filters.filter(unique_findings),
         unique_findings,
+        findings,
         vm_exclusions,
         devops_platform_gateway,
         dict_args,

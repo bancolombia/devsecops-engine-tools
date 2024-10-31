@@ -11,8 +11,7 @@ class HandleFilters:
         findings_map = {}
 
         for finding in findings:
-            id_tuple = tuple(sorted((k, v) for d in finding.id for k, v in d.items()))
-            key = (finding.where, id_tuple, finding.vuln_id_from_tool)
+            key = (finding.where, tuple(finding.id), finding.vuln_id_from_tool)
             if key in findings_map:
                 existing_finding = findings_map[key]
                 combined_services = set(existing_finding.service.split() + finding.service.split())
