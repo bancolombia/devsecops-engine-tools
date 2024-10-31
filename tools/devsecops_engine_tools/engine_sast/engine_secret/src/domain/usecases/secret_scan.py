@@ -52,7 +52,8 @@ class SecretScan:
                     self.devops_platform_gateway.get_variable("repository"),
                     config_tool,
                     secret_tool,
-                    secret_external_checks)
+                    secret_external_checks,
+                    self.devops_platform_gateway.get_variable("temp_directory"))
             finding_list = self.tool_deserialize.get_list_vulnerability(
                 findings,
                 self.devops_platform_gateway.get_variable("os"),

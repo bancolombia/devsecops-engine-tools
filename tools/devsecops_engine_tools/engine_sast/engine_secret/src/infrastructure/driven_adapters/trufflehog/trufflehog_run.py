@@ -58,11 +58,12 @@ class TrufflehogRun(ToolGateway):
         repository_name,
         config_tool,
         secret_tool,
-        secret_external_checks
+        secret_external_checks,
+        agent_temp_dir
     ):
         trufflehog_command = "trufflehog"
         if "Windows" in agent_os:
-            trufflehog_command = "C:/Trufflehog/bin/trufflehog.exe"
+            trufflehog_command = f"{agent_temp_dir}/trufflehog.exe"
         with open(f"{agent_work_folder}/excludedPath.txt", "w") as file:
             file.write("\n".join(config_tool.exclude_path))
         exclude_path = f"{agent_work_folder}/excludedPath.txt"
