@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { iacScanRequest, secretScanRequest } from './application/InitEngineCore';
+import { iacScanRequest, imageScanRequest } from './application/InitEngineCore';
+import { Docker, IOptions } from 'docker-cli-js';
 
 class DevSecOpsTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | null | void>();
@@ -27,25 +28,13 @@ class DevSecOpsTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeIt
 		const iacScanItem = new vscode.TreeItem('Iac Scan', vscode.TreeItemCollapsibleState.None);
 		iacScanItem.command = {
 			command: 'devsecops.iacScan',
-			title: 'Iac Scan',
+			title: 'IAC SCAN',
 			arguments: [iacScanItem]
 		};
 		items.push(iacScanItem);
 
-		const secretScanItem = new vscode.TreeItem('Secret Scan', vscode.TreeItemCollapsibleState.None);
-		iacScanItem.command = {
-			command: 'devsecops.secretScan',
-			title: 'Secret Scan',
-			arguments: [secretScanItem]
-		};
-		items.push(secretScanItem);
-
 		return items;
 	}
-}
-
-function removeAnsiEscapeCodes(text: string): string {
-    return text.replace(/\x1b\[[0-9;]*m/g, '');
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -95,45 +84,72 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	const secretScanDisposable = vscode.commands.registerCommand('devsecops.secretScan', async () => {
-		const selectedFolder = await vscode.window.showOpenDialog({
-			canSelectFolders: true,
-			canSelectFiles: false,
-			canSelectMany: false,
-			openLabel: 'Select Folder'
+	const getDockerImages = async () => {
+		const options: IOptions = {
+			env: {
+				...process.env,
+				PATH: process.env.PATH + ':/usr/local/bin'
+			}
+		};
+		const dockerCli = new Docker(options);
+	
+		return dockerCli.command('images').then(function (data) {
+			const output = data.raw.split('\n');
+			const images = [];
+	
+			for (let i = 1; i < output.length; i++) {
+				const imageInfo = output[i].split(/\s+/);
+				const imageName = imageInfo[0];
+				const imageTag = imageInfo[1];
+				const imageSize = imageInfo[6];
+	
+				if (imageName && imageTag && imageSize) {
+					const imageLabel = `${imageName}:${imageTag} (${imageSize})`;
+					const imageItem = new vscode.TreeItem(imageLabel, vscode.TreeItemCollapsibleState.None);
+					imageItem.command = {
+						command: 'devsecops.imageScan',
+						title: 'Image Scan',
+						arguments: [imageItem]
+					};
+					images.push(imageItem);
+				}
+			}
+	
+			return images;
+		}).catch(function (err) {
+			console.error(err);
+			return [];
+		});
+	};
+
+	const imageScanDisposable = vscode.commands.registerCommand('devsecops.imageScan', async () => {
+		const images = await getDockerImages();
+		images.map((image) => console.log(image));
+		const imageName = "defectdojo/defectdojo-django";
+		const imageOptions = images.map(image => image.label);
+		const quickPickItems: vscode.QuickPickItem[] = images.map(i => {
+			return {
+				label: i.label?.toString() ?? '',
+			};
 		});
 
-		const organizationName: string = vscode.workspace.getConfiguration('devsecops').get('organizationName') || '';
-		const projectName: string = vscode.workspace.getConfiguration('devsecops').get('projectName') || '';
-		const groupName: string = vscode.workspace.getConfiguration('devsecops').get('groupName') || '';
-		const adUserName: string = vscode.workspace.getConfiguration('devsecops').get('username') || '';
-		const adPersonalAccessToken: string = vscode.workspace.getConfiguration('devsecops').get('personalAccessToken') || '';
+		await vscode.window.showQuickPick(quickPickItems,{
+			placeHolder: 'Select an image to scan'
+		});		
 
-		vscode.window.showInformationMessage(`Devsecops Secret Scanning`);
+		vscode.window.showInformationMessage(`DevSecOps Image Scanning: ${imageName}`);
 
-		if (selectedFolder && selectedFolder.length > 0) {
-			let folderPath = selectedFolder[0].fsPath;
-
-			folderPath = folderPath.replace(/^file:\/\//, '');
-
-			vscode.window.showInformationMessage(`Devsecops Secret Scanning: ${folderPath}`);
-
-			const scanner = secretScanRequest();
-			const outputChannel = vscode.window.createOutputChannel('Secret Scan Results');
-			scanner.makeScan(folderPath,
-				organizationName,
-				projectName,
-				groupName,
-				adUserName,
-				adPersonalAccessToken,
-				outputChannel
-			);
-		}
+		const scanner = imageScanRequest();
+		const outputChannel = vscode.window.createOutputChannel('IaC Scan Results');
+		scanner.makeScan(
+			imageName,
+			outputChannel
+		);
 	});
 
 	context.subscriptions.push(disposable);
 	context.subscriptions.push(iacScanDisposable);
-	context.subscriptions.push(secretScanDisposable);
+	context.subscriptions.push(imageScanDisposable);
 }
 
 // This method is called when your extension is deactivated
