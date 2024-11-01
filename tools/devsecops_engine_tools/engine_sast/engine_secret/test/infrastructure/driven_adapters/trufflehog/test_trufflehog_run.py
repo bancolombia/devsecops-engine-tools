@@ -7,6 +7,22 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_
 import os
 
 class TestTrufflehogRun(unittest.TestCase):
+    @patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run.subprocess.run')
+    def test_install_tool_win(self, mock_subprocess_run):
+        tool_version = "3.0.1"
+        agent_os = "Windows"
+        agent_temp_dir = "/tmp"
+
+        mock_subprocess_run.return_value = MagicMock(stderr=b"version 3.0.1")
+
+        obj = TrufflehogRun()
+        obj.run_install_win = MagicMock()
+        obj.run_install = MagicMock()
+
+        obj.install_tool(agent_os, agent_temp_dir, tool_version)
+        
+        obj.run_install.assert_not_called()
+        obj.run_install_win.assert_not_called()
        
     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run.subprocess.run')
     def test_install_tool_unix(self, mock_subprocess_run):
@@ -14,18 +30,14 @@ class TestTrufflehogRun(unittest.TestCase):
         agent_os = "Linux"
         agent_temp_dir = "/tmp"
 
-        # Simular una salida del comando que no coincide con la versión esperada
         mock_subprocess_run.return_value = MagicMock(stderr=b"version 2.9.0")
 
-        # Crear una instancia de la clase que contiene el método
         obj = TrufflehogRun()
         obj.run_install_win = MagicMock()
         obj.run_install = MagicMock()
 
-        # Llamada al método
         obj.install_tool(agent_os, agent_temp_dir, tool_version)
 
-        # Asegurarse de que se llama a run_install ya que hay una discrepancia de versión
         obj.run_install.assert_called_once_with(tool_version)
         obj.run_install_win.assert_not_called()
     
