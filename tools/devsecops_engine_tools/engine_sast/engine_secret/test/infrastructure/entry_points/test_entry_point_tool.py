@@ -45,6 +45,7 @@ class TestEngineSecretScan(unittest.TestCase):
                 },
                 "TARGET_BRANCHES": ["trunk", "develop", "main"],
                 "trufflehog": {
+                    "VERSION": "1.2.3",
                     "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
                     "NUMBER_THREADS": 4,
                     "ENABLE_CUSTOM_RULES" : "True",
