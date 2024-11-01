@@ -129,7 +129,7 @@ class TrufflehogRun(ToolGateway):
         command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
 
         if enable_custom_rules == "true":
-            command = command.replace("--no-verification --json", "--config /tmp/rules/trufflehog/custom-rules.yaml --no-verification --json")
+            command = command.replace("--no-verification --json", "--config /tmp/rules/trufflehog/custom-rules.yaml --no-verification --no-update --json")
 
         result = subprocess.run(command, capture_output=True, shell=True, text=True, encoding='utf-8')
         return result.stdout.strip()
