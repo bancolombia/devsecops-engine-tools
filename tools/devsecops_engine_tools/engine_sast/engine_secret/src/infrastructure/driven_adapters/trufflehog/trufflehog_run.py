@@ -126,7 +126,7 @@ class TrufflehogRun(ToolGateway):
         repository_name,
         enable_custom_rules
     ):
-        command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
+        command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --no-update --json"
 
         if enable_custom_rules == "true":
             command = command.replace("--no-verification --json", "--config /tmp/rules/trufflehog/custom-rules.yaml --no-verification --no-update --json")
