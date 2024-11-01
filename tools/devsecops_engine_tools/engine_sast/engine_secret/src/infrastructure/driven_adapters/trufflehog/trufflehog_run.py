@@ -25,23 +25,26 @@ class TrufflehogRun(ToolGateway):
         reg_exp_tool = fr"{tool_version}"
         if check_os:
             command = f"{agent_temp_dir}/trufflehog.exe --version"
+            subprocess.run(command, shell=True)
             result = subprocess.run(command, capture_output=True, shell=True)
             output = result.stderr.strip()
             check_tool = re.search(reg_exp_tool, output.decode("utf-8"))
             if not check_tool:
                 self.run_install_win(agent_temp_dir, tool_version)
+                subprocess.run(command, shell=True)
         else:
             command = f"trufflehog --version"
+            subprocess.run(command, shell=True)
             result = subprocess.run(command, capture_output=True, shell=True)
             output = result.stderr.strip()
             check_tool = re.search(reg_exp_tool, output.decode("utf-8"))
             if not check_tool:
                 self.run_install(tool_version)
+                subprocess.run(command, shell=True)
 
     def run_install(self, tool_version):
         command = f"curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin v{tool_version}"
         res = subprocess.run(command, capture_output=True, shell=True)
-        print(res)
 
     def run_install_win(self, agent_temp_dir, tool_version):
         command_complete = f"powershell -Command [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; [Net.ServicePointManager]::SecurityProtocol; New-Item -Path {agent_temp_dir} -ItemType Directory -Force; Invoke-WebRequest -Uri 'https://github.com/trufflesecurity/trufflehog/releases/download/v{tool_version}/trufflehog_{tool_version}_windows_amd64.tar.gz' -OutFile {agent_temp_dir}/trufflehog.tar.gz -UseBasicParsing; tar -xzf {agent_temp_dir}/trufflehog.tar.gz -C {agent_temp_dir}; Remove-Item {agent_temp_dir}/trufflehog.tar.gz; $env:Path += '; + {agent_temp_dir}'; & {agent_temp_dir}/trufflehog.exe --version"
