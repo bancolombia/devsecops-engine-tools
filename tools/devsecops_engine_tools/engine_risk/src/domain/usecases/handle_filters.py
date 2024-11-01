@@ -1,5 +1,6 @@
 import copy
 
+
 class HandleFilters:
     def filter(self, findings):
         active_findings = self._get_active_findings(findings)
@@ -14,8 +15,10 @@ class HandleFilters:
             key = (finding.where, tuple(finding.id), finding.vuln_id_from_tool)
             if key in findings_map:
                 existing_finding = findings_map[key]
-                combined_services = set(existing_finding.service.split() + finding.service.split())
-                if finding.active or not existing_finding.active:
+                combined_services = set(
+                    existing_finding.service.split() + finding.service.split()
+                )
+                if finding.age >= existing_finding.age:
                     new_finding = copy.deepcopy(finding)
                     new_finding.service = " ".join(combined_services)
                     findings_map[key] = new_finding

@@ -258,7 +258,6 @@ def test_apply_exclusions_id():
     assert result == ([], exclusions)
 
 
-
 def test_tag_blacklist_control_error():
     report_list = [Report(vuln_id_from_tool="id1", tags=["blacklisted"], age=10)]
     remote_config = {
