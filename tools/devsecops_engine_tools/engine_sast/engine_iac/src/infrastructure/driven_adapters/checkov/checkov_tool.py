@@ -61,57 +61,57 @@ class CheckovTool(ToolGateway):
             file.close()
 
     def configurate_external_checks(self, config_tool, secret_tool, secret_external_checks):
-        agent_env = None
-        secret = None
-        github_token = None
-        github_api = GithubApi()
-
-        if secret_tool is not None:
-            secret = secret_tool
-            github_token = github_api.get_installation_access_token(
-                secret["github_token"],
-                config_tool[self.TOOL_CHECKOV]["APP_ID_GITHUB"],
-                config_tool[self.TOOL_CHECKOV]["INSTALLATION_ID_GITHUB"]
-            )
-
-        elif secret_external_checks is not None:
-            secret_external_checks_parts = {
-                "github_token": (
-                    secret_external_checks.split("github_token:")[1]
-                    if "github_token" in secret_external_checks
-                    else None
-                ),
-                "github_apps": (
-                    secret_external_checks.split("github_apps:")[1]
-                    if "github_apps" in secret_external_checks
-                    else None
-                ),
-                "repository_ssh_private_key": (
-                    secret_external_checks.split("ssh:")[1].split(":")[0]
-                    if "ssh" in secret_external_checks
-                    else None
-                ),
-                "repository_ssh_password": (
-                    secret_external_checks.split("ssh:")[1].split(":")[1]
-                    if "ssh" in secret_external_checks
-                    else None
-                ),
-            }
-
-            secret = {
-                key: secret_external_checks_parts[key]
-                for key in secret_external_checks_parts
-                if secret_external_checks_parts[key] is not None
-            }
-
-        if not secret.get("repository_ssh_private_key") and not secret.get("repository_ssh_password"):
-            github_token = secret.get("github_token") or github_api.get_installation_access_token(
-                secret.get("github_token"),
-                config_tool[self.TOOL_CHECKOV]["APP_ID_GITHUB"],
-                config_tool[self.TOOL_CHECKOV]["INSTALLATION_ID_GITHUB"]
-            )
-
         try:
+            agent_env = None
+            secret = None
+            github_token = None
+            github_api = GithubApi()
+
+            if secret_tool is not None:
+                secret = secret_tool
+                github_token = github_api.get_installation_access_token(
+                    secret["github_token"],
+                    config_tool[self.TOOL_CHECKOV]["APP_ID_GITHUB"],
+                    config_tool[self.TOOL_CHECKOV]["INSTALLATION_ID_GITHUB"]
+                )
+
+            elif secret_external_checks is not None:
+                secret_external_checks_parts = {
+                    "github_token": (
+                        secret_external_checks.split("github_token:")[1]
+                        if "github_token" in secret_external_checks
+                        else None
+                    ),
+                    "github_apps": (
+                        secret_external_checks.split("github_apps:")[1]
+                        if "github_apps" in secret_external_checks
+                        else None
+                    ),
+                    "repository_ssh_private_key": (
+                        secret_external_checks.split("ssh:")[1].split(":")[0]
+                        if "ssh" in secret_external_checks
+                        else None
+                    ),
+                    "repository_ssh_password": (
+                        secret_external_checks.split("ssh:")[1].split(":")[1]
+                        if "ssh" in secret_external_checks
+                        else None
+                    ),
+                }
+
+                secret = {
+                    key: secret_external_checks_parts[key]
+                    for key in secret_external_checks_parts
+                    if secret_external_checks_parts[key] is not None
+                }
+
+            if not secret.get("repository_ssh_private_key") and not secret.get("repository_ssh_password"):
+                github_token = secret.get("github_token") or github_api.get_installation_access_token(
+                    secret.get("github_token"),
+                    config_tool[self.TOOL_CHECKOV]["APP_ID_GITHUB"],
+                    config_tool[self.TOOL_CHECKOV]["INSTALLATION_ID_GITHUB"]
+                )
+
             if secret is None:
                 logger.warning("The secret is not configured for external controls")
 
