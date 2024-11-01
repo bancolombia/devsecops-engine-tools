@@ -74,6 +74,7 @@ jobs:
           packages-dir: tools/dist/
 
       - name: Build and tag Docker image
+        timeout-minutes: 2
         run: |
           docker build --build-arg VERSION=${{ env.RELEASE_VERSION }} -t bancolombia/devsecops-engine-tools:${{ env.RELEASE_VERSION }} -f docker/Dockerfile .
           docker tag bancolombia/devsecops-engine-tools:${{ env.RELEASE_VERSION }} bancolombia/devsecops-engine-tools:${{ env.RELEASE_VERSION }}

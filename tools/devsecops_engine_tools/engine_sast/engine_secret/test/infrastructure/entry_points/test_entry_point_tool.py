@@ -30,9 +30,7 @@ class TestEngineSecretScan(unittest.TestCase):
             }
         }
         json_config = {
-                "IGNORE_SEARCH_PATTERN": [
-                    "test"
-                ],
+                "IGNORE_SEARCH_PATTERN": "(.*test:*)",
                 "MESSAGE_INFO_ENGINE_SECRET": "dummy message",
                 "THRESHOLD": {
                     "VULNERABILITY": {
@@ -47,6 +45,7 @@ class TestEngineSecretScan(unittest.TestCase):
                 },
                 "TARGET_BRANCHES": ["trunk", "develop", "main"],
                 "trufflehog": {
+                    "VERSION": "1.2.3",
                     "EXCLUDE_PATH": [".git", "node_modules", "target", "build", "build.gradle", "twistcli-scan", ".svg", ".drawio"],
                     "NUMBER_THREADS": 4,
                     "ENABLE_CUSTOM_RULES" : "True",
@@ -57,9 +56,10 @@ class TestEngineSecretScan(unittest.TestCase):
         obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
         mock_devops_platform_gateway.get_remote_config.side_effect = [json_exclusion ,json_config, json_exclusion]
         secret_tool = "secret"
+        skip_tool_isp = False
         
         mock_secret_scan_instance = MockSecretScan.return_value
-        mock_secret_scan_instance.complete_config_tool.return_value = obj_config_tool
+        mock_secret_scan_instance.complete_config_tool.return_value = obj_config_tool, skip_tool_isp
         mock_devops_platform_gateway.get_variable.side_effect = ["pipeline_name_carlos","pipeline_name_carlos", "pipeline_name", "build"]
         mock_secret_scan_instance.process.return_value = ([], "")
         

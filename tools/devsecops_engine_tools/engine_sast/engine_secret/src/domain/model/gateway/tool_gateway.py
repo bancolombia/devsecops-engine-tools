@@ -3,7 +3,7 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.Deseriali
 
 class ToolGateway(metaclass=ABCMeta):
     @abstractmethod
-    def install_tool(self, agent_os: str, agent_temp_dir:str) -> any:
+    def install_tool(self, agent_os: str, agent_temp_dir:str, version: str) -> any:
         "install tool"
     @abstractmethod
     def run_tool_secret_scan(self,
@@ -13,5 +13,6 @@ class ToolGateway(metaclass=ABCMeta):
                             repository_name: str,
                             config_tool: DeserializeConfigTool,
                             secret_tool,
-                            secret_external_checks) -> str:
+                            secret_external_checks,
+                            agent_tem_dir:str) -> str:
         "run tool secret scan"
