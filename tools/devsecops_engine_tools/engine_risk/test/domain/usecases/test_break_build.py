@@ -321,6 +321,7 @@ def test_risk_score_control_break():
             "severity": {"high": 5},
             "epss_score": 1,
             "age": 1,
+            "max_age": 1,
             "tags": {"tag": 1},
         },
     }
@@ -351,6 +352,7 @@ def test_risk_score_control_not_break():
             "severity": {"high": 1},
             "epss_score": 1,
             "age": 1,
+            "max_age": 1,
             "tags": {"tag": 1},
         },
     }

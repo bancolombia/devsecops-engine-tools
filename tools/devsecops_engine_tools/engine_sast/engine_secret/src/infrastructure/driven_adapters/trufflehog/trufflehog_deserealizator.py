@@ -14,20 +14,17 @@ class SecretScanDeserealizator(DeseralizatorGateway):
 
         for result in results_scan_list:
             where_text, raw_data = self.get_where_correctly(result, os, path_directory)
-            extra_data = result.get("ExtraData", {})
-            rule_name = extra_data.get("name") if extra_data else None
+            rule_name = result.get("Id", {})
 
-            if rule_name and "Actuator" in rule_name:
+            if "MISCONFIGURATION_SCANNING" in rule_name:
                 description = "Actuator misconfiguration can leak sensitive information"
-                finding_id = "MISCONFIGURATION_SCANNING"
                 where = f"{where_text}, Misconfiguration: {raw_data}"
             else:
                 description = "Sensitive information in source code"
-                finding_id = "SECRET_SCANNING"
                 where = f"{where_text}, Secret: {raw_data}"
             
             vulnerability_open = Finding(
-                id=finding_id,
+                id=result.get("Id", {}),
                 cvss=None,
                 where=where,
                 description=description,

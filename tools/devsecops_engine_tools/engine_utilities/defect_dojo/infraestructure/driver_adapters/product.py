@@ -11,16 +11,17 @@ logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 
 
 class ProductRestConsumer:
-    def __init__(self, request: ImportScanRequest, session: SessionManager):
-        self.__token = request.token_defect_dojo
-        self.__host = request.host_defect_dojo
+    def __init__(self, session: SessionManager):
+        self.__token = session._token
+        self.__host = session._host
         self.__session = session._instance
 
-    def get_products(self, request: ImportScanRequest) -> ProductList:
-        url = f"{self.__host}/api/v2/products/?name={request.code_app}"
+
+    def get_products(self, request) -> ProductList:
+        url = f"{self.__host}/api/v2/products/"
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
         try:
-            response = self.__session.get(url, headers=headers, data={}, verify=VERIFY_CERTIFICATE)
+            response = self.__session.get(url, headers=headers, params=request, verify=VERIFY_CERTIFICATE)
             if response.status_code != 200:
                 raise ApiError(response.json())
             products_object = ProductList.from_dict(response.json())

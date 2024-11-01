@@ -14,3 +14,4 @@ class DeserializeConfigTool:
         self.external_dir_repo = json_data[tool]["EXTERNAL_DIR_REPOSITORY"]
         self.app_id_github = json_data[tool]["APP_ID_GITHUB"]
         self.installation_id_github = json_data[tool]["INSTALLATION_ID_GITHUB"]
+        self.tool_version = json_data[tool]["VERSION"]
