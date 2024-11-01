@@ -105,13 +105,6 @@ class CheckovTool(ToolGateway):
                     if secret_external_checks_parts[key] is not None
                 }
 
-            if not secret.get("repository_ssh_private_key") and not secret.get("repository_ssh_password"):
-                github_token = secret.get("github_token") or github_api.get_installation_access_token(
-                    secret.get("github_token"),
-                    config_tool[self.TOOL_CHECKOV]["APP_ID_GITHUB"],
-                    config_tool[self.TOOL_CHECKOV]["INSTALLATION_ID_GITHUB"]
-                )
-
             if secret is None:
                 logger.warning("The secret is not configured for external controls")
 
@@ -130,6 +123,11 @@ class CheckovTool(ToolGateway):
                 agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
 
             elif config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_DIR"] == "True":
+                github_token = secret.get("github_token") or github_api.get_installation_access_token(
+                    secret.get("github_apps"),
+                    config_tool[self.TOOL_CHECKOV]["APP_ID_GITHUB"],
+                    config_tool[self.TOOL_CHECKOV]["INSTALLATION_ID_GITHUB"]
+                )
                 github_api.download_latest_release_assets(
                     config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_OWNER"],
                     config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_REPOSITORY"],
