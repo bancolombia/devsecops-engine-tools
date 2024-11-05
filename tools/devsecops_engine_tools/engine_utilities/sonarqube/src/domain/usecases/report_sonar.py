@@ -16,6 +16,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform
 from devsecops_engine_tools.engine_utilities.sonarqube.src.domain.model.gateways.sonar_gateway import (
     SonarGateway
 )
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
+    InputCore
+)
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
@@ -35,6 +38,14 @@ class ReportSonar:
         self.sonar_gateway = sonar_gateway
 
     def process(self, args):
+        input_core = InputCore(
+            [],
+            {},
+            "",
+            "",
+            self.devops_platform_gateway.get_variable("pipeline_name"),
+            self.devops_platform_gateway.get_variable("stage").capitalize(),
+        )
         pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
         branch = self.devops_platform_gateway.get_variable("branch_name")
 
@@ -47,9 +58,7 @@ class ReportSonar:
             args["remote_config_repo"],
             "/engine_core/ConfigTool.json"
         )
-        environment = {"dev": "Development",
-                       "qa": "Staging",
-                       "pdn": "Production"}.get(define_env(None, branch))
+        environment = define_env(None, branch)
         
         if args["use_secrets_manager"] == "true": 
             secret = self.secrets_manager_gateway.get_secret(config_tool)
@@ -60,6 +69,7 @@ class ReportSonar:
             args["remote_config_repo"],
             "/report_sonar/ConfigTool.json"
         )
+
         get_components = report_config_tool["PIPELINE_COMPONENTS"].get(pipeline_name)
         if get_components:
             project_keys = [f"{pipeline_name}_{component}" for component in get_components]
@@ -77,36 +87,81 @@ class ReportSonar:
                     config_tool=config_tool
                 )[0]
                 filtered_findings = self.sonar_gateway.filter_by_sonarqube_tag(findings)
-                sonar_vulnerabilities = self.sonar_gateway.get_vulnerabilities(
+
+                sonar_vulnerabilities = self.sonar_gateway.get_findings(
                     args["sonar_url"],
                     secret["token_sonar"],
-                    project_key
+                    "/api/issues/search",
+                    {
+                        "componentKeys": project_key,
+                        "types": "VULNERABILITY",
+                        "ps": 500,
+                        "p": 1,
+                        "s": "CREATION_DATE",
+                        "asc": "false"
+                    },
+                    "issues"
+                )
+                sonar_hotspots = self.sonar_gateway.get_findings(
+                    args["sonar_url"],
+                    secret["token_sonar"],
+                    "/api/hotspots/search",
+                    {
+                        "projectKey": project_key,
+                        "ps": 100,
+                        "p": 1,
+                    },
+                    "hotspots"
                 )
 
+                sonar_findings = sonar_vulnerabilities + sonar_hotspots
+
                 for finding in filtered_findings:
-                    related_vulnerability = self.sonar_gateway.find_issue_by_id(
-                        sonar_vulnerabilities, 
+                    related_sonar_finding = self.sonar_gateway.search_finding_by_id(
+                        sonar_findings, 
                         finding.unique_id_from_tool
                     )
-                    transition = None
-                    if related_vulnerability:
-                        if finding.active and related_vulnerability["status"] == "RESOLVED":
-                            transition = "reopen"
-                        elif related_vulnerability["status"] != "RESOLVED":
-                            if finding.false_p:
-                                transition = "falsepositive"
-                            elif finding.risk_accepted:
-                                transition = "close"
-                            elif finding.mitigated:
-                                transition = "resolved"
+                    status = None
+                    if related_sonar_finding:
+                        if related_sonar_finding["type"] == "VULNERABILITY":
+                            if finding.active and related_sonar_finding["status"] == "RESOLVED": status = "reopen"
+                            elif related_sonar_finding["status"] != "RESOLVED":
+                                if finding.false_p: status = "falsepositive"
+                                elif finding.risk_accepted: status = "close"
+                                elif finding.out_of_scope: status = "wontfix"
+                            if status:
+                                self.sonar_gateway.change_finding_status(
+                                    args["sonar_url"],
+                                    secret["token_sonar"],
+                                    "/api/issues/do_transition",
+                                    {
+                                        "issue": finding.unique_id_from_tool,
+                                        "transition": status
+                                    },
+                                    "issue"
+                                )
+                        else:
+                            resolution = None
+                            if finding.active and related_sonar_finding["status"] == "REVIEWED": status = "TO_REVIEW"
+                            elif related_sonar_finding["status"] == "TO_REVIEW":
+                                if finding.false_p: resolution = "SAFE"
+                                elif finding.risk_accepted or finding.out_of_scope: resolution = "ACKNOWLEDGED"
+                                if resolution: status = "REVIEWED"
+                            if status:
+                                data = {
+                                    "hotspot": finding.unique_id_from_tool,
+                                    "status": status,
+                                    "resolution": resolution
+                                }
+                                if not resolution: data.pop("resolution")
+                                self.sonar_gateway.change_finding_status(
+                                    args["sonar_url"],
+                                    secret["token_sonar"],
+                                    "/api/hotspots/change_status",
+                                    data,
+                                    "hotspot"
+                                )
 
-                        if transition:
-                            self.sonar_gateway.change_issue_transition(
-                                args["sonar_url"],
-                                secret["token_sonar"],
-                                finding.unique_id_from_tool,
-                                transition
-                            )
             except Exception as e:
                 print(f"It was not possible to synchronize Sonar and Vulnerability Manager: {e}")
                 logger.warning(f"It was not possible to synchronize Sonar and Vulnerability Manager: {e}")
@@ -120,3 +175,5 @@ class ReportSonar:
                 self.devops_platform_gateway,
                 project_key
             )
+
+        return input_core

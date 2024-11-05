@@ -33,28 +33,31 @@ class SonarGateway(metaclass=ABCMeta):
         "search for sonar findings"
     
     @abstractmethod
-    def change_issue_transition(
+    def change_finding_status(
         self,
         sonar_url: str,
         sonar_token: str,
-        issue_id: str,
-        transition: str
+        endpoint: str,
+        data: dict,
+        finding_type: str
     ):
         "use API to change vulnerabilities state in sonar"
 
     @abstractmethod
-    def get_vulnerabilities(
+    def get_findings(
         self,
         sonar_url: str,
         sonar_token: str,
-        project_key: str
+        endpoint: str,
+        params: dict,
+        finding_type: str
     ):
-        "use API to get project vulnerabilities in sonar"
+        "use API to get project findings in sonar"
 
     @abstractmethod
-    def find_issue_by_id(
+    def search_finding_by_id(
         self,
-        issues: list,
-        issue_id: str
+        findings: list,
+        finding_id: str
     ):
-        "find an issue by id"
+        "search a finding by id"

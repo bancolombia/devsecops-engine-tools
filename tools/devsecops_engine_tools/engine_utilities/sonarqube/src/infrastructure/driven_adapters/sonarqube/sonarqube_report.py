@@ -46,7 +46,6 @@ class SonarAdapter(SonarGateway):
                     logger.warning(f"[SQ] Parse Task report error: {err}")
                     return None
         except Exception as err:
-            print(f"[SQ] Error reading file: {str(err)}")
             logger.warning(f"[SQ] Error reading file: {str(err)}")
             return None
 
@@ -61,61 +60,44 @@ class SonarAdapter(SonarGateway):
     
     def filter_by_sonarqube_tag(self, findings):
         return [finding for finding in findings if "sonarqube" in finding.tags]
-
-    def change_issue_transition(self, sonar_url, sonar_token, issue_id, transition):
-        endpoint = f"{sonar_url}/api/issues/do_transition"
+    
+    def change_finding_status(self, sonar_url, sonar_token, endpoint, data, finding_type):
         try:
             response = requests.post(
-                endpoint,
+                f"{sonar_url}{endpoint}",
                 headers={
                     "Authorization": f"Basic {Utils().encode_token_to_base64(sonar_token)}"
                 },
-                data={
-                    "issue": issue_id,
-                    "transition": transition
-                }
+                data=data
             )
             response.raise_for_status()
-            print(f"The state of the issue {issue_id} was changed.")
+            print(f"The state of the {finding_type} {data[finding_type]} was changed.")
         except:
-            logger.warning(f"Unable to change the status of issue {issue_id}.")
+            logger.warning(f"Unable to change the status of {finding_type} {data[finding_type]}.")
             pass
-    
-    def get_vulnerabilities(self, sonar_url, sonar_token, project_key):
-        endpoint = f"{sonar_url}/api/issues/search"
-        vulnerabilities = []
-        page = 1
-        page_size = 500
 
+    def get_findings(self, sonar_url, sonar_token, endpoint, params, finding_type):
+        findings = []
         try:
             while True:
                 response = requests.get(
-                    endpoint,
+                    f"{sonar_url}{endpoint}",
                     headers={
                         "Authorization": f"Basic {Utils().encode_token_to_base64(sonar_token)}"
                     },
-                    params={
-                        "componentKeys": project_key,
-                        "types": "VULNERABILITY",
-                        "ps": page_size,
-                        "p": page,
-                        "s": "CREATION_DATE",
-                        "asc": "false"
-                    }
+                    params=params
                 )
                 response.raise_for_status()
                 data = response.json()
 
-                vulnerabilities.extend(data["issues"])
-                if len(data["issues"]) < page_size: break
-                page += 1
+                findings.extend(data[finding_type])
+                if len(data[finding_type]) < params["ps"]: break
+                params["p"] = params["p"] + 1
 
-            return vulnerabilities
-
+            return findings
         except Exception as e:
-            print(f"It was not possible to obtain the vulnerabilities: {str(e)}")
-            logger.warning(f"It was not possible to obtain the vulnerabilities: {str(e)}")
+            logger.warning(f"It was not possible to obtain the {finding_type}: {str(e)}")
             return []
 
-    def find_issue_by_id(self, issues, issue_id):
-        return next((issue for issue in issues if issue["key"] == issue_id), None)
+    def search_finding_by_id(self, issues, issue_id):
+        return next((issue for issue in issues if issue["key"] in issue_id), None)
