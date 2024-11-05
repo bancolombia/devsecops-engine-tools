@@ -143,7 +143,7 @@ class ReportSonar:
                     )
                     status = None
                     if related_sonar_finding:
-                        if related_sonar_finding["type"] == "VULNERABILITY":
+                        if related_sonar_finding.get("type") == "VULNERABILITY":
                             if finding.active and related_sonar_finding["status"] == "RESOLVED": status = "reopen"
                             elif related_sonar_finding["status"] != "RESOLVED":
                                 if finding.false_p: status = "falsepositive"
