@@ -7,6 +7,9 @@ from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_management_gateway import (
     VulnerabilityManagementGateway
 )
+from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
+    VulnerabilityManagement
+)
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.secrets_manager_gateway import (
     SecretsManagerGateway
 )
@@ -38,16 +41,16 @@ class ReportSonar:
         self.sonar_gateway = sonar_gateway
 
     def process(self, args):
+        pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
+        branch = self.devops_platform_gateway.get_variable("branch_name")
         input_core = InputCore(
             [],
             {},
             "",
             "",
-            self.devops_platform_gateway.get_variable("pipeline_name"),
+            "",
             self.devops_platform_gateway.get_variable("stage").capitalize(),
         )
-        pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
-        branch = self.devops_platform_gateway.get_variable("branch_name")
 
         compact_remote_config_url = self.devops_platform_gateway.get_base_compact_remote_config_url(args["remote_config_repo"])
         source_code_management_uri = set_repository(
@@ -77,6 +80,23 @@ class ReportSonar:
             logger.info(f"Multiple project keys detected: {project_keys}")
         else:
             project_keys = self.sonar_gateway.get_project_keys(pipeline_name)
+
+        args["tool"] = "sonarqube"
+        vulnerability_manager = VulnerabilityManagement(
+            scan_type = "SONARQUBE",
+            input_core = input_core,
+            dict_args = args,
+            secret_tool = self.secrets_manager_gateway,
+            config_tool = config_tool,
+            source_code_management_uri = source_code_management_uri,
+            base_compact_remote_config_url = compact_remote_config_url,
+            access_token = self.devops_platform_gateway.get_variable("access_token"),
+            version = self.devops_platform_gateway.get_variable("build_execution_id"),
+            build_id = self.devops_platform_gateway.get_variable("build_id"),
+            branch_tag = branch,
+            commit_hash = self.devops_platform_gateway.get_variable("commit_hash"),
+            environment = environment
+        )
 
         for project_key in project_keys:
             try:
@@ -135,7 +155,7 @@ class ReportSonar:
                                     secret["token_sonar"],
                                     "/api/issues/do_transition",
                                     {
-                                        "issue": finding.unique_id_from_tool,
+                                        "issue": related_sonar_finding["key"],
                                         "transition": status
                                     },
                                     "issue"
@@ -149,7 +169,7 @@ class ReportSonar:
                                 if resolution: status = "REVIEWED"
                             if status:
                                 data = {
-                                    "hotspot": finding.unique_id_from_tool,
+                                    "hotspot": related_sonar_finding["key"],
                                     "status": status,
                                     "resolution": resolution
                                 }
@@ -166,14 +186,10 @@ class ReportSonar:
                 print(f"It was not possible to synchronize Sonar and Vulnerability Manager: {e}")
                 logger.warning(f"It was not possible to synchronize Sonar and Vulnerability Manager: {e}")
 
-            self.vulnerability_management_gateway.send_report(
-                compact_remote_config_url,
-                source_code_management_uri,
-                environment,
-                secret,
-                config_tool,
-                self.devops_platform_gateway,
-                project_key
+            input_core.scope_pipeline = project_key
+            self.vulnerability_management_gateway.send_vulnerability_management(
+                vulnerability_management=vulnerability_manager
             )
 
+        input_core.scope_pipeline = pipeline_name
         return input_core

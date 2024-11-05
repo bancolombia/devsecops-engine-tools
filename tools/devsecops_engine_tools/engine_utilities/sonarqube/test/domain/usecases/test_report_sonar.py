@@ -1,6 +1,6 @@
 import unittest
 from unittest import mock
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 from devsecops_engine_tools.engine_utilities.sonarqube.src.domain.usecases.report_sonar import (
     ReportSonar
 )
@@ -24,7 +24,11 @@ class TestReportSonar(unittest.TestCase):
         mock_devops_platform_gateway.get_variable.side_effect = [
             "pipeline_name",
             "branch_name",
-            "repository"
+            "repository",
+            "access_token",
+            "build_execution_id",
+            "build_id",
+            "commit_hash"
         ]
         mock_set_repository.return_value = "repository_uri"
         mock_define_env.return_value = "dev"
@@ -38,14 +42,13 @@ class TestReportSonar(unittest.TestCase):
         
         mock_sonar_gateway.get_project_keys.return_value = ["project_key_1"]
         mock_sonar_gateway.filter_by_sonarqube_tag.return_value = [
-            MagicMock(unique_id_from_tool="123", active=True, mitigated=False, false_p=False)
+            MagicMock(unique_id_from_tool="123", active=True, mitigated=False, false_p=False),
+            MagicMock(unique_id_from_tool="1234", active=False, mitigated=False, false_p=True)
         ]
-        mock_sonar_gateway.get_vulnerabilities.return_value = [
-            {"status": "RESOLVED", "id": "123"}
+        mock_sonar_gateway.search_finding_by_id.side_effect = [
+            {"status": "RESOLVED", "key": "123", "type": "VULNERABILITY"},
+            {"status": "REVIEWED", "key": "1234"}
         ]
-        mock_sonar_gateway.find_issue_by_id.return_value = {
-            "status": "RESOLVED", "id": "123"
-        }
 
         report_sonar = ReportSonar(
             vulnerability_management_gateway=mock_vulnerability_gateway,
@@ -60,18 +63,46 @@ class TestReportSonar(unittest.TestCase):
         report_sonar.process(args)
 
         # Assert
-        mock_sonar_gateway.get_vulnerabilities.assert_called_once_with(
-            "sonar_url", "sonar_token", "project_key_1"
+        mock_sonar_gateway.get_findings.assert_has_calls(
+            [
+                call("sonar_url", 
+                    "sonar_token", 
+                    "/api/issues/search",
+                    {
+                        "componentKeys": "project_key_1",
+                        "types": "VULNERABILITY",
+                        "ps": 500,
+                        "p": 1,
+                        "s": "CREATION_DATE",
+                        "asc": "false"
+                    },
+                    "issues"
+                ),
+                call("sonar_url", 
+                    "sonar_token", 
+                    "/api/hotspots/search",
+                    {
+                        "projectKey": "project_key_1",
+                        "ps": 100,
+                        "p": 1
+                    },
+                    "hotspots"
+                )
+            ],
+            any_order=False
         )
-        mock_sonar_gateway.change_issue_transition.assert_called_once_with(
-            "sonar_url", "sonar_token", "123", "reopen"
-        )
-        mock_vulnerability_gateway.send_report.assert_called_once_with(
-            mock.ANY,
-            "repository_uri",
-            "Development",
-            {"token_sonar": "sonar_token"},
-            mock.ANY,
-            mock_devops_platform_gateway,
-            "project_key_1"
+        mock_sonar_gateway.change_finding_status.assert_has_calls(
+            [
+                call(
+                    "sonar_url", 
+                    "sonar_token", 
+                    "/api/issues/do_transition", 
+                    {
+                        "issue": "123",
+                        "transition": "reopen"
+                    },
+                    "issue"
+                )
+            ],
+            any_order=False
         )

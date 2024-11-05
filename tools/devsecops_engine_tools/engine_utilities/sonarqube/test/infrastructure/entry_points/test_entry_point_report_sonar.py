@@ -17,7 +17,8 @@ class TestInitReportSonar(unittest.TestCase):
         mock_devops_platform_gateway.get_remote_config.return_value = {
             "REPORT_SONAR" : {
                 "ENABLED": "true"
-            }
+            },
+            "BANNER": "DevSecOps"
         }
         args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false"}
 
@@ -50,7 +51,8 @@ class TestInitReportSonar(unittest.TestCase):
         mock_devops_platform_gateway.get_remote_config.return_value = {
             "REPORT_SONAR" : {
                 "ENABLED": "false"
-            }
+            },
+            "BANNER": "DevSecOps"
         }
         args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false"}
 

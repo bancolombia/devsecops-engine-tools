@@ -109,7 +109,7 @@ class TestSonarAdapter(unittest.TestCase):
     @patch(
         "devsecops_engine_tools.engine_utilities.sonarqube.src.infrastructure.driven_adapters.sonarqube.sonarqube_report.Utils.encode_token_to_base64"
     ) 
-    def test_change_issue_transition(self, mock_encode, mock_post):
+    def test_change_finding_status(self, mock_encode, mock_post):
         # Arrange
         mock_encode.return_value = "encoded_token"
         mock_response = MagicMock()
@@ -119,17 +119,26 @@ class TestSonarAdapter(unittest.TestCase):
         sonar_adapter = SonarAdapter()
         sonar_url = "https://sonar.example.com"
         sonar_token = "my_token"
-        issue_id = "123"
-        transition = "reopen"
+        endpoint = "/api/issues/do_transition"
+        data = {
+            "issue": "123",
+            "transition": "reopen"
+        }
 
         # Act
-        sonar_adapter.change_issue_transition(sonar_url, sonar_token, issue_id, transition)
+        sonar_adapter.change_finding_status(
+            sonar_url, 
+            sonar_token, 
+            endpoint,
+            data,
+            "issue"
+        )
 
         # Assert
         mock_post.assert_called_once_with(
-            f"{sonar_url}/api/issues/do_transition",
+            f"{sonar_url}{endpoint}",
             headers={"Authorization": "Basic encoded_token"},
-            data={"issue": issue_id, "transition": transition}
+            data={"issue": "123", "transition": "reopen"}
         )
         mock_response.raise_for_status.assert_called_once()
 
@@ -139,7 +148,7 @@ class TestSonarAdapter(unittest.TestCase):
     @patch(
         "devsecops_engine_tools.engine_utilities.sonarqube.src.infrastructure.driven_adapters.sonarqube.sonarqube_report.Utils.encode_token_to_base64"
     )
-    def test_get_vulnerabilities(self, mock_encode, mock_get):
+    def test_get_findings(self, mock_encode, mock_get):
         # Arrange
         mock_encode.return_value = "encoded_token"
         mock_response = MagicMock()
@@ -152,28 +161,35 @@ class TestSonarAdapter(unittest.TestCase):
         report_sonar = SonarAdapter()
         sonar_url = "https://sonar.example.com"
         sonar_token = "my_token"
-        project_key = "project_1"
+        endpoint = "/api/issues/search"
+        params = {
+            "componentKeys": "my_project",
+            "types": "VULNERABILITY",
+            "ps": 500,
+            "p": 1,
+            "s": "CREATION_DATE",
+            "asc": "false"
+        }
 
         # Act
-        vulnerabilities = report_sonar.get_vulnerabilities(sonar_url, sonar_token, project_key)
+        findings = report_sonar.get_findings(
+            sonar_url, 
+            sonar_token, 
+            endpoint,
+            params,
+            "issues"
+        )
 
         # Assert
         mock_get.assert_called_once_with(
-            f"{sonar_url}/api/issues/search",
+            f"{sonar_url}{endpoint}",
             headers={"Authorization": "Basic encoded_token"},
-            params={
-                "componentKeys": project_key,
-                "types": "VULNERABILITY",
-                "ps": 500,
-                "p": 1,
-                "s": "CREATION_DATE",
-                "asc": "false"
-            }
+            params=params
         )
         mock_response.raise_for_status.assert_called_once()
-        self.assertEqual(vulnerabilities, [{"key": "123", "type": "VULNERABILITY"}])
+        self.assertEqual(findings, [{"key": "123", "type": "VULNERABILITY"}])
 
-    def test_find_issue_by_id(self):
+    def test_search_finding_by_id(self):
         # Arrange
         report_sonar = SonarAdapter()
         issues = [
@@ -183,12 +199,12 @@ class TestSonarAdapter(unittest.TestCase):
         issue_id = "123"
 
         # Act
-        result = report_sonar.find_issue_by_id(issues, issue_id)
+        result = report_sonar.search_finding_by_id(issues, issue_id)
 
         # Assert
         self.assertEqual(result, {"key": "123", "type": "VULNERABILITY"})
 
-    def test_find_issue_by_id_not_found(self):
+    def test_search_finding_by_id_not_found(self):
         # Arrange
         report_sonar = SonarAdapter()
         issues = [
@@ -197,7 +213,7 @@ class TestSonarAdapter(unittest.TestCase):
         issue_id = "999"
 
         # Act
-        result = report_sonar.find_issue_by_id(issues, issue_id)
+        result = report_sonar.search_finding_by_id(issues, issue_id)
 
         # Assert
         self.assertIsNone(result)
