@@ -18,21 +18,20 @@ def init_report_sonar(vulnerability_management_gateway, secrets_manager_gateway,
     )
     Printers.print_logo_tool(config_tool["BANNER"])
 
-    if config_tool["REPORT_SONAR"]["ENABLED"] != "true":
+    if config_tool["REPORT_SONAR"]["ENABLED"] == "true":
+        input_core = ReportSonar(
+            vulnerability_management_gateway,
+            secrets_manager_gateway, 
+            devops_platform_gateway, 
+            sonar_gateway
+        ).process(args)
+        
+        if args["send_metrics"] == "true":
+            MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(
+                config_tool, input_core, {"tool": "report_sonar"}, ""
+            )
+    else:
         print(
             devops_platform_gateway.message(
                 "warning", "DevSecOps Engine Tool - {0} in maintenance...".format("report_sonar")),
-        )
-        return
-
-    input_core = ReportSonar(
-        vulnerability_management_gateway,
-        secrets_manager_gateway, 
-        devops_platform_gateway, 
-        sonar_gateway
-    ).process(args)
-    
-    if args["send_metrics"] == "true":
-        MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(
-            config_tool, input_core, {"tool": "report_sonar"}, ""
         )
