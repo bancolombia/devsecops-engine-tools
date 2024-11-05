@@ -88,7 +88,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         "product_description": "arearesponsableti",
                         "codigo_app": "CodigoApp",
                     },
-                    compact_remote_config_url=f'{vulnerability_management.base_compact_remote_config_url.rstrip("/")}{vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB_MAPPING_PATH"]}',
+                    compact_remote_config_url=f'{vulnerability_management.base_compact_remote_config_url}{vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB_MAPPING_PATH"]}',
                     personal_access_token=vulnerability_management.access_token,
                     token_cmdb=token_cmdb,
                     host_cmdb=vulnerability_management.config_tool[
