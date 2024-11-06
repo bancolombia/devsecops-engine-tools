@@ -15,15 +15,38 @@ class HandleFilters:
             key = (finding.where, tuple(finding.id), finding.vuln_id_from_tool)
             if key in findings_map:
                 existing_finding = findings_map[key]
-                combined_services = set(
-                    existing_finding.service.split() + finding.service.split()
-                )
+                combined_services = existing_finding.service.split() + [
+                    s
+                    for s in finding.service.split()
+                    if s not in existing_finding.service.split()
+                ]
+                combined_services_url = existing_finding.service_url.split() + [
+                    s_url
+                    for s_url in finding.service_url.split()
+                    if s_url not in existing_finding.service_url.split()
+                ]
+                combined_vm_ids = existing_finding.vm_id.split() + [
+                    vm
+                    for vm in finding.vm_id.split()
+                    if vm not in existing_finding.vm_id.split()
+                ]
+                combined_vm_id_urls = existing_finding.vm_id_url.split() + [
+                    vm_url
+                    for vm_url in finding.vm_id_url.split()
+                    if vm_url not in existing_finding.vm_id_url.split()
+                ]
                 if finding.age >= existing_finding.age:
                     new_finding = copy.deepcopy(finding)
                     new_finding.service = " ".join(combined_services)
+                    new_finding.service_url = " ".join(combined_services_url)
+                    new_finding.vm_id = " ".join(combined_vm_ids)
+                    new_finding.vm_id_url = " ".join(combined_vm_id_urls)
                     findings_map[key] = new_finding
                 else:
                     existing_finding.service = " ".join(combined_services)
+                    existing_finding.service_url = " ".join(combined_services_url)
+                    new_finding.vm_id = " ".join(combined_vm_ids)
+                    new_finding.vm_id_url = " ".join(combined_vm_id_urls)
             else:
                 findings_map[key] = copy.deepcopy(finding)
 

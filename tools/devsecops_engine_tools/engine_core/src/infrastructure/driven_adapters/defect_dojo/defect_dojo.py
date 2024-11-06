@@ -226,6 +226,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             max_retries = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
                 "MAX_RETRIES_QUERY"
             ]
+            host_dd = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"]
 
             findings = self._get_findings(
                 self._get_session_manager(dict_args, secret_tool, config_tool),
@@ -236,7 +237,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
             all_findings = list(
                 map(
-                    partial(self._create_report),
+                    partial(self._create_report, host_dd=host_dd),
                     findings,
                 )
             )
@@ -363,8 +364,10 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             reason=reason,
         )
 
-    def _create_report(self, finding):
+    def _create_report(self, finding, host_dd):
         return Report(
+            vm_id=str(finding.id),
+            vm_id_url=f"{host_dd}/finding/{finding.id}",
             id=finding.vulnerability_ids,
             vuln_id_from_tool=finding.vuln_id_from_tool,
             status=finding.display_status,
@@ -391,6 +394,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             risk_accepted=finding.risk_accepted,
             false_p=finding.false_p,
             service=finding.service,
+            service_url=f"{host_dd}/finding?active=true&service={finding.service}",
         )
 
     def _format_date_to_dd_format(self, date_string):

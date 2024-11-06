@@ -22,6 +22,9 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.s
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.printer_pretty_table.printer_pretty_table import (
     PrinterPrettyTable,
 )
+from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.printer_rich_table.printer_rich_table import (
+    PrinterRichTable,
+)
 import sys
 import argparse
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
@@ -191,8 +194,12 @@ def application_core():
             "github": GithubActions(),
             "local": RuntimeLocal(),
         }.get(args["platform_devops"])
-        printer_table_gateway = PrinterPrettyTable()
         metrics_manager_gateway = S3Manager()
+
+        if args["tool"] == "engine_risk":
+            printer_table_gateway = PrinterRichTable()
+        else:
+            printer_table_gateway = PrinterPrettyTable()
 
         init_engine_core(
             vulnerability_management_gateway,

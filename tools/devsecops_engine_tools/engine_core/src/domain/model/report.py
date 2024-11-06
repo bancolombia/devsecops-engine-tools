@@ -4,6 +4,8 @@ from dataclasses import dataclass
 @dataclass
 class Report:
     def __init__(self, **kwargs):
+        self.vm_id = kwargs.get("vm_id", "")
+        self.vm_id_url = kwargs.get("vm_id_url", "")
         self.id = kwargs.get("id", [])
         self.vuln_id_from_tool = kwargs.get("vuln_id_from_tool", "")
         self.where = kwargs.get("where", "")
@@ -27,6 +29,7 @@ class Report:
         self.risk_accepted = kwargs.get("risk_accepted", "")
         self.false_p = kwargs.get("false_p", "")
         self.service = kwargs.get("service", "")
+        self.service_url = kwargs.get("service_url", "")
         self.reason = kwargs.get("reason", "")
         self.component_name = kwargs.get("component_name", "")
         self.component_version = kwargs.get("component_version", "")
