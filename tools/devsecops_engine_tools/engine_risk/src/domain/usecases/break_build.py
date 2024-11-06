@@ -162,6 +162,11 @@ class BreakBuild:
                 "create_date": exclusion.create_date,
                 "expired_date": exclusion.expired_date,
                 "reason": exclusion.reason,
+                "vm_id": exclusion.vm_id,
+                "vm_id_url": exclusion.vm_id_url,
+                "service": exclusion.service,
+                "service_url": exclusion.service_url,
+                "tags": exclusion.tags,
             }
             for exclusion in exclusions
         ]
@@ -181,7 +186,13 @@ class BreakBuild:
                     or (report.id and report.id == exclusion.id)
                 ) and ((exclusion.where in report.where) or (exclusion.where == "all")):
                     exclude = True
-                    applied_exclusions.append(exclusion)
+                    exclusion_copy = copy.deepcopy(exclusion)
+                    exclusion_copy.vm_id = report.vm_id
+                    exclusion_copy.vm_id_url = report.vm_id_url
+                    exclusion_copy.service = report.service
+                    exclusion_copy.service_url = report.service_url
+                    exclusion_copy.tags = report.tags
+                    applied_exclusions.append(exclusion_copy)
                     break
             if not exclude:
                 report.reason = "Remediation Rate"

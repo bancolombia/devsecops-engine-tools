@@ -10,11 +10,12 @@ from devsecops_engine_tools.engine_core.src.domain.model.report import (
     Report,
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
-    format_date
+    format_date,
 )
 from rich.console import Console
 from rich.table import Table
 from rich import box
+
 
 @dataclass
 class PrinterRichTable(PrinterTableGateway):
@@ -23,9 +24,13 @@ class PrinterRichTable(PrinterTableGateway):
         return
 
     def print_table_report(self, report_list: "list[Report]"):
-        sorted_report_list = sorted(report_list, key=lambda report: report.risk_score, reverse=True)
+        sorted_report_list = sorted(
+            report_list, key=lambda report: report.risk_score, reverse=True
+        )
         headers = ["Risk Score", "ID", "Tags", "Services"]
-        table = Table(show_header=True, header_style="bold magenta", box=box.DOUBLE_EDGE)
+        table = Table(
+            show_header=True, header_style="bold magenta", box=box.DOUBLE_EDGE
+        )
         for header in headers:
             table.add_column(header)
         for report in sorted_report_list:
@@ -33,15 +38,38 @@ class PrinterRichTable(PrinterTableGateway):
                 str(report.risk_score),
                 self._check_spaces(report.vm_id, report.vm_id_url),
                 ", ".join(report.tags),
-                self._check_spaces(report.service, report.service_url)
+                self._check_spaces(report.service, report.service_url),
             ]
             table.add_row(*row_data)
         console = Console()
         console.print(table)
 
     def print_table_exclusions(self, exclusions_list):
-        # To implement
-        return
+        headers = []
+        if exclusions_list:
+            headers = ["ID", "Tags", "Create Date", "Expired Date", "Reason", "Service"]
+        table = Table(
+            show_header=True, header_style="bold magenta", box=box.DOUBLE_EDGE
+        )
+        for header in headers:
+            table.add_column(header)
+        for exclusion in exclusions_list:
+            row_data = [
+                self._check_spaces(exclusion["vm_id"], exclusion["vm_id_url"]),
+                ", ".join(exclusion["tags"]),
+                format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
+                (
+                    format_date(exclusion["expired_date"], "%d%m%Y", "%d/%m/%Y")
+                    if exclusion["expired_date"]
+                    and exclusion["expired_date"] != "undefined"
+                    else "NA"
+                ),
+                exclusion["reason"],
+                self._check_spaces(exclusion["service"], exclusion["service_url"]),
+            ]
+            table.add_row(*row_data)
+        console = Console()
+        console.print(table)
 
     def _check_spaces(self, value, url):
         values = value.split()
