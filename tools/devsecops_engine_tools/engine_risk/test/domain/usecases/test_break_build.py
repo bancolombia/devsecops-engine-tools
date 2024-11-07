@@ -126,7 +126,7 @@ def test_remediation_rate_control_greater():
 
     devops_platform_gateway.message.assert_called_with(
         "succeeded",
-        f"Remediation Rate {remediation_rate_value}% is greater than {risk_threshold}%",
+        f"Remediation rate {remediation_rate_value}% is greater than {risk_threshold}%",
     )
 
 
@@ -153,7 +153,7 @@ def test_remediation_rate_control_close():
 
     devops_platform_gateway.message.assert_called_with(
         "warning",
-        f"Remediation Rate {remediation_rate_value}% is close to {risk_threshold}%",
+        f"Remediation rate {remediation_rate_value}% is close to {risk_threshold}%",
     )
 
 
@@ -180,7 +180,7 @@ def test_remediation_rate_control_less():
 
     devops_platform_gateway.message.assert_called_with(
         "error",
-        f"Remediation Rate {remediation_rate_value}% is less than {risk_threshold}%",
+        f"Remediation rate {remediation_rate_value}% is less than {risk_threshold}%",
     )
 
 
@@ -193,6 +193,11 @@ def test_map_applied_exclusion():
             create_date="create_date",
             expired_date="expired_date",
             reason="reason",
+            vm_id="vm_id",
+            vm_id_url="vm_id_url",
+            service="service",
+            service_url="service_url",
+            tags=["tags"],
         )
     ]
     expected = [
@@ -203,6 +208,11 @@ def test_map_applied_exclusion():
             "create_date": "create_date",
             "expired_date": "expired_date",
             "reason": "reason",
+            "vm_id": "vm_id",
+            "vm_id_url": "vm_id_url",
+            "service": "service",
+            "service_url": "service_url",
+            "tags": ["tags"],
         }
     ]
 
@@ -258,7 +268,8 @@ def test_apply_exclusions_id():
     assert result == ([], exclusions)
 
 
-def test_tag_blacklist_control_error():
+@patch("devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.Console")
+def test_tag_blacklist_control_error(mock_console):
     report_list = [Report(vuln_id_from_tool="id1", tags=["blacklisted"], age=10)]
     remote_config = {
         "THRESHOLD": {
@@ -267,9 +278,8 @@ def test_tag_blacklist_control_error():
         }
     }
     tag_age_threshold = remote_config["THRESHOLD"]["TAG_MAX_AGE"]
-    devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
-        devops_platform_gateway,
+        MagicMock(),
         MagicMock(),
         remote_config,
         [],
@@ -279,13 +289,13 @@ def test_tag_blacklist_control_error():
     )
     break_build._tag_blacklist_control(report_list)
 
-    devops_platform_gateway.message.assert_called_once_with(
-        "error",
-        f"Report {report_list[0].vuln_id_from_tool} with tag {report_list[0].tags[0]} is blacklisted and age {report_list[0].age} is above threshold {tag_age_threshold}",
+    mock_console.return_value.print.assert_called_once_with(
+        f"[red]Report [link={report_list[0].vm_id_url}]{report_list[0].vm_id}[/link] with tag {report_list[0].tags[0]} is blacklisted and age {report_list[0].age} is above threshold {tag_age_threshold}[/red]"
     )
 
 
-def test_tag_blacklist_control_warning():
+@patch("devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.Console")
+def test_tag_blacklist_control_warning(mock_console):
     report_list = [Report(vuln_id_from_tool="id2", tags=["blacklisted"], age=3)]
     remote_config = {
         "THRESHOLD": {
@@ -294,9 +304,8 @@ def test_tag_blacklist_control_warning():
         }
     }
     tag_age_threshold = remote_config["THRESHOLD"]["TAG_MAX_AGE"]
-    devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
-        devops_platform_gateway,
+        MagicMock(),
         MagicMock(),
         remote_config,
         [],
@@ -306,9 +315,8 @@ def test_tag_blacklist_control_warning():
     )
     break_build._tag_blacklist_control(report_list)
 
-    devops_platform_gateway.message.assert_called_once_with(
-        "warning",
-        f"Report {report_list[0].vuln_id_from_tool} with tag {report_list[0].tags[0]} is blacklisted but age {report_list[0].age} is below threshold {tag_age_threshold}",
+    mock_console.return_value.print.assert_called_once_with(
+        f"[yellow]Report [link={report_list[0].vm_id_url}]{report_list[0].vm_id}[/link] with tag {report_list[0].tags[0]} is blacklisted but age {report_list[0].age} is below threshold {tag_age_threshold}[/yellow]"
     )
 
 
