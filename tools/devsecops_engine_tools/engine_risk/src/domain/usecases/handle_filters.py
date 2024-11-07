@@ -1,6 +1,7 @@
 import copy
 from rich.console import Console
 
+
 class HandleFilters:
     def filter(self, findings):
         active_findings = self._get_active_findings(findings)
@@ -64,7 +65,7 @@ class HandleFilters:
                 if tag in tag_exclusion_days and finding.age < tag_exclusion_days[tag]:
                     exclude = True
                     console.print(
-                        f"[yellow]Finding [link={finding.vm_id_url}]{finding.vm_id}[/link] with tag '{tag}' and age {finding.age} days is being excluded. It will be considered in {tag_exclusion_days[tag] - finding.age} days.[/yellow]"
+                        f"[yellow]Report [link={finding.vm_id_url}]{finding.vm_id}[/link] with tag '{tag}' and age {finding.age} days is being excluded. It will be considered in {tag_exclusion_days[tag] - finding.age} days.[/yellow]"
                     )
                     break
             if not exclude:

@@ -13,6 +13,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
 
 from collections import Counter
 import copy
+from rich.console import Console
 
 
 class BreakBuild:
@@ -205,6 +206,7 @@ class BreakBuild:
         if report_list:
             tag_blacklist = set(remote_config["THRESHOLD"]["TAG_BLACKLIST"])
             tag_age_threshold = remote_config["THRESHOLD"]["TAG_MAX_AGE"]
+            console = Console()
 
             filtered_reports_above_threshold = [
                 (report, tag)
@@ -222,19 +224,13 @@ class BreakBuild:
 
             for report, tag in filtered_reports_above_threshold:
                 report.reason = "Blacklisted"
-                print(
-                    self.devops_platform_gateway.message(
-                        "error",
-                        f"Report {report.vuln_id_from_tool if report.vuln_id_from_tool else report.id} with tag {tag} is blacklisted and age {report.age} is above threshold {tag_age_threshold}",
-                    )
+                console.print(
+                    f"[red]Report [link={report.vm_id_url}]{report.vm_id}[/link] with tag {tag} is blacklisted and age {report.age} is above threshold {tag_age_threshold}[/red]"
                 )
 
             for report, tag in filtered_reports_below_threshold:
-                print(
-                    self.devops_platform_gateway.message(
-                        "warning",
-                        f"Report {report.vuln_id_from_tool if report.vuln_id_from_tool else report.id} with tag {tag} is blacklisted but age {report.age} is below threshold {tag_age_threshold}",
-                    )
+                console.print(
+                    f"[yellow]Report [link={report.vm_id_url}]{report.vm_id}[/link] with tag {tag} is blacklisted but age {report.age} is below threshold {tag_age_threshold}[/yellow]"
                 )
 
             if filtered_reports_above_threshold:
@@ -269,9 +265,7 @@ class BreakBuild:
                     break_build = True
                     report.reason = "Risk Score"
                     self.report_breaker.append(copy.deepcopy(report))
-            print(
-                "Below are open vulnerabilities from Vulnerability Management Platform"
-            )
+            print("Below are open findings from Vulnerability Management Platform")
             self.printer_table_gateway.print_table_report(
                 report_list,
             )
@@ -295,7 +289,8 @@ class BreakBuild:
         else:
             print(
                 self.devops_platform_gateway.message(
-                    "succeeded", "There are no vulnerabilities"
+                    "succeeded",
+                    "There are no open findings from Vulnerability Management Platform",
                 )
             )
 
