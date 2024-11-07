@@ -1,12 +1,15 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 from unittest import mock
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 from devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan import (
     HandleScan,
 )
-from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import ( ExceptionVulnerabilityManagement, ExceptionFindingsExcepted)
+from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
+    ExceptionVulnerabilityManagement,
+    ExceptionFindingsExcepted,
+)
 
 
 class TestHandleScan(unittest.TestCase):
@@ -14,6 +17,17 @@ class TestHandleScan(unittest.TestCase):
         self.vulnerability_management = MagicMock()
         self.secrets_manager_gateway = MagicMock()
         self.devops_platform_gateway = MagicMock()
+        self.threshold = Threshold(
+            {
+                "VULNERABILITY": {
+                    "Critical": 5,
+                    "High": 8,
+                    "Medium": 10,
+                    "Low": 15,
+                },
+                "COMPLIANCE": {"Critical": 1},
+            }
+        )
         self.handle_scan = HandleScan(
             self.vulnerability_management,
             self.secrets_manager_gateway,
@@ -39,7 +53,7 @@ class TestHandleScan(unittest.TestCase):
         findings_list = ["finding1", "finding2"]
         input_core = InputCore(
             totalized_exclusions=[],
-            threshold_defined=Threshold,
+            threshold_defined=self.threshold,
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
@@ -64,7 +78,11 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
         mock_runner_engine_iac.assert_called_once_with(
-            dict_args, config_tool["ENGINE_IAC"]["TOOL"], secret_tool, self.devops_platform_gateway, "dev"
+            dict_args,
+            config_tool["ENGINE_IAC"]["TOOL"],
+            secret_tool,
+            self.devops_platform_gateway,
+            "dev",
         )
         self.vulnerability_management.send_vulnerability_management.assert_called_once()
         self.vulnerability_management.get_findings_excepted.assert_called_once()
@@ -94,10 +112,14 @@ class TestHandleScan(unittest.TestCase):
         mock_runner_engine_iac.return_value = findings_list, input_core
 
         # Mock the send_vulnerability_management method
-        self.vulnerability_management.send_vulnerability_management.side_effect = ExceptionVulnerabilityManagement("Simulated error")
+        self.vulnerability_management.send_vulnerability_management.side_effect = (
+            ExceptionVulnerabilityManagement("Simulated error")
+        )
 
         # Mock the get_findings_excepted method
-        self.vulnerability_management.get_findings_excepted.side_effect = ExceptionFindingsExcepted("Simulated error")
+        self.vulnerability_management.get_findings_excepted.side_effect = (
+            ExceptionFindingsExcepted("Simulated error")
+        )
 
         # Call the process method
         result_findings_list, result_input_core = self.handle_scan.process(
@@ -119,7 +141,7 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_container",
             "remote_config_repo": "test_repo",
-            "use_vulnerability_management":"true",
+            "use_vulnerability_management": "true",
         }
         config_tool = {"ENGINE_CONTAINER": {"ENABLED": "true", "TOOL": "tool"}}
         secret_tool = {"token_prisma_cloud": "test"}
@@ -129,13 +151,44 @@ class TestHandleScan(unittest.TestCase):
         findings_list = ["finding1", "finding2"]
         input_core = InputCore(
             totalized_exclusions=[],
-            threshold_defined=Threshold,
+            threshold_defined=Threshold(
+                {
+                    "VULNERABILITY": {
+                        "Critical": 5,
+                        "High": 8,
+                        "Medium": 10,
+                        "Low": 15,
+                    },
+                    "COMPLIANCE": {"Critical": 1},
+                    "QUALITY_VULNERABILITY_MANAGEMENT": {
+                        "PTS": [
+                            {
+                                "PT1": {
+                                    "APPS": ["pipeline", "app2", "app3"],
+                                    "PROFILE": "STRONG",
+                                }
+                            },
+                            {
+                                "PT2": {
+                                    "APPS": "ALL",
+                                    "PROFILE": "MODERATE",
+                                }
+                            },
+                        ],
+                        "STRONG": {"Critical": 0, "High": 0, "Medium": 5, "Low": 15},
+                        "MODERATE": {"Critical": 1, "High": 3, "Medium": 5, "Low": 15},
+                    },
+                }
+            ),
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
             stage_pipeline="Release",
         )
         mock_runner_engine_container.return_value = findings_list, input_core
+        mock_product_type = Mock()
+        mock_product_type.name = "PT1"
+        self.vulnerability_management.get_product_type_service.return_value = mock_product_type
 
         # Call the process method
         result_findings_list, result_input_core = self.handle_scan.process(
@@ -157,7 +210,9 @@ class TestHandleScan(unittest.TestCase):
         self.handle_scan.process(dict_args, config_tool)
         mock_print.assert_called_once_with("not yet enabled")
 
-    @mock.patch("devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_secret_scan")
+    @mock.patch(
+        "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_secret_scan"
+    )
     def test_process_with_engine_secret(self, mock_runner_secret_scan):
         dict_args = {
             "use_secrets_manager": "true",
@@ -173,7 +228,43 @@ class TestHandleScan(unittest.TestCase):
         findings_list = ["finding1", "finding2"]
         input_core = InputCore(
             totalized_exclusions=[],
-            threshold_defined=Threshold,
+            threshold_defined=self.threshold,
+            path_file_results="test/file",
+            custom_message_break_build="message",
+            scope_pipeline="pipeline",
+            stage_pipeline="Release",
+        )
+        mock_runner_secret_scan.return_value = findings_list, input_core
+
+        # Call the process method
+        result_findings_list, result_input_core = self.handle_scan.process(
+            dict_args, config_tool
+        )
+
+        # Assert the expected values
+        self.assertEqual(result_findings_list, findings_list)
+        self.assertEqual(result_input_core, input_core)
+        mock_runner_secret_scan.assert_called_once_with(
+            dict_args, config_tool["ENGINE_SECRET"]["TOOL"], self.devops_platform_gateway, secret_tool
+        )
+
+    @mock.patch("devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_secret_scan")
+    def test_process_with_engine_secret_without_secret_manager(self, mock_runner_secret_scan):
+        dict_args = {
+            "use_secrets_manager": "true",
+            "tool": "engine_secret",
+            "remote_config_repo": "test_repo",
+            "use_vulnerability_management": "true",
+        }
+        config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
+        secret_tool = None
+        self.secrets_manager_gateway.get_secret.return_value = secret_tool
+
+        # Mock the runner_engine_secret function and its return values
+        findings_list = ["finding1", "finding2"]
+        input_core = InputCore(
+            totalized_exclusions=[],
+            threshold_defined=self.threshold,
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
@@ -209,7 +300,7 @@ class TestHandleScan(unittest.TestCase):
         findings_list = ["finding1", "finding2"]
         input_core = InputCore(
             totalized_exclusions=[],
-            threshold_defined=Threshold,
+            threshold_defined=self.threshold,
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
@@ -237,11 +328,11 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_dependencies",
             "remote_config_repo": "test_repo",
-            "use_vulnerability_management": "true"
+            "use_vulnerability_management": "true",
         }
         config_tool = {
             "ENGINE_DEPENDENCIES": "some_config",
-            "ENGINE_DEPENDENCIES": {"TOOL": "some_tool"}
+            "ENGINE_DEPENDENCIES": {"TOOL": "some_tool"},
         }
         secret_tool = {"token_xray": "test"}
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
@@ -250,7 +341,7 @@ class TestHandleScan(unittest.TestCase):
         findings_list = ["finding1", "finding2"]
         input_core = InputCore(
             totalized_exclusions=[],
-            threshold_defined=Threshold,
+            threshold_defined=self.threshold,
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
@@ -270,5 +361,3 @@ class TestHandleScan(unittest.TestCase):
         mock_runner_engine_dependencies.assert_called_once_with(
             dict_args, config_tool, secret_tool, self.devops_platform_gateway
         )
-
-        
