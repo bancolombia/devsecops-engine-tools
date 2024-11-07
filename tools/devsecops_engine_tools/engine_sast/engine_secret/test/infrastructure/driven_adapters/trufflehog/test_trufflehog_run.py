@@ -147,7 +147,7 @@ class TestTrufflehogRun(unittest.TestCase):
     def test_config_include_path(self, mock_open):
         trufflehog_run = TrufflehogRun()
 
-        result = trufflehog_run.config_include_path(['/usr/file1.py', '/usr/file2.py'], '/usr/temp')
+        result = trufflehog_run.config_include_path(['/usr/file1.py', '/usr/file2.py'], '/usr/temp', 'Windows')
 
         expected_result = ['/usr/temp/includePath0.txt', '/usr/temp/includePath1.txt']
         self.assertEqual(result, expected_result)

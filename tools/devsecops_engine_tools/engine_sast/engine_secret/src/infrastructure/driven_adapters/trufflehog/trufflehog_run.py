@@ -70,7 +70,7 @@ class TrufflehogRun(ToolGateway):
         with open(f"{agent_work_folder}/excludedPath.txt", "w") as file:
             file.write("\n".join(config_tool.exclude_path))
         exclude_path = f"{agent_work_folder}/excludedPath.txt"
-        include_paths = self.config_include_path(files_commits, agent_work_folder)
+        include_paths = self.config_include_path(files_commits, agent_work_folder, agent_os)
         enable_custom_rules = config_tool.enable_custom_rules.lower()
         secret = None
         
@@ -97,7 +97,7 @@ class TrufflehogRun(ToolGateway):
         findings, file_findings = self.create_file(self.decode_output(results), agent_work_folder)
         return  findings, file_findings
 
-    def config_include_path(self, files, agent_work_folder):
+    def config_include_path(self, files, agent_work_folder, agent_os):
         chunks = []
         if len(files) != 0:
             chunk_size = (len(files) + 3) // 4
@@ -112,7 +112,8 @@ class TrufflehogRun(ToolGateway):
             include_paths.append(file_path)
             with open(file_path, "w") as file:
                 for file_pr_path in chunk:
-                    file_pr_path = str(file_pr_path).replace("/","\\\\")
+                    if "Windows" in agent_os:
+                        file_pr_path = str(file_pr_path).replace("/","\\\\")
                     file.write(f"{file_pr_path.strip()}\n")
         return include_paths
 
@@ -125,12 +126,12 @@ class TrufflehogRun(ToolGateway):
         repository_name,
         enable_custom_rules
     ):
-        command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
+        command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --no-update --json"
 
         if enable_custom_rules == "true":
-            command = command.replace("--no-verification --json", "--config /tmp/rules/trufflehog/custom-rules.yaml --no-verification --json")
+            command = command.replace("--no-verification --json", "--config /tmp/rules/trufflehog/custom-rules.yaml --no-verification --no-update --json")
 
-        result = subprocess.run(command, capture_output=True, shell=True, text=True)
+        result = subprocess.run(command, capture_output=True, shell=True, text=True, encoding='utf-8')
         return result.stdout.strip()
 
     def decode_output(self, results):
