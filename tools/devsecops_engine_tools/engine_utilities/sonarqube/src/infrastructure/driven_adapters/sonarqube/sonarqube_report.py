@@ -71,9 +71,18 @@ class SonarAdapter(SonarGateway):
                 data=data
             )
             response.raise_for_status()
-            print(f"The state of the {finding_type} {data[finding_type]} was changed.")
-        except:
-            logger.warning(f"Unable to change the status of {finding_type} {data[finding_type]}.")
+
+            if finding_type == "issue": 
+                info = data["transition"]
+            else:
+                resolution_info = ""
+                if data.get("resolution"): resolution_info = f" ({data['resolution']})"
+
+                info = f"{data['status']}{resolution_info}"
+
+            print(f"The state of the {finding_type} {data[finding_type]} was changed to {info}.")
+        except Exception as e:
+            logger.warning(f"Unable to change the status of {finding_type} {data[finding_type]}. Error: {e}")
             pass
 
     def get_findings(self, sonar_url, sonar_token, endpoint, params, finding_type):

@@ -270,7 +270,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 max_retries,
                 all_findings_query_params,
             )
-            findings
+
             all_findings = list(
                 map(
                     partial(self._create_report),

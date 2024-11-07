@@ -148,7 +148,7 @@ class ReportSonar:
                             elif related_sonar_finding["status"] != "RESOLVED":
                                 if finding.false_p: status = "falsepositive"
                                 elif finding.risk_accepted: status = "close"
-                                elif finding.out_of_scope: status = "wontfix"
+                                elif finding.risk_accepted or finding.out_of_scope: status = "wontfix"
                             if status:
                                 self.sonar_gateway.change_finding_status(
                                     args["sonar_url"],
@@ -183,7 +183,6 @@ class ReportSonar:
                                 )
 
             except Exception as e:
-                print(f"It was not possible to synchronize Sonar and Vulnerability Manager: {e}")
                 logger.warning(f"It was not possible to synchronize Sonar and Vulnerability Manager: {e}")
 
             input_core.scope_pipeline = project_key
