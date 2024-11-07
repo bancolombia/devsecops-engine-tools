@@ -5,6 +5,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_m
 from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
     VulnerabilityManagement,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway
+)
 from devsecops_engine_tools.engine_utilities.defect_dojo import (
     DefectDojo,
     ImportScanRequest,
@@ -67,7 +70,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "KUBESCAPE": "Kubescape Scanner",
                 "KICS": "KICS Scanner",
                 "BEARER": "Bearer CLI",
-                "DEPENDENCY_CHECK": "Dependency Check Scan"
+                "DEPENDENCY_CHECK": "Dependency Check Scan",
+                "SONARQUBE": "SonarQube API Import"
             }
 
             if any(
@@ -426,6 +430,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             risk_accepted=finding.risk_accepted,
             false_p=finding.false_p,
             service=finding.service,
+            unique_id_from_tool=finding.unique_id_from_tool,
+            out_of_scope=finding.out_of_scope
         )
 
     def _format_date_to_dd_format(self, date_string):
