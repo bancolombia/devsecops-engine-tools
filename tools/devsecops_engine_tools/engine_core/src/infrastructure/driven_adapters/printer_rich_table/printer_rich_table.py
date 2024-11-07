@@ -47,7 +47,7 @@ class PrinterRichTable(PrinterTableGateway):
     def print_table_exclusions(self, exclusions_list):
         headers = []
         if exclusions_list:
-            headers = ["ID", "Tags", "Create Date", "Expired Date", "Reason", "Service"]
+            headers = ["ID", "Tags", "Service", "Create Date", "Expired Date", "Reason"]
         table = Table(
             show_header=True, header_style="bold magenta", box=box.DOUBLE_EDGE
         )
@@ -57,6 +57,7 @@ class PrinterRichTable(PrinterTableGateway):
             row_data = [
                 self._check_spaces(exclusion["vm_id"], exclusion["vm_id_url"]),
                 ", ".join(exclusion["tags"]),
+                self._check_spaces(exclusion["service"], exclusion["service_url"]),
                 format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
                 (
                     format_date(exclusion["expired_date"], "%d%m%Y", "%d/%m/%Y")
@@ -65,7 +66,6 @@ class PrinterRichTable(PrinterTableGateway):
                     else "NA"
                 ),
                 exclusion["reason"],
-                self._check_spaces(exclusion["service"], exclusion["service_url"]),
             ]
             table.add_row(*row_data)
         console = Console()

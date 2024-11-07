@@ -45,7 +45,11 @@ def init_engine_risk(
 
     unique_findings = handle_filters.filter_duplicated(active_findings)
 
-    data_added = AddData(add_epss_gateway, unique_findings).process()
+    filtered_findings = handle_filters.filter_tags_days(
+        remote_config, unique_findings
+    )
+
+    data_added = AddData(add_epss_gateway, filtered_findings).process()
 
     get_exclusions = GetExclusions(
         devops_platform_gateway,

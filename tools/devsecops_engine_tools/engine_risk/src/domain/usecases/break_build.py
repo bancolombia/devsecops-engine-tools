@@ -130,14 +130,14 @@ class BreakBuild:
             print(
                 self.devops_platform_gateway.message(
                     "succeeded",
-                    f"Remediation Rate {remediation_rate_value}% is greater than {risk_threshold}%",
+                    f"Remediation rate {remediation_rate_value}% is greater than {risk_threshold}%",
                 )
             )
         elif remediation_rate_value >= risk_threshold:
             print(
                 self.devops_platform_gateway.message(
                     "warning",
-                    f"Remediation Rate {remediation_rate_value}% is close to {risk_threshold}%",
+                    f"Remediation rate {remediation_rate_value}% is close to {risk_threshold}%",
                 )
             )
             self.warning_build = True
@@ -145,7 +145,7 @@ class BreakBuild:
             print(
                 self.devops_platform_gateway.message(
                     "error",
-                    f"Remediation Rate {remediation_rate_value}% is less than {risk_threshold}%",
+                    f"Remediation rate {remediation_rate_value}% is less than {risk_threshold}%",
                 )
             )
             self.break_build = True

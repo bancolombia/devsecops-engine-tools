@@ -1,5 +1,5 @@
 import copy
-
+from rich.console import Console
 
 class HandleFilters:
     def filter(self, findings):
@@ -52,6 +52,25 @@ class HandleFilters:
 
         unique_findings = list(findings_map.values())
         return unique_findings
+
+    def filter_tags_days(self, remote_config, findings):
+        tag_exclusion_days = remote_config["TAG_EXCLUSION_DAYS"]
+        filtered_findings = []
+        console = Console()
+
+        for finding in findings:
+            exclude = False
+            for tag in finding.tags:
+                if tag in tag_exclusion_days and finding.age < tag_exclusion_days[tag]:
+                    exclude = True
+                    console.print(
+                        f"[yellow]Finding [link={finding.vm_id_url}]{finding.vm_id}[/link] with tag '{tag}' and age {finding.age} days is being excluded. It will be considered in {tag_exclusion_days[tag] - finding.age} days.[/yellow]"
+                    )
+                    break
+            if not exclude:
+                filtered_findings.append(finding)
+
+        return filtered_findings
 
     def _get_active_findings(self, findings):
         return list(
