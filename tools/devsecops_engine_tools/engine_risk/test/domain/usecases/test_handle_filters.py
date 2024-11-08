@@ -93,10 +93,7 @@ class TestHandleFilters(unittest.TestCase):
 
         assert len(result) == 2
 
-    @patch(
-        "devsecops_engine_tools.engine_risk.src.domain.usecases.handle_filters.Console"
-    )
-    def test_filter_tags_days(self, mock_console):
+    def test_filter_tags_days(self):
         remote_config = {"TAG_EXCLUSION_DAYS": {"tag1": 5, "tag2": 10}}
         findings = [
             Report(
@@ -130,10 +127,13 @@ class TestHandleFilters(unittest.TestCase):
                 age=5,
             ),
         ]
+        devops_platform_gateway = MagicMock()
 
-        result = self.handle_filters.filter_tags_days(remote_config, findings)
+        result = self.handle_filters.filter_tags_days(
+            devops_platform_gateway, remote_config, findings
+        )
 
-        mock_console().print.assert_called_once()
+        devops_platform_gateway.message.assert_called_once()
         assert len(result) == 2
 
     def test__get_active_findings(self):

@@ -1,5 +1,4 @@
 import copy
-from rich.console import Console
 
 
 class HandleFilters:
@@ -21,11 +20,6 @@ class HandleFilters:
                     for s in finding.service.split()
                     if s not in existing_finding.service.split()
                 ]
-                combined_services_url = existing_finding.service_url.split() + [
-                    s_url
-                    for s_url in finding.service_url.split()
-                    if s_url not in existing_finding.service_url.split()
-                ]
                 combined_vm_ids = existing_finding.vm_id.split() + [
                     vm
                     for vm in finding.vm_id.split()
@@ -39,13 +33,11 @@ class HandleFilters:
                 if finding.age >= existing_finding.age:
                     new_finding = copy.deepcopy(finding)
                     new_finding.service = " ".join(combined_services)
-                    new_finding.service_url = " ".join(combined_services_url)
                     new_finding.vm_id = " ".join(combined_vm_ids)
                     new_finding.vm_id_url = " ".join(combined_vm_id_urls)
                     findings_map[key] = new_finding
                 else:
                     existing_finding.service = " ".join(combined_services)
-                    existing_finding.service_url = " ".join(combined_services_url)
                     new_finding.vm_id = " ".join(combined_vm_ids)
                     new_finding.vm_id_url = " ".join(combined_vm_id_urls)
             else:
@@ -54,18 +46,20 @@ class HandleFilters:
         unique_findings = list(findings_map.values())
         return unique_findings
 
-    def filter_tags_days(self, remote_config, findings):
+    def filter_tags_days(self, devops_platform_gateway, remote_config, findings):
         tag_exclusion_days = remote_config["TAG_EXCLUSION_DAYS"]
         filtered_findings = []
-        console = Console()
 
         for finding in findings:
             exclude = False
             for tag in finding.tags:
                 if tag in tag_exclusion_days and finding.age < tag_exclusion_days[tag]:
                     exclude = True
-                    console.print(
-                        f"[yellow]Report [link={finding.vm_id_url}]{finding.vm_id}[/link] with tag '{tag}' and age {finding.age} days is being excluded. It will be considered in {tag_exclusion_days[tag] - finding.age} days.[/yellow]"
+                    print(
+                        devops_platform_gateway.message(
+                            "warning",
+                            f"Report {finding.vm_id}[{finding.vm_id_url}] with tag '{tag}' and age {finding.age} days is being excluded. It will be considered in {tag_exclusion_days[tag] - finding.age} days.",
+                        )
                     )
                     break
             if not exclude:

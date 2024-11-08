@@ -195,11 +195,7 @@ def application_core():
             "local": RuntimeLocal(),
         }.get(args["platform_devops"])
         metrics_manager_gateway = S3Manager()
-
-        if args["tool"] == "engine_risk":
-            printer_table_gateway = PrinterRichTable()
-        else:
-            printer_table_gateway = PrinterPrettyTable()
+        printer_table_gateway = PrinterPrettyTable()
 
         init_engine_core(
             vulnerability_management_gateway,

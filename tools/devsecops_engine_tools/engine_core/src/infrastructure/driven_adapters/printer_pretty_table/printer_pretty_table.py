@@ -10,7 +10,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.report import (
     Report,
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
-    format_date
+    format_date,
 )
 from prettytable import PrettyTable, DOUBLE_BORDER
 
@@ -63,24 +63,20 @@ class PrinterPrettyTable(PrinterTableGateway):
             print(sorted_table)
 
     def print_table_report(self, report_list: "list[Report]"):
-        headers = ["Risk Score", "Severity", "ID", "Tags", "Where", "Service"]
+        headers = ["Risk Score", "ID", "Tags", "Services"]
         table = PrettyTable(headers)
         for report in report_list:
             row_data = [
                 report.risk_score,
-                report.severity.lower(),
-                report.vuln_id_from_tool if report.vuln_id_from_tool else report.id,
-                report.tags,
-                report.where,
-                report.service
+                self._check_spaces_url(report.vm_id, report.vm_id_url),
+                ", ".join(report.tags),
+                self._check_spaces(report.service),
             ]
             table.add_row(row_data)
 
         sorted_table = PrettyTable()
         sorted_table.field_names = table.field_names
-        sorted_table.add_rows(
-            sorted(table._rows, key=lambda row: row[0], reverse=True)
-        )
+        sorted_table.add_rows(sorted(table._rows, key=lambda row: row[0], reverse=True))
 
         for column in table.field_names:
             sorted_table.align[column] = "l"
@@ -90,19 +86,31 @@ class PrinterPrettyTable(PrinterTableGateway):
         if len(sorted_table.rows) > 0:
             print(sorted_table)
 
-    def print_table_exclusions(self, exclusions):
-        if (exclusions):
-            headers = ["Severity", "ID", "Where", "Create Date", "Expired Date", "Reason"]
+    def print_table_report_exlusions(self, exclusions):
+        if exclusions:
+            headers = [
+                "ID",
+                "Tags",
+                "Services",
+                "Created Date",
+                "Expired Date",
+                "Reason",
+            ]
 
         table = PrettyTable(headers)
 
         for exclusion in exclusions:
             row_data = [
-                exclusion["severity"],
-                exclusion["id"],
-                exclusion["where"],
+                self._check_spaces_url(exclusion["vm_id"], exclusion["vm_id_url"]),
+                ", ".join(exclusion["tags"]),
+                self._check_spaces(exclusion["service"]),
                 format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
-                format_date(exclusion["expired_date"], "%d%m%Y", "%d/%m/%Y") if exclusion["expired_date"] and exclusion["expired_date"] != "undefined" else "NA",
+                (
+                    format_date(exclusion["expired_date"], "%d%m%Y", "%d/%m/%Y")
+                    if exclusion["expired_date"]
+                    and exclusion["expired_date"] != "undefined"
+                    else "NA"
+                ),
                 exclusion["reason"],
             ]
             table.add_row(row_data)
@@ -113,3 +121,58 @@ class PrinterPrettyTable(PrinterTableGateway):
         table.set_style(DOUBLE_BORDER)
         if len(table.rows) > 0:
             print(table)
+
+    def print_table_exclusions(self, exclusions):
+        if exclusions:
+            headers = [
+                "Severity",
+                "ID",
+                "Where",
+                "Create Date",
+                "Expired Date",
+                "Reason",
+            ]
+
+        table = PrettyTable(headers)
+
+        for exclusion in exclusions:
+            row_data = [
+                exclusion["severity"],
+                exclusion["id"],
+                exclusion["where"],
+                format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
+                (
+                    format_date(exclusion["expired_date"], "%d%m%Y", "%d/%m/%Y")
+                    if exclusion["expired_date"]
+                    and exclusion["expired_date"] != "undefined"
+                    else "NA"
+                ),
+                exclusion["reason"],
+            ]
+            table.add_row(row_data)
+
+        for column in table.field_names:
+            table.align[column] = "l"
+
+        table.set_style(DOUBLE_BORDER)
+        if len(table.rows) > 0:
+            print(table)
+
+    def _check_spaces_url(self, value, url):
+        values = value.split()
+        urls = url.split()
+        new_value = ""
+        if len(values) > 1 or len(urls) > 1:
+            new_value = "\n".join(f"{v}[{u}]" for v, u in zip(values, urls))
+        else:
+            new_value = f"{values[0]}[{urls[0]}]"
+        return new_value
+
+    def _check_spaces(self, value):
+        values = value.split()
+        new_value = ""
+        if len(values) > 1:
+            new_value = "\n".join(values)
+        else:
+            new_value = f"{values[0]}"
+        return new_value

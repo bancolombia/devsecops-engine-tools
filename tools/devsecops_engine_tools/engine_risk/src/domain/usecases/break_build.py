@@ -13,7 +13,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
 
 from collections import Counter
 import copy
-from rich.console import Console
 
 
 class BreakBuild:
@@ -166,7 +165,6 @@ class BreakBuild:
                 "vm_id": exclusion.vm_id,
                 "vm_id_url": exclusion.vm_id_url,
                 "service": exclusion.service,
-                "service_url": exclusion.service_url,
                 "tags": exclusion.tags,
             }
             for exclusion in exclusions
@@ -185,13 +183,13 @@ class BreakBuild:
                         and report.vuln_id_from_tool == exclusion.id
                     )
                     or (report.id and report.id == exclusion.id)
+                    or (report.vm_id and exclusion.id in report.vm_id)
                 ) and ((exclusion.where in report.where) or (exclusion.where == "all")):
                     exclude = True
                     exclusion_copy = copy.deepcopy(exclusion)
                     exclusion_copy.vm_id = report.vm_id
                     exclusion_copy.vm_id_url = report.vm_id_url
                     exclusion_copy.service = report.service
-                    exclusion_copy.service_url = report.service_url
                     exclusion_copy.tags = report.tags
                     applied_exclusions.append(exclusion_copy)
                     break
@@ -206,7 +204,6 @@ class BreakBuild:
         if report_list:
             tag_blacklist = set(remote_config["THRESHOLD"]["TAG_BLACKLIST"])
             tag_age_threshold = remote_config["THRESHOLD"]["TAG_MAX_AGE"]
-            console = Console()
 
             filtered_reports_above_threshold = [
                 (report, tag)
@@ -224,13 +221,19 @@ class BreakBuild:
 
             for report, tag in filtered_reports_above_threshold:
                 report.reason = "Blacklisted"
-                console.print(
-                    f"[red]Report [link={report.vm_id_url}]{report.vm_id}[/link] with tag {tag} is blacklisted and age {report.age} is above threshold {tag_age_threshold}[/red]"
+                print(
+                    self.devops_platform_gateway.message(
+                        "error",
+                        f"Report {report.vm_id}[{report.vm_id_url}] with tag {tag} is blacklisted and age {report.age} is above threshold {tag_age_threshold}",
+                    )
                 )
 
             for report, tag in filtered_reports_below_threshold:
-                console.print(
-                    f"[yellow]Report [link={report.vm_id_url}]{report.vm_id}[/link] with tag {tag} is blacklisted but age {report.age} is below threshold {tag_age_threshold}[/yellow]"
+                print(
+                    self.devops_platform_gateway.message(
+                        "warning",
+                        f"Report {report.vm_id}[{report.vm_id_url}] with tag {tag} is blacklisted but age {report.age} is below threshold {tag_age_threshold}",
+                    )
                 )
 
             if filtered_reports_above_threshold:
@@ -301,7 +304,7 @@ class BreakBuild:
                     "warning", "Bellow are all findings that were excepted"
                 )
             )
-            self.printer_table_gateway.print_table_exclusions(applied_exclusions)
+            self.printer_table_gateway.print_table_report_exlusions(applied_exclusions)
             for reason, total in Counter(
                 map(lambda x: x["reason"], applied_exclusions)
             ).items():

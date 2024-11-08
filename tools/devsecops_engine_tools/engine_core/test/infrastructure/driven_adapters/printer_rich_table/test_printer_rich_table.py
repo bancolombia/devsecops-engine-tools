@@ -60,7 +60,6 @@ class TestPrinterRichTable:
                 "expired_date": "02012021",
                 "reason": "reason1",
                 "vm_id_url": "url1",
-                "service_url": "url2",
             }
         ]
         printer = PrinterRichTable()

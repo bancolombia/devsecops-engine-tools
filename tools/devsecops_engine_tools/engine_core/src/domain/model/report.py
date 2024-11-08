@@ -29,7 +29,6 @@ class Report:
         self.risk_accepted = kwargs.get("risk_accepted", "")
         self.false_p = kwargs.get("false_p", "")
         self.service = kwargs.get("service", "")
-        self.service_url = kwargs.get("service_url", "")
         self.reason = kwargs.get("reason", "")
         self.component_name = kwargs.get("component_name", "")
         self.component_version = kwargs.get("component_version", "")

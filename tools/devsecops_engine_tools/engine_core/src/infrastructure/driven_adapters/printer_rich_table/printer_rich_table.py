@@ -38,7 +38,7 @@ class PrinterRichTable(PrinterTableGateway):
                 str(report.risk_score),
                 self._check_spaces(report.vm_id, report.vm_id_url),
                 ", ".join(report.tags),
-                self._check_spaces(report.service, report.service_url),
+                report.service,
             ]
             table.add_row(*row_data)
         console = Console()
@@ -57,7 +57,7 @@ class PrinterRichTable(PrinterTableGateway):
             row_data = [
                 self._check_spaces(exclusion["vm_id"], exclusion["vm_id_url"]),
                 ", ".join(exclusion["tags"]),
-                self._check_spaces(exclusion["service"], exclusion["service_url"]),
+                exclusion["service"],
                 format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
                 (
                     format_date(exclusion["expired_date"], "%d%m%Y", "%d/%m/%Y")

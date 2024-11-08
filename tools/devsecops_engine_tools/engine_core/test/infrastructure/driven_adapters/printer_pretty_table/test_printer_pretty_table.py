@@ -103,7 +103,16 @@ class TestPrinterPrettyTable:
     @patch("builtins.print")
     def test_print_table_exclusions(self, mock_print):
         # Arrange
-        exclusions = [{"severity": "severity" ,"id": "id", "where": "path", "create_date": "01042023", "expired_date": "04032023", "reason": "reason"}]
+        exclusions = [
+            {
+                "severity": "severity",
+                "id": "id",
+                "where": "path",
+                "create_date": "01042023",
+                "expired_date": "04032023",
+                "reason": "reason",
+            }
+        ]
         printer = PrinterPrettyTable()
 
         # Act
@@ -119,13 +128,14 @@ class TestPrinterPrettyTable:
         report_list = [
             Report(
                 risk_score=1,
-                id="id2",
-                date="21022024",
+                vm_id="id1 id2",
+                vm_id_url="url1 url2",
                 status="stat2",
                 where="path",
                 tags=["tag1"],
                 severity="low",
                 active=True,
+                service="service1",
             ),
         ]
         printer = PrinterPrettyTable()
@@ -135,6 +145,25 @@ class TestPrinterPrettyTable:
 
         # Assert
         assert mock_print.called
-        # Add more assertions to validate the output
 
+    @patch("builtins.print")
+    def test_print_table_report_exlusions(self, mock_print):
+        # Arrange
+        exclusions = [
+            {
+                "vm_id": "id",
+                "vm_id_url": "url",
+                "tags": ["tag1"],
+                "service": "service1",
+                "create_date": "01042023",
+                "expired_date": "04032023",
+                "reason": "reason",
+            }
+        ]
+        printer = PrinterPrettyTable()
 
+        # Act
+        printer.print_table_report_exlusions(exclusions)
+
+        # Assert
+        assert mock_print.called

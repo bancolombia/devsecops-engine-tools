@@ -418,7 +418,6 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             vm_id=str(finding.vm_id),
             vm_id_url=f"{host_dd}/finding/{finding.vm_id}",
             service=finding.service,
-            service_url=f"{host_dd}/finding?active=true&service={finding.service}",
             tags=finding.tags,
         )
 
@@ -452,7 +451,6 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             risk_accepted=finding.risk_accepted,
             false_p=finding.false_p,
             service=finding.service,
-            service_url=f"{host_dd}/finding?active=true&service={finding.service}",
         )
 
     def _format_date_to_dd_format(self, date_string):

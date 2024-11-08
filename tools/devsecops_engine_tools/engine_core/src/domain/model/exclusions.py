@@ -15,5 +15,4 @@ class Exclusions:
         self.vm_id = kwargs.get("vm_id", "")
         self.vm_id_url = kwargs.get("vm_id_url", "")
         self.service = kwargs.get("service", "")
-        self.service_url = kwargs.get("service_url", "")
         self.tags = kwargs.get("tags", [])
