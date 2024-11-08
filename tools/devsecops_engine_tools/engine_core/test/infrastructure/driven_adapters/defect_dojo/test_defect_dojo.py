@@ -8,7 +8,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.report import Report
 from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
     VulnerabilityManagement,
 )
-
+from devsecops_engine_tools.engine_utilities.defect_dojo.domain.request_objects.import_scan import (
+    ImportScanRequest
+)
 
 class TestDefectDojoPlatform(unittest.TestCase):
     def setUp(self):
