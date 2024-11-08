@@ -63,14 +63,14 @@ class PrinterPrettyTable(PrinterTableGateway):
             print(sorted_table)
 
     def print_table_report(self, report_list: "list[Report]"):
-        headers = ["Risk Score", "ID", "Tags", "Services"]
+        headers = ["Risk Score", "VM URL", "Services", "Tags"]
         table = PrettyTable(headers)
         for report in report_list:
             row_data = [
                 report.risk_score,
-                self._check_spaces_url(report.vm_id, report.vm_id_url),
-                ", ".join(report.tags),
+                self._check_spaces(report.vm_id_url),
                 self._check_spaces(report.service),
+                ", ".join(report.tags),
             ]
             table.add_row(row_data)
 
@@ -89,7 +89,7 @@ class PrinterPrettyTable(PrinterTableGateway):
     def print_table_report_exlusions(self, exclusions):
         if exclusions:
             headers = [
-                "ID",
+                "VM URL",
                 "Tags",
                 "Services",
                 "Created Date",
@@ -101,7 +101,7 @@ class PrinterPrettyTable(PrinterTableGateway):
 
         for exclusion in exclusions:
             row_data = [
-                self._check_spaces_url(exclusion["vm_id"], exclusion["vm_id_url"]),
+                self._check_spaces(exclusion["vm_id_url"]),
                 ", ".join(exclusion["tags"]),
                 self._check_spaces(exclusion["service"]),
                 format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
@@ -157,16 +157,6 @@ class PrinterPrettyTable(PrinterTableGateway):
         table.set_style(DOUBLE_BORDER)
         if len(table.rows) > 0:
             print(table)
-
-    def _check_spaces_url(self, value, url):
-        values = value.split()
-        urls = url.split()
-        new_value = ""
-        if len(values) > 1 or len(urls) > 1:
-            new_value = "\n".join(f"{v}[{u}]" for v, u in zip(values, urls))
-        else:
-            new_value = f"{values[0]}[{urls[0]}]"
-        return new_value
 
     def _check_spaces(self, value):
         values = value.split()
