@@ -80,6 +80,20 @@
                     "cvss": "",
                     "category": "Vulnerability"
                 }
+            },
+            "RULES_TERRAFORM": {
+                "CKV_TERRAFORM_1": {
+                    "checkID": "IAC-CKV-TERRAFORM-1 Ensure terraform",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "guideline",
+                    "severity": "Critical",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                }
             }
         }
     },
