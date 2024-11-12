@@ -100,7 +100,7 @@ def get_inputs_from_cli(args):
     parser.add_argument(
         "-p",
         "--platform",
-        type=parse_choices({"all", "docker", "k8s", "cloudformation", "openapi"}),
+        type=parse_choices({"all", "docker", "k8s", "cloudformation", "openapi", "terraform"}),
         required=False,
         default="all",
         help="Platform to scan, only apply engine_iac tool",
