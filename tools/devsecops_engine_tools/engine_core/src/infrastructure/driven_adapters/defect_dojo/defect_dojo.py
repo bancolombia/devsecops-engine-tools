@@ -311,7 +311,14 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "active": "true",
             }
 
-            return Engagement.get_engagements(request_is, request_active).results
+            engagements = Engagement.get_engagements(request_is, request_active).results
+
+            host_dd = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"]
+
+            for engagement in engagements:
+                engagement.vm_url = f"{host_dd}/engagement/{engagement.id}/finding/open"
+
+            return engagements
 
         except Exception as ex:
             raise ExceptionGettingEngagements(

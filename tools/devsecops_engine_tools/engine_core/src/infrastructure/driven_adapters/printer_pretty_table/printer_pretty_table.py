@@ -63,12 +63,12 @@ class PrinterPrettyTable(PrinterTableGateway):
             print(sorted_table)
 
     def print_table_report(self, report_list: "list[Report]"):
-        headers = ["Risk Score", "VM URL", "Services", "Tags"]
+        headers = ["Risk Score", "VM ID", "Services", "Tags"]
         table = PrettyTable(headers)
         for report in report_list:
             row_data = [
                 report.risk_score,
-                self._check_spaces(report.vm_id_url),
+                self._check_spaces(report.vm_id),
                 self._check_spaces(report.service),
                 ", ".join(report.tags),
             ]
@@ -89,7 +89,7 @@ class PrinterPrettyTable(PrinterTableGateway):
     def print_table_report_exlusions(self, exclusions):
         if exclusions:
             headers = [
-                "VM URL",
+                "VM ID",
                 "Tags",
                 "Services",
                 "Created Date",
@@ -101,7 +101,7 @@ class PrinterPrettyTable(PrinterTableGateway):
 
         for exclusion in exclusions:
             row_data = [
-                self._check_spaces(exclusion["vm_id_url"]),
+                self._check_spaces(exclusion["vm_id"]),
                 ", ".join(exclusion["tags"]),
                 self._check_spaces(exclusion["service"]),
                 format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
