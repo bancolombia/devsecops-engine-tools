@@ -293,12 +293,21 @@ class CheckovTool(ToolGateway):
 
             checkov_deserealizator = CheckovDeserealizator()
             findings_list = checkov_deserealizator.get_list_finding(
-                result_scans, rules_run
+                result_scans, 
+                rules_run, 
+                config_tool[self.TOOL_CHECKOV]["DEFAULT_SEVERITY"],
+                config_tool[self.TOOL_CHECKOV]["DEFAULT_CATEGORY"]
             )
 
             return (
                 findings_list,
-                generate_file_from_tool(self.TOOL_CHECKOV, result_scans, rules_run),
+                generate_file_from_tool(
+                    self.TOOL_CHECKOV, 
+                    result_scans, 
+                    rules_run, 
+                    config_tool[self.TOOL_CHECKOV]["DEFAULT_SEVERITY"],
+                    config_tool[self.TOOL_CHECKOV]["DEFAULT_CATEGORY"]
+                ),
             )
         else:
             return [], None
