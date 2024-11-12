@@ -58,7 +58,7 @@ class HandleFilters:
                     print(
                         devops_platform_gateway.message(
                             "warning",
-                            f"Report {finding.vm_id}[{finding.vm_id_url}] with tag '{tag}' and age {finding.age} days is being excluded. It will be considered in {tag_exclusion_days[tag] - finding.age} days.",
+                            f"Report {finding.vm_id} with tag '{tag}' and age {finding.age} days is being excluded. It will be considered in {tag_exclusion_days[tag] - finding.age} days.",
                         )
                     )
                     break

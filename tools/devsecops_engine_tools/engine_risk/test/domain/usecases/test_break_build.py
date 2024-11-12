@@ -297,7 +297,7 @@ def test_tag_blacklist_control_error():
 
     mock_devops_platform_gateway.message.assert_called_once_with(
         "error",
-        f"Report {report_list[0].vm_id}[{report_list[0].vm_id_url}] with tag {report_list[0].tags[0]} is blacklisted and age {report_list[0].age} is above threshold {tag_age_threshold}",
+        f"Report {report_list[0].vm_id} with tag {report_list[0].tags[0]} is blacklisted and age {report_list[0].age} is above threshold {tag_age_threshold}",
     )
 
 
@@ -332,7 +332,7 @@ def test_tag_blacklist_control_warning():
 
     mock_devops_platform_gateway.message.assert_called_once_with(
         "warning",
-        f"Report {report_list[0].vm_id}[{report_list[0].vm_id_url}] with tag {report_list[0].tags[0]} is blacklisted but age {report_list[0].age} is below threshold {tag_age_threshold}",
+        f"Report {report_list[0].vm_id} with tag {report_list[0].tags[0]} is blacklisted but age {report_list[0].age} is below threshold {tag_age_threshold}",
     )
 
 
