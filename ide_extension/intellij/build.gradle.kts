@@ -51,7 +51,7 @@ dependencies {
     }
 
     implementation("com.squareup.okhttp3:okhttp")
-    implementation("org.jetbrains:annotations:26.0.0")
+    implementation("org.jetbrains:annotations:26.0.1")
 
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
@@ -59,7 +59,7 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:1.18.34")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.34")
 
-    testImplementation("org.mockito:mockito-core:5.14.1")
+    testImplementation("org.mockito:mockito-core:5.14.2")
 
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
 }
