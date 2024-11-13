@@ -25,8 +25,11 @@ class IacScan:
         self.devops_platform_gateway = devops_platform_gateway
 
     def process(self, dict_args, secret_tool, tool, env):
+        branch = ""
+        if dict_args["remote_config_branch"]: branch = dict_args["remote_config_branch"]
+
         config_tool_iac = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_sast/engine_iac/ConfigTool.json"
+            dict_args["remote_config_repo"], "engine_sast/engine_iac/ConfigTool.json", branch=branch
         )
 
         exclusions = self.devops_platform_gateway.get_remote_config(
