@@ -56,7 +56,7 @@ class GithubApi:
 
         return git_client
 
-    def get_remote_json_config(self, git_client: Github, owner, repository, path, branch):
+    def get_remote_json_config(self, git_client: Github, owner, repository, path, branch=""):
         try:
             repo = git_client.get_repo(f"{owner}/{repository}")
 
