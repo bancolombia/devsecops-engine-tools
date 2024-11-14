@@ -600,9 +600,9 @@ class TestDefectDojoPlatform(unittest.TestCase):
         )
 
     @patch(
-        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.DefectDojoPlatform._create_exclusion"
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.DefectDojoPlatform._create_report_exclusion"
     )
-    def test_get_report_exclusions(self, mock_create_exclusion):
+    def test_get_report_exclusions(self, mock_create_report_exclusion):
         total_findings = [
             MagicMock(
                 risk_accepted=True,
@@ -623,7 +623,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
             ),
         ]
         date_fn = MagicMock()
+        host_dd = "host_defect_dojo"
 
-        exclusions = self.defect_dojo._get_report_exclusions(total_findings, date_fn)
+        exclusions = self.defect_dojo._get_report_exclusions(total_findings, date_fn, host_dd)
 
         assert len(exclusions) == 3

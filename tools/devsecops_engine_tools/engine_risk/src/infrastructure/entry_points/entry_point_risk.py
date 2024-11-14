@@ -12,8 +12,6 @@ from devsecops_engine_tools.engine_risk.src.domain.usecases.get_exclusions impor
 )
 
 
-import re
-
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
@@ -36,30 +34,6 @@ def init_engine_risk(
         dict_args["remote_config_repo"], "engine_risk/Exclusions.json"
     )
 
-    return process_findings(
-        findings,
-        vm_exclusions,
-        dict_args,
-        services,
-        risk_exclusions,
-        remote_config,
-        add_epss_gateway,
-        devops_platform_gateway,
-        print_table_gateway,
-    )
-
-
-def process_findings(
-    findings,
-    vm_exclusions,
-    dict_args,
-    services,
-    risk_exclusions,
-    remote_config,
-    add_epss_gateway,
-    devops_platform_gateway,
-    print_table_gateway,
-):
     if not findings:
         print("No findings found in Vulnerability Management Platform")
         logger.info("No findings found in Vulnerability Management Platform")
@@ -67,33 +41,16 @@ def process_findings(
 
     handle_filters = HandleFilters()
 
-    return process_active_findings(
-        handle_filters.filter(findings),
-        findings,
-        vm_exclusions,
-        devops_platform_gateway,
-        dict_args,
-        remote_config,
-        risk_exclusions,
-        services,
-        add_epss_gateway,
-        print_table_gateway,
+    active_findings = handle_filters.filter(findings)
+
+    unique_findings = handle_filters.filter_duplicated(active_findings)
+
+    filtered_findings = handle_filters.filter_tags_days(
+        devops_platform_gateway, remote_config, unique_findings
     )
 
+    data_added = AddData(add_epss_gateway, filtered_findings).process()
 
-def process_active_findings(
-    active_findings,
-    total_findings,
-    vm_exclusions,
-    devops_platform_gateway,
-    dict_args,
-    remote_config,
-    risk_exclusions,
-    services,
-    add_epss_gateway,
-    print_table_gateway,
-):
-    data_added = AddData(add_epss_gateway, active_findings).process()
     get_exclusions = GetExclusions(
         devops_platform_gateway,
         dict_args,
@@ -103,6 +60,7 @@ def process_active_findings(
         services,
     )
     exclusions = get_exclusions.process()
+
     break_build = BreakBuild(
         devops_platform_gateway,
         print_table_gateway,
@@ -110,7 +68,7 @@ def process_active_findings(
         exclusions,
         vm_exclusions,
         data_added,
-        total_findings,
+        findings,
     )
 
     return break_build.process()
