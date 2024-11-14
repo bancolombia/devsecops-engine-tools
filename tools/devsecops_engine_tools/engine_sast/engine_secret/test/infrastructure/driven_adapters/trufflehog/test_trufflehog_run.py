@@ -121,7 +121,12 @@ class TestTrufflehogRun(unittest.TestCase):
                     "NUMBER_THREADS": 4,
                     "ENABLE_CUSTOM_RULES" : "True",
                     "EXTERNAL_DIR_OWNER": "External_Github",
-                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks"
+                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",
+                    "RULES": {
+                        "MISSCONFIGURATION_SCANNING" : {
+                            "References" : "https://link.reference.com"
+                        }
+                    }
                 }
             }
         config_tool = DeserializeConfigTool(json_data=json_config_tool, tool="trufflehog")
@@ -139,7 +144,9 @@ class TestTrufflehogRun(unittest.TestCase):
             "RawV2": "https://admin:admin@the-internet.herokuapp.com/basic_auth",
             "Redacted": "https://admin:********@the-internet.herokuapp.com", "ExtraData": None,
             "StructuredData": None,
-            "Id": "SECRET_SCANNING"}]
+            "Id": "SECRET_SCANNING",
+            'References': 'N.A', 
+            'Mitigation': ''}]
         self.assertEqual(result, expected_result)
         self.assertEqual(os.path.normpath(file_findings), os.path.normpath(os.path.join('/usr/temp/', 'secret_scan_result.json')))
 
