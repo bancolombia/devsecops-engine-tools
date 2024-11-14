@@ -57,7 +57,7 @@ def test_process(
         [],
     )
     break_build.break_build = True
-    result = break_build.process()
+    break_build.process()
 
     remediation_rate_control.assert_called_once()
     apply_exclusions.assert_called_once()
@@ -126,7 +126,7 @@ def test_remediation_rate_control_greater():
 
     devops_platform_gateway.message.assert_called_with(
         "succeeded",
-        f"Remediation Rate {remediation_rate_value}% is greater than {risk_threshold}%",
+        f"Remediation rate {remediation_rate_value}% is greater than {risk_threshold}%",
     )
 
 
@@ -153,7 +153,7 @@ def test_remediation_rate_control_close():
 
     devops_platform_gateway.message.assert_called_with(
         "warning",
-        f"Remediation Rate {remediation_rate_value}% is close to {risk_threshold}%",
+        f"Remediation rate {remediation_rate_value}% is close to {risk_threshold}%",
     )
 
 
@@ -180,7 +180,7 @@ def test_remediation_rate_control_less():
 
     devops_platform_gateway.message.assert_called_with(
         "error",
-        f"Remediation Rate {remediation_rate_value}% is less than {risk_threshold}%",
+        f"Remediation rate {remediation_rate_value}% is less than {risk_threshold}%",
     )
 
 
@@ -193,6 +193,10 @@ def test_map_applied_exclusion():
             create_date="create_date",
             expired_date="expired_date",
             reason="reason",
+            vm_id="vm_id",
+            vm_id_url="vm_id_url",
+            service="service",
+            tags=["tags"],
         )
     ]
     expected = [
@@ -203,6 +207,10 @@ def test_map_applied_exclusion():
             "create_date": "create_date",
             "expired_date": "expired_date",
             "reason": "reason",
+            "vm_id": "vm_id",
+            "vm_id_url": "vm_id_url",
+            "service": "service",
+            "tags": ["tags"],
         }
     ]
 
@@ -258,9 +266,16 @@ def test_apply_exclusions_id():
     assert result == ([], exclusions)
 
 
-
 def test_tag_blacklist_control_error():
-    report_list = [Report(vuln_id_from_tool="id1", tags=["blacklisted"], age=10)]
+    report_list = [
+        Report(
+            vuln_id_from_tool="id1",
+            tags=["blacklisted"],
+            age=10,
+            vm_id="vm_id",
+            vm_id_url="vm_id_url",
+        )
+    ]
     remote_config = {
         "THRESHOLD": {
             "TAG_BLACKLIST": ["blacklisted"],
@@ -268,9 +283,9 @@ def test_tag_blacklist_control_error():
         }
     }
     tag_age_threshold = remote_config["THRESHOLD"]["TAG_MAX_AGE"]
-    devops_platform_gateway = MagicMock()
+    mock_devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
-        devops_platform_gateway,
+        mock_devops_platform_gateway,
         MagicMock(),
         remote_config,
         [],
@@ -280,14 +295,22 @@ def test_tag_blacklist_control_error():
     )
     break_build._tag_blacklist_control(report_list)
 
-    devops_platform_gateway.message.assert_called_once_with(
+    mock_devops_platform_gateway.message.assert_called_once_with(
         "error",
-        f"Report {report_list[0].vuln_id_from_tool} with tag {report_list[0].tags[0]} is blacklisted and age {report_list[0].age} is above threshold {tag_age_threshold}",
+        f"Report {report_list[0].vm_id} with tag {report_list[0].tags[0]} is blacklisted and age {report_list[0].age} is above threshold {tag_age_threshold}",
     )
 
 
 def test_tag_blacklist_control_warning():
-    report_list = [Report(vuln_id_from_tool="id2", tags=["blacklisted"], age=3)]
+    report_list = [
+        Report(
+            vuln_id_from_tool="id2",
+            tags=["blacklisted"],
+            age=3,
+            vm_id="vm_id",
+            vm_id_url="vm_id_url",
+        )
+    ]
     remote_config = {
         "THRESHOLD": {
             "TAG_BLACKLIST": ["blacklisted"],
@@ -295,9 +318,9 @@ def test_tag_blacklist_control_warning():
         }
     }
     tag_age_threshold = remote_config["THRESHOLD"]["TAG_MAX_AGE"]
-    devops_platform_gateway = MagicMock()
+    mock_devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
-        devops_platform_gateway,
+        mock_devops_platform_gateway,
         MagicMock(),
         remote_config,
         [],
@@ -307,9 +330,9 @@ def test_tag_blacklist_control_warning():
     )
     break_build._tag_blacklist_control(report_list)
 
-    devops_platform_gateway.message.assert_called_once_with(
+    mock_devops_platform_gateway.message.assert_called_once_with(
         "warning",
-        f"Report {report_list[0].vuln_id_from_tool} with tag {report_list[0].tags[0]} is blacklisted but age {report_list[0].age} is below threshold {tag_age_threshold}",
+        f"Report {report_list[0].vm_id} with tag {report_list[0].tags[0]} is blacklisted but age {report_list[0].age} is below threshold {tag_age_threshold}",
     )
 
 
