@@ -90,8 +90,8 @@ class PrinterPrettyTable(PrinterTableGateway):
         if exclusions:
             headers = [
                 "VM ID",
-                "Tags",
                 "Services",
+                "Tags",
                 "Created Date",
                 "Expired Date",
                 "Reason",
@@ -102,8 +102,8 @@ class PrinterPrettyTable(PrinterTableGateway):
         for exclusion in exclusions:
             row_data = [
                 self._check_spaces(exclusion["vm_id"]),
-                ", ".join(exclusion["tags"]),
                 self._check_spaces(exclusion["service"]),
+                ", ".join(exclusion["tags"]),
                 format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
                 (
                     format_date(exclusion["expired_date"], "%d%m%Y", "%d/%m/%Y")
