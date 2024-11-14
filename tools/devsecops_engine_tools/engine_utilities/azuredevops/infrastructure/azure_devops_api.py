@@ -52,22 +52,17 @@ class AzureDevopsApi:
     def get_remote_json_config(self, connection: Connection, branch):
         try:
             git_client = connection.clients.get_git_client()
+            version_descriptor = None
             if branch:
-                version_descriptor = GitVersionDescriptor()
-                version_descriptor.version = branch
-                version_descriptor.version_type = "branch"
-                file_content = git_client.get_item_text(
-                    repository_id=self.__repository_id,
-                    path=self.__remote_config_path,
-                    project=self.__project_remote_config,
-                    version_descriptor=version_descriptor
-                )
-            else:
-                file_content = git_client.get_item_text(
-                    repository_id=self.__repository_id,
-                    path=self.__remote_config_path,
-                    project=self.__project_remote_config,
-                )
+                version_descriptor = GitVersionDescriptor(version=branch, version_type="branch")
+
+            file_content = git_client.get_item_text(
+                repository_id=self.__repository_id,
+                path=self.__remote_config_path,
+                project=self.__project_remote_config,
+                version_descriptor=version_descriptor
+            )
+            
             data = json.loads(b"".join(file_content).decode("utf-8"))
             return data
         except Exception as e:
