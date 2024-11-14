@@ -39,11 +39,11 @@ class TestCodeScan(unittest.TestCase):
         self.mock_devops_platform_gateway.get_variable.return_value = "pipeline_test_name"
 
         # Act
-        self.code_scan.set_config_tool({"remote_config_repo": "test_repo"})
+        self.code_scan.set_config_tool({"remote_config_repo": "test_repo", "remote_config_branch": ""})
 
         # Assert
         self.mock_devops_platform_gateway.get_remote_config.assert_called_once_with(
-            "test_repo", "engine_sast/engine_code/ConfigTool.json"
+            "test_repo", "engine_sast/engine_code/ConfigTool.json", ""
         )
         self.mock_devops_platform_gateway.get_variable.assert_called_once_with("pipeline_name")
         mock_config_tool.assert_called_once_with(
@@ -93,11 +93,11 @@ class TestCodeScan(unittest.TestCase):
         mock_exclusions.return_value = Mock()
 
         # Act
-        exclusions, skip_tool = self.code_scan.get_exclusions({"remote_config_repo": "test_repo"}, "TOOL_NAME")
+        exclusions, skip_tool = self.code_scan.get_exclusions({"remote_config_repo": "test_repo", "remote_config_branch": ""}, "TOOL_NAME")
 
         # Aserciones
         self.mock_devops_platform_gateway.get_remote_config.assert_called_once_with(
-            "test_repo", "engine_sast/engine_code/Exclusions.json"
+            "test_repo", "engine_sast/engine_code/Exclusions.json", ""
         )
         self.assertFalse(skip_tool)
         mock_exclusions.assert_called_with(
@@ -127,11 +127,11 @@ class TestCodeScan(unittest.TestCase):
         mock_exclusions.return_value = Mock()
 
         # Act
-        exclusions, skip_tool = self.code_scan.get_exclusions({"remote_config_repo": "test_repo"}, "TOOL_NAME")
+        exclusions, skip_tool = self.code_scan.get_exclusions({"remote_config_repo": "test_repo", "remote_config_branch": ""}, "TOOL_NAME")
 
         # Assert
         self.mock_devops_platform_gateway.get_remote_config.assert_called_once_with(
-            "test_repo", "engine_sast/engine_code/Exclusions.json"
+            "test_repo", "engine_sast/engine_code/Exclusions.json", ""
         )
         self.assertFalse(skip_tool)
         mock_exclusions.assert_called_with(
@@ -157,11 +157,11 @@ class TestCodeScan(unittest.TestCase):
         mock_exclusions.return_value = Mock()
 
         # Act
-        exclusions, skip_tool = self.code_scan.get_exclusions({"remote_config_repo": "test_repo"}, "TOOL_NAME")
+        exclusions, skip_tool = self.code_scan.get_exclusions({"remote_config_repo": "test_repo", "remote_config_branch": ""}, "TOOL_NAME")
 
         # Assert
         self.mock_devops_platform_gateway.get_remote_config.assert_called_once_with(
-            "test_repo", "engine_sast/engine_code/Exclusions.json"
+            "test_repo", "engine_sast/engine_code/Exclusions.json", ""
         )
         self.assertTrue(skip_tool)
         self.assertEqual(exclusions, [])

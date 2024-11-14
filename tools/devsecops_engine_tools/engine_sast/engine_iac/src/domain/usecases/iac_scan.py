@@ -29,11 +29,11 @@ class IacScan:
         if dict_args["remote_config_branch"]: branch = dict_args["remote_config_branch"]
 
         config_tool_iac = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_sast/engine_iac/ConfigTool.json", branch=branch
+            dict_args["remote_config_repo"], "engine_sast/engine_iac/ConfigTool.json", dict_args["remote_config_branch"]
         )
 
         exclusions = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_sast/engine_iac/Exclusions.json"
+            dict_args["remote_config_repo"], "engine_sast/engine_iac/Exclusions.json", dict_args["remote_config_branch"]
         )
 
         config_tool_core, folders_to_scan, skip_tool = self.complete_config_tool(

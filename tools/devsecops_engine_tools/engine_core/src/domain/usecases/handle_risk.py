@@ -84,7 +84,7 @@ class HandleRisk:
 
     def _exclude_services(self, dict_args, pipeline_name, service_list):
         risk_exclusions = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_risk/Exclusions.json"
+            dict_args["remote_config_repo"], "engine_risk/Exclusions.json", dict_args["remote_config_branch"]
         )
         if (
             pipeline_name in risk_exclusions
@@ -114,10 +114,10 @@ class HandleRisk:
 
     def process(self, dict_args: any, remote_config: any):
         risk_config = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
+            dict_args["remote_config_repo"], "engine_risk/ConfigTool.json", dict_args["remote_config_branch"]
         )
         risk_exclusions = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_risk/Exclusions.json"
+            dict_args["remote_config_repo"], "engine_risk/Exclusions.json", dict_args["remote_config_branch"]
         )
         pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
 

@@ -19,7 +19,11 @@ class RuntimeLocal(DevopsPlatformGateway):
 
 
     def get_remote_config(self, repository, path, branch=""):
-        with open(f"{repository}/{path}") as f:
+        folder = ""
+        if branch: folder = f"/{branch}"
+        remote_config_path = f"{repository}{folder}/{path}"
+
+        with open(remote_config_path) as f:
             return json.load(f)
 
     def message(self, type, message):

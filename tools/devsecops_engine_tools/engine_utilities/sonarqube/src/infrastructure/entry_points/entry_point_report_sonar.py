@@ -14,7 +14,7 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 def init_report_sonar(vulnerability_management_gateway, secrets_manager_gateway, devops_platform_gateway, sonar_gateway, metrics_manager_gateway, args):
     config_tool = devops_platform_gateway.get_remote_config(
-        args["remote_config_repo"], "/engine_core/ConfigTool.json"
+        args["remote_config_repo"], "/engine_core/ConfigTool.json", args["remote_config_branch"]
     )
     Printers.print_logo_tool(config_tool["BANNER"])
 

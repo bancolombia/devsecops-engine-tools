@@ -59,7 +59,8 @@ class ReportSonar:
         )
         config_tool = self.devops_platform_gateway.get_remote_config(
             args["remote_config_repo"],
-            "/engine_core/ConfigTool.json"
+            "/engine_core/ConfigTool.json",
+            args["remote_config_branch"]
         )
         environment = define_env(None, branch)
         
@@ -70,7 +71,8 @@ class ReportSonar:
 
         report_config_tool = self.devops_platform_gateway.get_remote_config(
             args["remote_config_repo"],
-            "/report_sonar/ConfigTool.json"
+            "/report_sonar/ConfigTool.json",
+            args["remote_config_branch"]
         )
 
         get_components = report_config_tool["PIPELINE_COMPONENTS"].get(pipeline_name)

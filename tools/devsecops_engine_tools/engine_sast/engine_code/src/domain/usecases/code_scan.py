@@ -32,7 +32,8 @@ class CodeScan:
     def set_config_tool(self, dict_args):
         init_config_tool = self.devops_platform_gateway.get_remote_config(
             dict_args["remote_config_repo"], 
-            "engine_sast/engine_code/ConfigTool.json"
+            "engine_sast/engine_code/ConfigTool.json",
+            dict_args["remote_config_branch"]
         )
         scope_pipeline = self.devops_platform_gateway.get_variable(
             "pipeline_name"
@@ -56,7 +57,8 @@ class CodeScan:
     def get_exclusions(self, dict_args, tool):
         exclusions_data = self.devops_platform_gateway.get_remote_config(
             dict_args["remote_config_repo"],
-            "engine_sast/engine_code/Exclusions.json"
+            "engine_sast/engine_code/Exclusions.json",
+            dict_args["remote_config_branch"]
         )
         list_exclusions = []
         skip_tool = False

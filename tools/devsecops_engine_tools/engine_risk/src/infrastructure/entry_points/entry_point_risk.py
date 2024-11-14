@@ -30,10 +30,10 @@ def init_engine_risk(
     vm_exclusions,
 ):
     remote_config = devops_platform_gateway.get_remote_config(
-        dict_args["remote_config_repo"], "engine_risk/ConfigTool.json"
+        dict_args["remote_config_repo"], "engine_risk/ConfigTool.json", dict_args["remote_config_branch"]
     )
     risk_exclusions = devops_platform_gateway.get_remote_config(
-        dict_args["remote_config_repo"], "engine_risk/Exclusions.json"
+        dict_args["remote_config_repo"], "engine_risk/Exclusions.json", dict_args["remote_config_branch"]
     )
 
     return process_findings(

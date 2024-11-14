@@ -20,7 +20,7 @@ class TestInitReportSonar(unittest.TestCase):
             },
             "BANNER": "DevSecOps"
         }
-        args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false"}
+        args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false", "remote_config_branch": ""}
 
         # Act
         init_report_sonar(
@@ -54,7 +54,7 @@ class TestInitReportSonar(unittest.TestCase):
             },
             "BANNER": "DevSecOps"
         }
-        args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false"}
+        args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false", "remote_config_branch": ""}
 
         # Act
         init_report_sonar(

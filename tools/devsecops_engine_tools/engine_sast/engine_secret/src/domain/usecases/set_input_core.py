@@ -22,7 +22,7 @@ class SetInputCore:
         Returns:
             dict: Remote configuration.
         """
-        return self.tool_remote.get_remote_config(self.dict_args["remote_config_repo"], file_path)
+        return self.tool_remote.get_remote_config(self.dict_args["remote_config_repo"], file_path, self.dict_args["remote_config_branch"])
 
     def get_variable(self, variable):
         """
