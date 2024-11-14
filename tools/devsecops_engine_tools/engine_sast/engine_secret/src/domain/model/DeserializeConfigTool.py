@@ -13,3 +13,4 @@ class DeserializeConfigTool:
         self.external_dir_owner = json_data[tool]["EXTERNAL_DIR_OWNER"]
         self.external_dir_repo = json_data[tool]["EXTERNAL_DIR_REPOSITORY"]
         self.tool_version = json_data[tool]["VERSION"]
+        self.extradata_rules = json_data[tool]["RULES"]

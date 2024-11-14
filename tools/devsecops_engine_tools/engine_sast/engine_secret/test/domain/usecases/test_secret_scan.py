@@ -32,7 +32,12 @@ class TestSecretScan(unittest.TestCase):
                 "NUMBER_THREADS": 4,
                 "ENABLE_CUSTOM_RULES" : "True",
                 "EXTERNAL_DIR_OWNER": "ExternalOrg",
-                "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks"
+                "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",
+                "RULES": {
+                    "MISSCONFIGURATION_SCANNING" : {
+                        "References" : "https://link.reference.com"
+                    }
+                }
             }
         }
 

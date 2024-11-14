@@ -51,7 +51,13 @@ class TestEngineSecretScan(unittest.TestCase):
                     "NUMBER_THREADS": 4,
                     "ENABLE_CUSTOM_RULES" : "True",
                     "EXTERNAL_DIR_OWNER": "External_Github",
-                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks"
+                    "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",
+                    "RULES": {
+                        "MISSCONFIGURATION_SCANNING" : {
+                            "References" : "https://link.reference.com",
+                            "Mitigation" : "Make sure do all good"
+                        }
+                    }
                 }
             }
         obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
