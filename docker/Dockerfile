@@ -30,7 +30,6 @@ RUN apt-get update && apt-get install -y dos2unix
 
 COPY ./example_remote_config_local /app/example_remote_config_local
 COPY ./docker/remoteConfigGeneration.sh /app/remoteConfigGeneration.sh
-COPY ./docker/Base_IAC_Config.json /app/example_remote_config_local/engine_sast/engine_iac/ConfigTool.json
 
 RUN dos2unix /app/remoteConfigGeneration.sh
 
@@ -75,10 +74,6 @@ RUN ln -s /usr/bin/python3 /usr/local/bin/python3 && \
 
 RUN python3 -m venv venv
 RUN python3 -m pip install --break-system-packages checkov==2.3.296
-
-# Download twistcli with authorization header
-RUN curl -L -H "Authorization: Basic YTg0MDM2Y2EtOTZmMi00MWNjLTk1ZDQtYjg0YzA2NThmYzUwOjNGOUY1djE1L1ZzZjdKT3dnMVk5VnozT2VXZz0=" -o /app/twistcli https://us-west1.cloud.twistlock.com/us-3-159209233/api/v1/util/twistcli && \
-    chmod +x /app/twistcli
 
 RUN python3 -m pip install --break-system-packages -i https://pypi.org/simple devsecops-engine-tools==$APP_VERSION
 
