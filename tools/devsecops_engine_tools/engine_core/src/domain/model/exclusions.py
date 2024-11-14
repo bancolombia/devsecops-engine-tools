@@ -12,3 +12,7 @@ class Exclusions:
         self.severity = kwargs.get("severity", "")
         self.hu = kwargs.get("hu", "")
         self.reason = kwargs.get("reason", "Risk Accepted")
+        self.vm_id = kwargs.get("vm_id", "")
+        self.vm_id_url = kwargs.get("vm_id_url", "")
+        self.service = kwargs.get("service", "")
+        self.tags = kwargs.get("tags", [])

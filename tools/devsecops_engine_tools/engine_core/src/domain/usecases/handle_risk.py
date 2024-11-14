@@ -51,7 +51,7 @@ class HandleRisk:
                 "Error getting finding list in handle risk: {0}".format(str(e))
             )
 
-    def _filter_engagements(self, engagements, service, risk_config):
+    def _filter_engagements(self, engagements, service, initial_services, risk_config):
         filtered_engagements = []
         min_word_length = risk_config["HANDLE_SERVICE_NAME"]["MIN_WORD_LENGTH"]
         words = [
@@ -65,20 +65,22 @@ class HandleRisk:
         min_word_amount = risk_config["HANDLE_SERVICE_NAME"]["MIN_WORD_AMOUNT"]
         endings = risk_config["HANDLE_SERVICE_NAME"]["CHECK_ENDING"]
 
+        initial_services_lower = [service.lower() for service in initial_services]
+
         for engagement in engagements:
-            if service.lower() == engagement.name.lower():
-                filtered_engagements += [engagement.name]
+            if engagement.name.lower() in initial_services_lower:
+                filtered_engagements += [engagement]
             elif re.search(check_words_regex, engagement.name.lower()) and (
                 sum(1 for word in words if word.lower() in engagement.name.lower())
                 >= min_word_amount
             ):
-                filtered_engagements += [engagement.name]
+                filtered_engagements += [engagement]
             elif endings:
                 if any(
                     (service.lower() + ending.lower() == engagement.name.lower())
                     for ending in endings
                 ):
-                    filtered_engagements += [engagement.name]
+                    filtered_engagements += [engagement]
 
         return filtered_engagements
 
@@ -94,15 +96,28 @@ class HandleRisk:
             services_to_exclude = set(
                 risk_exclusions[pipeline_name]["SKIP_SERVICE"].get("services", [])
             )
-            service_set = set(service_list)
 
-            remaining_services = list(service_set - services_to_exclude)
-            service_excluded = list(service_set & services_to_exclude)
+            remaining_engagements = [
+                engagement
+                for engagement in service_list
+                if engagement.name.lower()
+                not in [service.lower() for service in services_to_exclude]
+            ]
+            excluded_engagements = [
+                engagement
+                for engagement in service_list
+                if engagement.name.lower()
+                in [service.lower() for service in services_to_exclude]
+            ]
 
-            print(f"Services to exclude: {service_excluded}")
-            logger.info(f"Services to exclude: {service_excluded}")
+            print(
+                f"Services to exclude: {[engagement.name for engagement in excluded_engagements]}"
+            )
+            logger.info(
+                f"Services to exclude: {[engagement.name for engagement in excluded_engagements]}"
+            )
 
-            return remaining_services
+            return remaining_engagements
         return service_list
 
     def _should_skip_analysis(self, remote_config, pipeline_name, exclusions):
@@ -141,6 +156,15 @@ class HandleRisk:
 
         service = pipeline_name
         service_list = []
+        initial_services = []
+        initial_services += [service]
+
+        match_parent = re.match(
+            risk_config["PARENT_ANALYSIS"]["REGEX_GET_PARENT"], service
+        )
+        if risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true" and match_parent:
+            parent_service = match_parent.group(0)
+            initial_services += [parent_service]
 
         if risk_config["HANDLE_SERVICE_NAME"]["ENABLED"].lower() == "true":
             service = next(
@@ -156,7 +180,7 @@ class HandleRisk:
             )
             if match_service_code:
                 service_code = match_service_code.group(0)
-                service_list += [
+                initial_services += [
                     service.format(service_code=service_code)
                     for service in risk_config["HANDLE_SERVICE_NAME"]["ADD_SERVICES"]
                 ]
@@ -164,31 +188,33 @@ class HandleRisk:
                     service_code, dict_args, secret_tool, remote_config
                 )
                 service_list += self._filter_engagements(
-                    engagements, service, risk_config
+                    engagements, service, initial_services, risk_config
                 )
+        else:
+            for service in initial_services:
+                engagements = self.vulnerability_management.get_active_engagements(
+                    service, dict_args, secret_tool, remote_config
+                )
+                for engagement in engagements:
+                    if engagement.name.lower() == service.lower():
+                        service_list += [engagement]
+                        break
 
-        service_list += [service]
-
-        match_parent = re.match(
-            risk_config["PARENT_ANALYSIS"]["REGEX_GET_PARENT"], service
-        )
-        if risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true" and match_parent:
-            parent_service = match_parent.group(0)
-            service_list += [parent_service]
-
-        service_list = list(set(service_list))
         new_service_list = self._exclude_services(
             dict_args, pipeline_name, service_list
         )
 
-        print(f"Services to analyze: {new_service_list}")
-        logger.info(f"Services to analyze: {new_service_list}")
+        for engagement in new_service_list:
+            print(f"Service to analyze: {engagement.name}, URL: {engagement.vm_url}")
+            logger.info(
+                f"Service to analyze: {engagement.name}, URL: {engagement.vm_url}"
+            )
 
         findings = []
         exclusions = []
         for service in new_service_list:
             findings_list, exclusions_list = self._get_all_from_vm(
-                dict_args, secret_tool, remote_config, service
+                dict_args, secret_tool, remote_config, service.name
             )
             findings += findings_list
             exclusions += exclusions_list
@@ -197,7 +223,7 @@ class HandleRisk:
             dict_args,
             findings,
             exclusions,
-            new_service_list,
+            [service.name for service in new_service_list],
             self.devops_platform_gateway,
             self.print_table_gateway,
         )

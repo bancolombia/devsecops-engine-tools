@@ -200,8 +200,8 @@ def application_core():
             "github": GithubActions(),
             "local": RuntimeLocal(),
         }.get(args["platform_devops"])
-        printer_table_gateway = PrinterPrettyTable()
         metrics_manager_gateway = S3Manager()
+        printer_table_gateway = PrinterPrettyTable()
 
         init_engine_core(
             vulnerability_management_gateway,
