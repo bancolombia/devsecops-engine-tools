@@ -38,8 +38,8 @@ class HandleFilters:
                     findings_map[key] = new_finding
                 else:
                     existing_finding.service = " ".join(combined_services)
-                    new_finding.vm_id = " ".join(combined_vm_ids)
-                    new_finding.vm_id_url = " ".join(combined_vm_id_urls)
+                    existing_finding.vm_id = " ".join(combined_vm_ids)
+                    existing_finding.vm_id_url = " ".join(combined_vm_id_urls)
             else:
                 findings_map[key] = copy.deepcopy(finding)
 
