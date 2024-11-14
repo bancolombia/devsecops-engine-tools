@@ -43,6 +43,7 @@ class TestHandleScan(unittest.TestCase):
             "tool": "engine_iac",
             "use_vulnerability_management": "true",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": ""
         }
         config_tool = {"ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
         secret_tool = "some_secret"
@@ -96,6 +97,7 @@ class TestHandleScan(unittest.TestCase):
             "tool": "engine_iac",
             "use_vulnerability_management": "true",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": ""
         }
         config_tool = {"ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
 
@@ -141,6 +143,7 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_container",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
         config_tool = {"ENGINE_CONTAINER": {"ENABLED": "true", "TOOL": "tool"}}
@@ -218,6 +221,7 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_secret",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
         config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
@@ -254,6 +258,7 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_secret",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
         config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
@@ -290,6 +295,7 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "false",
             "tool": "engine_secret",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
         config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
@@ -328,6 +334,7 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_dependencies",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
         config_tool = {

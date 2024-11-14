@@ -202,7 +202,7 @@ class TestCodeScan(unittest.TestCase):
         self.mock_devops_platform_gateway.get_variable.side_effect = ["test_work_folder", "test_repo", "test_stage"]
 
         # Act
-        findings_list, _ = self.code_scan.process({"folder_path": None, "remote_config_repo": "some_repo"}, "TOOL_NAME")
+        findings_list, _ = self.code_scan.process({"folder_path": None, "remote_config_repo": "some_repo", "remote_config_branch": ""}, "TOOL_NAME")
 
         # Assert
         self.code_scan.set_config_tool.assert_called_once()
@@ -228,7 +228,7 @@ class TestCodeScan(unittest.TestCase):
         self.mock_devops_platform_gateway.get_variable.return_value = "test_stage"
 
         # Act
-        findings_list, _ = self.code_scan.process({"folder_path": None, "remote_config_repo": "some_repo"}, "TOOL_NAME")
+        findings_list, _ = self.code_scan.process({"folder_path": None, "remote_config_repo": "some_repo", "remote_config_branch": ""}, "TOOL_NAME")
 
         # Assert
         self.code_scan.set_config_tool.assert_called_once()

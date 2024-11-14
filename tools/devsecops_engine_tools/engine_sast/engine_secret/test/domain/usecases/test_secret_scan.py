@@ -56,6 +56,7 @@ class TestSecretScan(unittest.TestCase):
         mock_git_gateway_instance = mock_git_gateway.return_value
         mock_dict_args = {
             "remote_config_repo": "example_repo",
+            "remote_config_branch": "",
             "folder_path": ".",
             "environment": "test",
             "platform": "local",
@@ -111,6 +112,7 @@ class TestSecretScan(unittest.TestCase):
         mock_git_gateway_instance = mock_git_gateway.return_value
         mock_dict_args = {
             "remote_config_repo": "example_repo",
+            "remote_config_branch": "",
             "folder_path": ".",
             "environment": "test",
             "platform": "local",
@@ -265,7 +267,7 @@ class TestSecretScan(unittest.TestCase):
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
 
         config_tool_instance, skip_tool_isp = secret_scan.complete_config_tool(
-            {"remote_config_repo": "repository"}, "TRUFFLEHOG"
+            {"remote_config_repo": "repository", "remote_config_branch": ""}, "TRUFFLEHOG"
         )
 
         self.assertEqual(config_tool_instance.scope_pipeline, "example_pipeline")

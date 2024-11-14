@@ -13,7 +13,7 @@ def test_init_engine_dependencies():
     ) as mock_set_input_core, patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.HandleRemoteConfigPatterns"
     ) as mock_handle_remote_config_patterns:
-        dict_args = {"remote_config_repo": "remote_repo"}
+        dict_args = {"remote_config_repo": "remote_repo", "remote_config_branch": ""}
         token = "token"
         tool = "tool"
         mock_handle_remote_config_patterns.process_handle_working_directory.return_value = (

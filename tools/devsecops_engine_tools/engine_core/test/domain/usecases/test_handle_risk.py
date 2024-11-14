@@ -126,6 +126,7 @@ class TestHandleRisk(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_risk",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": ""
         }
         secret_tool = None
         remote_config = {"ENGINE_RISK": {"ENABLED": "true"}}
@@ -147,6 +148,7 @@ class TestHandleRisk(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_risk",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": ""
         }
         secret_tool = None
         remote_config = {"ENGINE_RISK": {"ENABLED": "true"}}
