@@ -22,9 +22,6 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.s
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.printer_pretty_table.printer_pretty_table import (
     PrinterPrettyTable,
 )
-from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.printer_rich_table.printer_rich_table import (
-    PrinterRichTable,
-)
 import sys
 import argparse
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
