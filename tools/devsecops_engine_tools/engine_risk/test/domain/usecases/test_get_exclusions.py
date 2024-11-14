@@ -20,7 +20,7 @@ def test_process(
 
     get_exclusions = GetExclusions(
         MagicMock(),
-        {"remote_config_repo": "repo"},
+        {"remote_config_repo": "repo", "remote_config_branch": "repo"},
         MagicMock(),
         {"EXCLUSIONS_PATHS": {"tag1": "path1"}},
         MagicMock(),
