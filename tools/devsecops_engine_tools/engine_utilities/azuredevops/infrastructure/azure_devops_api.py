@@ -2,6 +2,7 @@ import json
 from devsecops_engine_tools.engine_utilities.utils.api_error import ApiError
 from urllib.parse import urlsplit, unquote
 from azure.devops.connection import Connection
+from azure.devops.v7_1.wiki.models import GitVersionDescriptor    
 from msrest.authentication import BasicAuthentication
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities.settings import SETTING_LOGGER
@@ -52,14 +53,14 @@ class AzureDevopsApi:
         try:
             git_client = connection.clients.get_git_client()
             if branch:
+                version_descriptor = GitVersionDescriptor()
+                version_descriptor.version = branch
+                version_descriptor.version_type = "branch"
                 file_content = git_client.get_item_text(
                     repository_id=self.__repository_id,
                     path=self.__remote_config_path,
                     project=self.__project_remote_config,
-                    version_descriptor={
-                        'versionType': 'branch',
-                        'version': branch
-                    }
+                    version_descriptor=version_descriptor
                 )
             else:
                 file_content = git_client.get_item_text(
