@@ -153,8 +153,8 @@ class TrufflehogRun(ToolGateway):
                 where_text = original_where.replace(agent_work_folder, "")
                 find["SourceMetadata"]["Data"]["Filesystem"]["file"] = where_text
                 find["Id"] = "MISCONFIGURATION_SCANNING" if "exposure" in find["Raw"] else "SECRET_SCANNING"
-                find["References"] = config_tool.extradata_rules["MISSCONFIGURATION_SCANNING"]["References"] if "MISSCONFIGURATION_SCANNING" in find["Id"] else "N.A"
-                find["Mitigation"] = "Make sure you only enable the Spring Boot Actuator endpoints that you really need and restrict access to these endpoints." if "MISSCONFIGURATION_SCANNING" in find["Id"] else ""
+                find["References"] = config_tool.extradata_rules[find["Id"]]["References"] if "SECRET_SCANNING" not in find["Id"] else "N.A"
+                find["Mitigation"] = config_tool.extradata_rules[find["Id"]]["Mitigation"] if "SECRET_SCANNING" not in find["Id"] else "N.A"
                 json_str = json.dumps(find)
                 file.write(json_str + '\n')
         return findings, file_findings

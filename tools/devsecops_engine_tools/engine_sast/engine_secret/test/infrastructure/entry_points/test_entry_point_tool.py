@@ -53,7 +53,8 @@ class TestEngineSecretScan(unittest.TestCase):
                     "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",
                     "RULES": {
                         "MISSCONFIGURATION_SCANNING" : {
-                            "References" : "https://link.reference.com"
+                            "References" : "https://link.reference.com",
+                            "Mitigation" : "Make sure do all good"
                         }
                     }
                 }

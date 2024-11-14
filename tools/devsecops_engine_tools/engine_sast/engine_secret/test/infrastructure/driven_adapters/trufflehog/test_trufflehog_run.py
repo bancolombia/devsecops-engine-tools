@@ -124,7 +124,8 @@ class TestTrufflehogRun(unittest.TestCase):
                     "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",
                     "RULES": {
                         "MISSCONFIGURATION_SCANNING" : {
-                            "References" : "https://link.reference.com"
+                            "References" : "https://link.reference.com",
+                            "Mitigation" : "Make sure do all good"
                         }
                     }
                 }
@@ -146,7 +147,7 @@ class TestTrufflehogRun(unittest.TestCase):
             "StructuredData": None,
             "Id": "SECRET_SCANNING",
             'References': 'N.A', 
-            'Mitigation': ''}]
+            'Mitigation': 'N.A'}]
         self.assertEqual(result, expected_result)
         self.assertEqual(os.path.normpath(file_findings), os.path.normpath(os.path.join('/usr/temp/', 'secret_scan_result.json')))
 
