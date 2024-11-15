@@ -1,4 +1,6 @@
 {
+    "IGNORE_SEARCH_PATTERN": ".*test.*",
+    "TARGET_BRANCHES": ["trunk", "develop", "master"],
     "PIPELINE_COMPONENTS": {
         "EXAMPLE_MULTICOMPONENT_PIPELINE": [
             "component1",
