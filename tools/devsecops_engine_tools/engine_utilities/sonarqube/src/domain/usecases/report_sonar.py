@@ -87,7 +87,7 @@ class ReportSonar:
             scan_type = "SONARQUBE",
             input_core = input_core,
             dict_args = args,
-            secret_tool = self.secrets_manager_gateway,
+            secret_tool = self.secrets_manager_gateway.get_secret(config_tool),
             config_tool = config_tool,
             source_code_management_uri = source_code_management_uri,
             base_compact_remote_config_url = compact_remote_config_url,
