@@ -13,6 +13,8 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclu
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
+from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
@@ -45,11 +47,11 @@ class IacScan:
                 environment="pdn" if env not in ["dev", "qa", "pdn"] else env,
                 platform_to_scan=dict_args["platform"],
                 secret_tool=secret_tool,
-                secret_external_checks=dict_args["token_external_checks"]
+                secret_external_checks=dict_args["token_external_checks"],
             )
         else:
             print(f"Tool skipped by DevSecOps policy")
-            logger.info(f"Tool skipped by DevSecOps policy")
+            dict_args["send_metrics"] = "false"
 
         totalized_exclusions = []
         (
@@ -69,7 +71,12 @@ class IacScan:
 
         input_core = InputCore(
             totalized_exclusions=totalized_exclusions,
-            threshold_defined=config_tool_core.threshold,
+            threshold_defined=Utils.update_threshold(
+                self,
+                config_tool_core.threshold,
+                exclusions,
+                config_tool_core.scope_pipeline,
+            ),
             path_file_results=path_file_results,
             custom_message_break_build=config_tool_core.message_info_engine_iac,
             scope_pipeline=config_tool_core.scope_pipeline,
@@ -88,7 +95,13 @@ class IacScan:
             "pipeline_name"
         )
 
-        skip_tool = bool(re.match(config_tool.ignore_search_pattern, config_tool.scope_pipeline, re.IGNORECASE))
+        skip_tool = bool(
+            re.match(
+                config_tool.ignore_search_pattern,
+                config_tool.scope_pipeline,
+                re.IGNORECASE,
+            )
+        )
 
         if config_tool.exclusions.get("All") is not None:
             config_tool.exclusions_all = config_tool.exclusions.get("All").get(tool)
@@ -96,7 +109,9 @@ class IacScan:
             config_tool.exclusions_scope = config_tool.exclusions.get(
                 config_tool.scope_pipeline
             ).get(tool)
-            skip_tool = bool(config_tool.exclusions.get(config_tool.scope_pipeline).get("SKIP_TOOL"))
+            skip_tool = bool(
+                config_tool.exclusions.get(config_tool.scope_pipeline).get("SKIP_TOOL")
+            )
 
         if dict_args["folder_path"]:
             if (
@@ -124,11 +139,7 @@ class IacScan:
 
     def search_folders(self, search_pattern):
         current_directory = os.getcwd()
-        patron = (
-            "(?i).*?("
-            + "|".join(search_pattern)
-            + ").*$"
-        )
+        patron = "(?i).*?(" + "|".join(search_pattern) + ").*$"
         folders = [
             folder
             for folder in os.listdir(current_directory)

@@ -30,15 +30,15 @@ class S3Manager(MetricsManagerGateway):
         if credentials_role:
             client = session.client(
                 service_name="s3",
-                region_name=config_tool["METRICS_MANAGER"]["AWS"]["REGION_NAME"]
-            )
-        else:
-            client = session.client(
-                service_name="s3",
                 region_name=config_tool["METRICS_MANAGER"]["AWS"]["REGION_NAME"],
                 aws_access_key_id=credentials_role["AccessKeyId"],
                 aws_secret_access_key=credentials_role["SecretAccessKey"],
                 aws_session_token=credentials_role["SessionToken"],
+            )
+        else:
+            client = session.client(
+                service_name="s3",
+                region_name=config_tool["METRICS_MANAGER"]["AWS"]["REGION_NAME"]
             )
         date = datetime.datetime.now()
         path_bucket = f'engine_tools/{tool}/{date.strftime("%Y")}/{date.strftime("%m")}/{date.strftime("%d")}/{file_path.split("/")[-1]}'

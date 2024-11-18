@@ -22,7 +22,7 @@
     "METRICS_MANAGER": {
         "AWS": {
             "BUCKET": "",
-            "USE_ROLE": true,
+            "USE_ROLE": false,
             "ROLE_ARN": "",
             "REGION_NAME": ""
         }

@@ -1,6 +1,7 @@
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 
 class SetInputCore:
@@ -31,15 +32,6 @@ class SetInputCore:
                     list_exclusions.extend(exclusions)
         return list_exclusions
 
-    def update_threshold(self, threshold, exclusions_data, pipeline_name):
-        if (pipeline_name in exclusions_data) and (
-            exclusions_data[pipeline_name].get("THRESHOLD", 0)
-        ):
-            threshold["VULNERABILITY"] = exclusions_data[pipeline_name][
-                "THRESHOLD"
-            ].get("VULNERABILITY")
-        return threshold
-
     def set_input_core(self, dependencies_scanned):
         """
         Set the input core.
@@ -53,10 +45,11 @@ class SetInputCore:
                 self.pipeline_name,
                 self.tool,
             ),
-            Threshold(
-                self.update_threshold(
-                    self.remote_config["THRESHOLD"], self.exclusions, self.pipeline_name
-                )
+            Utils.update_threshold(
+                self,
+                Threshold(self.remote_config["THRESHOLD"]),
+                self.exclusions,
+                self.pipeline_name,
             ),
             dependencies_scanned,
             self.remote_config["MESSAGE_INFO_ENGINE_DEPENDENCIES"],

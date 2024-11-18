@@ -132,7 +132,7 @@ class HandleRisk:
 
         if self._should_skip_analysis(risk_config, pipeline_name, risk_exclusions):
             print("Tool skipped by DevSecOps Policy.")
-            logger.info("Tool skipped by DevSecOps Policy.")
+            dict_args["send_metrics"] = "false"
             return [], input_core
 
         secret_tool = None

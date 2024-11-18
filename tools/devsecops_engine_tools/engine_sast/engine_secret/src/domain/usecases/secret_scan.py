@@ -58,6 +58,9 @@ class SecretScan:
                 self.devops_platform_gateway.get_variable("os"),
                 self.devops_platform_gateway.get_variable("path_directory")
                 )
+        else:
+            print(f"Tool skipped by DevSecOps policy")
+            dict_args["send_metrics"] = "false"
         return finding_list, file_path_findings
     
     def complete_config_tool(self, dict_args, tool):
