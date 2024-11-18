@@ -22,6 +22,7 @@ from devsecops_engine_tools.engine_utilities.sonarqube.src.domain.model.gateways
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore
 )
+import re
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
@@ -188,6 +189,9 @@ class ReportSonar:
                 logger.warning(f"It was not possible to synchronize Sonar and Vulnerability Manager: {e}")
 
             input_core.scope_pipeline = project_key
+            if re.match(report_config_tool["SCOPE_VALIDATION_REGEX"], source_code_management_uri, re.IGNORECASE):
+                input_core.scope_pipeline = pipeline_name
+
             self.vulnerability_management_gateway.send_vulnerability_management(
                 vulnerability_management=vulnerability_manager
             )

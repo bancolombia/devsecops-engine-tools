@@ -14,13 +14,24 @@ class TestInitReportSonar(unittest.TestCase):
         mock_devops_platform_gateway = MagicMock()
         mock_metrics_manager_gateway = MagicMock()
         mock_sonar_gateway = MagicMock()
-        mock_devops_platform_gateway.get_remote_config.return_value = {
-            "REPORT_SONAR" : {
-                "ENABLED": "true"
+        mock_devops_platform_gateway.get_remote_config.side_effect = [
+            {
+                "REPORT_SONAR" : {
+                    "ENABLED": "true"
+                },
+                "BANNER": "DevSecOps"
             },
-            "BANNER": "DevSecOps"
-        }
+            {
+                "IGNORE_SEARCH_PATTERN": ".*test.*",
+                "TARGET_BRANCHES": ["trunk", "develop", "master"],
+                "PIPELINE_COMPONENTS": {
+                    "EXAMPLE_MULTICOMPONENT_PIPELINE": []
+                }
+            }
+        ]
+        
         args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false", "remote_config_branch": ""}
+        mock_devops_platform_gateway.get_variable.side_effect = ["pipeline_name", "trunk"]
 
         # Act
         init_report_sonar(
@@ -48,13 +59,23 @@ class TestInitReportSonar(unittest.TestCase):
         # Arrange
         mock_devops_platform_gateway = MagicMock()
         mock_metrics_manager_gateway = MagicMock()
-        mock_devops_platform_gateway.get_remote_config.return_value = {
-            "REPORT_SONAR" : {
-                "ENABLED": "false"
+        mock_devops_platform_gateway.get_remote_config.side_effect = [
+            {
+                "REPORT_SONAR" : {
+                    "ENABLED": "false"
+                },
+                "BANNER": "DevSecOps"
             },
-            "BANNER": "DevSecOps"
-        }
+            {
+                "IGNORE_SEARCH_PATTERN": ".*test.*",
+                "TARGET_BRANCHES": ["trunk", "develop", "master"],
+                "PIPELINE_COMPONENTS": {
+                    "EXAMPLE_MULTICOMPONENT_PIPELINE": []
+                }
+            }
+        ]
         args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false", "remote_config_branch": ""}
+        mock_devops_platform_gateway.get_variable.side_effect = ["pipeline_name", "develop"]
 
         # Act
         init_report_sonar(
