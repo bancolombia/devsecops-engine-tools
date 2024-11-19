@@ -370,7 +370,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             elif finding.out_of_scope:
                 exclusions.append(
                     self._create_report_exclusion(
-                        finding, date_fn, "engine_risk", "Out of Scope"
+                        finding, date_fn, "engine_risk", "Out of Scope", host_dd
                     )
                 )
             elif finding.risk_status == "Transfer Accepted":
@@ -487,8 +487,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             false_p=finding.false_p,
             out_of_scope=finding.out_of_scope,
             service=finding.service,
-            unique_id_from_tool=finding.unique_id_from_tool,
-            out_of_scope=finding.out_of_scope
+            unique_id_from_tool=finding.unique_id_from_tool
         )
 
     def _format_date_to_dd_format(self, date_string):
