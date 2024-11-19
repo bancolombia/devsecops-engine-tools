@@ -106,7 +106,7 @@ class ReportSonar:
                 findings = self.vulnerability_management_gateway.get_all(
                     service=project_key,
                     dict_args=args,
-                    secret_tool=self.secrets_manager_gateway,
+                    secret_tool=secret_tool,
                     config_tool=config_tool
                 )[0]
                 filtered_findings = self.sonar_gateway.filter_by_sonarqube_tag(findings)
