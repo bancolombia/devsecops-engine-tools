@@ -28,6 +28,10 @@
         "engine_container": "engine_sca/engine_container/Exclusions.json",
         "engine_dependencies": "engine_sca/engine_dependencies/Exclusions.json"
     },
+    "TAG_EXCLUSION_DAYS": {
+        "tag1": 10,
+        "tag2": 20
+    },
     "WEIGHTS": {
         "severity": {
             "critical": 10,

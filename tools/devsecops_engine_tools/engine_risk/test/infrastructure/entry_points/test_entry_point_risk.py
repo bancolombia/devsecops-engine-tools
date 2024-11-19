@@ -1,101 +1,71 @@
 from unittest.mock import MagicMock, patch
 from devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk import (
     init_engine_risk,
-    process_findings,
 )
-
-
-@patch(
-    "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.process_findings"
-)
-def test_init_engine_risk_process(mock_process):
-    dict_args = {"remote_config_repo": "remote_config"}
-    findings = ["finding1", "finding2"]
-    services = ["service1", "service2"]
-    vm_exclusions = ["exclusion1", "exclusion2"]
-
-    init_engine_risk(
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        dict_args,
-        findings,
-        services,
-        vm_exclusions,
-    )
-
-    mock_process.assert_called_once()
-
-
-@patch("builtins.print")
-def test_process_findings_no_findings(mock_print):
-    findings = []
-
-    process_findings(
-        findings,
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-    )
-
-    mock_print.assert_called_once_with(
-        "No findings found in Vulnerability Management Platform"
-    )
 
 
 @patch(
     "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.HandleFilters"
 )
 @patch(
-    "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.process_active_findings"
-)
-def test_process_findings(mock_process_active, mock_filters):
-    findings = ["finding1", "finding2"]
-    mock_filters.return_value.filter.return_value = []
-
-    process_findings(
-        findings,
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-    )
-
-    mock_process_active.assert_called_once()
-
-
-@patch(
-    "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.GetExclusions"
+    "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.BreakBuild"
 )
 @patch(
     "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.AddData"
 )
 @patch(
-    "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.BreakBuild"
+    "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.GetExclusions"
 )
-def test_process_active_findings(mock_break, mock_add, mock_exclusions):
+def test_init_engine_risk(
+    mock_get_exclusions, mock_add_data, mock_break_build, mock_handle_filters
+):
+    dict_args = {"remote_config_repo": "remote_config"}
+    findings = ["finding1", "finding2"]
+    services = ["service1", "service2"]
+    vm_exclusions = ["exclusion1", "exclusion2"]
+    mock_devops_platform_gateway = MagicMock()
+    mock_print_table_gateway = MagicMock()
 
-    process_findings(
+    init_engine_risk(
         MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
-        MagicMock(),
+        mock_devops_platform_gateway,
+        mock_print_table_gateway,
+        dict_args,
+        findings,
+        services,
+        vm_exclusions,
     )
 
-    mock_add.return_value.process.assert_called_once()
-    mock_exclusions.return_value.process.assert_called_once()
-    mock_break.return_value.process.assert_called_once()
+    assert mock_devops_platform_gateway.get_remote_config.call_count == 2
+    mock_handle_filters.return_value.filter.assert_called_once_with(findings)
+    mock_handle_filters.return_value.filter_duplicated.assert_called_once()
+    mock_handle_filters.return_value.filter_tags_days.assert_called_once()
+    mock_add_data.assert_called_once()
+    mock_get_exclusions.assert_called_once()
+    mock_break_build.assert_called_once()
+
+
+@patch(
+    "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.logger"
+)
+def test_init_engine_risk_no_findings(mock_logger):
+    dict_args = {"remote_config_repo": "remote_config"}
+    findings = []
+    services = ["service1", "service2"]
+    vm_exclusions = ["exclusion1", "exclusion2"]
+    mock_devops_platform_gateway = MagicMock()
+    mock_print_table_gateway = MagicMock()
+
+    init_engine_risk(
+        MagicMock(),
+        mock_devops_platform_gateway,
+        mock_print_table_gateway,
+        dict_args,
+        findings,
+        services,
+        vm_exclusions,
+    )
+
+    mock_logger.info.assert_called_once_with(
+        "No findings found in Vulnerability Management Platform"
+    )

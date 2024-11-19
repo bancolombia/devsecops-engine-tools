@@ -42,12 +42,14 @@ class CheckovTool(ToolGateway):
         "RULES_K8S": "kubernetes",
         "RULES_CLOUDFORMATION": "cloudformation",
         "RULES_OPENAPI": "openapi",
+        "RULES_TERRAFORM": "terraform"
     }
     framework_external_checks = [
         "RULES_K8S",
         "RULES_CLOUDFORMATION",
         "RULES_DOCKER",
         "RULES_OPENAPI",
+        "RULES_TERRAFORM"
     ]
 
     def create_config_file(self, checkov_config: CheckovConfig):
@@ -191,10 +193,14 @@ class CheckovTool(ToolGateway):
                 if "all" in platform_to_scan or any(
                     elem.upper() in rule for elem in platform_to_scan
                 ):
+                    framework = [self.framework_mapping[rule]]
+                    if "terraform" in platform_to_scan or ("all" in platform_to_scan and self.framework_mapping[rule] == "terraform"): 
+                        framework.append("terraform_plan")
+
                     checkov_config = CheckovConfig(
                         path_config_file="",
                         config_file_name=rule,
-                        framework=self.framework_mapping[rule],
+                        framework=framework,
                         checks=[
                             key
                             for key, value in config_tool[self.TOOL_CHECKOV]["RULES"][
@@ -287,12 +293,21 @@ class CheckovTool(ToolGateway):
 
             checkov_deserealizator = CheckovDeserealizator()
             findings_list = checkov_deserealizator.get_list_finding(
-                result_scans, rules_run
+                result_scans, 
+                rules_run, 
+                config_tool[self.TOOL_CHECKOV]["DEFAULT_SEVERITY"],
+                config_tool[self.TOOL_CHECKOV]["DEFAULT_CATEGORY"]
             )
 
             return (
                 findings_list,
-                generate_file_from_tool(self.TOOL_CHECKOV, result_scans, rules_run),
+                generate_file_from_tool(
+                    self.TOOL_CHECKOV, 
+                    result_scans, 
+                    rules_run, 
+                    config_tool[self.TOOL_CHECKOV]["DEFAULT_SEVERITY"],
+                    config_tool[self.TOOL_CHECKOV]["DEFAULT_CATEGORY"]
+                ),
             )
         else:
             return [], None
