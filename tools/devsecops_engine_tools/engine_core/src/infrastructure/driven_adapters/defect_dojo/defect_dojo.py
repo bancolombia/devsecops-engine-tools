@@ -39,6 +39,11 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 @dataclass
 class DefectDojoPlatform(VulnerabilityManagementGateway):
+
+    OUT_OF_SCOPE = "Out of Scope"
+    FALSE_POSITIVE = "False Positive"
+    TRANSFERRED_FINDING = "Transferred Finding"
+
     def send_vulnerability_management(
         self, vulnerability_management: VulnerabilityManagement
     ):
@@ -235,7 +240,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 false_positive_query_params,
                 tool,
                 self._format_date_to_dd_format,
-                "False Positive",
+                self.FALSE_POSITIVE,
             )
 
             exclusions_false_positive = self._get_findings_with_exclusions(
@@ -245,7 +250,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 out_of_scope_query_params,
                 tool,
                 self._format_date_to_dd_format,
-                "Out of Scope",
+                self.OUT_OF_SCOPE,
             )
 
             exclusions_transfer_finding = self._get_findings_with_exclusions(
@@ -255,7 +260,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 transfer_finding_query_params,
                 tool,
                 self._format_date_to_dd_format,
-                "Transferred Finding",
+                self.TRANSFERRED_FINDING,
             )
 
             return (
@@ -364,19 +369,19 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             elif finding.false_p:
                 exclusions.append(
                     self._create_report_exclusion(
-                        finding, date_fn, "engine_risk", "False Positive", host_dd
+                        finding, date_fn, "engine_risk", self.FALSE_POSITIVE, host_dd
                     )
                 )
             elif finding.out_of_scope:
                 exclusions.append(
                     self._create_report_exclusion(
-                        finding, date_fn, "engine_risk", "Out of Scope", host_dd
+                        finding, date_fn, "engine_risk", self.OUT_OF_SCOPE, host_dd
                     )
                 )
             elif finding.risk_status == "Transfer Accepted":
                 exclusions.append(
                     self._create_report_exclusion(
-                        finding, date_fn, "engine_risk", "Transferred Finding", host_dd
+                        finding, date_fn, "engine_risk", self.TRANSFERRED_FINDING, host_dd
                     )
                 )
         return exclusions
@@ -414,10 +419,10 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     raise e
 
     def _date_reason_based(self, finding, date_fn, reason):
-        if reason in ["False Positive", "Out of Scope"]:
+        if reason in [self.FALSE_POSITIVE, self.OUT_OF_SCOPE]:
             create_date = date_fn(finding.last_status_update)
             expired_date = date_fn(None)
-        elif reason == "Transferred Finding":
+        elif reason == self.TRANSFERRED_FINDING:
             create_date = date_fn(finding.transfer_finding.date)
             expired_date = date_fn(finding.transfer_finding.expiration_date)
         else:

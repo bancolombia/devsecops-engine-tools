@@ -119,7 +119,7 @@ class CodeScan:
             )
 
         else:
-            print(f"Tool skipped by DevSecOps policy")
+            print("Tool skipped by DevSecOps policy")
             dict_args["send_metrics"] = "false"
 
         input_core = InputCore(

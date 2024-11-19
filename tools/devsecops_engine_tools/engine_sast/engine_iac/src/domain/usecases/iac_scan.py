@@ -50,7 +50,7 @@ class IacScan:
                 secret_external_checks=dict_args["token_external_checks"],
             )
         else:
-            print(f"Tool skipped by DevSecOps policy")
+            print("Tool skipped by DevSecOps policy")
             dict_args["send_metrics"] = "false"
 
         totalized_exclusions = []
