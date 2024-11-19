@@ -630,10 +630,12 @@ class TestDefectDojoPlatform(unittest.TestCase):
             MagicMock(
                 risk_accepted=None,
                 false_p=None,
+                out_of_scope=None,
                 risk_status="Transfer Accepted",
             ),
             MagicMock(
                 risk_accepted=None,
+                out_of_scope=True,
                 false_p=None,
                 risk_status=None,
             ),
@@ -642,4 +644,4 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
         exclusions = self.defect_dojo._get_report_exclusions(total_findings, date_fn)
 
-        assert len(exclusions) == 3
+        assert len(exclusions) == 4
