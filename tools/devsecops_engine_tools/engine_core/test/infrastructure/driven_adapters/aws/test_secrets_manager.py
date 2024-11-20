@@ -21,6 +21,7 @@ class SecretsManagerTests(unittest.TestCase):
         config_tool = {
             "SECRET_MANAGER": {
                 "AWS": {
+                    "USE_ROLE": True,
                     "ROLE_ARN": "arn:aws:iam::123456789012:role/MyRole",
                     "REGION_NAME": "us-west-2",
                     "SECRET_NAME": "my-secret-different-account",
@@ -46,6 +47,38 @@ class SecretsManagerTests(unittest.TestCase):
             aws_access_key_id="access_key_id",
             aws_secret_access_key="secret_access_key",
             aws_session_token="session_token",
+        )
+        mock_client.return_value.get_secret_value.assert_called_once_with(
+            SecretId="my-secret-different-account"
+        )
+    
+    @patch("boto3.session.Session.client")
+    def test_get_secret_without_role(
+        self, mock_client
+    ):
+        mock_client.return_value = MagicMock()
+
+        config_tool = {
+            "SECRET_MANAGER": {
+                "AWS": {
+                    "USE_ROLE": False,
+                    "ROLE_ARN": "arn:aws:iam::123456789012:role/MyRole",
+                    "REGION_NAME": "us-west-2",
+                    "SECRET_NAME": "my-secret-different-account",
+                }
+            }
+        }
+
+        mock_client.return_value.get_secret_value.return_value = {
+            "SecretString": '{"username": "admin", "password": "password123"}'
+        }
+
+        secret = self.secrets_manager.get_secret(config_tool)
+
+        assert secret == {"username": "admin", "password": "password123"}
+        mock_client.assert_called_once_with(
+            service_name="secretsmanager",
+            region_name="us-west-2",
         )
         mock_client.return_value.get_secret_value.assert_called_once_with(
             SecretId="my-secret-different-account"

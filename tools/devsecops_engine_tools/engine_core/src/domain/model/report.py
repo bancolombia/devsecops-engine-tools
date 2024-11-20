@@ -28,6 +28,7 @@ class Report:
         self.vul_description = kwargs.get("vul_description", "")
         self.risk_accepted = kwargs.get("risk_accepted", "")
         self.false_p = kwargs.get("false_p", "")
+        self.out_of_scope = kwargs.get("out_of_scope", "")
         self.service = kwargs.get("service", "")
         self.reason = kwargs.get("reason", "")
         self.component_name = kwargs.get("component_name", "")

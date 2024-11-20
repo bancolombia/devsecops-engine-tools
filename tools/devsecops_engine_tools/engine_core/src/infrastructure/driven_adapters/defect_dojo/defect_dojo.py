@@ -39,6 +39,11 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 @dataclass
 class DefectDojoPlatform(VulnerabilityManagementGateway):
+
+    OUT_OF_SCOPE = "Out of Scope"
+    FALSE_POSITIVE = "False Positive"
+    TRANSFERRED_FINDING = "Transferred Finding"
+
     def send_vulnerability_management(
         self, vulnerability_management: VulnerabilityManagement
     ):
@@ -80,6 +85,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     "VULNERABILITY_MANAGER"
                 ]["BRANCH_FILTER"].split(",")
             ) or (vulnerability_management.dict_args["tool"] == "engine_secret"):
+                tags = vulnerability_management.dict_args["tool"]
+                if vulnerability_management.dict_args["tool"] == "engine_iac":
+                    tags = f"{vulnerability_management.dict_args["tool"]}_{"_".join(vulnerability_management.dict_args["platform"])}"
                 request: ImportScanRequest = Connect.cmdb(
                     cmdb_mapping={
                         "product_type_name": "nombreevc",
@@ -117,7 +125,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         in enviroment_mapping
                         else enviroment_mapping["default"]
                     ),
-                    tags=vulnerability_management.dict_args["tool"],
+                    tags=tags,
                 )
 
                 def request_func():
@@ -199,6 +207,11 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "tags": tool,
                 "limit": dd_limits_query,
             }
+            out_of_scope_query_params = {
+                "out_of_scope": True,
+                "tags": tool,
+                "limit": dd_limits_query,
+            }
             false_positive_query_params = {
                 "false_p": True,
                 "tags": tool,
@@ -227,7 +240,17 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 false_positive_query_params,
                 tool,
                 self._format_date_to_dd_format,
-                "False Positive",
+                self.FALSE_POSITIVE,
+            )
+
+            exclusions_false_positive = self._get_findings_with_exclusions(
+                session_manager,
+                service,
+                dd_max_retries,
+                out_of_scope_query_params,
+                tool,
+                self._format_date_to_dd_format,
+                self.OUT_OF_SCOPE,
             )
 
             exclusions_transfer_finding = self._get_findings_with_exclusions(
@@ -237,7 +260,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 transfer_finding_query_params,
                 tool,
                 self._format_date_to_dd_format,
-                "Transferred Finding",
+                self.TRANSFERRED_FINDING,
             )
 
             return (
@@ -346,13 +369,19 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             elif finding.false_p:
                 exclusions.append(
                     self._create_report_exclusion(
-                        finding, date_fn, "engine_risk", "False Positive", host_dd
+                        finding, date_fn, "engine_risk", self.FALSE_POSITIVE, host_dd
+                    )
+                )
+            elif finding.out_of_scope:
+                exclusions.append(
+                    self._create_report_exclusion(
+                        finding, date_fn, "engine_risk", self.OUT_OF_SCOPE, host_dd
                     )
                 )
             elif finding.risk_status == "Transfer Accepted":
                 exclusions.append(
                     self._create_report_exclusion(
-                        finding, date_fn, "engine_risk", "Transferred Finding", host_dd
+                        finding, date_fn, "engine_risk", self.TRANSFERRED_FINDING, host_dd
                     )
                 )
         return exclusions
@@ -390,10 +419,10 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     raise e
 
     def _date_reason_based(self, finding, date_fn, reason):
-        if reason == "False Positive":
+        if reason in [self.FALSE_POSITIVE, self.OUT_OF_SCOPE]:
             create_date = date_fn(finding.last_status_update)
             expired_date = date_fn(None)
-        elif reason == "Transferred Finding":
+        elif reason == self.TRANSFERRED_FINDING:
             create_date = date_fn(finding.transfer_finding.date)
             expired_date = date_fn(finding.transfer_finding.expiration_date)
         else:
@@ -461,9 +490,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             vul_description=finding.description,
             risk_accepted=finding.risk_accepted,
             false_p=finding.false_p,
+            out_of_scope=finding.out_of_scope,
             service=finding.service,
-            unique_id_from_tool=finding.unique_id_from_tool,
-            out_of_scope=finding.out_of_scope
+            unique_id_from_tool=finding.unique_id_from_tool
         )
 
     def _format_date_to_dd_format(self, date_string):
