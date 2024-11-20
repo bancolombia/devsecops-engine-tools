@@ -53,8 +53,7 @@ class AzureDevopsApi:
         try:
             git_client = connection.clients.get_git_client()
             version_descriptor = None
-            if branch:
-                version_descriptor = GitVersionDescriptor(version=branch, version_type="branch")
+            if branch: version_descriptor = GitVersionDescriptor(version=branch, version_type="branch")
 
             file_content = git_client.get_item_text(
                 repository_id=self.__repository_id,
