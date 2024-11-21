@@ -58,6 +58,7 @@ class GetExclusions:
                             **exclusion,
                         )
                         for exclusion in config[scope][key]
+                        if exclusion.get("id", None)
                     ]
                 )
         return exclusions
