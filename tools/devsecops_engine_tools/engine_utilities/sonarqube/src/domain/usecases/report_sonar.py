@@ -152,7 +152,6 @@ class ReportSonar:
                             if finding.active and related_sonar_finding["status"] == "RESOLVED": status = "reopen"
                             elif related_sonar_finding["status"] != "RESOLVED":
                                 if finding.false_p: status = "falsepositive"
-                                elif finding.risk_accepted: status = "close"
                                 elif finding.risk_accepted or finding.out_of_scope: status = "wontfix"
                             if status:
                                 self.sonar_gateway.change_finding_status(

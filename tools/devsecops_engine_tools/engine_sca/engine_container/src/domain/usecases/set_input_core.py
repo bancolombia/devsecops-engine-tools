@@ -1,8 +1,7 @@
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
-from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
-
-
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
+from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 
 class SetInputCore:
@@ -44,7 +43,12 @@ class SetInputCore:
                 self.pipeline_name,
                 self.tool,
             ),
-            Threshold(self.remote_config["THRESHOLD"]),
+            Utils.update_threshold(
+                self,
+                Threshold(self.remote_config["THRESHOLD"]),
+                self.exclusions,
+                self.pipeline_name,
+            ),
             image_scanned,
             self.remote_config["MESSAGE_INFO_ENGINE_CONTAINER"],
             self.pipeline_name,

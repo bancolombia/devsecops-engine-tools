@@ -71,12 +71,9 @@ class TestCodeScan(unittest.TestCase):
         )
         self.assertEqual(files, ["file1", "file2"])
     
-    @patch(
-        "devsecops_engine_tools.engine_sast.engine_code.src.domain.usecases.code_scan.Exclusions"
-    )
-    def test_get_exclusions_all_pipelines(self, mock_exclusions):
+    def test_get_exclusions_all_pipelines(self):
         # Arrange
-        self.mock_devops_platform_gateway.get_remote_config.return_value = {
+        exclusions_data = {
             "All":{
                 "TOOL_NAME": [
                     {
@@ -90,27 +87,18 @@ class TestCodeScan(unittest.TestCase):
             }
         }
         self.mock_devops_platform_gateway.get_variable.return_value = "pipeline_test_name"
-        mock_exclusions.return_value = Mock()
 
         # Act
-        exclusions, skip_tool = self.code_scan.get_exclusions({"remote_config_repo": "test_repo", "remote_config_branch": ""}, "TOOL_NAME")
+        exclusions, skip_tool = self.code_scan.get_exclusions("TOOL_NAME", exclusions_data)
 
         # Aserciones
-        self.mock_devops_platform_gateway.get_remote_config.assert_called_once_with(
-            "test_repo", "engine_sast/engine_code/Exclusions.json", ""
-        )
         self.assertFalse(skip_tool)
-        mock_exclusions.assert_called_with(
-            id="vul id", where="", create_date="18102023", expired_date="18042024", severity="low", hu="4338704", reason="Risk acceptance"
-        )
         self.assertEqual(len(exclusions), 1)
     
-    @patch(
-        "devsecops_engine_tools.engine_sast.engine_code.src.domain.usecases.code_scan.Exclusions"
-    )
-    def test_get_exclusions_specific_pipeline(self, mock_exclusions):
+
+    def test_get_exclusions_specific_pipeline(self):
         # Arrange
-        self.mock_devops_platform_gateway.get_remote_config.return_value = {
+        exclusions_data = {
             "pipeline_test_name":{
                 "TOOL_NAME": [
                     {
@@ -124,27 +112,18 @@ class TestCodeScan(unittest.TestCase):
             }
         }
         self.mock_devops_platform_gateway.get_variable.return_value = "pipeline_test_name"
-        mock_exclusions.return_value = Mock()
 
         # Act
-        exclusions, skip_tool = self.code_scan.get_exclusions({"remote_config_repo": "test_repo", "remote_config_branch": ""}, "TOOL_NAME")
+        exclusions, skip_tool = self.code_scan.get_exclusions("TOOL_NAME", exclusions_data)
 
         # Assert
-        self.mock_devops_platform_gateway.get_remote_config.assert_called_once_with(
-            "test_repo", "engine_sast/engine_code/Exclusions.json", ""
-        )
         self.assertFalse(skip_tool)
-        mock_exclusions.assert_called_with(
-            id="vul id", where="", create_date="18102023", expired_date="18042024", severity="low", hu="4338704", reason="Risk acceptance"
-        )
         self.assertEqual(len(exclusions), 1)
     
-    @patch(
-        "devsecops_engine_tools.engine_sast.engine_code.src.domain.usecases.code_scan.Exclusions"
-    )
-    def test_get_exclusions_skip_tool(self, mock_exclusions):
+
+    def test_get_exclusions_skip_tool(self):
         # Arrange
-        self.mock_devops_platform_gateway.get_remote_config.return_value = {
+        exclusions_data = {
             "pipeline_test_name":{
                 "SKIP_TOOL": {
                     "create_date": "24012024",
@@ -154,15 +133,11 @@ class TestCodeScan(unittest.TestCase):
             }
         }
         self.mock_devops_platform_gateway.get_variable.return_value = "pipeline_test_name"
-        mock_exclusions.return_value = Mock()
 
         # Act
-        exclusions, skip_tool = self.code_scan.get_exclusions({"remote_config_repo": "test_repo", "remote_config_branch": ""}, "TOOL_NAME")
+        exclusions, skip_tool = self.code_scan.get_exclusions("TOOL_NAME", exclusions_data)
 
         # Assert
-        self.mock_devops_platform_gateway.get_remote_config.assert_called_once_with(
-            "test_repo", "engine_sast/engine_code/Exclusions.json", ""
-        )
         self.assertTrue(skip_tool)
         self.assertEqual(exclusions, [])
     

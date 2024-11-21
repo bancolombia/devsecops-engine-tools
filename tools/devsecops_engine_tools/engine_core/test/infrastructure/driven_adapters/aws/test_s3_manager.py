@@ -24,6 +24,7 @@ class S3ManagerTests(unittest.TestCase):
         config_tool = {
             "METRICS_MANAGER": {
                 "AWS": {
+                    "USE_ROLE": True,
                     "ROLE_ARN": "arn:aws:iam::123456789012:role/MyRole",
                     "REGION_NAME": "us-west-2",
                     "BUCKET": "my-bucket",
@@ -44,6 +45,39 @@ class S3ManagerTests(unittest.TestCase):
             aws_access_key_id=mock.ANY,
             aws_secret_access_key=mock.ANY,
             aws_session_token=mock.ANY,
+        )
+        date = datetime.datetime.now()
+        mock_client.return_value.put_object.assert_called_once_with(
+            Bucket="my-bucket", Key=f"engine_tools/my-tool/{date.strftime('%Y')}/{date.strftime('%m')}/{date.strftime('%d')}/file.txt", Body=mock.ANY
+        )
+
+    @patch("boto3.session.Session.client")
+    def test_send_metrics_without_role(self, mock_client):
+        # Mock the necessary dependencies
+        mock_client.return_value = MagicMock()
+
+        # Set up test data
+        config_tool = {
+            "METRICS_MANAGER": {
+                "AWS": {
+                    "USE_ROLE": False,
+                    "ROLE_ARN": "arn:aws:iam::123456789012:role/MyRole",
+                    "REGION_NAME": "us-ueast-2",
+                    "BUCKET": "my-bucket",
+                }
+            }
+        }
+        tool = "my-tool"
+        file_path = "/path/to/my/file.txt"
+
+        with mock.patch("builtins.open", create=True) as mock_open:
+            # Call the method under test
+            self.s3_manager.send_metrics(config_tool, tool, file_path)
+
+        # Assert that the necessary methods were called with the correct arguments
+        mock_client.assert_called_once_with(
+            service_name="s3",
+            region_name="us-ueast-2"
         )
         date = datetime.datetime.now()
         mock_client.return_value.put_object.assert_called_once_with(
