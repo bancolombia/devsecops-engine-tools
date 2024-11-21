@@ -87,7 +87,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             ) or (vulnerability_management.dict_args["tool"] == "engine_secret"):
                 tags = vulnerability_management.dict_args["tool"]
                 if vulnerability_management.dict_args["tool"] == "engine_iac":
-                    tags = f"{vulnerability_management.dict_args["tool"]}_{"_".join(vulnerability_management.dict_args["platform"])}"
+                    tags = f"{vulnerability_management.dict_args['tool']}_{'_'.join(vulnerability_management.dict_args['platform'])}"
                 request: ImportScanRequest = Connect.cmdb(
                     cmdb_mapping={
                         "product_type_name": "nombreevc",
