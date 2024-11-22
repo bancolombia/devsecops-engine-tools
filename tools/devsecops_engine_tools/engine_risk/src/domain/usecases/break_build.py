@@ -119,7 +119,6 @@ class BreakBuild:
             print(self.devops_platform_gateway.result_pipeline("succeeded"))
 
     def _remediation_rate_control(self, all_report: "list[Report]"):
-        remote_config = self.remote_config
         mitigated = sum(1 for report in all_report if report.mitigated)
         total = len(all_report)
         print(f"Mitigated count: {mitigated}   Total count: {total}")
