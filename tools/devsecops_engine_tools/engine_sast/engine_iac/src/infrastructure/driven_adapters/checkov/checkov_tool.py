@@ -19,22 +19,15 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
     generate_file_from_tool,
 )
-from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
-    GithubApi,
-)
-from devsecops_engine_tools.engine_utilities.ssh.managment_private_key import (
-    create_ssh_private_file,
-    add_ssh_private_key,
-    decode_base64,
-    config_knowns_hosts,
-)
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class CheckovTool(ToolGateway):
+    
     CHECKOV_CONFIG_FILE = "checkov_config.yaml"
     TOOL_CHECKOV = "CHECKOV"
     framework_mapping = {
@@ -60,84 +53,6 @@ class CheckovTool(ToolGateway):
             yaml.dump(checkov_config.dict_confg_file, file)
             file.close()
 
-    def configurate_external_checks(self, config_tool, secret_tool, secret_external_checks):
-        try:
-            agent_env = None
-            secret = None
-            github_token = None
-            github_api = GithubApi()
-
-            if secret_tool is not None:
-                secret = secret_tool
-                github_token = github_api.get_installation_access_token(
-                    secret["github_token"],
-                    config_tool[self.TOOL_CHECKOV]["APP_ID_GITHUB"],
-                    config_tool[self.TOOL_CHECKOV]["INSTALLATION_ID_GITHUB"]
-                )
-
-            elif secret_external_checks is not None:
-                secret_external_checks_parts = {
-                    "github_token": (
-                        secret_external_checks.split("github_token:")[1]
-                        if "github_token" in secret_external_checks
-                        else None
-                    ),
-                    "github_apps": (
-                        secret_external_checks.split("github_apps:")[1]
-                        if "github_apps" in secret_external_checks
-                        else None
-                    ),
-                    "repository_ssh_private_key": (
-                        secret_external_checks.split("ssh:")[1].split(":")[0]
-                        if "ssh" in secret_external_checks
-                        else None
-                    ),
-                    "repository_ssh_password": (
-                        secret_external_checks.split("ssh:")[1].split(":")[1]
-                        if "ssh" in secret_external_checks
-                        else None
-                    ),
-                }
-
-                secret = {
-                    key: secret_external_checks_parts[key]
-                    for key in secret_external_checks_parts
-                    if secret_external_checks_parts[key] is not None
-                }
-
-            if secret is None:
-                logger.warning("The secret is not configured for external controls")
-
-            
-            elif config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_GIT"] == "True" and platform.system() in (
-                "Linux", "Darwin",
-            ):
-                config_knowns_hosts(
-                    config_tool[self.TOOL_CHECKOV]["EXTERNAL_GIT_SSH_HOST"],
-                    config_tool[self.TOOL_CHECKOV]["EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT"],
-                )
-                ssh_key_content = decode_base64(secret["repository_ssh_private_key"])
-                ssh_key_file_path = "/tmp/ssh_key_file"
-                create_ssh_private_file(ssh_key_file_path, ssh_key_content)
-                ssh_key_password = decode_base64(secret["repository_ssh_password"])
-                agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
-
-            elif config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_DIR"] == "True":
-                github_token = secret.get("github_token") or github_api.get_installation_access_token(
-                    secret.get("github_apps"),
-                    config_tool[self.TOOL_CHECKOV]["APP_ID_GITHUB"],
-                    config_tool[self.TOOL_CHECKOV]["INSTALLATION_ID_GITHUB"]
-                )
-                github_api.download_latest_release_assets(
-                    config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_OWNER"],
-                    config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_REPOSITORY"],
-                    github_token,
-                    "/tmp",
-                )
-
-        except Exception as ex:
-            logger.error(f"An error occurred configuring external checks: {ex}")
-        return agent_env
 
     def retryable_install_package(self, package: str, version: str) -> bool:
         MAX_RETRIES = 3
@@ -293,8 +208,8 @@ class CheckovTool(ToolGateway):
         secret_tool,
         secret_external_checks,
     ):
-
-        agent_env = self.configurate_external_checks(config_tool, secret_tool,secret_external_checks)
+        util = Utils()
+        agent_env = util.configurate_external_checks(self.TOOL_CHECKOV,config_tool, secret_tool,secret_external_checks)
 
         checkov_install = self.retryable_install_package(
             "checkov", config_tool[self.TOOL_CHECKOV]["VERSION"]
