@@ -1,6 +1,9 @@
+import os
 import subprocess
 import json
-import re
+import platform
+import requests
+import shutil
 from devsecops_engine_tools.engine_dast.src.domain.model.config_tool import (
     ConfigTool,
 )
@@ -18,6 +21,7 @@ from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api im
 )
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
@@ -32,47 +36,80 @@ class NucleiTool(ToolGateway):
         self.data_config_cli = data_config_cli
         self.TOOL: str = "NUCLEI"
 
-    def check_install_tool(self) -> any:
-        command = "nuclei --version"
-        result = subprocess.run(command, capture_output=True, shell=True)
-        output = result.stderr.strip()
-        reg_exp = r"not found"
-        check_tool = re.search(reg_exp, output.decode("utf-8"))
-        if check_tool:
-            install_result = self.run_install()
-            if install_result != 0:
-                logger.error(f"{self.TOOL} can't installed")
-            return -1
-        return 0
+    def download_tool(self, version):
+        try:
+            base_url = f"https://github.com/projectdiscovery/nuclei/releases/download/v{version}/"
+            os_type = platform.system().lower()
 
-    def run_install(self):
-        download = subprocess.run(
-            "wget -q https://github.com/projectdiscovery/nuclei/releases/download/v3.3.4/nuclei_3.3.4_linux_amd64.zip -O nuclei.zip",
-            capture_output=True,
-            shell=True
-        )
-        if download.returncode != 0:
-            logger.error(f"Error downloading {self.TOOL} binary")
-            return -1
+            if os_type == "darwin":
+                file_name = f"nuclei_{version}_macOS_amd64.zip"
+            elif os_type == "linux":
+                file_name = f"nuclei_{version}_linux_amd64.zip"
+            elif os_type == "windows":
+                file_name = f"nuclei_{version}_windows_amd64.zip"
+            else:
+                logger.error(f"Error [101]: {os_type} is an unsupported OS type!")
+                return 101  # Unsupported OS type error
 
-        unzip = subprocess.run(
-            "unzip -o nuclei.zip -d /usr/local/bin/",
-            capture_output=True,
-            shell=True
-        )
-        if unzip.returncode != 0:
-            logger.error(f"Error Unzipping {self.TOOL} binary")
-            return -1
+            url = f"{base_url}{file_name}"
 
-        make_exe = subprocess.run(
-            "chmod +x /usr/local/bin/nuclei",
-            capture_output=True,
-            shell=True
-        )
-        if make_exe.returncode != 0:
-            logger.error(f"Error giving execution permissions to {self.TOOL}")
-            return -1
-        return 0
+            response = requests.get(url, allow_redirects=True)
+            if response.status_code != 200:
+                logger.error(f"Error [102]: Failed to download Nuclei version {version}. HTTP status code: {response.status_code}")
+                return 102  # Download failed error
+
+            home_directory = os.path.expanduser("~")
+            zip_name = os.path.join(home_directory, file_name)
+            with open(zip_name, "wb") as f:
+                f.write(response.content)
+
+            utils = Utils()
+            utils.unzip_file(zip_name, home_directory)
+            logger.info("Download and extraction completed successfully.")
+            return 0  # Success
+        except Exception as e:
+            logger.error(f"Error [103]: An exception occurred during download: {e}")
+            return 103  # General exception error
+
+    def install_tool(self, version):
+        try:
+            nuclei_path = shutil.which("nuclei")
+            if nuclei_path:
+                logger.info(f"Success [200]: Nuclei is already installed at {nuclei_path}")
+                return 200  # Already installed
+
+            logger.info("Nuclei not found. Downloading and installing...")
+            download_result = self.download_tool(version)
+            if download_result != 0:
+                logger.error(f"Error [104]: Download failed with error code {download_result}")
+                return 104  # Download step failed
+
+            os_type = platform.system().lower()
+            home_directory = os.path.expanduser("~")
+
+            if os_type == "darwin" or os_type == "linux":
+                executable_path = os.path.join(home_directory, "nuclei")
+                subprocess.run(["chmod", "+x", executable_path], check=True)
+                target_path = os.path.expanduser("~/.local/bin/nuclei")
+                shutil.move(executable_path, target_path)
+                logger.info(f"Success [201]: Nuclei installed at {target_path}")
+                return 201  # Installation successful
+            elif os_type == "windows":
+                executable_path = os.path.join(home_directory, "nuclei.exe")
+                target_path = os.path.join(os.getenv("ProgramFiles"), "nuclei.exe")
+                shutil.move(executable_path, target_path)
+                logger.info(f"Success [202]: Nuclei installed at {target_path}")
+                return 202  # Installation successful (Windows)
+            else:
+                logger.error(f"Error [105]: {os_type} is an unsupported OS type!")
+                return 105  # Unsupported OS type error
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error [106]: Command execution failed: {e}")
+            return 106  # Subprocess execution error
+        except Exception as e:
+            logger.error(f"Error [107]: An exception occurred during installation: {e}")
+            return 107  # General exception error
+
 
     def configurate_external_checks(
         self, config_tool: ConfigTool, secret, output_dir: str = "/tmp"
@@ -140,8 +177,8 @@ class NucleiTool(ToolGateway):
                     else None
                 )
             }
-        if self.check_install_tool() != 0:
-            return None
+        if self.install_tool(config_tool.version) < 200:
+            return [], None
         nuclei_config = NucleiConfig(target_data)
         checks_directory = self.configurate_external_checks(config_tool, secret, "/tmp") #DATA PDN
         if checks_directory:
