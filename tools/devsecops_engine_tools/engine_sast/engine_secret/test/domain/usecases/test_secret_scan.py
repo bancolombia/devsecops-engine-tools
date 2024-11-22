@@ -33,8 +33,16 @@ class TestSecretScan(unittest.TestCase):
                 "ENABLE_CUSTOM_RULES" : "True",
                 "EXTERNAL_DIR_OWNER": "ExternalOrg",
                 "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",
+<<<<<<< HEAD
                 "APP_ID_GITHUB":"123123",
                 "INSTALLATION_ID_GITHUB":"234234"
+=======
+                "RULES": {
+                    "MISSCONFIGURATION_SCANNING" : {
+                        "References" : "https://link.reference.com"
+                    }
+                }
+>>>>>>> 72599aa7dce2d385e4fb6e14c648f68d925a2338
             }
         }
 

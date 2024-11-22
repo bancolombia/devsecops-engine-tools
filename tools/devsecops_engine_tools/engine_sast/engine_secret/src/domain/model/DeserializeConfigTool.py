@@ -15,3 +15,4 @@ class DeserializeConfigTool:
         self.app_id_github = json_data[tool]["APP_ID_GITHUB"]
         self.installation_id_github = json_data[tool]["INSTALLATION_ID_GITHUB"]
         self.tool_version = json_data[tool]["VERSION"]
+        self.extradata_rules = json_data[tool]["RULES"]

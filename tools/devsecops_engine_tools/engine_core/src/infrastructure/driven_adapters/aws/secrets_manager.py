@@ -19,15 +19,22 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 @dataclass
 class SecretsManager(SecretsManagerGateway):
     def get_secret(self, config_tool):
-        temp_credentials = assume_role(config_tool["SECRET_MANAGER"]["AWS"]["ROLE_ARN"])
+        credentials_role = assume_role(config_tool["SECRET_MANAGER"]["AWS"]["ROLE_ARN"]) if config_tool["SECRET_MANAGER"]["AWS"]["USE_ROLE"] else None
         session = boto3.session.Session()
-        client = session.client(
-            service_name="secretsmanager",
-            region_name=config_tool["SECRET_MANAGER"]["AWS"]["REGION_NAME"],
-            aws_access_key_id=temp_credentials["AccessKeyId"],
-            aws_secret_access_key=temp_credentials["SecretAccessKey"],
-            aws_session_token=temp_credentials["SessionToken"],
-        )
+
+        if credentials_role:
+            client = session.client(
+                service_name="secretsmanager",
+                region_name=config_tool["SECRET_MANAGER"]["AWS"]["REGION_NAME"],
+                aws_access_key_id=credentials_role["AccessKeyId"],
+                aws_secret_access_key=credentials_role["SecretAccessKey"],
+                aws_session_token=credentials_role["SessionToken"],
+            )
+        else:
+            client = session.client(
+                service_name="secretsmanager",
+                region_name=config_tool["SECRET_MANAGER"]["AWS"]["REGION_NAME"],
+            )
 
         try:
             secret_name = config_tool["SECRET_MANAGER"]["AWS"]["SECRET_NAME"]

@@ -8,7 +8,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.report import Report
 from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
     VulnerabilityManagement,
 )
-
+from devsecops_engine_tools.engine_utilities.defect_dojo.domain.request_objects.import_scan import (
+    ImportScanRequest
+)
 
 class TestDefectDojoPlatform(unittest.TestCase):
     def setUp(self):
@@ -23,6 +25,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
             "token_vulnerability_management": "token1",
             "token_cmdb": "token2",
             "tool": "engine_iac",
+            "platform": ["k8s"]
         }
         self.vulnerability_management.secret_tool = {
             "token_defect_dojo": "token3",
@@ -90,7 +93,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 branch_tag="trunk",
                 commit_hash="commit_hash",
                 environment="Development",
-                tags="engine_iac",
+                tags="engine_iac_k8s",
             )
 
     def test_send_vulnerability_management_exception(self):
@@ -223,6 +226,21 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     ),
                 ]
             ),
+            # Findings out of scope
+            MagicMock(
+                results=[
+                    MagicMock(
+                        vuln_id_from_tool="id1",
+                        file_path="path1",
+                        last_status_update="2024-01-10T00:00:00Z",
+                    ),
+                    MagicMock(
+                        vuln_id_from_tool="id2",
+                        file_path="path2",
+                        last_status_update="2024-01-10T00:00:00Z",
+                    ),
+                ]
+            ),
             # Findings Transferred Finding
             MagicMock(
                 results=[
@@ -330,6 +348,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 ]
             ),
             # Findings false positive
+            MagicMock(results=[]),
+            # Findings out of scope
             MagicMock(results=[]),
             # Findings Transferred Finding
             MagicMock(results=[]),
@@ -598,9 +618,9 @@ class TestDefectDojoPlatform(unittest.TestCase):
         )
 
     @patch(
-        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.DefectDojoPlatform._create_exclusion"
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.DefectDojoPlatform._create_report_exclusion"
     )
-    def test_get_report_exclusions(self, mock_create_exclusion):
+    def test_get_report_exclusions(self, mock_create_report_exclusion):
         total_findings = [
             MagicMock(
                 risk_accepted=True,
@@ -612,16 +632,19 @@ class TestDefectDojoPlatform(unittest.TestCase):
             MagicMock(
                 risk_accepted=None,
                 false_p=None,
+                out_of_scope=None,
                 risk_status="Transfer Accepted",
             ),
             MagicMock(
                 risk_accepted=None,
+                out_of_scope=True,
                 false_p=None,
                 risk_status=None,
             ),
         ]
         date_fn = MagicMock()
+        host_dd = "host_defect_dojo"
 
-        exclusions = self.defect_dojo._get_report_exclusions(total_findings, date_fn)
+        exclusions = self.defect_dojo._get_report_exclusions(total_findings, date_fn, host_dd)
 
-        assert len(exclusions) == 3
+        assert len(exclusions) == 4

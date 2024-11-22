@@ -3,6 +3,7 @@
     "SECRET_MANAGER": {
         "AWS": {
             "SECRET_NAME": "",
+            "USE_ROLE": false,
             "ROLE_ARN": "",
             "REGION_NAME": ""
         }
@@ -21,6 +22,7 @@
     "METRICS_MANAGER": {
         "AWS": {
             "BUCKET": "",
+            "USE_ROLE": false,
             "ROLE_ARN": "",
             "REGION_NAME": ""
         }
@@ -48,5 +50,8 @@
     "ENGINE_CODE": {
         "ENABLED": "true",
         "TOOL": "BEARER"
+    },
+    "REPORT_SONAR": {
+        "ENABLED": "true"
     }
 }

@@ -41,6 +41,7 @@ class Engagement(FromDictMixin):
     build_server: str = ""
     source_code_management_server: str = ""
     orchestration_engine: str = ""
+    vm_url: str = ""
     notes = []
     files = []
     risk_acceptance = []

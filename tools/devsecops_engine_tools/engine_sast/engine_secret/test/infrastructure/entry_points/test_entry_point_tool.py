@@ -52,7 +52,13 @@ class TestEngineSecretScan(unittest.TestCase):
                     "EXTERNAL_DIR_OWNER": "External_Github",
                     "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",
                     "APP_ID_GITHUB":"123123",
-                    "INSTALLATION_ID_GITHUB":"234234"
+                    "INSTALLATION_ID_GITHUB":"234234",
+                    "RULES": {
+                        "MISSCONFIGURATION_SCANNING" : {
+                            "References" : "https://link.reference.com",
+                            "Mitigation" : "Make sure do all good"
+                        }
+                    }
                 }
             }
         obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')

@@ -126,7 +126,7 @@ def test_generate_file_from_tool():
         },
     }
 
-    absolute_path = generate_file_from_tool("CHECKOV", results_scan_list, rules_doc)
+    absolute_path = generate_file_from_tool("CHECKOV", results_scan_list, rules_doc, "", "")
 
     with open(absolute_path, "r") as file:
         data = file.read()
@@ -232,7 +232,7 @@ def test_generate_file_from_tool_exception():
         }
     ]
 
-    absolute_path = generate_file_from_tool("CHECKOV", results_scan_list, None)
+    absolute_path = generate_file_from_tool("CHECKOV", results_scan_list, None, "", "")
 
     assert absolute_path == None
         

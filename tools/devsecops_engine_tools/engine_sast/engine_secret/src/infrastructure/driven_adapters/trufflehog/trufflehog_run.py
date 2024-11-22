@@ -100,7 +100,7 @@ class TrufflehogRun(ToolGateway):
                 [repository_name] * len(include_paths),
                 [enable_custom_rules] * len(include_paths),
             )
-        findings, file_findings = self.create_file(self.decode_output(results), agent_work_folder)
+        findings, file_findings = self.create_file(self.decode_output(results), agent_work_folder, config_tool)
         return  findings, file_findings
 
     def config_include_path(self, files, agent_work_folder, agent_os):
@@ -132,10 +132,10 @@ class TrufflehogRun(ToolGateway):
         repository_name,
         enable_custom_rules
     ):
-        command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --json"
+        command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --no-update --json"
 
-        if enable_custom_rules == "true":
-            command = command.replace("--no-verification --json", "--config /tmp/rules/trufflehog/custom-rules.yaml --no-verification --json")
+        if str(enable_custom_rules).lower() == "true":
+            command = command.replace("--no-verification --no-update --json", "--config /tmp/rules/trufflehog/custom-rules.yaml --no-verification --no-update --json")
 
         result = subprocess.run(command, capture_output=True, shell=True, text=True, encoding='utf-8')
         return result.stdout.strip()
@@ -150,7 +150,7 @@ class TrufflehogRun(ToolGateway):
                         result.append(json_obj)
         return result
     
-    def create_file(self, findings, agent_work_folder):
+    def create_file(self, findings, agent_work_folder, config_tool):
         file_findings = os.path.join(agent_work_folder, "secret_scan_result.json")
         with open(file_findings, "w") as file:
             for find in findings:
@@ -158,7 +158,9 @@ class TrufflehogRun(ToolGateway):
                 original_where = original_where.replace("\\", "/")
                 where_text = original_where.replace(agent_work_folder, "")
                 find["SourceMetadata"]["Data"]["Filesystem"]["file"] = where_text
-                find["Id"] = "MISSCONFIGURATION_SCANNING" if "exposure" in find["Raw"] else "SECRET_SCANNING"
+                find["Id"] = "MISCONFIGURATION_SCANNING" if "exposure" in find["Raw"] else "SECRET_SCANNING"
+                find["References"] = config_tool.extradata_rules[find["Id"]]["References"] if "SECRET_SCANNING" not in find["Id"] else "N.A"
+                find["Mitigation"] = config_tool.extradata_rules[find["Id"]]["Mitigation"] if "SECRET_SCANNING" not in find["Id"] else "N.A"
                 json_str = json.dumps(find)
                 file.write(json_str + '\n')
         return findings, file_findings

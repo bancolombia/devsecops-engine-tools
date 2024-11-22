@@ -130,14 +130,14 @@ class BreakBuild:
             print(
                 self.devops_platform_gateway.message(
                     "succeeded",
-                    f"Remediation Rate {remediation_rate_value}% is greater than {risk_threshold}%",
+                    f"Remediation rate {remediation_rate_value}% is greater than {risk_threshold}%",
                 )
             )
         elif remediation_rate_value >= risk_threshold:
             print(
                 self.devops_platform_gateway.message(
                     "warning",
-                    f"Remediation Rate {remediation_rate_value}% is close to {risk_threshold}%",
+                    f"Remediation rate {remediation_rate_value}% is close to {risk_threshold}%",
                 )
             )
             self.warning_build = True
@@ -145,7 +145,7 @@ class BreakBuild:
             print(
                 self.devops_platform_gateway.message(
                     "error",
-                    f"Remediation Rate {remediation_rate_value}% is less than {risk_threshold}%",
+                    f"Remediation rate {remediation_rate_value}% is less than {risk_threshold}%",
                 )
             )
             self.break_build = True
@@ -162,6 +162,10 @@ class BreakBuild:
                 "create_date": exclusion.create_date,
                 "expired_date": exclusion.expired_date,
                 "reason": exclusion.reason,
+                "vm_id": exclusion.vm_id,
+                "vm_id_url": exclusion.vm_id_url,
+                "service": exclusion.service,
+                "tags": exclusion.tags,
             }
             for exclusion in exclusions
         ]
@@ -179,9 +183,15 @@ class BreakBuild:
                         and report.vuln_id_from_tool == exclusion.id
                     )
                     or (report.id and report.id == exclusion.id)
+                    or (report.vm_id and exclusion.id in report.vm_id)
                 ) and ((exclusion.where in report.where) or (exclusion.where == "all")):
                     exclude = True
-                    applied_exclusions.append(exclusion)
+                    exclusion_copy = copy.deepcopy(exclusion)
+                    exclusion_copy.vm_id = report.vm_id
+                    exclusion_copy.vm_id_url = report.vm_id_url
+                    exclusion_copy.service = report.service
+                    exclusion_copy.tags = report.tags
+                    applied_exclusions.append(exclusion_copy)
                     break
             if not exclude:
                 report.reason = "Remediation Rate"
@@ -214,7 +224,7 @@ class BreakBuild:
                 print(
                     self.devops_platform_gateway.message(
                         "error",
-                        f"Report {report.vuln_id_from_tool if report.vuln_id_from_tool else report.id} with tag {tag} is blacklisted and age {report.age} is above threshold {tag_age_threshold}",
+                        f"Report {report.vm_id} with tag {tag} is blacklisted and age {report.age} is above threshold {tag_age_threshold}",
                     )
                 )
 
@@ -222,7 +232,7 @@ class BreakBuild:
                 print(
                     self.devops_platform_gateway.message(
                         "warning",
-                        f"Report {report.vuln_id_from_tool if report.vuln_id_from_tool else report.id} with tag {tag} is blacklisted but age {report.age} is below threshold {tag_age_threshold}",
+                        f"Report {report.vm_id} with tag {tag} is blacklisted but age {report.age} is below threshold {tag_age_threshold}",
                     )
                 )
 
@@ -258,9 +268,7 @@ class BreakBuild:
                     break_build = True
                     report.reason = "Risk Score"
                     self.report_breaker.append(copy.deepcopy(report))
-            print(
-                "Below are open vulnerabilities from Vulnerability Management Platform"
-            )
+            print("Below are open findings from Vulnerability Management Platform")
             self.printer_table_gateway.print_table_report(
                 report_list,
             )
@@ -284,7 +292,8 @@ class BreakBuild:
         else:
             print(
                 self.devops_platform_gateway.message(
-                    "succeeded", "There are no vulnerabilities"
+                    "succeeded",
+                    "There are no open findings from Vulnerability Management Platform",
                 )
             )
 
@@ -295,7 +304,7 @@ class BreakBuild:
                     "warning", "Bellow are all findings that were excepted"
                 )
             )
-            self.printer_table_gateway.print_table_exclusions(applied_exclusions)
+            self.printer_table_gateway.print_table_report_exlusions(applied_exclusions)
             for reason, total in Counter(
                 map(lambda x: x["reason"], applied_exclusions)
             ).items():

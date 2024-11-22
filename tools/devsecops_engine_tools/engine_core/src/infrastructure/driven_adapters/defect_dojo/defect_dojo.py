@@ -5,6 +5,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_m
 from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
     VulnerabilityManagement,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway
+)
 from devsecops_engine_tools.engine_utilities.defect_dojo import (
     DefectDojo,
     ImportScanRequest,
@@ -36,6 +39,11 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 @dataclass
 class DefectDojoPlatform(VulnerabilityManagementGateway):
+
+    OUT_OF_SCOPE = "Out of Scope"
+    FALSE_POSITIVE = "False Positive"
+    TRANSFERRED_FINDING = "Transferred Finding"
+
     def send_vulnerability_management(
         self, vulnerability_management: VulnerabilityManagement
     ):
@@ -67,7 +75,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "KUBESCAPE": "Kubescape Scanner",
                 "KICS": "KICS Scanner",
                 "BEARER": "Bearer CLI",
-                "DEPENDENCY_CHECK": "Dependency Check Scan"
+                "DEPENDENCY_CHECK": "Dependency Check Scan",
+                "SONARQUBE": "SonarQube API Import"
             }
 
             if any(
@@ -76,6 +85,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     "VULNERABILITY_MANAGER"
                 ]["BRANCH_FILTER"].split(",")
             ) or (vulnerability_management.dict_args["tool"] == "engine_secret"):
+                tags = vulnerability_management.dict_args["tool"]
+                if vulnerability_management.dict_args["tool"] == "engine_iac":
+                    tags = f"{vulnerability_management.dict_args['tool']}_{'_'.join(vulnerability_management.dict_args['platform'])}"
                 request: ImportScanRequest = Connect.cmdb(
                     cmdb_mapping={
                         "product_type_name": "nombreevc",
@@ -113,7 +125,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         in enviroment_mapping
                         else enviroment_mapping["default"]
                     ),
-                    tags=vulnerability_management.dict_args["tool"],
+                    tags=tags,
                 )
 
                 def request_func():
@@ -195,6 +207,11 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "tags": tool,
                 "limit": dd_limits_query,
             }
+            out_of_scope_query_params = {
+                "out_of_scope": True,
+                "tags": tool,
+                "limit": dd_limits_query,
+            }
             false_positive_query_params = {
                 "false_p": True,
                 "tags": tool,
@@ -223,7 +240,17 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 false_positive_query_params,
                 tool,
                 self._format_date_to_dd_format,
-                "False Positive",
+                self.FALSE_POSITIVE,
+            )
+
+            exclusions_false_positive = self._get_findings_with_exclusions(
+                session_manager,
+                service,
+                dd_max_retries,
+                out_of_scope_query_params,
+                tool,
+                self._format_date_to_dd_format,
+                self.OUT_OF_SCOPE,
             )
 
             exclusions_transfer_finding = self._get_findings_with_exclusions(
@@ -233,7 +260,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 transfer_finding_query_params,
                 tool,
                 self._format_date_to_dd_format,
-                "Transferred Finding",
+                self.TRANSFERRED_FINDING,
             )
 
             return (
@@ -259,6 +286,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             max_retries = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
                 "MAX_RETRIES_QUERY"
             ]
+            host_dd = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"]
 
             findings = self._get_findings(
                 self._get_session_manager(dict_args, secret_tool, config_tool),
@@ -269,13 +297,13 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
             all_findings = list(
                 map(
-                    partial(self._create_report),
+                    partial(self._create_report, host_dd=host_dd),
                     findings,
                 )
             )
 
             all_exclusions = self._get_report_exclusions(
-                all_findings, self._format_date_to_dd_format
+                all_findings, self._format_date_to_dd_format, host_dd=host_dd
             )
 
             return all_findings, all_exclusions
@@ -306,7 +334,14 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "active": "true",
             }
 
-            return Engagement.get_engagements(request_is, request_active).results
+            engagements = Engagement.get_engagements(request_is, request_active).results
+
+            host_dd = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"]
+
+            for engagement in engagements:
+                engagement.vm_url = f"{host_dd}/engagement/{engagement.id}/finding/open"
+
+            return engagements
 
         except Exception as ex:
             raise ExceptionGettingEngagements(
@@ -322,25 +357,31 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"],
         )
 
-    def _get_report_exclusions(self, total_findings, date_fn):
+    def _get_report_exclusions(self, total_findings, date_fn, host_dd):
         exclusions = []
         for finding in total_findings:
             if finding.risk_accepted:
                 exclusions.append(
-                    self._create_exclusion(
-                        finding, date_fn, "engine_risk", "Risk Accepted"
+                    self._create_report_exclusion(
+                        finding, date_fn, "engine_risk", "Risk Accepted", host_dd
                     )
                 )
             elif finding.false_p:
                 exclusions.append(
-                    self._create_exclusion(
-                        finding, date_fn, "engine_risk", "False Positive"
+                    self._create_report_exclusion(
+                        finding, date_fn, "engine_risk", self.FALSE_POSITIVE, host_dd
+                    )
+                )
+            elif finding.out_of_scope:
+                exclusions.append(
+                    self._create_report_exclusion(
+                        finding, date_fn, "engine_risk", self.OUT_OF_SCOPE, host_dd
                     )
                 )
             elif finding.risk_status == "Transfer Accepted":
                 exclusions.append(
-                    self._create_exclusion(
-                        finding, date_fn, "engine_risk", "Transferred Finding"
+                    self._create_report_exclusion(
+                        finding, date_fn, "engine_risk", self.TRANSFERRED_FINDING, host_dd
                     )
                 )
         return exclusions
@@ -377,17 +418,23 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     logger.error("Maximum number of retries reached, aborting.")
                     raise e
 
-    def _create_exclusion(self, finding, date_fn, tool, reason):
-        if reason == "False Positive":
+    def _date_reason_based(self, finding, date_fn, reason):
+        if reason in [self.FALSE_POSITIVE, self.OUT_OF_SCOPE]:
             create_date = date_fn(finding.last_status_update)
             expired_date = date_fn(None)
-        elif reason == "Transferred Finding":
+        elif reason == self.TRANSFERRED_FINDING:
             create_date = date_fn(finding.transfer_finding.date)
             expired_date = date_fn(finding.transfer_finding.expiration_date)
         else:
             last_accepted_risk = finding.accepted_risks[-1]
             create_date = date_fn(last_accepted_risk["created"])
             expired_date = date_fn(last_accepted_risk["expiration_date"])
+
+        return create_date, expired_date
+
+
+    def _create_exclusion(self, finding, date_fn, tool, reason):
+        create_date, expired_date = self._date_reason_based(finding, date_fn, reason)
 
         return Exclusions(
             id=finding.vuln_id_from_tool,
@@ -397,9 +444,27 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             severity=finding.severity,
             reason=reason,
         )
+    
+    def _create_report_exclusion(self, finding, date_fn, tool, reason, host_dd):
+        create_date, expired_date = self._date_reason_based(finding, date_fn, reason)
 
-    def _create_report(self, finding):
+        return Exclusions(
+            id=finding.vuln_id_from_tool,
+            where=self._get_where(finding, tool),
+            create_date=create_date,
+            expired_date=expired_date,
+            severity=finding.severity,
+            reason=reason,
+            vm_id=str(finding.vm_id),
+            vm_id_url=f"{host_dd}/finding/{finding.vm_id}",
+            service=finding.service,
+            tags=finding.tags,
+        )
+
+    def _create_report(self, finding, host_dd):
         return Report(
+            vm_id=str(finding.id),
+            vm_id_url=f"{host_dd}/finding/{finding.id}",
             id=finding.vulnerability_ids,
             vuln_id_from_tool=finding.vuln_id_from_tool,
             status=finding.display_status,
@@ -425,7 +490,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             vul_description=finding.description,
             risk_accepted=finding.risk_accepted,
             false_p=finding.false_p,
+            out_of_scope=finding.out_of_scope,
             service=finding.service,
+            unique_id_from_tool=finding.unique_id_from_tool
         )
 
     def _format_date_to_dd_format(self, date_string):
@@ -443,5 +510,6 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         elif tool == "engine_risk":
             for tag in finding.tags:
                 return self._get_where(finding, tag)
+            return finding.file_path
         else:
             return finding.file_path
