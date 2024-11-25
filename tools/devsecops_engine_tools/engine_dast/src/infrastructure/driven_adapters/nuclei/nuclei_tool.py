@@ -96,10 +96,11 @@ class NucleiTool(ToolGateway):
                 return 201  # Installation successful
             elif os_type == "windows":
                 executable_path = os.path.join(home_directory, "nuclei.exe")
-                target_path = os.path.join(os.getenv("ProgramFiles"), "nuclei.exe")
+                target_path = os.path.join(home_directory, "AppData", "Local", "Programs", "nuclei.exe")
+                os.makedirs(os.path.dirname(target_path), exist_ok=True)
                 shutil.move(executable_path, target_path)
                 logger.info(f"Success [202]: Nuclei installed at {target_path}")
-                return 202  # Installation successful (Windows)
+                return {"status": 202, "path":target_path}
             else:
                 logger.error(f"Error [105]: {os_type} is an unsupported OS type!")
                 return 105  # Unsupported OS type error
@@ -112,7 +113,7 @@ class NucleiTool(ToolGateway):
 
 
     def configurate_external_checks(
-        self, config_tool: ConfigTool, secret, output_dir: str = "/tmp"
+        self, config_tool: ConfigTool, secret, output_dir: str = "tmp"
     ):
         if secret is None:
             logger.warning("The secret is not configured for external controls")
@@ -129,12 +130,12 @@ class NucleiTool(ToolGateway):
             return None
 
 
-    def execute(self, target_config: NucleiConfig) -> dict:
+    def execute(self, command_prefix: str, target_config: NucleiConfig) -> dict:
         """Interact with nuclei's core application"""
 
         command = (
-            "nuclei "
-            + "-duc "  # disable automatic update check
+            command_prefix
+            + " -duc "  # disable automatic update check
             + "-u "  # target URLs/hosts to scan
             + target_config.url
             + (f" -ud {target_config.custom_templates_dir}" if target_config.custom_templates_dir else "")
@@ -144,6 +145,7 @@ class NucleiTool(ToolGateway):
             + target_config.target_type
             + " -je "  # file to export results in JSON format
             + str(target_config.output_file)
+            + " -sr"
         )
 
         if command is not None:
@@ -177,13 +179,14 @@ class NucleiTool(ToolGateway):
                     else None
                 )
             }
-        if self.install_tool(config_tool.version) < 200:
+        result_install = self.install_tool(config_tool.version)
+        if result_install["status"] < 200:
             return [], None
         nuclei_config = NucleiConfig(target_data)
-        checks_directory = self.configurate_external_checks(config_tool, secret, "/tmp") #DATA PDN
+        checks_directory = self.configurate_external_checks(config_tool, secret, "./tmp") #DATA PDN
         if checks_directory:
             nuclei_config.customize_templates(checks_directory)
-        result_scans = self.execute(nuclei_config)
+        result_scans = self.execute(result_install["path"],nuclei_config)
         nuclei_deserealizator = NucleiDesealizator()
         findings_list = nuclei_deserealizator.get_list_finding(result_scans)
         return findings_list, nuclei_config.output_file
