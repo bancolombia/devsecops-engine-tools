@@ -243,7 +243,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 self.FALSE_POSITIVE,
             )
 
-            exclusions_false_positive = self._get_findings_with_exclusions(
+            exclusions_out_of_scope = self._get_findings_with_exclusions(
                 session_manager,
                 service,
                 dd_max_retries,
@@ -266,6 +266,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             return (
                 list(exclusions_risk_accepted)
                 + list(exclusions_false_positive)
+                + list(exclusions_out_of_scope)
                 + list(exclusions_transfer_finding)
             )
         except Exception as ex:
