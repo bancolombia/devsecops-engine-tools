@@ -55,6 +55,7 @@ def test_process(
         [],
         [],
         [],
+        {}
     )
     break_build.break_build = True
     break_build.process()
@@ -79,6 +80,7 @@ def test_breaker_break():
         [],
         [],
         [],
+        {}
     )
     break_build.break_build = True
     break_build._breaker()
@@ -96,6 +98,7 @@ def test_breaker_not_break():
         [],
         [],
         [],
+        {}
     )
     break_build.break_build = False
     break_build._breaker()
@@ -110,17 +113,17 @@ def test_remediation_rate_control_greater():
         Report(mitigated=False),
     ]
     remediation_rate_value = round((1 / 3) * 100, 3)
-    remote_config = {"THRESHOLD": {"REMEDIATION_RATE": 10}}
-    risk_threshold = remote_config["THRESHOLD"]["REMEDIATION_RATE"]
+    risk_threshold = 10
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
         devops_platform_gateway,
         MagicMock(),
-        remote_config,
+        {},
         [],
         [],
         [],
         [],
+        {"REMEDIATION_RATE": 10}
     )
     break_build._remediation_rate_control(all_report)
 
@@ -137,17 +140,17 @@ def test_remediation_rate_control_close():
         Report(mitigated=False),
     ]
     remediation_rate_value = round((1 / 3) * 100, 3)
-    remote_config = {"THRESHOLD": {"REMEDIATION_RATE": 30}}
-    risk_threshold = remote_config["THRESHOLD"]["REMEDIATION_RATE"]
+    risk_threshold = 30
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
         devops_platform_gateway,
         MagicMock(),
-        remote_config,
+        {},
         [],
         [],
         [],
         [],
+        {"REMEDIATION_RATE": 30},
     )
     break_build._remediation_rate_control(all_report)
 
@@ -164,17 +167,17 @@ def test_remediation_rate_control_less():
         Report(mitigated=False),
     ]
     remediation_rate_value = round((1 / 3) * 100, 3)
-    remote_config = {"THRESHOLD": {"REMEDIATION_RATE": 50}}
-    risk_threshold = remote_config["THRESHOLD"]["REMEDIATION_RATE"]
+    risk_threshold = 50
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
         devops_platform_gateway,
         MagicMock(),
-        remote_config,
+        {},
         [],
         [],
         [],
         [],
+        {"REMEDIATION_RATE": 50},
     )
     break_build._remediation_rate_control(all_report)
 
@@ -222,6 +225,7 @@ def test_map_applied_exclusion():
         [],
         [],
         [],
+        {},
     )
     result = break_build._map_applied_exclusion(exclusions)
 
@@ -239,6 +243,7 @@ def test_apply_exclusions_vuln_id_from_tool():
         [],
         [],
         [],
+        {},
     )
     break_build.exclusions = exclusions
 
@@ -258,6 +263,7 @@ def test_apply_exclusions_id():
         [],
         [],
         [],
+        {},
     )
     break_build.exclusions = exclusions
 
@@ -277,12 +283,9 @@ def test_tag_blacklist_control_error():
         )
     ]
     remote_config = {
-        "THRESHOLD": {
-            "TAG_BLACKLIST": ["blacklisted"],
-            "TAG_MAX_AGE": 5,
-        }
+        "TAG_BLACKLIST": ["blacklisted"]
     }
-    tag_age_threshold = remote_config["THRESHOLD"]["TAG_MAX_AGE"]
+    tag_age_threshold = 5
     mock_devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
         mock_devops_platform_gateway,
@@ -292,6 +295,7 @@ def test_tag_blacklist_control_error():
         [],
         [],
         [],
+        {"TAG_MAX_AGE": 5}
     )
     break_build._tag_blacklist_control(report_list)
 
@@ -312,12 +316,9 @@ def test_tag_blacklist_control_warning():
         )
     ]
     remote_config = {
-        "THRESHOLD": {
-            "TAG_BLACKLIST": ["blacklisted"],
-            "TAG_MAX_AGE": 5,
-        }
+        "TAG_BLACKLIST": ["blacklisted"]
     }
-    tag_age_threshold = remote_config["THRESHOLD"]["TAG_MAX_AGE"]
+    tag_age_threshold = 5
     mock_devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
         mock_devops_platform_gateway,
@@ -327,6 +328,7 @@ def test_tag_blacklist_control_warning():
         [],
         [],
         [],
+        {"TAG_MAX_AGE": 5}
     )
     break_build._tag_blacklist_control(report_list)
 
@@ -339,7 +341,6 @@ def test_tag_blacklist_control_warning():
 def test_risk_score_control_break():
     report_list = [Report(severity="high", epss_score=0, age=0, tags=["tag"])]
     remote_config = {
-        "THRESHOLD": {"RISK_SCORE": 4},
         "WEIGHTS": {
             "severity": {"high": 5},
             "epss_score": 1,
@@ -348,7 +349,7 @@ def test_risk_score_control_break():
             "tags": {"tag": 1},
         },
     }
-    risk_score_threshold = remote_config["THRESHOLD"]["RISK_SCORE"]
+    risk_score_threshold = 4
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
         devops_platform_gateway,
@@ -358,6 +359,7 @@ def test_risk_score_control_break():
         [],
         [],
         [],
+        {"RISK_SCORE": 4}
     )
     break_build._risk_score_control(report_list)
 
@@ -370,7 +372,6 @@ def test_risk_score_control_break():
 def test_risk_score_control_not_break():
     report_list = [Report(severity="low", epss_score=0, age=0, tags=["tag"])]
     remote_config = {
-        "THRESHOLD": {"RISK_SCORE": 4},
         "WEIGHTS": {
             "severity": {"high": 1},
             "epss_score": 1,
@@ -379,7 +380,7 @@ def test_risk_score_control_not_break():
             "tags": {"tag": 1},
         },
     }
-    risk_score_threshold = remote_config["THRESHOLD"]["RISK_SCORE"]
+    risk_score_threshold = 4
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
         devops_platform_gateway,
@@ -389,6 +390,7 @@ def test_risk_score_control_not_break():
         [],
         [],
         [],
+        {"RISK_SCORE": 4}
     )
     break_build._risk_score_control(report_list)
 
@@ -418,6 +420,7 @@ def test_print_exclusions():
         [],
         [],
         [],
+        {}
     )
     break_build._print_exclusions(applied_exclusions)
 
