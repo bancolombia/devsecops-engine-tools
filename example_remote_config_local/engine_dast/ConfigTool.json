@@ -14,7 +14,6 @@
     "NUCLEI": {
         "VERSION": "3.3.5",
         "DOWNLOAD_URL": "https://github.com/projectdiscovery/nuclei/releases/download/",
-        "EXCLUSIONS_PATH": "/engine_dast/Exclusions.json",
         "USE_EXTERNAL_CHECKS_DIR": "True",
         "EXTERNAL_DIR_OWNER": "dummie-username",
         "EXTERNAL_DIR_REPOSITORY": "example-repo-templates",
