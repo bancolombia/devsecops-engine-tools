@@ -12,11 +12,11 @@
     },
     "MESSAGE_INFO_DAST": "If you have doubts, visit https://forum.example",
     "NUCLEI": {
-        "VERSION": "2.3.296",
+        "VERSION": "3.3.5",
         "DOWNLOAD_URL": "https://github.com/projectdiscovery/nuclei/releases/download/",
         "EXCLUSIONS_PATH": "/engine_dast/Exclusions.json",
         "USE_EXTERNAL_CHECKS_DIR": "True",
-        "EXTERNAL_DIR_OWNER": "username",
+        "EXTERNAL_DIR_OWNER": "dummie-username",
         "EXTERNAL_DIR_REPOSITORY": "example-repo-templates",
         "EXTERNAL_DIR_ASSET_NAME": "path/templates",
         "EXTERNAL_CHECKS_PATH": "/local-templates"

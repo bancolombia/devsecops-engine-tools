@@ -35,7 +35,8 @@
     },
     "ENGINE_DAST": {
         "ENABLED": "true",
-        "TOOL": "NUCLEI"
+        "TOOL": "NUCLEI",
+        "EXTRA_TOOLS": ["JWT"]
     },
     "ENGINE_SECRET": {
         "ENABLED": "true",
