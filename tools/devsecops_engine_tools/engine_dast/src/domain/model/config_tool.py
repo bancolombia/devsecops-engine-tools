@@ -4,7 +4,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.threshold import Thresh
 class ConfigTool:
     def __init__(self, json_data, tool):
         self.version = json_data[tool].get("VERSION")
-        self.exclusions_path = json_data[tool].get("EXCLUSIONS_PATH")
         self.use_external_checks_dir = json_data[tool].get("USE_EXTERNAL_CHECKS_DIR")
         self.external_dir_owner = json_data[tool].get("EXTERNAL_DIR_OWNER")
         self.external_dir_repository = json_data[tool].get("EXTERNAL_DIR_REPOSITORY")
