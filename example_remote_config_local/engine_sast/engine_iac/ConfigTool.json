@@ -25,6 +25,10 @@
         "USE_EXTERNAL_CHECKS_DIR": "True",
         "EXTERNAL_DIR_OWNER": "",
         "EXTERNAL_DIR_REPOSITORY": "",
+        "APP_ID_GITHUB":"",
+        "INSTALLATION_ID_GITHUB":"",
+        "DEFAULT_SEVERITY": "Critical",
+        "DEFAULT_CATEGORY": "Compliance",
         "RULES": {
             "RULES_DOCKER": {
                 "CKV_DOCKER_1": {
@@ -702,6 +706,20 @@
                         "qa": true
                     },
                     "guideline": "https://bit.ly/44frBRZ",
+                    "severity": "Medium",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                }
+            },
+            "RULES_TERRAFORM": {
+                "CKV_AWS_144": {
+                    "checkID": "IAC-CKV-TERRAFORM-1 Ensure terraform",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "guideline",
                     "severity": "Medium",
                     "cvss": "",
                     "category": "Vulnerability"

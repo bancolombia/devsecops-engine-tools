@@ -93,7 +93,7 @@ def test_get_list_finding():
     }
 
     list_findings = CheckovDeserealizator.get_list_finding(
-        results_scan_list, config_rules
+        results_scan_list, config_rules, "", ""
     )
 
     list_findings_compare: list[Finding] = []

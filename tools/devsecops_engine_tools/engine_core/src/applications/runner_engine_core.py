@@ -97,7 +97,7 @@ def get_inputs_from_cli(args):
     parser.add_argument(
         "-p",
         "--platform",
-        type=parse_choices({"all", "docker", "k8s", "cloudformation", "openapi"}),
+        type=parse_choices({"all", "docker", "k8s", "cloudformation", "openapi", "terraform"}),
         required=False,
         default="all",
         help="Platform to scan, only apply engine_iac tool",
@@ -144,7 +144,7 @@ def get_inputs_from_cli(args):
     parser.add_argument(
         "--token_external_checks",
         required=False,
-        help="Token for downloading external checks from engine_iac or engine_secret if is necessary. Ej: github:token, ssh:privatekey:pass",
+        help="Token for downloading external checks from engine_iac or engine_secret if is necessary. Ej: github_token:token, github_app:private_key, ssh:privatekey:pass",
     )
     parser.add_argument(
         "--xray_mode",
@@ -191,8 +191,8 @@ def application_core():
             "github": GithubActions(),
             "local": RuntimeLocal(),
         }.get(args["platform_devops"])
-        printer_table_gateway = PrinterPrettyTable()
         metrics_manager_gateway = S3Manager()
+        printer_table_gateway = PrinterPrettyTable()
 
         init_engine_core(
             vulnerability_management_gateway,

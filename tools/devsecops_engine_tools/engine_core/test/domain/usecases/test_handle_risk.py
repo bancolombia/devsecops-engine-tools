@@ -24,6 +24,9 @@ class TestHandleRisk(unittest.TestCase):
         )
 
     @mock.patch(
+        "devsecops_engine_tools.engine_core.src.domain.usecases.handle_risk.HandleRisk._should_skip_analysis"
+    )
+    @mock.patch(
         "devsecops_engine_tools.engine_core.src.domain.usecases.handle_risk.runner_engine_risk"
     )
     @mock.patch(
@@ -39,6 +42,7 @@ class TestHandleRisk(unittest.TestCase):
         mock_filter_engagements,
         mock_get_all_from_vm,
         mock_runner_engine_risk,
+        mock_should_skip_analysis,
     ):
         dict_args = {
             "use_secrets_manager": "true",
@@ -51,16 +55,20 @@ class TestHandleRisk(unittest.TestCase):
             "HANDLE_SERVICE_NAME": {
                 "ENABLED": "true",
                 "ADD_SERVICES": ["service1", "service2"],
-                "EXCLUSIVE_ENDING": ["_ending"],
+                "CHECK_ENDING": ["_ending"],
                 "REGEX_GET_SERVICE_CODE": "[^_]+",
             },
         }
         self.devops_platform_gateway.get_variable.return_value = (
             "code_pipeline_name_id_test"
         )
+        mock_should_skip_analysis.return_value = False
         mock_runner_engine_risk.return_value = {"result": "result"}
         mock_get_all_from_vm.return_value = ([], [])
-        mock_filter_engagements.return_value = ["service1", "service2"]
+        mock_filter_engagements.return_value = [
+            MagicMock(name="service1"),
+            MagicMock(name="service2"),
+        ]
         mock_match.side_effect = [
             MagicMock(group=MagicMock(return_value="code_pipeline_name_id_test")),
             MagicMock(group=MagicMock(return_value="code_pipeline_name_id_test")),
@@ -72,7 +80,7 @@ class TestHandleRisk(unittest.TestCase):
         # Assert the expected values
         assert mock_filter_engagements.call_count == 1
         assert mock_match.call_count == 2
-        assert mock_get_all_from_vm.call_count == 3
+        assert mock_get_all_from_vm.call_count == 2
         assert mock_runner_engine_risk.call_count == 1
         assert result == {"result": "result"}
         assert type(input_core) == InputCore
@@ -88,9 +96,15 @@ class TestHandleRisk(unittest.TestCase):
             MagicMock(name="code_another_service_2"),
         ]
         service = "code_service_id"
-        endings_to_exclude = ["_id", "_ending"]
+        initial_services = [
+            "code_service_id",
+            "code_service_id_test",
+            "code_service_id_test_word1",
+            "code_service_id_test_word2",
+        ]
         risk_config = {
             "HANDLE_SERVICE_NAME": {
+                "CHECK_ENDING": ["_ending"],
                 "REGEX_GET_WORDS": "[_-]",
                 "MIN_WORD_LENGTH": 3,
                 "MIN_WORD_AMOUNT": 2,
@@ -100,7 +114,7 @@ class TestHandleRisk(unittest.TestCase):
 
         # Call the process method
         self.handle_risk._filter_engagements(
-            engagements, service, endings_to_exclude, risk_config
+            engagements, service, initial_services, risk_config
         )
 
         # Assert the expected values
@@ -155,7 +169,12 @@ class TestHandleRisk(unittest.TestCase):
             "remote_config_repo": "test_repo",
         }
         pipeline_name = "pipeline_name"
-        service_list = ["code_service_1", "code_service_2", "service1", "service2"]
+        service_list = [
+            MagicMock(name="code_service_1"),
+            MagicMock(name="code_service_2"),
+            MagicMock(name="service_1"),
+            MagicMock(name="service_2"),
+        ]
         self.devops_platform_gateway.get_remote_config.return_value = {
             "pipeline_name": {
                 "SKIP_SERVICE": {"services": ["code_service_1", "code_service_2"]}
@@ -169,3 +188,14 @@ class TestHandleRisk(unittest.TestCase):
 
         # Assert the expected values
         assert type(result) == list
+
+    def test_should_skip_analysis(self):
+        remote_config = {"IGNORE_ANALYSIS_PATTERN": "pattern"}
+        pipeline_name = "pipeline"
+        exclusions = {"pipeline": {"SKIP_TOOL": 1}}
+
+        result = self.handle_risk._should_skip_analysis(
+            remote_config, pipeline_name, exclusions
+        )
+
+        assert result == True

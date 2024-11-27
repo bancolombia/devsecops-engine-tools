@@ -3,13 +3,20 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform
     DevopsPlatformGateway,
 )
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.DeserializeConfigTool import (
-    DeserializeConfigTool
-    )
+    DeserializeConfigTool,
+)
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 
 class SetInputCore:
-    def __init__(self, tool_remote: DevopsPlatformGateway, dict_args, tool, config_tool: DeserializeConfigTool):
+    def __init__(
+        self,
+        tool_remote: DevopsPlatformGateway,
+        dict_args,
+        tool,
+        config_tool: DeserializeConfigTool,
+    ):
         self.tool_remote = tool_remote
         self.dict_args = dict_args
         self.tool = tool
@@ -22,7 +29,9 @@ class SetInputCore:
         Returns:
             dict: Remote configuration.
         """
-        return self.tool_remote.get_remote_config(self.dict_args["remote_config_repo"], file_path)
+        return self.tool_remote.get_remote_config(
+            self.dict_args["remote_config_repo"], file_path
+        )
 
     def get_variable(self, variable):
         """
@@ -60,15 +69,23 @@ class SetInputCore:
         Returns:
             dict: Input core.
         """
+        exclusions_config = self.get_remote_config(
+            "engine_sast/engine_secret/Exclusions.json"
+        )
         return InputCore(
             totalized_exclusions=self.get_exclusions(
-                self.get_remote_config("engine_sast/engine_secret/Exclusions.json"),
+                exclusions_config,
                 self.get_variable("pipeline_name"),
                 self.tool,
             ),
-            threshold_defined=self.config_tool.level_compliance,
+            threshold_defined=Utils.update_threshold(
+                self,
+                self.config_tool.level_compliance,
+                exclusions_config,
+                self.config_tool.scope_pipeline,
+            ),
             path_file_results=finding_list,
             custom_message_break_build=self.config_tool.message_info_engine_secret,
             scope_pipeline=self.config_tool.scope_pipeline,
-            stage_pipeline=self.tool_remote.get_variable("stage").capitalize()
+            stage_pipeline=self.tool_remote.get_variable("stage").capitalize(),
         )

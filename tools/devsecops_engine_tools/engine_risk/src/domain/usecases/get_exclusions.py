@@ -11,14 +11,14 @@ class GetExclusions:
         findings,
         risk_config,
         risk_exclusions,
-        pipeline_name,
+        services,
     ):
         self.devops_platform_gateway = devops_platform_gateway
         self.dict_args = dict_args
         self.findings = findings
         self.risk_config = risk_config
         self.risk_exclusions = risk_exclusions
-        self.pipeline_name = pipeline_name
+        self.services = services
 
     def process(self):
         core_config = self.devops_platform_gateway.get_remote_config(
@@ -49,7 +49,8 @@ class GetExclusions:
 
     def _get_exclusions(self, config, key):
         exclusions = []
-        for scope in ["All", self.pipeline_name]:
+        scope_list = ["All"] + self.services
+        for scope in scope_list:
             if config.get(scope, None) and config[scope].get(key, None):
                 exclusions.extend(
                     [
@@ -57,6 +58,7 @@ class GetExclusions:
                             **exclusion,
                         )
                         for exclusion in config[scope][key]
+                        if exclusion.get("id", None)
                     ]
                 )
         return exclusions

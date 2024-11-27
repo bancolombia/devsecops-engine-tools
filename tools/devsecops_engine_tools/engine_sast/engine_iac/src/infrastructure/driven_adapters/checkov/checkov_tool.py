@@ -19,22 +19,15 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.helpers.file_generator_tool import (
     generate_file_from_tool,
 )
-from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
-    GithubApi,
-)
-from devsecops_engine_tools.engine_utilities.ssh.managment_private_key import (
-    create_ssh_private_file,
-    add_ssh_private_key,
-    decode_base64,
-    config_knowns_hosts,
-)
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class CheckovTool(ToolGateway):
+    
     CHECKOV_CONFIG_FILE = "checkov_config.yaml"
     TOOL_CHECKOV = "CHECKOV"
     framework_mapping = {
@@ -42,12 +35,14 @@ class CheckovTool(ToolGateway):
         "RULES_K8S": "kubernetes",
         "RULES_CLOUDFORMATION": "cloudformation",
         "RULES_OPENAPI": "openapi",
+        "RULES_TERRAFORM": "terraform"
     }
     framework_external_checks = [
         "RULES_K8S",
         "RULES_CLOUDFORMATION",
         "RULES_DOCKER",
         "RULES_OPENAPI",
+        "RULES_TERRAFORM"
     ]
 
     def create_config_file(self, checkov_config: CheckovConfig):
@@ -60,43 +55,6 @@ class CheckovTool(ToolGateway):
             yaml.dump(checkov_config.dict_confg_file, file)
             file.close()
 
-    def configurate_external_checks(self, config_tool, secret):
-        agent_env = None
-        try:
-            if secret is None:
-                logger.warning("The secret is not configured for external controls")
-
-            # Create configuration git external checks
-            elif config_tool[self.TOOL_CHECKOV][
-                "USE_EXTERNAL_CHECKS_GIT"
-            ] == "True" and platform.system() in (
-                "Linux",
-                "Darwin",
-            ):
-                config_knowns_hosts(
-                    config_tool[self.TOOL_CHECKOV]["EXTERNAL_GIT_SSH_HOST"],
-                    config_tool[self.TOOL_CHECKOV][
-                        "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT"
-                    ],
-                )
-                ssh_key_content = decode_base64(secret["repository_ssh_private_key"])
-                ssh_key_file_path = "/tmp/ssh_key_file"
-                create_ssh_private_file(ssh_key_file_path, ssh_key_content)
-                ssh_key_password = decode_base64(secret["repository_ssh_password"])
-                agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
-
-            # Create configuration dir external checks
-            elif config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_DIR"] == "True":
-                github_api = GithubApi(secret["github_token"])
-                github_api.download_latest_release_assets(
-                    config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_OWNER"],
-                    config_tool[self.TOOL_CHECKOV]["EXTERNAL_DIR_REPOSITORY"],
-                    "/tmp",
-                )
-
-        except Exception as ex:
-            logger.error(f"An error ocurred configuring external checks {ex}")
-        return agent_env
 
     def retryable_install_package(self, package: str, version: str) -> bool:
         MAX_RETRIES = 3
@@ -191,10 +149,14 @@ class CheckovTool(ToolGateway):
                 if "all" in platform_to_scan or any(
                     elem.upper() in rule for elem in platform_to_scan
                 ):
+                    framework = [self.framework_mapping[rule]]
+                    if "terraform" in platform_to_scan or ("all" in platform_to_scan and self.framework_mapping[rule] == "terraform"): 
+                        framework.append("terraform_plan")
+
                     checkov_config = CheckovConfig(
                         path_config_file="",
                         config_file_name=rule,
-                        framework=self.framework_mapping[rule],
+                        framework=framework,
                         checks=[
                             key
                             for key, value in config_tool[self.TOOL_CHECKOV]["RULES"][
@@ -252,29 +214,8 @@ class CheckovTool(ToolGateway):
         secret_tool,
         secret_external_checks,
     ):
-        secret = None
-        if secret_tool is not None:
-            secret = secret_tool
-        elif secret_external_checks is not None:
-            secret = {
-                "github_token": (
-                    secret_external_checks.split("github:")[1]
-                    if "github" in secret_external_checks
-                    else None
-                ),
-                "repository_ssh_private_key": (
-                    secret_external_checks.split("ssh:")[1].split(":")[0]
-                    if "ssh" in secret_external_checks
-                    else None
-                ),
-                "repository_ssh_password": (
-                    secret_external_checks.split("ssh:")[1].split(":")[1]
-                    if "ssh" in secret_external_checks
-                    else None
-                ),
-            }
-
-        agent_env = self.configurate_external_checks(config_tool, secret)
+        util = Utils()
+        agent_env = util.configurate_external_checks(self.TOOL_CHECKOV,config_tool, secret_tool,secret_external_checks)
 
         checkov_install = self.retryable_install_package(
             "checkov", config_tool[self.TOOL_CHECKOV]["VERSION"]
@@ -287,12 +228,21 @@ class CheckovTool(ToolGateway):
 
             checkov_deserealizator = CheckovDeserealizator()
             findings_list = checkov_deserealizator.get_list_finding(
-                result_scans, rules_run
+                result_scans, 
+                rules_run, 
+                config_tool[self.TOOL_CHECKOV]["DEFAULT_SEVERITY"],
+                config_tool[self.TOOL_CHECKOV]["DEFAULT_CATEGORY"]
             )
 
             return (
                 findings_list,
-                generate_file_from_tool(self.TOOL_CHECKOV, result_scans, rules_run),
+                generate_file_from_tool(
+                    self.TOOL_CHECKOV, 
+                    result_scans, 
+                    rules_run, 
+                    config_tool[self.TOOL_CHECKOV]["DEFAULT_SEVERITY"],
+                    config_tool[self.TOOL_CHECKOV]["DEFAULT_CATEGORY"]
+                ),
             )
         else:
             return [], None

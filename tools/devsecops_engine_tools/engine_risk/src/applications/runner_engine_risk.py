@@ -13,7 +13,12 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 def runner_engine_risk(
-    dict_args, findings, vm_exclusions, devops_platform_gateway, print_table_gateway
+    dict_args,
+    findings,
+    vm_exclusions,
+    services,
+    devops_platform_gateway,
+    print_table_gateway,
 ):
     add_epss_gateway = FirstCsv()
 
@@ -23,5 +28,6 @@ def runner_engine_risk(
         print_table_gateway,
         dict_args,
         findings,
+        services,
         vm_exclusions,
     )

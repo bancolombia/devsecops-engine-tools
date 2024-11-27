@@ -1,7 +1,5 @@
 {
-    "IGNORE_SEARCH_PATTERN": [
-        "test"
-    ],
+    "IGNORE_SEARCH_PATTERN": "(.*test.*)",
     "MESSAGE_INFO_ENGINE_SECRET": "message custom",
     "THRESHOLD": {
         "VULNERABILITY": {
@@ -16,10 +14,13 @@
     },
     "TARGET_BRANCHES": ["trunk", "develop"],
     "trufflehog": {
+        "VERSION": "1.2.3",
         "EXCLUDE_PATH": [".git"],
         "NUMBER_THREADS": 4,
         "ENABLE_CUSTOM_RULES" : "True",
         "EXTERNAL_DIR_OWNER": "ExternalOrg",
-        "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks"
+        "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",
+        "APP_ID_GITHUB":"",
+        "INSTALLATION_ID_GITHUB":""
     }
 }

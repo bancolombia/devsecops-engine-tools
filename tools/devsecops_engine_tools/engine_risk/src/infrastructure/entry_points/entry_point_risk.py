@@ -10,9 +10,10 @@ from devsecops_engine_tools.engine_risk.src.domain.usecases.add_data import (
 from devsecops_engine_tools.engine_risk.src.domain.usecases.get_exclusions import (
     GetExclusions,
 )
+from devsecops_engine_tools.engine_risk.src.domain.usecases.check_threshold import (
+    CheckThreshold,
+)
 
-
-import re
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -26,6 +27,7 @@ def init_engine_risk(
     print_table_gateway,
     dict_args,
     findings,
+    services,
     vm_exclusions,
 ):
     remote_config = devops_platform_gateway.get_remote_config(
@@ -35,42 +37,7 @@ def init_engine_risk(
         dict_args["remote_config_repo"], "engine_risk/Exclusions.json"
     )
     pipeline_name = devops_platform_gateway.get_variable("pipeline_name")
-    if should_skip_analysis(remote_config, pipeline_name, risk_exclusions):
-        print("Tool skipped by DevSecOps Policy.")
-        logger.info("Tool skipped by DevSecOps Policy.")
-        return
 
-    return process_findings(
-        findings,
-        vm_exclusions,
-        dict_args,
-        pipeline_name,
-        risk_exclusions,
-        remote_config,
-        add_epss_gateway,
-        devops_platform_gateway,
-        print_table_gateway,
-    )
-
-
-def should_skip_analysis(remote_config, pipeline_name, exclusions):
-    ignore_pattern = remote_config["IGNORE_ANALYSIS_PATTERN"]
-    return re.match(ignore_pattern, pipeline_name, re.IGNORECASE) or (
-        pipeline_name in exclusions and exclusions[pipeline_name].get("SKIP_TOOL", 0)
-    )
-
-
-def process_findings(
-    findings,
-    vm_exclusions,
-    dict_args,
-    pipeline_name,
-    risk_exclusions,
-    remote_config,
-    add_epss_gateway,
-    devops_platform_gateway,
-    print_table_gateway,
-):
     if not findings:
         print("No findings found in Vulnerability Management Platform")
         logger.info("No findings found in Vulnerability Management Platform")
@@ -78,42 +45,30 @@ def process_findings(
 
     handle_filters = HandleFilters()
 
-    return process_active_findings(
-        handle_filters.filter(findings),
-        findings,
-        vm_exclusions,
-        devops_platform_gateway,
-        dict_args,
-        remote_config,
-        risk_exclusions,
-        pipeline_name,
-        add_epss_gateway,
-        print_table_gateway,
+    active_findings = handle_filters.filter(findings)
+
+    unique_findings = handle_filters.filter_duplicated(active_findings)
+
+    filtered_findings = handle_filters.filter_tags_days(
+        devops_platform_gateway, remote_config, unique_findings
     )
 
+    data_added = AddData(add_epss_gateway, filtered_findings).process()
 
-def process_active_findings(
-    active_findings,
-    total_findings,
-    vm_exclusions,
-    devops_platform_gateway,
-    dict_args,
-    remote_config,
-    risk_exclusions,
-    pipeline_name,
-    add_epss_gateway,
-    print_table_gateway,
-):
-    data_added = AddData(add_epss_gateway, active_findings).process()
     get_exclusions = GetExclusions(
         devops_platform_gateway,
         dict_args,
         data_added,
         remote_config,
         risk_exclusions,
-        pipeline_name,
+        services,
     )
     exclusions = get_exclusions.process()
+
+    threshold = CheckThreshold(
+        pipeline_name, remote_config["THRESHOLD"], risk_exclusions
+    ).process()
+
     break_build = BreakBuild(
         devops_platform_gateway,
         print_table_gateway,
@@ -121,7 +76,8 @@ def process_active_findings(
         exclusions,
         vm_exclusions,
         data_added,
-        total_findings,
+        findings,
+        threshold,
     )
 
     return break_build.process()
