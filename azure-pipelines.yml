@@ -17,3 +17,11 @@ steps:
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
+- task: ArtifactoryDocker@1
+  displayName: Docker Push
+  inputs:
+    command: 'push'
+    repository: 'devops/devsecops-engine-tools'
+    artifactoryService: 'Artifactor'
+    targetRepo: 'docker-registry'
+    imageName: 'artifactory.apps.bancolombia.com/devops/devsecops-engine-tools:$(version)'
