@@ -19,8 +19,12 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class DependencyCheckTool(ToolGateway):
+    def __init__(self):
+        self.download_tool_called = False
+
     def download_tool(self, cli_version):
         try:
+            self.download_tool_called = True
             url = f"https://github.com/jeremylong/DependencyCheck/releases/download/v{cli_version}/dependency-check-{cli_version}-release.zip"
             response = requests.get(url, allow_redirects=True)
             home_directory = os.path.expanduser("~")
@@ -89,6 +93,7 @@ class DependencyCheckTool(ToolGateway):
                     file_to_scan,
                 ]
 
+            if not self.download_tool_called: command.append("--noupdate")
             subprocess.run(command, capture_output=True, check=True)
         except subprocess.CalledProcessError as error:
             logger.error(f"Error executing OWASP dependency check scan: {error}")

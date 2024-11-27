@@ -207,6 +207,7 @@ class TestDependencyCheckTool(unittest.TestCase):
                 "token",
                 "--scan",
                 "mock_file_to_scan",
+                "--noupdate"
             ],
             capture_output=True,
             check=True,
@@ -240,6 +241,7 @@ class TestDependencyCheckTool(unittest.TestCase):
                 "token",
                 "--scan",
                 "mock_file_to_scan",
+                "--noupdate"
             ],
             capture_output=True,
             check=True,
