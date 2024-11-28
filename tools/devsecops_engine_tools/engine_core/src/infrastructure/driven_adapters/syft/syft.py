@@ -51,7 +51,7 @@ class Syft(SbomManagerGateway):
             command_prefix,
             artifact,
             "-o",
-            f"{config["SYFT"]["OUTPUT_FORMAT"]}={result_file}",
+            f"{config['SYFT']['OUTPUT_FORMAT']}={result_file}",
         ]
         try:
             subprocess.run(
