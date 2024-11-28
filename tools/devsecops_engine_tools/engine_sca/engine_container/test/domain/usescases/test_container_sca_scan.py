@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.container_sca_scan import (
     ContainerScaScan,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.component import Component
 
 
 @pytest.fixture
@@ -40,7 +41,7 @@ def container_sca_scan(
         "1234",
         "token",
         "token_engine_container",
-        "image_to_scan"
+        "image_to_scan",
     )
 
 
@@ -74,10 +75,8 @@ def test_process_image_already_scanned(container_sca_scan):
     container_sca_scan.get_images_already_scanned = MagicMock()
     container_sca_scan.get_image = MagicMock()
     container_sca_scan.get_image.return_value = mock_image
-    container_sca_scan.get_images_already_scanned.return_value = [
-        "my_image:1234"
-    ]
-    assert container_sca_scan.process() == None
+    container_sca_scan.get_images_already_scanned.return_value = ["my_image:1234"]
+    assert container_sca_scan.process() == (None, None)
 
 
 def test_process_image_not_already_scanned(container_sca_scan):
@@ -89,12 +88,18 @@ def test_process_image_not_already_scanned(container_sca_scan):
     container_sca_scan.get_images_already_scanned.return_value = [
         "my_image_scan_result.json"
     ]
+    component_list = [
+        Component("component1", "version1"),
+        Component("component2", "version2"),
+    ]
     container_sca_scan.tool_run.run_tool_container_sca.return_value = [
         "my_image:1234_scan_result.json"
-    ]
+    ], component_list
     container_sca_scan.set_image_scanned = MagicMock()
-    assert container_sca_scan.process() == ["my_image:1234_scan_result.json"]
-
+    assert container_sca_scan.process() == (
+        ["my_image:1234_scan_result.json"],
+        component_list,
+    )
 
 
 def test_deserialize(container_sca_scan):

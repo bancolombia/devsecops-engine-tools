@@ -1,7 +1,7 @@
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan import (
     PrismaCloudManagerScan,
 )
-
+from devsecops_engine_tools.engine_core.src.domain.model.component import Component
 from unittest.mock import patch, Mock, MagicMock
 import pytest
 
@@ -135,10 +135,12 @@ def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image):
         PrismaCloudManagerScan.scan_image = MagicMock()
         mock_exists.return_value = False
         PrismaCloudManagerScan.scan_image.return_value = "result.json"
+        PrismaCloudManagerScan._generate_sbom = MagicMock()
+        PrismaCloudManagerScan._generate_sbom.return_value = [Component("component1", "version1")]
 
         scan_manager = PrismaCloudManagerScan()
         result = scan_manager.run_tool_container_sca(
-            mock_remoteconfig, {"token_prisma_cloud": "token"}, "token_container", "image_name", "result.json"
+            mock_remoteconfig, {"token_prisma_cloud": "token"}, "token_container", "image_name", "result.json", True
         )
 
-        assert result == "result.json"
+        assert result == ("result.json", [Component("component1", "version1")])

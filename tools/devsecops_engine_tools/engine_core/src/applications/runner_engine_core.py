@@ -22,6 +22,7 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.s
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.printer_pretty_table.printer_pretty_table import (
     PrinterPrettyTable,
 )
+from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.syft.syft import Syft
 import sys
 import argparse
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
@@ -107,6 +108,7 @@ def get_inputs_from_cli(args):
         choices=["true", "false"],
         type=str,
         required=False,
+        default="false",
         help="Use Secrets Manager to get the tokens",
     )
     parser.add_argument(
@@ -114,6 +116,7 @@ def get_inputs_from_cli(args):
         choices=["true", "false"],
         type=str,
         required=False,
+        default="false",
         help="Use Vulnerability Management to send the vulnerabilities to the platform",
     )
     parser.add_argument(
@@ -121,6 +124,7 @@ def get_inputs_from_cli(args):
         choices=["true", "false"],
         type=str,
         required=False,
+        default="false",
         help="Enable or Disable the send metrics to the driven adapter metrics",
     )
     parser.add_argument(
@@ -193,6 +197,7 @@ def application_core():
         }.get(args["platform_devops"])
         metrics_manager_gateway = S3Manager()
         printer_table_gateway = PrinterPrettyTable()
+        sbom_tool_gateway = Syft()
 
         init_engine_core(
             vulnerability_management_gateway,
@@ -200,6 +205,7 @@ def application_core():
             devops_platform_gateway,
             printer_table_gateway,
             metrics_manager_gateway,
+            sbom_tool_gateway,
             args,
         )
     except Exception as e:

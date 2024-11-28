@@ -21,6 +21,7 @@ def init_engine_core(
     devops_platform_gateway: any,
     print_table_gateway: any,
     metrics_manager_gateway: any,
+    sbom_tool_gateway: any,
     args: any
 ):
     config_tool = devops_platform_gateway.get_remote_config(
@@ -28,7 +29,7 @@ def init_engine_core(
     )
     Printers.print_logo_tool(config_tool["BANNER"])
 
-    if config_tool[args["tool"].upper()]["ENABLED"] == "true":
+    if config_tool[args["tool"].upper()]["ENABLED"]:
         if args["tool"] == "engine_risk":
             results, input_core = HandleRisk(
                 vulnerability_management_gateway,
@@ -42,6 +43,7 @@ def init_engine_core(
                 vulnerability_management_gateway,
                 secrets_manager_gateway,
                 devops_platform_gateway,
+                sbom_tool_gateway
             ).process(args, config_tool)
 
             results = BreakBuild(devops_platform_gateway, print_table_gateway).process(

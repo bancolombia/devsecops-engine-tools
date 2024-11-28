@@ -15,7 +15,7 @@ def test_init_engine_dependencies():
     ) as mock_handle_remote_config_patterns:
         dict_args = {"remote_config_repo": "remote_repo"}
         token = "token"
-        tool = "tool"
+        tool = {"ENGINE_DEPENDENCIES": {"TOOL": "tool"}, "SBOM_MANAGER": {"ENABLED": True, "BRANCH_FILTER": ["trunk"]}}
         mock_handle_remote_config_patterns.process_handle_working_directory.return_value = (
             "working_dir"
         )
@@ -32,4 +32,5 @@ def test_init_engine_dependencies():
             dict_args,
             token,
             tool,
+            None
         )

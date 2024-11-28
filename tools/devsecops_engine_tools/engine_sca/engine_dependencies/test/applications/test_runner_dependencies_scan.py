@@ -15,7 +15,7 @@ def test_init_engine_dependencies_xray():
             "ENGINE_DEPENDENCIES": {"ENABLED": "true", "TOOL": "XRAY"},
         }
 
-        result = runner_engine_dependencies(dict_args, config_tool, token, None)
+        result = runner_engine_dependencies(dict_args, config_tool, token, None, None)
 
         mock_init_engine_dependencies.assert_any_call
 
@@ -30,6 +30,6 @@ def test_init_engine_dependencies_dependency_check():
             "ENGINE_DEPENDENCIES": {"ENABLED": "true", "TOOL": "DEPENDENCY_CHECK"},
         }
 
-        result = runner_engine_dependencies(dict_args, config_tool, token, None)
+        result = runner_engine_dependencies(dict_args, config_tool, token, None, None)
 
         mock_init_engine_dependencies.assert_any_call

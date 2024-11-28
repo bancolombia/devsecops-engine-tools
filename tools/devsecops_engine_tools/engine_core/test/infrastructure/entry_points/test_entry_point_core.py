@@ -53,6 +53,7 @@ class TestEntryPointCore(unittest.TestCase):
             devops_platform_gateway=mock_devops_platform_gateway,
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
+            sbom_tool_gateway=mock.Mock(),
             args=args,
         )
 
@@ -84,7 +85,7 @@ class TestEntryPointCore(unittest.TestCase):
 
         mock_config_tool = {
             "BANNER": "DevSecOps Engine Tools",
-            "ENGINE_IAC": {"ENABLED": "false", "TOOL": "tool", "send_metrics": "false"}
+            "ENGINE_IAC": {"ENABLED": False, "TOOL": "tool"}
         }
         mock_devops_platform_gateway = mock.Mock()
 
@@ -97,6 +98,7 @@ class TestEntryPointCore(unittest.TestCase):
             devops_platform_gateway=mock_devops_platform_gateway,
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
+            sbom_tool_gateway=mock.Mock(),
             args={"remote_config_repo": "test", "tool": "engine_iac"},
         )
 
@@ -131,6 +133,7 @@ class TestEntryPointCore(unittest.TestCase):
             devops_platform_gateway=mock_devops_platform_gateway,
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
+            sbom_tool_gateway=mock.Mock(),
             args={"remote_config_repo": "test", "tool": "engine_risk", "send_metrics": "true"},
         )
 

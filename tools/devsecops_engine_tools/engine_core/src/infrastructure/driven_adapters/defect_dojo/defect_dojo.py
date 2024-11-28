@@ -5,9 +5,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_m
 from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
     VulnerabilityManagement,
 )
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
-    DevopsPlatformGateway
-)
 from devsecops_engine_tools.engine_utilities.defect_dojo import (
     DefectDojo,
     ImportScanRequest,
@@ -15,6 +12,7 @@ from devsecops_engine_tools.engine_utilities.defect_dojo import (
     Finding,
     Engagement,
     Product,
+    Component,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_tools.engine_core.src.domain.model.report import Report
@@ -33,6 +31,7 @@ from functools import partial
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 import time
+import concurrent.futures
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
@@ -76,14 +75,14 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "KICS": "KICS Scanner",
                 "BEARER": "Bearer CLI",
                 "DEPENDENCY_CHECK": "Dependency Check Scan",
-                "SONARQUBE": "SonarQube API Import"
+                "SONARQUBE": "SonarQube API Import",
             }
 
             if any(
                 branch in str(vulnerability_management.branch_tag)
                 for branch in vulnerability_management.config_tool[
                     "VULNERABILITY_MANAGER"
-                ]["BRANCH_FILTER"].split(",")
+                ]["BRANCH_FILTER"]
             ) or (vulnerability_management.dict_args["tool"] == "engine_secret"):
                 tags = vulnerability_management.dict_args["tool"]
                 if vulnerability_management.dict_args["tool"] == "engine_iac":
@@ -178,7 +177,11 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         "prefetch": "prod_type",
                     },
                 )
-                return response.prefetch.prod_type[str(response.results[0].prod_type)] if response.prefetch else None
+                return (
+                    response.prefetch.prod_type[str(response.results[0].prod_type)]
+                    if response.prefetch
+                    else None
+                )
 
             return self._retries_requests(request_func, dd_max_retries, retry_delay=5)
 
@@ -282,12 +285,14 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "limit": config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
                     "LIMITS_QUERY"
                 ],
-                "duplicate": "false"
+                "duplicate": "false",
             }
             max_retries = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
                 "MAX_RETRIES_QUERY"
             ]
-            host_dd = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"]
+            host_dd = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                "HOST_DEFECT_DOJO"
+            ]
 
             findings = self._get_findings(
                 self._get_session_manager(dict_args, secret_tool, config_tool),
@@ -337,7 +342,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
             engagements = Engagement.get_engagements(request_is, request_active).results
 
-            host_dd = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["HOST_DEFECT_DOJO"]
+            host_dd = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                "HOST_DEFECT_DOJO"
+            ]
 
             for engagement in engagements:
                 engagement.vm_url = f"{host_dd}/engagement/{engagement.id}/finding/open"
@@ -347,6 +354,53 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         except Exception as ex:
             raise ExceptionGettingEngagements(
                 "Error getting engagements with the following error: {0} ".format(ex)
+            )
+
+    def send_sbom_components(
+        self, sbom_components, service, dict_args, secret_tool, config_tool
+    ):
+        try:
+            engagements = self.get_active_engagements(
+                service, dict_args, secret_tool, config_tool
+            )
+            engagement = [
+                engagement for engagement in engagements if engagement.name == service
+            ]
+            session_manager = self._get_session_manager(
+                dict_args, secret_tool, config_tool
+            )
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
+                futures = [
+                    executor.submit(
+                        self._process_component,
+                        sbom_component,
+                        session_manager,
+                        engagement,
+                    )
+                    for sbom_component in sbom_components
+                ]
+
+        except Exception as ex:
+            raise ExceptionVulnerabilityManagement(
+                "Error sending components sbom to vulnerability management with the following error: {0} ".format(
+                    ex
+                )
+            )
+
+    def _process_component(self, component_sbom, session_manager, engagement):
+        request = {
+            "name": component_sbom.name,
+            "version": component_sbom.version,
+            "engagement_id": engagement[0].id,
+        }
+        components = Component.get_component(session=session_manager, request=request)
+        if components.results == []:
+            response = Component.create_component(
+                session=session_manager, request=request
+            )
+            logger.info(
+                f"Component created: {response.name} - {response.version} found with id: {response.id}"
             )
 
     def _get_session_manager(self, dict_args, secret_tool, config_tool):
@@ -382,7 +436,11 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             elif finding.risk_status == "Transfer Accepted":
                 exclusions.append(
                     self._create_report_exclusion(
-                        finding, date_fn, "engine_risk", self.TRANSFERRED_FINDING, host_dd
+                        finding,
+                        date_fn,
+                        "engine_risk",
+                        self.TRANSFERRED_FINDING,
+                        host_dd,
                     )
                 )
         return exclusions
@@ -433,7 +491,6 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
         return create_date, expired_date
 
-
     def _create_exclusion(self, finding, date_fn, tool, reason):
         create_date, expired_date = self._date_reason_based(finding, date_fn, reason)
 
@@ -445,7 +502,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             severity=finding.severity,
             reason=reason,
         )
-    
+
     def _create_report_exclusion(self, finding, date_fn, tool, reason, host_dd):
         create_date, expired_date = self._date_reason_based(finding, date_fn, reason)
 
@@ -493,7 +550,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             false_p=finding.false_p,
             out_of_scope=finding.out_of_scope,
             service=finding.service,
-            unique_id_from_tool=finding.unique_id_from_tool
+            unique_id_from_tool=finding.unique_id_from_tool,
         )
 
     def _format_date_to_dd_format(self, date_string):

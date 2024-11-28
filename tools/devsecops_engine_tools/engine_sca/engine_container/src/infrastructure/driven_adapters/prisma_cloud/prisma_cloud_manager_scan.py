@@ -4,8 +4,12 @@ import os
 import subprocess
 import logging
 import base64
+import json
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
+)
+from devsecops_engine_tools.engine_utilities.sbom.deserealizator import (
+    get_list_component,
 )
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -74,13 +78,49 @@ class PrismaCloudManagerScan(ToolGateway):
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during image scan of {image_name}: {e.stderr}")
 
+    def _generate_sbom(self, image_scanned, remoteconfig, prisma_secret_key):
+
+        url = f"{remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"]}/api/{remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"]}/sbom/download/cli-images"
+        credentials = base64.b64encode(
+            f"{remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"]}:{prisma_secret_key}".encode()
+        ).decode()
+        headers = {"Authorization": f"Basic {credentials}"}
+        try:
+
+            with open(image_scanned, "rb") as file:
+                image_object = file.read()
+                json_data = json.loads(image_object)
+
+            response = requests.get(
+                url,
+                headers=headers,
+                params={
+                    "id": json_data["results"][0]["scanID"],
+                    "sbomFormat": remoteconfig["PRISMA_CLOUD"]["SBOM_FORMAT"],
+                },
+            )
+            response.raise_for_status()
+
+            result_sbom = "prisma-sbom.json"
+            with open(result_sbom, "wb") as file:
+                file.write(response.content)
+            
+            print(f"SBOM generated and saved to: {result_sbom}")
+
+            return get_list_component(result_sbom, remoteconfig["PRISMA_CLOUD"]["SBOM_FORMAT"])
+        except Exception as e:
+            logger.error(f"Error generating SBOM: {e}")
+
     def run_tool_container_sca(
-        self, remoteconfig, secret_tool, token_engine_container, image_name, result_file
+        self, remoteconfig, secret_tool, token_engine_container, image_name, result_file, generate_sbom
     ):
-        prisma_secret_key = secret_tool["token_prisma_cloud"] if secret_tool else token_engine_container
+        prisma_secret_key = (
+            secret_tool["token_prisma_cloud"] if secret_tool else token_engine_container
+        )
         file_path = os.path.join(
             os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
         )
+        sbom_components = None
 
         if not os.path.exists(file_path):
             self.download_twistcli(
@@ -97,5 +137,11 @@ class PrismaCloudManagerScan(ToolGateway):
             remoteconfig,
             prisma_secret_key,
         )
+        if generate_sbom:
+            sbom_components = self._generate_sbom(
+                image_scanned,
+                remoteconfig,
+                prisma_secret_key,
+            )
 
-        return image_scanned
+        return image_scanned, sbom_components

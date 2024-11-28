@@ -54,6 +54,7 @@ twistcli
 trivy*
 trivy_*
 *scan_result.json
+*-sbom.json
 jf
 jf.exe
 target
