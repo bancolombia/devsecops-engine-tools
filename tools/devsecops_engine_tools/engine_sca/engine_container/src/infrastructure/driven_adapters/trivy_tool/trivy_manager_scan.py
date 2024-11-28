@@ -38,9 +38,11 @@ class TrivyScan(ToolGateway):
                 self.download_tool(file, url)
                 with tarfile.open(file, 'r:gz') as tar_file:
                     tar_file.extract(member=tar_file.getmember("trivy"))
-                    command_prefix = "./trivy"
+                    return "./trivy"
             except Exception as e:
                 logger.error(f"Error installing trivy: {e}")
+        else:
+            return installed.stdout.decode().strip()
         
     def install_tool_windows(self, file, url, command_prefix):
         try:
@@ -49,12 +51,13 @@ class TrivyScan(ToolGateway):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
+            return command_prefix
         except:
             try:
                 self.download_tool(file, url)
                 with zipfile.ZipFile(file, 'r') as zip_file:
                     zip_file.extract(member="trivy.exe")
-                    command_prefix = "./trivy.exe"
+                    return "./trivy.exe"
             except Exception as e:
                 logger.error(f"Error installing trivy: {e}")
 
@@ -120,14 +123,13 @@ class TrivyScan(ToolGateway):
         command_prefix = "trivy"
         if os_platform == "Linux":
             file=f"trivy_{trivy_version}_Linux-{arch_platform}.tar.gz"
-            self.install_tool(file, base_url+file, command_prefix)
+            command_prefix = self.install_tool(file, base_url+file, "trivy")
         elif os_platform == "Darwin":
             file=f"trivy_{trivy_version}_macOS-{arch_platform}.tar.gz"
-            self.install_tool(file, base_url+file, command_prefix)
+            command_prefix = self.install_tool(file, base_url+file, "trivy")
         elif os_platform == "Windows":
             file=f"trivy_{trivy_version}_windows-{arch_platform}.zip"
-            command_prefix = "trivy.exe"
-            self.install_tool_windows(file, base_url+file, command_prefix)
+            command_prefix = self.install_tool_windows(file, base_url+file, "trivy.exe")
         else:
             logger.warning(f"{os_platform} is not supported.")
             return None

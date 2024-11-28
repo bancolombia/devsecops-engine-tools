@@ -31,14 +31,13 @@ class Syft(SbomManagerGateway):
         command_prefix = "syft"
         if os_platform == "Linux":
             file = f"syft_{syft_version}_linux_{arch_platform}.tar.gz"
-            self._install_tool_unix(file, base_url + file, command_prefix)
+            command_prefix = self._install_tool_unix(file, base_url + file, command_prefix)
         elif os_platform == "Darwin":
             file = f"syft_{syft_version}_darwin_{arch_platform}.tar.gz"
-            self._install_tool_unix(file, base_url + file, command_prefix)
+            command_prefix = self._install_tool_unix(file, base_url + file, command_prefix)
         elif os_platform == "Windows":
             file = f"syft_{syft_version}_windows_{arch_platform}.zip"
-            command_prefix = "syft.exe"
-            self._install_tool_windows(file, base_url + file, command_prefix)
+            command_prefix = self._install_tool_windows(file, base_url + file, "syft.exe")
         else:
             logger.warning(f"{os_platform} is not supported.")
             return None
@@ -78,9 +77,11 @@ class Syft(SbomManagerGateway):
                 self._download_tool(file, url)
                 with tarfile.open(file, "r:gz") as tar_file:
                     tar_file.extract(member=tar_file.getmember("syft"))
-                    command_prefix = "./syft"
+                    return "./syft"
             except Exception as e:
                 logger.error(f"Error installing syft: {e}")
+        else:
+            return installed.stdout.decode("utf-8").strip()
 
     def _install_tool_windows(self, file, url, command_prefix):
         try:
@@ -89,12 +90,13 @@ class Syft(SbomManagerGateway):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
+            return command_prefix
         except:
             try:
                 self._download_tool(file, url)
                 with zipfile.ZipFile(file, "r") as zip_file:
                     zip_file.extract(member="syft.exe")
-                    command_prefix = "./syft.exe"
+                    return "./syft.exe"
             except Exception as e:
                 logger.error(f"Error installing syft: {e}")
 
