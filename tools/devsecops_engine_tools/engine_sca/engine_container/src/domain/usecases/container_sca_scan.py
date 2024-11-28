@@ -41,6 +41,15 @@ class ContainerScaScan:
         """
         return self.tool_images.list_images(image_to_scan)
 
+    def get_base_image(self, matching_image):
+            """
+            Process the base image.
+
+            Returns:
+                String: base image.
+            """
+            return self.tool_images.get_base_image(matching_image)
+
     def get_images_already_scanned(self):
         """
         Create images scanned file if it does not exist and get the images that have already been scanned.
@@ -67,6 +76,8 @@ class ContainerScaScan:
             string: file scanning results name.
         """
         matching_image = self.get_image(self.image_to_scan)
+        base_image = self.get_base_image(matching_image)
+        print(base_image)
         image_scanned = None
         if matching_image:
             image_name = matching_image.tags[0]

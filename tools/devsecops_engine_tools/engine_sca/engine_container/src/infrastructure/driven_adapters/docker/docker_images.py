@@ -31,3 +31,29 @@ class DockerImages(ImagesGateway):
             logger.error(
                 f"Error listing images, docker must be running and added to PATH: {e}"
             )
+
+    def get_base_image(self, matching_image):
+        try:
+            client = docker.from_env()
+            image_details = client.api.inspect_image(matching_image.id)
+            parent_id = image_details.get("Parent")
+
+            if parent_id:
+                parent_image_details = client.api.inspect_image(parent_id)
+                parent_tags = parent_image_details.get("RepoTags", [])
+                if parent_tags:
+                    logger.info(f"Base image for '{matching_image}' from Parent: {parent_tags[0]}")
+                    return parent_tags[0]
+
+            labels = image_details.get("Config", {}).get("Labels", {})
+            source_image = labels.get("source-image")
+            if source_image:
+                logger.info(f"Base image for '{matching_image}' from source-image label: {source_image}")
+                return source_image
+
+            logger.warning(f"Base image not found for '{matching_image}'.")
+            return None
+
+        except Exception as e:
+            logger.error(f"Error getting base image: {e}")
+            return None
