@@ -25,18 +25,17 @@ class Syft(SbomManagerGateway):
 
         syft_version = config["SYFT"]["SYFT_VERSION"]
         os_platform = platform.system()
-        arch_platform = platform.uname().machine
         base_url = f"https://github.com/anchore/syft/releases/download/v{syft_version}/"
 
         command_prefix = "syft"
         if os_platform == "Linux":
-            file = f"syft_{syft_version}_linux_{arch_platform}.tar.gz"
+            file = f"syft_{syft_version}_linux_amd64.tar.gz"
             command_prefix = self._install_tool_unix(file, base_url + file, command_prefix)
         elif os_platform == "Darwin":
-            file = f"syft_{syft_version}_darwin_{arch_platform}.tar.gz"
+            file = f"syft_{syft_version}_darwin_amd64.tar.gz"
             command_prefix = self._install_tool_unix(file, base_url + file, command_prefix)
         elif os_platform == "Windows":
-            file = f"syft_{syft_version}_windows_{arch_platform}.zip"
+            file = f"syft_{syft_version}_windows_amd64.zip"
             command_prefix = self._install_tool_windows(file, base_url + file, "syft.exe")
         else:
             logger.warning(f"{os_platform} is not supported.")
