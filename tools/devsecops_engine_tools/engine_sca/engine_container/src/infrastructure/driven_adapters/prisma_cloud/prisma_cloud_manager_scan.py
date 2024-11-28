@@ -80,9 +80,9 @@ class PrismaCloudManagerScan(ToolGateway):
 
     def _generate_sbom(self, image_scanned, remoteconfig, prisma_secret_key):
 
-        url = f"{remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"]}/api/{remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"]}/sbom/download/cli-images"
+        url = f"{remoteconfig['PRISMA_CLOUD']['PRISMA_CONSOLE_URL']}/api/{remoteconfig['PRISMA_CLOUD']['PRISMA_API_VERSION']}/sbom/download/cli-images"
         credentials = base64.b64encode(
-            f"{remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"]}:{prisma_secret_key}".encode()
+            f"{remoteconfig['PRISMA_CLOUD']['PRISMA_ACCESS_KEY']}:{prisma_secret_key}".encode()
         ).decode()
         headers = {"Authorization": f"Basic {credentials}"}
         try:
