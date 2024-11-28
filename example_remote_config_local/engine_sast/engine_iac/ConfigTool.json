@@ -15,14 +15,14 @@
             "Critical": 1
         }
     },
-    "UPDATE_SERVICE_WITH_FILE_NAME_CFT": "False",
+    "UPDATE_SERVICE_WITH_FILE_NAME_CFT": false,
     "CHECKOV": {
         "VERSION": "2.3.296",
-        "USE_EXTERNAL_CHECKS_GIT": "False",
+        "USE_EXTERNAL_CHECKS_GIT": false,
         "EXTERNAL_CHECKS_GIT": "",
         "EXTERNAL_GIT_SSH_HOST": "",
         "EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT": "",
-        "USE_EXTERNAL_CHECKS_DIR": "False",
+        "USE_EXTERNAL_CHECKS_DIR": false,
         "EXTERNAL_DIR_OWNER": "",
         "EXTERNAL_DIR_REPOSITORY": "",
         "APP_ID_GITHUB":"",

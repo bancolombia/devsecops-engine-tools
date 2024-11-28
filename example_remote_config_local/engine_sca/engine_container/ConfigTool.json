@@ -3,10 +3,19 @@
         "TWISTCLI_PATH": "twistcli",
         "PRISMA_CONSOLE_URL": "",
         "PRISMA_ACCESS_KEY": "",
-        "PRISMA_API_VERSION":""
+        "PRISMA_API_VERSION":"",
+        "SBOM_FORMAT": "cyclonedx_json"
     },
     "TRIVY": {
-        "TRIVY_VERSION": "0.51.4"
+        "TRIVY_VERSION": "0.51.4",
+        "SBOM_FORMAT": "cyclonedx"
+    },
+    "SBOM": {
+        "ENABLED": false,
+        "BRANCH_FILTER": [
+            "trunk",
+            "main"
+        ]
     },
     "MESSAGE_INFO_ENGINE_CONTAINER": "message custom",
     "IGNORE_SEARCH_PATTERN":"(.*_demo0|.*_cer)",
