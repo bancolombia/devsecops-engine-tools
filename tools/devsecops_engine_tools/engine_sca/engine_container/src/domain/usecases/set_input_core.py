@@ -12,7 +12,9 @@ class SetInputCore:
         self.tool = tool
         self.stage = stage
 
-    def get_exclusions(self, exclusions_data, pipeline_name, tool):
+    def get_exclusions(self, exclusions_data, pipeline_name, tool,base_image):
+        print("llego hasta aqui")
+        print(base_image)
         list_exclusions = [
             Exclusions(
                 id=item.get("id", ""),
@@ -27,10 +29,11 @@ class SetInputCore:
             for key, value in exclusions_data.items()
             if key in {"All", pipeline_name} and value.get(tool)
             for item in value[tool]
+            if any(base_image in source for source in item.get("source_images", []))
         ]
         return list_exclusions
 
-    def set_input_core(self, image_scanned):
+    def set_input_core(self, image_scanned,base_image):
         """
         Set the input core.
 
@@ -42,6 +45,7 @@ class SetInputCore:
                 self.exclusions,
                 self.pipeline_name,
                 self.tool,
+                base_image
             ),
             Utils.update_threshold(
                 self,

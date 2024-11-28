@@ -51,12 +51,12 @@ def init_engine_sca_rm(
             dict_args["token_engine_container"],
             image_to_scan,
         )
-        image_scanned = container_sca_scan.process()
+        image_scanned,base_image = container_sca_scan.process()
         if image_scanned:
             deseralized = container_sca_scan.deseralizator(image_scanned)
     else:
         print("Tool skipped by DevSecOps policy")
         dict_args["send_metrics"] = "false"
-    core_input = input_core.set_input_core(image_scanned)
+    core_input = input_core.set_input_core(image_scanned,base_image)
 
     return deseralized, core_input

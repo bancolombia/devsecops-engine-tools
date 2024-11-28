@@ -91,7 +91,7 @@ class ContainerScaScan:
             self.set_image_scanned(image_name)
         else:
             print(f"'Not image found for {self.image_to_scan}'. Tool skipped.")
-        return image_scanned
+        return image_scanned, base_image
 
     def deseralizator(self, image_scanned):
         """
