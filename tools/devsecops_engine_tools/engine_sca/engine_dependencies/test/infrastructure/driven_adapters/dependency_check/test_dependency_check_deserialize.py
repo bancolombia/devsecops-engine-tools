@@ -42,7 +42,7 @@ def test_get_list_findings_valid(mock_load_results, deserializator, json_data):
             "VULNERABILITY_CONFIDENCE": ["highest"]
         }
     }
-    result = deserializator.get_list_findings("dummy_file.json", )
+    result = deserializator.get_list_findings("dummy_file.json", mock_remote_config)
 
     assert len(result) > 0
     assert result[0].id == "CVE-1234"
