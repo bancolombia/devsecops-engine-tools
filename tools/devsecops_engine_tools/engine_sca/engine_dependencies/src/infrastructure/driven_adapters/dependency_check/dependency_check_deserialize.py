@@ -17,8 +17,9 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 @dataclass
 class DependencyCheckDeserialize(DeserializatorGateway):
+    TOOL = "DEPENDENCY_CHECK"
 
-    def get_list_findings(self, dependencies_scanned_file) -> "list[Finding]":
+    def get_list_findings(self, dependencies_scanned_file, remote_config) -> "list[Finding]":
         filename, extension = os.path.splitext(dependencies_scanned_file)
         if extension.lower() != ".json":
             dependencies_scanned_file = f"{filename}.json"
@@ -26,7 +27,17 @@ class DependencyCheckDeserialize(DeserializatorGateway):
         data_result = self.load_results(dependencies_scanned_file)
 
         list_open_vulnerabilities = []
+        confidences = remote_config[self.TOOL]["VULNERABILITY_CONFIDENCE"]
+        confidence_levels = ["low", "medium", "high", "highest"]
+
         for dependency in data_result.get("dependencies", []):
+            vul_ids_confidences = [conf.get("confidence", "").lower() for conf in dependency.get("vulnerabilityIds", [])]
+            if len(vul_ids_confidences) > 0:
+                if not max(vul_ids_confidences, key=lambda c: confidence_levels.index(c)) in confidences: 
+                    continue
+            elif not "no_confidence" in confidences:
+                continue
+
             for vulnerability in dependency.get("vulnerabilities", []):
                 vulnerable_software = vulnerability.get("vulnerableSoftware", [])
                 fix = (
