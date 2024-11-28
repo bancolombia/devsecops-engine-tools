@@ -25,7 +25,7 @@ class Syft(SbomManagerGateway):
 
         syft_version = config["SYFT"]["SYFT_VERSION"]
         os_platform = platform.system()
-        arch_platform = platform.architecture()[0]
+        arch_platform = platform.uname().machine
         base_url = f"https://github.com/anchore/syft/releases/download/v{syft_version}/"
 
         command_prefix = "syft"
@@ -75,7 +75,7 @@ class Syft(SbomManagerGateway):
         if installed.returncode == 1:
             try:
                 self._download_tool(file, url)
-                with tarfile.open(file, "r:gz") as tar_file:
+                with tarfile.open(file, 'r:gz') as tar_file:
                     tar_file.extract(member=tar_file.getmember("syft"))
                     return "./syft"
             except Exception as e:
