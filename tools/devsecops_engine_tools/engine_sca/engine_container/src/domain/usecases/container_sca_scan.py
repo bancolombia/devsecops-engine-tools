@@ -83,7 +83,7 @@ class ContainerScaScan:
             result_file = image_name.replace("/","_") + "_scan_result.json"
             if image_name in self.get_images_already_scanned():
                 print(f"The image {image_name} has already been scanned previously.")
-                return image_scanned
+                return image_scanned, base_image
             image_scanned = self.tool_run.run_tool_container_sca(
                 self.remote_config, self.secret_tool, self.token_engine_container, image_name, result_file
             )

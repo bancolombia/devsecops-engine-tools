@@ -13,24 +13,30 @@ class SetInputCore:
         self.stage = stage
 
     def get_exclusions(self, exclusions_data, pipeline_name, tool, base_image):
-        print("llego hasta aqui")
-        print(base_image)
-        list_exclusions = [
-            Exclusions(
-                id=item.get("id", ""),
-                where=item.get("where", ""),
-                cve_id=item.get("cve_id", ""),
-                create_date=item.get("create_date", ""),
-                expired_date=item.get("expired_date", ""),
-                severity=item.get("severity", ""),
-                hu=item.get("hu", ""),
-                reason=item.get("reason", "Risk acceptance"),
-            )
-            for key, value in exclusions_data.items()
-            if key in {"All", pipeline_name} and value.get(tool)
-            for item in value[tool]
-            if key != "All" or any(base_image in source for source in item.get("source_images", []))
-        ]
+        list_exclusions = []
+
+        for key, value in exclusions_data.items():
+            if key not in {"All", pipeline_name} or not value.get(tool):
+                continue
+
+            for item in value[tool]:
+                if key == "All":
+                    source_images = item.get("source_images", [])
+                    if not any(base_image in source for source in source_images):
+                        continue
+                list_exclusions.append(
+                    Exclusions(
+                        id=item.get("id", ""),
+                        where=item.get("where", ""),
+                        cve_id=item.get("cve_id", ""),
+                        create_date=item.get("create_date", ""),
+                        expired_date=item.get("expired_date", ""),
+                        severity=item.get("severity", ""),
+                        hu=item.get("hu", ""),
+                        reason=item.get("reason", "Risk acceptance"),
+                    )
+                )
+
         return list_exclusions
 
     def set_input_core(self, image_scanned,base_image):
