@@ -24,7 +24,7 @@ def init_engine_core(
     args: any
 ):
     config_tool = devops_platform_gateway.get_remote_config(
-        args["remote_config_repo"], "/engine_core/ConfigTool.json"
+        args["remote_config_repo"], "/engine_core/ConfigTool.json", args["remote_config_branch"]
     )
     Printers.print_logo_tool(config_tool["BANNER"])
 

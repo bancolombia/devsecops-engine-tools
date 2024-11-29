@@ -23,10 +23,10 @@ def init_engine_sca_rm(
     tool,
 ):
     remote_config = tool_remote.get_remote_config(
-        dict_args["remote_config_repo"], "engine_sca/engine_container/ConfigTool.json"
+        dict_args["remote_config_repo"], "engine_sca/engine_container/ConfigTool.json", dict_args["remote_config_branch"]
     )
     exclusions = tool_remote.get_remote_config(
-        dict_args["remote_config_repo"], "engine_sca/engine_container/Exclusions.json"
+        dict_args["remote_config_repo"], "engine_sca/engine_container/Exclusions.json", dict_args["remote_config_branch"]
     )
     pipeline_name = tool_remote.get_variable("pipeline_name")
     handle_remote_config_patterns = HandleRemoteConfigPatterns(

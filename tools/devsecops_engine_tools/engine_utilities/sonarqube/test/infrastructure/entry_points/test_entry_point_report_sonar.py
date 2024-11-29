@@ -29,8 +29,9 @@ class TestInitReportSonar(unittest.TestCase):
                 }
             }
         ]
+        
+        args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false", "remote_config_branch": ""}
         mock_devops_platform_gateway.get_variable.side_effect = ["pipeline_name", "trunk"]
-        args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false"}
 
         # Act
         init_report_sonar(
@@ -73,8 +74,8 @@ class TestInitReportSonar(unittest.TestCase):
                 }
             }
         ]
+        args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false", "remote_config_branch": ""}
         mock_devops_platform_gateway.get_variable.side_effect = ["pipeline_name", "develop"]
-        args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false"}
 
         # Act
         init_report_sonar(

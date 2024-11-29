@@ -23,10 +23,12 @@ def init_engine_dependencies(
     remote_config = tool_remote.get_remote_config(
         dict_args["remote_config_repo"],
         "engine_sca/engine_dependencies/ConfigTool.json",
+        dict_args["remote_config_branch"]
     )
     exclusions = tool_remote.get_remote_config(
         dict_args["remote_config_repo"],
         "engine_sca/engine_dependencies/Exclusions.json",
+        dict_args["remote_config_branch"]
     )
     pipeline_name = tool_remote.get_variable("pipeline_name")
 

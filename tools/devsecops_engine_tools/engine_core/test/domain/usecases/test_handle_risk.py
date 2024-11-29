@@ -48,6 +48,7 @@ class TestHandleRisk(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_risk",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": ""
         }
         config_tool = {"ENGINE_RISK": {"ENABLED": "true"}}
         self.devops_platform_gateway.get_remote_config.return_value = {
@@ -125,6 +126,7 @@ class TestHandleRisk(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_risk",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": ""
         }
         secret_tool = None
         remote_config = {"ENGINE_RISK": {"ENABLED": "true"}}
@@ -146,6 +148,7 @@ class TestHandleRisk(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_risk",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": ""
         }
         secret_tool = None
         remote_config = {"ENGINE_RISK": {"ENABLED": "true"}}
@@ -167,6 +170,7 @@ class TestHandleRisk(unittest.TestCase):
     def test_exclude_services(self):
         dict_args = {
             "remote_config_repo": "test_repo",
+            "remote_config_branch": ""
         }
         pipeline_name = "pipeline_name"
         service_list = [
