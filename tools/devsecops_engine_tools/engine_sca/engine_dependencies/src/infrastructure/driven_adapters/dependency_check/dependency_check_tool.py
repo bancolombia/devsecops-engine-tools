@@ -70,8 +70,6 @@ class DependencyCheckTool(ToolGateway):
             command = [
                 command_prefix,
                 "--format",
-                "JSON",
-                "--format",
                 "XML",
                 "--nvdApiKey",
                 token,
@@ -85,8 +83,6 @@ class DependencyCheckTool(ToolGateway):
                 )
                 command = [
                     command_prefix,
-                    "--format",
-                    "JSON",
                     "--format",
                     "XML",
                     "--scan",

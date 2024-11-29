@@ -200,8 +200,6 @@ class TestDependencyCheckTool(unittest.TestCase):
             [
                 "dependency-check.sh",
                 "--format",
-                "JSON",
-                "--format",
                 "XML",
                 "--nvdApiKey",
                 "token",
@@ -233,8 +231,6 @@ class TestDependencyCheckTool(unittest.TestCase):
         mock_subprocess_run.assert_called_once_with(
             [
                 "dependency-check.sh",
-                "--format",
-                "JSON",
                 "--format",
                 "XML",
                 "--nvdApiKey",
