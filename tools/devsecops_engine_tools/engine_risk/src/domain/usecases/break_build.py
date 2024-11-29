@@ -25,6 +25,7 @@ class BreakBuild:
         vm_exclusions: "list[Exclusions]",
         report_list: "list[Report]",
         all_report: "list[Report]",
+        threshold: any,
     ):
         self.devops_platform_gateway = devops_platform_gateway
         self.printer_table_gateway = printer_table_gateway
@@ -33,6 +34,7 @@ class BreakBuild:
         self.vm_exclusions = vm_exclusions
         self.report_list = report_list
         self.all_report = all_report
+        self.threshold = threshold
         self.break_build = False
         self.warning_build = False
         self.report_breaker = []
@@ -117,13 +119,12 @@ class BreakBuild:
             print(self.devops_platform_gateway.result_pipeline("succeeded"))
 
     def _remediation_rate_control(self, all_report: "list[Report]"):
-        remote_config = self.remote_config
         mitigated = sum(1 for report in all_report if report.mitigated)
         total = len(all_report)
         print(f"Mitigated count: {mitigated}   Total count: {total}")
         remediation_rate_value = self._get_percentage(mitigated / total)
 
-        risk_threshold = remote_config["THRESHOLD"]["REMEDIATION_RATE"]
+        risk_threshold = self.threshold["REMEDIATION_RATE"]
         self.remediation_rate = remediation_rate_value
 
         if remediation_rate_value >= (risk_threshold + 5):
@@ -202,8 +203,8 @@ class BreakBuild:
     def _tag_blacklist_control(self, report_list: "list[Report]"):
         remote_config = self.remote_config
         if report_list:
-            tag_blacklist = set(remote_config["THRESHOLD"]["TAG_BLACKLIST"])
-            tag_age_threshold = remote_config["THRESHOLD"]["TAG_MAX_AGE"]
+            tag_blacklist = set(remote_config["TAG_BLACKLIST"])
+            tag_age_threshold = self.threshold["TAG_MAX_AGE"]
 
             filtered_reports_above_threshold = [
                 (report, tag)
@@ -247,7 +248,7 @@ class BreakBuild:
 
     def _risk_score_control(self, report_list: "list[Report]"):
         remote_config = self.remote_config
-        risk_score_threshold = remote_config["THRESHOLD"]["RISK_SCORE"]
+        risk_score_threshold = self.threshold["RISK_SCORE"]
         break_build = False
         if report_list:
             for report in report_list:

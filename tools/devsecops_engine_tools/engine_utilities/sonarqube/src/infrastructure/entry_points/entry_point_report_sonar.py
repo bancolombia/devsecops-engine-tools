@@ -26,8 +26,9 @@ def init_report_sonar(vulnerability_management_gateway, secrets_manager_gateway,
     branch = devops_platform_gateway.get_variable("branch_name")
     is_valid_pipeline = not re.match(report_config_tool["IGNORE_SEARCH_PATTERN"], pipeline_name, re.IGNORECASE)
     is_valid_branch = branch in report_config_tool["TARGET_BRANCHES"]
-
-    if config_tool["REPORT_SONAR"]["ENABLED"] == "true" and is_valid_pipeline and is_valid_branch:
+    is_enabled = config_tool["REPORT_SONAR"]["ENABLED"] == "true"
+    
+    if is_enabled and is_valid_pipeline and is_valid_branch:
         input_core = ReportSonar(
             vulnerability_management_gateway,
             secrets_manager_gateway, 
@@ -40,7 +41,10 @@ def init_report_sonar(vulnerability_management_gateway, secrets_manager_gateway,
                 config_tool, input_core, {"tool": "report_sonar"}, ""
             )
     else:
+        if not is_enabled: message = "DevSecOps Engine Tool - {0} in maintenance...".format("report_sonar")
+        else: message = "Tool skipped by DevSecOps policy"
+
         print(
             devops_platform_gateway.message(
-                "warning", "DevSecOps Engine Tool - {0} in maintenance...".format("report_sonar")),
+                "warning", message),
         )

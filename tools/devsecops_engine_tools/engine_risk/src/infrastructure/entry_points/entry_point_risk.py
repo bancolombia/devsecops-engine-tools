@@ -10,6 +10,9 @@ from devsecops_engine_tools.engine_risk.src.domain.usecases.add_data import (
 from devsecops_engine_tools.engine_risk.src.domain.usecases.get_exclusions import (
     GetExclusions,
 )
+from devsecops_engine_tools.engine_risk.src.domain.usecases.check_threshold import (
+    CheckThreshold,
+)
 
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
@@ -33,6 +36,7 @@ def init_engine_risk(
     risk_exclusions = devops_platform_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_risk/Exclusions.json", dict_args["remote_config_branch"]
     )
+    pipeline_name = devops_platform_gateway.get_variable("pipeline_name")
 
     if not findings:
         print("No findings found in Vulnerability Management Platform")
@@ -61,6 +65,10 @@ def init_engine_risk(
     )
     exclusions = get_exclusions.process()
 
+    threshold = CheckThreshold(
+        pipeline_name, remote_config["THRESHOLD"], risk_exclusions
+    ).process()
+
     break_build = BreakBuild(
         devops_platform_gateway,
         print_table_gateway,
@@ -69,6 +77,7 @@ def init_engine_risk(
         vm_exclusions,
         data_added,
         findings,
+        threshold,
     )
 
     return break_build.process()
