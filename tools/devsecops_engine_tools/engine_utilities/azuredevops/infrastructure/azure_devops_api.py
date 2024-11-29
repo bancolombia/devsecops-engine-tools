@@ -2,6 +2,7 @@ import json
 from devsecops_engine_tools.engine_utilities.utils.api_error import ApiError
 from urllib.parse import urlsplit, unquote
 from azure.devops.connection import Connection
+from azure.devops.v7_1.wiki.models import GitVersionDescriptor    
 from msrest.authentication import BasicAuthentication
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities.settings import SETTING_LOGGER
@@ -48,14 +49,19 @@ class AzureDevopsApi:
         except Exception as e:
             raise ApiError("Error getting Azure DevOps connection: " + str(e))
 
-    def get_remote_json_config(self, connection: Connection):
+    def get_remote_json_config(self, connection: Connection, branch):
         try:
             git_client = connection.clients.get_git_client()
+            version_descriptor = None
+            if branch: version_descriptor = GitVersionDescriptor(version=branch, version_type="branch")
+
             file_content = git_client.get_item_text(
                 repository_id=self.__repository_id,
                 path=self.__remote_config_path,
                 project=self.__project_remote_config,
+                version_descriptor=version_descriptor
             )
+            
             data = json.loads(b"".join(file_content).decode("utf-8"))
             return data
         except Exception as e:

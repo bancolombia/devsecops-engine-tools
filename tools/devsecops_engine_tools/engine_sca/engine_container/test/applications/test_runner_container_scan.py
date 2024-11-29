@@ -9,7 +9,7 @@ def test_init_engine_container():
     with patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan.init_engine_sca_rm"
     ) as mock_init_engine_sca_rm:
-        dict_args = {"remote_config_repo": "remote_repo"}
+        dict_args = {"remote_config_repo": "remote_repo", "remote_config_branch": ""}
         token = "token"
         tool = "PRISMA"
 

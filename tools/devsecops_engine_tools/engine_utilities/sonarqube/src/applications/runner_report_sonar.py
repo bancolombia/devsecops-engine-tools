@@ -33,6 +33,14 @@ def get_inputs_from_cli(args):
         help="Name of Config Repo",
     )
     parser.add_argument(
+        "-rcb",
+        "--remote_config_branch",
+        type=str,
+        required=False,
+        default="",
+        help="Name of the branch of Config Repo",
+    )
+    parser.add_argument(
         "--use_secrets_manager",
         choices=["true", "false"],
         type=str,
@@ -70,6 +78,7 @@ def get_inputs_from_cli(args):
     args = parser.parse_args()
     return {
         "remote_config_repo": args.remote_config_repo,
+        "remote_config_branch": args.remote_config_branch,
         "use_secrets_manager": args.use_secrets_manager,
         "send_metrics": args.send_metrics,
         "sonar_url": args.sonar_url,

@@ -52,10 +52,13 @@ class GithubApi:
         git_client = Github(personal_access_token)
         return git_client
 
-    def get_remote_json_config(self, git_client: Github, owner, repository, path):
+    def get_remote_json_config(self, git_client: Github, owner, repository, path, branch=""):
         try:
             repo = git_client.get_repo(f"{owner}/{repository}")
-            file_content = repo.get_contents(path)
+
+            if branch: file_content = repo.get_contents(path, ref=branch)
+            else: file_content = repo.get_contents(path)
+
             data = file_content.decoded_content.decode()
             content_json = json.loads(data)
 

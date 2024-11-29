@@ -17,6 +17,7 @@ def test_application_core(mock_get_inputs_from_cli, mock_entry_point_tool):
     mock_args = {
         "platform_devops": "azure",
         "remote_config_repo": "https://github.com/example/repo",
+        "remote_config_branch": "",
         "tool": "engine_iac",
         "environment": "dev",
         "platform": "k8s",
@@ -55,6 +56,7 @@ def test_application_core_exception(
     mock_args = {
         "platform_devops": "azure",
         "remote_config_repo": "https://github.com/example/repo",
+        "remote_config_branch": "",
         "tool": "engine_iac",
         "environment": "dev",
         "platform": "all",
@@ -87,6 +89,7 @@ def test_get_inputs_from_cli(mock_parse_args):
     mock_args = mock.MagicMock()
     mock_args.platform_devops = "azure"
     mock_args.remote_config_repo = "https://github.com/example/repo"
+    mock_args.remote_config_branch = ""
     mock_args.tool = "engine_iac"
     mock_args.folder_path = "/path/to/folder"
     mock_args.platform = "k8s,docker"
@@ -111,6 +114,7 @@ def test_get_inputs_from_cli(mock_parse_args):
     assert result == {
         "platform_devops": "azure",
         "remote_config_repo": "https://github.com/example/repo",
+        "remote_config_branch": "",
         "tool": "engine_iac",
         "folder_path": "/path/to/folder",
         "platform": "k8s,docker",
