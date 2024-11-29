@@ -22,7 +22,7 @@ class GetExclusions:
 
     def process(self):
         core_config = self.devops_platform_gateway.get_remote_config(
-            self.dict_args["remote_config_repo"], "engine_core/ConfigTool.json"
+            self.dict_args["remote_config_repo"], "engine_core/ConfigTool.json", self.dict_args["remote_config_branch"]
         )
         unique_tags = self._get_unique_tags()
         exclusions = []
@@ -42,7 +42,7 @@ class GetExclusions:
 
     def _get_exclusions_by_practice(self, core_config, practice, path):
         exclusions_config = self.devops_platform_gateway.get_remote_config(
-            self.dict_args["remote_config_repo"], path
+            self.dict_args["remote_config_repo"], path, self.dict_args["remote_config_branch"]
         )
         tool = core_config[practice.upper()]["TOOL"]
         return self._get_exclusions(exclusions_config, tool)

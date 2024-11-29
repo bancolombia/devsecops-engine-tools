@@ -44,6 +44,7 @@ class TestEntryPointCore(unittest.TestCase):
             "remote_config_repo": "https://github.com/example/repo",
             "tool": "engine_iac",
             "send_metrics": "true",
+            "remote_config_branch": ""
         }
 
         # Call the function
@@ -58,13 +59,14 @@ class TestEntryPointCore(unittest.TestCase):
 
         # Assert that the function calls were made with the expected arguments
         mock_devops_platform_gateway.get_remote_config.assert_called_once_with(
-            "https://github.com/example/repo", "/engine_core/ConfigTool.json"
+            "https://github.com/example/repo", "/engine_core/ConfigTool.json", ""
         )
         mock_handle_scan.return_value.process.assert_called_once_with(
             {
                 "remote_config_repo": "https://github.com/example/repo",
                 "tool": "engine_iac",
                 "send_metrics": "true",
+                "remote_config_branch": ""
             },
             mock_config_tool,
         )
@@ -97,7 +99,7 @@ class TestEntryPointCore(unittest.TestCase):
             devops_platform_gateway=mock_devops_platform_gateway,
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
-            args={"remote_config_repo": "test", "tool": "engine_iac"},
+            args={"remote_config_repo": "test", "tool": "engine_iac", "remote_config_branch": ""},
         )
 
         # Assert
@@ -131,7 +133,7 @@ class TestEntryPointCore(unittest.TestCase):
             devops_platform_gateway=mock_devops_platform_gateway,
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
-            args={"remote_config_repo": "test", "tool": "engine_risk", "send_metrics": "true"},
+            args={"remote_config_repo": "test", "tool": "engine_risk", "send_metrics": "true", "remote_config_branch": ""},
         )
 
         #Assert

@@ -20,6 +20,7 @@ class TestIacScan(unittest.TestCase):
     def test_process(self):
         dict_args = {
             "remote_config_repo": "example_repo",
+            "remote_config_branch": "",
             "folder_path": ".",
             "environment": "test",
             "platform": "cloudformation",
@@ -78,6 +79,7 @@ class TestIacScan(unittest.TestCase):
     def test_process_skip_search_folder(self):
         dict_args = {
             "remote_config_repo": "example_repo",
+            "remote_config_branch": "",
             "folder_path": "example_folder",
             "environment": "test",
             "platform": "eks",

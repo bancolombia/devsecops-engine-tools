@@ -69,7 +69,15 @@ def get_inputs_from_cli(args):
         "--remote_config_repo",
         type=str,
         required=True,
-        help="Name or Folder Path of Config Repo",
+        help="Name or Folder Path of Remote Config Repo",
+    )
+    parser.add_argument(
+        "-rcb",
+        "--remote_config_branch",
+        type=str,
+        required=False,
+        default="",
+        help="Name of the branch of Remote Config Repo",
     )
     parser.add_argument(
         "-t",
@@ -162,6 +170,7 @@ def get_inputs_from_cli(args):
     return {
         "platform_devops": args.platform_devops,
         "remote_config_repo": args.remote_config_repo,
+        "remote_config_branch": args.remote_config_branch,
         "tool": args.tool,
         "folder_path": args.folder_path,
         "platform": args.platform,

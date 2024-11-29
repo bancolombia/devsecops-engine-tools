@@ -67,7 +67,7 @@ class SecretScan:
     def complete_config_tool(self, dict_args, tool):
         tool = str(tool).lower()
         init_config_tool = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_sast/engine_secret/ConfigTool.json"
+            dict_args["remote_config_repo"], "engine_sast/engine_secret/ConfigTool.json", dict_args["remote_config_branch"]
         )
         config_tool = DeserializeConfigTool(json_data=init_config_tool, tool=tool)
         config_tool.scope_pipeline = self.devops_platform_gateway.get_variable("pipeline_name")
