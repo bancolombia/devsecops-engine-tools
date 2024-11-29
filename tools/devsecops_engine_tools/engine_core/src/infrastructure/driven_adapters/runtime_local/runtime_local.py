@@ -19,9 +19,7 @@ class RuntimeLocal(DevopsPlatformGateway):
 
 
     def get_remote_config(self, repository, path, branch=""):
-        folder = ""
-        if branch: folder = f"/{branch}"
-        remote_config_path = f"{repository}{folder}/{path}"
+        remote_config_path = f"{repository}/{path}"
 
         with open(remote_config_path) as f:
             return json.load(f)
