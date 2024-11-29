@@ -12,7 +12,7 @@ class SetInputCore:
         self.tool = tool
         self.stage = stage
 
-    def get_exclusions(self, exclusions_data, pipeline_name, tool,base_image):
+    def get_exclusions(self, exclusions_data, pipeline_name, tool, base_image):
         print("llego hasta aqui")
         print(base_image)
         list_exclusions = [
@@ -29,7 +29,7 @@ class SetInputCore:
             for key, value in exclusions_data.items()
             if key in {"All", pipeline_name} and value.get(tool)
             for item in value[tool]
-            if any(base_image in source for source in item.get("source_images", []))
+            if key != "All" or any(base_image in source for source in item.get("source_images", []))
         ]
         return list_exclusions
 

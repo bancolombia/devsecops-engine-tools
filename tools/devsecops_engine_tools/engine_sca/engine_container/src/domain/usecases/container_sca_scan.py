@@ -77,7 +77,6 @@ class ContainerScaScan:
         """
         matching_image = self.get_image(self.image_to_scan)
         base_image = self.get_base_image(matching_image)
-        print(base_image)
         image_scanned = None
         if matching_image:
             image_name = matching_image.tags[0]
