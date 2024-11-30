@@ -36,11 +36,11 @@ class DependencyCheckDeserialize(DeserializatorGateway):
                             fix = software[0].get("versionEndExcluding", "Not found").lower()
                     
                     id = vulnerability.find('ns:name', namespace).text[:20]
-                    cvss = str(vulnerability.find('ns:cvssV3', namespace)) if vulnerability.find('ns:cvssV3', namespace) else ""
+                    cvss = ", ".join(f"{child.tag.split('}')[-1]}: {child.text}" for child in vulnerability.find('ns:cvssV3', namespace)) if vulnerability.find('ns:cvssV3', namespace) else ""
                     fileName = dependency.find('ns:fileName', namespace).text.split(":")[-1].strip()
                     description = vulnerability.find('ns:description', namespace).text if vulnerability.find('ns:description', namespace).text else ""
                     severity = vulnerability.find('ns:severity', namespace).text.lower()
-                    
+                    cvss
                     finding_open = Finding(
                         id=id,
                         cvss=cvss,
