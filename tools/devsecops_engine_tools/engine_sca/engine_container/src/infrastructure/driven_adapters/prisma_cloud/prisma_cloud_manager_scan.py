@@ -78,7 +78,7 @@ class PrismaCloudManagerScan(ToolGateway):
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during image scan of {image_name}: {e.stderr}")
 
-    def _generate_sbom(self, image_scanned, remoteconfig, prisma_secret_key):
+    def _generate_sbom(self, image_scanned, remoteconfig, prisma_secret_key, image_name):
 
         url = f"{remoteconfig['PRISMA_CLOUD']['PRISMA_CONSOLE_URL']}/api/{remoteconfig['PRISMA_CLOUD']['PRISMA_API_VERSION']}/sbom/download/cli-images"
         credentials = base64.b64encode(
@@ -101,7 +101,7 @@ class PrismaCloudManagerScan(ToolGateway):
             )
             response.raise_for_status()
 
-            result_sbom = "prisma-sbom.json"
+            result_sbom = f"{image_name}_SBOM.json"
             with open(result_sbom, "wb") as file:
                 file.write(response.content)
             
@@ -142,6 +142,7 @@ class PrismaCloudManagerScan(ToolGateway):
                 image_scanned,
                 remoteconfig,
                 prisma_secret_key,
+                image_name
             )
 
         return image_scanned, sbom_components

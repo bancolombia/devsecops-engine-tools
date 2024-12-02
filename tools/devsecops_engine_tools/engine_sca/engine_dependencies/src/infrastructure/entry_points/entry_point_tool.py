@@ -78,6 +78,7 @@ def init_engine_dependencies(
                 sbom_components = tool_sbom.get_components(
                     to_scan,
                     config_sbom,
+                    pipeline_name
                 )
             dependencies_scanned = dependencies_sca_scan.process()
             deserialized = (

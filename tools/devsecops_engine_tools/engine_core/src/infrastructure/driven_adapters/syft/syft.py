@@ -11,6 +11,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.sbom_manager im
 from devsecops_engine_tools.engine_utilities.sbom.deserealizator import (
     get_list_component,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.component import (
+    Component,
+)
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -21,7 +24,7 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 @dataclass
 class Syft(SbomManagerGateway):
 
-    def get_components(self, artifact, config):
+    def get_components(self, artifact, config, service_name) -> "list[Component]":
 
         syft_version = config["SYFT"]["SYFT_VERSION"]
         os_platform = platform.system()
@@ -41,11 +44,11 @@ class Syft(SbomManagerGateway):
             logger.warning(f"{os_platform} is not supported.")
             return None
 
-        result_sbom = self._run_syft(command_prefix, artifact, config)
+        result_sbom = self._run_syft(command_prefix, artifact, config, service_name)
         return get_list_component(result_sbom, config["SYFT"]["OUTPUT_FORMAT"])
 
-    def _run_syft(self, command_prefix, artifact, config):
-        result_file = "syft-sbom.json"
+    def _run_syft(self, command_prefix, artifact, config, service_name):
+        result_file = f"{service_name}_SBOM.json"
         command = [
             command_prefix,
             artifact,

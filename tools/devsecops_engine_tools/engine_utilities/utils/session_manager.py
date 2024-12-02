@@ -1,5 +1,5 @@
 import requests
-
+from requests.adapters import HTTPAdapter
 
 class SessionManager:
     _instance = None
@@ -11,4 +11,7 @@ class SessionManager:
         cls._host = host
         if not cls._instance:
             cls._instance = requests.Session()
+            adapter = HTTPAdapter(pool_connections=10, pool_maxsize=40)
+            cls._instance.mount('https://', adapter)
+            cls._instance.mount('http://', adapter)
         return cls

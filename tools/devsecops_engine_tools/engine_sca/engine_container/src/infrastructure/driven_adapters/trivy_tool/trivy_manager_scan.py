@@ -88,7 +88,7 @@ class TrivyScan(ToolGateway):
             logger.error(f"Error during image scan of {image_name}: {e}")
 
     def _generate_sbom(self, prefix, image_name, remoteconfig):
-        result_sbom = "trivy-sbom.json"
+        result_sbom = f"{image_name}_SBOM.json"
         command = [
             prefix,
             "image",
