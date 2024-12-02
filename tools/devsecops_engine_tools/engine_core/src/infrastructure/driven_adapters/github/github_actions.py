@@ -22,18 +22,15 @@ class GithubActions(DevopsPlatformGateway):
     ICON_FAIL = "\u2718"
     ICON_SUCCESS = "\u2714"
 
-    def get_remote_config(self, repository, path):
+    def get_remote_config(self, repository, path, branch=""):
 
         github_repository = SystemVariables.github_repository.value()
         split = github_repository.split("/")
         owner = split[0]
 
-        utils_github = GithubApi(
-            personal_access_token=SystemVariables.github_access_token.value()
-        )
-
-        git_client = utils_github.get_github_connection()
-        json_config = utils_github.get_remote_json_config(git_client, owner, repository, path)
+        utils_github = GithubApi()
+        git_client = utils_github.get_github_connection(SystemVariables.github_access_token.value())
+        json_config = utils_github.get_remote_json_config(git_client, owner, repository, path, branch)
 
         return json_config
 

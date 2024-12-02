@@ -14,7 +14,9 @@ class GetArtifacts:
 
     def excluded_files(self, remote_config, pipeline_name, exclusions, tool):
         pattern = remote_config[tool]["REGEX_EXPRESSION_EXTENSIONS"]
-        if pipeline_name in exclusions:
+        if (pipeline_name in exclusions) and (
+            exclusions[pipeline_name].get(tool, None)
+        ):
             for ex in exclusions[pipeline_name][tool]:
                 if ex.get("SKIP_FILES", 0):
                     exclusion = ex.get("SKIP_FILES")

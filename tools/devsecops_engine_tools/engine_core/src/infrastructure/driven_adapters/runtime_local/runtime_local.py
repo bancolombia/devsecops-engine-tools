@@ -18,8 +18,10 @@ class RuntimeLocal(DevopsPlatformGateway):
     ICON_SUCCESS = "\u2714"
 
 
-    def get_remote_config(self, repository, path):
-        with open(f"{repository}/{path}") as f:
+    def get_remote_config(self, repository, path, branch=""):
+        remote_config_path = f"{repository}/{path}"
+
+        with open(remote_config_path) as f:
             return json.load(f)
 
     def message(self, type, message):

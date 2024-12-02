@@ -284,6 +284,12 @@ class TestDefectDojoPlatform(unittest.TestCase):
             Exclusions(
                 id="id2", where="path2", create_date="10062024", expired_date=""
             ),
+             Exclusions(
+                id="id1", where="path1", create_date="10012024", expired_date=""
+            ),
+            Exclusions(
+                id="id2", where="path2", create_date="10012024", expired_date=""
+            ),
             Exclusions(
                 id="id3", where="pathq", create_date="14082024", expired_date="15082024"
             ),

@@ -69,7 +69,15 @@ def get_inputs_from_cli(args):
         "--remote_config_repo",
         type=str,
         required=True,
-        help="Name or Folder Path of Config Repo",
+        help="Name or Folder Path of Remote Config Repo",
+    )
+    parser.add_argument(
+        "-rcb",
+        "--remote_config_branch",
+        type=str,
+        required=False,
+        default="",
+        help="Name of the branch of Remote Config Repo",
     )
     parser.add_argument(
         "-t",
@@ -144,7 +152,7 @@ def get_inputs_from_cli(args):
     parser.add_argument(
         "--token_external_checks",
         required=False,
-        help="Token for downloading external checks from engine_iac or engine_secret if is necessary. Ej: github:token, ssh:privatekey:pass",
+        help="Token for downloading external checks from engine_iac or engine_secret if is necessary. Ej: github_token:token, github_app:private_key, ssh:privatekey:pass",
     )
     parser.add_argument(
         "--xray_mode",
@@ -162,6 +170,7 @@ def get_inputs_from_cli(args):
     return {
         "platform_devops": args.platform_devops,
         "remote_config_repo": args.remote_config_repo,
+        "remote_config_branch": args.remote_config_branch,
         "tool": args.tool,
         "folder_path": args.folder_path,
         "platform": args.platform,

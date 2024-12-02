@@ -19,7 +19,7 @@ from devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_po
 def test_init_engine_risk(
     mock_get_exclusions, mock_add_data, mock_break_build, mock_handle_filters
 ):
-    dict_args = {"remote_config_repo": "remote_config"}
+    dict_args = {"remote_config_repo": "remote_config", "remote_config_branch": ""}
     findings = ["finding1", "finding2"]
     services = ["service1", "service2"]
     vm_exclusions = ["exclusion1", "exclusion2"]
@@ -49,7 +49,7 @@ def test_init_engine_risk(
     "devsecops_engine_tools.engine_risk.src.infrastructure.entry_points.entry_point_risk.logger"
 )
 def test_init_engine_risk_no_findings(mock_logger):
-    dict_args = {"remote_config_repo": "remote_config"}
+    dict_args = {"remote_config_repo": "remote_config", "remote_config_branch": ""}
     findings = []
     services = ["service1", "service2"]
     vm_exclusions = ["exclusion1", "exclusion2"]

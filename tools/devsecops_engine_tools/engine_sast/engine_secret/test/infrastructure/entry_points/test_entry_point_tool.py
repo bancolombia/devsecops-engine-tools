@@ -12,6 +12,7 @@ class TestEngineSecretScan(unittest.TestCase):
         mock_tool_gateway = Mock()
         mock_dict_args = {
             "remote_config_repo": "example_repo",
+            "remote_config_branch": "",
             "folder_path": ".",
             "environment": "test",
             "platform": "local",
@@ -51,6 +52,8 @@ class TestEngineSecretScan(unittest.TestCase):
                     "ENABLE_CUSTOM_RULES" : "True",
                     "EXTERNAL_DIR_OWNER": "External_Github",
                     "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",
+                    "APP_ID_GITHUB":"123123",
+                    "INSTALLATION_ID_GITHUB":"234234",
                     "RULES": {
                         "MISSCONFIGURATION_SCANNING" : {
                             "References" : "https://link.reference.com",
