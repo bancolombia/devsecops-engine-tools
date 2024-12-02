@@ -1,8 +1,9 @@
+import subprocess
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan import (
     PrismaCloudManagerScan,
 )
 
-from unittest.mock import patch, Mock, MagicMock
+from unittest.mock import patch, Mock, MagicMock, mock_open
 import pytest
 
 
@@ -108,23 +109,70 @@ def test_download_twistcli_failure(twistcli_instance, mock_requests_get):
 
 
 def test_scan_image_success(mock_remoteconfig):
-    with patch("builtins.print") as mock_print, patch(
-        "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.subprocess.run"
-    ) as mock_run:
+    mock_file_data = '{"scanned_data": {"vulnerabilities": []}}'
+    mock_updated_data = {
+        "scanned_data": {"vulnerabilities": []},
+        "baseImage": "base_image",
+    }
+
+    with patch("builtins.print") as mock_print, \
+         patch("devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.subprocess.run") as mock_run, \
+         patch("builtins.open", mock_open(read_data=mock_file_data)) as mock_file, \
+         patch("json.dump") as mock_json_dump:
+
         mock_run.return_value = MagicMock()
         mock_run.return_value.stdout = ""
         mock_run.return_value.stderr = ""
 
+    
         scan_manager = PrismaCloudManagerScan()
+
+       
         result = scan_manager.scan_image(
             "file_path",
             "image_name",
             "result.json",
             mock_remoteconfig,
             "prisma_secret_key",
+            "base_image"
         )
 
+       
         assert result == "result.json"
+        mock_run.assert_called_once_with(
+            (
+                "file_path",
+                "images",
+                "scan",
+                "--address",
+                mock_remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
+                "--user",
+                mock_remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
+                "--password",
+                "prisma_secret_key",
+                "--output-file",
+                "result.json",
+                "--details",
+                "image_name",
+            ),
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+
+       
+        assert mock_file.call_count == 2
+        mock_file.assert_any_call("result.json", "r")
+        mock_file.assert_any_call("result.json", "w")
+
+       
+        mock_json_dump.assert_called_once_with(
+            mock_updated_data, mock_file(), indent=4
+        )
+
+       
+        mock_print.assert_any_call("The image image_name was scanned")
 
 
 def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image):
@@ -138,7 +186,7 @@ def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image):
 
         scan_manager = PrismaCloudManagerScan()
         result = scan_manager.run_tool_container_sca(
-            mock_remoteconfig, {"token_prisma_cloud": "token"}, "token_container", "image_name", "result.json"
+            mock_remoteconfig, {"token_prisma_cloud": "token"}, "token_container", "image_name", "result.json" ,"base_image"
         )
 
         assert result == "result.json"

@@ -4,6 +4,7 @@ import os
 import subprocess
 import logging
 import base64
+import json
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -42,7 +43,7 @@ class PrismaCloudManagerScan(ToolGateway):
             raise ValueError(f"Error downloading twistcli: {e}")
 
     def scan_image(
-        self, file_path, image_name, result_file, remoteconfig, prisma_secret_key
+        self, file_path, image_name, result_file, remoteconfig, prisma_secret_key, base_image
     ):
         command = (
             file_path,
@@ -68,14 +69,18 @@ class PrismaCloudManagerScan(ToolGateway):
                 text=True,
             )
             print(f"The image {image_name} was scanned")
-
+            with open(result_file, "r") as file:
+                data = json.load(file)
+            data["baseImage"] = base_image  
+            with open(result_file, "w") as file:
+                json.dump(data, file, indent=4)
             return result_file
 
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during image scan of {image_name}: {e.stderr}")
 
     def run_tool_container_sca(
-        self, remoteconfig, secret_tool, token_engine_container, image_name, result_file
+        self, remoteconfig, secret_tool, token_engine_container, image_name, result_file, base_image
     ):
         prisma_secret_key = secret_tool["token_prisma_cloud"] if secret_tool else token_engine_container
         file_path = os.path.join(
@@ -96,6 +101,7 @@ class PrismaCloudManagerScan(ToolGateway):
             result_file,
             remoteconfig,
             prisma_secret_key,
+            base_image,
         )
 
         return image_scanned

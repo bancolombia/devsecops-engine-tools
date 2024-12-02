@@ -115,6 +115,7 @@ def test_process_image_not_already_scanned(container_sca_scan):
         container_sca_scan.token_engine_container,
         "my_image:1234",
         "my_image:1234_scan_result.json",
+        "base_image:latest"
     )
     container_sca_scan.set_image_scanned.assert_called_once_with("my_image:1234")
 
