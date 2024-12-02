@@ -75,6 +75,7 @@ class DependencyCheckTool(ToolGateway):
                 token,
                 "--scan",
                 file_to_scan,
+                "--noupdate"
             ]
 
             if not token:
@@ -87,9 +88,9 @@ class DependencyCheckTool(ToolGateway):
                     "XML",
                     "--scan",
                     file_to_scan,
+                    "--noupdate"
                 ]
 
-            if not self.download_tool_called: command.append("--noupdate")
             subprocess.run(command, capture_output=True, check=True)
         except subprocess.CalledProcessError as error:
             logger.error(f"Error executing OWASP dependency check scan: {error}")
