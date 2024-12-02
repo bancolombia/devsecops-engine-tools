@@ -49,7 +49,7 @@ class AzureDevopsApi:
         except Exception as e:
             raise ApiError("Error getting Azure DevOps connection: " + str(e))
 
-    def get_remote_json_config(self, connection: Connection, branch):
+    def get_remote_json_config(self, connection: Connection, branch=""):
         try:
             git_client = connection.clients.get_git_client()
             version_descriptor = None
