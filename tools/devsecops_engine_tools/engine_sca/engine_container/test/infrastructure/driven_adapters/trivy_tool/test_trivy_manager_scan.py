@@ -86,10 +86,10 @@ def test_scan_image_success(trivy_scan_instance):
     with patch("subprocess.run") as mock_run, patch(
         "builtins.print"
     ) as mock_print:
-        result = trivy_scan_instance.scan_image("prefix", "image_name", "result.json")
+        result = trivy_scan_instance.scan_image("prefix", "image_name", "result.json","base_image")
 
         assert mock_print.call_count == 1
-        assert result == "result.json"
+        assert result == None
 
 
 def test_scan_image_exception(trivy_scan_instance):
@@ -98,7 +98,7 @@ def test_scan_image_exception(trivy_scan_instance):
         ) as mocke_logger:
         mock_run.side_effect = Exception("custom error")
 
-        trivy_scan_instance.scan_image("prefix", "image_name", "result.json")
+        trivy_scan_instance.scan_image("prefix", "image_name", "result.json","base_image")
 
         mocke_logger.assert_called_with("Error during image scan of image_name: custom error")
 
@@ -114,7 +114,7 @@ def test_run_tool_container_sca_linux(trivy_scan_instance):
         file = f"trivy_{version}_Linux-64bit.tar.gz"
         base_url = f"https://github.com/aquasecurity/trivy/releases/download/v{version}/"
 
-        result = trivy_scan_instance.run_tool_container_sca(remote_config, None, None, "image_name", "result.json")
+        result = trivy_scan_instance.run_tool_container_sca(remote_config, None, None, "image_name", "result.json", "base_image")
 
         trivy_scan_instance.install_tool.assert_called_with(file, base_url+file)
         assert result == "result.json"
@@ -131,7 +131,7 @@ def test_run_tool_container_sca_darwin(trivy_scan_instance):
         file = f"trivy_{version}_macOS-64bit.tar.gz"
         base_url = f"https://github.com/aquasecurity/trivy/releases/download/v{version}/"
 
-        result = trivy_scan_instance.run_tool_container_sca(remote_config, None, None, "image_name", "result.json")
+        result = trivy_scan_instance.run_tool_container_sca(remote_config, None, None, "image_name", "result.json", "base_image")
 
         trivy_scan_instance.install_tool.assert_called_with(file, base_url+file)
         assert result == "result.json"
@@ -148,7 +148,7 @@ def test_run_tool_container_sca_windows(trivy_scan_instance):
         file = f"trivy_{version}_windows-64bit.zip"
         base_url = f"https://github.com/aquasecurity/trivy/releases/download/v{version}/"
 
-        result = trivy_scan_instance.run_tool_container_sca(remote_config, None, None, "image_name", "result.json")
+        result = trivy_scan_instance.run_tool_container_sca(remote_config, None, None, "image_name", "result.json", "base_image")
 
         trivy_scan_instance.install_tool_windows.assert_called_with(file, base_url+file)
         assert result == "result.json"
@@ -160,7 +160,7 @@ def test_run_tool_container_sca_none(trivy_scan_instance):
         remote_config = {"TRIVY":{"TRIVY_VERSION": "1.2.3"}}
         mock_platform.return_value = "None"
 
-        result = trivy_scan_instance.run_tool_container_sca(remote_config, None, None, "image_name", "result.json")
+        result = trivy_scan_instance.run_tool_container_sca(remote_config, None, None, "image_name", "result.json", "base_image")
 
         mock_logger.assert_called_with("None is not supported.")
         assert result == None
