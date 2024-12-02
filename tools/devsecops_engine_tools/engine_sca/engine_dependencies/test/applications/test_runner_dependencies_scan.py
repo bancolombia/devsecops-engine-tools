@@ -9,7 +9,7 @@ def test_init_engine_dependencies_xray():
     with patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.applications.runner_dependencies_scan.init_engine_dependencies"
     ) as mock_init_engine_dependencies:
-        dict_args = {"remote_config_repo": "remote_repo"}
+        dict_args = {"remote_config_repo": "remote_repo", "remote_config_branch": ""}
         token = "token"
         config_tool = {
             "ENGINE_DEPENDENCIES": {"ENABLED": "true", "TOOL": "XRAY"},
@@ -24,7 +24,7 @@ def test_init_engine_dependencies_dependency_check():
     with patch(
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.applications.runner_dependencies_scan.init_engine_dependencies"
     ) as mock_init_engine_dependencies:
-        dict_args = {"remote_config_repo": "remote_repo"}
+        dict_args = {"remote_config_repo": "remote_repo", "remote_config_branch": ""}
         token = "token"
         config_tool = {
             "ENGINE_DEPENDENCIES": {"ENABLED": "true", "TOOL": "DEPENDENCY_CHECK"},

@@ -47,6 +47,7 @@ class TestRunnerReportSonar(unittest.TestCase):
             token_cmdb="my_token_cmdb",
             token_vulnerability_management="my_token_vm",
             token_sonar="my_token_sonar",
+            remote_config_branch=""
         )
 
         expected_output = {
@@ -57,6 +58,7 @@ class TestRunnerReportSonar(unittest.TestCase):
             "token_cmdb": "my_token_cmdb",
             "token_vulnerability_management": "my_token_vm",
             "token_sonar": "my_token_sonar",
+            "remote_config_branch": ""
         }
 
         # Act

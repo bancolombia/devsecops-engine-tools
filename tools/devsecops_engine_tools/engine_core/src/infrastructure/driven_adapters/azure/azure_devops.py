@@ -23,7 +23,8 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 @dataclass
 class AzureDevops(DevopsPlatformGateway):
-    def get_remote_config(self, repository, path):
+    def get_remote_config(self, repository, path, branch=""):
+
         base_compact_remote_config_url = (
             f"https://{SystemVariables.System_TeamFoundationCollectionUri.value().rstrip('/').split('/')[-1].replace('.visualstudio.com','')}"
             f".visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/"
@@ -34,7 +35,7 @@ class AzureDevops(DevopsPlatformGateway):
             compact_remote_config_url=base_compact_remote_config_url,
         )
         connection = utils_azure.get_azure_connection()
-        return utils_azure.get_remote_json_config(connection=connection)
+        return utils_azure.get_remote_json_config(connection=connection, branch=branch)
 
     def message(self, type, message):
         if type == "succeeded":

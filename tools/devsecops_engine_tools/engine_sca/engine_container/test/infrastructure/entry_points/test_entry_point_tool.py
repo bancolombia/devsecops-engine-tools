@@ -12,7 +12,7 @@ def test_init_engine_sca_rm():
     ) as mock_set_input_core, patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool.HandleRemoteConfigPatterns"
     ) as mock_handle_remote_config_patterns:
-        dict_args = {"remote_config_repo": "remote_repo", "image_to_scan":"image"}
+        dict_args = {"remote_config_repo": "remote_repo", "image_to_scan":"image", "remote_config_branch": ""}
         token = "token"
         tool = "tool"
         mock_handle_remote_config_patterns.process_handle_working_directory.return_value = (
@@ -43,7 +43,7 @@ def test_init_engine_sca_rm_skip_tool():
     ) as mock_set_input_core, patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool.HandleRemoteConfigPatterns"
     ) as mock_handle_remote_config_patterns:
-        dict_args = {"remote_config_repo": "remote_repo", "image_to_scan":"image"}
+        dict_args = {"remote_config_repo": "remote_repo", "image_to_scan":"image", "remote_config_branch": ""}
         token = "token"
         tool = "tool"
         mock_handle_remote_config_patterns.process_handle_working_directory.return_value = (
@@ -75,7 +75,7 @@ def test_init_engine_sca_rm_no_exclusions():
     ) as mock_set_input_core, patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool.HandleRemoteConfigPatterns"
     ) as mock_handle_remote_config_patterns:
-        dict_args = {"remote_config_repo": "remote_repo", "image_to_scan":"image"}
+        dict_args = {"remote_config_repo": "remote_repo", "image_to_scan":"image", "remote_config_branch": ""}
         token = "token"
         tool = "tool"
         mock_handle_remote_config_patterns.process_handle_working_directory.return_value = (
@@ -108,7 +108,7 @@ def test_init_engine_sca_rm_empty_remote_config():
     ) as mock_set_input_core, patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool.HandleRemoteConfigPatterns"
     ) as mock_handle_remote_config_patterns:
-        dict_args = {"remote_config_repo": "remote_repo", "image_to_scan":"image"}
+        dict_args = {"remote_config_repo": "remote_repo", "image_to_scan":"image", "remote_config_branch": ""}
         token = "token"
         tool = "tool"
         mock_handle_remote_config_patterns.process_handle_working_directory.return_value = (

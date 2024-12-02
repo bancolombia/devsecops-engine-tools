@@ -23,7 +23,7 @@ def init_report_sonar(
     args,
 ):
     config_tool = devops_platform_gateway.get_remote_config(
-        args["remote_config_repo"], "/engine_core/ConfigTool.json"
+        args["remote_config_repo"], "/engine_core/ConfigTool.json", args["remote_config_branch"]
     )
     report_config_tool = devops_platform_gateway.get_remote_config(
         args["remote_config_repo"], "/report_sonar/ConfigTool.json"

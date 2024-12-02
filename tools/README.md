@@ -108,6 +108,7 @@ devsecops_engine_tools
 |           defect_dojo
 |           github
 |           input_validations
+|           sonarqube
 |           ssh
 |           utils
 ```
