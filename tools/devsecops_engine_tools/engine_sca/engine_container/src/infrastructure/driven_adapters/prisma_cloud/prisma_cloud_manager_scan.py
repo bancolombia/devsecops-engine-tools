@@ -101,7 +101,7 @@ class PrismaCloudManagerScan(ToolGateway):
             )
             response.raise_for_status()
 
-            result_sbom = f"{image_name}_SBOM.json"
+            result_sbom = f"{image_name.replace('/', '_')}_SBOM.json"
             with open(result_sbom, "wb") as file:
                 file.write(response.content)
             
