@@ -56,7 +56,7 @@ def test_init_engine_dependencies_success(mock_exists, mock_dependencies_scan, m
     tool_remote.get_variable.return_value = "main"
     tool_deserializator = MagicMock()
     tool_sbom = MagicMock(spec=SbomManagerGateway)
-    dict_args = {"remote_config_repo": "repo", "folder_path": "path"}
+    dict_args = {"remote_config_repo": "repo", "folder_path": "path", "remote_config_branch": ""}
     secret_tool = MagicMock()
     config_tool = {
         "SBOM_MANAGER": {"ENABLED": True, "BRANCH_FILTER": ["main"]},
@@ -69,8 +69,8 @@ def test_init_engine_dependencies_success(mock_exists, mock_dependencies_scan, m
     )
 
     # Verificar que se llamaron las funciones esperadas
-    tool_remote.get_remote_config.assert_any_call("repo", "engine_sca/engine_dependencies/ConfigTool.json")
-    tool_remote.get_remote_config.assert_any_call("repo", "engine_sca/engine_dependencies/Exclusions.json")
+    tool_remote.get_remote_config.assert_any_call("repo", "engine_sca/engine_dependencies/ConfigTool.json", "")
+    tool_remote.get_remote_config.assert_any_call("repo", "engine_sca/engine_dependencies/Exclusions.json", "")
     # tool_remote.get_variable.assert_called_with("pipeline_name")
     mock_handle_remote_config_patterns.assert_called_once()
     mock_dependencies_scan.return_value.process.assert_called_once()
