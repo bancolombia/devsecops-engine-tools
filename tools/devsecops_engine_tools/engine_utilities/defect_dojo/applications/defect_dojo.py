@@ -57,4 +57,5 @@ class DefectDojo:
             )
             return uc.execute(request)
         except ApiError as e:
+            logger.error(f"Error during import scan: {e}")
             raise e
