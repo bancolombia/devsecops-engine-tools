@@ -38,6 +38,7 @@ def init_engine_sca_rm(
     stage = tool_remote.get_variable("stage")
     image_to_scan = dict_args["image_to_scan"]
     image_scanned = None
+    base_image = None
     deseralized = []
     input_core = SetInputCore(remote_config, exclusions, pipeline_name, tool, stage)
     if scan_flag and not (skip_flag):
