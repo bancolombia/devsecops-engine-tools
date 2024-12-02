@@ -1,7 +1,7 @@
 {
     "IGNORE_SEARCH_PATTERN": ".*test.*",
     "TARGET_BRANCHES": ["trunk", "develop", "master"],
-    "SCOPE_VALIDATION_REGEX": "^https://github\\.com/[^/]+/[^/]+(/|\\.git|$)",
+    "SCOPE_VALIDATION_REGEX": "github",
     "PIPELINE_COMPONENTS": {
         "EXAMPLE_MULTICOMPONENT_PIPELINE": [
             "component1",

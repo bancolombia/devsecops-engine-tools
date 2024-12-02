@@ -28,7 +28,8 @@ class TestReportSonar(unittest.TestCase):
             "access_token",
             "build_execution_id",
             "build_id",
-            "commit_hash"
+            "commit_hash",
+            "repository_provider"
         ]
         mock_set_repository.return_value = "repository_uri"
         mock_define_env.return_value = "dev"
