@@ -5,6 +5,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.component import Compon
 
 from unittest.mock import patch, MagicMock, Mock
 import pytest
+import subprocess
 
 
 @pytest.fixture
@@ -167,3 +168,68 @@ def test_run_tool_container_sca_none(trivy_scan_instance):
 
         mock_logger.assert_called_with("None is not supported.")
         assert result == None
+
+@patch('devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.trivy_tool.trivy_manager_scan.subprocess.run')
+@patch('devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.trivy_tool.trivy_manager_scan.get_list_component')
+def test_generate_sbom_success(mock_get_list_component, mock_subprocess_run):
+    # Configurar los mocks
+    mock_subprocess_run.return_value = MagicMock()
+    mock_get_list_component.return_value = ["component1", "component2"]
+
+    # Crear instancia de TrivyScan
+    trivy_scan = TrivyScan()
+
+    # Datos de prueba
+    prefix = "trivy"
+    image_name = "test_image"
+    remoteconfig = {
+        "TRIVY": {
+            "SBOM_FORMAT": "json"
+        }
+    }
+
+    # Llamar a la función
+    result = trivy_scan._generate_sbom(prefix, image_name, remoteconfig)
+
+    # Verificar que se llamaron las funciones esperadas
+    mock_subprocess_run.assert_called_once_with(
+        [
+            prefix,
+            "image",
+            "--format",
+            "json",
+            "--output",
+            f"{image_name.replace('/', '_')}_SBOM.json",
+            "--quiet",
+            image_name,
+        ],
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    mock_get_list_component.assert_called_once_with(f"{image_name.replace('/', '_')}_SBOM.json", "json")
+    assert result, ["component1", "component2"]
+
+@patch('devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.trivy_tool.trivy_manager_scan.subprocess.run')
+@patch('devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.trivy_tool.trivy_manager_scan.logger')
+def test_generate_sbom_failure(mock_logger, mock_subprocess_run):
+    # Configurar los mocks
+    mock_subprocess_run.side_effect = Exception("Test exception")
+
+    # Crear instancia de TrivyScan
+    trivy_scan = TrivyScan()
+
+    # Datos de prueba
+    prefix = "trivy"
+    image_name = "test_image"
+    remoteconfig = {
+        "TRIVY": {
+            "SBOM_FORMAT": "json"
+        }
+    }
+
+    # Llamar a la función y verificar que se lanza la excepción esperada
+    trivy_scan._generate_sbom(prefix, image_name, remoteconfig)
+
+    mock_logger.error.assert_called_once_with("Error during SBOM generation: Test exception")

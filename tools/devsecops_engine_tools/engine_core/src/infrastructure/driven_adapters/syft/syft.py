@@ -87,12 +87,12 @@ class Syft(SbomManagerGateway):
 
     def _install_tool_windows(self, file, url, command_prefix):
         try:
-            subprocess.run(
+            installed = subprocess.run(
                 [command_prefix, "--version"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
-            return command_prefix
+            return installed.stdout.decode("utf-8").strip()
         except:
             try:
                 self._download_tool(file, url)
