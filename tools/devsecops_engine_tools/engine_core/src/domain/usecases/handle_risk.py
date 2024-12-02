@@ -175,6 +175,7 @@ class HandleRisk:
                 ),
                 pipeline_name,
             )
+            initial_services += [service]
             match_service_code = re.match(
                 risk_config["HANDLE_SERVICE_NAME"]["REGEX_GET_SERVICE_CODE"], service
             )
