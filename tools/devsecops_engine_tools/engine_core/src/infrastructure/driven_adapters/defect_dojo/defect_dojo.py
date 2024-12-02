@@ -371,7 +371,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             )
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=25) as executor:
-                futures = [
+                _ = [
                     executor.submit(
                         self._process_component,
                         sbom_component,
