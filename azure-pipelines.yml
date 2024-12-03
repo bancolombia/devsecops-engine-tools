@@ -1,22 +1,39 @@
+
 trigger:
 - trunk
 
 pool:
-  vmImage: ubuntu-latest
+  name: Release-cloud
 
 steps:
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
+  
+- script: echo "##vso[task.setvariable variable=RELEASE_VERSION]$(Build.SourceBranchName#refs/heads/v)"
+  displayName: 'Set lib version'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: InstallPython@0
+  inputs:
+    versions: 'python;pythonx86'
+    versionlist: '3.12'
+
+- task: PythonScript@0
+  inputs:
+    scriptSource: 'filePath'
+    arguments: 'test1 test2 test3'
+
+- task: Docker@2
+  inputs:
+    command: 'build'
+    Dockerfile: 'docker/Dockerfile'
+    tags: 'bancolombia/devsecops-engine-tools:$(VERSION)'
+    arguments: 'VERSION=$(VERSION) REMOTE_CONFIG_PATH=$(REMOTE_CONFIG_PATH)'
+
 - task: ArtifactoryDocker@1
   displayName: Docker Push
   inputs:
     command: 'push'
     repository: 'devops/devsecops-engine-tools'
     artifactoryService: 'Artifactor'
-    targetRepo: 'docker-registry'
+    targetRepo: 'devops/devsecops-engine-tools'
     imageName: 'artifactory.apps.bancolombia.com/devops/devsecops-engine-tools:$(version)'
