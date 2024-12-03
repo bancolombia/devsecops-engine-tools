@@ -4,6 +4,9 @@ WORKDIR /app
 ARG VERSION
 ENV APP_VERSION=$VERSION
 
+ARG REMOTE_CONFIG="./example_remote_config_local"
+ENV REMOTE_CONFIG_PATH=$REMOTE_CONFIG
+
 ENV DET_PIPELINE_NAME="" \
     DET_PATH_DIRECTORY="." \
     DET_OS="Linux" \
@@ -28,8 +31,9 @@ ENV DET_PIPELINE_NAME="" \
 RUN apt-get update && apt-get install -y bash
 RUN apt-get update && apt-get install -y dos2unix
 
-COPY ./example_remote_config_local /app/example_remote_config_local
+COPY $REMOTE_CONFIG /app/example_remote_config_local
 COPY ./docker/remoteConfigGeneration.sh /app/remoteConfigGeneration.sh
+COPY ./docker/rules /tmp/rules
 
 RUN dos2unix /app/remoteConfigGeneration.sh
 
