@@ -14,9 +14,9 @@ class TestGetListComponent(unittest.TestCase):
         read_data=json.dumps(
             {
                 "components": [
-                    {"name": "component1", "version": "1.0.0"},
-                    {"name": "component2", "version": "2.0.0"},
-                    {"name": "component3", "version": "UNKNOWN"},
+                    {"group": "group1", "name": "component1", "version": "1.0.0"},
+                    {"group": "group2", "name": "component2", "version": "2.0.0"},
+                    {"group": "group3", "name": "component3", "version": "UNKNOWN"},
                 ]
             }
         ),
@@ -25,8 +25,8 @@ class TestGetListComponent(unittest.TestCase):
         result_sbom = "dummy_path"
         format = "cyclonedx"
         expected_components = [
-            Component("component1", "1.0.0"),
-            Component("component2", "2.0.0"),
+            Component("group1_component1", "1.0.0"),
+            Component("group2_component2", "2.0.0"),
         ]
 
         components = get_list_component(result_sbom, format)

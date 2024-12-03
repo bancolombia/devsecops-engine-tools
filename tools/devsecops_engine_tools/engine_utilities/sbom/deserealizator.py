@@ -13,7 +13,12 @@ def get_list_component(result_sbom, format) -> "list[Component]":
         if "cyclonedx" in format:
             for component in json_data.get("components", []):
                 if component.get("version") != "UNKNOWN":
+                    component_name = (
+                        f"{component.get('group','')}_{component.get('name')}"
+                        if component.get("group")
+                        else component.get("name")
+                    )
                     list_components.append(
-                        Component(component.get("name"), component.get("version"))
+                        Component(component_name, component.get("version"))
                     )
         return list_components
