@@ -190,8 +190,6 @@ class ReportSonar:
                 logger.warning(f"It was not possible to synchronize Sonar and Vulnerability Manager: {e}")
 
             input_core.scope_pipeline = project_key
-            if re.match(report_config_tool["SCOPE_VALIDATION_REGEX"], self.devops_platform_gateway.get_variable("repository_provider"), re.IGNORECASE):
-                input_core.scope_pipeline = pipeline_name
 
             self.vulnerability_management_gateway.send_vulnerability_management(
                 vulnerability_management=vulnerability_manager

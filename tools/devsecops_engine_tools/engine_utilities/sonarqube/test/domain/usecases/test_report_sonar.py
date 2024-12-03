@@ -38,8 +38,7 @@ class TestReportSonar(unittest.TestCase):
         }
 
         mock_devops_platform_gateway.get_remote_config.return_value = {
-            "PIPELINE_COMPONENTS": {},
-            "SCOPE_VALIDATION_REGEX": ""
+            "PIPELINE_COMPONENTS": {}
         }
         
         mock_sonar_gateway.get_project_keys.return_value = ["project_key_1"]
