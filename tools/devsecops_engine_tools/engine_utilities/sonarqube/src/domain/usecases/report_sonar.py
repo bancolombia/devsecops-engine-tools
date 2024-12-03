@@ -22,7 +22,6 @@ from devsecops_engine_tools.engine_utilities.sonarqube.src.domain.model.gateways
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore
 )
-import re
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 

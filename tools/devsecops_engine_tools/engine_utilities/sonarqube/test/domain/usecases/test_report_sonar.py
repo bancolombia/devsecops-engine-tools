@@ -1,5 +1,4 @@
 import unittest
-from unittest import mock
 from unittest.mock import MagicMock, patch, call
 from devsecops_engine_tools.engine_utilities.sonarqube.src.domain.usecases.report_sonar import (
     ReportSonar
