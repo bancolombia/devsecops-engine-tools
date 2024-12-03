@@ -561,7 +561,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         )
 
     def _get_where(self, finding, tool):
-        if tool in ["engine_container", "engine_dependencies"]:
+        if tool == "engine_dependencies":
+            return finding.component_name.replace("_", ":") + ":" + finding.component_version
+        elif tool == "engine_container":
             return finding.component_name + ":" + finding.component_version
         elif tool == "engine_dast":
             return finding.endpoints
