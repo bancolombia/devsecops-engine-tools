@@ -14,12 +14,12 @@ steps:
 
 - task: PythonScript@0
   inputs:
-    scriptSource: 'get_files_gh.py'
+    script: 'get_files_gh.py'
     arguments: '$(repo-owner) $(project) rules $(gh-at) rules'
 
 - task: PythonScript@0
   inputs:
-    scriptSource: 'get_files_ad.py'
+    script: 'get_files_ad.py'
     arguments: '$(repo-owner-ad) $(project-ad) engine_core $(ad-at) actual_remote_config'
 
 - task: Docker@2
