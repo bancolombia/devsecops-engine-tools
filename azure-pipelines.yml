@@ -12,6 +12,9 @@ steps:
 - script: echo "##vso[task.setvariable variable=RELEASE_VERSION]$(Build.SourceBranchName#refs/heads/v)"
   displayName: 'Set lib version'
 
+- script: pwd && ls
+  displayName
+
 - task: PythonScript@0
   inputs:
     script: 'get_files_gh.py'
