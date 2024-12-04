@@ -12,11 +12,6 @@ steps:
 - script: echo "##vso[task.setvariable variable=RELEASE_VERSION]$(Build.SourceBranchName#refs/heads/v)"
   displayName: 'Set lib version'
 
-- task: InstallPython@0
-  inputs:
-    versions: 'python;pythonx86'
-    versionlist: '3.12'
-
 - task: PythonScript@0
   inputs:
     scriptSource: 'get_files_gh.py'
