@@ -39,6 +39,6 @@ steps:
   inputs:
     command: 'push'
     repository: 'devops/devsecops-engine-tools'
-    artifactoryService: 'Artifactor'
+    artifactoryService: 'Artifactory'
     targetRepo: 'devops/devsecops-engine-tools'
     imageName: 'artifactory.apps.bancolombia.com/devops/devsecops-engine-tools:$(version)'
