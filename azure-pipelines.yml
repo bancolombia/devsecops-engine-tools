@@ -13,7 +13,7 @@ steps:
   displayName: 'Set lib version'
 
 - script: pwd && ls
-  displayName
+  displayName: Test Felipe
 
 - task: PythonScript@0
   inputs:
