@@ -12,6 +12,9 @@ steps:
 - script: echo "##vso[task.setvariable variable=RELEASE_VERSION]$(Build.SourceBranchName#refs/heads/v)"
   displayName: 'Set lib version'
 
+- script: python3 --version
+  displayName: 'Test Felipe'
+
 - script: python3 docker/get_files_ad.py $(repo-owner-ad) $(project-ad) engine_core $(ad-at) actual_remote_config
   displayName: 'Get Remote Config'
 
