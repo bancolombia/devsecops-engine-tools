@@ -1,5 +1,4 @@
 import unittest
-from unittest import mock
 from unittest.mock import MagicMock, patch, call
 from devsecops_engine_tools.engine_utilities.sonarqube.src.domain.usecases.report_sonar import (
     ReportSonar
@@ -28,7 +27,8 @@ class TestReportSonar(unittest.TestCase):
             "access_token",
             "build_execution_id",
             "build_id",
-            "commit_hash"
+            "commit_hash",
+            "repository_provider"
         ]
         mock_set_repository.return_value = "repository_uri"
         mock_define_env.return_value = "dev"
@@ -37,8 +37,7 @@ class TestReportSonar(unittest.TestCase):
         }
 
         mock_devops_platform_gateway.get_remote_config.return_value = {
-            "PIPELINE_COMPONENTS": {},
-            "SCOPE_VALIDATION_REGEX": ""
+            "PIPELINE_COMPONENTS": {}
         }
         
         mock_sonar_gateway.get_project_keys.return_value = ["project_key_1"]
