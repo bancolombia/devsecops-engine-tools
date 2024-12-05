@@ -20,7 +20,7 @@ steps:
   
 - task: Bash@3
   inputs:
-    filePath: '$(System.DefaultWorkingDirectory/docker/get_files_ad.py'
+    filePath: '$(System.DefaultWorkingDirectory)/docker/get_files_ad.py'
     arguments: '$(repo-owner-ad) $(project-ad) engine_core $(ad-at) actual_remote_config'
 
 - script: python3 docker/get_files_ad.py $(repo-owner-ad) $(project-ad) engine_core $(ad-at) actual_remote_config
