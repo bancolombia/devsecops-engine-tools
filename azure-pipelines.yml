@@ -15,6 +15,9 @@ steps:
 - script: python3 --version
   displayName: 'Test Felipe'
 
+- script: ls docker
+  displayName: 'Test Felipe ls'
+
 - script: python3 docker/get_files_ad.py $(repo-owner-ad) $(project-ad) engine_core $(ad-at) actual_remote_config
   displayName: 'Get Remote Config'
 
