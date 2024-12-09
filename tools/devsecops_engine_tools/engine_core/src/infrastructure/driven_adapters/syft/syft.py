@@ -25,27 +25,38 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 class Syft(SbomManagerGateway):
 
     def get_components(self, artifact, config, service_name) -> "list[Component]":
+        try:
+            syft_version = config["SYFT"]["SYFT_VERSION"]
+            os_platform = platform.system()
+            base_url = (
+                f"https://github.com/anchore/syft/releases/download/v{syft_version}/"
+            )
 
-        syft_version = config["SYFT"]["SYFT_VERSION"]
-        os_platform = platform.system()
-        base_url = f"https://github.com/anchore/syft/releases/download/v{syft_version}/"
+            command_prefix = "syft"
+            if os_platform == "Linux":
+                file = f"syft_{syft_version}_linux_amd64.tar.gz"
+                command_prefix = self._install_tool_unix(
+                    file, base_url + file, command_prefix
+                )
+            elif os_platform == "Darwin":
+                file = f"syft_{syft_version}_darwin_amd64.tar.gz"
+                command_prefix = self._install_tool_unix(
+                    file, base_url + file, command_prefix
+                )
+            elif os_platform == "Windows":
+                file = f"syft_{syft_version}_windows_amd64.zip"
+                command_prefix = self._install_tool_windows(
+                    file, base_url + file, "syft.exe"
+                )
+            else:
+                logger.warning(f"{os_platform} is not supported.")
+                return None
 
-        command_prefix = "syft"
-        if os_platform == "Linux":
-            file = f"syft_{syft_version}_linux_amd64.tar.gz"
-            command_prefix = self._install_tool_unix(file, base_url + file, command_prefix)
-        elif os_platform == "Darwin":
-            file = f"syft_{syft_version}_darwin_amd64.tar.gz"
-            command_prefix = self._install_tool_unix(file, base_url + file, command_prefix)
-        elif os_platform == "Windows":
-            file = f"syft_{syft_version}_windows_amd64.zip"
-            command_prefix = self._install_tool_windows(file, base_url + file, "syft.exe")
-        else:
-            logger.warning(f"{os_platform} is not supported.")
+            result_sbom = self._run_syft(command_prefix, artifact, config, service_name)
+            return get_list_component(result_sbom, config["SYFT"]["OUTPUT_FORMAT"])
+        except Exception as e:
+            logger.error(f"Error generating SBOM: {e}")
             return None
-
-        result_sbom = self._run_syft(command_prefix, artifact, config, service_name)
-        return get_list_component(result_sbom, config["SYFT"]["OUTPUT_FORMAT"])
 
     def _run_syft(self, command_prefix, artifact, config, service_name):
         result_file = f"{service_name}_SBOM.json"
@@ -66,7 +77,7 @@ class Syft(SbomManagerGateway):
             print(f"SBOM generated and saved to: {result_file}")
             return result_file
         except Exception as e:
-            logger.error(f"Error during sbom generation of {artifact}: {e}")
+            logger.error(f"Error running syft: {e}")
 
     def _install_tool_unix(self, file, url, command_prefix):
         installed = subprocess.run(
@@ -77,7 +88,7 @@ class Syft(SbomManagerGateway):
         if installed.returncode == 1:
             try:
                 self._download_tool(file, url)
-                with tarfile.open(file, 'r:gz') as tar_file:
+                with tarfile.open(file, "r:gz") as tar_file:
                     tar_file.extract(member=tar_file.getmember("syft"))
                     return "./syft"
             except Exception as e:

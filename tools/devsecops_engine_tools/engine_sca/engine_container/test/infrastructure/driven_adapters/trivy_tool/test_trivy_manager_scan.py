@@ -232,4 +232,4 @@ def test_generate_sbom_failure(mock_logger, mock_subprocess_run):
     # Llamar a la función y verificar que se lanza la excepción esperada
     trivy_scan._generate_sbom(prefix, image_name, remoteconfig)
 
-    mock_logger.error.assert_called_once_with("Error during SBOM generation: Test exception")
+    mock_logger.error.assert_called_once_with("Error generating SBOM: Test exception")

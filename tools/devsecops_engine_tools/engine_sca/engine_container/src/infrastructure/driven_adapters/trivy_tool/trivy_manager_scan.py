@@ -111,7 +111,7 @@ class TrivyScan(ToolGateway):
             return get_list_component(result_sbom, remoteconfig["TRIVY"]["SBOM_FORMAT"])
 
         except Exception as e:
-            logger.error(f"Error during SBOM generation: {e}")
+            logger.error(f"Error generating SBOM: {e}")
 
     def run_tool_container_sca(self, remoteconfig, secret_tool, token_engine_container, image_name, result_file, generate_sbom):
         trivy_version = remoteconfig["TRIVY"]["TRIVY_VERSION"]
