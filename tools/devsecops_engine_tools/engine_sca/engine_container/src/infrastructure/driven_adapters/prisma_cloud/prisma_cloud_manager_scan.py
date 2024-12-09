@@ -91,6 +91,10 @@ class PrismaCloudManagerScan(ToolGateway):
                 image_object = file.read()
                 json_data = json.loads(image_object)
 
+            if not json_data["results"]:
+                print("No results found in the scan, SBOM not generated")
+                return None
+
             response = requests.get(
                 url,
                 headers=headers,
