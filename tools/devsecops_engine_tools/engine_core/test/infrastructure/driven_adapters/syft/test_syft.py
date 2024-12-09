@@ -107,7 +107,7 @@ class TestSyft(unittest.TestCase):
         result_file = syft._run_syft(command_prefix, artifact, config, service_name)
 
         self.assertIsNone(result_file)
-        mock_logger.error.assert_called_once_with("Error during sbom generation of artifact: Error install")
+        mock_logger.error.assert_called_once_with("Error running syft: Error install")
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.syft.syft.subprocess.run')
     def test_install_tool_unix_already_installed(self, mock_subprocess_run):
