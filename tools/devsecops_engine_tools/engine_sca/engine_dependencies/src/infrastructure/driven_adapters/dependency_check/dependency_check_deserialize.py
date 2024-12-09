@@ -150,6 +150,6 @@ class DependencyCheckDeserialize(DeserializatorGateway):
                 if len(maven_parts) == 3:
                     component_name = maven_parts[0] + ":" + maven_parts[1]
                     component_version = maven_parts[2]
-                    return component_name, component_version
+                    return f"{component_name}:{component_version}"
 
         return ""

@@ -147,7 +147,7 @@ class TestDependencyCheckDeserialize(unittest.TestCase):
         result = DependencyCheckDeserialize().get_where(dependency, {"ns": "http://example.com/schema"})
 
         # Assert
-        self.assertEqual(result, ("group:artifact", "1.0.0"))
+        self.assertEqual(result, ("group:artifact:1.0.0"))
 
     def test_get_where_without_identifiers(self):
         # Arrange
