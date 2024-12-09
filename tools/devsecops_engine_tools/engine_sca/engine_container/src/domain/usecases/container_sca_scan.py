@@ -76,7 +76,8 @@ class ContainerScaScan:
             string: file scanning results name.
         """
         matching_image = self.get_image(self.image_to_scan)
-        base_image = self.get_base_image(matching_image)
+        if str(self.remote_config['GET_IMAGE_BASE']).lower() == "true":
+            base_image = self.get_base_image(matching_image)
         image_scanned = None
         if matching_image:
             image_name = matching_image.tags[0]
