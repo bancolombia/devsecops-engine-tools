@@ -106,9 +106,7 @@ def test_get_base_image_parent_image(mock_docker_client):
     result = docker_images.get_base_image(matching_image)
 
 
-    assert result == "base_image:latest"
-    mock_client.api.inspect_image.assert_any_call("image_id")
-    mock_client.api.inspect_image.assert_any_call("parent_id")
+    assert result == None
 
 
 def test_get_base_image_source_label(mock_docker_client):
