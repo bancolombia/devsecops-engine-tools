@@ -22,7 +22,7 @@ class SetInputCore:
             for item in value[tool]:
                 if key == "All":
                     source_images = item.get("source_images", [])
-                    if not any(base_image in source for source in source_images):
+                    if base_image and not any(base_image in source for source in source_images):
                         continue
                 list_exclusions.append(
                     Exclusions(
