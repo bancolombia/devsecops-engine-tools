@@ -22,6 +22,7 @@ class ContainerScaScan:
         secret_tool,
         token_engine_container,
         image_to_scan,
+        exclusions
     ):
         self.tool_run = tool_run
         self.remote_config = remote_config
@@ -31,6 +32,7 @@ class ContainerScaScan:
         self.secret_tool = secret_tool
         self.token_engine_container = token_engine_container
         self.image_to_scan = image_to_scan
+        self.exclusions = exclusions
 
     def get_image(self, image_to_scan):
         """
@@ -87,7 +89,7 @@ class ContainerScaScan:
                 print(f"The image {image_name} has already been scanned previously.")
                 return image_scanned, base_image
             image_scanned = self.tool_run.run_tool_container_sca(
-                self.remote_config, self.secret_tool, self.token_engine_container, image_name, result_file, base_image
+                self.remote_config, self.secret_tool, self.token_engine_container, image_name, result_file, base_image, self.exclusions
             )
             self.set_image_scanned(image_name)
         else:
