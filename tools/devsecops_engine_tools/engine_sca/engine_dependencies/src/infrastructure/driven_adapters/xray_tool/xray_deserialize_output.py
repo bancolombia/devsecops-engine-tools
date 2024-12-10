@@ -46,7 +46,7 @@ class XrayDeserializator(DeserializatorGateway):
         ]
         return vulnerabilities
 
-    def get_list_findings(self, dependencies_scanned_file) -> "list[Finding]":
+    def get_list_findings(self, dependencies_scanned_file, remote_config) -> "list[Finding]":
         list_open_vulnerabilities = []
         with open(dependencies_scanned_file, "rb") as file:
             json_data = json.loads(file.read())

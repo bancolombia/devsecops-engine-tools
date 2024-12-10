@@ -103,5 +103,5 @@ def test_deserializator():
         dependencies_scan_instance.deserializator(dependencies_scanned)
 
         mock_deserializator_gateway.get_list_findings.assert_called_once_with(
-            dependencies_scanned
+            dependencies_scanned, remote_config
         )

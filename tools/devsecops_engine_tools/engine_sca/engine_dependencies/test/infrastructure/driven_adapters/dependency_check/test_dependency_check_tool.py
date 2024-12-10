@@ -200,13 +200,12 @@ class TestDependencyCheckTool(unittest.TestCase):
             [
                 "dependency-check.sh",
                 "--format",
-                "JSON",
-                "--format",
                 "XML",
                 "--nvdApiKey",
                 "token",
                 "--scan",
                 "mock_file_to_scan",
+                "--noupdate"
             ],
             capture_output=True,
             check=True,
@@ -233,13 +232,12 @@ class TestDependencyCheckTool(unittest.TestCase):
             [
                 "dependency-check.sh",
                 "--format",
-                "JSON",
-                "--format",
                 "XML",
                 "--nvdApiKey",
                 "token",
                 "--scan",
                 "mock_file_to_scan",
+                "--noupdate"
             ],
             capture_output=True,
             check=True,
