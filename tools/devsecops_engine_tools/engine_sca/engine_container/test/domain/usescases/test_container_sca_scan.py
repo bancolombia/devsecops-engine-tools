@@ -83,7 +83,7 @@ def test_process_image_already_scanned(container_sca_scan):
     image_scanned, base_image = container_sca_scan.process()
 
     assert image_scanned is None  
-    assert base_image is 'base_image:latest'
+    assert base_image == 'base_image:latest'
     container_sca_scan.get_image.assert_called_once_with(container_sca_scan.image_to_scan)
     container_sca_scan.get_images_already_scanned.assert_called_once()
     container_sca_scan.tool_run.run_tool_container_sca.assert_not_called()
