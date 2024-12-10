@@ -73,17 +73,13 @@ class TrivyScan(ToolGateway):
                 text=True,
             )
             print(f"The image {image_name} was scanned")
-            with open(result_file, "r") as file:
-                data = json.load(file)
-            data["baseImage"] = base_image  
-            with open(result_file, "w") as file:
-                json.dump(data, file, indent=4)
+
             return result_file
 
         except Exception as e:
             logger.error(f"Error during image scan of {image_name}: {e}")
 
-    def run_tool_container_sca(self, remoteconfig, secret_tool, token_engine_container, image_name, result_file ,base_image):
+    def run_tool_container_sca(self, remoteconfig, secret_tool, token_engine_container, image_name, result_file ,base_image, exclusions):
         trivy_version = remoteconfig["TRIVY"]["TRIVY_VERSION"]
         os_platform = platform.system()
         arch_platform = platform.architecture()[0]
