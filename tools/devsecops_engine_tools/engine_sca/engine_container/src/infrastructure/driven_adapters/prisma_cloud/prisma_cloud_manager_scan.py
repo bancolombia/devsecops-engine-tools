@@ -42,7 +42,7 @@ class PrismaCloudManagerScan(ToolGateway):
         except Exception as e:
             raise ValueError(f"Error downloading twistcli: {e}")
 
-    def _scan_image(
+    def scan_image(
         self, file_path, image_name, result_file, remoteconfig, prisma_secret_key
     ):
         command = (
@@ -113,7 +113,7 @@ class PrismaCloudManagerScan(ToolGateway):
                 remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
                 remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"],
             )
-        image_scanned = self._scan_image(
+        image_scanned = self.scan_image(
             file_path,
             image_name,
             result_file,
