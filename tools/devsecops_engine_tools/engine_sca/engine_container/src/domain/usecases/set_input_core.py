@@ -14,7 +14,7 @@ class SetInputCore:
 
     def get_exclusions(self, exclusions_data, pipeline_name, tool, base_image):
         list_exclusions = []
-
+        print("The base image used is:", base_image)
         for key, value in exclusions_data.items():
             if key not in {"All", pipeline_name} or not value.get(tool):
                 continue
