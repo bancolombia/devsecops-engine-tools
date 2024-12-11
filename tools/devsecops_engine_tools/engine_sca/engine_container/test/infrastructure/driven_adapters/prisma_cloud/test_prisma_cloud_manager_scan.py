@@ -1,8 +1,10 @@
+import json
+import subprocess
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan import (
     PrismaCloudManagerScan,
 )
 
-from unittest.mock import patch, Mock, MagicMock
+from unittest.mock import patch, Mock, MagicMock, mock_open
 import pytest
 
 
@@ -108,23 +110,54 @@ def test_download_twistcli_failure(twistcli_instance, mock_requests_get):
 
 
 def test_scan_image_success(mock_remoteconfig):
-    with patch("builtins.print") as mock_print, patch(
-        "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.subprocess.run"
-    ) as mock_run:
+    mock_file_data = '{"scanned_data": {"vulnerabilities": []}}'
+
+    with patch("builtins.print") as mock_print, \
+         patch("devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan.subprocess.run") as mock_run, \
+         patch("builtins.open", mock_open(read_data=mock_file_data)) as mock_file, \
+         patch("json.dump") as mock_json_dump:
+
         mock_run.return_value = MagicMock()
         mock_run.return_value.stdout = ""
         mock_run.return_value.stderr = ""
 
+    
         scan_manager = PrismaCloudManagerScan()
+
+       
         result = scan_manager.scan_image(
             "file_path",
             "image_name",
             "result.json",
             mock_remoteconfig,
-            "prisma_secret_key",
+            "prisma_secret_key"
         )
 
+       
         assert result == "result.json"
+        mock_run.assert_called_once_with(
+            (
+                "file_path",
+                "images",
+                "scan",
+                "--address",
+                mock_remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
+                "--user",
+                mock_remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
+                "--password",
+                "prisma_secret_key",
+                "--output-file",
+                "result.json",
+                "--details",
+                "image_name"
+            ),
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+       
+        mock_print.assert_any_call("The image image_name was scanned")
 
 
 def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image):
@@ -138,7 +171,82 @@ def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image):
 
         scan_manager = PrismaCloudManagerScan()
         result = scan_manager.run_tool_container_sca(
-            mock_remoteconfig, {"token_prisma_cloud": "token"}, "token_container", "image_name", "result.json"
+            mock_remoteconfig, {"token_prisma_cloud": "token"}, "token_container", "image_name", "result.json" ,None , {"exclusions": "all"}
         )
 
         assert result == "result.json"
+
+def test_write_image_base_success():
+    mock_file_data = json.dumps({
+        "results": [
+            {
+                "vulnerabilities": [
+                    {"id": "CVE-1234-5678", "other_field": "value"}
+                ]
+            }
+        ]
+    })
+    exclusions_data = {
+        "All": {
+            "PRISMA": [
+                {
+                    "id": "CVE-1234-5678",
+                    "source_images": ["python:3.9"]
+                }
+            ]
+        }
+    }
+    with patch("builtins.open", mock_open(read_data=mock_file_data)) as mock_file, \
+         patch("json.dump") as mock_json_dump:
+        scan_manager = PrismaCloudManagerScan()
+        scan_manager._write_image_base("result.json", "python:3.9", exclusions_data)
+
+        # Validar que el archivo fue modificado
+        mock_file.assert_called_with("result.json", "w")
+        mock_json_dump.assert_called_once()
+        written_data = mock_json_dump.call_args[0][0]
+        assert written_data["results"][0]["vulnerabilities"][0]["baseImage"] == "python:3.9"
+
+def test_write_image_base_no_match():
+    mock_file_data = json.dumps({
+        "results": [
+            {
+                "vulnerabilities": [
+                    {"id": "CVE-9999-8888", "other_field": "value"}
+                ]
+            }
+        ]
+    })
+    exclusions_data = {
+        "All": {
+            "PRISMA": [
+                {
+                    "id": "CVE-1234-5678",
+                    "source_images": ["python:3.9"]
+                }
+            ]
+        }
+    }
+    with patch("builtins.open", mock_open(read_data=mock_file_data)), \
+         patch("json.dump") as mock_json_dump:
+        scan_manager = PrismaCloudManagerScan()
+        scan_manager._write_image_base("result.json", "python:3.9", exclusions_data)
+
+        # Validar que el archivo no fue modificado
+        mock_json_dump.assert_not_called()
+
+def test_write_image_base_file_not_found():
+    exclusions_data = {
+        "All": {
+            "PRISMA": [
+                {
+                    "id": "CVE-1234-5678",
+                    "source_images": ["python:3.9"]
+                }
+            ]
+        }
+    }
+    with patch("builtins.open", side_effect=FileNotFoundError):
+        scan_manager = PrismaCloudManagerScan()
+        with pytest.raises(FileNotFoundError):
+            scan_manager._write_image_base("result.json", "python:3.9", exclusions_data)

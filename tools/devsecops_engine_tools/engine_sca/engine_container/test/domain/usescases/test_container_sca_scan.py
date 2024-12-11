@@ -40,7 +40,8 @@ def container_sca_scan(
         "1234",
         "token",
         "token_engine_container",
-        "image_to_scan"
+        "image_to_scan",
+        "exclusions"
     )
 
 
@@ -71,29 +72,51 @@ def test_set_image_scanned(container_sca_scan):
 def test_process_image_already_scanned(container_sca_scan):
     mock_image = MagicMock()
     mock_image.tags = ["my_image:1234"]
-    container_sca_scan.get_images_already_scanned = MagicMock()
-    container_sca_scan.get_image = MagicMock()
-    container_sca_scan.get_image.return_value = mock_image
-    container_sca_scan.get_images_already_scanned.return_value = [
-        "my_image:1234"
-    ]
-    assert container_sca_scan.process() == None
+    container_sca_scan.get_image = MagicMock(return_value=mock_image)
+    container_sca_scan.get_base_image = MagicMock(return_value="base_image:latest")
+    container_sca_scan.get_images_already_scanned = MagicMock(
+        return_value=["my_image:1234"]
+    )
+    container_sca_scan.tool_run = MagicMock()  
+    container_sca_scan.set_image_scanned = MagicMock()
 
+    image_scanned, base_image = container_sca_scan.process()
+
+    assert image_scanned is None  
+    assert base_image == 'base_image:latest'
+    container_sca_scan.get_image.assert_called_once_with(container_sca_scan.image_to_scan)
+    container_sca_scan.get_images_already_scanned.assert_called_once()
+    container_sca_scan.tool_run.run_tool_container_sca.assert_not_called()
+    container_sca_scan.set_image_scanned.assert_not_called()
 
 def test_process_image_not_already_scanned(container_sca_scan):
     mock_image = MagicMock()
     mock_image.tags = ["my_image:1234"]
-    container_sca_scan.get_images_already_scanned = MagicMock()
-    container_sca_scan.get_image = MagicMock()
-    container_sca_scan.get_image.return_value = mock_image
-    container_sca_scan.get_images_already_scanned.return_value = [
-        "my_image_scan_result.json"
-    ]
-    container_sca_scan.tool_run.run_tool_container_sca.return_value = [
-        "my_image:1234_scan_result.json"
-    ]
+    
+    container_sca_scan.get_image = MagicMock(return_value=mock_image)
+    container_sca_scan.get_base_image = MagicMock(return_value="base_image:latest")
+    container_sca_scan.get_images_already_scanned = MagicMock(return_value=[])
+    container_sca_scan.tool_run = MagicMock()
+    container_sca_scan.tool_run.run_tool_container_sca = MagicMock(
+        return_value="my_image:1234_scan_result.json"
+    )
     container_sca_scan.set_image_scanned = MagicMock()
-    assert container_sca_scan.process() == ["my_image:1234_scan_result.json"]
+
+    image_scanned, base_image = container_sca_scan.process()
+
+    assert image_scanned == "my_image:1234_scan_result.json"  
+    container_sca_scan.get_image.assert_called_once_with(container_sca_scan.image_to_scan)
+    container_sca_scan.get_images_already_scanned.assert_called_once()
+    container_sca_scan.tool_run.run_tool_container_sca.assert_called_once_with(
+        container_sca_scan.remote_config,
+        container_sca_scan.secret_tool,
+        container_sca_scan.token_engine_container,
+        "my_image:1234",
+        "my_image:1234_scan_result.json",
+        "base_image:latest",
+        "exclusions"
+    )
+    container_sca_scan.set_image_scanned.assert_called_once_with("my_image:1234")
 
 
 

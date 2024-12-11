@@ -4,6 +4,7 @@ import os
 import subprocess
 import logging
 import base64
+import json
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -68,14 +69,36 @@ class PrismaCloudManagerScan(ToolGateway):
                 text=True,
             )
             print(f"The image {image_name} was scanned")
-
             return result_file
 
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during image scan of {image_name}: {e.stderr}")
 
+    def _write_image_base(self, result_file, base_image, exclusions_data):
+        try:
+            with open(result_file, "r") as file:
+                data = json.load(file)
+
+            prisma_exclusions = exclusions_data.get("All", {}).get("PRISMA", [])
+            modified = False
+            for result in data.get("results", []):
+                for vulnerability in result.get("vulnerabilities", []):
+                    for exclusion in prisma_exclusions:
+                        if (
+                            vulnerability.get("id") == exclusion.get("id") and
+                            any(image.startswith(base_image) for image in exclusion.get("source_images", []))
+                        ):
+                            vulnerability["baseImage"] = base_image
+                            modified = True
+
+            if modified:
+                with open(result_file, "w") as file:
+                    json.dump(data, file, indent=4)
+        except subprocess.CalledProcessError as e:
+             logger.error(f"Error during write image base of {base_image}: {e.stderr}")
+            
     def run_tool_container_sca(
-        self, remoteconfig, secret_tool, token_engine_container, image_name, result_file
+        self, remoteconfig, secret_tool, token_engine_container, image_name, result_file, base_image, exclusions
     ):
         prisma_secret_key = secret_tool["token_prisma_cloud"] if secret_tool else token_engine_container
         file_path = os.path.join(
@@ -95,7 +118,9 @@ class PrismaCloudManagerScan(ToolGateway):
             image_name,
             result_file,
             remoteconfig,
-            prisma_secret_key,
+            prisma_secret_key
         )
+        if base_image:
+            self._write_image_base(result_file, base_image, exclusions)
 
         return image_scanned

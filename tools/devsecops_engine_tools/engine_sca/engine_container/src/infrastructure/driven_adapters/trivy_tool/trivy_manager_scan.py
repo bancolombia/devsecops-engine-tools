@@ -7,6 +7,7 @@ import platform
 import requests
 import tarfile
 import zipfile
+import json
 
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -52,7 +53,7 @@ class TrivyScan(ToolGateway):
             except Exception as e:
                 logger.error(f"Error installing trivy: {e}")
 
-    def scan_image(self, prefix, image_name, result_file):
+    def scan_image(self, prefix, image_name, result_file, base_image):
         command = [
             prefix,
             "--scanners",
@@ -78,7 +79,7 @@ class TrivyScan(ToolGateway):
         except Exception as e:
             logger.error(f"Error during image scan of {image_name}: {e}")
 
-    def run_tool_container_sca(self, remoteconfig, secret_tool, token_engine_container, image_name, result_file):
+    def run_tool_container_sca(self, remoteconfig, secret_tool, token_engine_container, image_name, result_file ,base_image, exclusions):
         trivy_version = remoteconfig["TRIVY"]["TRIVY_VERSION"]
         os_platform = platform.system()
         arch_platform = platform.architecture()[0]
@@ -101,7 +102,7 @@ class TrivyScan(ToolGateway):
             return None
 
         image_scanned = (
-            self.scan_image(command_prefix, image_name, result_file)
+            self.scan_image(command_prefix, image_name, result_file, base_image)
         )
 
         return image_scanned
