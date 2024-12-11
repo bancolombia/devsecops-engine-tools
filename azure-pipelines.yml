@@ -18,11 +18,8 @@ steps:
 - script: ls docker
   displayName: 'Test Felipe ls'
 
-- task: PythonScript@0
-  inputs:
-    scriptSource: 'filePath'
-    scriptPath: '$(System.DefaultWorkingDirectory)/docker/get_files_ad.py'
-    arguments: '$(repo-owner-ad) $(project-ad) engine_core $(ad-at) actual_remote_config'
+- script: python3 docker/get_files_ad.py $(repo-owner-ad) $(project-ad) engine_core $(ad-at) actual_remote_config
+  displayName: 'Get Custom Checkov Rules'
 
 - script: python3 docker/get_files_gh.py $(repo-owner) $(project) rules $(gh-at) rules
   displayName: 'Get Custom IAC Rules'
