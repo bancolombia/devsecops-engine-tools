@@ -18,7 +18,7 @@ steps:
 - script: pwd && ls
   displayName: 'Test'
 
-- script: python3 docker/get_files_ad.py $(repo-owner-ad) $(project-ad) engine_core $(ad-at) actual_remote_config
+- script: python3 docker/get_files_ad.py $(repo-owner-ad) "$(project-ad)" NU0429001_DevSecOps_Remote_Config engine_core $(ad-at) actual_remote_config
   displayName: 'Get Custom Remote Config'
 
 - script: python3 docker/get_files_gh.py $(repo-owner) $(project) rules $(gh-at) rules
