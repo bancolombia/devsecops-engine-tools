@@ -24,6 +24,9 @@ steps:
 - script: python3 docker/get_files_gh.py $(repo-owner) $(project) rules $(gh-at) rules
   displayName: 'Get Custom IAC Rules'
 
+- script: pwd && ls
+  displayName: 'Test'
+
 - script: docker build --build-arg VERSION=1 -t bancolombia/devsecops-engine-tools:1 -f docker/Dockerfile . && docker tag bancolombia/devsecops-engine-tools:1 bancolombia/devsecops-engine-tools:1
   displayName: 'Build Docker Image'
 
