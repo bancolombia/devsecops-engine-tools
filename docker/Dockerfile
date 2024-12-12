@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y dos2unix
 
 COPY $REMOTE_CONFIG /app/example_remote_config_local
 COPY ./docker/remoteConfigGeneration.sh /app/remoteConfigGeneration.sh
-COPY ./docker/rules /tmp/rules
+COPY ./rules /tmp/rules
 
 RUN dos2unix /app/remoteConfigGeneration.sh
 
