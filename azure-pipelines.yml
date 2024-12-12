@@ -3,7 +3,7 @@ trigger:
 - trunk
 
 pool:
-  name: Release-cloud
+  name: Azure Pipelines
 
 steps:
 
