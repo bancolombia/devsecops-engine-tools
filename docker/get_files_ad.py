@@ -9,7 +9,9 @@ def download_folder_from_azure_devops(organization, project, repository, path, t
     response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
-        content = str(json.dumps(response.json()))
+        data = response.json()
+        data['CHECKOV']['USE_EXTERNAL_CHECKS_DIR'] = "True"
+        content = str(json.dumps(data))
         file_path = "example_remote_config_local/engine_sast/engine_iac/ConfigTool.json"
         with open(file_path, "w") as file:
             file.write(content)
