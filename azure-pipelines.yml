@@ -24,12 +24,8 @@ steps:
 - script: python3 docker/get_files_gh.py $(repo-owner) $(project) rules $(gh-at) rules
   displayName: 'Get Custom IAC Rules'
 
-- task: Docker@2
-  inputs:
-    command: 'build'
-    Dockerfile: 'docker/Dockerfile'
-    tags: 'bancolombia/devsecops-engine-tools:$(VERSION)'
-    arguments: '--build-arg VERSION=$(VERSION) --build-arg REMOTE_CONFIG_PATH=$(REMOTE_CONFIG_PATH)'
+- script: docker build --build-arg VERSION=$(VERSION) --build-arg REMOTE_CONFIG_PATH=$(REMOTE_CONFIG_PATH) -t bancolombia/devsecops-engine-tools:$(VERSION) -f docker/Dockerfile . && docker tag bancolombia/devsecops-engine-tools:$(VERSION)  bancolombia/devsecops-engine-tools:$(VERSION) 
+  displayName: 'Build Docker Image'
 
 - task: ArtifactoryDocker@1
   displayName: Docker Push
