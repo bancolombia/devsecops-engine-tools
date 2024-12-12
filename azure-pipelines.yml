@@ -29,7 +29,7 @@ steps:
     command: 'build'
     Dockerfile: 'docker/Dockerfile'
     tags: 'bancolombia/devsecops-engine-tools:$(VERSION)'
-    arguments: 'VERSION=$(VERSION) REMOTE_CONFIG_PATH=$(REMOTE_CONFIG_PATH)'
+    arguments: '--build-arg VERSION=$(VERSION) --build-arg REMOTE_CONFIG_PATH=$(REMOTE_CONFIG_PATH)'
 
 - task: ArtifactoryDocker@1
   displayName: Docker Push
