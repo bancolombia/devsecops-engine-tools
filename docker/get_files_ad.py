@@ -2,7 +2,8 @@ import requests
 import sys
 import json
 
-def download_folder_from_azure_devops(organization, project, repository, path, token):
+def download_folder_from_azure_devops(organization, project, repository, path, token, download_path):
+    print(download_path)
     url = f"https://dev.azure.com/{organization}/{project}/_apis/git/repositories/{repository}/items?scopePath={path}&recursionLevel=Full&api-version=7.1"
     headers = {"Authorization": f"Basic {token}"}
     response = requests.get(url, headers=headers)
@@ -29,7 +30,7 @@ def download_folder_from_azure_devops(organization, project, repository, path, t
 
 if __name__ == "__main__":
     if len(sys.argv) < 7:
-        print("Usage: python get_files_ad.py <organization> <project> <repository> <path> <token>")
+        print("Usage: python get_files_ad.py <organization> <project> <repository> <path> <token> <download_path>")
         sys.exit(1)
 
     organization = sys.argv[1]
@@ -37,5 +38,6 @@ if __name__ == "__main__":
     repository = sys.argv[3]
     path = sys.argv[4] # path to download
     token = sys.argv[5] # your personal access token
+    download_path = sys.argv[6]
 
-    download_folder_from_azure_devops(organization, project, repository, path, token)
+    download_folder_from_azure_devops(organization, project, repository, path, token, download_path)
