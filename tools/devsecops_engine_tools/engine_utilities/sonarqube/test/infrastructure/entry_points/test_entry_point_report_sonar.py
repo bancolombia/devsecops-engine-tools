@@ -17,7 +17,7 @@ class TestInitReportSonar(unittest.TestCase):
         mock_devops_platform_gateway.get_remote_config.side_effect = [
             {
                 "REPORT_SONAR" : {
-                    "ENABLED": "true"
+                    "ENABLED": True
                 },
                 "BANNER": "DevSecOps"
             },
@@ -62,7 +62,7 @@ class TestInitReportSonar(unittest.TestCase):
         mock_devops_platform_gateway.get_remote_config.side_effect = [
             {
                 "REPORT_SONAR" : {
-                    "ENABLED": "false"
+                    "ENABLED": False
                 },
                 "BANNER": "DevSecOps"
             },

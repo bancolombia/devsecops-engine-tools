@@ -115,7 +115,7 @@ class IacScan:
 
         if dict_args["folder_path"]:
             if (
-                config_tool.update_service_file_name_cft == "True"
+                config_tool.update_service_file_name_cft
                 and "cloudformation" in dict_args["platform"]
             ):
                 files = os.listdir(os.path.join(os.getcwd(), dict_args["folder_path"]))

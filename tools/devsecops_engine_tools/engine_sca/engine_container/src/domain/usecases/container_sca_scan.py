@@ -18,7 +18,7 @@ class ContainerScaScan:
         remote_config,
         tool_images: ImagesGateway,
         tool_deseralizator: DeseralizatorGateway,
-        build_id,
+        branch,
         secret_tool,
         token_engine_container,
         image_to_scan,
@@ -28,7 +28,7 @@ class ContainerScaScan:
         self.remote_config = remote_config
         self.tool_images = tool_images
         self.tool_deseralizator = tool_deseralizator
-        self.build_id = build_id
+        self.branch = branch
         self.secret_tool = secret_tool
         self.token_engine_container = token_engine_container
         self.image_to_scan = image_to_scan
@@ -82,19 +82,29 @@ class ContainerScaScan:
         matching_image = self.get_image(self.image_to_scan)
         if self.remote_config['GET_IMAGE_BASE']:
             base_image = self.get_base_image(matching_image)
+        sbom_components = None
+        generate_sbom = self.remote_config["SBOM"]["ENABLED"] and any(
+            branch in str(self.branch)
+            for branch in self.remote_config["SBOM"]["BRANCH_FILTER"]
+        )
         if matching_image:
             image_name = matching_image.tags[0]
-            result_file = image_name.replace("/","_") + "_scan_result.json"
+            result_file = image_name.replace("/", "_") + "_scan_result.json"
             if image_name in self.get_images_already_scanned():
                 print(f"The image {image_name} has already been scanned previously.")
-                return image_scanned, base_image
-            image_scanned = self.tool_run.run_tool_container_sca(
-                self.remote_config, self.secret_tool, self.token_engine_container, image_name, result_file, base_image, self.exclusions
+                return image_scanned, base_image, sbom_components
+            image_scanned, sbom_components = self.tool_run.run_tool_container_sca(
+                self.remote_config,
+                self.secret_tool,
+                self.token_engine_container,
+                image_name,
+                result_file, base_image, self.exclusions,
+                generate_sbom,
             )
             self.set_image_scanned(image_name)
         else:
             print(f"'Not image found for {self.image_to_scan}'. Tool skipped.")
-        return image_scanned, base_image
+        return image_scanned, base_image, sbom_components
 
     def deseralizator(self, image_scanned):
         """

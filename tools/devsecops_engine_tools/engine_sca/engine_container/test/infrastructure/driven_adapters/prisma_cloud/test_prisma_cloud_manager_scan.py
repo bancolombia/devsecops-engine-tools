@@ -3,9 +3,10 @@ import subprocess
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan import (
     PrismaCloudManagerScan,
 )
-
-from unittest.mock import patch, Mock, MagicMock, mock_open
+from devsecops_engine_tools.engine_core.src.domain.model.component import Component
+from unittest.mock import patch, Mock, MagicMock, mock_open, mock_open
 import pytest
+import json
 
 
 @pytest.fixture
@@ -171,10 +172,56 @@ def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image):
 
         scan_manager = PrismaCloudManagerScan()
         result = scan_manager.run_tool_container_sca(
-            mock_remoteconfig, {"token_prisma_cloud": "token"}, "token_container", "image_name", "result.json" ,None , {"exclusions": "all"}
+            mock_remoteconfig,
+            {"token_prisma_cloud": "token"},
+            "token_container",
+            "image_name",
+            "result.json" , None , {"exclusions": "all"},
+            True,
+        )
+        
+        assert result == ("result.json", None)
+
+
+def test_generate_sbom_success():
+    with patch(
+        "builtins.open",
+        mock_open(read_data=json.dumps({"results": [{"scanID": "12345"}]})),
+    ), patch("requests.get") as mock_request:
+
+        # Configurar los mocks
+        mock_response = MagicMock()
+        mock_response.content = b"fake sbom content"
+        mock_request.return_value = mock_response
+
+        # Crear instancia de PrismaCloudManagerScan
+        prisma_scan = PrismaCloudManagerScan()
+
+        # Datos de prueba
+        image_scanned = "image_scanned.json"
+        remoteconfig = {
+            "PRISMA_CLOUD": {
+                "PRISMA_CONSOLE_URL": "http://example.com",
+                "PRISMA_API_VERSION": "v1",
+                "PRISMA_ACCESS_KEY": "access_key",
+                "SBOM_FORMAT": "json",
+            }
+        }
+        prisma_secret_key = "secret_key"
+        image_name = "test_image"
+
+        # Llamar a la función
+        result = prisma_scan._generate_sbom(
+            image_scanned, remoteconfig, prisma_secret_key, image_name
         )
 
-        assert result == "result.json"
+        # Verificar que se llamaron las funciones esperadas
+        mock_request.assert_called_once_with(
+            "http://example.com/api/v1/sbom/download/cli-images",
+            headers={"Authorization": "Basic YWNjZXNzX2tleTpzZWNyZXRfa2V5"},
+            params={"id": "12345", "sbomFormat": "json"},
+        )
+        assert result is not None
 
 def test_write_image_base_success():
     mock_file_data = json.dumps({

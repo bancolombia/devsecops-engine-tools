@@ -106,8 +106,10 @@ devsecops_engine_tools
 ├───engine_utilities -> Utilities transversal.
 |           azuredevops
 |           defect_dojo
+|           git_cli
 |           github
 |           input_validations
+|           sbom
 |           sonarqube
 |           ssh
 |           utils

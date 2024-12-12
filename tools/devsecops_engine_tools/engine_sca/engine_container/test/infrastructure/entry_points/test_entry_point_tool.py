@@ -2,7 +2,6 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry
     init_engine_sca_rm,
 )
 from unittest.mock import patch, Mock
-import pytest
 
 
 def test_init_engine_sca_rm():
@@ -23,9 +22,9 @@ def test_init_engine_sca_rm():
         mock_handle_remote_config_patterns.process_handle_analysis_pattern.return_value = (
             True
         )
-        mock_container_sca_scan.process.return_value = "scan_result.json"
+        mock_container_sca_scan.process.return_value = ("scan_result.json", None)
 
-        deserialized, core_input = init_engine_sca_rm(
+        deserialized, core_input, sbom_components = init_engine_sca_rm(
             Mock(),
             Mock(),
             Mock(),
@@ -55,7 +54,7 @@ def test_init_engine_sca_rm_skip_tool():
             True
         )
 
-        deserialized, core_input = init_engine_sca_rm(
+        deserialized, core_input, sbom_components = init_engine_sca_rm(
             Mock(),
             Mock(),
             Mock(),
@@ -88,7 +87,7 @@ def test_init_engine_sca_rm_no_exclusions():
         )
         mock_container_sca_scan.process.return_value = "scan_result.json"
 
-        deserialized, core_input = init_engine_sca_rm(
+        deserialized, core_input, sbom_components = init_engine_sca_rm(
             Mock(),
             Mock(),
             Mock(),
@@ -121,7 +120,7 @@ def test_init_engine_sca_rm_empty_remote_config():
         )
         mock_container_sca_scan.process.return_value = "scan_result.json"
 
-        deserialized, core_input = init_engine_sca_rm(
+        deserialized, core_input, sbom_components = init_engine_sca_rm(
             Mock(),
             Mock(),
             Mock(),
