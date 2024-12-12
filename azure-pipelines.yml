@@ -24,7 +24,7 @@ steps:
 - script: python3 docker/get_files_gh.py $(repo-owner) $(project) rules $(gh-at) rules
   displayName: 'Get Custom IAC Rules'
 
-- script: docker build --build-arg VERSION=1.25.1 -t bancolombia/devsecops-engine-tools:1.25.1 -f docker/Dockerfile . && docker tag bancolombia/devsecops-engine-tools:1.25.1 bancolombia/devsecops-engine-tools:1.25.1
+- script: docker build --build-arg VERSION=1.25.1 -t artifactory.apps.bancolombia.com/devops/devsecops-engine-tools:1.25.1 -f docker/Dockerfile . && docker tag artifactory.apps.bancolombia.com/devops/devsecops-engine-tools:1.25.1 artifactory.apps.bancolombia.com/devops/devsecops-engine-tools:1.25.1
   displayName: 'Build Docker Image'
 
 - task: ArtifactoryDocker@1
@@ -34,4 +34,4 @@ steps:
     repository: 'devops/devsecops-engine-tools'
     artifactoryService: 'Artifactory'
     targetRepo: 'devops/devsecops-engine-tools'
-    imageName: 'bancolombia/devsecops-engine-tools:1.25.1'
+    imageName: 'artifactory.apps.bancolombia.com/devops/devsecops-engine-tools:1.25.1'
