@@ -17,6 +17,7 @@
             "main"
         ]
     },
+    "GET_IMAGE_BASE": true,
     "MESSAGE_INFO_ENGINE_CONTAINER": "message custom",
     "IGNORE_SEARCH_PATTERN":"(.*_demo0|.*_cer)",
     "THRESHOLD": {

@@ -22,6 +22,7 @@ class ContainerScaScan:
         secret_tool,
         token_engine_container,
         image_to_scan,
+        exclusions
     ):
         self.tool_run = tool_run
         self.remote_config = remote_config
@@ -31,6 +32,7 @@ class ContainerScaScan:
         self.secret_tool = secret_tool
         self.token_engine_container = token_engine_container
         self.image_to_scan = image_to_scan
+        self.exclusions = exclusions
 
     def get_image(self, image_to_scan):
         """
@@ -40,6 +42,15 @@ class ContainerScaScan:
             list: List of processed images.
         """
         return self.tool_images.list_images(image_to_scan)
+
+    def get_base_image(self, matching_image):
+            """
+            Process the base image.
+
+            Returns:
+                String: base image.
+            """
+            return self.tool_images.get_base_image(matching_image)
 
     def get_images_already_scanned(self):
         """
@@ -66,8 +77,11 @@ class ContainerScaScan:
         Returns:
             string: file scanning results name.
         """
-        matching_image = self.get_image(self.image_to_scan)
+        base_image = None
         image_scanned = None
+        matching_image = self.get_image(self.image_to_scan)
+        if self.remote_config['GET_IMAGE_BASE']:
+            base_image = self.get_base_image(matching_image)
         sbom_components = None
         generate_sbom = self.remote_config["SBOM"]["ENABLED"] and any(
             branch in str(self.branch)
@@ -78,19 +92,19 @@ class ContainerScaScan:
             result_file = image_name.replace("/", "_") + "_scan_result.json"
             if image_name in self.get_images_already_scanned():
                 print(f"The image {image_name} has already been scanned previously.")
-                return image_scanned, sbom_components
+                return image_scanned, base_image, sbom_components
             image_scanned, sbom_components = self.tool_run.run_tool_container_sca(
                 self.remote_config,
                 self.secret_tool,
                 self.token_engine_container,
                 image_name,
-                result_file,
+                result_file, base_image, self.exclusions,
                 generate_sbom,
             )
             self.set_image_scanned(image_name)
         else:
             print(f"'Not image found for {self.image_to_scan}'. Tool skipped.")
-        return image_scanned, sbom_components
+        return image_scanned, base_image, sbom_components
 
     def deseralizator(self, image_scanned):
         """

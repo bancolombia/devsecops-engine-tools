@@ -38,6 +38,7 @@ def init_engine_sca_rm(
     stage = tool_remote.get_variable("stage")
     image_to_scan = dict_args["image_to_scan"]
     image_scanned = None
+    base_image = None
     sbom_components = None
     deseralized = []
     input_core = SetInputCore(remote_config, exclusions, pipeline_name, tool, stage)
@@ -51,13 +52,14 @@ def init_engine_sca_rm(
             secret_tool,
             dict_args["token_engine_container"],
             image_to_scan,
+            exclusions
         )
-        image_scanned, sbom_components = container_sca_scan.process()
+        image_scanned, base_image, sbom_components = container_sca_scan.process()
         if image_scanned:
             deseralized = container_sca_scan.deseralizator(image_scanned)
     else:
         print("Tool skipped by DevSecOps policy")
         dict_args["send_metrics"] = "false"
-    core_input = input_core.set_input_core(image_scanned)
+    core_input = input_core.set_input_core(image_scanned,base_image)
 
     return deseralized, core_input, sbom_components

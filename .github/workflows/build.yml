@@ -63,6 +63,7 @@ jobs:
           python -m coverage xml
 
       - name: Run analysis on SonarQube
+        if: ${{ github.event.pull_request.head.repo.fork == false }}
         uses: SonarSource/sonarqube-scan-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
