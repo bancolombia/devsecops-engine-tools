@@ -2,7 +2,6 @@ import yaml
 import subprocess
 import time
 import os
-import platform
 import queue
 import threading
 import json
@@ -171,7 +170,6 @@ class CheckovTool(ToolGateway):
                                 f"{config_tool[self.TOOL_CHECKOV]['EXTERNAL_CHECKS_GIT']}/{self.framework_mapping[rule]}"
                             ]
                             if config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_GIT"]
-                            == "True"
                             and agent_env is not None
                             and rule in self.framework_external_checks
                             else []
@@ -180,7 +178,6 @@ class CheckovTool(ToolGateway):
                         external_checks_dir=(
                             f"/tmp/rules/{self.framework_mapping[rule]}"
                             if config_tool[self.TOOL_CHECKOV]["USE_EXTERNAL_CHECKS_DIR"]
-                            == "True"
                             and rule in self.framework_external_checks
                             else []
                         ),

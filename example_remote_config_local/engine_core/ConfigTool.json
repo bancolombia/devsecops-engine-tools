@@ -9,7 +9,10 @@
         }
     },
     "VULNERABILITY_MANAGER": {
-        "BRANCH_FILTER": "",
+        "BRANCH_FILTER": [
+            "trunk",
+            "main"
+        ],
         "DEFECT_DOJO": {
             "CMDB_MAPPING_PATH": "",
             "HOST_CMDB": "",
@@ -27,31 +30,42 @@
             "REGION_NAME": ""
         }
     },
+    "SBOM_MANAGER": {
+        "ENABLED": false,
+        "BRANCH_FILTER": [
+            "trunk",
+            "main"
+        ],
+        "SYFT": {
+            "SYFT_VERSION": "1.17.0",
+            "OUTPUT_FORMAT": "cyclonedx-json"
+        }
+    },
     "ENGINE_IAC": {
-        "ENABLED": "true",
+        "ENABLED": true,
         "TOOL": "CHECKOV|KUBESCAPE|KICS"
     },
     "ENGINE_CONTAINER": {
-        "ENABLED": "true",
+        "ENABLED": true,
         "TOOL": "PRISMA|TRIVY"
     },
     "ENGINE_DAST": {
-        "ENABLED": "true",
+        "ENABLED": true,
         "TOOL": "NUCLEI"
     },
     "ENGINE_SECRET": {
-        "ENABLED": "true",
+        "ENABLED": true,
         "TOOL": "TRUFFLEHOG"
     },
     "ENGINE_DEPENDENCIES": {
-        "ENABLED": "true",
+        "ENABLED": true,
         "TOOL": "XRAY|DEPENDENCY_CHECK"
     },
     "ENGINE_CODE": {
-        "ENABLED": "true",
+        "ENABLED": true,
         "TOOL": "BEARER"
     },
     "REPORT_SONAR": {
-        "ENABLED": "true"
+        "ENABLED": true
     }
 }

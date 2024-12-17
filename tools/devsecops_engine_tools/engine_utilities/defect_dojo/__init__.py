@@ -5,3 +5,4 @@ from .applications.finding import Finding
 from .applications.connect import Connect
 from .applications.engagement import Engagement
 from .applications.product import Product
+from .applications.component import Component

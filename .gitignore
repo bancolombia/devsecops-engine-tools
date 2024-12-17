@@ -65,6 +65,10 @@ kics_assets/
 assets_compressed.zip
 kics_*.zip
 kubescape-macos-latest
+*.tar.gz
+*.zip
+*_SBOM.json
+syft
 
 # Extensions
 out

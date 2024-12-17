@@ -28,11 +28,11 @@ class IacScan:
 
     def process(self, dict_args, secret_tool, tool, env):
         config_tool_iac = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_sast/engine_iac/ConfigTool.json"
+            dict_args["remote_config_repo"], "engine_sast/engine_iac/ConfigTool.json", dict_args["remote_config_branch"]
         )
 
         exclusions = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_sast/engine_iac/Exclusions.json"
+            dict_args["remote_config_repo"], "engine_sast/engine_iac/Exclusions.json", dict_args["remote_config_branch"]
         )
 
         config_tool_core, folders_to_scan, skip_tool = self.complete_config_tool(
@@ -115,7 +115,7 @@ class IacScan:
 
         if dict_args["folder_path"]:
             if (
-                config_tool.update_service_file_name_cft == "True"
+                config_tool.update_service_file_name_cft
                 and "cloudformation" in dict_args["platform"]
             ):
                 files = os.listdir(os.path.join(os.getcwd(), dict_args["folder_path"]))

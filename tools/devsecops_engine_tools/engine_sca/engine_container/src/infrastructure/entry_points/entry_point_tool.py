@@ -23,10 +23,10 @@ def init_engine_sca_rm(
     tool,
 ):
     remote_config = tool_remote.get_remote_config(
-        dict_args["remote_config_repo"], "engine_sca/engine_container/ConfigTool.json"
+        dict_args["remote_config_repo"], "engine_sca/engine_container/ConfigTool.json", dict_args["remote_config_branch"]
     )
     exclusions = tool_remote.get_remote_config(
-        dict_args["remote_config_repo"], "engine_sca/engine_container/Exclusions.json"
+        dict_args["remote_config_repo"], "engine_sca/engine_container/Exclusions.json", dict_args["remote_config_branch"]
     )
     pipeline_name = tool_remote.get_variable("pipeline_name")
     handle_remote_config_patterns = HandleRemoteConfigPatterns(
@@ -34,10 +34,12 @@ def init_engine_sca_rm(
     )
     skip_flag = handle_remote_config_patterns.skip_from_exclusion()
     scan_flag = handle_remote_config_patterns.ignore_analysis_pattern()
-    build_id = tool_remote.get_variable("build_id")
+    branch = tool_remote.get_variable("branch_tag")
     stage = tool_remote.get_variable("stage")
     image_to_scan = dict_args["image_to_scan"]
     image_scanned = None
+    base_image = None
+    sbom_components = None
     deseralized = []
     input_core = SetInputCore(remote_config, exclusions, pipeline_name, tool, stage)
     if scan_flag and not (skip_flag):
@@ -46,17 +48,18 @@ def init_engine_sca_rm(
             remote_config,
             tool_images,
             tool_deseralizator,
-            build_id,
+            branch,
             secret_tool,
             dict_args["token_engine_container"],
             image_to_scan,
+            exclusions
         )
-        image_scanned = container_sca_scan.process()
+        image_scanned, base_image, sbom_components = container_sca_scan.process()
         if image_scanned:
             deseralized = container_sca_scan.deseralizator(image_scanned)
     else:
         print("Tool skipped by DevSecOps policy")
         dict_args["send_metrics"] = "false"
-    core_input = input_core.set_input_core(image_scanned)
+    core_input = input_core.set_input_core(image_scanned,base_image)
 
-    return deseralized, core_input
+    return deseralized, core_input, sbom_components

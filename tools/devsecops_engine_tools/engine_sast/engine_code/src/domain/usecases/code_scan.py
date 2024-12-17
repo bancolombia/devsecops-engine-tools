@@ -33,7 +33,7 @@ class CodeScan:
 
     def set_config_tool(self, dict_args):
         init_config_tool = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_sast/engine_code/ConfigTool.json"
+            dict_args["remote_config_repo"], "engine_sast/engine_code/ConfigTool.json", dict_args["remote_config_branch"]
         )
         scope_pipeline = self.devops_platform_gateway.get_variable("pipeline_name")
         return ConfigTool(json_data=init_config_tool, scope=scope_pipeline)
