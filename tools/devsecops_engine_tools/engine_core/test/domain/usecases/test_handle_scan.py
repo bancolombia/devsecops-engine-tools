@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, Mock
 from unittest import mock
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
+from devsecops_engine_tools.engine_core.src.domain.model.component import Component
 from devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan import (
     HandleScan,
 )
@@ -17,6 +18,7 @@ class TestHandleScan(unittest.TestCase):
         self.vulnerability_management = MagicMock()
         self.secrets_manager_gateway = MagicMock()
         self.devops_platform_gateway = MagicMock()
+        self.sbom_gateway = MagicMock()
         self.threshold = Threshold(
             {
                 "VULNERABILITY": {
@@ -32,6 +34,7 @@ class TestHandleScan(unittest.TestCase):
             self.vulnerability_management,
             self.secrets_manager_gateway,
             self.devops_platform_gateway,
+            self.sbom_gateway,
         )
 
     @mock.patch(
@@ -43,6 +46,7 @@ class TestHandleScan(unittest.TestCase):
             "tool": "engine_iac",
             "use_vulnerability_management": "true",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": ""
         }
         config_tool = {"ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
         secret_tool = "some_secret"
@@ -96,6 +100,7 @@ class TestHandleScan(unittest.TestCase):
             "tool": "engine_iac",
             "use_vulnerability_management": "true",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": ""
         }
         config_tool = {"ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
 
@@ -141,6 +146,7 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_container",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
         config_tool = {"ENGINE_CONTAINER": {"ENABLED": "true", "TOOL": "tool"}}
@@ -185,7 +191,9 @@ class TestHandleScan(unittest.TestCase):
             scope_pipeline="pipeline",
             stage_pipeline="Release",
         )
-        mock_runner_engine_container.return_value = findings_list, input_core
+        component_list = [Component("component1", "version1"), Component("component2", "version2")]
+
+        mock_runner_engine_container.return_value = findings_list, input_core, component_list
         mock_product_type = Mock()
         mock_product_type.name = "PT1"
         self.vulnerability_management.get_product_type_service.return_value = mock_product_type
@@ -218,6 +226,7 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_secret",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
         config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
@@ -254,6 +263,7 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_secret",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
         config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
@@ -290,6 +300,7 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "false",
             "tool": "engine_secret",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
         config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
@@ -328,6 +339,7 @@ class TestHandleScan(unittest.TestCase):
             "use_secrets_manager": "true",
             "tool": "engine_dependencies",
             "remote_config_repo": "test_repo",
+            "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
         config_tool = {
@@ -347,7 +359,7 @@ class TestHandleScan(unittest.TestCase):
             scope_pipeline="pipeline",
             stage_pipeline="Release",
         )
-        mock_runner_engine_dependencies.return_value = findings_list, input_core
+        mock_runner_engine_dependencies.return_value = findings_list, input_core, None
 
         # Call the process method
         result_findings_list, result_input_core = self.handle_scan.process(
@@ -359,5 +371,5 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
         mock_runner_engine_dependencies.assert_called_once_with(
-            dict_args, config_tool, secret_tool, self.devops_platform_gateway
+            dict_args, config_tool, secret_tool, self.devops_platform_gateway, self.sbom_gateway
         )

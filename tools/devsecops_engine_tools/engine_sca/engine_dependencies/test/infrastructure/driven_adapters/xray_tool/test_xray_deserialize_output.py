@@ -42,5 +42,5 @@ def json_data():
 
 def test_get_list_findings_valid(deserializator, json_data):
     with patch("builtins.open", mock_open(read_data=json.dumps(json_data))):
-        result = deserializator.get_list_findings("ruta_inexistente.json")
+        result = deserializator.get_list_findings("ruta_inexistente.json", {})
         assert len(result) > 0

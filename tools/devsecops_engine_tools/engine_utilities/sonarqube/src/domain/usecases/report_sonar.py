@@ -22,7 +22,6 @@ from devsecops_engine_tools.engine_utilities.sonarqube.src.domain.model.gateways
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore
 )
-import re
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
@@ -60,7 +59,8 @@ class ReportSonar:
         )
         config_tool = self.devops_platform_gateway.get_remote_config(
             args["remote_config_repo"],
-            "/engine_core/ConfigTool.json"
+            "/engine_core/ConfigTool.json",
+            args["remote_config_branch"]
         )
         environment = define_env(None, branch)
         
@@ -73,7 +73,8 @@ class ReportSonar:
 
         report_config_tool = self.devops_platform_gateway.get_remote_config(
             args["remote_config_repo"],
-            "/report_sonar/ConfigTool.json"
+            "/report_sonar/ConfigTool.json",
+            args["remote_config_branch"]
         )
 
         get_components = report_config_tool["PIPELINE_COMPONENTS"].get(pipeline_name)
@@ -188,8 +189,6 @@ class ReportSonar:
                 logger.warning(f"It was not possible to synchronize Sonar and Vulnerability Manager: {e}")
 
             input_core.scope_pipeline = project_key
-            if re.match(report_config_tool["SCOPE_VALIDATION_REGEX"], source_code_management_uri, re.IGNORECASE):
-                input_core.scope_pipeline = pipeline_name
 
             self.vulnerability_management_gateway.send_vulnerability_management(
                 vulnerability_management=vulnerability_manager

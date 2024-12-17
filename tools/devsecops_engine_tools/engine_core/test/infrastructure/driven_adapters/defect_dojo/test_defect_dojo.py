@@ -8,8 +8,10 @@ from devsecops_engine_tools.engine_core.src.domain.model.report import Report
 from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_management import (
     VulnerabilityManagement,
 )
-from devsecops_engine_tools.engine_utilities.defect_dojo.domain.request_objects.import_scan import (
-    ImportScanRequest
+from devsecops_engine_tools.engine_core.src.domain.model.component import Component
+from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.engagement import Engagement
+from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
+    ExceptionVulnerabilityManagement,
 )
 
 class TestDefectDojoPlatform(unittest.TestCase):
@@ -654,3 +656,72 @@ class TestDefectDojoPlatform(unittest.TestCase):
         exclusions = self.defect_dojo._get_report_exclusions(total_findings, date_fn, host_dd)
 
         assert len(exclusions) == 4
+
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Engagement"
+    )
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.SessionManager"
+    )
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Component')
+    def test_send_sbom_components_success(self,  mock_component, mock_session_manager, mock_engagement):
+        # Configurar los mocks
+        mock_engagement.get_engagements.return_value.results = [Engagement(id=1, name='test_service')]
+        mock_session_manager.return_value = MagicMock()
+
+        mock_component.get_component.return_value.results = []
+        mock_component.create_component.return_value = Component(name='component_name', version='1.0')
+
+
+        # Datos de prueba
+        sbom_components = [Component(name='component1', version='1.0'), Component(name='component2', version='2.0')]
+        service = 'test_service'
+        dict_args = {'token_vulnerability_management': 'test_token'}
+        secret_tool = {'token_defect_dojo': 'secret_token'}
+        config_tool = {
+            'VULNERABILITY_MANAGER': {
+                'DEFECT_DOJO': {
+                    'HOST_DEFECT_DOJO': 'http://defectdojo',
+                    'MAX_RETRIES_QUERY': 3,
+                    'LIMITS_QUERY': 100
+                }
+            }
+        }
+
+        # Llamar a la función
+        self.defect_dojo.send_sbom_components(sbom_components, service, dict_args, secret_tool, config_tool)
+
+        # Verificar que se llamaron las funciones esperadas
+        mock_session_manager.assert_called_once()
+        mock_engagement.get_engagements.assert_called_once()
+        assert mock_component.get_component.call_count == 2
+        assert mock_component.create_component.call_count == 2
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Engagement')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.SessionManager')
+    def test_send_sbom_components_exception(self, mock_session_manager, mock_engagement):
+        # Configurar los mocks
+        mock_engagement.get_engagements.side_effect = Exception("Test exception")
+
+
+        # Datos de prueba
+        sbom_components = [Component(name='component1', version='1.0')]
+        service = 'test_service'
+        dict_args = {'token_vulnerability_management': 'test_token'}
+        secret_tool = {'token_defect_dojo': 'secret_token'}
+        config_tool = {
+            'VULNERABILITY_MANAGER': {
+                'DEFECT_DOJO': {
+                    'HOST_DEFECT_DOJO': 'http://defectdojo',
+                    'MAX_RETRIES_QUERY': 3,
+                    'LIMITS_QUERY': 100
+                }
+            }
+        }
+
+        # Verificar que se lanza la excepción esperada
+        with self.assertRaises(ExceptionVulnerabilityManagement):
+            self.defect_dojo.send_sbom_components(sbom_components, service, dict_args, secret_tool, config_tool)
+
+    
+
