@@ -37,7 +37,7 @@ class DockerImages(ImagesGateway):
             client = docker.from_env()
             image_details = client.api.inspect_image(matching_image.id)
             labels = image_details.get("Config", {}).get("Labels", {})
-            source_image = labels.get("source-image")
+            source_image = labels.get("x86.image.name")
             if source_image:
                 logger.info(f"Base image for '{matching_image}' from source-image label: {source_image}")
                 return source_image
