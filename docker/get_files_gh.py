@@ -42,8 +42,8 @@ def download_file_from_github(owner, repository, path, token, download_path=".")
 
 owner = sys.argv[1]
 repository = sys.argv[2]
-path = sys.argv[3] #path to download
-token = sys.argv[4] #your personal access token
+path = sys.argv[3]
+token = sys.argv[4]
 download_path = sys.argv[5]
 
 download_folder_from_github(owner, repository, path, token, download_path)
