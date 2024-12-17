@@ -13,7 +13,8 @@ steps:
     hostedAgentService: 90469226-70c7-4fd9-acf1-a6f54739e00a
 
 - script: |
-    version=$(python -c "import version; print(version.version)")
+    python3 -c "import version; print(version.version)"
+    version=$(python3 -c "import version; print(version.version)")
     echo "##vso[task.setvariable variable=RELEASE_VERSION]$version"
   displayName: 'Set lib version from version.py'
 
