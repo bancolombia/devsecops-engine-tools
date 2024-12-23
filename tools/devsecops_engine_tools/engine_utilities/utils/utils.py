@@ -79,7 +79,7 @@ class Utils:
                 logger.warning("The secret is not configured for external controls")
 
             
-            elif config_tool[tool]["USE_EXTERNAL_CHECKS_GIT"] == "True" and platform.system() in (
+            elif config_tool[tool]["USE_EXTERNAL_CHECKS_GIT"] and platform.system() in (
                 "Linux", "Darwin",
             ):
                 config_knowns_hosts(
@@ -92,7 +92,7 @@ class Utils:
                 ssh_key_password = decode_base64(secret["repository_ssh_password"])
                 agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
 
-            elif config_tool[tool]["USE_EXTERNAL_CHECKS_DIR"] == "True":
+            elif config_tool[tool]["USE_EXTERNAL_CHECKS_DIR"]:
                 if not github_token:
                     github_token = github_api.get_installation_access_token(
                         secret.get("github_apps"),
