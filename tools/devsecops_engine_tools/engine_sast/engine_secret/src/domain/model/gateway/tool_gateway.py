@@ -11,8 +11,9 @@ class ToolGateway(metaclass=ABCMeta):
                             agent_os: str,
                             agent_work_folder: str,
                             repository_name: str,
-                            config_tool: DeserializeConfigTool,
+                            config_tool,
                             secret_tool,
                             secret_external_checks,
-                            agent_tem_dir:str) -> str:
+                            agent_tem_dir:str,
+                            tool) -> str:
         "run tool secret scan"

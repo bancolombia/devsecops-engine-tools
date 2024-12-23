@@ -2,12 +2,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.input_core import Input
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.DeserializeConfigTool import (
-    DeserializeConfigTool,
-)
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_tools.engine_utilities.utils.utils import Utils
-
+from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 
 class SetInputCore:
     def __init__(
@@ -15,7 +12,7 @@ class SetInputCore:
         tool_remote: DevopsPlatformGateway,
         dict_args,
         tool,
-        config_tool: DeserializeConfigTool,
+        config_tool,
     ):
         self.tool_remote = tool_remote
         self.dict_args = dict_args
@@ -80,12 +77,12 @@ class SetInputCore:
             ),
             threshold_defined=Utils.update_threshold(
                 self,
-                self.config_tool.level_compliance,
+                Threshold(self.config_tool['THRESHOLD']),
                 exclusions_config,
-                self.config_tool.scope_pipeline,
+                self.config_tool["SCOPE_PIPELINE"],
             ),
             path_file_results=finding_list,
-            custom_message_break_build=self.config_tool.message_info_engine_secret,
-            scope_pipeline=self.config_tool.scope_pipeline,
+            custom_message_break_build=self.config_tool["MESSAGE_INFO_ENGINE_SECRET"],
+            scope_pipeline=self.config_tool["SCOPE_PIPELINE"],
             stage_pipeline=self.tool_remote.get_variable("stage").capitalize(),
         )
