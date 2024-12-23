@@ -42,7 +42,7 @@ class ReportSonar:
 
     def process(self, args):
         pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
-        branch = self.devops_platform_gateway.get_variable("branch_name")
+        branch = self.devops_platform_gateway.get_variable("branch_tag").replace("refs/heads/", "")
         input_core = InputCore(
             [],
             {},
