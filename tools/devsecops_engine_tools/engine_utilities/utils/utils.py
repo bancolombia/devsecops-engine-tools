@@ -83,8 +83,8 @@ class Utils:
                 "Linux", "Darwin",
             ):
                 config_knowns_hosts(
-                    config_tool[tool]["EXTERNAL_GIT_SSH_HOST"],
-                    config_tool[tool]["EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT"],
+                        config_tool[tool]["EXTERNAL_GIT_SSH_HOST"],
+                        config_tool[tool]["EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT"],
                 )
                 ssh_key_content = decode_base64(secret["repository_ssh_private_key"])
                 ssh_key_file_path = "/tmp/ssh_key_file"
