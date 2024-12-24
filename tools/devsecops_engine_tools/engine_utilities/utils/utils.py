@@ -30,7 +30,7 @@ class Utils:
         with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
             zip_ref.extractall(extract_path)
 
-    def configurate_external_checks(self, tool, config_tool, secret_tool, secret_external_checks):
+    def configurate_external_checks(self, tool, config_tool, secret_tool, secret_external_checks, agent_work_folder="/tmp"):
         try:
             agent_env = None
             secret = None
@@ -99,12 +99,20 @@ class Utils:
                         config_tool[tool]["APP_ID_GITHUB"],
                         config_tool[tool]["INSTALLATION_ID_GITHUB"]
                     ) if secret.get("github_apps") else secret.get("github_token") 
-                github_api.download_latest_release_assets(
-                    config_tool[tool]["EXTERNAL_DIR_OWNER"],
-                    config_tool[tool]["EXTERNAL_DIR_REPOSITORY"],
-                    github_token,
-                    "/tmp",
-                )
+                if platform.system() in "Windows":
+                    github_api.download_latest_release_assets(
+                        config_tool[tool]["EXTERNAL_DIR_OWNER"],
+                        config_tool[tool]["EXTERNAL_DIR_REPOSITORY"],
+                        github_token,
+                        agent_work_folder
+                    )
+                else:
+                    github_api.download_latest_release_assets(
+                        config_tool[tool]["EXTERNAL_DIR_OWNER"],
+                        config_tool[tool]["EXTERNAL_DIR_REPOSITORY"],
+                        github_token,
+                        "/tmp"
+                    )
 
         except Exception as ex:
             logger.error(f"An error occurred configuring external checks: {ex}")
