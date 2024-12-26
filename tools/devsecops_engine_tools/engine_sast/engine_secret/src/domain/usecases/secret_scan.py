@@ -71,8 +71,6 @@ class SecretScan:
             dict_args["remote_config_repo"], "engine_sast/engine_secret/ConfigTool.json", dict_args["remote_config_branch"]
         )
         init_config_tool['SCOPE_PIPELINE'] = self.devops_platform_gateway.get_variable("pipeline_name")
-        # config_tool = DeserializeConfigTool(json_data=init_config_tool, tool=tool)
-        # config_tool.scope_pipeline = self.devops_platform_gateway.get_variable("pipeline_name")
 
         skip_tool = bool(re.match(init_config_tool["IGNORE_SEARCH_PATTERN"], init_config_tool["SCOPE_PIPELINE"], re.IGNORECASE))
         

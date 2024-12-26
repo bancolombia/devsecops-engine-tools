@@ -132,12 +132,11 @@ class TestTrufflehogRun(unittest.TestCase):
                     }
                 }
             }
-        config_tool = DeserializeConfigTool(json_data=json_config_tool, tool="trufflehog")
         secret_tool = None
 
         trufflehog_run = TrufflehogRun()
 
-        result, file_findings = trufflehog_run.run_tool_secret_scan(files_commits, agent_os, agent_work_folder, repository_name, config_tool, secret_tool, secret_external_checks, agent_temp_dir)
+        result, file_findings = trufflehog_run.run_tool_secret_scan(files_commits, agent_os, agent_work_folder, repository_name, json_config_tool, secret_tool, secret_external_checks, agent_temp_dir, "trufflehog")
 
         expected_result = [
             {"SourceMetadata": {"Data": {"Filesystem": {"file": "/usr/bin/local/file1.txt", "line": 1}}}, "SourceID": 1,
@@ -168,7 +167,7 @@ class TestTrufflehogRun(unittest.TestCase):
         enable_custom_rules = "false"
         trufflehog_run = TrufflehogRun()
 
-        result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt', 'NU00000_Repo_Test', enable_custom_rules)
+        result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt', 'NU00000_Repo_Test', enable_custom_rules, "trufflehog")
 
         expected_result = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
         self.assertEqual(result, expected_result)
@@ -179,7 +178,7 @@ class TestTrufflehogRun(unittest.TestCase):
         enable_custom_rules = "true"
         trufflehog_run = TrufflehogRun()
 
-        result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt', 'NU00000_Repo_Test', enable_custom_rules)
+        result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt', 'NU00000_Repo_Test', enable_custom_rules, "trufflehog")
 
         expected_result = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
         self.assertEqual(result, expected_result)

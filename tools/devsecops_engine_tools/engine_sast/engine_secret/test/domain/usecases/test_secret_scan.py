@@ -64,7 +64,7 @@ class TestSecretScan(unittest.TestCase):
         mock_dict_args = {
             "remote_config_repo": "example_repo",
             "remote_config_branch": "",
-            "folder_path": ".",
+            "folder_path": None,
             "environment": "test",
             "platform": "local",
             "token_external_checks": "fake_github_token",
@@ -83,7 +83,6 @@ class TestSecretScan(unittest.TestCase):
             "vulnerability_data"
         ]
 
-        obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
         mock_devops_gateway_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
         mock_tool_gateway_instance.run_tool_secret_scan.return_value = (
@@ -91,7 +90,7 @@ class TestSecretScan(unittest.TestCase):
         )
 
         finding_list, file_path_findings = secret_scan.process(
-            False, obj_config_tool, secret_tool, mock_dict_args
+            False, json_config, secret_tool, mock_dict_args, "trufflehog"
         )
 
         self.assertEqual(finding_list, ["vulnerability_data"])
@@ -137,13 +136,12 @@ class TestSecretScan(unittest.TestCase):
 
         mock_deserialize_gateway_instance.get_list_vulnerability.return_value = []
 
-        obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
         mock_devops_gateway_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
         mock_tool_gateway_instance.run_tool_secret_scan.return_value = "", ""
 
         finding_list, file_path_findings = secret_scan.process(
-            False, obj_config_tool, secret_tool, mock_dict_args
+            False, json_config, secret_tool, mock_dict_args, "trufflehog"
         )
 
         self.assertEqual(finding_list, [])
@@ -277,7 +275,7 @@ class TestSecretScan(unittest.TestCase):
             {"remote_config_repo": "repository", "remote_config_branch": ""}, "TRUFFLEHOG"
         )
 
-        self.assertEqual(config_tool_instance.scope_pipeline, "example_pipeline")
+        self.assertEqual(config_tool_instance["SCOPE_PIPELINE"], "example_pipeline")
 
 if __name__ == "__main__":
     unittest.main()
