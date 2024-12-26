@@ -45,6 +45,24 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "REGEX_EXPRESSION_CMDB": "regex",
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
+                    "CMDB_MAPPING": {
+                        "PRODUCT_TYPE_NAME": "nombreevc",
+                        "PRODUCT_NAME": "nombreapp",
+                        "TAG_PRODUCT": "nombreentorno",
+                        "PRODUCT_DESCRIPTION": "arearesponsableti",
+                        "CODIGO_APP": "CodigoApp"
+                    },
+                    "CMDB_REQUEST_RESPONSE": {
+                        "HEADERS": {
+                            "Content-Type": "application/json",
+                            "tokenkey": "tokenvalue"
+                        },
+                        "METHOD": "POST",
+                        "BODY": {
+                            "codapp": "codappvalue"
+                        },
+                        "RESPONSE": [0]
+                    }
                 },
             }
         }
@@ -82,6 +100,17 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 personal_access_token="access_token",
                 token_cmdb="token2",
                 host_cmdb="cmdb_host",
+                cmdb_request_response={
+                    "HEADERS": {
+                        "Content-Type": "application/json",
+                        "tokenkey": "tokenvalue"
+                    },
+                    "METHOD": "POST",
+                    "BODY": {
+                        "codapp": "codappvalue"
+                    },
+                    "RESPONSE": [0]
+                },
                 expression="regex",
                 token_defect_dojo="token1",
                 host_defect_dojo="host_defect_dojo",

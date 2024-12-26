@@ -89,11 +89,11 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     tags = f"{vulnerability_management.dict_args['tool']}_{'_'.join(vulnerability_management.dict_args['platform'])}"
                 request: ImportScanRequest = Connect.cmdb(
                     cmdb_mapping={
-                        "product_type_name": "nombreevc",
-                        "product_name": "nombreapp",
-                        "tag_product": "nombreentorno",
-                        "product_description": "arearesponsableti",
-                        "codigo_app": "CodigoApp",
+                        "product_type_name": vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB_MAPPING"]["PRODUCT_TYPE_NAME"],
+                        "product_name": vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB_MAPPING"]["PRODUCT_NAME"],
+                        "tag_product": vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB_MAPPING"]["TAG_PRODUCT"],
+                        "product_description": vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB_MAPPING"]["PRODUCT_DESCRIPTION"],
+                        "codigo_app": vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB_MAPPING"]["CODIGO_APP"],
                     },
                     compact_remote_config_url=f'{vulnerability_management.base_compact_remote_config_url}{vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB_MAPPING_PATH"]}',
                     personal_access_token=vulnerability_management.access_token,
@@ -101,6 +101,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     host_cmdb=vulnerability_management.config_tool[
                         "VULNERABILITY_MANAGER"
                     ]["DEFECT_DOJO"]["HOST_CMDB"],
+                    cmdb_request_response=vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB_REQUEST_RESPONSE"],
                     expression=vulnerability_management.config_tool[
                         "VULNERABILITY_MANAGER"
                     ]["DEFECT_DOJO"]["REGEX_EXPRESSION_CMDB"],

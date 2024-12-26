@@ -84,6 +84,17 @@ def test_execute(engagement_name, obj_cmdb):
         "project_remote_config": "Vicepresidencia Servicios de Tecnología",
         "token_cmdb": "123456789",
         "host_cmdb": "http://localhost:8000",
+        "cmdb_request_response": {
+            "HEADERS": {
+                "Content-Type": "application/json",
+                "tokenkey": "tokenvalue"
+            },
+            "METHOD": "POST",
+            "BODY": {
+                "codapp": "codappvalue"
+            },
+            "RESPONSE": [0]
+        },
         "expression": "((AUD|AP|CLD|USR|OPS|ASN|AW|NU|EUC|IS))_",
         "token_defect_dojo": "123456789101212",
         "host_defect_dojo": "http://localhost:8000",

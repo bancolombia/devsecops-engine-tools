@@ -205,6 +205,7 @@ class ImportScanSerializer(Schema):
     # defect-dojo credential
     token_cmdb = fields.Str(required=True)
     host_cmdb = fields.Url(required=True)
+    cmdb_request_response = fields.Dict(required=True)
     token_defect_dojo = fields.Str(required=True)
     host_defect_dojo = fields.Str(required=True)
     cmdb_mapping = fields.Dict(required=True)
