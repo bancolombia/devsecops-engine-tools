@@ -7,6 +7,12 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_deserealizator import (
     SecretScanDeserealizator
     )
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_tool import (
+    GitleaksTool
+    )
+from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_deserealizator import (
+    GitleaksDeserealizator
+    )
 from devsecops_engine_tools.engine_utilities.git_cli.infrastructure.git_run import (
     GitRun
     )
@@ -19,6 +25,10 @@ def runner_secret_scan(dict_args, tool, devops_platform_gateway, secret_tool):
         if (tool == "TRUFFLEHOG"):
             tool_gateway = TrufflehogRun()
             tool_deserealizator = SecretScanDeserealizator()
+        elif (tool == "GITLEAKS"):
+            tool_gateway = GitleaksTool()
+            tool_deserealizator = GitleaksDeserealizator()
+
         return engine_secret_scan(
             devops_platform_gateway = devops_platform_gateway,
             tool_gateway = tool_gateway,

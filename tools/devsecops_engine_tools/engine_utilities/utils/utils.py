@@ -1,4 +1,5 @@
 import zipfile
+import tarfile
 import platform
 from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
     GithubApi,
@@ -29,6 +30,10 @@ class Utils:
     def unzip_file(self, zip_file_path, extract_path):
         with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
             zip_ref.extractall(extract_path)
+    
+    def extract_targz_file(self, tar_file_path, extract_path):
+        with tarfile.open(tar_file_path, "r:gz") as tar_ref:
+            tar_ref.extractall(path=extract_path)
 
     def configurate_external_checks(self, tool, config_tool, secret_tool, secret_external_checks, agent_work_folder="/tmp"):
         try:

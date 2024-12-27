@@ -22,5 +22,11 @@
         "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",
         "APP_ID_GITHUB":"",
         "INSTALLATION_ID_GITHUB":""
+    },
+    "gitleaks": {
+        "VERSION": "8.21.1",
+        "EXCLUDE_PATH": [".git"],
+        "NUMBER_THREADS": 4,
+        "ALLOW_IGNORE_LEAKS": false
     }
 }
