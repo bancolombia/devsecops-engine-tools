@@ -116,16 +116,13 @@ class GitleaksTool(ToolGateway):
 
                 self.create_report(finding_path, findings)
             else:
-                aux_finding_path = os.path.join(
-                    agent_work_folder, f"gitleaks_aux_report_{os.path.basename(files[0])}.json"
-                )
-                command.extend([files[0], "--report-path", aux_finding_path])
+                command.extend([files[0], "--report-path", finding_path])
 
                 if not config_tool[tool]["ALLOW_IGNORE_LEAKS"]:
                     command.append("--ignore-gitleaks-allow")
 
                 subprocess.run(command, capture_output=True, text=True)
-                findings = self.extract_json_data(aux_finding_path)
+                findings = self.extract_json_data(finding_path)
 
             return findings, finding_path
 
