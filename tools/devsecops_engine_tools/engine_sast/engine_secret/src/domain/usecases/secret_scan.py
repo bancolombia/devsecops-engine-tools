@@ -31,11 +31,11 @@ class SecretScan:
         finding_list = []
         file_path_findings = ""
         secret_external_checks=dict_args["token_external_checks"]
-        files_pullrequest = None if dict_args["folder_path"] is None else [dict_args["folder_path"]]
+        files_to_scan = None if dict_args["folder_path"] is None else [dict_args["folder_path"]]
         if skip_tool == False:
             self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("os"), self.devops_platform_gateway.get_variable("temp_directory"), config_tool[tool]["VERSION"])
-            if files_pullrequest is None:
-                files_pullrequest = self.git_gateway.get_files_pull_request(
+            if files_to_scan is None:
+                files_to_scan = self.git_gateway.get_files_pull_request(
                     self.devops_platform_gateway.get_variable("path_directory"),
                     self.devops_platform_gateway.get_variable("target_branch"),
                     config_tool["TARGET_BRANCHES"],
@@ -46,7 +46,7 @@ class SecretScan:
                     self.devops_platform_gateway.get_variable("repository"),
                     self.devops_platform_gateway.get_variable("repository_provider"))
             findings, file_path_findings = self.tool_gateway.run_tool_secret_scan(
-                    files_pullrequest,
+                    files_to_scan,
                     self.devops_platform_gateway.get_variable("os"),
                     self.devops_platform_gateway.get_variable("path_directory"),
                     self.devops_platform_gateway.get_variable("repository"),

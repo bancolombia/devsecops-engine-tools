@@ -99,21 +99,13 @@ class Utils:
                         config_tool[tool]["APP_ID_GITHUB"],
                         config_tool[tool]["INSTALLATION_ID_GITHUB"]
                     ) if secret.get("github_apps") else secret.get("github_token") 
-                if platform.system() in "Windows":
-                    github_api.download_latest_release_assets(
+                github_api.download_latest_release_assets(
                         config_tool[tool]["EXTERNAL_DIR_OWNER"],
                         config_tool[tool]["EXTERNAL_DIR_REPOSITORY"],
                         github_token,
-                        agent_work_folder
+                        agent_work_folder if platform.system() in "Windows" else "/tmp"
                     )
-                else:
-                    github_api.download_latest_release_assets(
-                        config_tool[tool]["EXTERNAL_DIR_OWNER"],
-                        config_tool[tool]["EXTERNAL_DIR_REPOSITORY"],
-                        github_token,
-                        "/tmp"
-                    )
-
+    
         except Exception as ex:
             logger.error(f"An error occurred configuring external checks: {ex}")
         return agent_env

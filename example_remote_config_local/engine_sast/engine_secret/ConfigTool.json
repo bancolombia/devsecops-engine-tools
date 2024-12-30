@@ -21,6 +21,14 @@
         "EXTERNAL_DIR_OWNER": "ExternalOrg",
         "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",
         "APP_ID_GITHUB":"",
-        "INSTALLATION_ID_GITHUB":""
+        "INSTALLATION_ID_GITHUB":"",
+        "USE_EXTERNAL_CHECKS_GIT": false,
+        "USE_EXTERNAL_CHECKS_DIR": true,
+        "RULES": {
+            "MISCONFIGURATION_SCANNING": {
+                "References": "https://reference.url/",
+                "Mitigation": "Make sure you only enable the Spring Boot Actuator endpoints that you really need and restrict access to these endpoints."
+            }
+        }
     }
 }
