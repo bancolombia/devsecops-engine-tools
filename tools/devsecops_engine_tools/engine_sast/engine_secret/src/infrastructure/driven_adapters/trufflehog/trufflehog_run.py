@@ -71,7 +71,7 @@ class TrufflehogRun(ToolGateway):
             file.write("\n".join(config_tool[tool]["EXCLUDE_PATH"]))
         exclude_path = f"{agent_work_folder}/excludedPath.txt"
         include_paths = self.config_include_path(files_commits, agent_work_folder, agent_os)
-        enable_custom_rules = config_tool[tool]["ENABLE_CUSTOM_RULES"].lower()
+        enable_custom_rules = config_tool[tool]["ENABLE_CUSTOM_RULES"]
         Utils().configurate_external_checks(tool, config_tool, secret_tool, secret_external_checks, agent_work_folder)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=config_tool[tool]["NUMBER_THREADS"]) as executor:
@@ -120,7 +120,7 @@ class TrufflehogRun(ToolGateway):
     ):
         command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --no-update --json"
 
-        if str(enable_custom_rules).lower() == "true":
+        if enable_custom_rules:
             command = command.replace("--no-verification --no-update --json", f"--config {agent_work_folder}//rules//trufflehog//custom-rules.yaml --no-verification --no-update --json" if "Windows" in agent_os else
                                       "/tmp/rules/trufflehog/custom-rules.yaml --no-verification --no-update --json" if "Linux" in agent_os else
                                       "--no-verification --no-update --json")

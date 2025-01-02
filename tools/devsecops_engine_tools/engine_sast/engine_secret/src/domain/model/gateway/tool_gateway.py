@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.DeserializeConfigTool import DeserializeConfigTool
 
 class ToolGateway(metaclass=ABCMeta):
     @abstractmethod

@@ -1,7 +1,5 @@
-import json
 import unittest
 from unittest.mock import patch, MagicMock
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.DeserializeConfigTool import DeserializeConfigTool
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_run import TrufflehogRun
 
 import os
@@ -164,7 +162,7 @@ class TestTrufflehogRun(unittest.TestCase):
     @patch('subprocess.run')
     def test_run_trufflehog_enable_rules_false(self, mock_subprocess_run):
         mock_subprocess_run.return_value.stdout.strip.return_value = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
-        enable_custom_rules = "false"
+        enable_custom_rules = False
         trufflehog_run = TrufflehogRun()
 
         result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt', 'NU00000_Repo_Test', enable_custom_rules, "trufflehog")
@@ -175,7 +173,7 @@ class TestTrufflehogRun(unittest.TestCase):
     @patch('subprocess.run')
     def test_run_trufflehog_enable_rules_true(self, mock_subprocess_run):
         mock_subprocess_run.return_value.stdout.strip.return_value = '{"SourceMetadata":{"Data":{"Filesystem":{"file":"/usr/bin/local/file1.txt","line":1}}},"SourceID":1,"SourceType":15,"SourceName":"trufflehog - filesystem","DetectorType":17,"DetectorName":"URI","DecoderName":"BASE64","Verified":false,"Raw":"https://admin:admin@the-internet.herokuapp.com","RawV2":"https://admin:admin@the-internet.herokuapp.com/basic_auth","Redacted":"https://admin:********@the-internet.herokuapp.com","ExtraData":null,"StructuredData":null}'
-        enable_custom_rules = "true"
+        enable_custom_rules = True
         trufflehog_run = TrufflehogRun()
 
         result = trufflehog_run.run_trufflehog('trufflehog', '/usr/local', '/usr/temp/excludedPath.txt', '/usr/temp/includePath0.txt', 'NU00000_Repo_Test', enable_custom_rules, "trufflehog")
