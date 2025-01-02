@@ -1,11 +1,7 @@
 import unittest
 from unittest.mock import patch
-from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.secret_scan import (
     SecretScan,
-)
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.DeserializeConfigTool import (
-    DeserializeConfigTool,
 )
 
 class TestSecretScan(unittest.TestCase):
