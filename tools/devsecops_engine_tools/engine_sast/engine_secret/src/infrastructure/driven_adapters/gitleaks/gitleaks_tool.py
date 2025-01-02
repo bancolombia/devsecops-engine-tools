@@ -66,7 +66,7 @@ class GitleaksTool(ToolGateway):
             json.dump(combined_data, f, ensure_ascii=False, indent=4)
 
     def check_path(self, path, excluded_paths):
-        parts = path.split(os.sep)
+        parts = path.split("/")
         for part in parts:
             if part in excluded_paths: return True
         return False
@@ -106,7 +106,8 @@ class GitleaksTool(ToolGateway):
                             "--report-path", aux_finding_path
                         ])
 
-                        if not config_tool[tool]["ALLOW_IGNORE_LEAKS"]: command_aux.append("--ignore-gitleaks-allow")
+                        if not config_tool[tool]["ALLOW_IGNORE_LEAKS"]: 
+                            command_aux.append("--ignore-gitleaks-allow")
                         
                         futures.append(executor.submit(self.run_subprocess_command, command_aux, aux_finding_path))
 
@@ -127,7 +128,6 @@ class GitleaksTool(ToolGateway):
             return findings, finding_path
 
         except Exception as e:
-            print("El error es:", e)
             logger.error(f"Error executing gitleaks scan: {e}")
 
     def run_subprocess_command(self, command_aux, aux_finding_path):
