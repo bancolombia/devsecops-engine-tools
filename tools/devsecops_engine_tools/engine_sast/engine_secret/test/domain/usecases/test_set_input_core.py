@@ -1,8 +1,5 @@
 import pytest
-import json
 from unittest.mock import MagicMock, Mock
-from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
-from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
 )
