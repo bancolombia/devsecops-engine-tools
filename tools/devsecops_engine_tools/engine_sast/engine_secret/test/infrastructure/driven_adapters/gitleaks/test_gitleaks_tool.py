@@ -18,7 +18,8 @@ class TestGitleaksTool(unittest.TestCase):
                 "VERSION": "8.20.0",
                 "EXCLUDE_PATH": ["excluded_dir"],
                 "NUMBER_THREADS": 2,
-                "ALLOW_IGNORE_LEAKS": False
+                "ALLOW_IGNORE_LEAKS": False,
+                "ENABLE_CUSTOM_RULES" : False
             }
         }
 

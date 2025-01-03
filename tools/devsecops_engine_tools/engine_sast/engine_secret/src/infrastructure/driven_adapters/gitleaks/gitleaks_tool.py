@@ -87,6 +87,10 @@ class GitleaksTool(ToolGateway):
         finding_path = os.path.join(agent_work_folder, "gitleaks_report.json")
         excluded_paths = config_tool[tool]["EXCLUDE_PATH"]
 
+        if config_tool[tool]["ENABLE_CUSTOM_RULES"]:
+            Utils().configurate_external_checks(tool, config_tool, secret_tool, secret_external_checks, agent_work_folder)
+            command.extend(["--config", f"{agent_work_folder}{os.sep}rules{os.sep}gitleaks{os.sep}gitleaks.toml"])
+
         try:
             findings = []
             if len(files) > 1:
