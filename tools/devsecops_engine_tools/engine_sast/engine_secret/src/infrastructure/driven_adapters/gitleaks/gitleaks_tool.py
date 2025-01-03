@@ -89,7 +89,10 @@ class GitleaksTool(ToolGateway):
 
         if config_tool[tool]["ENABLE_CUSTOM_RULES"]:
             Utils().configurate_external_checks(tool, config_tool, secret_tool, secret_external_checks, agent_work_folder)
-            command.extend(["--config", f"{agent_work_folder}{os.sep}rules{os.sep}gitleaks{os.sep}gitleaks.toml"])
+            if "gitleaks.exe" in self.COMMAND: folder = agent_work_folder
+            else: folder = "/tmp"
+            
+            command.extend(["--config", f"{folder}{os.sep}rules{os.sep}gitleaks{os.sep}gitleaks.toml"])
 
         try:
             findings = []
