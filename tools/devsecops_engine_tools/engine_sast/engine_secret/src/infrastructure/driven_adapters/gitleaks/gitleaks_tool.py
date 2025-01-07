@@ -92,7 +92,7 @@ class GitleaksTool(ToolGateway):
             if "gitleaks.exe" in self.COMMAND: folder = agent_work_folder
             else: folder = "/tmp"
             
-            command.extend(["--config", f"{folder}{os.sep}rules{os.sep}gitleaks{os.sep}gitleaks.toml"])
+            config_flag = ["--config", f"{folder}{os.sep}rules{os.sep}gitleaks{os.sep}gitleaks.toml"]
 
         try:
             findings = []
@@ -116,6 +116,9 @@ class GitleaksTool(ToolGateway):
                         if not config_tool[tool]["ALLOW_IGNORE_LEAKS"]: 
                             command_aux.append("--ignore-gitleaks-allow")
                         
+                        if config_tool[tool]["ENABLE_CUSTOM_RULES"]:
+                            command_aux.extend(config_flag)
+                        
                         futures.append(executor.submit(self.run_subprocess_command, command_aux, aux_finding_path))
 
                     for future in as_completed(futures):
@@ -128,6 +131,9 @@ class GitleaksTool(ToolGateway):
 
                 if not config_tool[tool]["ALLOW_IGNORE_LEAKS"]:
                     command.append("--ignore-gitleaks-allow")
+                
+                if config_tool[tool]["ENABLE_CUSTOM_RULES"]:
+                    command.extend(config_flag)
 
                 subprocess.run(command, capture_output=True, text=True)
                 findings = self.extract_json_data(finding_path)
