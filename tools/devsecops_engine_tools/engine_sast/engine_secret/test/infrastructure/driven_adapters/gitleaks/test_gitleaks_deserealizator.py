@@ -19,12 +19,14 @@ class TestGitleaksDeserealizator(unittest.TestCase):
             {
                 "RuleID": "GITLEAKS_RULE_1",
                 "Description": "Hardcoded secret found",
-                "File": "/path/to/repo/file1.txt"
+                "File": "/path/to/repo/file1.txt",
+                "Secret": "ABCDEFG123456789"
             },
             {
                 "RuleID": "GITLEAKS_RULE_2",
                 "Description": "API key detected",
-                "File": "/path/to/repo/file2.txt"
+                "File": "/path/to/repo/file2.txt",
+                "Secret": "ABCDEFG123456789"
             }
         ]
         os = "Linux"
@@ -44,17 +46,18 @@ class TestGitleaksDeserealizator(unittest.TestCase):
         self.assertEqual(vulnerability.identification_date, "27012024")
         self.assertEqual(vulnerability.tool, "Gitleaks")
         self.assertEqual(vulnerability.category, Category.VULNERABILITY)
-        self.assertEqual(vulnerability.where, "/file1.txt")
+        self.assertEqual(vulnerability.where, "/file1.txt, Secret: ABC*********789")
 
         vulnerability2 = vulnerabilities[1]
         self.assertEqual(vulnerability2.id, "GITLEAKS_RULE_2")
         self.assertEqual(vulnerability2.description, "API key detected")
-        self.assertEqual(vulnerability2.where, "/file2.txt")
+        self.assertEqual(vulnerability2.where, "/file2.txt, Secret: ABC*********789")
 
     def test_get_where_correctly(self):
         # Arrange
         result = {
-            "File": "/path/to/repo/file1.txt"
+            "File": "/path/to/repo/file1.txt",
+            "Secret": "ABCDEFG123456789"
         }
         path_directory = "/path/to/repo"
         
@@ -62,4 +65,4 @@ class TestGitleaksDeserealizator(unittest.TestCase):
         where_correctly = self.deserealizator.get_where_correctly(result, "Linux", path_directory)
         
         # Assert
-        self.assertEqual(where_correctly, "/file1.txt")
+        self.assertEqual(where_correctly, "/file1.txt, Secret: ABC*********789")

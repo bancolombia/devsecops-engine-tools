@@ -32,4 +32,6 @@ class GitleaksDeserealizator(DeseralizatorGateway):
         return list_open_vulnerabilities
     
     def get_where_correctly(self, result: dict, os, path_directory):
-        return result.get("File", "").replace(path_directory, "")
+        path = result.get("File", "").replace(path_directory, "")
+        hidden_secret = str(result.get("Secret"))[:3] + '*' * 9 + str(result.get("Secret"))[-3:]
+        return f"{path}, Secret: {hidden_secret}"
