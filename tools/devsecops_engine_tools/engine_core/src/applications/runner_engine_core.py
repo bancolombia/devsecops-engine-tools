@@ -207,7 +207,7 @@ def application_core():
         metrics_manager_gateway = S3Manager()
         printer_table_gateway = PrinterPrettyTable()
         sbom_tool_gateway = Syft()
-
+        print (devops_platform_gateway)
         init_engine_core(
             vulnerability_management_gateway,
             secrets_manager_gateway,
