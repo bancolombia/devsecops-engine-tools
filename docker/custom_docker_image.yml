@@ -15,7 +15,7 @@ steps:
     hostedAgentService: $(agent-id)
 
 - script: |
-    version=$(python3 -c "import sys; sys.path.append('tools/devsecops_engine_tools'); import version; print(version.version)")
+    version=$(Build.SourceBranch)
     echo "##vso[task.setvariable variable=RELEASE_VERSION]$version"
   displayName: 'Set lib version from version.py'
 
