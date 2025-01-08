@@ -84,8 +84,12 @@ class CmdbRestConsumer:
         for key in keys:
             if isinstance(data, dict) and key in data:
                 data = data[key]
-            elif isinstance(data, list) and isinstance(key, int) and 0 <= key < len(data):
-                data = data[key]
+            elif isinstance(data, list) and isinstance(key, int):
+                key = key if key >=0 else len(data) + key
+                if 0 <= key < len(data):
+                    data = data[key]
+                else:
+                    raise KeyError(f"Index '{key}' out of range in the current context.")
             else:
                 raise KeyError(f"Key '{key}' not found or invalid in the current context.")
         return data

@@ -66,6 +66,9 @@ class RuntimeLocal(DevopsPlatformGateway):
             "temp_directory" : "DET_TEMP_DIRECTORY",
             "target_branch" : "DET_TARGET_BRANCH",
             "source_branch" : "DET_SOURCE_BRANCH",
-            "repository_provider" : "DET_REPOSITORY_PROVIDER"
+            "repository_provider" : "DET_REPOSITORY_PROVIDER",
+            "vm_product_type_name" : "DET_VM_PRODUCT_TYPE_NAME",
+            "vm_product_name" : "DET_VM_PRODUCT_NAME",
+            "vm_product_description" : "DET_VM_PRODUCT_DESCRIPTION",
         }
         return os.environ.get(env_variables[variable], None)
