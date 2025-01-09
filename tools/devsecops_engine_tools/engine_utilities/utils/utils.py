@@ -30,7 +30,7 @@ class Utils:
         with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
             zip_ref.extractall(extract_path)
 
-    def configurate_external_checks(self, tool, config_tool, secret_tool, secret_external_checks):
+    def configurate_external_checks(self, tool, config_tool, secret_tool, secret_external_checks, agent_work_folder="/tmp"):
         try:
             agent_env = None
             secret = None
@@ -79,12 +79,12 @@ class Utils:
                 logger.warning("The secret is not configured for external controls")
 
             
-            elif config_tool[tool]["USE_EXTERNAL_CHECKS_GIT"] == "True" and platform.system() in (
+            elif config_tool[tool]["USE_EXTERNAL_CHECKS_GIT"] and platform.system() in (
                 "Linux", "Darwin",
             ):
                 config_knowns_hosts(
-                    config_tool[tool]["EXTERNAL_GIT_SSH_HOST"],
-                    config_tool[tool]["EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT"],
+                        config_tool[tool]["EXTERNAL_GIT_SSH_HOST"],
+                        config_tool[tool]["EXTERNAL_GIT_PUBLIC_KEY_FINGERPRINT"],
                 )
                 ssh_key_content = decode_base64(secret["repository_ssh_private_key"])
                 ssh_key_file_path = "/tmp/ssh_key_file"
@@ -92,7 +92,7 @@ class Utils:
                 ssh_key_password = decode_base64(secret["repository_ssh_password"])
                 agent_env = add_ssh_private_key(ssh_key_file_path, ssh_key_password)
 
-            elif config_tool[tool]["USE_EXTERNAL_CHECKS_DIR"] == "True":
+            elif config_tool[tool]["USE_EXTERNAL_CHECKS_DIR"]:
                 if not github_token:
                     github_token = github_api.get_installation_access_token(
                         secret.get("github_apps"),
@@ -100,12 +100,12 @@ class Utils:
                         config_tool[tool]["INSTALLATION_ID_GITHUB"]
                     ) if secret.get("github_apps") else secret.get("github_token") 
                 github_api.download_latest_release_assets(
-                    config_tool[tool]["EXTERNAL_DIR_OWNER"],
-                    config_tool[tool]["EXTERNAL_DIR_REPOSITORY"],
-                    github_token,
-                    "/tmp",
-                )
-
+                        config_tool[tool]["EXTERNAL_DIR_OWNER"],
+                        config_tool[tool]["EXTERNAL_DIR_REPOSITORY"],
+                        github_token,
+                        agent_work_folder if platform.system() in "Windows" else "/tmp"
+                    )
+    
         except Exception as ex:
             logger.error(f"An error occurred configuring external checks: {ex}")
         return agent_env

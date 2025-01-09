@@ -201,14 +201,14 @@ class TestDependencyCheckTool(unittest.TestCase):
                 "dependency-check.sh",
                 "--format",
                 "XML",
-                "--nvdApiKey",
-                "token",
                 "--scan",
-                "mock_file_to_scan",
-                "--noupdate"
+                "mock_file_to_scan",              
+                "--nvdApiKey",
+                "token"
             ],
             capture_output=True,
             check=True,
+            text=True
         )
 
     @patch("subprocess.run")
@@ -217,7 +217,7 @@ class TestDependencyCheckTool(unittest.TestCase):
     )
     def test_scan_dependencies_failure(self, mock_logger_error, mock_subprocess_run):
         mock_subprocess_run.side_effect = subprocess.CalledProcessError(
-            returncode=1, cmd="dependency-check.sh"
+            returncode=1, cmd="dependency-check.sh", stderr="Mock Error"
         )
 
         tool = DependencyCheckTool()
@@ -225,7 +225,7 @@ class TestDependencyCheckTool(unittest.TestCase):
         tool.scan_dependencies("dependency-check.sh", "mock_file_to_scan", "token")
 
         mock_logger_error.assert_called_once_with(
-            "Error executing OWASP dependency check scan: Command 'dependency-check.sh' returned non-zero exit status 1."
+            "Error executing OWASP dependency check scan: Mock Error"
         )
 
         mock_subprocess_run.assert_called_once_with(
@@ -233,14 +233,14 @@ class TestDependencyCheckTool(unittest.TestCase):
                 "dependency-check.sh",
                 "--format",
                 "XML",
-                "--nvdApiKey",
-                "token",
                 "--scan",
                 "mock_file_to_scan",
-                "--noupdate"
+                "--nvdApiKey",
+                "token"
             ],
             capture_output=True,
             check=True,
+            text=True
         )
 
     @patch("platform.system")

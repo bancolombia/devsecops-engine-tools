@@ -71,29 +71,22 @@ class DependencyCheckTool(ToolGateway):
                 command_prefix,
                 "--format",
                 "XML",
-                "--nvdApiKey",
-                token,
                 "--scan",
                 file_to_scan,
-                "--noupdate"
             ]
 
-            if not token:
-                print(
-                    "¡¡Remember!!, it is recommended to use the API key for faster vulnerability database downloads."
-                )
-                command = [
-                    command_prefix,
-                    "--format",
-                    "XML",
-                    "--scan",
-                    file_to_scan,
-                    "--noupdate"
-                ]
+            if token:
+                command.extend([
+                    "--nvdApiKey",
+                    token
+                ])
+            
+            if not self.download_tool:
+                command.append("--noupdate")
 
-            subprocess.run(command, capture_output=True, check=True)
-        except subprocess.CalledProcessError as error:
-            logger.error(f"Error executing OWASP dependency check scan: {error}")
+            result = subprocess.run(command, capture_output=True, check=True, text=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error executing OWASP dependency check scan: {e.stderr}")
 
     def select_operative_system(self, cli_version):
         os_platform = platform.system()
