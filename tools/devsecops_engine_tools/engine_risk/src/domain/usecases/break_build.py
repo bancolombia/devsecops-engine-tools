@@ -124,7 +124,7 @@ class BreakBuild:
         print(f"Mitigated count: {mitigated}   Total count: {total}")
         remediation_rate_value = self._get_percentage(mitigated / total)
 
-        risk_threshold = self.threshold["REMEDIATION_RATE"]
+        risk_threshold = self._get_remediation_rate_threshold(total)
         self.remediation_rate = remediation_rate_value
 
         if remediation_rate_value >= (risk_threshold + 5):
@@ -150,6 +150,13 @@ class BreakBuild:
                 )
             )
             self.break_build = True
+
+    def _get_remediation_rate_threshold(self, total):
+        remediation_rate = self.threshold["REMEDIATION_RATE"]
+        for key in sorted(remediation_rate.keys(), key=lambda x: int(x) if x.isdigit() else float('inf')):
+            if key.isdigit() and total <= int(key):
+                return remediation_rate[key]
+        return remediation_rate["other"]
 
     def _get_percentage(self, decimal):
         return round(decimal * 100, 3)
