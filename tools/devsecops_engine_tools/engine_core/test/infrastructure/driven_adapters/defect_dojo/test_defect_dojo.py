@@ -217,7 +217,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         ) as mock_cmdb:
             mock_cmdb.return_value = "cmdb_request_result"
 
-            result = self.defect_dojo.build_request(
+            result = self.defect_dojo._build_request_importscan(
                 vulnerability_management=self.vulnerability_management,
                 token_cmdb=self.token_cmdb,
                 token_dd=self.token_dd,
@@ -319,7 +319,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         ) as mock_serializer:
             mock_serializer().load.return_value = "import_scan_request_result"
 
-            result = self.defect_dojo.build_request(
+            result = self.defect_dojo._build_request_importscan(
                 vulnerability_management=self.vulnerability_management,
                 token_cmdb=self.token_cmdb,
                 token_dd=self.token_dd,

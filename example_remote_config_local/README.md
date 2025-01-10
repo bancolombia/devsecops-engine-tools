@@ -63,27 +63,25 @@ Then, the remote config settings should look similar to this:
 
 **Let’s detail the description for the elements under the CMDB key:**
 
-*USE_CMDB:* The value is a boolean, indicating whether or not CMDB will be used.
+- *USE_CMDB:* The value is a boolean, indicating whether or not CMDB will be used.
 
-*USE_CMDB:* The value is a boolean, indicating whether or not CMDB will be used.
+- *HOST_CMDB:* The URL of the API for querying the CMDB.
 
-*HOST_CMDB:* The URL of the API for querying the CMDB.
+- *REGEX_EXPRESSION_CMDB:* Regular expression.
 
-*REGEX_EXPRESSION_CMDB:* Regular expression.
+- *CMDB_MAPPING_PATH:* Location of the mapping for possible product types.
 
-*CMDB_MAPPING_PATH:* Location of the mapping for possible product types.
+- *CMDB_MAPPING:* Element containing the equivalent mappings between DefectDojo and the CMDB.
 
-*CMDB_MAPPING:* Element containing the equivalent mappings between DefectDojo and the CMDB.
+- *CMDB_REQUEST_RESPONSE:* Contains the necessary elements to make a request to the CMDB.
 
-*MDB_REQUEST_RESPONSE:* Contains the necessary elements to make a request to the CMDB.
+- *HEADERS:* Headers required to make the request. Note that the authentication type must be via Api-Key. The value "tokenvalue" should remain as is, as it is necessary for replacing the token.
 
-*HEADERS:* Headers required to make the request. Note that the authentication type must be via Api-Key. The value "tokenvalue" should remain as is, as it is necessary for replacing the token.
+- *METHOD:* Can be either POST or GET.
 
-*METHOD:* Can be either POST or GET.
+- *PARAMS:* Used if the selected METHOD is GET. The value "codappvalue" should remain as is, as it is necessary for replacement.
 
-*PARAMS:* Used if the selected METHOD is GET. The value "codappvalue" should remain as is, as it is necessary for replacement.
-
-*BODY:* Used if the selected METHOD is POST. The value "codappvalue" should remain as is, as it is necessary for replacement.
+- *BODY:* Used if the selected METHOD is POST. The value "codappvalue" should remain as is, as it is necessary for replacement.
 
 ### Without Using CMDB:
 For this case, three environment variables must be created according to the DevOps platform.
