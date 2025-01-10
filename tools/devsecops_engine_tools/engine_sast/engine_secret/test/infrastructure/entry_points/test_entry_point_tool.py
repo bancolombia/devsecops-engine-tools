@@ -1,6 +1,5 @@
 import unittest
 from unittest.mock import Mock, patch
-from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.DeserializeConfigTool import DeserializeConfigTool
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.entry_points.entry_point_tool import engine_secret_scan
 
 class TestEngineSecretScan(unittest.TestCase):
@@ -62,13 +61,12 @@ class TestEngineSecretScan(unittest.TestCase):
                     }
                 }
             }
-        obj_config_tool = DeserializeConfigTool(json_config, 'trufflehog')
         mock_devops_platform_gateway.get_remote_config.side_effect = [json_exclusion ,json_config, json_exclusion]
         secret_tool = "secret"
         skip_tool_isp = False
         
         mock_secret_scan_instance = MockSecretScan.return_value
-        mock_secret_scan_instance.complete_config_tool.return_value = obj_config_tool, skip_tool_isp
+        mock_secret_scan_instance.complete_config_tool.return_value = json_config, skip_tool_isp
         mock_devops_platform_gateway.get_variable.side_effect = ["pipeline_name_carlos","pipeline_name_carlos", "pipeline_name", "build"]
         mock_secret_scan_instance.process.return_value = ([], "")
         
