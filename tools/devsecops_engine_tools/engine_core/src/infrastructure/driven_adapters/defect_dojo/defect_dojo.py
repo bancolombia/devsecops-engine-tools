@@ -493,9 +493,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
     def _create_exclusion(self, finding, date_fn, tool, reason):
         create_date, expired_date = self._date_reason_based(finding, date_fn, reason)
-
+            
         return Exclusions(
-            id=finding.vuln_id_from_tool,
+            id=finding.vuln_id_from_tool if finding.vuln_id_from_tool else finding.vulnerability_ids[0]["vulnerability_id"],
             where=self._get_where(finding, tool),
             create_date=create_date,
             expired_date=expired_date,
@@ -507,7 +507,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         create_date, expired_date = self._date_reason_based(finding, date_fn, reason)
 
         return Exclusions(
-            id=finding.vuln_id_from_tool,
+            id=finding.vuln_id_from_tool if finding.vuln_id_from_tool else finding.vulnerability_ids[0]["vulnerability_id"],
             where=self._get_where(finding, tool),
             create_date=create_date,
             expired_date=expired_date,
