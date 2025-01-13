@@ -63,3 +63,8 @@ class AgentVariables(BaseEnum):
     Agent_WorkFolder = "Agent.WorkFolder"
     Agent_TempDirectory = "Agent.TempDirectory"
     Agent_OS = "Agent.OS"
+
+class VMVariables(BaseEnum):
+    Vm_Product_Type_Name = "Vm.Product.Type.Name"
+    Vm_Product_Name = "Vm.Product.Name"
+    Vm_Product_Description = "Vm.Product.Description"
