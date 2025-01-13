@@ -40,12 +40,33 @@ class TestDefectDojoPlatform(unittest.TestCase):
             "VULNERABILITY_MANAGER": {
                 "BRANCH_FILTER": "trunk,master,release,develop",
                 "DEFECT_DOJO": {
-                    "CMDB_MAPPING_PATH": "mapping_path",
-                    "HOST_CMDB": "cmdb_host",
-                    "REGEX_EXPRESSION_CMDB": "regex",
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
-                },
+                    "CMDB": {
+                        "USE_CMDB": True,
+                        "HOST_CMDB": "cmdb_host",
+                        "REGEX_EXPRESSION_CMDB": "regex",
+                        "CMDB_MAPPING_PATH": "mapping_path",
+                        "CMDB_MAPPING": {
+                            "PRODUCT_TYPE_NAME": "nombreevc",
+                            "PRODUCT_NAME": "nombreapp",
+                            "TAG_PRODUCT": "nombreentorno",
+                            "PRODUCT_DESCRIPTION": "arearesponsableti",
+                            "CODIGO_APP": "CodigoApp"
+                        },
+                        "CMDB_REQUEST_RESPONSE": {
+                            "HEADERS": {
+                                "Content-Type": "application/json",
+                                "tokenkey": "tokenvalue"
+                            },
+                            "METHOD": "POST",
+                            "BODY": {
+                                "codapp": "codappvalue"
+                            },
+                            "RESPONSE": [0]
+                        }
+                    }   
+                }
             }
         }
         self.vulnerability_management.access_token = "access_token"
@@ -82,6 +103,17 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 personal_access_token="access_token",
                 token_cmdb="token2",
                 host_cmdb="cmdb_host",
+                cmdb_request_response={
+                    "HEADERS": {
+                        "Content-Type": "application/json",
+                        "tokenkey": "tokenvalue"
+                    },
+                    "METHOD": "POST",
+                    "BODY": {
+                        "codapp": "codappvalue"
+                    },
+                    "RESPONSE": [0]
+                },
                 expression="regex",
                 token_defect_dojo="token1",
                 host_defect_dojo="host_defect_dojo",
@@ -115,6 +147,212 @@ class TestDefectDojoPlatform(unittest.TestCase):
             in str(context.exception)
         )
 
+
+    def test_build_request_with_cmdb(self):
+        use_cmdb = True
+        tags = "engine_iac_k8s"
+
+        self.vulnerability_management.scan_type = "CHECKOV"
+        self.vulnerability_management.input_core = MagicMock()
+        self.vulnerability_management.input_core.path_file_results = "file_path"
+        self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
+        self.vulnerability_management.source_code_management_uri = "source_code_uri"
+        self.vulnerability_management.version = "1.0"
+        self.vulnerability_management.build_id = "build_id"
+        self.vulnerability_management.branch_tag = "trunk"
+        self.vulnerability_management.commit_hash = "commit_hash"
+        self.vulnerability_management.environment = "dev"
+
+        self.vulnerability_management.config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "BRANCH_FILTER": "trunk,master,release,develop",
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "MAX_RETRIES_QUERY": 5,
+                    "CMDB": {
+                        "USE_CMDB": True,
+                        "HOST_CMDB": "cmdb_host",
+                        "REGEX_EXPRESSION_CMDB": "regex",
+                        "CMDB_MAPPING_PATH": "mapping_path",
+                        "CMDB_MAPPING": {
+                            "PRODUCT_TYPE_NAME": "nombreevc",
+                            "PRODUCT_NAME": "nombreapp",
+                            "TAG_PRODUCT": "nombreentorno",
+                            "PRODUCT_DESCRIPTION": "arearesponsableti",
+                            "CODIGO_APP": "CodigoApp"
+                        },
+                        "CMDB_REQUEST_RESPONSE": {
+                            "HEADERS": {
+                                "Content-Type": "application/json",
+                                "tokenkey": "tokenvalue"
+                            },
+                            "METHOD": "POST",
+                            "BODY": {
+                                "codapp": "codappvalue"
+                            },
+                            "RESPONSE": [0]
+                        }
+                    }   
+                }
+            }
+        }
+        self.vulnerability_management.base_compact_remote_config_url = "http://example.com/"
+        self.vulnerability_management.access_token = "access_token"
+
+        self.token_cmdb = "token_cmdb"
+        self.token_dd = "token_dd"
+
+        self.scan_type_mapping = {
+            "CHECKOV": "Checkov Scan"
+        }
+        self.enviroment_mapping = {
+            "dev": "Development",
+            "qa": "Staging",
+            "pdn": "Production",
+            "default": "Production",
+        }
+
+        with patch(
+            "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Connect.cmdb"
+        ) as mock_cmdb:
+            mock_cmdb.return_value = "cmdb_request_result"
+
+            result = self.defect_dojo._build_request_importscan(
+                vulnerability_management=self.vulnerability_management,
+                token_cmdb=self.token_cmdb,
+                token_dd=self.token_dd,
+                scan_type_mapping=self.scan_type_mapping,
+                enviroment_mapping=self.enviroment_mapping,
+                tags=tags,
+                use_cmdb=use_cmdb,
+            )
+
+            mock_cmdb.assert_called_once_with(
+                cmdb_mapping={
+                    "product_type_name": "nombreevc",
+                    "product_name": "nombreapp",
+                    "tag_product": "nombreentorno",
+                    "product_description": "arearesponsableti",
+                    "codigo_app": "CodigoApp",
+                },
+                compact_remote_config_url="http://example.com/mapping_path",
+                personal_access_token="access_token",
+                token_cmdb=self.token_cmdb,
+                host_cmdb="cmdb_host",
+                cmdb_request_response={
+                    "HEADERS": {
+                        "Content-Type": "application/json",
+                        "tokenkey": "tokenvalue"
+                    },
+                    "METHOD": "POST",
+                    "BODY": {
+                        "codapp": "codappvalue"
+                    },
+                    "RESPONSE": [0]
+                },
+                scan_type="Checkov Scan",
+                file="file_path",
+                engagement_name="engagement_name",
+                source_code_management_uri="source_code_uri",
+                tags=tags,
+                version="1.0",
+                build_id="build_id",
+                branch_tag="trunk",
+                commit_hash="commit_hash",
+                service="engagement_name",
+                environment="Development",
+                token_defect_dojo=self.token_dd,
+                host_defect_dojo="host_defect_dojo",
+                expression="regex",
+            )
+            self.assertEqual(result, "cmdb_request_result")
+        
+    def test_build_request_without_cmdb(self):
+        use_cmdb = False
+        tags = "engine_iac_k8s"
+
+        self.vulnerability_management.scan_type = "CHECKOV"
+        self.vulnerability_management.input_core = MagicMock()
+        self.vulnerability_management.input_core.path_file_results = "file_path"
+        self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
+        self.vulnerability_management.source_code_management_uri = "source_code_uri"
+        self.vulnerability_management.version = "1.0"
+        self.vulnerability_management.build_id = "build_id"
+        self.vulnerability_management.branch_tag = "trunk"
+        self.vulnerability_management.commit_hash = "commit_hash"
+        self.vulnerability_management.environment = "dev"
+        self.vulnerability_management.vm_product_type_name = "ProductType"
+        self.vulnerability_management.vm_product_name = "ProductName"
+        self.vulnerability_management.vm_product_description = "ProductDescription"
+
+        self.vulnerability_management.config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "BRANCH_FILTER": "trunk,master,release,develop",
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "MAX_RETRIES_QUERY": 5,
+                    "CMDB": {
+                        "USE_CMDB": True,
+                        "REGEX_EXPRESSION_CMDB": "regex"
+                    }   
+                }
+            }
+        }
+        self.vulnerability_management.base_compact_remote_config_url = "http://example.com/"
+        self.vulnerability_management.access_token = "access_token"
+
+        self.token_cmdb = "token_cmdb"
+        self.token_dd = "token_dd"
+
+        self.scan_type_mapping = {
+            "CHECKOV": "Checkov Scan"
+        }
+        self.enviroment_mapping = {
+            "dev": "Development",
+            "qa": "Staging",
+            "pdn": "Production",
+            "default": "Production",
+        }
+
+        with patch(
+            "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.ImportScanSerializer"
+        ) as mock_serializer:
+            mock_serializer().load.return_value = "import_scan_request_result"
+
+            result = self.defect_dojo._build_request_importscan(
+                vulnerability_management=self.vulnerability_management,
+                token_cmdb=self.token_cmdb,
+                token_dd=self.token_dd,
+                scan_type_mapping=self.scan_type_mapping,
+                enviroment_mapping=self.enviroment_mapping,
+                tags=tags,
+                use_cmdb=use_cmdb,
+            )
+
+            mock_serializer().load.assert_called_once_with(
+                {
+                    "product_type_name": "ProductType",
+                    "product_name": "ProductName",
+                    "product_description": "ProductDescription",
+                    "code_app": "ProductName",
+                    "scan_type": "Checkov Scan",
+                    "file": "file_path",
+                    "engagement_name": "engagement_name",
+                    "source_code_management_uri": "source_code_uri",
+                    "tags": tags,
+                    "version": "1.0",
+                    "build_id": "build_id",
+                    "branch_tag": "trunk",
+                    "commit_hash": "commit_hash",
+                    "service": "engagement_name",
+                    "environment": "Development",
+                    "token_defect_dojo": self.token_dd,
+                    "host_defect_dojo": "host_defect_dojo",
+                    "expression": "regex",
+                }
+            )
+            self.assertEqual(result, "import_scan_request_result")
+
     @patch(
         "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.SessionManager"
     )
@@ -136,7 +374,9 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
                     "MAX_RETRIES_QUERY": 5,
-                    "REGEX_EXPRESSION_CMDB": "regex",
+                    "CMDB": {
+                        "REGEX_EXPRESSION_CMDB": "regex"
+                    }
                 }
             }
         }
