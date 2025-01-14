@@ -31,7 +31,6 @@ class GithubActions(DevopsPlatformGateway):
         utils_github = GithubApi()
         git_client = utils_github.get_github_connection(SystemVariables.github_access_token.value())
         json_config = utils_github.get_remote_json_config(git_client, owner, repository, path, branch)
-        print(json_config)
         return json_config
 
     def message(self, type, message):
