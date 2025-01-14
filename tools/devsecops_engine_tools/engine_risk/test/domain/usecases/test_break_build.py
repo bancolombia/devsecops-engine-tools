@@ -123,7 +123,10 @@ def test_remediation_rate_control_greater():
         [],
         [],
         [],
-        {"REMEDIATION_RATE": 10}
+        {"REMEDIATION_RATE": {
+            "1": 0,
+            "other": 10
+        }}
     )
     break_build._remediation_rate_control(all_report)
 
@@ -150,7 +153,9 @@ def test_remediation_rate_control_close():
         [],
         [],
         [],
-        {"REMEDIATION_RATE": 30},
+        {"REMEDIATION_RATE": {
+            "5": 30
+        }},
     )
     break_build._remediation_rate_control(all_report)
 
@@ -177,7 +182,10 @@ def test_remediation_rate_control_less():
         [],
         [],
         [],
-        {"REMEDIATION_RATE": 50},
+        {"REMEDIATION_RATE": {
+            "1": 0,
+            "other": 50
+        }},
     )
     break_build._remediation_rate_control(all_report)
 

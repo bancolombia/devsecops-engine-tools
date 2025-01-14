@@ -68,7 +68,7 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
    ┃   ┗ 📜ConfigTool.json
    ┃   ┗ 📜Exclusions.json
 ```
-
+For more information visit [here](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/example_remote_config_local/README.md)
 #### Tools available for the modules (Configuration engine_core/ConfigTool.json)
 
 

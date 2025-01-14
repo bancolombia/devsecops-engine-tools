@@ -7,6 +7,7 @@ from devsecops_engine_tools.engine_utilities.azuredevops.models.AzurePredefinedV
     SystemVariables,
     ReleaseVariables,
     AgentVariables,
+    VMVariables
 )
 from devsecops_engine_tools.engine_utilities.azuredevops.infrastructure.azure_devops_api import (
     AzureDevopsApi,
@@ -95,6 +96,9 @@ class AzureDevops(DevopsPlatformGateway):
                 "target_branch": SystemVariables.System_TargetBranchName,
                 "source_branch": SystemVariables.System_SourceBranch,
                 "repository_provider": BuildVariables.Build_Repository_Provider,
+                "vm_product_type_name": VMVariables.Vm_Product_Type_Name,
+                "vm_product_name": VMVariables.Vm_Product_Name,
+                "vm_product_description": VMVariables.Vm_Product_Description,
             }
             try:
                 return variable_map.get(variable).value()
