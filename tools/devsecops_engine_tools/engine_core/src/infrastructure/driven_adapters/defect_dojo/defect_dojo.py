@@ -85,12 +85,11 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     "VULNERABILITY_MANAGER"
                 ]["BRANCH_FILTER"]
             ) or (vulnerability_management.dict_args["tool"] == "engine_secret"):
-                tags = vulnerability_management.dict_args["tool"]
+                tags = [vulnerability_management.dict_args["tool"]]
                 if vulnerability_management.dict_args["tool"] == "engine_iac":
-                    tags = f"{vulnerability_management.dict_args['tool']}_{'_'.join(vulnerability_management.dict_args['platform'])}"
+                    tags = [f"{vulnerability_management.dict_args['tool']}_{'_'.join(vulnerability_management.dict_args['platform'])}"]
                 if vulnerability_management.dict_args["tool"] == "engine_container" and sum(1 for line in open("scanned_images.txt", 'r', encoding='utf-8') if line.strip()) > 1:
-                    tags = (re.search(r"(?<=:)([^-]+)", vulnerability_management.dict_args['image_to_scan']) or [None]).group(1)
-                    #tags= vulnerability_management.dict_args['image_to_scan']
+                    tags.append((re.search(r"(?<=:)([^-]+)", vulnerability_management.dict_args['image_to_scan']) or [None]).group(1))
                 request: ImportScanRequest = Connect.cmdb(
                     cmdb_mapping={
                         "product_type_name": "nombreevc",

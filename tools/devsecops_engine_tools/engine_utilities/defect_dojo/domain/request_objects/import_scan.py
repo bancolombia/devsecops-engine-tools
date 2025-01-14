@@ -1,4 +1,5 @@
 import dataclasses
+from typing import List
 
 
 @dataclasses.dataclass
@@ -20,7 +21,7 @@ class ImportScanRequest:
     auto_create_context: str = ""
     deduplication_on_engagement: str = ""
     lead: str = ""
-    tags: str = ""
+    tags: List[str] = dataclasses.field(default_factory=list)
     close_old_findings: str = ""
     close_old_findings_product_scope: str = ""
     push_to_jira: str = ""
