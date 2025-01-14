@@ -95,7 +95,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 branch_tag="trunk",
                 commit_hash="commit_hash",
                 environment="Development",
-                tags="engine_iac_k8s",
+                tags=["engine_iac_k8s"],
             )
 
     def test_send_vulnerability_management_exception(self):
