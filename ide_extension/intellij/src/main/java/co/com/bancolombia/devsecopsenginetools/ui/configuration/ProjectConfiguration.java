@@ -135,16 +135,14 @@ public class ProjectConfiguration implements Configurable, Configurable.NoScroll
         variableGroups.setText(projectSettings.getAzureDevOpsVariableGroups());
         releaseDefinition.setText(projectSettings.getAzureReleaseDefinitionId());
         stageName.setText(projectSettings.getAzureReleaseStageName());
-
-        iacDirectory.addBrowseFolderListener("Select IaC Resources", "Select IaC resources directory",
-                project, FileChooserDescriptorFactory.createMultipleFoldersDescriptor());
-        dotEnvVariables.addBrowseFolderListener("Select .env File", "Select .env file",
-                project, FileChooserDescriptorFactory.createSingleFileDescriptor());
-
-        dockerFilePath.addBrowseFolderListener("Select Dockerfile", "Select Dockerfile resource",
-                project, FileChooserDescriptorFactory.createSingleFileDescriptor());
-        buildContextPath.addBrowseFolderListener("Select Build Context Path", "Select image build context",
-                project, FileChooserDescriptorFactory.createSingleFolderDescriptor());
+        iacDirectory.addBrowseFolderListener(project, FileChooserDescriptorFactory.createMultipleFoldersDescriptor()
+                .withTitle("Select IaC Resources").withDescription("Select IaC resources directory"));
+        dotEnvVariables.addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFileDescriptor()
+                .withTitle("Select .env File").withDescription("Select .env file"));
+        dockerFilePath.addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFileDescriptor()
+                .withTitle("Select Dockerfile").withDescription("Select Dockerfile resource"));
+        buildContextPath.addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFolderDescriptor()
+                .withTitle("Select Build Context Path").withDescription("Select image build context"));
     }
 
 
