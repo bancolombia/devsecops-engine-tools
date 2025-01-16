@@ -15,23 +15,25 @@ from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class GitleaksTool(ToolGateway):
-    COMMAND = None
+    _COMMAND = None
     
     def install_tool(self, agent_os, agent_temp_dir, tool_version) -> any:
-        reg_exp_os = r"Windows"
-        is_windows_os = re.search(reg_exp_os, agent_os)
-        reg_exp_tool = fr"{tool_version}"
+        is_windows_os = re.search(r"Windows", agent_os)
+        is_linux_os = re.search(r"Linux", agent_os)
 
         if is_windows_os:
             file_extension = "windows_x64.zip"
-            command = f"{agent_temp_dir}/gitleaks.exe"
-        else:
+        elif is_linux_os:
             file_extension = "linux_x64.tar.gz"
-            command = f"gitleaks"
-
-        self.COMMAND = command    
+        else:
+            file_extension = "darwin_x64.tar.gz"
+        
+        command = f"{agent_temp_dir}{os.sep}gitleaks"
+        command = f"{command}.exe" if is_windows_os else command
+        
+        self._COMMAND = command
         result = subprocess.run(f"{command} --version", capture_output=True, shell=True, text=True)
-        is_tool_installed = re.search(reg_exp_tool, result.stdout.strip())
+        is_tool_installed = re.search(fr"{tool_version}", result.stdout.strip())
 
         if is_tool_installed: return
 
@@ -44,16 +46,15 @@ class GitleaksTool(ToolGateway):
             with open(compressed_name, "wb") as f:
                 f.write(response.content)
 
-            utils = Utils()
             if is_windows_os:
-                utils.unzip_file(compressed_name, agent_temp_dir)
+                Utils().unzip_file(compressed_name, agent_temp_dir)
             else:
-                utils.extract_targz_file(compressed_name, "/usr/local/bin")
+                Utils().extract_targz_file(compressed_name, agent_temp_dir)
 
         except Exception as ex:
             logger.error(f"An error ocurred downloading Gitleaks: {ex}")
     
-    def extract_json_data(self, file_path):
+    def _extract_json_data(self, file_path):
         if os.path.exists(file_path):
             with open(file_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
@@ -61,11 +62,11 @@ class GitleaksTool(ToolGateway):
             print(f"File {file_path} does not exist")
             return []
 
-    def create_report(self, output_file, combined_data):        
+    def _create_report(self, output_file, combined_data):        
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(combined_data, f, ensure_ascii=False, indent=4)
 
-    def check_path(self, path, excluded_paths):
+    def _check_path(self, path, excluded_paths):
         parts = path.split(os.sep)
         for part in parts:
             if part in excluded_paths: return True
@@ -83,16 +84,14 @@ class GitleaksTool(ToolGateway):
         agent_temp_dir,
         tool
     ):
-        command = [self.COMMAND, "dir"]
+        command = [self._COMMAND, "dir"]
         finding_path = os.path.join(agent_work_folder, "gitleaks_report.json")
         excluded_paths = config_tool[tool]["EXCLUDE_PATH"]
 
         if config_tool[tool]["ENABLE_CUSTOM_RULES"]:
             Utils().configurate_external_checks(tool, config_tool, secret_tool, secret_external_checks, agent_work_folder)
-            if "gitleaks.exe" in self.COMMAND: folder = agent_work_folder
-            else: folder = "/tmp"
             
-            config_flag = ["--config", f"{folder}{os.sep}rules{os.sep}gitleaks{os.sep}gitleaks.toml"]
+            config_flag = ["--config", f"{agent_work_folder}{os.sep}rules{os.sep}gitleaks{os.sep}gitleaks.toml"]
 
         try:
             findings = []
@@ -101,7 +100,7 @@ class GitleaksTool(ToolGateway):
                     futures = []
 
                     for pull_file in files:
-                        if self.check_path(pull_file, excluded_paths): continue
+                        if self._check_path(pull_file, excluded_paths): continue
                         
                         aux_finding_path = os.path.join(
                             agent_work_folder, f"gitleaks_aux_report_{pull_file.replace(os.sep, '_')}.json"
@@ -119,13 +118,13 @@ class GitleaksTool(ToolGateway):
                         if config_tool[tool]["ENABLE_CUSTOM_RULES"]:
                             command_aux.extend(config_flag)
                         
-                        futures.append(executor.submit(self.run_subprocess_command, command_aux, aux_finding_path))
+                        futures.append(executor.submit(self._run_subprocess_command, command_aux, aux_finding_path))
 
                     for future in as_completed(futures):
                         result = future.result()
                         findings.extend(result)
 
-                self.create_report(finding_path, findings)
+                self._create_report(finding_path, findings)
             else:
                 command.extend([files[0], "--report-path", finding_path])
 
@@ -136,17 +135,17 @@ class GitleaksTool(ToolGateway):
                     command.extend(config_flag)
 
                 subprocess.run(command, capture_output=True, text=True)
-                findings = self.extract_json_data(finding_path)
+                findings = self._extract_json_data(finding_path)
 
             return findings, finding_path
 
         except Exception as e:
             logger.error(f"Error executing gitleaks scan: {e}")
 
-    def run_subprocess_command(self, command_aux, aux_finding_path):
+    def _run_subprocess_command(self, command_aux, aux_finding_path):
         try:
             subprocess.run(command_aux, capture_output=True, text=True)
-            return self.extract_json_data(aux_finding_path)
+            return self._extract_json_data(aux_finding_path)
         except Exception as e:
             logger.error(f"Error executing gitleaks on {command_aux}: {e}")
             return []

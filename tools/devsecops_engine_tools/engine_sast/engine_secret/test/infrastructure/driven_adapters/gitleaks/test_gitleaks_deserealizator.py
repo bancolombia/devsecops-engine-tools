@@ -33,7 +33,7 @@ class TestGitleaksDeserealizator(unittest.TestCase):
         path_directory = "/path/to/repo"
         
         # Act
-        vulnerabilities = self.deserealizator.get_list_vulnerability(results_scan_list, os, path_directory)
+        vulnerabilities = self.deserealizator.get_list_vulnerability(results_scan_list, path_directory, os)
         
         # Assert
         self.assertEqual(len(vulnerabilities), 2)
@@ -62,7 +62,7 @@ class TestGitleaksDeserealizator(unittest.TestCase):
         path_directory = "/path/to/repo"
         
         # Act
-        where_correctly = self.deserealizator.get_where_correctly(result, "Linux", path_directory)
+        where_correctly = self.deserealizator.get_where_correctly(result, path_directory)
         
         # Assert
         self.assertEqual(where_correctly, "/file1.txt, Secret: ABC*********789")

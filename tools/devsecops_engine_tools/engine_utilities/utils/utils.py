@@ -108,7 +108,7 @@ class Utils:
                         config_tool[tool]["EXTERNAL_DIR_OWNER"],
                         config_tool[tool]["EXTERNAL_DIR_REPOSITORY"],
                         github_token,
-                        agent_work_folder if platform.system() in "Windows" else "/tmp"
+                        agent_work_folder
                     )
     
         except Exception as ex:

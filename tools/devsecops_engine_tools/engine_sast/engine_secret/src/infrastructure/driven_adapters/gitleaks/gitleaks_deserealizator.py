@@ -1,4 +1,3 @@
-import re
 from datetime import datetime
 from dataclasses import dataclass
 from typing import List
@@ -10,7 +9,7 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.g
 @dataclass
 class GitleaksDeserealizator(DeseralizatorGateway):
 
-    def get_list_vulnerability(self, results_scan_list: List[dict], os, path_directory) -> List[Finding]:
+    def get_list_vulnerability(self, results_scan_list: List[dict], path_directory: str, os: str) -> List[Finding]:
         list_open_vulnerabilities = []
         current_date=datetime.now().strftime("%d%m%Y")
 
@@ -18,7 +17,7 @@ class GitleaksDeserealizator(DeseralizatorGateway):
             vulnerability_open = Finding(
                 id=result.get("RuleID", "SECRET_SCANNING"),
                 cvss=None,
-                where=self.get_where_correctly(result, os, path_directory),
+                where=self.get_where_correctly(result, path_directory),
                 description=result.get("Description", "No description available"),
                 severity="critical",
                 identification_date=current_date,
@@ -31,7 +30,7 @@ class GitleaksDeserealizator(DeseralizatorGateway):
             list_open_vulnerabilities.append(vulnerability_open)
         return list_open_vulnerabilities
     
-    def get_where_correctly(self, result: dict, os, path_directory):
+    def get_where_correctly(self, result: dict, path_directory=""):
         path = result.get("File", "").replace(path_directory, "")
         hidden_secret = str(result.get("Secret"))[:3] + '*' * 9 + str(result.get("Secret"))[-3:]
         return f"{path}, Secret: {hidden_secret}"

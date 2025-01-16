@@ -27,7 +27,7 @@ class TestGitleaksTool(unittest.TestCase):
     @patch("re.search")
     def test_install_tool_windows(self, mock_search, mock_run):
         # Arrange
-        mock_search.side_effect = [True, None]
+        mock_search.side_effect = [True, None, None]
         mock_run.return_value = MagicMock(stdout="command not found")
         
         with patch("requests.get") as mock_requests, patch("builtins.open", mock_open()) as mock_file, patch("devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_tool.Utils.unzip_file") as mock_unzip:
@@ -48,7 +48,7 @@ class TestGitleaksTool(unittest.TestCase):
     @patch("re.search")
     def test_install_tool_linux(self, mock_search, mock_run):
         # Arrange
-        mock_search.side_effect = [None, None]
+        mock_search.side_effect = [None, True, None]
         mock_run.return_value = MagicMock(stdout="command not found")
         
         with patch("requests.get") as mock_requests, patch("builtins.open", mock_open()) as mock_file, patch("devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_tool.Utils.extract_targz_file") as mock_extract:
@@ -63,22 +63,41 @@ class TestGitleaksTool(unittest.TestCase):
                 allow_redirects=True
             )
             mock_file.assert_called_once_with(f"{self.agent_temp_dir}/gitleaks_8.0.0_linux_x64.tar.gz", "wb")
-            mock_extract.assert_called_once_with(
-                f"{self.agent_temp_dir}/gitleaks_8.0.0_linux_x64.tar.gz", "/usr/local/bin"
+            mock_extract.assert_called_once()
+
+    @patch("subprocess.run")
+    @patch("re.search")
+    def test_install_tool_darwin(self, mock_search, mock_run):
+        # Arrange
+        mock_search.side_effect = [None, None, None]
+        mock_run.return_value = MagicMock(stdout="command not found")
+        
+        with patch("requests.get") as mock_requests, patch("builtins.open", mock_open()) as mock_file, patch("devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_tool.Utils.extract_targz_file") as mock_extract:
+            mock_requests.return_value.content = b"compressed_data"
+
+            # Act
+            self.tool.install_tool("Darwin", self.agent_temp_dir, "8.0.0")
+
+            # Assert
+            mock_requests.assert_called_once_with(
+                "https://github.com/gitleaks/gitleaks/releases/download/v8.0.0/gitleaks_8.0.0_darwin_x64.tar.gz",
+                allow_redirects=True
             )
+            mock_file.assert_called_once_with(f"{self.agent_temp_dir}/gitleaks_8.0.0_darwin_x64.tar.gz", "wb")
+            mock_extract.assert_called_once()
 
     @patch("subprocess.run")
     @patch("re.search")
     def test_tool_already_installed(self, mock_search, mock_run):
         # Arrange
-        mock_search.side_effect = [None, True]
+        mock_search.side_effect = [None, True, True]
         mock_run.return_value = MagicMock(stdout="gitleaks version 8.20.0")
 
         # Act
         self.tool.install_tool("Linux", self.agent_temp_dir, "8.20.0")
 
         # Assert
-        mock_run.assert_called_once_with("gitleaks --version", capture_output=True, shell=True, text=True)
+        mock_run.assert_called_once_with(f"{self.agent_temp_dir}/gitleaks --version", capture_output=True, shell=True, text=True)
         mock_search.assert_any_call(r"8.20.0", "gitleaks version 8.20.0")
 
     @patch("os.path.exists")
@@ -88,7 +107,7 @@ class TestGitleaksTool(unittest.TestCase):
         mock_exists.return_value = True
 
         # Act
-        result = self.tool.extract_json_data("/path/to/file.json")
+        result = self.tool._extract_json_data("/path/to/file.json")
 
         # Assert
         self.assertEqual(result, {"key": "value"})
@@ -100,7 +119,7 @@ class TestGitleaksTool(unittest.TestCase):
         mock_exists.return_value = False
 
         # Act
-        result = self.tool.extract_json_data("/path/to/nonexistent.json")
+        result = self.tool._extract_json_data("/path/to/nonexistent.json")
 
         # Assert
         self.assertEqual(result, [])
@@ -111,7 +130,7 @@ class TestGitleaksTool(unittest.TestCase):
         data = [{"key": "value"}]
 
         # Act
-        self.tool.create_report("/path/to/report.json", data)
+        self.tool._create_report("/path/to/report.json", data)
 
         # Assert
         mock_file.assert_called_once_with("/path/to/report.json", "w", encoding="utf-8")
@@ -121,12 +140,12 @@ class TestGitleaksTool(unittest.TestCase):
         excluded_paths = ["excluded_dir"]
 
         # Act & Assert
-        self.assertTrue(self.tool.check_path("some/excluded_dir/file.txt", excluded_paths))
-        self.assertFalse(self.tool.check_path("some/other_dir/file.txt", excluded_paths))
+        self.assertTrue(self.tool._check_path("some/excluded_dir/file.txt", excluded_paths))
+        self.assertFalse(self.tool._check_path("some/other_dir/file.txt", excluded_paths))
 
     @patch("subprocess.run")
     @patch("os.path.join", side_effect=lambda *args: "/".join(args))
-    @patch("devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_tool.GitleaksTool.extract_json_data", return_value=[{"leak": "found"}])
+    @patch("devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_tool.GitleaksTool._extract_json_data", return_value=[{"leak": "found"}])
     def test_run_tool_secret_scan_single_file(self, mock_extract, mock_join, mock_run):
         # Act
         findings, finding_path = self.tool.run_tool_secret_scan(
@@ -149,8 +168,8 @@ class TestGitleaksTool(unittest.TestCase):
     @patch("concurrent.futures.ThreadPoolExecutor")
     @patch("subprocess.run")
     @patch("os.path.join", side_effect=lambda *args: "/".join(args))
-    @patch("devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_tool.GitleaksTool.extract_json_data", side_effect=lambda x: [{"leak": f"found in {x}"}])
-    @patch("devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_tool.GitleaksTool.create_report")
+    @patch("devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_tool.GitleaksTool._extract_json_data", side_effect=lambda x: [{"leak": f"found in {x}"}])
+    @patch("devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_tool.GitleaksTool._create_report")
     def test_run_tool_secret_scan_multiple_files(self, mock_create_report, mock_extract, mock_join, mock_run, mock_executor):
         # Arrange
         files = ["file1.txt", "file2.txt"]
