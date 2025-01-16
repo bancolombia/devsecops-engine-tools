@@ -72,6 +72,16 @@ class GitleaksTool(ToolGateway):
             if part in excluded_paths: return True
         return False
     
+    def _add_flags(self, config_tool, tool, agent_work_folder):
+        flags = []
+        if not config_tool[tool]["ALLOW_IGNORE_LEAKS"]:
+            flags.append("--ignore-gitleaks-allow")
+        
+        if config_tool[tool]["ENABLE_CUSTOM_RULES"]:
+            flags.extend(["--config", f"{agent_work_folder}{os.sep}rules{os.sep}gitleaks{os.sep}gitleaks.toml"])
+        
+        return flags
+
     def run_tool_secret_scan(
         self,
         files,
@@ -91,10 +101,9 @@ class GitleaksTool(ToolGateway):
         if config_tool[tool]["ENABLE_CUSTOM_RULES"]:
             Utils().configurate_external_checks(tool, config_tool, secret_tool, secret_external_checks, agent_work_folder)
             
-            config_flag = ["--config", f"{agent_work_folder}{os.sep}rules{os.sep}gitleaks{os.sep}gitleaks.toml"]
-
         try:
             findings = []
+            flags = self._add_flags(config_tool, tool, agent_work_folder)
             if len(files) > 1:
                 with ThreadPoolExecutor(max_workers=config_tool[tool]["NUMBER_THREADS"]) as executor:
                     futures = []
@@ -111,12 +120,7 @@ class GitleaksTool(ToolGateway):
                             os.path.join(agent_work_folder, repository_name, pull_file),
                             "--report-path", aux_finding_path
                         ])
-
-                        if not config_tool[tool]["ALLOW_IGNORE_LEAKS"]: 
-                            command_aux.append("--ignore-gitleaks-allow")
-                        
-                        if config_tool[tool]["ENABLE_CUSTOM_RULES"]:
-                            command_aux.extend(config_flag)
+                        command_aux.extend(flags)
                         
                         futures.append(executor.submit(self._run_subprocess_command, command_aux, aux_finding_path))
 
@@ -127,12 +131,7 @@ class GitleaksTool(ToolGateway):
                 self._create_report(finding_path, findings)
             else:
                 command.extend([files[0], "--report-path", finding_path])
-
-                if not config_tool[tool]["ALLOW_IGNORE_LEAKS"]:
-                    command.append("--ignore-gitleaks-allow")
-                
-                if config_tool[tool]["ENABLE_CUSTOM_RULES"]:
-                    command.extend(config_flag)
+                command.extend(flags)
 
                 subprocess.run(command, capture_output=True, text=True)
                 findings = self._extract_json_data(finding_path)

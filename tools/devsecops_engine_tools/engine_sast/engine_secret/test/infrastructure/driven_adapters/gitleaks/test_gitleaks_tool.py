@@ -143,6 +143,21 @@ class TestGitleaksTool(unittest.TestCase):
         self.assertTrue(self.tool._check_path("some/excluded_dir/file.txt", excluded_paths))
         self.assertFalse(self.tool._check_path("some/other_dir/file.txt", excluded_paths))
 
+    def test_add_flags(self):
+        config_tool = {
+            "gitleaks": {
+                "ALLOW_IGNORE_LEAKS": False,
+                "ENABLE_CUSTOM_RULES": True,
+            }
+        }
+        expected_flags = [
+            "--ignore-gitleaks-allow",
+            "--config",
+            f"{self.agent_work_folder}{os.sep}rules{os.sep}gitleaks{os.sep}gitleaks.toml"
+        ]
+        result = self.tool._add_flags(config_tool, "gitleaks", self.agent_work_folder)
+        self.assertEqual(result, expected_flags)
+
     @patch("subprocess.run")
     @patch("os.path.join", side_effect=lambda *args: "/".join(args))
     @patch("devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_tool.GitleaksTool._extract_json_data", return_value=[{"leak": "found"}])
