@@ -617,9 +617,6 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.assertEqual(result, expected_result)
 
     @patch(
-        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.DefectDojoPlatform._date_reason_based"
-    )
-    @patch(
         "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.FindingExclusion.get_finding_exclusion"
     )
     @patch(
@@ -633,7 +630,6 @@ class TestDefectDojoPlatform(unittest.TestCase):
         mock_finding,
         mock_session_manager,
         mock_finding_exclusion,
-        mock_date_reason_based,
     ):
         service = "test"
         dict_args = {
@@ -692,17 +688,6 @@ class TestDefectDojoPlatform(unittest.TestCase):
             MagicMock(results=[]),
         ]
         mock_finding.side_effect = findings_list
-
-        mock_date_reason_based.side_effect = [
-            (
-                "21022024",
-                "29022024",
-            ),
-            (
-                "21022024",
-                "30032024",
-            ),
-        ]
 
         mock_finding_exclusion.return_value.results = []
 
@@ -1122,10 +1107,9 @@ class TestDefectDojoPlatform(unittest.TestCase):
         date_fn = MagicMock(return_value="10012024")
         reason = self.defect_dojo.FALSE_POSITIVE
         tool = "engine_risk"
-        white_list = []
 
         create_date, expired_date = self.defect_dojo._date_reason_based(
-            finding, date_fn, reason, tool, white_list
+            finding, date_fn, reason, tool
         )
 
         self.assertEqual(create_date, "10012024")
@@ -1137,10 +1121,9 @@ class TestDefectDojoPlatform(unittest.TestCase):
         date_fn = MagicMock(return_value="10012024")
         reason = self.defect_dojo.OUT_OF_SCOPE
         tool = "engine_risk"
-        white_list = []
 
         create_date, expired_date = self.defect_dojo._date_reason_based(
-            finding, date_fn, reason, tool, white_list
+            finding, date_fn, reason, tool
         )
 
         self.assertEqual(create_date, "10012024")
@@ -1153,10 +1136,9 @@ class TestDefectDojoPlatform(unittest.TestCase):
         date_fn = MagicMock(side_effect=["14082024", "15082024"])
         reason = self.defect_dojo.TRANSFERRED_FINDING
         tool = "engine_risk"
-        white_list = []
 
         create_date, expired_date = self.defect_dojo._date_reason_based(
-            finding, date_fn, reason, tool, white_list
+            finding, date_fn, reason, tool
         )
 
         self.assertEqual(create_date, "14082024")
@@ -1173,10 +1155,9 @@ class TestDefectDojoPlatform(unittest.TestCase):
         date_fn = MagicMock(side_effect=["10012024", "10042024"])
         reason = self.defect_dojo.RISK_ACCEPTED
         tool = "engine_risk"
-        white_list = []
 
         create_date, expired_date = self.defect_dojo._date_reason_based(
-            finding, date_fn, reason, tool, white_list
+            finding, date_fn, reason, tool
         )
 
         self.assertEqual(create_date, "10012024")
@@ -1197,7 +1178,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         ]
 
         create_date, expired_date = self.defect_dojo._date_reason_based(
-            finding, date_fn, reason, tool, white_list
+            finding, date_fn, reason, tool, white_list=white_list
         )
 
         self.assertEqual(create_date, "21022024")
@@ -1218,7 +1199,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         ]
 
         create_date, expired_date = self.defect_dojo._date_reason_based(
-            finding, date_fn, reason, tool, white_list
+            finding, date_fn, reason, tool, white_list=white_list
         )
 
         self.assertEqual(create_date, "21022024")
@@ -1229,10 +1210,9 @@ class TestDefectDojoPlatform(unittest.TestCase):
         date_fn = MagicMock(return_value="default_date")
         reason = "UNKNOWN_REASON"
         tool = "engine_risk"
-        white_list = []
 
         create_date, expired_date = self.defect_dojo._date_reason_based(
-            finding, date_fn, reason, tool, white_list
+            finding, date_fn, reason, tool
         )
 
         self.assertEqual(create_date, "default_date")

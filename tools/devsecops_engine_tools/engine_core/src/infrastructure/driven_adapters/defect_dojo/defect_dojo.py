@@ -577,7 +577,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     raise e
 
 
-    def _date_reason_based(self, finding, date_fn, reason, tool, white_list):
+    def _date_reason_based(self, finding, date_fn, reason, tool, **kwargs):
         def get_vuln_id(finding, tool):
             if tool == "engine_risk":
                 return finding.id[0]["vulnerability_id"] if finding.id else finding.vuln_id_from_tool
@@ -595,7 +595,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             self.OUT_OF_SCOPE: lambda: (date_fn(finding.last_status_update), date_fn(None)),
             self.TRANSFERRED_FINDING: lambda: (date_fn(finding.transfer_finding.date), date_fn(finding.transfer_finding.expiration_date)),
             self.RISK_ACCEPTED: lambda: (date_fn(finding.accepted_risks[-1]["created"]), date_fn(finding.accepted_risks[-1]["expiration_date"])),
-            self.ON_WHITELIST: lambda: get_dates_from_whitelist(get_vuln_id(finding, tool), white_list)
+            self.ON_WHITELIST: lambda: get_dates_from_whitelist(get_vuln_id(finding, tool), kwargs.get("white_list", [])),
         }
 
         create_date, expired_date = reason_to_dates.get(reason, lambda: (date_fn(None), date_fn(None)))()
