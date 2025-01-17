@@ -1,9 +1,6 @@
-from devsecops_engine_tools.engine_utilities.defect_dojo.domain.request_objects.finding import FindingRequest
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.serializers.finding import FindingSerializer
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.finding import FindingRestConsumer
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.user_case.finding import FindingUserCase, FindingGetUserCase
-from devsecops_engine_tools.engine_utilities.utils.session_manager import SessionManager
-from devsecops_engine_tools.engine_utilities.utils.api_error import ApiError
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
