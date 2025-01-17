@@ -66,12 +66,12 @@ class ImportScanUserCase:
                         with id {product_type_id}"
                 )
 
-                product = self.__rest_product.post_product(request, product_type_id)
-                product_id = product.id
-                logger.info(
-                    f"product created: {product.name}\
-                        found with id: {product.id}"
-                )
+            product = self.__rest_product.post_product(request, product_type_id)
+            product_id = product.id
+            logger.info(
+                f"product created: {product.name}\
+                    found with id: {product.id}"
+            )
 
         api_scan_bool = re.search(" API ", request.scan_type)
         if api_scan_bool:

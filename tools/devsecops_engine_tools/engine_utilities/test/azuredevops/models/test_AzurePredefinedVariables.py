@@ -5,6 +5,7 @@ from devsecops_engine_tools.engine_utilities.azuredevops.models.AzurePredefinedV
     BuildVariables,
     ReleaseVariables,
     AgentVariables,
+    VMVariables
 )
 
 
@@ -24,6 +25,9 @@ from devsecops_engine_tools.engine_utilities.azuredevops.models.AzurePredefinedV
         (ReleaseVariables.Artifact_Path, "ARTIFACT_PATH", "ArtifactPathValue"),
         (AgentVariables.Agent_WorkFolder, "AGENT_WORKFOLDER", "AgentWorkFolder"),
         (AgentVariables.Agent_BuildDirectory, "AGENT_BUILDDIRECTORY", "AgentBuildDirectory"),
+        (VMVariables.Vm_Product_Type_Name, "VM_PRODUCT_TYPE_NAME", "ProductTypeName"),
+        (VMVariables.Vm_Product_Name, "VM_PRODUCT_NAME", "ProductName"),
+        (VMVariables.Vm_Product_Description, "VM_PRODUCT_DESCRIPTION", "ProductDescription"),
     ],
 )
 def test_enum_env_name(monkeypatch, enum_class, expected_env_name, expected_value):

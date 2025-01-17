@@ -99,7 +99,10 @@ class ReportSonar:
             build_id = self.devops_platform_gateway.get_variable("build_id"),
             branch_tag = branch,
             commit_hash = self.devops_platform_gateway.get_variable("commit_hash"),
-            environment = environment
+            environment = environment,
+            vm_product_type_name = self.devops_platform_gateway.get_variable("vm_product_type_name"),
+            vm_product_name = self.devops_platform_gateway.get_variable("vm_product_name"),
+            vm_product_description = self.devops_platform_gateway.get_variable("vm_product_description"),
         )
 
         for project_key in project_keys:

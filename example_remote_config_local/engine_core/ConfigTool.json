@@ -14,12 +14,36 @@
             "main"
         ],
         "DEFECT_DOJO": {
-            "CMDB_MAPPING_PATH": "",
-            "HOST_CMDB": "",
             "HOST_DEFECT_DOJO": "",
-            "REGEX_EXPRESSION_CMDB": "",
             "LIMITS_QUERY": 100,
-            "MAX_RETRIES_QUERY": 5
+            "MAX_RETRIES_QUERY": 5,
+            "CMDB": {
+                "USE_CMDB": false,
+                "HOST_CMDB": "",
+                "REGEX_EXPRESSION_CMDB": "",
+                "CMDB_MAPPING_PATH": "",
+                "CMDB_MAPPING": {
+                    "PRODUCT_TYPE_NAME": "",
+                    "PRODUCT_NAME": "",
+                    "TAG_PRODUCT": "",
+                    "PRODUCT_DESCRIPTION": "",
+                    "CODIGO_APP": ""
+                },
+                "CMDB_REQUEST_RESPONSE": {
+                    "HEADERS": {
+                        "Content-Type": "application/json",
+                        "Api-Key": "tokenvalue"
+                    },
+                    "METHOD": "GET|POST",
+                    "PARAMS": {
+                        "appCode": "codappvalue"
+                    },
+                    "BODY": {
+                        "appCode": "codappvalue"
+                    },
+                    "RESPONSE": [0]
+                }
+            }
         }
     },
     "METRICS_MANAGER": {
