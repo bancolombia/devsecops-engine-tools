@@ -103,8 +103,12 @@ For more information visit [here](https://github.com/bancolombia/devsecops-engin
     <td>Free</td>
   </tr>
   <tr>
-    <td>ENGINE_SECRET</td>
+    <td rowspan="2">ENGINE_SECRET</td>
     <td><a href="https://trufflesecurity.com/trufflehog">TRUFFLEHOG</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td><a href="https://gitleaks.io/">GITLEAKS</a></td>
     <td>Free</td>
   </tr>
   <tr>
