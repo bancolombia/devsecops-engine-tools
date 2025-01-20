@@ -72,7 +72,8 @@ class TrufflehogRun(ToolGateway):
         exclude_path = f"{agent_work_folder}/excludedPath.txt"
         include_paths = self.config_include_path(files_commits, agent_work_folder, agent_os)
         enable_custom_rules = config_tool[tool]["ENABLE_CUSTOM_RULES"]
-        Utils().configurate_external_checks(tool, config_tool, secret_tool, secret_external_checks, agent_work_folder)
+        if enable_custom_rules:
+            Utils().configurate_external_checks(tool, config_tool, secret_tool, secret_external_checks, agent_work_folder)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=config_tool[tool]["NUMBER_THREADS"]) as executor:
             results = executor.map(
