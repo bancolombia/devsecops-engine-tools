@@ -37,7 +37,7 @@ class TestNucleiTool(unittest.TestCase):
     @patch('json.load', return_value={"key": "value"})
     def test_execute(self, mock_json_load, mock_open, mock_os_environ):
         target_config = NucleiConfig(self.target_config)
-        result = self.nuclei_tool.execute(target_config)
+        result = self.nuclei_tool.execute("", target_config)
         mock_open.assert_called_once_with(target_config.output_file, 'r')
         mock_json_load.assert_called_once()
         self.assertEqual(result, {"key": "value"})
