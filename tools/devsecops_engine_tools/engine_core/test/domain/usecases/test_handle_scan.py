@@ -239,7 +239,7 @@ class TestHandleScan(unittest.TestCase):
         config_tool = {"ENGINE_DAST":{"ENABLED": "true", "TOOL": "NUCLEI"}}
         input_core = InputCore(
             totalized_exclusions=[],
-            threshold_defined=Threshold,
+            threshold_defined=self.threshold,
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
