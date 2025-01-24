@@ -31,7 +31,7 @@ from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.json_handler 
     load_json_file
 )
 
-def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
+def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gateway):
 
     if config_tool["TOOL"].lower() == "nuclei": # tool_gateway is the main Tool
         tool_run = NucleiTool()
@@ -54,7 +54,9 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
                             elem,
                             JwtObject(
                                 elem["operation"]["security_auth"]
-                    )))
+                            )
+                        )
+                    )
                 elif security_type == "oauth":
                     operations.append(
                         ApiOperation(
@@ -83,14 +85,13 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
                     )
             target_config = WaConfig(data, authentication_gateway)
         else:
-            raise ValueError("Can't match if the target type is an api or a web application ")
+            raise ValueError("Can't match if the target type is an api or a web application")
 
-        if any((k.lower() == "jwt") for k in config_tool["EXTRA_TOOLS"]) and \
-        any(isinstance(operation.authentication_gateway, JwtObject) for operation in data["operations"] ):
+        if any((k.lower() == "jwt") for k in config_tool["EXTRA_TOOLS"]) and any(isinstance(operation.authentication_gateway, JwtObject) for operation in data["operations"] ):
             extra_tools.append(JwtTool(target_config))
 
         return init_engine_dast(
-            devops_platform_gateway=devops_platform,
+            devops_platform_gateway=devops_platform_gateway,
             tool_gateway=tool_run,
             dict_args=dict_args,
             secret_tool=secret_tool,
@@ -99,5 +100,5 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform):
             target_data=target_config
         )
     except Exception as e:
-        raise Exception(f"Error engine_dast {e}")
+        raise Exception(f"Error engine_dast: {e}")
         

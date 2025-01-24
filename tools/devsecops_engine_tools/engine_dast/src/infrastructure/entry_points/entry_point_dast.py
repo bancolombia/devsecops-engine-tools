@@ -2,7 +2,6 @@ from devsecops_engine_tools.engine_dast.src.domain.usecases.dast_scan import (
     DastScan,
 )
 
-
 def init_engine_dast(
     devops_platform_gateway,
     tool_gateway,
