@@ -67,6 +67,7 @@ kubescape-macos-latest
 syft
 gitleaks_aux_report_*.json
 gitleaks_report.json
+result_dast_scan.json
 
 # Extensions
 out
