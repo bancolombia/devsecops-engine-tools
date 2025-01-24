@@ -1,4 +1,3 @@
-import os
 from typing import List
 from devsecops_engine_tools.engine_dast.src.infrastructure.entry_points.entry_point_dast import (
     init_engine_dast,
@@ -32,7 +31,6 @@ from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.json_handler 
 )
 
 def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gateway):
-
     if config_tool["TOOL"].lower() == "nuclei": # tool_gateway is the main Tool
         tool_run = NucleiTool()
     extra_tools = []
@@ -42,8 +40,6 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gate
     data = load_json_file(dict_args["dast_file_path"])
 
     try:
-
-
         if "operations" in data: # Api
             operations: List = []
             for elem in data["operations"]:

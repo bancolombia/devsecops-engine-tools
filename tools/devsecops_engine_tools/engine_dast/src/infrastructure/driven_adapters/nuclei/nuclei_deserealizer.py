@@ -18,15 +18,14 @@ class NucleiDesealizator:
         results_scan_list: "list[dict]",
     ) -> "list[Finding]":
         list_open_findings = []
-
         if len(results_scan_list) > 0:
             for scan in results_scan_list:
                 finding_open = Finding(
                     id=scan.get("template-id"),
-                    cvss=scan["info"].get("classification").get("cvss-score"),
+                    cvss=scan["info"].get("classification", {}).get("cvss-score", ""),
                     where=scan.get("matched-at"),
                     description=scan["info"].get("description"),
-                    severity=scan["info"].get("severity").lower(),
+                    severity=scan["info"].get("severity").lower() if scan["info"].get("severity").lower() != "info" else "low",
                     identification_date=datetime.now().strftime("%d%m%Y"),
                     module="engine_dast",
                     category=Category("vulnerability"),
