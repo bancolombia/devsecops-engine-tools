@@ -64,8 +64,7 @@ def test_download_twistcli_success(mock_remoteconfig):
         scan_manager = PrismaCloudManagerScan()
         scan_manager.download_twistcli(
             "file_path",
-            "prisma_access_key",
-            "prisma_secret_key",
+            "prisma_key",
             mock_remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
             mock_remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"],
         )
@@ -73,8 +72,7 @@ def test_download_twistcli_success(mock_remoteconfig):
 
 def test_download_twistcli_failure(twistcli_instance, mock_requests_get):
     file_path = "/path/to/twistcli"
-    prisma_access_key = "your_access_key"
-    prisma_secret_key = "your_secret_key"
+    prisma_key = "your_access_key:your_secret_key"
     prisma_console_url = "https://prisma-console-url.com"
     prisma_api_version = "v1"
 
@@ -95,8 +93,7 @@ def test_download_twistcli_failure(twistcli_instance, mock_requests_get):
     ) as mock_logger_info:
         twistcli_instance.download_twistcli(
             file_path,
-            prisma_access_key,
-            prisma_secret_key,
+            prisma_key,
             prisma_console_url,
             prisma_api_version,
         )
@@ -131,7 +128,7 @@ def test_scan_image_success(mock_remoteconfig):
             "image_name",
             "result.json",
             mock_remoteconfig,
-            "prisma_secret_key"
+            "prisma_access_key:some_secret_key",
         )
 
        
@@ -144,9 +141,9 @@ def test_scan_image_success(mock_remoteconfig):
                 "--address",
                 mock_remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
                 "--user",
-                mock_remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
+                "prisma_access_key",
                 "--password",
-                "prisma_secret_key",
+                "some_secret_key",
                 "--output-file",
                 "result.json",
                 "--details",
@@ -173,7 +170,7 @@ def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image):
         scan_manager = PrismaCloudManagerScan()
         result = scan_manager.run_tool_container_sca(
             mock_remoteconfig,
-            {"token_prisma_cloud": "token"},
+            {"access_prisma": "asdasd","token_prisma": "asdasd"},
             "token_container",
             "image_name",
             "result.json" , None , {"exclusions": "all"},
@@ -203,22 +200,21 @@ def test_generate_sbom_success():
             "PRISMA_CLOUD": {
                 "PRISMA_CONSOLE_URL": "http://example.com",
                 "PRISMA_API_VERSION": "v1",
-                "PRISMA_ACCESS_KEY": "access_key",
                 "SBOM_FORMAT": "json",
             }
         }
-        prisma_secret_key = "secret_key"
+        prisma_key = "secret_key"
         image_name = "test_image"
 
         # Llamar a la función
         result = prisma_scan._generate_sbom(
-            image_scanned, remoteconfig, prisma_secret_key, image_name
+            image_scanned, remoteconfig, prisma_key, image_name
         )
 
         # Verificar que se llamaron las funciones esperadas
         mock_request.assert_called_once_with(
             "http://example.com/api/v1/sbom/download/cli-images",
-            headers={"Authorization": "Basic YWNjZXNzX2tleTpzZWNyZXRfa2V5"},
+            headers={"Authorization": "Basic c2VjcmV0X2tleQ=="},
             params={"id": "12345", "sbomFormat": "json"},
         )
         assert result is not None
@@ -297,3 +293,29 @@ def test_write_image_base_file_not_found():
         scan_manager = PrismaCloudManagerScan()
         with pytest.raises(FileNotFoundError):
             scan_manager._write_image_base("result.json", "python:3.9", exclusions_data)
+
+def test_valid_prisma_key():
+    scan_manager = PrismaCloudManagerScan()
+    prisma_key = "your_access_key:your_secret_key"
+    result = scan_manager._split_prisma_token(prisma_key)
+    assert result == ("your_access_key", "your_secret_key")
+    assert type(result) == tuple
+
+def test_invalid_prisma_key():
+    scan_manager = PrismaCloudManagerScan()
+    prisma_key = "your_access_key"
+    with pytest.raises(ValueError, match="The string is not properly formatted. Make sure it contains a ':'."):
+        scan_manager._split_prisma_token(prisma_key)
+
+def test_empty_prisma_key():
+    scan_manager = PrismaCloudManagerScan()
+    prisma_key = ""
+    with pytest.raises(ValueError, match="The string is not properly formatted. Make sure it contains a ':'."):
+        scan_manager._split_prisma_token(prisma_key)
+
+def test_extra_colon_prisma_key():
+    scan_manager = PrismaCloudManagerScan()
+    prisma_key = "your_access_key:your_secret_key:extra"
+    with pytest.raises(ValueError, match="The string is not properly formatted. Make sure it contains a ':'."):
+        scan_manager._split_prisma_token(prisma_key)
+    
