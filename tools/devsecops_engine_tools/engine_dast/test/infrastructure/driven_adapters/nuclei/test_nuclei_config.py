@@ -66,11 +66,12 @@ class TestNucleiConfig(unittest.TestCase):
         }
         template_counter = 0
 
-        self.nuclei_api.process_template_file(base_folder,
-                                              dest_folder,
-                                              template_name,
-                                              new_template_data,
-                                              template_counter)
+        self.nuclei_api.process_template_file(
+            dest_folder,
+            template_name,
+            new_template_data,
+            template_counter
+        )
 
         mock_load.assert_called_once()
         mock_dump.assert_called_once()
@@ -79,5 +80,5 @@ class TestNucleiConfig(unittest.TestCase):
     def test_customize_templates(self, mock_process_templates_folder):
         directory = "dummy_directory"
         self.nuclei_api.customize_templates(directory)
-        self.assertEqual(self.nuclei_api.custom_templates_dir, "customized-nuclei-templates")
+        self.assertEqual(self.nuclei_api.custom_templates_dir, "dummy_directory/customized-nuclei-templates")
         mock_process_templates_folder.assert_any_call(base_folder=directory)

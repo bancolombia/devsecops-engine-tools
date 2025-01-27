@@ -32,10 +32,13 @@ class TestNucleiTool(unittest.TestCase):
 
         self.nuclei_tool = NucleiTool(target_config=self.target_config)
 
-    @patch('os.environ.get', return_value="true")
     @patch('builtins.open', new_callable=mock_open, read_data='{"key": "value"}')
     @patch('json.load', return_value={"key": "value"})
-    def test_execute(self, mock_json_load, mock_open, mock_os_environ):
+    @patch("subprocess.run")
+    def test_execute(self, mock_subprocess, mock_json_load, mock_open):
+        mock_subprocess.side_effect = [
+            Mock(returncode=0),
+         ]
         target_config = NucleiConfig(self.target_config)
         result = self.nuclei_tool.execute("", target_config)
         mock_open.assert_called_once_with(target_config.output_file, 'r')
