@@ -13,9 +13,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
     Exclusions,
 )
-from devsecops_engine_tools.engine_dast.src.domain.model.config_tool import (
-    ConfigTool,
-)
+from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 
 class DastScan:
     def __init__(
@@ -32,25 +30,24 @@ class DastScan:
 
     def complete_config_tool(
         self, data_file_tool, exclusions, tool
-    ) -> "Tuple[ConfigTool, Any]":
-        config_tool = ConfigTool(
-            json_data=data_file_tool,
-            tool=tool,
-        )
+    ) -> "Tuple[Any, Any]":
+        
+        config_tool = data_file_tool
 
-        config_tool.exclusions = exclusions
-        config_tool.scope_pipeline = self.devops_platform_gateway.get_variable(
+        config_tool["SCOPE_PIPELINE"] = self.devops_platform_gateway.get_variable(
             "pipeline_name"
         )
 
-        if config_tool.exclusions.get("All") is not None:
-            config_tool.exclusions_all = config_tool.exclusions.get("All").get(
-                tool
-            )
-        if config_tool.exclusions.get(config_tool.scope_pipeline) is not None:
-            config_tool.exclusions_scope = config_tool.exclusions.get(
-                config_tool.scope_pipeline
-            ).get(config_tool)
+        config_tool["EXCLUSIONS"] = exclusions
+
+        config_exclusions = config_tool["EXCLUSIONS"]
+
+        if config_exclusions.get("All") is not None:
+            config_tool["EXCLUSIONS_ALL"] = config_exclusions.get("All").get(tool)
+        if config_exclusions.get(config_tool["SCOPE_PIPELINE"]) is not None:
+            config_tool["EXCLUSIONS_SCOPE"] = config_exclusions.get(
+                config_tool["SCOPE_PIPELINE"]
+            ).get(tool)
 
         data_target_config = self.data_target
         return config_tool, data_target_config
@@ -67,6 +64,8 @@ class DastScan:
             "engine_dast/Exclusions.json"
         )
 
+        agent_work_folder = self.devops_platform_gateway.get_variable("path_directory")
+
         config_tool, data_target = self.complete_config_tool(
             data_file_tool=init_config_tool,
             exclusions=exclusions,
@@ -77,8 +76,10 @@ class DastScan:
             target_data=data_target,
             config_tool=config_tool,
             secret_tool=secret_tool,
-            secret_external_checks=dict_args["token_external_checks"]
+            secret_external_checks=dict_args["token_external_checks"],
+            agent_work_folder=agent_work_folder
         )
+
         #Here execute other tools and append to finding list
         if len(self.other_tools) > 0:
             for i in range(len(self.other_tools)):
@@ -98,29 +99,29 @@ class DastScan:
         (
             totalized_exclusions.extend(
                 map(
-                    lambda elem: Exclusions(**elem), config_tool.exclusions_all
+                    lambda elem: Exclusions(**elem), config_tool.get("EXCLUSIONS_ALL")
                 )
             )
-            if config_tool.exclusions_all is not None
+            if config_tool.get("EXCLUSIONS_ALL") is not None
             else None
         )
         (
             totalized_exclusions.extend(
                 map(
                     lambda elem: Exclusions(**elem),
-                    config_tool.exclusions_scope,
+                    config_tool.get("EXCLUSIONS_SCOPE"),
                 )
             )
-            if config_tool.exclusions_scope is not None
+            if config_tool.get("EXCLUSIONS_SCOPE") is not None
             else None
         )
 
         input_core = InputCore(
             totalized_exclusions=totalized_exclusions,
-            threshold_defined=config_tool.threshold,
+            threshold_defined=Threshold(config_tool.get("THRESHOLD")),
             path_file_results=path_file_results,
-            custom_message_break_build=config_tool.message_info_dast,
-            scope_pipeline=config_tool.scope_pipeline,
+            custom_message_break_build=config_tool.get("MESSAGE_INFO_DAST"),
+            scope_pipeline=config_tool.get("SCOPE_PIPELINE"),
             stage_pipeline=self.devops_platform_gateway.get_variable("stage"),
         )
 
