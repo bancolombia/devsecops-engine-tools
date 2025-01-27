@@ -13,9 +13,6 @@ from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nucle
 from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nuclei.nuclei_deserealizer import (
     NucleiDesealizator,
 )
-from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
-    GithubApi
-)
 from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
