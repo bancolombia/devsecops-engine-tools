@@ -1,67 +1,86 @@
 import unittest
-from unittest.mock import patch, mock_open, call
+import os
 import json
-
-# Importa la función a probar
-from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.file_generator_tool import generate_file_from_tool, update_field
+from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.file_generator_tool import generate_file_from_tool  # Asegúrate de ajustar el import al módulo correcto
 
 class TestGenerateFileFromTool(unittest.TestCase):
-    @patch("devsecops_engine_tools.engine_dast.src.infrastructure.helpers.file_generator_tool.open", new_callable=mock_open)  # Simula 'open'
-    @patch("devsecops_engine_tools.engine_dast.src.infrastructure.helpers.file_generator_tool.os.path.abspath")  # Simula 'os.path.abspath'
-    def test_generate_file_from_tool_nuclei(self, mock_abspath, mock_open):
-        # Datos de entrada simulados
-        tool = "nuclei"
-        result_list = [
+
+    def setUp(self):
+        self.tool_name = "JWT"
+        self.result_scans = [
             {
-                "results": {
-                    "failed_checks": [
-                        {"check_id": "id1", "severity": "high"},
-                        {"check_id": "id2", "severity": "medium"},
-                    ]
-                },
-                "summary": {
-                    "passed": 5,
-                    "failed": 2,
-                    "skipped": 1,
-                    "parsing_errors": 0,
-                    "resource_count": 10,
-                    "version": "2.4.1",
-                }
-            },
-            {
-                "results": {
-                    "failed_checks": [
-                        {"check_id": "id3", "severity": "low"},
-                    ]
-                },
-                "summary": {
-                    "passed": 2,
-                    "failed": 1,
-                    "skipped": 0,
-                    "parsing_errors": 0,
-                    "resource_count": 5,
-                    "version": "2.4.1",
-                }
+                "check_id": "JWT_ALGORITHM",
+                "cvss": 7.5,
+                "matched-at": "src/auth/token.py",
+                "description": "The algorithm 'none' is insecure.",
+                "severity": "high",
+                "remediation": "Use a secure algorithm like RS256 or HS256."
             }
         ]
-        rules_doc = {
-            "id1": {"severity": "critical"},
-            "id2": {"severity": "high"},
-            "id3": {"severity": "low"},
+        self.config_tool = {
+            "RULES": {
+                "JWT_ALGORITHM": {
+                    "description": "Evaluate JSON Web token's algorithm",
+                    "severity": "high",
+                    "cvss": 7.5,
+                    "helpUri": "https://example.com/jwt_algorithm"
+                }
+            }
         }
 
-        # Valores de retorno simulados
-        mock_abspath.return_value = "/mocked/path/results.json"
+    def test_generate_file_creation(self):
+        sarif_file = generate_file_from_tool(self.tool_name, self.result_scans, self.config_tool)
 
-        # Llamada a la función
-        result = generate_file_from_tool(tool, result_list, rules_doc)
+        self.assertTrue(os.path.exists(sarif_file))
 
-        # Verificación del nombre de archivo devuelto
-        self.assertEqual(result, "/mocked/path/results.json")
+        with open(sarif_file, 'r', encoding='utf-8') as file:
+            sarif_content = json.load(file)
 
-        # Verifica que 'open' se llame con el nombre de archivo correcto
-        mock_open.assert_called_once_with("results.json", "w")
-        
-        # Obtener la instancia del archivo simulado
-        handle = mock_open()
-        handle.write.assert_called()  # Verifica que write se haya llamado
+        self.assertEqual(sarif_content["version"], "2.1.0")
+        self.assertEqual(sarif_content["runs"][0]["tool"]["driver"]["name"], self.tool_name)
+
+        rules = sarif_content["runs"][0]["tool"]["driver"]["rules"]
+        self.assertEqual(len(rules), 1)
+        self.assertEqual(rules[0]["id"], "JWT_ALGORITHM")
+        self.assertEqual(rules[0]["shortDescription"]["text"], "Evaluate JSON Web token's algorithm")
+        self.assertEqual(rules[0]["properties"]["severity"], "high")
+        self.assertEqual(rules[0]["properties"]["cvss"], 7.5)
+
+        results = sarif_content["runs"][0]["results"]
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["ruleId"], "JWT_ALGORITHM")
+        self.assertEqual(results[0]["message"]["text"], "The algorithm 'none' is insecure.")
+        self.assertEqual(results[0]["locations"][0]["physicalLocation"]["artifactLocation"]["uri"], "src/auth/token.py")
+        self.assertEqual(results[0]["properties"]["severity"], "high")
+        self.assertEqual(results[0]["properties"]["cvss"], 7.5)
+        self.assertEqual(results[0]["properties"]["remediation"], "Use a secure algorithm like RS256 or HS256.")
+
+        os.remove(sarif_file)
+
+    def test_generate_file_empty_results(self):
+        empty_results = []
+        sarif_file = generate_file_from_tool(self.tool_name, empty_results, self.config_tool)
+
+        self.assertTrue(os.path.exists(sarif_file))
+
+        with open(sarif_file, 'r', encoding='utf-8') as file:
+            sarif_content = json.load(file)
+
+        results = sarif_content["runs"][0]["results"]
+        self.assertEqual(len(results), 0)
+
+        os.remove(sarif_file)
+
+    def test_generate_file_empty_rules(self):
+        empty_config_tool = {"RULES": {}}
+        sarif_file = generate_file_from_tool(self.tool_name, self.result_scans, empty_config_tool)
+
+        self.assertTrue(os.path.exists(sarif_file))
+
+        with open(sarif_file, 'r', encoding='utf-8') as file:
+            sarif_content = json.load(file)
+
+        rules = sarif_content["runs"][0]["tool"]["driver"]["rules"]
+        self.assertEqual(len(rules), 0)
+
+        os.remove(sarif_file)

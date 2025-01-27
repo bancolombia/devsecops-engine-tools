@@ -1,71 +1,61 @@
 import json
-import os
+import json
+from datetime import datetime
 
+def generate_file_from_tool(tool_name, result_scans, config_tool):
+    if tool_name == "JWT":
+        sarif_report = {
+            "version": "2.1.0",
+            "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+            "runs": [
+                {
+                    "tool": {
+                        "driver": {
+                            "name": tool_name,
+                            "version": "1.0.0",
+                            "rules": [
+                                {
+                                    "id": rule_id,
+                                    "shortDescription": {"text": rule["description"]},
+                                    "helpUri": rule.get("helpUri", ""),
+                                    "properties": {
+                                        "severity": rule.get("severity", "medium"),
+                                        "cvss": rule.get("cvss", 0)
+                                    }
+                                }
+                                for rule_id, rule in config_tool.get("RULES", {}).items()
+                            ]
+                        }
+                    },
+                    "results": [
+                        {
+                            "ruleId": result["check_id"],
+                            "message": {"text": result["description"]},
+                            "locations": [
+                                {
+                                    "physicalLocation": {
+                                        "artifactLocation": {
+                                            "uri": result["matched-at"]
+                                        }
+                                    }
+                                }
+                            ],
+                            "properties": {
+                                "severity": result["severity"],
+                                "cvss": result["cvss"],
+                                "remediation": result.get("remediation", "No remediation provided")
+                            }
+                        }
+                        for result in result_scans
+                    ]
+                }
+            ]
+        }
 
-def generate_file_from_tool(tool, result_list, rules_doc):
-    if tool.lower() == "nuclei":
-        try:
-            result_one: dict = {}
-            result_two: dict = {}
-            if len(result_list) > 1:
-                result_one = result_list[0]
-                result_two = result_list[1]
-            file_name = "results.json"
-            results_data = {
-                "check_type": "Api and Web Application",
-                "results": {
-                    "failed_checks": list(
-                        map(
-                            lambda x: update_field(
-                                x,
-                                "severity",
-                                rules_doc[x.get("check_id")].get("severity").lower(),
-                            ),
-                            result_one.get("results", {}).get("failed_checks", []),
-                        )
-                    )
-                    + list(
-                        map(
-                            lambda x: update_field(
-                                x,
-                                "severity",
-                                rules_doc[x.get("check_id")].get("severity").lower(),
-                            ),
-                            result_two.get("results", {}).get("failed_checks", []),
-                        )
-                    )
-                },
-                "summary": {
-                    "passed": result_one.get("summary", {}).get("passed", 0)
-                    + result_two.get("summary", {}).get("passed", 0),
-                    "failed": result_one.get("summary", {}).get("failed", 0)
-                    + result_two.get("summary", {}).get("failed", 0),
-                    "skipped": result_one.get("summary", {}).get("skipped", 0)
-                    + result_two.get("summary", {}).get("skipped", 0),
-                    "parsing_errors": result_one.get("summary", {}).get(
-                        "parsing_errors", 0
-                    )
-                    + result_one.get("summary", {}).get("parsing_errors", 0),
-                    "resource_count": result_one.get("summary", {}).get(
-                        "resource_count", 0
-                    )
-                    + result_two.get("summary", {}).get("resource_count", 0),
-                    "nuclei_version": result_one.get("summary", {}).get(
-                        "version", None
-                    ),
-                },
-            }
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        sarif_file_path = f"{tool_name}_report_{timestamp}.sarif"
+        
+        with open(sarif_file_path, "w", encoding="utf-8") as sarif_file:
+            json.dump(sarif_report, sarif_file, indent=4)
 
-            with open(file_name, "w") as json_file:
-                json.dump(results_data, json_file, indent=4)
-
-            absolute_path = os.path.abspath(file_name)
-            return absolute_path
-        except KeyError as e:
-            print(f"Dict KeyError in checks integration: {e}")
-        except Exception as ex:
-            print(f"Error during handling checkov json integrator {ex}")
-
-
-def update_field(elem, field, new_value):
-    return {**elem, field: new_value}
+        return sarif_file_path
