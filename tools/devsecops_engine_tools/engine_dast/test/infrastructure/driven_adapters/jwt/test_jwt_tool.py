@@ -1,6 +1,5 @@
 import unittest
 from unittest.mock import MagicMock, Mock, patch
-from devsecops_engine_tools.engine_dast.src.domain.model import config_tool
 from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.jwt.jwt_tool import JwtTool
 
 class TestJwtTool(unittest.TestCase):
