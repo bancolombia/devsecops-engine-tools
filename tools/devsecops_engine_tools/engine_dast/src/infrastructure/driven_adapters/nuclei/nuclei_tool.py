@@ -113,8 +113,8 @@ class NucleiTool(ToolGateway):
             + (f" -ud {target_config.custom_templates_dir}" if target_config.custom_templates_dir else "")
             + " -ni "  # disable interactsh server
             + "-dc "  # disable clustering of requests
-            #+ "-tags " # Excute only templates with the especified tag
-           # + target_config.target_type
+            + "-tags " # Excute only templates with the especified tag
+            + target_config.target_type
             + " -je "  # file to export results in JSON format
             + str(target_config.output_file)
             + " -sr"
