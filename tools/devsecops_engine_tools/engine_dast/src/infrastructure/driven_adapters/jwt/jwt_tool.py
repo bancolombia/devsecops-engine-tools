@@ -97,6 +97,7 @@ class JwtTool(ToolGateway):
             }
             return mapped_result
         return None
+    
     def configure_tool(self, target_data):
         """Method for group all operations that uses JWT"""
         jwt_list: List[ApiOperation] = []
