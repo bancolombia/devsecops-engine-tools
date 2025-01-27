@@ -4,9 +4,6 @@ import json
 import platform
 import requests
 import shutil
-from devsecops_engine_tools.engine_dast.src.domain.model.config_tool import (
-    ConfigTool,
-)
 from devsecops_engine_tools.engine_dast.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -19,6 +16,7 @@ from devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nucle
 from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
     GithubApi
 )
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 from devsecops_engine_tools.engine_utilities.utils.utils import Utils
@@ -104,24 +102,6 @@ class NucleiTool(ToolGateway):
             logger.error(f"Error [107]: An exception occurred during installation: {e}")
             return {"status": 107}
 
-    def configurate_external_checks(
-        self, config_tool: ConfigTool, secret, output_dir: str = "tmp"
-    ):
-        if secret is None:
-            logger.warning("The secret is not configured for external controls")
-        # Create configuration dir external checks
-        elif config_tool.use_external_checks_dir == "True":
-            github_api = GithubApi(secret["github_token"])
-            github_api.download_latest_release_assets(
-                config_tool.external_dir_owner,
-                config_tool.external_dir_repository,
-                output_dir,
-            )
-            return output_dir + config_tool.external_asset_name
-        else:
-            return None
-
-
     def execute(self, command_prefix: str, target_config: NucleiConfig) -> dict:
         """Interact with nuclei's core application"""
 
@@ -133,8 +113,8 @@ class NucleiTool(ToolGateway):
             + (f" -ud {target_config.custom_templates_dir}" if target_config.custom_templates_dir else "")
             + " -ni "  # disable interactsh server
             + "-dc "  # disable clustering of requests
-            + "-tags " # Excute only templates with the especified tag
-            + target_config.target_type
+            #+ "-tags " # Excute only templates with the especified tag
+           # + target_config.target_type
             + " -je "  # file to export results in JSON format
             + str(target_config.output_file)
             + " -sr"
@@ -157,29 +137,17 @@ class NucleiTool(ToolGateway):
         target_data, 
         config_tool,
         secret_tool, 
-        secret_external_checks
+        secret_external_checks,
+        agent_work_folder
     ):
-        secret = None
-        if secret_tool is not None: secret = secret_tool
-        elif secret_external_checks is not None:
-            secret = {
-                "github_token": (
-                    secret_external_checks.split("github")[1]
-                    if "github" in secret_external_checks
-                    else None
-                )
-            }
-
-        result_install = self.install_tool(config_tool.version)
+        result_install = self.install_tool(config_tool[self.TOOL]["VERSION"])
         if result_install["status"] < 200:
             return [], None
         
         nuclei_config = NucleiConfig(target_data)
-        nuclei_config
-        checks_directory = self.configurate_external_checks(config_tool, secret, "./tmp") #DATA PDN
-
-        if checks_directory:
-            nuclei_config.customize_templates(checks_directory)
+        if config_tool[self.TOOL]["ENABLE_CUSTOM_RULES"]:
+            Utils().configurate_external_checks(self.TOOL, config_tool, secret_tool, secret_external_checks, agent_work_folder)
+            nuclei_config.customize_templates(agent_work_folder)
 
         result_scans = self.execute(result_install["path"], nuclei_config)
         findings_list = NucleiDesealizator().get_list_finding(result_scans)

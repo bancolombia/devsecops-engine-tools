@@ -19,7 +19,6 @@ class NucleiConfig:
 
     def process_template_file(
         self,
-        base_folder: str,
         dest_folder: str,
         template_name: str,
         new_template_data: dict,
@@ -33,7 +32,8 @@ class NucleiConfig:
                 template_data["http"][0]["path"] = [
                     "{{BaseURL}}" + new_template_data["operation"]["path"]
                 ]
-                template_data["http"][0]["headers"] = new_template_data["operation"]["headers"]
+                if "headers" in template_data.get("http", [{}])[0]:
+                    template_data["http"][0]["headers"] = new_template_data["operation"]["headers"]
                 if "payload" in new_template_data["operation"]:
                     body = json_dumps(new_template_data["operation"]["payload"])
                     template_data["http"][0]["body"] = body
@@ -50,11 +50,10 @@ class NucleiConfig:
         t_counter = 0
         for operation in self.data:
             operation.authenticate() #Api Authentication
-            for root, dirs, files in os.walk(base_folder):
+            for root, _, files in os.walk(f"{base_folder}{os.sep}rules{os.sep}nuclei"):
                 for file in files:
                     if file.endswith(".yaml"):
                         self.process_template_file(
-                            base_folder=base_folder,
                             dest_folder=self.custom_templates_dir,
                             template_name=os.path.join(root, file),
                             new_template_data=operation.data,
@@ -64,7 +63,7 @@ class NucleiConfig:
 
     def customize_templates(self, directory: str) -> None:
         if self.target_type == "api":
-            self.custom_templates_dir = "customized-nuclei-templates"
+            self.custom_templates_dir = f"{directory}{os.sep}customized-nuclei-templates"
             self.process_templates_folder(
                 base_folder=directory
             )
