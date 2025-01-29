@@ -16,3 +16,4 @@ class Exclusions:
         self.vm_id_url = kwargs.get("vm_id_url", "")
         self.service = kwargs.get("service", "")
         self.tags = kwargs.get("tags", [])
+        self.check_in_desc = kwargs.get("x86.image.name", [])

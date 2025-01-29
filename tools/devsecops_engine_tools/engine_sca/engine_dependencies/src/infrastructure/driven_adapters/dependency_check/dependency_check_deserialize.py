@@ -37,7 +37,7 @@ class DependencyCheckDeserialize(DeserializatorGateway):
                         if len(software) > 0:
                             fix = software[0].get("versionEndExcluding", "Not found").lower()
                     
-                    id = vulnerability.find('ns:name', namespace).text[:20]
+                    id = vulnerability.find('ns:name', namespace).text[:28]
                     cvss = ", ".join(f"{child.tag.split('}')[-1]}: {child.text}" for child in vulnerability.find('ns:cvssV3', namespace)) if vulnerability.find('ns:cvssV3', namespace) else ""
                     where = self.get_where(dependency, namespace)
                     description = vulnerability.find('ns:description', namespace).text if vulnerability.find('ns:description', namespace).text else ""

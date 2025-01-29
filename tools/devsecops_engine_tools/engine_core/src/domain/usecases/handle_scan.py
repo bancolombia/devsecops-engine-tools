@@ -196,6 +196,9 @@ class HandleScan:
                             self.devops_platform_gateway.get_variable("branch_tag"),
                             self.devops_platform_gateway.get_variable("commit_hash"),
                             env,
+                            self.devops_platform_gateway.get_variable("vm_product_type_name"),
+                            self.devops_platform_gateway.get_variable("vm_product_name"),
+                            self.devops_platform_gateway.get_variable("vm_product_description"),
                         )
                     )
 

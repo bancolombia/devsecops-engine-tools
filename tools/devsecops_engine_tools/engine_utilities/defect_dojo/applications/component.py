@@ -25,5 +25,4 @@ class Component:
             uc = ComponentUserCase(rest_component)
             return uc.post(request)
         except ApiError as e:
-            logger.error(f"Error during create component: {e}")
             raise e

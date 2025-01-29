@@ -39,7 +39,7 @@ def test_runner_secret_scan(mock_entry_point_tool):
 def test_runner_secret_scan_exception(mock_entry_point_tool):
         # Arrange
         dict_args = {'arg1': 'value1', 'arg2': 'value2'}
-        tool = 'TRUFFLEHOG'
+        tool = 'GITLEAKS'
         secret_tool = "secret"
         devops_platform_gateway = None
         

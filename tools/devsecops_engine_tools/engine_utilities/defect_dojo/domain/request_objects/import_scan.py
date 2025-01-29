@@ -40,6 +40,7 @@ class ImportScanRequest:
     code_app: str = ""
     token_cmdb: str = ""
     host_cmdb: str = ""
+    cmdb_request_response: dict = None
     token_defect_dojo: str = ""
     host_defect_dojo: str = ""
     # *** config map ***
