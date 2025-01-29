@@ -54,7 +54,12 @@
         "tag2"
     ],
     "THRESHOLD": {
-        "REMEDIATION_RATE": 50,
+        "REMEDIATION_RATE": {
+            "1": 0,
+            "5": 30,
+            "10": 50,
+            "other": 70
+        },
         "RISK_SCORE": 10,
         "TAG_MAX_AGE": 999
     }

@@ -54,3 +54,9 @@ class AgentVariables(BaseEnum):
     github_workspace = "github.workspace"
     runner_os = "runner.os"
     runner_tool_cache = "runner.tool.cache"
+
+
+class VMVariables(BaseEnum):
+    Vm_Product_Type_Name = "Vm.Product.Type.Name"
+    Vm_Product_Name = "Vm.Product.Name"
+    Vm_Product_Description = "Vm.Product.Description"

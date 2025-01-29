@@ -69,6 +69,8 @@ kubescape-macos-latest
 *.zip
 *_SBOM.json
 syft
+gitleaks_aux_report_*.json
+gitleaks_report.json
 
 # Extensions
 out

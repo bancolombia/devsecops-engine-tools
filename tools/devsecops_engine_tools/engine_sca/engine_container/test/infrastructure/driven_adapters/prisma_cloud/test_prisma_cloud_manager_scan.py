@@ -238,7 +238,7 @@ def test_write_image_base_success():
             "PRISMA": [
                 {
                     "id": "CVE-1234-5678",
-                    "source_images": ["python:3.9"]
+                    "x86.image.name": ["python:3.9"]
                 }
             ]
         }

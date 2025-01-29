@@ -5,6 +5,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bancolombia_devsecops-engine-tools&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bancolombia_devsecops-engine-tools)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bancolombia_devsecops-engine-tools&metric=coverage)](https://sonarcloud.io/summary/new_code?id=bancolombia_devsecops-engine-tools)
 [![Python Version](https://img.shields.io/badge/python%20-%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20-blue)](#)
+[![PyPI](https://img.shields.io/pypi/v/devsecops-engine-tools)](https://pypi.org/project/devsecops-engine-tools/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/bancolombia/devsecops-engine-tools
 )](https://hub.docker.com/r/bancolombia/devsecops-engine-tools)
 
@@ -39,7 +40,7 @@ pip3 install devsecops-engine-tools
 ### Scan running - flags (CLI)
 
 ```bash
-devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --remote_config_branch ["remote_config_branch"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container", "engine_risk", "engine_code"] --folder_path ["Folder path scan engine_iac, engine_code and engine_dependencies"] --platform ["k8s","cloudformation","docker", "openapi", "terraform"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] --token_external_checks ["token_external_checks"] --xray_mode ["scan", "audit"] --image_to_scan ["image_to_scan"]
+devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --remote_config_branch ["remote_config_branch"] --tool ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container", "engine_risk", "engine_code"] --folder_path ["Folder path scan engine_iac, engine_code, engine_dependencies and engine_secret"] --platform ["k8s","cloudformation","docker", "openapi", "terraform"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] --token_external_checks ["token_external_checks"] --xray_mode ["scan", "audit"] --image_to_scan ["image_to_scan"]
 ```
 
 ### Structure Remote Config
@@ -68,7 +69,7 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
    ┃   ┗ 📜ConfigTool.json
    ┃   ┗ 📜Exclusions.json
 ```
-
+For more information visit [here](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/example_remote_config_local/README.md)
 #### Tools available for the modules (Configuration engine_core/ConfigTool.json)
 
 
@@ -102,8 +103,12 @@ devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_con
     <td>Free</td>
   </tr>
   <tr>
-    <td>ENGINE_SECRET</td>
+    <td rowspan="2">ENGINE_SECRET</td>
     <td><a href="https://trufflesecurity.com/trufflehog">TRUFFLEHOG</a></td>
+    <td>Free</td>
+  </tr>
+  <tr>
+    <td><a href="https://gitleaks.io/">GITLEAKS</a></td>
     <td>Free</td>
   </tr>
   <tr>

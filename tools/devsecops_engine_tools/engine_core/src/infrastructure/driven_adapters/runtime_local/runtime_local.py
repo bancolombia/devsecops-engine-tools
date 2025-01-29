@@ -21,7 +21,7 @@ class RuntimeLocal(DevopsPlatformGateway):
     def get_remote_config(self, repository, path, branch=""):
         remote_config_path = f"{repository}/{path}"
 
-        with open(remote_config_path) as f:
+        with open(remote_config_path, 'r', encoding='utf-8') as f:
             return json.load(f)
 
     def message(self, type, message):
@@ -66,6 +66,9 @@ class RuntimeLocal(DevopsPlatformGateway):
             "temp_directory" : "DET_TEMP_DIRECTORY",
             "target_branch" : "DET_TARGET_BRANCH",
             "source_branch" : "DET_SOURCE_BRANCH",
-            "repository_provider" : "DET_REPOSITORY_PROVIDER"
+            "repository_provider" : "DET_REPOSITORY_PROVIDER",
+            "vm_product_type_name" : "DET_VM_PRODUCT_TYPE_NAME",
+            "vm_product_name" : "DET_VM_PRODUCT_NAME",
+            "vm_product_description" : "DET_VM_PRODUCT_DESCRIPTION",
         }
         return os.environ.get(env_variables[variable], None)
