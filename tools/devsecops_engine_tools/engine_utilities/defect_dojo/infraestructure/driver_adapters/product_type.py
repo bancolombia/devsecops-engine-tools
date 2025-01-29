@@ -22,7 +22,7 @@ class ProductTypeRestConsumer:
         data = json.dumps({"name": product_type_name})
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": "application/json"}
         try:
-            response = self.__session.post(url, headers=headers, data=data)
+            response = self.__session.post(url, headers=headers, data=data, verify=VERIFY_CERTIFICATE)
             if response.status_code != 201:
                 raise ApiError(response.json())
             product_type_object = ProductType.from_dict(response.json())
