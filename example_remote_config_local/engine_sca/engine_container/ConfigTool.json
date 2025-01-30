@@ -2,7 +2,6 @@
     "PRISMA_CLOUD": {
         "TWISTCLI_PATH": "twistcli",
         "PRISMA_CONSOLE_URL": "",
-        "PRISMA_ACCESS_KEY": "",
         "PRISMA_API_VERSION":"",
         "SBOM_FORMAT": "cyclonedx_json"
     },

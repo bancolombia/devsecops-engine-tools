@@ -146,7 +146,7 @@ def get_inputs_from_cli(args):
     parser.add_argument(
         "--token_engine_container",
         required=False,
-        help="Token to execute engine_container if is necessary",
+        help="Token to execute engine_container if is necessary, accesskey:secretkey",
     )
     parser.add_argument(
         "--token_engine_dependencies",
