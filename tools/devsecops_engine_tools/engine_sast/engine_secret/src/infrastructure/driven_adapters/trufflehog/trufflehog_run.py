@@ -135,7 +135,7 @@ class TrufflehogRun(ToolGateway):
             result = subprocess.run(command, capture_output=True, shell=True, text=True, encoding='utf-8')
             return result.stdout.strip()
         except Exception as e:
-            logger.warning(f"Error getting files PullRequest: {e}")
+            logger.warning(f"Error executing engine secret tool: {e}")
 
     def decode_output(self, results):
         for decode_output in results:

@@ -1,4 +1,5 @@
 import re
+from venv import logger
 
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway import (
     ToolGateway,
@@ -27,45 +28,48 @@ class SecretScan:
         self.git_gateway = git_gateway
 
     def process(self, skip_tool, config_tool, secret_tool, dict_args, tool):
-        tool = str(tool).lower()
-        finding_list = []
-        file_path_findings = ""
-        secret_external_checks=dict_args["token_external_checks"]
-        files_to_scan = None if dict_args["folder_path"] is None else [dict_args["folder_path"]]
-        if skip_tool == False:
-            self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("os"), self.devops_platform_gateway.get_variable("temp_directory"), config_tool[tool]["VERSION"])
-            if files_to_scan is None:
-                files_to_scan = self.git_gateway.get_files_pull_request(
-                    self.devops_platform_gateway.get_variable("path_directory"),
-                    self.devops_platform_gateway.get_variable("target_branch"),
-                    config_tool["TARGET_BRANCHES"],
-                    self.devops_platform_gateway.get_variable("source_branch"),
-                    self.devops_platform_gateway.get_variable("access_token"),
-                    self.devops_platform_gateway.get_variable("organization"),
-                    self.devops_platform_gateway.get_variable("project_name"),
-                    self.devops_platform_gateway.get_variable("repository"),
-                    self.devops_platform_gateway.get_variable("repository_provider"))
-            findings, file_path_findings = self.tool_gateway.run_tool_secret_scan(
-                    files_to_scan,
+        try:
+            tool = str(tool).lower()
+            finding_list = []
+            file_path_findings = ""
+            secret_external_checks=dict_args["token_external_checks"]
+            files_to_scan = None if dict_args["folder_path"] is None else [dict_args["folder_path"]]
+            if skip_tool == False:
+                self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("os"), self.devops_platform_gateway.get_variable("temp_directory"), config_tool[tool]["VERSION"])
+                if files_to_scan is None:
+                    files_to_scan = self.git_gateway.get_files_pull_request(
+                        self.devops_platform_gateway.get_variable("path_directory"),
+                        self.devops_platform_gateway.get_variable("target_branch"),
+                        config_tool["TARGET_BRANCHES"],
+                        self.devops_platform_gateway.get_variable("source_branch"),
+                        self.devops_platform_gateway.get_variable("access_token"),
+                        self.devops_platform_gateway.get_variable("organization"),
+                        self.devops_platform_gateway.get_variable("project_name"),
+                        self.devops_platform_gateway.get_variable("repository"),
+                        self.devops_platform_gateway.get_variable("repository_provider"))
+                findings, file_path_findings = self.tool_gateway.run_tool_secret_scan(
+                        files_to_scan,
+                        self.devops_platform_gateway.get_variable("os"),
+                        self.devops_platform_gateway.get_variable("path_directory"),
+                        self.devops_platform_gateway.get_variable("repository"),
+                        config_tool,
+                        secret_tool,
+                        secret_external_checks,
+                        self.devops_platform_gateway.get_variable("temp_directory"),
+                        tool,
+                        self.devops_platform_gateway.get_variable("repository_provider"))
+                finding_list = self.tool_deserialize.get_list_vulnerability(
+                    findings,
                     self.devops_platform_gateway.get_variable("os"),
-                    self.devops_platform_gateway.get_variable("path_directory"),
-                    self.devops_platform_gateway.get_variable("repository"),
-                    config_tool,
-                    secret_tool,
-                    secret_external_checks,
-                    self.devops_platform_gateway.get_variable("temp_directory"),
-                    tool,
-                    self.devops_platform_gateway.get_variable("repository_provider"))
-            finding_list = self.tool_deserialize.get_list_vulnerability(
-                findings,
-                self.devops_platform_gateway.get_variable("os"),
-                self.devops_platform_gateway.get_variable("path_directory")
-                )
-        else:
-            print("Tool skipped by DevSecOps policy")
-            dict_args["send_metrics"] = "false"
-        return finding_list, file_path_findings
-    
+                    self.devops_platform_gateway.get_variable("path_directory")
+                    )
+            else:
+                print("Tool skipped by DevSecOps policy")
+                dict_args["send_metrics"] = "false"
+            return finding_list, file_path_findings
+        except Exception as e:
+            logger.warning(f"Error secret scan: {e}")
+                
     def complete_config_tool(self, dict_args, tool):
         tool = str(tool).lower()
         init_config_tool = self.devops_platform_gateway.get_remote_config(
