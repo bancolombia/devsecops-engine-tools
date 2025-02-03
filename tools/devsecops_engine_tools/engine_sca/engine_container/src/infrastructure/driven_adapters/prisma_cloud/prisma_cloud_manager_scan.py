@@ -21,14 +21,13 @@ class PrismaCloudManagerScan(ToolGateway):
     def download_twistcli(
         self,
         file_path,
-        prisma_access_key,
-        prisma_secret_key,
+        prisma_key,
         prisma_console_url,
         prisma_api_version,
     ):
         url = f"{prisma_console_url}/api/{prisma_api_version}/util/twistcli"
         credentials = base64.b64encode(
-            f"{prisma_access_key}:{prisma_secret_key}".encode()
+            prisma_key.encode()
         ).decode()
         headers = {"Authorization": f"Basic {credentials}"}
         try:
@@ -46,7 +45,7 @@ class PrismaCloudManagerScan(ToolGateway):
             raise ValueError(f"Error downloading twistcli: {e}")
 
     def scan_image(
-        self, file_path, image_name, result_file, remoteconfig, prisma_secret_key
+        self, file_path, image_name, result_file, remoteconfig, prisma_key
     ):
         command = (
             file_path,
@@ -55,9 +54,9 @@ class PrismaCloudManagerScan(ToolGateway):
             "--address",
             remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
             "--user",
-            remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
+            self._split_prisma_token(prisma_key)[0],
             "--password",
-            prisma_secret_key,
+            self._split_prisma_token(prisma_key)[1],
             "--output-file",
             result_file,
             "--details",
@@ -100,11 +99,11 @@ class PrismaCloudManagerScan(ToolGateway):
         except subprocess.CalledProcessError as e:
              logger.error(f"Error during write image base of {base_image}: {e.stderr}")
             
-    def _generate_sbom(self, image_scanned, remoteconfig, prisma_secret_key, image_name):
+    def _generate_sbom(self, image_scanned, remoteconfig, prisma_key, image_name):
 
         url = f"{remoteconfig['PRISMA_CLOUD']['PRISMA_CONSOLE_URL']}/api/{remoteconfig['PRISMA_CLOUD']['PRISMA_API_VERSION']}/sbom/download/cli-images"
         credentials = base64.b64encode(
-            f"{remoteconfig['PRISMA_CLOUD']['PRISMA_ACCESS_KEY']}:{prisma_secret_key}".encode()
+            prisma_key.encode()
         ).decode()
         headers = {"Authorization": f"Basic {credentials}"}
         try:
@@ -137,11 +136,19 @@ class PrismaCloudManagerScan(ToolGateway):
         except Exception as e:
             logger.error(f"Error generating SBOM: {e}")
 
+
+    def _split_prisma_token(self, prisma_key):
+        try:
+            access_prisma, token_prisma = prisma_key.split(":")
+            return access_prisma, token_prisma
+        except ValueError:
+            raise ValueError("The string is not properly formatted. Make sure it contains a ':'.")
+        
     def run_tool_container_sca(
         self, remoteconfig, secret_tool, token_engine_container, image_name, result_file, base_image, exclusions, generate_sbom
     ):
-        prisma_secret_key = (
-            secret_tool["token_prisma_cloud"] if secret_tool else token_engine_container
+        prisma_key = (
+            f"{secret_tool['access_prisma']}:{secret_tool['token_prisma']}" if secret_tool else token_engine_container
         )
         file_path = os.path.join(
             os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
@@ -151,8 +158,7 @@ class PrismaCloudManagerScan(ToolGateway):
         if not os.path.exists(file_path):
             self.download_twistcli(
                 file_path,
-                remoteconfig["PRISMA_CLOUD"]["PRISMA_ACCESS_KEY"],
-                prisma_secret_key,
+                prisma_key,
                 remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
                 remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"],
             )
@@ -161,7 +167,7 @@ class PrismaCloudManagerScan(ToolGateway):
             image_name,
             result_file,
             remoteconfig,
-            prisma_secret_key
+            prisma_key
         )
         if base_image:
             self._write_image_base(result_file, base_image, exclusions)
@@ -169,7 +175,7 @@ class PrismaCloudManagerScan(ToolGateway):
             sbom_components = self._generate_sbom(
                 image_scanned,
                 remoteconfig,
-                prisma_secret_key,
+                prisma_key,
                 image_name
             )
 
