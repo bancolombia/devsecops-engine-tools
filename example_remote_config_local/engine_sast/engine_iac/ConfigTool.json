@@ -671,6 +671,45 @@
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
+                },
+                "CKV_AWS_103": {
+                    "customID": "C-ELB-00501",
+                    "checkID": "C-ELB-00501-AWS ELB V2 Listener Secure Policy",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "https://bit.ly/44frBRZ",
+                    "severity": "Medium",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                },
+                "CKV_AWS_107": {
+                    "customID": "C-IAM-015",
+                    "checkID": "C-IAM-015-AWS IAM policies allow credentials exposure",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "https://bit.ly/44frBRZ",
+                    "severity": "Medium",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                },
+                "CKV_AWS_149": {
+                    "customID": "C-SCM-002",
+                    "checkID": "C-SCM-002-AWS Secret must be encrypted with its own CMK",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "https://bit.ly/44frBRZ",
+                    "severity": "Medium",
+                    "cvss": "",
+                    "category": "Vulnerability"
                 }
             },
             "RULES_TERRAFORM": {
@@ -688,16 +727,5 @@
                 }
             }
         }
-    },
-    "KUBESCAPE": {
-        "VERSION": "3.0.11"
-    },
-    "KICS": {
-        "VERSION": "2.1.0",
-        "KICS_LINUX": "https://example.url/kics/bin/linux/kics.zip",
-        "KICS_WINDOWS": "https://example.url/kics/bin/windows/kics.zip",
-        "KICS_MAC": "https://example.url/kics/bin/mac/kics.zip",
-        "PATH_KICS": "./kics/kics",
-        "DOWNLOAD_KICS_ASSETS": false
     }
 }
