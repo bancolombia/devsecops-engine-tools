@@ -89,6 +89,7 @@ class GithubActions(DevopsPlatformGateway):
             "vm_product_type_name": VMVariables.Vm_Product_Type_Name,
             "vm_product_name": VMVariables.Vm_Product_Name,
             "vm_product_description": VMVariables.Vm_Product_Description,
+            "github_actions": AgentVariables.github_actions,
         }
         try:
             return variable_map.get(variable).value()

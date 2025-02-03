@@ -34,7 +34,8 @@ class SecretScan:
             file_path_findings = ""
             secret_external_checks=dict_args["token_external_checks"]
             files_to_scan = None if dict_args["folder_path"] is None else [dict_args["folder_path"]]
-            print("files_to_scan", files_to_scan)
+            print("repository_provider", self.devops_platform_gateway.get_variable("repository_provider"))
+            print("github_actions", self.devops_platform_gateway.get_variable("github_actions"))
             if skip_tool == False:
                 self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("os"), self.devops_platform_gateway.get_variable("temp_directory"), config_tool[tool]["VERSION"])
                 if files_to_scan is None:
@@ -58,7 +59,7 @@ class SecretScan:
                         secret_external_checks,
                         self.devops_platform_gateway.get_variable("temp_directory"),
                         tool,
-                        self.devops_platform_gateway.get_variable("repository_provider"))
+                        self.devops_platform_gateway.get_variable("github_actions"))
                 finding_list = self.tool_deserialize.get_list_vulnerability(
                     findings,
                     self.devops_platform_gateway.get_variable("os"),

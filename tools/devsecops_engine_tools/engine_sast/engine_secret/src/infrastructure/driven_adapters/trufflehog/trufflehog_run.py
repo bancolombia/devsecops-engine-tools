@@ -120,10 +120,10 @@ class TrufflehogRun(ToolGateway):
         repository_name,
         enable_custom_rules,
         agent_os,
-        repository_provider= ""
+        github_provider= ""
     ):
         try:   
-            if repository_provider == 'GitHub':
+            if github_provider:
                 command = f"{trufflehog_command} filesystem {agent_work_folder} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --no-update --json"
             else:
                 command = f"{trufflehog_command} filesystem {agent_work_folder + "/" + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --no-update --json"             

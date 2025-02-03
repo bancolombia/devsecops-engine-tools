@@ -54,6 +54,7 @@ class AgentVariables(BaseEnum):
     github_workspace = "github.workspace"
     runner_os = "runner.os"
     runner_tool_cache = "runner.tool.cache"
+    github_actions = "github.actions"
 
 
 class VMVariables(BaseEnum):
