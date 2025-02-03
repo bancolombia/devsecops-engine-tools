@@ -34,6 +34,7 @@ class SecretScan:
             file_path_findings = ""
             secret_external_checks=dict_args["token_external_checks"]
             files_to_scan = None if dict_args["folder_path"] is None else [dict_args["folder_path"]]
+            print("files_to_scan", files_to_scan)
             if skip_tool == False:
                 self.tool_gateway.install_tool(self.devops_platform_gateway.get_variable("os"), self.devops_platform_gateway.get_variable("temp_directory"), config_tool[tool]["VERSION"])
                 if files_to_scan is None:
