@@ -63,7 +63,7 @@ class TrufflehogRun(ToolGateway):
         secret_external_checks,
         agent_temp_dir,
         tool,
-        repository_provider
+        github_provider = False
     ):
         trufflehog_command = "trufflehog"
         if "Windows" in agent_os:
@@ -86,7 +86,7 @@ class TrufflehogRun(ToolGateway):
                 [repository_name] * len(include_paths),
                 [enable_custom_rules] * len(include_paths),
                 [agent_os] * len(include_paths),
-                [repository_provider] * len(include_paths)
+                [github_provider] * len(include_paths)
             )
         findings, file_findings = self.create_file(self.decode_output(results), agent_work_folder, config_tool, tool)
         return  findings, file_findings
@@ -120,9 +120,10 @@ class TrufflehogRun(ToolGateway):
         repository_name,
         enable_custom_rules,
         agent_os,
-        github_provider= ""
+        github_provider
     ):
         try:   
+            print("github_provider", github_provider)
             if github_provider:
                 command = f"{trufflehog_command} filesystem {agent_work_folder} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --no-update --json"
             else:
