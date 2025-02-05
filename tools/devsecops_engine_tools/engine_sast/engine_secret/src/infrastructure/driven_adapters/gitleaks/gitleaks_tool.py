@@ -93,7 +93,7 @@ class GitleaksTool(ToolGateway):
         secret_external_checks,  # For external checks
         agent_temp_dir,
         tool,
-        github_provider = False
+        folder_path
     ):
         command = [self._COMMAND, "dir"]
         finding_path = os.path.join(agent_work_folder, "gitleaks_report.json")
