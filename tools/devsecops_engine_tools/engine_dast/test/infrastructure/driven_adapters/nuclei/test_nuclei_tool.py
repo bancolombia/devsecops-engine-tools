@@ -22,7 +22,6 @@ class TestNucleiTool(unittest.TestCase):
                 "USE_EXTERNAL_CHECKS_DIR": True,
                 "EXTERNAL_DIR_OWNER": "username",
                 "EXTERNAL_DIR_REPOSITORY": "engine-dast-nuclei-templates",
-                "EXTERNAL_DIR_ASSET_NAME": "rules/engine_dast/nuclei",
                 "MESSAGE_INFO_DAST": "If you have doubts, visit https://example.com/t/",
                 "ENABLE_CUSTOM_RULES": True,
             }
@@ -54,10 +53,9 @@ class TestNucleiTool(unittest.TestCase):
 
     @patch("shutil.which", return_value=None)
     @patch("subprocess.run")
-    @patch("shutil.move")
     @patch("os.path.expanduser")
     @patch("devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.nuclei.nuclei_tool.NucleiTool.download_tool")
-    def test_install_tool_linux(self, mock_download_tool, mock_expanduser, mock_shutil_move, mock_subprocess_run, mock_shutil_which):
+    def test_install_tool_linux(self, mock_download_tool, mock_expanduser, mock_subprocess_run, mock_shutil_which):
         mock_expanduser.return_value = "/home/user"
         mock_download_tool.return_value = 0
 
@@ -66,7 +64,6 @@ class TestNucleiTool(unittest.TestCase):
         self.assertEqual(result["status"], 201)
         mock_download_tool.assert_called_once()
         mock_subprocess_run.assert_called_once_with(["chmod", "+x", "/home/user/nuclei"], check=True)
-        mock_shutil_move.assert_called_once()
 
     @patch('builtins.open', new_callable=mock_open, read_data='{"key": "value"}')
     @patch('json.load', return_value={"key": "value"})
