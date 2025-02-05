@@ -15,5 +15,5 @@ class ToolGateway(metaclass=ABCMeta):
                             secret_external_checks,
                             agent_tem_dir:str,
                             tool,
-                            repository_provider: str) -> str:
+                            github_provider = False) -> str:
         "run tool secret scan"

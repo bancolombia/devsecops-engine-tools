@@ -63,6 +63,7 @@ class AgentVariables(BaseEnum):
     Agent_WorkFolder = "Agent.WorkFolder"
     Agent_TempDirectory = "Agent.TempDirectory"
     Agent_OS = "Agent.OS"
+    github_actions = "False"
 
 class VMVariables(BaseEnum):
     Vm_Product_Type_Name = "Vm.Product.Type.Name"
