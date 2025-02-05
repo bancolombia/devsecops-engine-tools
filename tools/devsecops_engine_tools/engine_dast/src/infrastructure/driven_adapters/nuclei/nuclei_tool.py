@@ -81,14 +81,9 @@ class NucleiTool(ToolGateway):
 
             if os_type == "darwin" or os_type == "linux":
                 subprocess.run(["chmod", "+x", executable_path], check=True)
-                target_path = os.path.expanduser("~/.local/bin/nuclei")
-                shutil.move(executable_path, target_path)
-                return {"status": 201, "path": target_path}  # Installation successful
+                return {"status": 201, "path": executable_path}  # Installation successful
             elif os_type == "windows":
-                target_path = os.path.join(home_directory, "AppData", "Local", "Programs", "nuclei.exe")
-                os.makedirs(os.path.dirname(target_path), exist_ok=True)
-                shutil.move(executable_path, target_path)
-                return {"status": 202, "path":target_path}
+                return {"status": 202, "path":executable_path}
             else:
                 raise Exception(f"Error [105]: {os_type} is an unsupported OS type!")
             
@@ -104,8 +99,7 @@ class NucleiTool(ToolGateway):
 
         command = (
             command_prefix
-            + " -duc "  # disable automatic update check
-            + "-u "  # target URLs/hosts to scan
+            + " -u "  # target URLs/hosts to scan
             + target_config.url
             + (f" -ud {target_config.custom_templates_dir}" if target_config.custom_templates_dir else "")
             + " -ni "  # disable interactsh server

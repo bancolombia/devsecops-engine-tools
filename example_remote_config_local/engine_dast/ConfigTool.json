@@ -14,11 +14,13 @@
     "NUCLEI": {
         "VERSION": "3.3.5",
         "DOWNLOAD_URL": "https://github.com/projectdiscovery/nuclei/releases/download/",
-        "USE_EXTERNAL_CHECKS_DIR": "True",
+        "USE_EXTERNAL_CHECKS_GIT": false,
+        "USE_EXTERNAL_CHECKS_DIR": true,
         "EXTERNAL_DIR_OWNER": "dummie-username",
         "EXTERNAL_DIR_REPOSITORY": "example-repo-templates",
-        "EXTERNAL_DIR_ASSET_NAME": "path/templates",
-        "EXTERNAL_CHECKS_PATH": "/local-templates"
+        "APP_ID_GITHUB": "00000000",
+        "INSTALLATION_ID_GITHUB": "00000000",
+        "ENABLE_CUSTOM_RULES": true
     },
     "JWT": {
         "RULES": {
