@@ -39,10 +39,6 @@ prueba.py
 main.py
 common_devsecops_lib/sheckov_scan.json
 _core_test*
-results.json
-bearer*.yml
-bearer*.json
-bin
 results*.json
 RULES_DOCKERcheckov_config.yaml
 RULES_K8Scheckov_config.yaml
@@ -71,6 +67,7 @@ kubescape-macos-latest
 syft
 gitleaks_aux_report_*.json
 gitleaks_report.json
+result_dast_scan.json
 
 # Extensions
 out

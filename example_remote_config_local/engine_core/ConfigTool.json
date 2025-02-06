@@ -74,8 +74,9 @@
         "TOOL": "PRISMA|TRIVY"
     },
     "ENGINE_DAST": {
-        "ENABLED": true,
-        "TOOL": "NUCLEI"
+        "ENABLED": "true",
+        "TOOL": "NUCLEI",
+        "EXTRA_TOOLS": ["JWT"]
     },
     "ENGINE_SECRET": {
         "ENABLED": true,
