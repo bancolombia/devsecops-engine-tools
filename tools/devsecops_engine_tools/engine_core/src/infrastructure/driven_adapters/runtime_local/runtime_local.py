@@ -42,6 +42,9 @@ class RuntimeLocal(DevopsPlatformGateway):
 
     def get_source_code_management_uri(self):
         return os.environ.get("DET_SOURCE_CODE_MANAGEMENT_URI")
+    
+    def get_build_pipeline_execution_url(self):
+        return os.environ.get("DET_BUILD_PIPELINE_EXECUTION_URL")
 
     def get_base_compact_remote_config_url(self, remote_config_repo):
         return f"{os.environ.get('DET_BASE_COMPACT_REMOTE_CONFIG_URL')}?path=/"

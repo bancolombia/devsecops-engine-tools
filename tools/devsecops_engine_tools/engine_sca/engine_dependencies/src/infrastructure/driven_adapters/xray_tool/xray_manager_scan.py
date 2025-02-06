@@ -12,6 +12,9 @@ import json
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.helpers.get_artifacts import (
     GetArtifacts,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway,
+)
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
@@ -105,13 +108,51 @@ class XrayScan(ToolGateway):
         if os.path.exists(gradlew_path):
             os.chmod(gradlew_path, 0o755)
 
-    def scan_dependencies(self, prefix, cwd, config, mode, to_scan):
+    def scan_dependencies(self, prefix, cwd, remote_tool:DevopsPlatformGateway,config, mode, to_scan):
         command = [
             prefix,
             mode,
             "--format=json",
             f"{to_scan}",
         ]
+
+        if mode == "build-scan":
+
+            #devops platform gateway parameters
+            build_definition_name = remote_tool.get_variable("pipeline_name")
+            build_number = remote_tool.get_variable("build_id")
+            build_uri = remote_tool.get_build_pipeline_execution_url()
+
+            #build info execution command
+            build_info_command =[
+               prefix,
+               "rt",
+               "bp",
+                build_definition_name,
+                build_number,
+                "--env-exclude=*password*;*psw*;*secret*;*key*;*token*;*auth*;",
+                f"--build-url={build_uri}"  
+            ]
+            build_info_result = subprocess.run(build_info_command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+            if  not build_info_result.stdout:
+               logger.error(f"Build info  NOT  successfully deployed to Jfrog Arifactory.: {build_info_result.stderr}")
+               return None
+
+            remote_tool.message(
+                "info", "Build info successfully deployed."
+            )
+            #build-scan execution command
+            command = [
+                prefix,
+                mode,
+                build_definition_name,
+                build_number,
+                "--format=json",
+                "--vuln",
+                "--fail=false",
+                "--rescan=true"
+            ]
         result = subprocess.run(
             command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
@@ -148,6 +189,7 @@ class XrayScan(ToolGateway):
         self,
         remote_config,
         dict_args,
+        remote_tool,
         exclusion,
         pipeline_name,
         to_scan,
@@ -155,7 +197,7 @@ class XrayScan(ToolGateway):
         token_engine_dependencies,
     ):
         token = secret_tool["token_xray"] if secret_tool else token_engine_dependencies
-        if dict_args["xray_mode"] == "scan":
+        if dict_args["xray_mode"] == "scan" or dict_args["xray_mode"] == "build-scan":
             get_artifacts = GetArtifacts()
             pattern = get_artifacts.excluded_files(
                 remote_config, pipeline_name, exclusion, "XRAY"
@@ -192,6 +234,7 @@ class XrayScan(ToolGateway):
         results_file = self.scan_dependencies(
             command_prefix,
             cwd,
+            remote_tool,
             remote_config,
             dict_args["xray_mode"],
             to_scan,
