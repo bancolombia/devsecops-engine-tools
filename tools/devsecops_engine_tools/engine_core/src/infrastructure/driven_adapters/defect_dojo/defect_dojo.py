@@ -83,7 +83,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "BEARER": "Bearer CLI",
                 "DEPENDENCY_CHECK": "Dependency Check Scan",
                 "SONARQUBE": "SonarQube API Import",
-                "GITLEAKS": "Gitleaks Scan"
+                "GITLEAKS": "Gitleaks Scan",
+                "NUCLEI": "Nuclei Scan"
             }
 
             if any(
