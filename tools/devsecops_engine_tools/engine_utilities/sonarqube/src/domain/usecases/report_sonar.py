@@ -127,7 +127,8 @@ class ReportSonar:
                         "s": "CREATION_DATE",
                         "asc": "false"
                     },
-                    "issues"
+                    "issues",
+                    report_config_tool["MAX_RETRIES_QUERY_SONAR"]
                 )
                 sonar_hotspots = self.sonar_gateway.get_findings(
                     args["sonar_url"],
@@ -138,7 +139,8 @@ class ReportSonar:
                         "ps": 100,
                         "p": 1,
                     },
-                    "hotspots"
+                    "hotspots",
+                    report_config_tool["MAX_RETRIES_QUERY_SONAR"]
                 )
 
                 sonar_findings = sonar_vulnerabilities + sonar_hotspots
@@ -164,7 +166,8 @@ class ReportSonar:
                                         "issue": related_sonar_finding["key"],
                                         "transition": status
                                     },
-                                    "issue"
+                                    "issue",
+                                    report_config_tool["MAX_RETRIES_QUERY_SONAR"]
                                 )
                         else:
                             resolution = None
@@ -185,7 +188,8 @@ class ReportSonar:
                                     secret["token_sonar"],
                                     "/api/hotspots/change_status",
                                     data,
-                                    "hotspot"
+                                    "hotspot",
+                                    report_config_tool["MAX_RETRIES_QUERY_SONAR"]
                                 )
 
             except Exception as e:
