@@ -63,24 +63,26 @@ class SonarAdapter(SonarGateway):
     
     def change_finding_status(self, sonar_url, sonar_token, endpoint, data, finding_type):
         try:
-            response = requests.post(
-                f"{sonar_url}{endpoint}",
-                headers={
-                    "Authorization": f"Basic {Utils().encode_token_to_base64(sonar_token)}"
-                },
-                data=data
-            )
-            response.raise_for_status()
+            def request_func():
+                response = requests.post(
+                    f"{sonar_url}{endpoint}",
+                    headers={
+                        "Authorization": f"Basic {Utils().encode_token_to_base64(sonar_token)}"
+                    },
+                    data=data
+                )
+                response.raise_for_status()
 
-            if finding_type == "issue": 
-                info = data["transition"]
-            else:
-                resolution_info = ""
-                if data.get("resolution"): resolution_info = f" ({data['resolution']})"
+                if finding_type == "issue": 
+                    info = data["transition"]
+                else:
+                    resolution_info = ""
+                    if data.get("resolution"): resolution_info = f" ({data['resolution']})"
 
-                info = f"{data['status']}{resolution_info}"
+                    info = f"{data['status']}{resolution_info}"
 
-            print(f"The state of the {finding_type} {data[finding_type]} was changed to {info}.")
+                print(f"The state of the {finding_type} {data[finding_type]} was changed to {info}.")
+                
         except Exception as e:
             logger.warning(f"Unable to change the status of {finding_type} {data[finding_type]}. Error: {e}")
             pass

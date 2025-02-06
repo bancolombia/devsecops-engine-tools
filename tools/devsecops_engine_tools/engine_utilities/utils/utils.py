@@ -1,6 +1,7 @@
 import zipfile
 import tarfile
 import platform
+import time
 from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
     GithubApi,
 )
@@ -141,3 +142,16 @@ class Utils:
         )
 
         return set_threshold(match_pattern) if match_pattern else threshold
+
+    def retries_requests(self, request_func, max_retries, retry_delay):
+        for attempt in range(max_retries):
+            try:
+                return request_func()
+            except Exception as e:
+                logger.error(f"Error making the request: {e}")
+                if attempt < max_retries - 1:
+                    logger.warning(f"Retry in {retry_delay} seconds...")
+                    time.sleep(retry_delay)
+                else:
+                    logger.error("Maximum number of retries reached, aborting.")
+                    raise e
