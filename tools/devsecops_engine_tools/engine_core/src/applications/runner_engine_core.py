@@ -109,7 +109,7 @@ def get_inputs_from_cli(args):
         type=parse_choices({"all", "docker", "k8s", "cloudformation", "openapi", "terraform"}),
         required=False,
         default="all",
-        help="Platform to scan, only apply engine_iac tool",
+        help="Platform to scan, applies only to the engine_iac tool and it is possible to select several {all, docker, k8s, cloudformation, openapi, terraform}",
     )
     parser.add_argument(
         "--use_secrets_manager",
