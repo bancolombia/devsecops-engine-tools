@@ -61,7 +61,7 @@ class SonarAdapter(SonarGateway):
     def filter_by_sonarqube_tag(self, findings):
         return [finding for finding in findings if "sonarqube" in finding.tags]
     
-    def change_finding_status(self, sonar_url, sonar_token, endpoint, data, finding_type):
+    def change_finding_status(self, sonar_url, sonar_token, endpoint, data, finding_type, sonar_max_retry):
         try:
             def request_func():
                 response = requests.post(
@@ -82,28 +82,33 @@ class SonarAdapter(SonarGateway):
                     info = f"{data['status']}{resolution_info}"
 
                 print(f"The state of the {finding_type} {data[finding_type]} was changed to {info}.")
+
+            Utils().retries_requests(request_func, sonar_max_retry, retry_delay=5)
                 
         except Exception as e:
             logger.warning(f"Unable to change the status of {finding_type} {data[finding_type]}. Error: {e}")
             pass
 
-    def get_findings(self, sonar_url, sonar_token, endpoint, params, finding_type):
+    def get_findings(self, sonar_url, sonar_token, endpoint, params, finding_type, sonar_max_retry):
         findings = []
         try:
-            while True:
-                response = requests.get(
-                    f"{sonar_url}{endpoint}",
-                    headers={
-                        "Authorization": f"Basic {Utils().encode_token_to_base64(sonar_token)}"
-                    },
-                    params=params
-                )
-                response.raise_for_status()
-                data = response.json()
+            def request_func():
+                while True:
+                    response = requests.get(
+                        f"{sonar_url}{endpoint}",
+                        headers={
+                            "Authorization": f"Basic {Utils().encode_token_to_base64(sonar_token)}"
+                        },
+                        params=params
+                    )
+                    response.raise_for_status()
+                    data = response.json()
 
-                findings.extend(data[finding_type])
-                if len(data[finding_type]) < params["ps"]: break
-                params["p"] = params["p"] + 1
+                    findings.extend(data[finding_type])
+                    if len(data[finding_type]) < params["ps"]: break
+                    params["p"] = params["p"] + 1
+            
+            Utils().retries_requests(request_func, sonar_max_retry, 5)
 
             return findings
         except Exception as e:
