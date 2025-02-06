@@ -1,0 +1,37 @@
+{
+    "THRESHOLD": {
+        "VULNERABILITY": {
+            "Critical": 1, 
+            "High": 8, 
+            "Medium": 10, 
+            "Low": 15
+        },
+        "COMPLIANCE": {
+            "Critical": 1
+        }
+    },
+    "MESSAGE_INFO_DAST": "If you have doubts, visit https://forum.example",
+    "NUCLEI": {
+        "VERSION": "3.3.5",
+        "DOWNLOAD_URL": "https://github.com/projectdiscovery/nuclei/releases/download/",
+        "USE_EXTERNAL_CHECKS_GIT": false,
+        "USE_EXTERNAL_CHECKS_DIR": true,
+        "EXTERNAL_DIR_OWNER": "dummie-username",
+        "EXTERNAL_DIR_REPOSITORY": "example-repo-templates",
+        "APP_ID_GITHUB": "00000000",
+        "INSTALLATION_ID_GITHUB": "00000000",
+        "ENABLE_CUSTOM_RULES": true
+    },
+    "JWT": {
+        "RULES": {
+                "JWT_ALGORITHM": {
+                    "checkID": "ENGINE_JWT_001",
+                    "environment": {"dev": "True", "pdn": "True", "qa": "True"},
+                    "guideline": "https://example.com/",
+                    "severity": "Low",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                }
+        }
+    }
+}
