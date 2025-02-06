@@ -6,7 +6,6 @@ class TestGenericOauth(unittest.TestCase):
 
     def setUp(self):
         self.data = {
-        "security_auth": {
           "type": "oauth",
           "method": "POST",
           "path": "oauth2/token",
@@ -18,7 +17,6 @@ class TestGenericOauth(unittest.TestCase):
               "content-type": "application/x-www-form-urlencoded",
               "accept": "application/json"
           }
-        }
         }
         self.oauth = GenericOauth(self.data, "example.com")
 
