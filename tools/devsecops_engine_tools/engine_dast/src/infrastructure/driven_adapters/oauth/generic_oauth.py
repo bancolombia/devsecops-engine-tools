@@ -17,13 +17,13 @@ class GenericOauth(AuthenticationGateway):
     def process_data(self):
 
         self.config = {
-            "method": self.data.get("security_auth",{}).get("method", "POST"),
-            "path": self.data.get("security_auth",{}).get("path", ""),
-            "grant_type": self.data.get("security_auth",{}).get("grant_type",""),
-            "scope": self.data.get("security_auth",{}).get("scope", None),
-            "headers": self.data.get("security_auth",{}).get("headers", {}),
-            "client_secret": self.data.get("security_auth",{}).get("client_secret", ""),
-            "client_id": self.data.get("security_auth",{}).get("client_id", "")
+            "method": self.data.get("method", "POST"),
+            "path": self.data.get("path", ""),
+            "grant_type": self.data.get("grant_type",""),
+            "scope": self.data.get("scope", None),
+            "headers": self.data.get("headers", {}),
+            "client_secret": self.data.get("client_secret", ""),
+            "client_id": self.data.get("client_id", "")
         }
         return self.config
 

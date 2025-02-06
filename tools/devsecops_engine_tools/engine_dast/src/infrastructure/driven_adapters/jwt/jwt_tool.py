@@ -110,6 +110,7 @@ class JwtTool(ToolGateway):
         result_scans = []
         if len(jwt_config) > 0:
             for jwt_operation in jwt_config:
+                jwt_operation.authenticate()
                 result = self.check_token(token=jwt_operation.credentials[1],
                                         jwt_details=jwt_operation.data["operation"],
                                         config_tool=config_tool)
