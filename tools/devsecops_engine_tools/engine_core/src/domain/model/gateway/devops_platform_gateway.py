@@ -21,6 +21,10 @@ class DevopsPlatformGateway(metaclass=ABCMeta):
     @abstractmethod
     def get_base_compact_remote_config_url(self, remote_config_repo):
         "get_base_compact_remote_config_url"
+    
+    @abstractmethod
+    def get_build_pipeline_execution_url(self):
+        "get_build_pipeline_execution_url"
 
     @abstractmethod
     def get_variable(self, variable):

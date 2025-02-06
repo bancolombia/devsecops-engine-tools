@@ -13,6 +13,7 @@ class DependenciesScan:
         tool_deserializator: DeserializatorGateway,
         remote_config,
         dict_args,
+        tool_remote,
         exclusions,
         pipeline_name,
         to_scan,
@@ -21,6 +22,7 @@ class DependenciesScan:
         self.tool_run = tool_run
         self.tool_deserializator = tool_deserializator
         self.remote_config = remote_config
+        self.tool_remote = tool_remote
         self.exclusions = exclusions
         self.pipeline_name = pipeline_name
         self.dict_args = dict_args
@@ -36,6 +38,7 @@ class DependenciesScan:
         return self.tool_run.run_tool_dependencies_sca(
             self.remote_config,
             self.dict_args,
+            self.tool_remote,
             self.exclusions,
             self.pipeline_name,
             self.to_scan,

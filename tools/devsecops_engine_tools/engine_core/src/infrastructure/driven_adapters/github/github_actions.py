@@ -61,6 +61,9 @@ class GithubActions(DevopsPlatformGateway):
         owner = split[0]
         return f"{SystemVariables.github_server_url}/{owner}/{remote_config_repo}"
 
+    def get_build_pipeline_execution_url(self):
+        return f"{SystemVariables.github_server_url.value()}/{SystemVariables.github_repository.value()}/actions/runs/{BuildVariables.github_run_id.value()}"
+
     def get_variable(self, variable):
         variable_map = {
             "branch_name": BuildVariables.github_ref,

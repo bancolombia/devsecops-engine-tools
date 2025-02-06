@@ -70,6 +70,9 @@ class AzureDevops(DevopsPlatformGateway):
             f"{remote_config_repo}?path=/"
         )
 
+    def get_build_pipeline_execution_url(self):
+        return f"{SystemVariables.System_TeamFoundationCollectionUri.value()}{SystemVariables.System_TeamProject.value()}/_build?buildId={BuildVariables.Build_BuildId.value()}"
+
     def get_variable(self, variable):
 
             variable_map = {

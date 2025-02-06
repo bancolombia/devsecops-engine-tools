@@ -68,6 +68,7 @@ def init_engine_dependencies(
                 tool_deserializator,
                 remote_config,
                 dict_args,
+                tool_remote,
                 exclusions,
                 pipeline_name,
                 to_scan,
