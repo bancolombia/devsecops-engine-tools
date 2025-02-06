@@ -145,37 +145,6 @@ class HandleScan:
             )
             return findings_list, input_core
 
-    def _define_threshold_quality_vuln(
-        self, input_core: InputCore, dict_args, secret_tool, config_tool
-    ):
-        quality_vulnerability_management = (
-            input_core.threshold_defined.quality_vulnerability_management
-        )
-        if quality_vulnerability_management:
-            product_type = self.vulnerability_management.get_product_type_service(
-                input_core.scope_pipeline, dict_args, secret_tool, config_tool
-            )
-            if product_type:
-                pt_name = product_type.name
-                apply_qualitypt = next(
-                    filter(
-                        lambda qapt: pt_name in qapt,
-                        quality_vulnerability_management["PTS"],
-                    ),
-                    None,
-                )
-                if apply_qualitypt:
-                    pt_info = apply_qualitypt[pt_name]
-                    pt_profile = pt_info["PROFILE"]
-                    pt_apps = pt_info["APPS"]
-
-                    input_core.threshold_defined.vulnerability = (
-                        LevelVulnerability(quality_vulnerability_management[pt_profile])
-                        if pt_apps == "ALL"
-                        or any(map(lambda pd: pd in input_core.scope_pipeline, pt_apps))
-                        else input_core.threshold_defined.vulnerability
-                    )
-
     def _use_vulnerability_management(
         self,
         config_tool,
@@ -222,6 +191,8 @@ class HandleScan:
                             config_tool,
                         )
 
+                self._update_threshold_cve(input_core, dict_args, secret_tool, config_tool)
+
                 self._define_threshold_quality_vuln(
                     input_core, dict_args, secret_tool, config_tool
                 )
@@ -239,3 +210,38 @@ class HandleScan:
                 )
             except ExceptionFindingsExcepted as ex2:
                 logger.error(str(ex2))
+
+    def _update_threshold_cve(self, input_core: InputCore, dict_args, secret_tool, config_tool):
+        return
+
+
+    def _define_threshold_quality_vuln(
+        self, input_core: InputCore, dict_args, secret_tool, config_tool
+    ):
+        quality_vulnerability_management = (
+            input_core.threshold_defined.quality_vulnerability_management
+        )
+        if quality_vulnerability_management:
+            product_type = self.vulnerability_management.get_product_type_service(
+                input_core.scope_pipeline, dict_args, secret_tool, config_tool
+            )
+            if product_type:
+                pt_name = product_type.name
+                apply_qualitypt = next(
+                    filter(
+                        lambda qapt: pt_name in qapt,
+                        quality_vulnerability_management["PTS"],
+                    ),
+                    None,
+                )
+                if apply_qualitypt:
+                    pt_info = apply_qualitypt[pt_name]
+                    pt_profile = pt_info["PROFILE"]
+                    pt_apps = pt_info["APPS"]
+
+                    input_core.threshold_defined.vulnerability = (
+                        LevelVulnerability(quality_vulnerability_management[pt_profile])
+                        if pt_apps == "ALL"
+                        or any(map(lambda pd: pd in input_core.scope_pipeline, pt_apps))
+                        else input_core.threshold_defined.vulnerability
+                    )
