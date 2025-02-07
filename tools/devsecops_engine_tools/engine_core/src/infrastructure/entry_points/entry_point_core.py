@@ -39,6 +39,9 @@ def init_engine_core(
             ).process(args, config_tool)
 
         else:
+            if args.get("tool"):
+                config_tool[args["module"].upper()]["TOOL"] = args.get("tool").upper()
+                
             findings_list, input_core = HandleScan(
                 vulnerability_management_gateway,
                 secrets_manager_gateway,
