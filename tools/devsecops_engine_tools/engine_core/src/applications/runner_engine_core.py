@@ -84,6 +84,26 @@ def get_inputs_from_cli(args):
         "-t",
         "--tool",
         choices=[
+            "nuclei",
+            "bearer",
+            "checkov",
+            "kics",
+            "kubescape",
+            "trufflehog",
+            "gitleaks",
+            "prisma",
+            "trivy",
+            "xray",
+            "dependency_check",
+        ],
+        type=str,
+        required=False,
+        help="Tool to execute according to the module",
+    )
+    parser.add_argument(
+        "-m",
+        "--module",
+        choices=[
             "engine_iac",
             "engine_dast",
             "engine_code",
@@ -94,7 +114,7 @@ def get_inputs_from_cli(args):
         ],
         type=str,
         required=True,
-        help="Tool to execute",
+        help="Module to execute",
     )
     parser.add_argument(
         "-fp",
@@ -182,6 +202,7 @@ def get_inputs_from_cli(args):
         "remote_config_repo": args.remote_config_repo,
         "remote_config_branch": args.remote_config_branch,
         "tool": args.tool,
+        "module": args.module,
         "folder_path": args.folder_path,
         "platform": args.platform,
         "use_secrets_manager": args.use_secrets_manager,

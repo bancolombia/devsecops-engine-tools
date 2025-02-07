@@ -43,7 +43,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_iac(self, mock_runner_engine_iac):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_iac",
+            "module": "engine_iac",
             "use_vulnerability_management": "true",
             "remote_config_repo": "test_repo",
             "remote_config_branch": ""
@@ -97,7 +97,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_iac_error(self, mock_runner_engine_iac):
         dict_args = {
             "use_secrets_manager": "false",
-            "tool": "engine_iac",
+            "module": "engine_iac",
             "use_vulnerability_management": "true",
             "remote_config_repo": "test_repo",
             "remote_config_branch": ""
@@ -144,7 +144,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_container(self, mock_runner_engine_container):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_container",
+            "module": "engine_container",
             "remote_config_repo": "test_repo",
             "remote_config_branch": "",
             "use_vulnerability_management": "true",
@@ -229,7 +229,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_dast(self, mock_open, mock_runner_engine_dast):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_dast",
+            "module": "engine_dast",
             "dast_file_path": "example_dast.json",
             "use_vulnerability_management": "true",
             "remote_config_repo": "dummie_repo"
@@ -263,7 +263,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_secret(self, mock_runner_secret_scan):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_secret",
+            "module": "engine_secret",
             "remote_config_repo": "test_repo",
             "remote_config_branch": "",
             "use_vulnerability_management": "true",
@@ -300,7 +300,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_secret_without_secret_manager(self, mock_runner_secret_scan):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_secret",
+            "module": "engine_secret",
             "remote_config_repo": "test_repo",
             "remote_config_branch": "",
             "use_vulnerability_management": "true",
@@ -337,7 +337,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_secret_without_secret_manager(self, mock_runner_secret_scan):
         dict_args = {
             "use_secrets_manager": "false",
-            "tool": "engine_secret",
+            "module": "engine_secret",
             "remote_config_repo": "test_repo",
             "remote_config_branch": "",
             "use_vulnerability_management": "true",
@@ -376,7 +376,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_dependencies(self, mock_runner_engine_dependencies):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_dependencies",
+            "module": "engine_dependencies",
             "remote_config_repo": "test_repo",
             "remote_config_branch": "",
             "use_vulnerability_management": "true",

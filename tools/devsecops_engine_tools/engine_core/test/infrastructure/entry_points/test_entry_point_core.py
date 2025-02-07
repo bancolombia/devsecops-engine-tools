@@ -42,7 +42,7 @@ class TestEntryPointCore(unittest.TestCase):
 
         args = {
             "remote_config_repo": "https://github.com/example/repo",
-            "tool": "engine_iac",
+            "module": "engine_iac",
             "send_metrics": "true",
             "remote_config_branch": ""
         }
@@ -65,7 +65,7 @@ class TestEntryPointCore(unittest.TestCase):
         mock_handle_scan.return_value.process.assert_called_once_with(
             {
                 "remote_config_repo": "https://github.com/example/repo",
-                "tool": "engine_iac",
+                "module": "engine_iac",
                 "send_metrics": "true",
                 "remote_config_branch": ""
             },
@@ -101,7 +101,7 @@ class TestEntryPointCore(unittest.TestCase):
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
             sbom_tool_gateway=mock.Mock(),
-            args={"remote_config_repo": "test", "tool": "engine_iac", "remote_config_branch": ""},
+            args={"remote_config_repo": "test", "module": "engine_iac", "remote_config_branch": ""},
         )
 
         # Assert
@@ -136,7 +136,7 @@ class TestEntryPointCore(unittest.TestCase):
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
             sbom_tool_gateway=mock.Mock(),
-            args={"remote_config_repo": "test", "tool": "engine_risk", "send_metrics": "true", "remote_config_branch": ""},
+            args={"remote_config_repo": "test", "module": "engine_risk", "send_metrics": "true", "remote_config_branch": ""},
         )
 
         #Assert

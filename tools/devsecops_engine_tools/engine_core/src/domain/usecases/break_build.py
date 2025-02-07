@@ -34,7 +34,7 @@ class BreakBuild:
     def _apply_policie_exception_new_vulnerability_industry(
         self, findings_list: "list[Finding]", exclusions: "list[Exclusions]", args: any
     ):
-        if args["tool"] in ["engine_container", "engine_dependencies"]:
+        if args["module"] in ["engine_container", "engine_dependencies"]:
             date_actual = datetime.now(pytz.utc)
             for item in findings_list:
                 if item.published_date_cve:

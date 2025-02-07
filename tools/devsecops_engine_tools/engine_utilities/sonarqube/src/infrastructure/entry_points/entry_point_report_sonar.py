@@ -60,7 +60,7 @@ def init_report_sonar(
 
         if args["send_metrics"] == "true":
             MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(
-                config_tool, input_core, {"tool": "report_sonar"}, ""
+                config_tool, input_core, {"module": "report_sonar"}, ""
             )
     else:
         if not is_enabled:

@@ -90,10 +90,10 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 for branch in vulnerability_management.config_tool[
                     "VULNERABILITY_MANAGER"
                 ]["BRANCH_FILTER"]
-            ) or (vulnerability_management.dict_args["tool"] == "engine_secret"):
-                tags = vulnerability_management.dict_args["tool"]
-                if vulnerability_management.dict_args["tool"] == "engine_iac":
-                    tags = f"{vulnerability_management.dict_args['tool']}_{'_'.join(vulnerability_management.dict_args['platform'])}"
+            ) or (vulnerability_management.dict_args["module"] == "engine_secret"):
+                tags = vulnerability_management.dict_args["module"]
+                if vulnerability_management.dict_args["module"] == "engine_iac":
+                    tags = f"{vulnerability_management.dict_args['module']}_{'_'.join(vulnerability_management.dict_args['platform'])}"
 
                 use_cmdb = vulnerability_management.config_tool[
                     "VULNERABILITY_MANAGER"
@@ -125,7 +125,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     test_string = "//".join([url_parts[0] + "/", url_parts[1]])
                     print(
                         "Report sent to vulnerability management: ",
-                        f"{test_string}?tags={vulnerability_management.dict_args['tool']}",
+                        f"{test_string}?tags={vulnerability_management.dict_args['module']}",
                     )
                 else:
                     raise ExceptionVulnerabilityManagement(response)
@@ -185,7 +185,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "MAX_RETRIES_QUERY"
             ]
 
-            tool = dict_args["tool"]
+            tool = dict_args["module"]
 
             risk_accepted_query_params = {
                 "risk_accepted": True,
