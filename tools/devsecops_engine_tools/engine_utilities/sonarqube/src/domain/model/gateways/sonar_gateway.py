@@ -39,7 +39,8 @@ class SonarGateway(metaclass=ABCMeta):
         sonar_token: str,
         endpoint: str,
         data: dict,
-        finding_type: str
+        finding_type: str,
+        sonar_max_retry: int
     ):
         "use API to change vulnerabilities state in sonar"
 
@@ -50,7 +51,8 @@ class SonarGateway(metaclass=ABCMeta):
         sonar_token: str,
         endpoint: str,
         params: dict,
-        finding_type: str
+        finding_type: str,
+        sonar_max_retry: int
     ):
         "use API to get project findings in sonar"
 
