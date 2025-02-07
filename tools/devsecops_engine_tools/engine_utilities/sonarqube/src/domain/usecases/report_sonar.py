@@ -85,7 +85,7 @@ class ReportSonar:
         else:
             project_keys = self.sonar_gateway.get_project_keys(pipeline_name)
 
-        args["tool"] = "sonarqube"
+        args["module"] = "sonarqube"
         vulnerability_manager = VulnerabilityManagement(
             scan_type = "SONARQUBE",
             input_core = input_core,
