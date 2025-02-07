@@ -29,13 +29,11 @@ from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     format_date,
 )
 from functools import partial
-
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.serializers.import_scan import (
     ImportScanSerializer,
 )
-import time
 import concurrent.futures
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
