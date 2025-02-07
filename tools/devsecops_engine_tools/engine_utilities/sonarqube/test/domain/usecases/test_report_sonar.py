@@ -39,7 +39,8 @@ class TestReportSonar(unittest.TestCase):
         }
 
         mock_devops_platform_gateway.get_remote_config.return_value = {
-            "PIPELINE_COMPONENTS": {}
+            "PIPELINE_COMPONENTS": {},
+            "MAX_RETRIES_QUERY_SONAR": 5
         }
         
         mock_sonar_gateway.get_project_keys.return_value = ["project_key_1"]
@@ -78,7 +79,8 @@ class TestReportSonar(unittest.TestCase):
                         "s": "CREATION_DATE",
                         "asc": "false"
                     },
-                    "issues"
+                    "issues",
+                    5
                 ),
                 call("sonar_url", 
                     "sonar_token", 
@@ -88,7 +90,8 @@ class TestReportSonar(unittest.TestCase):
                         "ps": 100,
                         "p": 1
                     },
-                    "hotspots"
+                    "hotspots",
+                    5
                 )
             ],
             any_order=False
@@ -103,7 +106,8 @@ class TestReportSonar(unittest.TestCase):
                         "issue": "123",
                         "transition": "reopen"
                     },
-                    "issue"
+                    "issue",
+                    5
                 )
             ],
             any_order=False

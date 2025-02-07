@@ -18,6 +18,7 @@ from devsecops_engine_tools.engine_utilities.defect_dojo import (
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_tools.engine_core.src.domain.model.report import Report
 from devsecops_engine_tools.engine_utilities.utils.session_manager import SessionManager
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionVulnerabilityManagement,
     ExceptionFindingsExcepted,
@@ -28,13 +29,11 @@ from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     format_date,
 )
 from functools import partial
-
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.serializers.import_scan import (
     ImportScanSerializer,
 )
-import time
 import concurrent.futures
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
@@ -113,7 +112,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 def request_func():
                     return DefectDojo.send_import_scan(request)
 
-                response = self._retries_requests(
+                response = Utils().retries_requests(
                     request_func,
                     vulnerability_management.config_tool["VULNERABILITY_MANAGER"][
                         "DEFECT_DOJO"
@@ -166,7 +165,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     else None
                 )
 
-            return self._retries_requests(request_func, dd_max_retries, retry_delay=5)
+            return Utils().retries_requests(request_func, dd_max_retries, retry_delay=5)
 
         except Exception as ex:
             raise ExceptionVulnerabilityManagement(
@@ -618,28 +617,15 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 session=session_manager, service=service, **query_params
             ).results
 
-        return self._retries_requests(request_func, max_retries, retry_delay=5)
-
+        return Utils().retries_requests(request_func, max_retries, retry_delay=5)
+    
     def _get_finding_exclusion(self, session_manager, max_retries, query_params):
         def request_func():
             return FindingExclusion.get_finding_exclusion(
                 session=session_manager, **query_params
             ).results
 
-        return self._retries_requests(request_func, max_retries, retry_delay=5)
-
-    def _retries_requests(self, request_func, max_retries, retry_delay):
-        for attempt in range(max_retries):
-            try:
-                return request_func()
-            except Exception as e:
-                logger.error(f"Error making the request: {e}")
-                if attempt < max_retries - 1:
-                    logger.warning(f"Retry in {retry_delay} seconds...")
-                    time.sleep(retry_delay)
-                else:
-                    logger.error("Maximum number of retries reached, aborting.")
-                    raise e
+        return Utils().retries_requests(request_func, max_retries, retry_delay=5)
 
     def _date_reason_based(self, finding, date_fn, reason, tool, **kwargs):
         def get_vuln_id(finding, tool):

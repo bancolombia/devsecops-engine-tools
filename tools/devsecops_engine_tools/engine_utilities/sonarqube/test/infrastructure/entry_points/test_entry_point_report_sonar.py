@@ -27,7 +27,8 @@ class TestInitReportSonar(unittest.TestCase):
                 "PIPELINE_COMPONENTS": {
                     "EXAMPLE_MULTICOMPONENT_PIPELINE": []
                 }
-            }
+            },
+            {}
         ]
         
         args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false", "remote_config_branch": ""}
@@ -71,6 +72,52 @@ class TestInitReportSonar(unittest.TestCase):
                 "TARGET_BRANCHES": ["trunk", "develop", "master"],
                 "PIPELINE_COMPONENTS": {
                     "EXAMPLE_MULTICOMPONENT_PIPELINE": []
+                }
+            },
+            {}
+        ]
+        args = {"remote_config_repo": "some_repo", "use_secrets_manager": "true", "send_metrics": "false", "remote_config_branch": ""}
+        mock_devops_platform_gateway.get_variable.side_effect = ["pipeline_name", "develop"]
+
+        # Act
+        init_report_sonar(
+            vulnerability_management_gateway=MagicMock(),
+            secrets_manager_gateway=MagicMock(),
+            devops_platform_gateway=mock_devops_platform_gateway,
+            sonar_gateway=MagicMock(),
+            metrics_manager_gateway=mock_metrics_manager_gateway,
+            args=args,
+        )
+
+        # Assert
+        mock_report_sonar.assert_not_called()
+
+    @patch(
+        "devsecops_engine_tools.engine_utilities.sonarqube.src.infrastructure.entry_points.entry_point_report_sonar.ReportSonar"
+    )
+    def test_init_report_sonar_excluded_pipeline(self, mock_report_sonar):
+        # Arrange
+        mock_devops_platform_gateway = MagicMock()
+        mock_metrics_manager_gateway = MagicMock()
+        mock_devops_platform_gateway.get_remote_config.side_effect = [
+            {
+                "REPORT_SONAR" : {
+                    "ENABLED": True
+                },
+                "BANNER": "DevSecOps"
+            },
+            {
+                "IGNORE_SEARCH_PATTERN": ".*test.*",
+                "TARGET_BRANCHES": ["trunk", "develop", "master"],
+                "PIPELINE_COMPONENTS": {
+                    "EXAMPLE_MULTICOMPONENT_PIPELINE": []
+                }
+            },
+            {
+                "pipeline_name": {
+                    "create_date": "18112023",
+                    "expired_date": "18032024",
+                    "hu": "0000000"
                 }
             }
         ]
