@@ -152,7 +152,9 @@ def test_scan_image_success(mock_remoteconfig):
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
+            encoding="utf-8",
+            errors="replace"
         )
        
         mock_print.assert_any_call("The image image_name was scanned")
