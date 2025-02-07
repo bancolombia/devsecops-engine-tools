@@ -1,6 +1,7 @@
 {
     "IGNORE_SEARCH_PATTERN": ".*test.*",
     "TARGET_BRANCHES": ["trunk", "develop", "master"],
+    "MAX_RETRIES_QUERY_SONAR": 5,
     "PIPELINE_COMPONENTS": {
         "EXAMPLE_MULTICOMPONENT_PIPELINE": [
             "component1",
