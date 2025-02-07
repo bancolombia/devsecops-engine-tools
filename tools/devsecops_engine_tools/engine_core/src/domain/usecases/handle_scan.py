@@ -37,7 +37,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.applications.runn
     runner_engine_dependencies,
 )
 from devsecops_engine_tools.engine_dast.src.applications.runner_dast_scan import (
-    runner_engine_dast
+    runner_engine_dast,
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
     define_env,
@@ -46,8 +46,6 @@ from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
-
-MESSAGE_ENABLED = "not yet enabled"
 
 
 class HandleScan:
@@ -104,7 +102,7 @@ class HandleScan:
                 dict_args,
                 config_tool["ENGINE_DAST"],
                 secret_tool,
-                self.devops_platform_gateway
+                self.devops_platform_gateway,
             )
             self._use_vulnerability_management(
                 config_tool, input_core, dict_args, secret_tool, env
@@ -133,15 +131,14 @@ class HandleScan:
             return findings_list, input_core
         elif "engine_dependencies" in dict_args["tool"]:
             findings_list, input_core, sbom_components = runner_engine_dependencies(
-                dict_args, config_tool, secret_tool, self.devops_platform_gateway, self.sbom_tool_gateway
+                dict_args,
+                config_tool,
+                secret_tool,
+                self.devops_platform_gateway,
+                self.sbom_tool_gateway,
             )
             self._use_vulnerability_management(
-                config_tool,
-                input_core,
-                dict_args,
-                secret_tool,
-                env,
-                sbom_components
+                config_tool, input_core, dict_args, secret_tool, env, sbom_components
             )
             return findings_list, input_core
 
@@ -176,9 +173,15 @@ class HandleScan:
                             self.devops_platform_gateway.get_variable("branch_tag"),
                             self.devops_platform_gateway.get_variable("commit_hash"),
                             env,
-                            self.devops_platform_gateway.get_variable("vm_product_type_name"),
-                            self.devops_platform_gateway.get_variable("vm_product_name"),
-                            self.devops_platform_gateway.get_variable("vm_product_description"),
+                            self.devops_platform_gateway.get_variable(
+                                "vm_product_type_name"
+                            ),
+                            self.devops_platform_gateway.get_variable(
+                                "vm_product_name"
+                            ),
+                            self.devops_platform_gateway.get_variable(
+                                "vm_product_description"
+                            ),
                         )
                     )
 
@@ -191,7 +194,9 @@ class HandleScan:
                             config_tool,
                         )
 
-                self._update_threshold_cve(input_core, dict_args, secret_tool, config_tool)
+                self._update_threshold_cve(
+                    input_core, dict_args, secret_tool, config_tool
+                )
 
                 self._define_threshold_quality_vuln(
                     input_core, dict_args, secret_tool, config_tool
@@ -211,9 +216,14 @@ class HandleScan:
             except ExceptionFindingsExcepted as ex2:
                 logger.error(str(ex2))
 
-    def _update_threshold_cve(self, input_core: InputCore, dict_args, secret_tool, config_tool):
-        return
-
+    def _update_threshold_cve(
+        self, input_core: InputCore, dict_args, secret_tool, config_tool
+    ):
+        input_core.threshold_defined.cve.extend(
+            self.vulnerability_management.get_black_list(
+                dict_args, secret_tool, config_tool
+            )
+        )
 
     def _define_threshold_quality_vuln(
         self, input_core: InputCore, dict_args, secret_tool, config_tool

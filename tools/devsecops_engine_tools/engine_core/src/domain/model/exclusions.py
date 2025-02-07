@@ -11,7 +11,7 @@ class Exclusions:
         self.expired_date = kwargs.get("expired_date", "")
         self.severity = kwargs.get("severity", "")
         self.hu = kwargs.get("hu", "")
-        self.reason = kwargs.get("reason", "Risk Accepted")
+        self.reason = kwargs.get("reason", "DevSecOps policy")
         self.vm_id = kwargs.get("vm_id", "")
         self.vm_id_url = kwargs.get("vm_id_url", "")
         self.service = kwargs.get("service", "")
