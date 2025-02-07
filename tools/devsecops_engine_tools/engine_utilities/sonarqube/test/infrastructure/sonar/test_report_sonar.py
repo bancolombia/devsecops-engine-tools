@@ -131,7 +131,8 @@ class TestSonarAdapter(unittest.TestCase):
             sonar_token, 
             endpoint,
             data,
-            "issue"
+            "issue",
+            5
         )
 
         # Assert
@@ -177,7 +178,8 @@ class TestSonarAdapter(unittest.TestCase):
             sonar_token, 
             endpoint,
             params,
-            "issues"
+            "issues",
+            5
         )
 
         # Assert
