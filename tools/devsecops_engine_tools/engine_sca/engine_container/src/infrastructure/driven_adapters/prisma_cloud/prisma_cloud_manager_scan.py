@@ -69,6 +69,8 @@ class PrismaCloudManagerScan(ToolGateway):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
             )
             print(f"The image {image_name} was scanned")
             return result_file
