@@ -131,7 +131,6 @@ def test_get_inputs_from_cli(mock_parse_args):
         "xray_mode": "scan",
         "image_to_scan": "image",
         "dast_file_path": "dast_file_path",
-        "image_to_scan": "image"
 
     }
 
