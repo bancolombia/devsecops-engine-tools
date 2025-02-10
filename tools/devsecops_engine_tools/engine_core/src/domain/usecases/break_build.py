@@ -1,5 +1,5 @@
 import sys
-import re
+from itertools import chain
 from dataclasses import dataclass
 from functools import reduce
 
@@ -54,7 +54,7 @@ class BreakBuild:
                         )
 
     def process(self, findings_list: "list[Finding]", input_core: InputCore, args: any):
-        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stdout.reconfigure(encoding="utf-8")
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
         threshold = input_core.threshold_defined
@@ -241,9 +241,11 @@ class BreakBuild:
                         ),
                     )
                 )
-                
+
                 if devops_platform_gateway.get_variable("stage") == "build":
-                    print(devops_platform_gateway.result_pipeline("succeeded_with_issues"))
+                    print(
+                        devops_platform_gateway.result_pipeline("succeeded_with_issues")
+                    )
                 else:
                     print(devops_platform_gateway.result_pipeline("succeeded"))
 
@@ -267,7 +269,12 @@ class BreakBuild:
                 }
 
             ids_vulnerabilitites = list(
-                map(lambda x: x.id, vulnerabilities_without_exclusions_list)
+                chain.from_iterable(
+                    (
+                        [x.id, x.description] if x.tool == "XRAY" else [x.id]
+                        for x in vulnerabilities_without_exclusions_list
+                    )
+                )
             )
             ids_match = list(filter(lambda x: x in ids_vulnerabilitites, threshold.cve))
             if len(ids_match) > 0:
@@ -301,7 +308,11 @@ class BreakBuild:
                     status = "failed"
                 else:
                     if devops_platform_gateway.get_variable("stage") == "build":
-                        print(devops_platform_gateway.result_pipeline("succeeded_with_issues"))
+                        print(
+                            devops_platform_gateway.result_pipeline(
+                                "succeeded_with_issues"
+                            )
+                        )
                 scan_result["compliances"] = {
                     "threshold": {"critical": compliance_critical},
                     "status": status,
@@ -334,7 +345,10 @@ class BreakBuild:
                                 (
                                     elem.create_date
                                     for elem in exclusions
-                                    if elem.id == item.id and (elem.where in item.where or "all" in elem.where)
+                                    if elem.id == item.id
+                                    and (
+                                        elem.where in item.where or "all" in elem.where
+                                    )
                                 ),
                                 None,
                             ),
@@ -342,7 +356,10 @@ class BreakBuild:
                                 (
                                     elem.expired_date
                                     for elem in exclusions
-                                    if elem.id == item.id and (elem.where in item.where or "all" in elem.where)
+                                    if elem.id == item.id
+                                    and (
+                                        elem.where in item.where or "all" in elem.where
+                                    )
                                 ),
                                 None,
                             ),
@@ -350,7 +367,10 @@ class BreakBuild:
                                 (
                                     elem.reason
                                     for elem in exclusions
-                                    if elem.id == item.id and (elem.where in item.where or "all" in elem.where)
+                                    if elem.id == item.id
+                                    and (
+                                        elem.where in item.where or "all" in elem.where
+                                    )
                                 ),
                                 None,
                             ),
