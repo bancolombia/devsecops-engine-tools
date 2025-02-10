@@ -129,8 +129,10 @@ def test_get_inputs_from_cli(mock_parse_args):
         "token_engine_dependencies": None,
         "token_external_checks": None,
         "xray_mode": "scan",
-        "image_to_scan":"image",
-        "dast_file_path": "dast_file_path"
+        "image_to_scan": "image",
+        "dast_file_path": "dast_file_path",
+        "image_to_scan": "image"
+
     }
 
 

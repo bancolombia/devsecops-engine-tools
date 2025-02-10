@@ -56,6 +56,8 @@ class ImportScanRequest:
     expression: str = ""
     # ** Test url
     url: str = ""
+    # ** Reimport Scan **
+    reimport_scan: bool = None
 
     @classmethod
     def from_dict(cls, obj):
@@ -100,6 +102,7 @@ class ImportScanRequest:
             product_type_name_mapping=obj.get("product_type_name_mapping"),
             expression=obj.get("expression"),
             compact_remote_config_url=obj.get("compact_remote_config_url"),
+            reimport_scan=obj.get("reimport_scan"),
         )
         return obj
 
