@@ -464,6 +464,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             "expression": vulnerability_management.config_tool["VULNERABILITY_MANAGER"][
                 "DEFECT_DOJO"
             ]["CMDB"]["REGEX_EXPRESSION_CMDB"],
+            "reimport_scan": vulnerability_management.config_tool["VULNERABILITY_MANAGER"][
+                "DEFECT_DOJO"]["REIMPORT_SCAN"]
         }
 
         if use_cmdb:

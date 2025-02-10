@@ -1,17 +1,17 @@
 import re
 import os
-from devsecops_engine_tools.engine_utilities.utils.api_error import ApiError
+import urllib3
 from devsecops_engine_tools.engine_utilities.settings import SETTING_LOGGER
+from devsecops_engine_tools.engine_utilities.utils.api_error import ApiError
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.import_scan import ImportScanRestConsumer
+from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.reimport_scan import ReimportScanRestConsumer 
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.product_type import ProductTypeRestConsumer
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.product import ProductRestConsumer
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.scan_configurations import (
-    ScanConfigrationRestConsumer,
-)
+    ScanConfigrationRestConsumer)
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.engagement import EngagementRestConsumer
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
-import urllib3
 
 logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 
@@ -26,15 +26,76 @@ class ImportScanUserCase:
         rest_product: ProductRestConsumer,
         rest_scan_configuration: ScanConfigrationRestConsumer,
         rest_engagement: EngagementRestConsumer,
+        rest_reimport_scan: ReimportScanRestConsumer,
     ):
         self.__rest_import_scan = rest_import_scan
         self.__rest_product_type = rest_product_type
         self.__rest_product = rest_product
         self.__rest_scan_configurations = rest_scan_configuration
         self.__rest_engagement = rest_engagement
+        self.__rest_reimport_scan = rest_reimport_scan
+
+
+    def get_file_type(self, path_file):
+        __, extension = os.path.splitext(path_file)
+        dict_rule_type_file = {
+            ".csv": "text/csv",
+            ".json": "apllication/json",
+            ".xml": "aplication/xml",
+            ".sarif": "aplication/json",
+        }
+        file_type = dict_rule_type_file.get(extension)
+        return file_type
+
+    def import_scan(self, request, api_scan_bool):
+        response = None
+
+        if api_scan_bool:
+            response = self.__rest_import_scan.import_scan_api(request)
+            logger.info(f"End process Succesfull!!!: {response}")
+        else:
+            try:
+                file_type = self.get_file_type(request.file)
+                if file_type is None:
+                    raise ApiError("File format not allowed")
+
+                with open(request.file, "rb") as file:
+                    logger.info(f"read {file_type} file successful !!!")
+                    files = [("file", (request.file, file, file_type))]
+                    response = self.__rest_import_scan.import_scan(request, files)
+
+            except Exception as e:
+                raise ApiError(e)
+
+        response.url = f"{request.host_defect_dojo}/engagement/{str(response.engagement_id)}/finding/open"
+        return response
+    
+    def reimport_scan(self, request, api_scan_bool):
+        response = None
+
+        if api_scan_bool:
+            logger.debug(f"reimport scan :{self.__rest_reimport_scan}")
+            response = self.__rest_reimport_scan.reimport_scan(request)
+            logger.info(f"End process Succesfull!!!: {response}")
+        else:
+            try:
+                logger.debug(f"reimport scan file :{self.__rest_reimport_scan}")
+                file_type = self.get_file_type(request.file)
+                if file_type is None:
+                    raise ApiError("File format not allowed")
+
+                with open(request.file, "rb") as file:
+                    logger.info(f"read {file_type} file successful !!!")
+                    files = [("file", (request.file, file, file_type))]
+                    response = self.__rest_reimport_scan.reimport_scan(request, files)
+
+            except Exception as e:
+                raise ApiError(e)
+
+        response.url = f"{request.host_defect_dojo}/engagement/{str(response.engagement_id)}/finding/open"
+        return response
 
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
-        response = None
         product_id = None
 
         if (request.product_name or request.product_type_name) == "":
@@ -101,33 +162,8 @@ class ImportScanUserCase:
                 engagement = self.__rest_engagement.post_engagement(request.engagement_name, product_id)
                 logger.debug(f"Egagement created: {engagement.name} whit product id {engagement.product}")
 
-        if api_scan_bool:
-            response = self.__rest_import_scan.import_scan_api(request)
-            logger.info(f"End process Succesfull!!!: {response}")
+        if request.reimport_scan is True:
+            logger.debug("reimport scan flow")
+            return self.reimport_scan(request, api_scan_bool)
         else:
-            try:
-                file_type = self.get_file_type(request.file)
-                if file_type is None:
-                    raise ApiError("File format not allowed")
-
-                with open(request.file, "rb") as file:
-                    logger.info(f"read {file_type} file successful !!!")
-                    files = [("file", (request.file, file, file_type))]
-                    response = self.__rest_import_scan.import_scan(request, files)
-
-            except Exception as e:
-                raise ApiError(e)
-
-        response.url = f"{request.host_defect_dojo}/engagement/{str(response.engagement_id)}/finding/open"
-        return response
-
-    def get_file_type(self, path_file):
-        __, extension = os.path.splitext(path_file)
-        dict_rule_type_file = {
-            ".csv": "text/csv",
-            ".json": "apllication/json",
-            ".xml": "aplication/xml",
-            ".sarif": "aplication/json",
-        }
-        file_type = dict_rule_type_file.get(extension)
-        return file_type
+            return self.import_scan(request, api_scan_bool)
