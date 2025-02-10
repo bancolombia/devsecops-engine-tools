@@ -62,7 +62,8 @@ class TrufflehogRun(ToolGateway):
         secret_tool,
         secret_external_checks,
         agent_temp_dir,
-        tool
+        tool,
+        folder_path
     ):
         trufflehog_command = "trufflehog"
         if "Windows" in agent_os:
@@ -84,7 +85,8 @@ class TrufflehogRun(ToolGateway):
                 include_paths,
                 [repository_name] * len(include_paths),
                 [enable_custom_rules] * len(include_paths),
-                [agent_os] * len(include_paths)
+                [agent_os] * len(include_paths),
+                [folder_path] * len(include_paths)
             )
         findings, file_findings = self.create_file(self.decode_output(results), agent_work_folder, config_tool, tool)
         return  findings, file_findings
@@ -117,10 +119,11 @@ class TrufflehogRun(ToolGateway):
         include_path,
         repository_name,
         enable_custom_rules,
-        agent_os
+        agent_os,
+        folder_path
     ):
-        command = f"{trufflehog_command} filesystem {agent_work_folder + '/' + repository_name} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --no-update --json"
-
+        path = agent_work_folder if folder_path is not None else f"{agent_work_folder}/{repository_name}"
+        command = f"{trufflehog_command} filesystem {path} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --no-update --json"
         if enable_custom_rules:
             command = command.replace("--no-verification --no-update --json", f"--config {agent_work_folder}//rules//trufflehog//custom-rules.yaml --no-verification --no-update --json" if "Windows" in agent_os else
                                       "/tmp/rules/trufflehog/custom-rules.yaml --no-verification --no-update --json" if "Linux" in agent_os else
