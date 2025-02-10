@@ -1217,3 +1217,42 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
         self.assertEqual(create_date, "default_date")
         self.assertEqual(expired_date, "default_date")
+
+    
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.FindingExclusion.get_finding_exclusion"
+    )
+    def test_get_black_list(self, mock_get_finding_exclusion):
+        dict_args = {"token_vulnerability_management": "token1"}
+        secret_tool = {"token_defect_dojo": "token2"}
+        config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "MAX_RETRIES_QUERY": 5,
+                }
+            }
+        }
+
+        mock_get_finding_exclusion.return_value.results = [
+            MagicMock(unique_id_from_tool="CVE-2024-0001"),
+            MagicMock(unique_id_from_tool="CVE-2024-0002"),
+        ]
+
+        result = self.defect_dojo.get_black_list(dict_args, secret_tool, config_tool)
+
+        self.assertEqual(result, ["CVE-2024-0001", "CVE-2024-0002"])
+
+    def test_get_black_list_exception(self):
+        dict_args = {"token_vulnerability_management": "token1"}
+        secret_tool = {"token_defect_dojo": "token2"}
+        config_tool = {"VULNERABILITY_MANAGER": {}}
+
+        with self.assertRaises(ExceptionVulnerabilityManagement) as context:
+            self.defect_dojo.get_black_list(dict_args, secret_tool, config_tool)
+        self.assertIn(
+            "Error getting black list with the following error:", str(context.exception)
+        )
+
+
+
