@@ -13,21 +13,25 @@ class DependenciesScan:
         tool_deserializator: DeserializatorGateway,
         remote_config,
         dict_args,
-        tool_remote,
         exclusions,
         pipeline_name,
         to_scan,
         secret_tool,
+        build_id,
+        build_url
+
     ):
         self.tool_run = tool_run
         self.tool_deserializator = tool_deserializator
         self.remote_config = remote_config
-        self.tool_remote = tool_remote
         self.exclusions = exclusions
         self.pipeline_name = pipeline_name
         self.dict_args = dict_args
         self.to_scan = to_scan
         self.secret_tool = secret_tool
+        self.build_id = build_id
+        self.build_url = build_url
+
 
     def process(self):
         """
@@ -38,12 +42,13 @@ class DependenciesScan:
         return self.tool_run.run_tool_dependencies_sca(
             self.remote_config,
             self.dict_args,
-            self.tool_remote,
             self.exclusions,
             self.pipeline_name,
             self.to_scan,
             self.secret_tool,
             self.dict_args["token_engine_dependencies"],
+            build_id=self.build_id,
+            build_url=self.build_url
         )
 
     def deserializator(self, dependencies_scanned):
