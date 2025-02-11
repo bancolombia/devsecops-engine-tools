@@ -36,7 +36,7 @@ class SetInputCore:
                         expired_date=item.get("expired_date", ""),
                         severity=item.get("severity", ""),
                         hu=item.get("hu", ""),
-                        reason=item.get("reason", "Risk acceptance"),
+                        reason=item.get("reason", "DevSecOps policy"),
                     )
                 )
 

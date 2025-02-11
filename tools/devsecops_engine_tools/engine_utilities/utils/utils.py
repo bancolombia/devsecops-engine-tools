@@ -1,5 +1,7 @@
 import zipfile
+import tarfile
 import platform
+import time
 from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
     GithubApi,
 )
@@ -29,6 +31,10 @@ class Utils:
     def unzip_file(self, zip_file_path, extract_path):
         with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
             zip_ref.extractall(extract_path)
+    
+    def extract_targz_file(self, tar_file_path, extract_path):
+        with tarfile.open(tar_file_path, "r:gz") as tar_ref:
+            tar_ref.extractall(path=extract_path)
 
     def configurate_external_checks(self, tool, config_tool, secret_tool, secret_external_checks, agent_work_folder="/tmp"):
         try:
@@ -103,7 +109,7 @@ class Utils:
                         config_tool[tool]["EXTERNAL_DIR_OWNER"],
                         config_tool[tool]["EXTERNAL_DIR_REPOSITORY"],
                         github_token,
-                        agent_work_folder if platform.system() in "Windows" else "/tmp"
+                        agent_work_folder
                     )
     
         except Exception as ex:
@@ -136,3 +142,16 @@ class Utils:
         )
 
         return set_threshold(match_pattern) if match_pattern else threshold
+
+    def retries_requests(self, request_func, max_retries, retry_delay):
+        for attempt in range(max_retries):
+            try:
+                return request_func()
+            except Exception as e:
+                logger.error(f"Error making the request: {e}")
+                if attempt < max_retries - 1:
+                    logger.warning(f"Retry in {retry_delay} seconds...")
+                    time.sleep(retry_delay)
+                else:
+                    logger.error("Maximum number of retries reached, aborting.")
+                    raise e

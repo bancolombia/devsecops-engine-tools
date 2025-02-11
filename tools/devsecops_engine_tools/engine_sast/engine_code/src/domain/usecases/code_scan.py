@@ -70,7 +70,7 @@ class CodeScan:
                             expired_date=exc.get("expired_date", ""),
                             severity=exc.get("severity", ""),
                             hu=exc.get("hu", ""),
-                            reason=exc.get("reason", "Risk acceptance"),
+                            reason=exc.get("reason", "DevSecOps policy"),
                         )
                         list_exclusions.append(exclusion)
         return list_exclusions, skip_tool

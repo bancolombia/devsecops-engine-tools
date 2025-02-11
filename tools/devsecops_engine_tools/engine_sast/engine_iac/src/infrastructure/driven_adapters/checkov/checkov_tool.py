@@ -6,6 +6,7 @@ import queue
 import threading
 import json
 import shutil
+import platform
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -63,16 +64,13 @@ class CheckovTool(ToolGateway):
             f"Retrying installation of {package} in {RETRY_DELAY} seconds..."
         )
 
-        installed = subprocess.run(
-            ["which", package],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-
-        if installed.returncode == 0:
+        installed = shutil.which(package)
+        if installed:
             return True
 
-        python_path = shutil.which("python3")
+        python_command = "python3" if platform.system() != "Windows" else "python"
+
+        python_path = shutil.which(python_command)
         if python_path is None:
             logger.error("Python3 not found on the system.")
             return False

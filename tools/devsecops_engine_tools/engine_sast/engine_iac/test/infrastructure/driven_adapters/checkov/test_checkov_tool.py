@@ -29,7 +29,8 @@ def test_retryable_install_package(checkov_tool):
     subprocess_mock = MagicMock()
     subprocess_mock.run.return_value.returncode = 1
 
-    with patch("subprocess.run", return_value=subprocess_mock) as mock_run:
+    with patch("shutil.which") as mock_which, patch("subprocess.run", return_value=subprocess_mock) as mock_run:
+        mock_which.side_effect = lambda x: None if x == "checkov" else "path/to/python"
         response = checkov_tool.retryable_install_package("checkov", "2.3.96")
 
         mock_run.assert_called()
