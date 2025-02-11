@@ -70,8 +70,7 @@ def mock_rest_reimport_scan(file_path, scan_type=None):
         assert import_scan_object.scan_type == data["scan_type"]
         assert import_scan_object.product_type_name == data["product_type_name"]
         assert import_scan_object.engagement_name == data["engagement_name"]
-        mock_rest_reimport_scan.import_scan_api.return_value = import_scan_object
-        mock_rest_reimport_scan.import_scan.return_value = import_scan_object
+        mock_rest_reimport_scan.reimport_scan.return_value = import_scan_object
     return mock_rest_reimport_scan
 
 
@@ -285,3 +284,48 @@ def test_execute_error(
     assert isinstance(request, ImportScanRequest)
     with pytest.raises(ApiError):
         uc.execute(request)
+
+
+@pytest.mark.parametrize(
+    """mock_rest_import_scan,
+    mock_rest_product_type,
+    mock_rest_product,
+    mock_rest_scan_configuration,
+    import_scan_request_instance,
+    mock_rest_engagement,
+    mock_rest_reimport_scan""",
+    [
+        (
+            mock_rest_import_scan(file_path="sonar_qube.json"),
+            mock_rest_product_type(),
+            mock_rest_product(result_list_empty=True),
+            mock_rest_scan_configuration(),
+            import_scan_request_instance(par_scan_type="SonarQube API Import"),
+            mock_rest_engagement(),
+            mock_rest_reimport_scan(file_path="sonar_qube.json"),
+        ),
+    ],
+)
+def test_execute_reimport_scan(
+    mock_rest_import_scan,
+    mock_rest_product_type,
+    mock_rest_product,
+    mock_rest_scan_configuration,
+    import_scan_request_instance,
+    mock_rest_engagement,
+    mock_rest_reimport_scan,
+):
+    request = import_scan_request_instance
+    request.reimport_scan = True
+    uc = ImportScanUserCase(
+        rest_import_scan=mock_rest_import_scan,
+        rest_product_type=mock_rest_product_type,
+        rest_product=mock_rest_product,
+        rest_scan_configuration=mock_rest_scan_configuration,
+        rest_engagement=mock_rest_engagement,
+        rest_reimport_scan=mock_rest_reimport_scan,
+    )
+    assert isinstance(uc, ImportScanUserCase)
+    assert isinstance(request, ImportScanRequest)
+    response = uc.execute(request)
+    assert response.scan_type == import_scan_request_instance.scan_type
