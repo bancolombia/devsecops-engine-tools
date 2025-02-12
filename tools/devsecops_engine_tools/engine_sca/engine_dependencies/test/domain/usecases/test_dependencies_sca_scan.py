@@ -17,6 +17,8 @@ def test_init():
         pipeline_name = "pipeline_name"
         to_scan = "path/"
         secret_tool = "secret_tool"
+        build_id = "build_id"
+        build_url = "build_url"
         dependencies_scan_instance = DependenciesScan(
             mock_tool_gateway,
             mock_deserializator_gateway,
@@ -26,6 +28,8 @@ def test_init():
             pipeline_name,
             to_scan,
             secret_tool,
+            build_id,
+            build_url
         )
 
         assert dependencies_scan_instance.tool_run == mock_tool_gateway
@@ -39,6 +43,8 @@ def test_init():
         assert dependencies_scan_instance.pipeline_name == pipeline_name
         assert dependencies_scan_instance.to_scan == to_scan
         assert dependencies_scan_instance.secret_tool == secret_tool
+        assert dependencies_scan_instance.build_id == build_id
+        assert dependencies_scan_instance.build_url == build_url
 
 
 def test_process():
@@ -53,6 +59,8 @@ def test_process():
         pipeline_name = "pipeline_name"
         to_scan = "path/"
         secret_tool = "secret_tool"
+        build_id = "build_id"
+        build_url = "build_url"
         dependencies_scan_instance = DependenciesScan(
             mock_tool_gateway,
             mock_deserializator_gateway,
@@ -62,6 +70,8 @@ def test_process():
             pipeline_name,
             to_scan,
             secret_tool,
+            build_id,
+            build_url
         )
         dependencies_scan_instance.process()
 
@@ -72,6 +82,8 @@ def test_process():
             pipeline_name,
             to_scan,
             secret_tool,
+            build_id,
+            build_url
             None,
         )
 
@@ -89,6 +101,8 @@ def test_deserializator():
         to_scan = "path/"
         token = "token"
         dependencies_scanned = "scanned.json"
+        build_id = "build_id"
+        build_url = "build_url"
 
         dependencies_scan_instance = DependenciesScan(
             mock_tool_gateway,
@@ -99,6 +113,9 @@ def test_deserializator():
             pipeline_name,
             to_scan,
             token,
+            build_id,
+            build_url
+            
         )
         dependencies_scan_instance.deserializator(dependencies_scanned)
 
