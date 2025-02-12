@@ -196,7 +196,25 @@ def get_inputs_from_cli(args):
         help="File path containing the configuration, structured according to the documentation, \
         for the API or web application to be scanned by the DAST tool."
     )
+
+    TOOLS = {
+        "engine_iac": ["checkov", "kics", "kubescape"],
+        "engine_secret": ["trufflehog", "gitleaks"],
+        "engine_container": ["prisma", "trivy"],
+        "engine_dependencies": ["xray", "dependency_check"],
+        "engine_code": ["bearer"],
+        "engine_risk": None,
+    }
+
     args = parser.parse_args()
+
+    if args.module in TOOLS and args.tool:
+        allowed_tools = TOOLS[args.module]
+        if allowed_tools is None:
+            parser.error(f"The tool flag should not be used with module {args.module}")
+        elif allowed_tools and (args.tool not in allowed_tools):
+            parser.error(f"Invalid value for tool. Allowed values for the provided module {args.module} are: {', '.join(allowed_tools)}")
+
     return {
         "platform_devops": args.platform_devops,
         "remote_config_repo": args.remote_config_repo,

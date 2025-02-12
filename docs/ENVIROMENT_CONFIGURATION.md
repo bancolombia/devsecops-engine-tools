@@ -43,7 +43,7 @@ PYTHONPATH=tools/
                 "local",
                 "--remote_config_repo",
                 "example_remote_config_local",
-                "--tool",
+                "--module",
                 "engine_iac",
                 "--use_secrets_manager",
                 "false",
