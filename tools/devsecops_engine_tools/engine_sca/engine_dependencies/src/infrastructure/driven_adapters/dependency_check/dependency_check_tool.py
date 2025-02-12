@@ -119,6 +119,7 @@ class DependencyCheckTool(ToolGateway):
         to_scan,
         token,
         token_engine_dependencies,
+        **kwargs,
     ):
         if not self.is_java_installed():
             logger.error(
