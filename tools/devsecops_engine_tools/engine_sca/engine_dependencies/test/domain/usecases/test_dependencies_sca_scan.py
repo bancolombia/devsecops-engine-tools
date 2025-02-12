@@ -82,9 +82,9 @@ def test_process():
             pipeline_name,
             to_scan,
             secret_tool,
-            build_id,
-            build_url
             None,
+            build_id=build_id,
+            build_url=build_url
         )
 
 
