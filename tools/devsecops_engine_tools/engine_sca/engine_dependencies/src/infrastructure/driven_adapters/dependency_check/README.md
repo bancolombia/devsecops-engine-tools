@@ -6,7 +6,7 @@ in [Request NVD API Key](https://nvd.nist.gov/developers/request-an-api-key). Ke
 The API Key can be passed to the devsecops engine tools using the flag `--token_engine_dependencies`. For example:
 
 ```bash
-devsecops-engine-tools --platform_devops local --remote_config_repo DevSecOps_Remote_Config --tool engine_dependencies --token_engine_dependencies nvd_api_key
+devsecops-engine-tools --platform_devops local --remote_config_repo DevSecOps_Remote_Config --module engine_dependencies --tool dependency_check --token_engine_dependencies nvd_api_key
 ```
 
 #### The NVD API Key, CI, and Rate Limiting
