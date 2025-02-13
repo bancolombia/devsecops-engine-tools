@@ -42,6 +42,8 @@ def init_engine_dependencies(
         dict_args["remote_config_branch"]
     )
     pipeline_name = tool_remote.get_variable("pipeline_name")
+    build_id = tool_remote.get_variable("build_id")
+    build_url = tool_remote.get_build_pipeline_execution_url()
 
     handle_remote_config_patterns = HandleRemoteConfigPatterns(
         remote_config, exclusions, pipeline_name
@@ -72,6 +74,9 @@ def init_engine_dependencies(
                 pipeline_name,
                 to_scan,
                 secret_tool,
+                build_id,
+                build_url
+
             )
             if config_sbom["ENABLED"] and any(
                 branch in str(tool_remote.get_variable("branch_tag"))

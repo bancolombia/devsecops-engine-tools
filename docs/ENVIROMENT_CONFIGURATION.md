@@ -96,6 +96,7 @@ PYTHONPATH=tools/
                 "DET_ORGANIZATION": "[DET_ORGANIZATION]",
                 "DET_PROJECT_NAME": "[DET_PROJECT_NAME]",
                 "DET_REPOSITORY": "[DET_REPOSITORY]",
+                "DET_BUILD_PIPELINE_EXECUTION_URL": "[DET_BUILD_PIPELINE_EXECUTION_URL]",
                 //platform github
                 "GITHUB_ACCESS_TOKEN": "token",
                 "GITHUB_WORKSPACE": "",

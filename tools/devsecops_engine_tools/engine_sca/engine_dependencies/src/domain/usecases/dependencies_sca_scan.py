@@ -17,6 +17,9 @@ class DependenciesScan:
         pipeline_name,
         to_scan,
         secret_tool,
+        build_id,
+        build_url
+
     ):
         self.tool_run = tool_run
         self.tool_deserializator = tool_deserializator
@@ -26,6 +29,9 @@ class DependenciesScan:
         self.dict_args = dict_args
         self.to_scan = to_scan
         self.secret_tool = secret_tool
+        self.build_id = build_id
+        self.build_url = build_url
+
 
     def process(self):
         """
@@ -41,6 +47,8 @@ class DependenciesScan:
             self.to_scan,
             self.secret_tool,
             self.dict_args["token_engine_dependencies"],
+            build_id=self.build_id,
+            build_url=self.build_url
         )
 
     def deserializator(self, dependencies_scanned):
