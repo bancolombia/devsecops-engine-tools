@@ -74,7 +74,15 @@ Available types:
  - test: Adding missing tests or correcting existing tests
  - build: Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)
  - ci: Changes to our CI configuration files and scripts (example scopes: Travis, Circle, BrowserStack, SauceLabs)
+ - removed: Elimination of obsolete features
+ - deprecated: Use when marking features as obsolete
+ - security: Use to identify security fixes
  - chore: Other changes that don't modify src or test files
+ - featurerelease: A new feature of release
+ - securitypatchrelease: A security path of release
+ - fixpatchrelease: A fix path of release
+ - breakingrelease: break of release
+ - breaking: break
  - revert: Reverts a previous commit
 
 You can find out more here. [Semantic Versioning](https://semver.org/)
