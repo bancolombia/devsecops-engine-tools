@@ -127,6 +127,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 branch_tag="trunk",
                 commit_hash="commit_hash",
                 environment="Development",
+                test_title="engine_iac_k8s",
                 tags="engine_iac_k8s",
                 reimport_scan=True,
             )
@@ -261,6 +262,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 token_defect_dojo=self.token_dd,
                 host_defect_dojo="host_defect_dojo",
                 expression="regex",
+                test_title="engine_iac_k8s",
                 reimport_scan=True,
             )
             self.assertEqual(result, "cmdb_request_result")
@@ -345,6 +347,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "token_defect_dojo": self.token_dd,
                     "host_defect_dojo": "host_defect_dojo",
                     "expression": "regex",
+                    "test_title": "engine_iac_k8s",
                     "reimport_scan": True,
                 }
             )

@@ -51,6 +51,7 @@ class ReimportScanRestConsumer:
             "close_old_findings_product_scope": request.close_old_findings_product_scope,
             "version": request.version,
             "tags": request.tags,
+            "test_title": request.test_title,
         }
 
         headers = {"Authorization": f"Token {self.__token}"}
