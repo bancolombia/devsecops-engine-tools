@@ -3,6 +3,9 @@ from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.import_scan import (
     ImportScanRestConsumer,
 )
+from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.reimport_scan import (
+    ReimportScanRestConsumer,
+)
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.product_type import (
     ProductTypeRestConsumer,
 )
@@ -48,12 +51,16 @@ class DefectDojo:
             rest_scan_configuration = ScanConfigrationRestConsumer(
                 request, session=SessionManager()
             )
+            rest_reimport_scan = ReimportScanRestConsumer(
+                request, session=SessionManager()
+            )
             uc = ImportScanUserCase(
                 rest_import_scan,
                 rest_product_type,
                 rest_product,
                 rest_scan_configuration,
                 rest_engagement=rest_engagement,
+                rest_reimport_scan=rest_reimport_scan
             )
             return uc.execute(request)
         except ApiError as e:

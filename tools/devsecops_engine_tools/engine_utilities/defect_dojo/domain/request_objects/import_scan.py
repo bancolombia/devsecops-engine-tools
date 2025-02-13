@@ -52,10 +52,10 @@ class ImportScanRequest:
     cmdb_mapping: dict = None
     product_type_name_mapping: dict = None
     compact_remote_config_url: str = None
-    # ** Expression
     expression: str = ""
-    # ** Test url
     url: str = ""
+    reimport_scan: bool = None
+    test_title: str = ""
 
     @classmethod
     def from_dict(cls, obj):
@@ -100,6 +100,7 @@ class ImportScanRequest:
             product_type_name_mapping=obj.get("product_type_name_mapping"),
             expression=obj.get("expression"),
             compact_remote_config_url=obj.get("compact_remote_config_url"),
+            reimport_scan=obj.get("reimport_scan"),
         )
         return obj
 

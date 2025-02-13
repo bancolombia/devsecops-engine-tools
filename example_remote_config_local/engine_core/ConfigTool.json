@@ -17,6 +17,7 @@
             "HOST_DEFECT_DOJO": "",
             "LIMITS_QUERY": 100,
             "MAX_RETRIES_QUERY": 5,
+            "REIMPORT_SCAN": false,
             "CMDB": {
                 "USE_CMDB": false,
                 "HOST_CMDB": "",
