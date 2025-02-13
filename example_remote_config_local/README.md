@@ -34,6 +34,7 @@ Then, the remote config settings should look similar to this:
     "HOST_DEFECT_DOJO": "http://localhost:8080",
     "LIMITS_QUERY": 100,
     "MAX_RETRIES_QUERY": 5,
+    "REIMPORT_SCAN": false,
     "CMDB": {
         "USE_CMDB": true,
         "HOST_CMDB": "http://host_cmdb_example",
@@ -108,6 +109,7 @@ The remote config settings should look similar to this:
         "HOST_DEFECT_DOJO": "http://localhost:8080",
         "LIMITS_QUERY": 100,
         "MAX_RETRIES_QUERY": 5,
+        "REIMPORT_SCAN": false,
         "CMDB": {
             "USE_CMDB": false,
             "REGEX_EXPRESSION_CMDB": "^([^-]+)",

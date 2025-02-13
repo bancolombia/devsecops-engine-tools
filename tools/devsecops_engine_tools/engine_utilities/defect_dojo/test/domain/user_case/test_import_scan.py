@@ -9,6 +9,7 @@ from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.product i
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.product_type import ProductType
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.engagement import Engagement, EngagementList
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.import_scan import ImportScanRestConsumer
+from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.reimport_scan import ReimportScanRestConsumer
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.product_type import ProductTypeRestConsumer
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.product import ProductRestConsumer
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.scan_configurations import (
@@ -45,16 +46,32 @@ def test_user_case_creation():
     rest_product = ProductRestConsumer(SessionManager())
     rest_scan_configuration = ScanConfigrationRestConsumer(request, SessionManager())
     rest_engagement = EngagementRestConsumer(request, SessionManager())
+    rest_import_scan = ReimportScanRestConsumer(request, SessionManager())
     uc = ImportScanUserCase(
         rest_import_scan=rest_import_scan,
         rest_product_type=rest_product_type,
         rest_product=rest_product,
         rest_scan_configuration=rest_scan_configuration,
         rest_engagement=rest_engagement,
+        rest_reimport_scan=rest_import_scan
     )
     assert isinstance(uc, object)
     assert hasattr(uc, "__init__")
     assert hasattr(uc, "execute")
+
+
+def mock_rest_reimport_scan(file_path, scan_type=None):
+    mock_rest_reimport_scan = MagicMock()
+    with open(f"{DEVSECOPS_ENGINE_UTILITIES_PATH}/defect_dojo/test/files/{file_path}", "r") as fp:
+        data = json.load(fp)
+        if scan_type:
+            data["scan_type"] = scan_type
+        import_scan_object = ImportScanRequest.from_dict(data)
+        assert import_scan_object.scan_type == data["scan_type"]
+        assert import_scan_object.product_type_name == data["product_type_name"]
+        assert import_scan_object.engagement_name == data["engagement_name"]
+        mock_rest_reimport_scan.reimport_scan.return_value = import_scan_object
+    return mock_rest_reimport_scan
 
 
 def mock_rest_import_scan(file_path, scan_type=None):
@@ -132,7 +149,8 @@ def mock_rest_scan_configuration():
     mock_rest_product,
     mock_rest_scan_configuration,
     import_scan_request_instance,
-    mock_rest_engagement""",
+    mock_rest_engagement,
+    mock_rest_reimport_scan""",
     [
         (
             mock_rest_import_scan(file_path="import_scan.json"),
@@ -141,6 +159,7 @@ def mock_rest_scan_configuration():
             mock_rest_scan_configuration(),
             import_scan_request_instance(par_scan_type="Xray Scan", file_name="jfrog-xray_on_demand_binary_scan.json"),
             mock_rest_engagement(),
+            mock_rest_reimport_scan(file_path="import_scan.json"),
         ),
         (
             mock_rest_import_scan(file_path="import_scan.json", scan_type="Twistlock Scan"),
@@ -149,6 +168,7 @@ def mock_rest_scan_configuration():
             mock_rest_scan_configuration(),
             import_scan_request_instance(par_scan_type="Twistlock Scan", file_name="twistlock.csv"),
             mock_rest_engagement(),
+            mock_rest_reimport_scan(file_path="import_scan.json", scan_type="Twistlock Scan"),
         ),
         (
             mock_rest_import_scan(file_path="sonar_qube.json"),
@@ -157,6 +177,7 @@ def mock_rest_scan_configuration():
             mock_rest_scan_configuration(),
             import_scan_request_instance(par_scan_type="SonarQube API Import"),
             mock_rest_engagement(),
+            mock_rest_reimport_scan(file_path="sonar_qube.json"),
         ),
         (
             mock_rest_import_scan(file_path="sonar_qube.json"),
@@ -165,6 +186,7 @@ def mock_rest_scan_configuration():
             mock_rest_scan_configuration(),
             import_scan_request_instance(par_scan_type="SonarQube API Import"),
             mock_rest_engagement(),
+            mock_rest_reimport_scan(file_path="sonar_qube.json"),
         ),
         (
             mock_rest_import_scan(file_path="sonar_qube.json"),
@@ -173,6 +195,7 @@ def mock_rest_scan_configuration():
             mock_rest_scan_configuration(),
             import_scan_request_instance(par_scan_type="SonarQube API Import"),
             mock_rest_engagement(),
+            mock_rest_reimport_scan(file_path="sonar_qube.json"),
         ),
     ],
 )
@@ -183,6 +206,7 @@ def test_execute_sucessfull(
     mock_rest_scan_configuration,
     import_scan_request_instance,
     mock_rest_engagement,
+    mock_rest_reimport_scan,
 ):
     request = import_scan_request_instance
     uc = ImportScanUserCase(
@@ -191,6 +215,7 @@ def test_execute_sucessfull(
         rest_product=mock_rest_product,
         rest_scan_configuration=mock_rest_scan_configuration,
         rest_engagement=mock_rest_engagement,
+        rest_reimport_scan=mock_rest_reimport_scan
     )
     assert isinstance(uc, ImportScanUserCase)
     assert isinstance(request, ImportScanRequest)
@@ -205,7 +230,8 @@ def test_execute_sucessfull(
     mock_rest_product,
     mock_rest_scan_configuration,
     import_scan_request_instance,
-    mock_rest_engagement""",
+    mock_rest_engagement,
+    mock_rest_reimport_scan""",
     [
         (
             mock_rest_import_scan("import_scan.json"),
@@ -214,6 +240,7 @@ def test_execute_sucessfull(
             mock_rest_scan_configuration(),
             import_scan_request_instance(par_scan_type="Xray Scan", file_name=""),
             mock_rest_engagement(),
+            mock_rest_reimport_scan("import_scan.json"),
         ),
         (
             mock_rest_import_scan("sonar_qube.json"),
@@ -222,6 +249,7 @@ def test_execute_sucessfull(
             mock_rest_scan_configuration(),
             import_scan_request_instance(par_scan_type="Xray Scan", file_name=None),
             mock_rest_engagement(),
+            mock_rest_reimport_scan("import_scan.json"),
         ),
         (
             mock_rest_import_scan("sonar_qube.json"),
@@ -230,6 +258,7 @@ def test_execute_sucessfull(
             mock_rest_scan_configuration(),
             import_scan_request_instance(par_scan_type="Xray Scan", file_name="incorrect url"),
             mock_rest_engagement(),
+            mock_rest_reimport_scan("import_scan.json"),
         ),
     ],
 )
@@ -240,6 +269,7 @@ def test_execute_error(
     mock_rest_scan_configuration,
     import_scan_request_instance,
     mock_rest_engagement,
+    mock_rest_reimport_scan,
 ):
     request = import_scan_request_instance
     uc = ImportScanUserCase(
@@ -248,8 +278,54 @@ def test_execute_error(
         rest_product=mock_rest_product,
         rest_scan_configuration=mock_rest_scan_configuration,
         rest_engagement=mock_rest_engagement,
+        rest_reimport_scan=mock_rest_reimport_scan,
     )
     assert isinstance(uc, ImportScanUserCase)
     assert isinstance(request, ImportScanRequest)
     with pytest.raises(ApiError):
         uc.execute(request)
+
+
+@pytest.mark.parametrize(
+    """mock_rest_import_scan,
+    mock_rest_product_type,
+    mock_rest_product,
+    mock_rest_scan_configuration,
+    import_scan_request_instance,
+    mock_rest_engagement,
+    mock_rest_reimport_scan""",
+    [
+        (
+            mock_rest_import_scan(file_path="sonar_qube.json"),
+            mock_rest_product_type(),
+            mock_rest_product(result_list_empty=True),
+            mock_rest_scan_configuration(),
+            import_scan_request_instance(par_scan_type="SonarQube API Import"),
+            mock_rest_engagement(),
+            mock_rest_reimport_scan(file_path="sonar_qube.json"),
+        ),
+    ],
+)
+def test_execute_reimport_scan(
+    mock_rest_import_scan,
+    mock_rest_product_type,
+    mock_rest_product,
+    mock_rest_scan_configuration,
+    import_scan_request_instance,
+    mock_rest_engagement,
+    mock_rest_reimport_scan,
+):
+    request = import_scan_request_instance
+    request.reimport_scan = True
+    uc = ImportScanUserCase(
+        rest_import_scan=mock_rest_import_scan,
+        rest_product_type=mock_rest_product_type,
+        rest_product=mock_rest_product,
+        rest_scan_configuration=mock_rest_scan_configuration,
+        rest_engagement=mock_rest_engagement,
+        rest_reimport_scan=mock_rest_reimport_scan,
+    )
+    assert isinstance(uc, ImportScanUserCase)
+    assert isinstance(request, ImportScanRequest)
+    response = uc.execute(request)
+    assert response.scan_type == import_scan_request_instance.scan_type

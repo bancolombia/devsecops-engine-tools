@@ -45,6 +45,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
+                    "REIMPORT_SCAN": True,
                     "CMDB": {
                         "USE_CMDB": True,
                         "HOST_CMDB": "cmdb_host",
@@ -126,7 +127,9 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 branch_tag="trunk",
                 commit_hash="commit_hash",
                 environment="Development",
+                test_title="engine_iac_k8s",
                 tags="engine_iac_k8s",
+                reimport_scan=True,
             )
 
     def test_send_vulnerability_management_exception(self):
@@ -166,6 +169,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "BRANCH_FILTER": "trunk,master,release,develop",
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
                     "CMDB": {
                         "USE_CMDB": True,
@@ -258,6 +262,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 token_defect_dojo=self.token_dd,
                 host_defect_dojo="host_defect_dojo",
                 expression="regex",
+                test_title="engine_iac_k8s",
+                reimport_scan=True,
             )
             self.assertEqual(result, "cmdb_request_result")
 
@@ -285,6 +291,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
+                    "REIMPORT_SCAN": True,
                     "CMDB": {"USE_CMDB": True, "REGEX_EXPRESSION_CMDB": "regex"},
                 },
             }
@@ -340,6 +347,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "token_defect_dojo": self.token_dd,
                     "host_defect_dojo": "host_defect_dojo",
                     "expression": "regex",
+                    "test_title": "engine_iac_k8s",
+                    "reimport_scan": True,
                 }
             )
             self.assertEqual(result, "import_scan_request_result")
@@ -364,6 +373,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
                     "CMDB": {"REGEX_EXPRESSION_CMDB": "regex"},
                 }
@@ -422,6 +432,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
                 }
             }
@@ -642,6 +653,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
                 }
             }
@@ -729,6 +741,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 2,
                 }
             }
@@ -791,6 +804,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
                 }
             }
@@ -941,6 +955,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 999,
+                    "REIMPORT_SCAN": True,
                 }
             }
         }
@@ -954,6 +969,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         mock_import_scan_request.assert_called_once()
         mock_engagement.get_engagements.assert_called_once()
 
+
     def test_get_active_engagements_exception(self):
         dict_args = {"token_vulnerability_management": "token1"}
         secret_tool = MagicMock()
@@ -962,6 +978,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 999,
+                    "REIMPORT_SCAN": True,
                 }
             }
         }
@@ -1053,6 +1070,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_DEFECT_DOJO": "http://defectdojo",
                     "MAX_RETRIES_QUERY": 3,
                     "LIMITS_QUERY": 100,
+                    "REIMPORT_SCAN": True,
                 }
             }
         }
@@ -1091,6 +1109,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_DEFECT_DOJO": "http://defectdojo",
                     "MAX_RETRIES_QUERY": 3,
                     "LIMITS_QUERY": 100,
+                    "REIMPORT_SCAN": True,
                 }
             }
         }
