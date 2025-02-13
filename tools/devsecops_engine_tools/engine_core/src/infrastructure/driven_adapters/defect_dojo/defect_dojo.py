@@ -451,6 +451,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             "branch_tag": vulnerability_management.branch_tag,
             "commit_hash": vulnerability_management.commit_hash,
             "service": vulnerability_management.input_core.scope_pipeline,
+            "test_title": tags,
             "environment": (
                 enviroment_mapping[vulnerability_management.environment.lower()]
                 if vulnerability_management.environment is not None
