@@ -203,6 +203,7 @@ def get_inputs_from_cli(args):
         "engine_container": ["prisma", "trivy"],
         "engine_dependencies": ["xray", "dependency_check"],
         "engine_code": ["bearer"],
+        "engine_dast": ["nuclei"],
         "engine_risk": None,
     }
 
