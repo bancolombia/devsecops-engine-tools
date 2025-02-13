@@ -39,7 +39,7 @@ class TestRunnerEngineDast(unittest.TestCase):
         # Configurar los argumentos
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_dast",
+            "module": "engine_dast",
             "dast_file_path": TestRunnerEngineDast.DAST_FILE_PATH
         }
         config_tool = {"ENABLED": "true", "TOOL": "NUCLEI", "EXTRA_TOOLS": ["JWT"]}
@@ -97,7 +97,7 @@ class TestRunnerEngineDast(unittest.TestCase):
         # Configurar los argumentos
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_dast",
+            "module": "engine_dast",
             "dast_file_path": TestRunnerEngineDast.DAST_FILE_PATH
         }
         config_tool = {"ENABLED": "true", "TOOL": "NUCLEI", "EXTRA_TOOLS": []}
@@ -135,7 +135,7 @@ class TestRunnerEngineDast(unittest.TestCase):
         # Configurar los argumentos
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_dast",
+            "module": "engine_dast",
             "dast_file_path": TestRunnerEngineDast.DAST_FILE_PATH
         }
         config_tool = {"ENABLED": "true", "TOOL": "NUCLEI", "EXTRA_TOOLS": []}

@@ -33,7 +33,7 @@ class TestMetricsManager(unittest.TestCase):
             path_file_results="test/file",
             custom_message_break_build="message",
         )
-        dict_args = {"tool": "Tool", "environment": "Environment"}
+        dict_args = {"module": "Tool", "environment": "Environment"}
         scan_result = "Scan Result"
         execution_id = "release_id"
         base_directory = "/tmp/log_engine_tools"

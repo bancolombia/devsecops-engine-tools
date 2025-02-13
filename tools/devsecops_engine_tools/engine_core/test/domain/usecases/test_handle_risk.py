@@ -46,7 +46,7 @@ class TestHandleRisk(unittest.TestCase):
     ):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_risk",
+            "module": "engine_risk",
             "remote_config_repo": "test_repo",
             "remote_config_branch": ""
         }
@@ -124,7 +124,7 @@ class TestHandleRisk(unittest.TestCase):
     def test_get_all_from_vm(self):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_risk",
+            "module": "engine_risk",
             "remote_config_repo": "test_repo",
             "remote_config_branch": ""
         }
@@ -146,7 +146,7 @@ class TestHandleRisk(unittest.TestCase):
     def test_get_all_from_vm_exception(self, mock_logger_error):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_risk",
+            "module": "engine_risk",
             "remote_config_repo": "test_repo",
             "remote_config_branch": ""
         }

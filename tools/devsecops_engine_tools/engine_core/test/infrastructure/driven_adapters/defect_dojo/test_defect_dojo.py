@@ -29,7 +29,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.dict_args = {
             "token_vulnerability_management": "token1",
             "token_cmdb": "token2",
-            "tool": "engine_iac",
+            "module": "engine_iac",
             "platform": ["k8s"],
         }
         self.vulnerability_management.secret_tool = {
@@ -425,7 +425,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         mock_date_reason_based,
     ):
         service = "test"
-        dict_args = {"tool": "engine_iac", "token_vulnerability_management": "token1"}
+        dict_args = {"module": "engine_iac", "token_vulnerability_management": "token1"}
         secret_tool = {"token_defect_dojo": "token2"}
         config_tool = {
             "VULNERABILITY_MANAGER": {
@@ -644,7 +644,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
     ):
         service = "test"
         dict_args = {
-            "tool": "engine_dependencies",
+            "module": "engine_dependencies",
             "token_vulnerability_management": "token1",
         }
         secret_tool = {"token_defect_dojo": "token2"}
@@ -732,7 +732,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
         service = "test"
         dict_args = {
-            "tool": "engine_dependencies",
+            "module": "engine_dependencies",
             "token_vulnerability_management": "token1",
         }
         secret_tool = {"token_defect_dojo": "token2"}
@@ -795,7 +795,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
     ):
         service = "test"
         dict_args = {
-            "tool": "engine_risk",
+            "module": "engine_risk",
             "token_vulnerability_management": "token1",
         }
         secret_tool = {"token_defect_dojo": "token2"}
