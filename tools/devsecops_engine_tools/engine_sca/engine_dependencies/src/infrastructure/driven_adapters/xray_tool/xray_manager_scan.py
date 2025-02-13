@@ -105,13 +105,42 @@ class XrayScan(ToolGateway):
         if os.path.exists(gradlew_path):
             os.chmod(gradlew_path, 0o755)
 
-    def scan_dependencies(self, prefix, cwd, config, mode, to_scan):
+    def scan_dependencies(self, prefix, cwd,pipeline_name,build_id,build_url,config, mode, to_scan):
         command = [
             prefix,
             mode,
             "--format=json",
             f"{to_scan}",
         ]
+
+        if mode == "build-scan":
+            #build info execution command
+            build_info_command =[
+               prefix,
+               "rt",
+               "bp",
+                pipeline_name,
+                build_id,
+                "--env-exclude=*password*;*psw*;*secret*;*key*;*token*;*auth*;",
+                f"--build-url={build_url}"  
+            ]
+            build_info_result = subprocess.run(build_info_command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+            if  not build_info_result.stdout:
+               logger.error(f"Build info  NOT  successfully deployed to Jfrog Arifactory.: {build_info_result.stderr}")
+               return None
+            print("##[info]Build info successfully deployed.")
+            #build-scan execution command
+            command = [
+                prefix,
+                mode,
+                pipeline_name,
+                build_id,
+                "--format=json",
+                "--vuln",
+                "--fail=false",
+                "--rescan=true"
+            ]
         result = subprocess.run(
             command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
@@ -153,9 +182,10 @@ class XrayScan(ToolGateway):
         to_scan,
         secret_tool,
         token_engine_dependencies,
+        **kwargs,
     ):
         token = secret_tool["token_xray"] if secret_tool else token_engine_dependencies
-        if dict_args["xray_mode"] == "scan":
+        if dict_args["xray_mode"] == "scan" or dict_args["xray_mode"] == "build-scan":
             get_artifacts = GetArtifacts()
             pattern = get_artifacts.excluded_files(
                 remote_config, pipeline_name, exclusion, "XRAY"
@@ -192,6 +222,9 @@ class XrayScan(ToolGateway):
         results_file = self.scan_dependencies(
             command_prefix,
             cwd,
+            pipeline_name,
+            kwargs.get("build_id"),
+            kwargs.get("build_url"),
             remote_config,
             dict_args["xray_mode"],
             to_scan,

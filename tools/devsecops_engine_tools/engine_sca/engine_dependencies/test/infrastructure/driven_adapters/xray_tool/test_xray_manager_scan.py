@@ -201,6 +201,9 @@ def test_scan_dependencies_success(xray_scan_instance):
     ) as mock_logger:
         prefix = "jf"
         cwd = "working_dir"
+        pipeline_name = "pipeline_name"
+        build_id = "build_id"
+        build_url = "build_url"
         mode = "scan"
         to_scan = "target_file.tar"
         remote_config = {
@@ -213,7 +216,7 @@ def test_scan_dependencies_success(xray_scan_instance):
         mock_subprocess_run.return_value = Mock(returncode=0, stdout="", stderr="expected, accepted")
         mock_os_getcwd.return_value = "working_dir"
 
-        xray_scan_instance.scan_dependencies(prefix, cwd, remote_config, mode, to_scan)
+        xray_scan_instance.scan_dependencies(prefix, cwd,pipeline_name,build_id,build_url,remote_config, mode, to_scan)
 
         mock_subprocess_run.assert_called_with(
             [
@@ -242,13 +245,16 @@ def test_scan_dependencies_failure(xray_scan_instance):
         remote_config = {"XRAY": {"STDERR_EXPECTED_WORDS": ["error"]}}
         mode = "scan"
         to_scan = "target_file.tar"
+        pipeline_name = "pipeline_name"
+        build_id = "build_id"
+        build_url = "build_url"
         mock_subprocess_run.return_value = Mock(
             returncode=1,
             stderr="Command 'xray scan' returned non-zero exit status 1.",
             stdout="",
         )
 
-        xray_scan_instance.scan_dependencies(prefix, cwd, remote_config, mode, to_scan)
+        xray_scan_instance.scan_dependencies(prefix, cwd,pipeline_name,build_id,build_url,remote_config, mode, to_scan)
 
         mock_logger_error.assert_called_with(
             "Error executing Xray scan: Command 'xray scan' returned non-zero exit status 1."
@@ -276,8 +282,11 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
         prefix = os.path.join("user_path", "jf")
         to_scan = "working_dir"
         secret_tool = {"token_xray": "token123"}
+        kwargs ={"build_id": "build_id", "build_url":"build_url"}
         exclusion = {}
         pipeline_name = "pipeline"
+        build_id = "build_id"
+        build_url = "build_url"
         mock_system.return_value = "Linux"
         mock_pathexist.return_value = True
         mock_userpath.return_value = "user_path"
@@ -290,12 +299,13 @@ def test_run_tool_dependencies_sca_linux(xray_scan_instance):
             to_scan,
             secret_tool,
             None,
+            **kwargs
         )
 
         mock_install_tool.assert_called_with(prefix, "1.0")
         mock_config_server.assert_called_with(prefix, "token123")
         mock_scan_dependencies.assert_called_with(
-            prefix, "working_dir", remote_config, dict_args["xray_mode"], ""
+            prefix, "working_dir",pipeline_name,build_id,build_url,remote_config, dict_args["xray_mode"], ""
         )
 
 
@@ -320,8 +330,11 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
         prefix = os.path.join("user_path", "jf.exe")
         to_scan = "working_dir"
         secret_tool = {"token_xray": "token123"}
+        kwargs ={"build_id": "build_id", "build_url":"build_url"}
         exclusion = {}
         pipeline_name = "pipeline"
+        build_id = "build_id"
+        build_url = "build_url"
         mock_system.return_value = "Windows"
         mock_pathexist.return_value = True
         mock_userpath.return_value = "user_path"
@@ -334,13 +347,14 @@ def test_run_tool_dependencies_sca_windows(xray_scan_instance):
             to_scan,
             secret_tool,
             None,
+            **kwargs
         )
 
         mock_install_tool.assert_called_with(prefix, "1.0")
         mock_config_server.assert_called_with(prefix, "token123")
 
         mock_scan_dependencies.assert_called_with(
-            prefix, "working_dir", remote_config, dict_args["xray_mode"], ""
+            prefix, "working_dir",pipeline_name,build_id,build_url,remote_config, dict_args["xray_mode"], ""
         )
 
 
@@ -366,7 +380,10 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
         to_scan = "working_dir"
         token = None
         exclusion = {}
+        kwargs ={"build_id": "build_id", "build_url":"build_url"}
         pipeline_name = "pipeline"
+        build_id = "build_id"
+        build_url = "build_url"
         mock_system.return_value = "Darwin"
         mock_pathexist.return_value = True
         mock_userpath.return_value = "user_path"
@@ -379,11 +396,13 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
             to_scan,
             token,
             "token_container",
+            **kwargs
+            
         )
 
         mock_install_tool.assert_called_with(prefix, "1.0")
         mock_config_server.assert_called_with(prefix, "token_container")
 
         mock_scan_dependencies.assert_called_with(
-            prefix, "working_dir", remote_config, dict_args["xray_mode"], ""
+            prefix, "working_dir",pipeline_name,build_id,build_url, remote_config, dict_args["xray_mode"], ""
         )

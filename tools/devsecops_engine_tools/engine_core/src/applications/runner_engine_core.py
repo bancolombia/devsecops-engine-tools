@@ -180,7 +180,7 @@ def get_inputs_from_cli(args):
     )
     parser.add_argument(
         "--xray_mode",
-        choices=["scan", "audit"],
+        choices=["scan", "audit","build-scan"],
         required=False,
         default="scan",
         help="Mode to execute xray, only apply engine_dependencies xray tool",
