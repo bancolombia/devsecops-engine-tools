@@ -23,7 +23,7 @@ class S3Manager(MetricsManagerGateway):
         except client.exceptions.NoSuchKey:
             return ""
 
-    def send_metrics(self, config_tool, tool, file_path):
+    def send_metrics(self, config_tool, module, file_path):
         credentials_role = assume_role(config_tool["METRICS_MANAGER"]["AWS"]["ROLE_ARN"]) if config_tool["METRICS_MANAGER"]["AWS"]["USE_ROLE"] else None
         session = boto3.session.Session()
 
@@ -41,7 +41,7 @@ class S3Manager(MetricsManagerGateway):
                 region_name=config_tool["METRICS_MANAGER"]["AWS"]["REGION_NAME"]
             )
         date = datetime.datetime.now()
-        path_bucket = f'engine_tools/{tool}/{date.strftime("%Y")}/{date.strftime("%m")}/{date.strftime("%d")}/{file_path.split("/")[-1]}'
+        path_bucket = f'engine_tools/{module}/{date.strftime("%Y")}/{date.strftime("%m")}/{date.strftime("%d")}/{file_path.split("/")[-1]}'
 
         data = self._get_s3_data(
             client, config_tool["METRICS_MANAGER"]["AWS"]["BUCKET"], path_bucket

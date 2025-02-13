@@ -29,8 +29,8 @@ def init_engine_core(
     )
     Printers.print_logo_tool(config_tool["BANNER"])
 
-    if config_tool[args["tool"].upper()]["ENABLED"]:
-        if args["tool"] == "engine_risk":
+    if config_tool[args["module"].upper()]["ENABLED"]:
+        if args["module"] == "engine_risk":
             results, input_core = HandleRisk(
                 vulnerability_management_gateway,
                 secrets_manager_gateway,
@@ -39,6 +39,9 @@ def init_engine_core(
             ).process(args, config_tool)
 
         else:
+            if args.get("tool"):
+                config_tool[args["module"].upper()]["TOOL"] = args.get("tool").upper()
+                
             findings_list, input_core = HandleScan(
                 vulnerability_management_gateway,
                 secrets_manager_gateway,
@@ -59,6 +62,6 @@ def init_engine_core(
         print(
             devops_platform_gateway.message(
                 "warning",
-                "DevSecOps Engine Tool - {0} in maintenance...".format(args["tool"]),
+                "DevSecOps Engine Tool - {0} in maintenance...".format(args["module"]),
             )
         )

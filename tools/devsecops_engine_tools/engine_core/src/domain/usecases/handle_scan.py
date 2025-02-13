@@ -47,7 +47,6 @@ from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
-
 class HandleScan:
     def __init__(
         self,
@@ -69,7 +68,7 @@ class HandleScan:
         )
         if dict_args["use_secrets_manager"] == "true":
             secret_tool = self.secrets_manager_gateway.get_secret(config_tool)
-        if "engine_iac" in dict_args["tool"]:
+        if "engine_iac" in dict_args["module"]:
             findings_list, input_core = runner_engine_iac(
                 dict_args,
                 config_tool["ENGINE_IAC"]["TOOL"],
@@ -81,7 +80,7 @@ class HandleScan:
                 config_tool, input_core, dict_args, secret_tool, env
             )
             return findings_list, input_core
-        elif "engine_container" in dict_args["tool"]:
+        elif "engine_container" in dict_args["module"]:
             findings_list, input_core, sbom_components = runner_engine_container(
                 dict_args,
                 config_tool["ENGINE_CONTAINER"]["TOOL"],
@@ -97,7 +96,7 @@ class HandleScan:
                 sbom_components,
             )
             return findings_list, input_core
-        elif "engine_dast" in dict_args["tool"]:
+        elif "engine_dast" in dict_args["module"]:
             findings_list, input_core = runner_engine_dast(
                 dict_args,
                 config_tool["ENGINE_DAST"],
@@ -108,7 +107,7 @@ class HandleScan:
                 config_tool, input_core, dict_args, secret_tool, env
             )
             return findings_list, input_core
-        elif "engine_code" in dict_args["tool"]:
+        elif "engine_code" in dict_args["module"]:
             findings_list, input_core = runner_engine_code(
                 dict_args,
                 config_tool["ENGINE_CODE"]["TOOL"],
@@ -118,7 +117,7 @@ class HandleScan:
                 config_tool, input_core, dict_args, secret_tool, env
             )
             return findings_list, input_core
-        elif "engine_secret" in dict_args["tool"]:
+        elif "engine_secret" in dict_args["module"]:
             findings_list, input_core = runner_secret_scan(
                 dict_args,
                 config_tool["ENGINE_SECRET"]["TOOL"],
@@ -129,7 +128,7 @@ class HandleScan:
                 config_tool, input_core, dict_args, secret_tool, env
             )
             return findings_list, input_core
-        elif "engine_dependencies" in dict_args["tool"]:
+        elif "engine_dependencies" in dict_args["module"]:
             findings_list, input_core, sbom_components = runner_engine_dependencies(
                 dict_args,
                 config_tool,
@@ -156,7 +155,7 @@ class HandleScan:
                 if input_core.path_file_results:
                     self.vulnerability_management.send_vulnerability_management(
                         VulnerabilityManagement(
-                            config_tool[dict_args["tool"].upper()]["TOOL"],
+                            config_tool[dict_args["module"].upper()]["TOOL"],
                             input_core,
                             dict_args,
                             secret_tool,

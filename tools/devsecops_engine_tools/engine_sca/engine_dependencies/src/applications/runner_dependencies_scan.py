@@ -20,7 +20,11 @@ def runner_engine_dependencies(
 ):
     try:
         tools_mapping = {
-            "XRAY": {"tool_run": XrayScan, "tool_deserializator": XrayDeserializator, "tool_sbom": sbom_tool_gateway},
+            "XRAY": {
+                "tool_run": XrayScan, 
+                "tool_deserializator": XrayDeserializator, 
+                "tool_sbom": sbom_tool_gateway
+            },
             "DEPENDENCY_CHECK": {
                 "tool_run": DependencyCheckTool,
                 "tool_deserializator": DependencyCheckDeserialize,
