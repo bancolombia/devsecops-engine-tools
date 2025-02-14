@@ -127,8 +127,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 branch_tag="trunk",
                 commit_hash="commit_hash",
                 environment="Development",
-                test_title="engine_iac_k8s",
-                tags="engine_iac_k8s",
+                tags=["engine_iac_k8s"],
+                test_title=["engine_iac_k8s"],
                 reimport_scan=True,
             )
 
@@ -1272,6 +1272,5 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.assertIn(
             "Error getting black list with the following error:", str(context.exception)
         )
-
 
 

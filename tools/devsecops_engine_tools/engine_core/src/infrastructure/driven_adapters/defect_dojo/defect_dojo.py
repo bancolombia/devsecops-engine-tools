@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import re
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_management_gateway import (
     VulnerabilityManagementGateway,
 )
@@ -91,10 +92,12 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     "VULNERABILITY_MANAGER"
                 ]["BRANCH_FILTER"]
             ) or (vulnerability_management.dict_args["module"] == "engine_secret"):
-                tags = vulnerability_management.dict_args["module"]
+                tags = [vulnerability_management.dict_args["module"]]
                 if vulnerability_management.dict_args["module"] == "engine_iac":
-                    tags = f"{vulnerability_management.dict_args['module']}_{'_'.join(vulnerability_management.dict_args['platform'])}"
-
+                    tags = [f"{vulnerability_management.dict_args['module']}_{'_'.join(vulnerability_management.dict_args['platform'])}"]
+                if vulnerability_management.dict_args["module"] == "engine_container" and sum(1 for line in open("scanned_images.txt", 'r', encoding='utf-8') if line.strip()) > 1:
+                    tags.append((re.search(r"(?<=:)([^-]+)", vulnerability_management.dict_args['image_to_scan']) or [None]).group(1))
+                  
                 use_cmdb = vulnerability_management.config_tool[
                     "VULNERABILITY_MANAGER"
                 ]["DEFECT_DOJO"]["CMDB"]["USE_CMDB"]
