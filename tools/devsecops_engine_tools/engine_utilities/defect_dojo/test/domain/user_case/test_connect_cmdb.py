@@ -101,7 +101,7 @@ def test_execute(engagement_name, obj_cmdb):
         "scan_type": "JFrog Xray Scan",
         "engagement_name": engagement_name,
         "file": f"{DEVSECOPS_ENGINE_UTILITIES_PATH}/defect_dojo/test/files/xray_scan.json",
-        "tags": "evc",
+        "tags": ["evc"],
     }
     request: ImportScanRequest = ImportScanSerializer().load(request)
     mock_rc = mock_rest_consumer_cmdb(request, token="91qewuro9quowedafj", host="https://localhost:8000")
@@ -135,7 +135,7 @@ def test_execute(engagement_name, obj_cmdb):
     response = uc.execute(request)
     assert response.scan_type == "JFrog Xray Scan"
     assert response.code_app == "nu0000001"
-    assert response.tags in ["evc"]
+    assert response.tags == ['evc']
     assert response.product_type_name in ["ORPHAN_PRODUCT_TYPE", "Product_type_test"]
 
 
