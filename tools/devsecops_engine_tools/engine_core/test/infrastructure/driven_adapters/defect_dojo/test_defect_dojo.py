@@ -128,7 +128,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 commit_hash="commit_hash",
                 environment="Development",
                 tags=["engine_iac_k8s"],
-                test_title=["engine_iac_k8s"],
+                test_title="engine_iac_k8s",
                 reimport_scan=True,
             )
 
@@ -151,7 +151,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
     def test_build_request_with_cmdb(self):
         use_cmdb = True
-        tags = "engine_iac_k8s"
+        tags = ["engine_iac_k8s"]
 
         self.vulnerability_management.scan_type = "CHECKOV"
         self.vulnerability_management.input_core = MagicMock()
@@ -269,7 +269,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
     def test_build_request_without_cmdb(self):
         use_cmdb = False
-        tags = "engine_iac_k8s"
+        tags = ["engine_iac_k8s","test_2"]
 
         self.vulnerability_management.scan_type = "CHECKOV"
         self.vulnerability_management.input_core = MagicMock()
@@ -347,7 +347,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "token_defect_dojo": self.token_dd,
                     "host_defect_dojo": "host_defect_dojo",
                     "expression": "regex",
-                    "test_title": "engine_iac_k8s",
+                    "test_title": "engine_iac_k8s_test_2",
                     "reimport_scan": True,
                 }
             )
