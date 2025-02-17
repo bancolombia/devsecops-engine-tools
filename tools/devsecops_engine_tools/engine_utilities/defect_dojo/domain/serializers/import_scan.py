@@ -137,6 +137,7 @@ list_scan_type = [
     "SSLyze Scan (JSON)",
     "StackHawk HawkScan",
     "Talisman Scan",
+    "Tenable Scan",
     "Terrascan Scan",
     "Testssl Scan",
     "TFSec Scan",
