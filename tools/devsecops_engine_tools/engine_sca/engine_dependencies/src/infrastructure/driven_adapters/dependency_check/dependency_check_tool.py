@@ -25,7 +25,7 @@ class DependencyCheckTool(ToolGateway):
     def download_tool(self, cli_version):
         try:
             self.download_tool_called = True
-            url = f"https://github.com/jeremylong/DependencyCheck/releases/download/v{cli_version}/dependency-check-{cli_version}-release.zip"
+            url = f"https://github.com/dependency-check/DependencyCheck/releases/download/v{cli_version}/dependency-check-{cli_version}-release.zip"
             response = requests.get(url, allow_redirects=True)
             home_directory = os.path.expanduser("~")
             zip_name = os.path.join(
@@ -81,7 +81,7 @@ class DependencyCheckTool(ToolGateway):
                     token
                 ])
             
-            if not self.download_tool:
+            if not self.download_tool_called:
                 command.append("--noupdate")
 
             result = subprocess.run(command, capture_output=True, check=True, text=True)
