@@ -33,7 +33,7 @@ class TestDependencyCheckTool(unittest.TestCase):
         tool.download_tool("7.0")
 
         mock_requests_get.assert_called_with(
-            "https://github.com/jeremylong/DependencyCheck/releases/download/v7.0/dependency-check-7.0-release.zip",
+            "https://github.com/dependency-check/DependencyCheck/releases/download/v7.0/dependency-check-7.0-release.zip",
             allow_redirects=True,
         )
 
@@ -204,7 +204,8 @@ class TestDependencyCheckTool(unittest.TestCase):
                 "--scan",
                 "mock_file_to_scan",              
                 "--nvdApiKey",
-                "token"
+                "token",
+                '--noupdate'
             ],
             capture_output=True,
             check=True,
@@ -236,7 +237,8 @@ class TestDependencyCheckTool(unittest.TestCase):
                 "--scan",
                 "mock_file_to_scan",
                 "--nvdApiKey",
-                "token"
+                "token",
+                '--noupdate'
             ],
             capture_output=True,
             check=True,
