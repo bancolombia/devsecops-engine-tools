@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import re
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_management_gateway import (
     VulnerabilityManagementGateway,
 )
@@ -91,10 +92,13 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     "VULNERABILITY_MANAGER"
                 ]["BRANCH_FILTER"]
             ) or (vulnerability_management.dict_args["module"] == "engine_secret"):
-                tags = vulnerability_management.dict_args["module"]
+                tags = [vulnerability_management.dict_args["module"]]
                 if vulnerability_management.dict_args["module"] == "engine_iac":
-                    tags = f"{vulnerability_management.dict_args['module']}_{'_'.join(vulnerability_management.dict_args['platform'])}"
-
+                    tags = [f"{vulnerability_management.dict_args['module']}_{'_'.join(vulnerability_management.dict_args['platform'])}"]
+                if vulnerability_management.dict_args["module"] == "engine_container" and sum(1 for line in open("scanned_images.txt", 'r', encoding='utf-8') if line.strip()) > 1:
+                    match = re.search(r"(?<=:)([^-]+)", vulnerability_management.dict_args['image_to_scan'])
+                    tags.append(match.group(1) if match else None)
+                  
                 use_cmdb = vulnerability_management.config_tool[
                     "VULNERABILITY_MANAGER"
                 ]["DEFECT_DOJO"]["CMDB"]["USE_CMDB"]
@@ -451,7 +455,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             "branch_tag": vulnerability_management.branch_tag,
             "commit_hash": vulnerability_management.commit_hash,
             "service": vulnerability_management.input_core.scope_pipeline,
-            "test_title": tags,
+            "test_title": '_'.join(tags),
             "environment": (
                 enviroment_mapping[vulnerability_management.environment.lower()]
                 if vulnerability_management.environment is not None

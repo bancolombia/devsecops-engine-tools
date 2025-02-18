@@ -34,7 +34,7 @@ class ImportScanRestConsumer:
             "auto_create_context": "false",
             "deduplication_on_engagement": request.deduplication_on_engagement,
             "lead": request.lead,
-            "tags": request.tags,
+            "tags": ",".join(request.tags) if request.tags else "",
             "close_old_findings": str(request.close_old_findings),
             "close_old_findings_product_scope": str(request.close_old_findings_product_scope),
             "push_to_jira": str(request.push_to_jira),
