@@ -154,6 +154,7 @@ class BreakBuild:
                 )
             )
             self.break_build = True
+            [setattr(report, "reason", "Remediation Rate") for report in new_report_list]
             self.report_breaker.extend(copy.deepcopy(new_report_list))
 
     def _get_remediation_rate_threshold(self, total):
@@ -217,7 +218,6 @@ class BreakBuild:
                         applied_exclusions.append(exclusion_copy)
                         break
             if not exclude:
-                report.reason = "Remediation Rate"
                 filtered_reports.append(report)
 
         return filtered_reports, applied_exclusions
