@@ -48,14 +48,7 @@ def test_process(
     apply_exclusions.return_value = (report_list, exclusions)
 
     break_build = BreakBuild(
-        MagicMock(),
-        MagicMock(),
-        remote_config,
-        [],
-        [],
-        [],
-        [],
-        {}
+        MagicMock(), MagicMock(), remote_config, [], [], [], [], {}
     )
     break_build.break_build = True
     break_build.process()
@@ -73,14 +66,7 @@ def test_process(
 def test_breaker_break():
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
-        devops_platform_gateway,
-        MagicMock(),
-        {},
-        [],
-        [],
-        [],
-        [],
-        {}
+        devops_platform_gateway, MagicMock(), {}, [], [], [], [], {}
     )
     break_build.break_build = True
     break_build._breaker()
@@ -91,14 +77,7 @@ def test_breaker_break():
 def test_breaker_not_break():
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
-        devops_platform_gateway,
-        MagicMock(),
-        {},
-        [],
-        [],
-        [],
-        [],
-        {}
+        devops_platform_gateway, MagicMock(), {}, [], [], [], [], {}
     )
     break_build.break_build = False
     break_build._breaker()
@@ -123,10 +102,7 @@ def test_remediation_rate_control_greater():
         [],
         [],
         [],
-        {"REMEDIATION_RATE": {
-            "1": 0,
-            "other": 10
-        }}
+        {"REMEDIATION_RATE": {"1": 0, "other": 10}},
     )
     break_build._remediation_rate_control(all_report)
 
@@ -153,9 +129,7 @@ def test_remediation_rate_control_close():
         [],
         [],
         [],
-        {"REMEDIATION_RATE": {
-            "5": 30
-        }},
+        {"REMEDIATION_RATE": {"5": 30}},
     )
     break_build._remediation_rate_control(all_report)
 
@@ -182,10 +156,7 @@ def test_remediation_rate_control_less():
         [],
         [],
         [],
-        {"REMEDIATION_RATE": {
-            "1": 0,
-            "other": 50
-        }},
+        {"REMEDIATION_RATE": {"1": 0, "other": 50}},
     )
     break_build._remediation_rate_control(all_report)
 
@@ -290,9 +261,7 @@ def test_tag_blacklist_control_error():
             vm_id_url="vm_id_url",
         )
     ]
-    remote_config = {
-        "TAG_BLACKLIST": ["blacklisted"]
-    }
+    remote_config = {"TAG_BLACKLIST": ["blacklisted"]}
     tag_age_threshold = 5
     mock_devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
@@ -303,7 +272,7 @@ def test_tag_blacklist_control_error():
         [],
         [],
         [],
-        {"TAG_MAX_AGE": 5}
+        {"TAG_MAX_AGE": 5},
     )
     break_build._tag_blacklist_control(report_list)
 
@@ -323,9 +292,7 @@ def test_tag_blacklist_control_warning():
             vm_id_url="vm_id_url",
         )
     ]
-    remote_config = {
-        "TAG_BLACKLIST": ["blacklisted"]
-    }
+    remote_config = {"TAG_BLACKLIST": ["blacklisted"]}
     tag_age_threshold = 5
     mock_devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
@@ -336,7 +303,7 @@ def test_tag_blacklist_control_warning():
         [],
         [],
         [],
-        {"TAG_MAX_AGE": 5}
+        {"TAG_MAX_AGE": 5},
     )
     break_build._tag_blacklist_control(report_list)
 
@@ -367,7 +334,7 @@ def test_risk_score_control_break():
         [],
         [],
         [],
-        {"RISK_SCORE": 4}
+        {"RISK_SCORE": 4},
     )
     break_build._risk_score_control(report_list)
 
@@ -398,7 +365,7 @@ def test_risk_score_control_not_break():
         [],
         [],
         [],
-        {"RISK_SCORE": 4}
+        {"RISK_SCORE": 4},
     )
     break_build._risk_score_control(report_list)
 
@@ -421,14 +388,7 @@ def test_print_exclusions():
     ]
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
-        devops_platform_gateway,
-        MagicMock(),
-        {},
-        [],
-        [],
-        [],
-        [],
-        {}
+        devops_platform_gateway, MagicMock(), {}, [], [], [], [], {}
     )
     break_build._print_exclusions(applied_exclusions)
 
