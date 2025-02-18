@@ -34,7 +34,7 @@ The DefectDojo module exposes functionalities applicable to the Defect-Dojo app,
         host_defect_dojo="http://localhost:8000",
         scan_type="Checkov Scan",
         engagement_name="ABC_TestCode",
-        tags="",
+        tags=["tag1","tag2"],
         branch_tag="master",
     )
 
