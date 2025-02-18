@@ -31,9 +31,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
 @patch(
     "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._breaker"
 )
-@patch("copy.deepcopy")
 def test_process(
-    deepcopy,
     breaker,
     map_applied_exclusion,
     print_exclusions,
@@ -48,14 +46,13 @@ def test_process(
     apply_exclusions.return_value = (report_list, exclusions)
 
     break_build = BreakBuild(
-        MagicMock(), MagicMock(), remote_config, [], [], [], [], {}
+        MagicMock(), MagicMock(), remote_config, [], [], [], [], {}, 0
     )
     break_build.break_build = True
     break_build.process()
 
     remediation_rate_control.assert_called_once()
     apply_exclusions.assert_called_once()
-    deepcopy.assert_called_once()
     tag_blacklist_control.assert_called_once()
     risk_score_control.assert_called_once()
     print_exclusions.assert_called_once()
@@ -66,7 +63,7 @@ def test_process(
 def test_breaker_break():
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
-        devops_platform_gateway, MagicMock(), {}, [], [], [], [], {}
+        devops_platform_gateway, MagicMock(), {}, [], [], [], [], {}, 0
     )
     break_build.break_build = True
     break_build._breaker()
@@ -77,7 +74,7 @@ def test_breaker_break():
 def test_breaker_not_break():
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
-        devops_platform_gateway, MagicMock(), {}, [], [], [], [], {}
+        devops_platform_gateway, MagicMock(), {}, [], [], [], [], {}, 0
     )
     break_build.break_build = False
     break_build._breaker()
@@ -88,6 +85,10 @@ def test_breaker_not_break():
 def test_remediation_rate_control_greater():
     all_report = [
         Report(mitigated=True),
+        Report(mitigated=False),
+        Report(mitigated=False),
+    ]
+    new_report_list = [
         Report(mitigated=False),
         Report(mitigated=False),
     ]
@@ -103,8 +104,9 @@ def test_remediation_rate_control_greater():
         [],
         [],
         {"REMEDIATION_RATE": {"1": 0, "other": 10}},
+        0,
     )
-    break_build._remediation_rate_control(all_report)
+    break_build._remediation_rate_control(all_report, new_report_list)
 
     devops_platform_gateway.message.assert_called_with(
         "succeeded",
@@ -115,6 +117,10 @@ def test_remediation_rate_control_greater():
 def test_remediation_rate_control_close():
     all_report = [
         Report(mitigated=True),
+        Report(mitigated=False),
+        Report(mitigated=False),
+    ]
+    new_report_list = [
         Report(mitigated=False),
         Report(mitigated=False),
     ]
@@ -130,8 +136,9 @@ def test_remediation_rate_control_close():
         [],
         [],
         {"REMEDIATION_RATE": {"5": 30}},
+        0,
     )
-    break_build._remediation_rate_control(all_report)
+    break_build._remediation_rate_control(all_report, new_report_list)
 
     devops_platform_gateway.message.assert_called_with(
         "warning",
@@ -142,6 +149,10 @@ def test_remediation_rate_control_close():
 def test_remediation_rate_control_less():
     all_report = [
         Report(mitigated=True),
+        Report(mitigated=False),
+        Report(mitigated=False),
+    ]
+    new_report_list = [
         Report(mitigated=False),
         Report(mitigated=False),
     ]
@@ -157,8 +168,9 @@ def test_remediation_rate_control_less():
         [],
         [],
         {"REMEDIATION_RATE": {"1": 0, "other": 50}},
+        0,
     )
-    break_build._remediation_rate_control(all_report)
+    break_build._remediation_rate_control(all_report, new_report_list)
 
     devops_platform_gateway.message.assert_called_with(
         "error",
@@ -205,6 +217,7 @@ def test_map_applied_exclusion():
         [],
         [],
         {},
+        0,
     )
     result = break_build._map_applied_exclusion(exclusions)
 
@@ -223,6 +236,7 @@ def test_apply_exclusions_vuln_id_from_tool():
         [],
         [],
         {},
+        0,
     )
     break_build.exclusions = exclusions
 
@@ -243,6 +257,7 @@ def test_apply_exclusions_id():
         [],
         [],
         {},
+        0,
     )
     break_build.exclusions = exclusions
 
@@ -261,7 +276,7 @@ def test_tag_blacklist_control_error():
             vm_id_url="vm_id_url",
         )
     ]
-    remote_config = {"TAG_BLACKLIST": ["blacklisted"]}
+    remote_config = {"TAG_BLACKLIST_EXCLUSION_DAYS": {"blacklisted": 5}}
     tag_age_threshold = 5
     mock_devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
@@ -273,12 +288,13 @@ def test_tag_blacklist_control_error():
         [],
         [],
         {"TAG_MAX_AGE": 5},
+        0,
     )
     break_build._tag_blacklist_control(report_list)
 
     mock_devops_platform_gateway.message.assert_called_once_with(
         "error",
-        f"Report {report_list[0].vm_id} with tag {report_list[0].tags[0]} is blacklisted and age {report_list[0].age} is above threshold {tag_age_threshold}",
+        f"Report {report_list[0].vm_id} with tag '{report_list[0].tags[0]}' is blacklisted and age {report_list[0].age} is above threshold {tag_age_threshold}",
     )
 
 
@@ -292,7 +308,7 @@ def test_tag_blacklist_control_warning():
             vm_id_url="vm_id_url",
         )
     ]
-    remote_config = {"TAG_BLACKLIST": ["blacklisted"]}
+    remote_config = {"TAG_BLACKLIST_EXCLUSION_DAYS": {"blacklisted": 5}}
     tag_age_threshold = 5
     mock_devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
@@ -304,12 +320,13 @@ def test_tag_blacklist_control_warning():
         [],
         [],
         {"TAG_MAX_AGE": 5},
+        0,
     )
     break_build._tag_blacklist_control(report_list)
 
     mock_devops_platform_gateway.message.assert_called_once_with(
         "warning",
-        f"Report {report_list[0].vm_id} with tag {report_list[0].tags[0]} is blacklisted but age {report_list[0].age} is below threshold {tag_age_threshold}",
+        f"Report {report_list[0].vm_id} with tag '{report_list[0].tags[0]}' is blacklisted but age {report_list[0].age} is below threshold {tag_age_threshold}",
     )
 
 
@@ -335,6 +352,7 @@ def test_risk_score_control_break():
         [],
         [],
         {"RISK_SCORE": 4},
+        0,
     )
     break_build._risk_score_control(report_list)
 
@@ -366,6 +384,7 @@ def test_risk_score_control_not_break():
         [],
         [],
         {"RISK_SCORE": 4},
+        0,
     )
     break_build._risk_score_control(report_list)
 
@@ -388,7 +407,7 @@ def test_print_exclusions():
     ]
     devops_platform_gateway = MagicMock()
     break_build = BreakBuild(
-        devops_platform_gateway, MagicMock(), {}, [], [], [], [], {}
+        devops_platform_gateway, MagicMock(), {}, [], [], [], [], {}, 0
     )
     break_build._print_exclusions(applied_exclusions)
 
