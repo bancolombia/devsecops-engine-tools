@@ -122,9 +122,14 @@ class BreakBuild:
         self, all_report: "list[Report]", new_report_list: "list[Report]"
     ):
         mitigated = sum(1 for report in all_report if report.mitigated)
-        total = len(all_report) - self.policy_excluded
+        white_list = sum(
+            1
+            for report in all_report
+            if "white_list" in report.tags and not report.mitigated
+        )
+        total = len(all_report) - self.policy_excluded - white_list
         print(
-            f"Mitigated count: {mitigated}   Total count: {len(all_report)}   Policy excluded: {self.policy_excluded}"
+            f"Mitigated count: {mitigated}   Total count: {len(all_report)}   Policy excluded: {self.policy_excluded + white_list}"
         )
         remediation_rate_value = self._get_percentage(mitigated / total)
 
@@ -154,7 +159,10 @@ class BreakBuild:
                 )
             )
             self.break_build = True
-            [setattr(report, "reason", "Remediation Rate") for report in new_report_list]
+            [
+                setattr(report, "reason", "Remediation Rate")
+                for report in new_report_list
+            ]
             self.report_breaker.extend(copy.deepcopy(new_report_list))
 
     def _get_remediation_rate_threshold(self, total):
