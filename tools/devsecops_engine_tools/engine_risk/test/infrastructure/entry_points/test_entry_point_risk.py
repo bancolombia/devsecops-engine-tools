@@ -26,6 +26,16 @@ def test_init_engine_risk(
     mock_devops_platform_gateway = MagicMock()
     mock_print_table_gateway = MagicMock()
 
+    # Configurar la instancia de HandleFilters correctamente
+    instance_handle_filters = mock_handle_filters.return_value
+    instance_handle_filters.filter.return_value = findings
+    instance_handle_filters.filter_duplicated.return_value = findings
+    instance_handle_filters.filter_tags_days.return_value = ("filtered_findings", 0)
+
+    # Configurar la instancia de GetExclusions correctamente
+    instance_get_exclusions = mock_get_exclusions.return_value
+    instance_get_exclusions.process.return_value = ("exclusion1", 0)
+
     init_engine_risk(
         MagicMock(),
         mock_devops_platform_gateway,
@@ -37,9 +47,9 @@ def test_init_engine_risk(
     )
 
     assert mock_devops_platform_gateway.get_remote_config.call_count == 2
-    mock_handle_filters.return_value.filter.assert_called_once_with(findings)
-    mock_handle_filters.return_value.filter_duplicated.assert_called_once()
-    mock_handle_filters.return_value.filter_tags_days.assert_called_once()
+    instance_handle_filters.filter.assert_called_once_with(findings)
+    instance_handle_filters.filter_duplicated.assert_called_once()
+    instance_handle_filters.filter_tags_days.assert_called_once()
     mock_add_data.assert_called_once()
     mock_get_exclusions.assert_called_once()
     mock_break_build.assert_called_once()
