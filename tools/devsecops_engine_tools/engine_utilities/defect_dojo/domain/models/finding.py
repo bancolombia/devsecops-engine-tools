@@ -77,7 +77,7 @@ class Finding(FromDictMixin):
     sast_source_line = None
     sast_source_file_path = None
     nb_occurences = None
-    publish_date = None
+    publish_date: str = ""
     planned_remediation_date = None
     planned_remediation_version = None
     effort_for_fixing = None

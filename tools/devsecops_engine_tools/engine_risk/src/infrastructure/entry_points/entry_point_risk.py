@@ -31,10 +31,14 @@ def init_engine_risk(
     vm_exclusions,
 ):
     remote_config = devops_platform_gateway.get_remote_config(
-        dict_args["remote_config_repo"], "engine_risk/ConfigTool.json", dict_args["remote_config_branch"]
+        dict_args["remote_config_repo"],
+        "engine_risk/ConfigTool.json",
+        dict_args["remote_config_branch"],
     )
     risk_exclusions = devops_platform_gateway.get_remote_config(
-        dict_args["remote_config_repo"], "engine_risk/Exclusions.json", dict_args["remote_config_branch"]
+        dict_args["remote_config_repo"],
+        "engine_risk/Exclusions.json",
+        dict_args["remote_config_branch"],
     )
     pipeline_name = devops_platform_gateway.get_variable("pipeline_name")
 
@@ -49,7 +53,7 @@ def init_engine_risk(
 
     unique_findings = handle_filters.filter_duplicated(active_findings)
 
-    filtered_findings = handle_filters.filter_tags_days(
+    filtered_findings, len_tag_filtered = handle_filters.filter_tags_days(
         devops_platform_gateway, remote_config, unique_findings
     )
 
@@ -62,8 +66,11 @@ def init_engine_risk(
         remote_config,
         risk_exclusions,
         services,
+        active_findings,
     )
-    exclusions = get_exclusions.process()
+    exclusions, len_new_vuln = get_exclusions.process()
+
+    policy_excluded = len_tag_filtered + len_new_vuln
 
     threshold = CheckThreshold(
         pipeline_name, remote_config["THRESHOLD"], risk_exclusions
@@ -78,6 +85,7 @@ def init_engine_risk(
         data_added,
         findings,
         threshold,
+        policy_excluded,
     )
 
     return break_build.process()

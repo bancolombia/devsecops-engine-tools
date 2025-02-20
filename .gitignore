@@ -69,6 +69,7 @@ gitleaks_aux_report_*.json
 gitleaks_report.json
 result_dast_scan.json
 test_file/*
+pytest.ini
 
 # Extensions
 out
