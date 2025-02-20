@@ -70,6 +70,15 @@ class ContainerScaScan:
         with open("scanned_images.txt", "a") as file:
             file.write(result_file + "\n")
 
+    def validate_base_image_date(self, matching_image, referenced_date):
+        """
+        Process the base image date validation.
+
+        Returns:
+            string: base image date.
+        """
+        return self.tool_images.validate_base_image_date(matching_image, referenced_date)
+    
     def process(self):
         """
         Process SCA scanning.
@@ -82,6 +91,10 @@ class ContainerScaScan:
         matching_image = self.get_image(self.image_to_scan)
         if self.remote_config['GET_IMAGE_BASE']:
             base_image = self.get_base_image(matching_image)
+        if self.remote_config["VALIDATE_BASE_IMAGE_DATE"]["ENABLED"]:
+            self.validate_base_image_date(
+                matching_image, self.remote_config["VALIDATE_BASE_IMAGE_DATE"]["REFERENCE_IMAGE_DATE"]
+            )
         sbom_components = None
         generate_sbom = self.remote_config["SBOM"]["ENABLED"] and any(
             branch in str(self.branch)
