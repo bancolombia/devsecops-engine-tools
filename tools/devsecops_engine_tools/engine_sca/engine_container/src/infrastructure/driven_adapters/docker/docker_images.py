@@ -1,3 +1,4 @@
+from datetime import datetime
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.images_gateway import (
     ImagesGateway,
 )
@@ -48,3 +49,35 @@ class DockerImages(ImagesGateway):
         except Exception as e:
             logger.error(f"Error getting base image: {e}")
             return None
+
+    def validate_base_image_date(self, matching_image, referenced_date):
+        client = docker.from_env()
+        image_details = client.api.inspect_image(matching_image.id)
+        labels = image_details.get("Config", {}).get("Labels", {})
+        baseline_date = labels.get("x86.baseline.date")
+        if baseline_date is None:
+            base_image = self.get_base_image_from_labels(labels)
+            date_image = self.extract_date_from_image(base_image)
+            return self.validate_date(date_image, referenced_date)
+        else:
+            return self.validate_date(datetime.strptime(baseline_date, "%Y%m%d"), referenced_date)
+                
+    def get_base_image_from_labels(self, labels):
+        if labels.get("image.base.digest"):
+            return labels.get("image.base.ref.name")
+        else:
+            return labels.get("source_images") or labels.get("source-image")
+        
+    def extract_date_from_image(self, image_name):
+        date = image_name.split("_")[-1]
+        try:
+            return datetime.strptime(date, "%Y%m%d")
+        except ValueError:
+            return None
+    
+    def validate_date(self, date, referenced_date):
+        reference_date = datetime.strptime(referenced_date, "%Y%m%d")
+        if date < reference_date:
+            raise ValueError(f"The source base image date ({date.strftime('%Y-%m-%d')}) is older than the referenced date ({reference_date.strftime('%Y-%m-%d')}).")
+        else:
+            return True
