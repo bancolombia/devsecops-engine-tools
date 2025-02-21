@@ -16,7 +16,6 @@ class ImportScanRestConsumer:
         self.__session = session._instance
 
     def import_scan_api(self, request: ImportScanRequest) -> ImportScanRequest:
-        url = f"{self.__host}/api/v2/import-scan/"
         data = {
             "scan_date": request.scan_date,
             "minimum_severity": request.minimum_severity,
@@ -24,14 +23,12 @@ class ImportScanRestConsumer:
             "verified": request.verified,
             "scan_type": request.scan_type,
             "endpoint_to_add": request.endpoint_to_add,
-            # "file": request.file,
             "product_type_name": request.product_type_name,
             "product_name": request.product_name,
             "engagement_name": request.engagement_name,
             "engagement_end_date": request.engagement_end_date,
             "source_code_management_uri": request.source_code_management_uri,
             "engagement": str(request.engagement) if request.engagement != 0 else "",
-            "auto_create_context": "false",
             "deduplication_on_engagement": request.deduplication_on_engagement,
             "lead": request.lead,
             "tags": request.tags,
@@ -49,6 +46,15 @@ class ImportScanRestConsumer:
             "service": request.service,
             "group_by": request.group_by,
         }
+
+        if request.reimport_scan:
+            url = f"{self.__host}/api/v2/reimport-scan/"
+            data["auto_create_context"] = "true"
+
+        else:
+            url = f"{self.__host}/api/v2/import-scan/"
+            data["auto_create_context"] = "false"
+
         multipart_data = MultipartEncoder(fields=data)
 
         headers = {"Authorization": f"Token {self.__token}", "Content-Type": multipart_data.content_type}
@@ -65,8 +71,7 @@ class ImportScanRestConsumer:
         return response
 
     def import_scan(self, request: ImportScanRequest, files) -> ImportScanRequest:
-        url = f"{self.__host}/api/v2/import-scan/"
-        payload = {
+        data = {
             "scan_date": request.scan_date,
             "minimum_severity": request.minimum_severity,
             "active": request.active,
@@ -80,7 +85,6 @@ class ImportScanRestConsumer:
             "engagement_end_date": request.engagement_end_date,
             "source_code_management_uri": request.source_code_management_uri,
             "engagement": request.engagement if request.engagement != 0 else "",
-            "auto_create_context": "false",
             "deduplication_on_engagement": request.deduplication_on_engagement,
             "lead": request.lead,
             "tags": request.tags,
@@ -98,12 +102,23 @@ class ImportScanRestConsumer:
             "service": request.service,
             "group_by": request.group_by,
         }
+        if request.reimport_scan is True:
+            url = f"{self.__host}/api/v2/reimport-scan/"
+            data["auto_create_context"] = "true"
+            data["title"] = request.title
+        else:
+            url = f"{self.__host}/api/v2/import-scan/"
+            data["auto_create_context"] = "false"
 
         headers = {"Authorization": f"Token {self.__token}"}
         try:
-            response = self.__session.post(url, headers=headers, data=payload, files=files, verify=VERIFY_CERTIFICATE)
+            response = self.__session.post(url,
+                                           headers=headers,
+                                           data=data,
+                                           files=files,
+                                           verify=VERIFY_CERTIFICATE)
             if response.status_code != 201:
-                logger.error(payload)
+                logger.error(data)
                 logger.error(response.json())
                 logger.error(response)
                 raise ApiError(response.json())
