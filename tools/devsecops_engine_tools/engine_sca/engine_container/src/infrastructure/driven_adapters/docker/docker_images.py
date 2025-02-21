@@ -64,16 +64,24 @@ class DockerImages(ImagesGateway):
 
             
     def get_base_image_from_labels(self, labels):
-        if labels.get("image.base.digest"):
-            return labels.get("image.base.ref.name")
-        else:
-            return labels.get("source_images") or labels.get("source-image")
+        try:
+            if labels.get("image.base.digest"):
+                return labels.get("image.base.ref.name")
+            else:
+                return labels.get("source_images") or labels.get("source-image")
+        except Exception as e:
+            logger.error(f"Error getting base image from labels: {e}")
+            return None
         
     def extract_date_from_image(self, image_name):
-        date = image_name.split("_")[-1]
         try:
+            date = image_name.split("_")[-1]
             return datetime.strptime(date, "%Y%m%d")
-        except ValueError:
+        except ValueError as e:
+            logger.error(f"Error extracting date from image name '{image_name}': {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error extracting date from image name '{image_name}': {e}")
             return None
     
     def validate_date(self, date, referenced_date):
