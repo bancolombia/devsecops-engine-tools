@@ -61,7 +61,8 @@ class DockerImages(ImagesGateway):
             return self.validate_date(date_image, referenced_date)
         else:
             return self.validate_date(datetime.strptime(baseline_date, "%Y%m%d"), referenced_date)
-                
+
+            
     def get_base_image_from_labels(self, labels):
         if labels.get("image.base.digest"):
             return labels.get("image.base.ref.name")
