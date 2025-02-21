@@ -74,8 +74,8 @@ class ImportScanUserCase:
         response = None
 
         if api_scan_bool:
-            logger.debug(f"reimport scan :{self.__rest_reimport_scan}")
-            response = self.__rest_reimport_scan.reimport_scan(request)
+            logger.debug(f"reimport scan Api :{self.__rest_reimport_scan}")
+            response = self.__rest_reimport_scan.reimport_scan_api(request)
             logger.info(f"End process Succesfull!!!: {response}")
         else:
             try:
