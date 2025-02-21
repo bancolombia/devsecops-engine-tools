@@ -31,7 +31,7 @@ class ReimportScanRestConsumer:
             "engagement_end_date": request.engagement_end_date,
             "source_code_management_uri": request.source_code_management_uri,
             "engagement": str(request.engagement) if request.engagement != 0 else "",
-            "auto_create_context": "false",
+            "auto_create_context": "true",
             "deduplication_on_engagement": request.deduplication_on_engagement,
             "lead": request.lead,
             "tags": request.tags,
@@ -48,6 +48,7 @@ class ReimportScanRestConsumer:
             else "",
             "service": request.service,
             "group_by": request.group_by,
+            "test_title": request.test_title,
         }
         multipart_data = MultipartEncoder(fields=payload)
 
