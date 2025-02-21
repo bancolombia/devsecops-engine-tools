@@ -71,6 +71,7 @@ def mock_rest_reimport_scan(file_path, scan_type=None):
         assert import_scan_object.product_type_name == data["product_type_name"]
         assert import_scan_object.engagement_name == data["engagement_name"]
         mock_rest_reimport_scan.reimport_scan.return_value = import_scan_object
+        mock_rest_reimport_scan.reimport_scan_api.return_value = import_scan_object
     return mock_rest_reimport_scan
 
 

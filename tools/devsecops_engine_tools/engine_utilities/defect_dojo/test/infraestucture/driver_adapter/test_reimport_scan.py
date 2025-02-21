@@ -41,3 +41,23 @@ def test_post_reimport_scan_info_failure():
     )
     with pytest.raises(ApiError):
         rest_reimport_scan.reimport_scan(request, file)
+
+
+def test_post_reimport_scan_api_info_failure():
+    session_mock = session_manager_post(status_code=500, mock_response="engagement.json")
+    request = ImportScanRequest()
+    rest_import_scan = ReimportScanRestConsumer(
+        request,
+        session_mock,
+    )
+    with pytest.raises(ApiError):
+        rest_import_scan.reimport_scan_api(request)
+
+
+def test_post_reimport_scan_info_sucessfull():
+    session_mock = session_manager_post(status_code=201, mock_response="import_scan.json")
+    request = ImportScanRequest()
+    rest_import_scan = ReimportScanRestConsumer(request, session_mock)
+    response = rest_import_scan.reimport_scan_api(request)
+    assert isinstance(response, ImportScanRequest)
+    assert response.product_type_name == "defect-dojo"
