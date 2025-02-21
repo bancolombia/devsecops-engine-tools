@@ -105,7 +105,7 @@ class ImportScanRestConsumer:
         if request.reimport_scan is True:
             url = f"{self.__host}/api/v2/reimport-scan/"
             data["auto_create_context"] = "true"
-            data["title"] = request.title
+            data["test_title"] = request.title
         else:
             url = f"{self.__host}/api/v2/import-scan/"
             data["auto_create_context"] = "false"
