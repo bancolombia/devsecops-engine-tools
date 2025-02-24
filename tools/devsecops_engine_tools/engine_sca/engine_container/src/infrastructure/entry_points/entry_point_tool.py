@@ -52,7 +52,8 @@ def init_engine_sca_rm(
             secret_tool,
             dict_args["token_engine_container"],
             image_to_scan,
-            exclusions
+            exclusions,
+            pipeline_name
         )
         image_scanned, base_image, sbom_components = container_sca_scan.process()
         if image_scanned:
