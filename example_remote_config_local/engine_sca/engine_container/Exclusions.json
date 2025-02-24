@@ -1,4 +1,4 @@
-{  
+{
   "All": {
     "PRISMA": [
       {
@@ -12,6 +12,11 @@
     ]
   },
   "Repository_Test": {
+    "VALIDATE_BASE_IMAGE_DATE": {
+      "create_date": "21022024",
+      "expired_date": "26052024",
+      "hu": "2342342"
+    },
     "PRISMA": [
       {
         "id": "CVE-2023-6237",
