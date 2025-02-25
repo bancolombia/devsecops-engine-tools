@@ -49,11 +49,13 @@ class HandleFilters:
     def filter_tags_days(self, devops_platform_gateway, remote_config, findings):
         tag_exclusion_days = remote_config["TAG_EXCLUSION_DAYS"]
         filtered_findings = []
+        filtered = 0
 
         for finding in findings:
             exclude = False
             for tag in finding.tags:
                 if tag in tag_exclusion_days and finding.age < tag_exclusion_days[tag]:
+                    filtered += 1
                     exclude = True
                     print(
                         devops_platform_gateway.message(
@@ -65,7 +67,7 @@ class HandleFilters:
             if not exclude:
                 filtered_findings.append(finding)
 
-        return filtered_findings
+        return filtered_findings, filtered
 
     def _get_active_findings(self, findings):
         return list(

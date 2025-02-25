@@ -21,7 +21,7 @@ class SetInputCore:
 
             for item in value[tool]:
                 if key == "All":
-                    source_images = item.get("source_images", [])
+                    source_images = item.get("x86.image.name", [])
                     if source_images and base_image is None:
                         continue
                     if source_images and not any(base_image in source for source in source_images):
