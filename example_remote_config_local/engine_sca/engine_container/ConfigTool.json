@@ -16,9 +16,9 @@
             "main"
         ]
     },
-    "GET_IMAGE_BASE": true,
+    "GET_IMAGE_BASE": false,
     "VALIDATE_BASE_IMAGE_DATE": {
-        "ENABLED": true,
+        "ENABLED": false,
         "REFERENCE_IMAGE_DATE": "20250206"
     },
     "MESSAGE_INFO_ENGINE_CONTAINER": "message custom",
