@@ -34,59 +34,82 @@ class DockerImages(ImagesGateway):
             )
 
     def get_base_image(self, matching_image):
-        try:
-            client = docker.from_env()
-            image_details = client.api.inspect_image(matching_image.id)
-            labels = image_details.get("Config", {}).get("Labels", {})
-            source_image = labels.get("x86.image.name")
-            if source_image:
-                logger.info(f"Base image for '{matching_image}' from source-image label: {source_image}")
-                return source_image
-
-            logger.warning(f"Base image not found for '{matching_image}'.")
+        image_details = self.get_image_details(matching_image.id)
+        if not image_details:
             return None
 
-        except Exception as e:
-            logger.error(f"Error getting base image: {e}")
-            return None
+        labels = image_details.get("Config", {}).get("Labels", {})
+        return self.extract_base_image_from_labels(labels, matching_image)
 
     def validate_base_image_date(self, matching_image, referenced_date):
-        client = docker.from_env()
-        image_details = client.api.inspect_image(matching_image.id)
+        image_details = self.get_image_details(matching_image.id)
+        if not image_details:
+            return False
+
         labels = image_details.get("Config", {}).get("Labels", {})
         baseline_date = labels.get("x86.baseline.date")
-        if baseline_date is None:
-            base_image = self.get_base_image_from_labels(labels)
-            date_image = self.extract_date_from_image(base_image)
-            return self.validate_date(date_image, referenced_date)
-        else:
-            return self.validate_date(datetime.strptime(baseline_date, "%Y%m%d"), referenced_date)
 
-            
-    def get_base_image_from_labels(self, labels):
+        if baseline_date:
+            date_image = self.parse_date(baseline_date)
+        else:
+            base_image = self.extract_base_image_from_labels(labels)
+            date_image = self.extract_date_from_image(base_image)
+
+        return self.validate_date(date_image, referenced_date)
+
+    def get_image_details(self, image_id):
         try:
-            if labels.get("image.base.digest"):
-                return labels.get("image.base.ref.name")
-            else:
-                return labels.get("source_images") or labels.get("source-image")
+            client = docker.from_env()
+            return client.api.inspect_image(image_id)
         except Exception as e:
-            logger.error(f"Error getting base image from labels: {e}")
+            logger.error(f"Error obtaining image details for '{image_id}': {e}")
             return None
-        
+
+    def extract_base_image_from_labels(self, labels, matching_image=None):
+        try:
+            source_image = labels.get("x86.image.name") or labels.get(
+                "image.base.ref.name"
+            )
+            if not source_image:
+                source_image = labels.get("source_images") or labels.get("source-image")
+
+            if source_image and matching_image:
+                logger.info(f"Base image for '{matching_image}' found: {source_image}")
+            elif matching_image:
+                logger.warning(f"Base image not found for '{matching_image}'.")
+
+            return source_image
+        except Exception as e:
+            logger.error(f"Error extracting base image from labels: {e}")
+            return None
+
     def extract_date_from_image(self, image_name):
+        if not image_name:
+            return None
         try:
             date = image_name.split("_")[-1]
-            return datetime.strptime(date, "%Y%m%d")
-        except ValueError as e:
+            return self.parse_date(date)
+        except Exception as e:
             logger.error(f"Error extracting date from image name '{image_name}': {e}")
             return None
-        except Exception as e:
-            logger.error(f"Unexpected error extracting date from image name '{image_name}': {e}")
+
+    def parse_date(self, date_str):
+        try:
+            return datetime.strptime(date_str, "%Y%m%d")
+        except ValueError:
+            logger.error(f"Invalid date format: {date_str}")
             return None
-    
+
     def validate_date(self, date, referenced_date):
-        reference_date = datetime.strptime(referenced_date, "%Y%m%d")
+        if not date:
+            raise ValueError("Cannot validate date: Invalid or missing date.")
+
+        reference_date = self.parse_date(referenced_date)
+        if not reference_date:
+            raise ValueError("Cannot validate date: Referenced date is invalid.")
+
         if date < reference_date:
-            raise ValueError(f"The source base image date ({date.strftime('%Y-%m-%d')}) is older than the referenced date ({reference_date.strftime('%Y-%m-%d')}).")
-        else:
-            return True
+            raise ValueError(
+                f"The source base image date ({date.strftime('%Y-%m-%d')}) is older than the referenced date ({reference_date.strftime('%Y-%m-%d')})."
+            )
+        return True
