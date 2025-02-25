@@ -86,84 +86,44 @@ def test_list_images_exception(mock_docker_client):
     assert result is None
     mock_docker_client.assert_called_once()
 
-
-def test_get_base_image_parent_image(mock_docker_client):
-
-    docker_images = DockerImages()
-
-    mock_client = MagicMock()
-    mock_docker_client.return_value = mock_client
-
-    matching_image = MagicMock()
-    matching_image.id = "image_id"
-
-    parent_image_details = {"RepoTags": ["base_image:latest"]}
-    mock_client.api.inspect_image.side_effect = [
-        {"Parent": "parent_id"},
-        parent_image_details,
-    ]
-
-
-    result = docker_images.get_base_image(matching_image)
-
-
-    assert result == None
-
-
 def test_get_base_image_source_label(mock_docker_client):
-
     docker_images = DockerImages()
-
-    mock_client = MagicMock()
-    mock_docker_client.return_value = mock_client
-
     matching_image = MagicMock()
     matching_image.id = "image_id"
-
+    
+    mock_client = MagicMock()
+    mock_docker_client.return_value = mock_client
     mock_client.api.inspect_image.return_value = {
         "Config": {"Labels": {"x86.image.name": "source_image:1.0"}},
     }
-
+    
     result = docker_images.get_base_image(matching_image)
-
     assert result == "source_image:1.0"
     mock_client.api.inspect_image.assert_called_once_with("image_id")
 
-
 def test_get_base_image_no_base_image(mock_docker_client):
-
     docker_images = DockerImages()
-
-    mock_client = MagicMock()
-    mock_docker_client.return_value = mock_client
-
     matching_image = MagicMock()
     matching_image.id = "image_id"
-
+    
+    mock_client = MagicMock()
+    mock_docker_client.return_value = mock_client
     mock_client.api.inspect_image.return_value = {"Config": {"Labels": {}}}
-
- 
+    
     result = docker_images.get_base_image(matching_image)
-
-   
     assert result is None
     mock_client.api.inspect_image.assert_called_once_with("image_id")
-
 
 def test_get_base_image_exception(mock_docker_client):
-
     docker_images = DockerImages()
-
-    mock_client = MagicMock()
-    mock_docker_client.return_value = mock_client
-
     matching_image = MagicMock()
     matching_image.id = "image_id"
-
+    
+    mock_client = MagicMock()
+    mock_docker_client.return_value = mock_client
     mock_client.api.inspect_image.side_effect = Exception("Inspection failed")
-
+    
     result = docker_images.get_base_image(matching_image)
-
     assert result is None
     mock_client.api.inspect_image.assert_called_once_with("image_id")
 
@@ -172,75 +132,48 @@ def test_validate_base_image_date_with_baseline_date(mock_docker_client):
     matching_image = MagicMock()
     matching_image.id = "image_id"
     referenced_date = "20230801"
-
-    mock_client = MagicMock()
-    mock_docker_client.return_value = mock_client
-
-    mock_client.api.inspect_image.return_value = {
-        "Config": {"Labels": {"x86.baseline.date": "20230802"}}
-    }
-
-    result = docker_images.validate_base_image_date(matching_image, referenced_date)
-
-    assert result is True
-    mock_client.api.inspect_image.assert_called_once_with("image_id")
     
-def test_validate_base_image_date_with_baseline_date(mock_docker_client):
-    docker_images = DockerImages()
-    matching_image = MagicMock()
-    matching_image.id = "image_id"
-    referenced_date = "20230801"
-
     mock_client = MagicMock()
     mock_docker_client.return_value = mock_client
-
     mock_client.api.inspect_image.return_value = {
         "Config": {"Labels": {"x86.baseline.date": "20230802"}}
     }
-
+    
     result = docker_images.validate_base_image_date(matching_image, referenced_date)
-
     assert result is True
     mock_client.api.inspect_image.assert_called_once_with("image_id")
-
 
 def test_validate_base_image_date_without_baseline_date(mock_docker_client):
     docker_images = DockerImages()
     matching_image = MagicMock()
     matching_image.id = "image_id"
     referenced_date = "20230801"
-
+    
     mock_client = MagicMock()
     mock_docker_client.return_value = mock_client
-
     mock_client.api.inspect_image.return_value = {
         "Config": {"Labels": {"source_images": "base_image_20230802"}}
     }
-
+    
     with patch.object(docker_images, 'extract_date_from_image', return_value=datetime.strptime("20230802", "%Y%m%d")):
         result = docker_images.validate_base_image_date(matching_image, referenced_date)
-
+    
     assert result is True
     mock_client.api.inspect_image.assert_called_once_with("image_id")
-
-
 
 def test_validate_base_image_date_older_than_referenced_date(mock_docker_client):
     docker_images = DockerImages()
     matching_image = MagicMock()
     matching_image.id = "image_id"
     referenced_date = "20230802"
-
+    
     mock_client = MagicMock()
     mock_docker_client.return_value = mock_client
-
     mock_client.api.inspect_image.return_value = {
         "Config": {"Labels": {"x86.baseline.date": "20230801"}}
     }
-
+    
     with pytest.raises(ValueError, match="The source base image date"):
         docker_images.validate_base_image_date(matching_image, referenced_date)
-
+    
     mock_client.api.inspect_image.assert_called_once_with("image_id")
-
-

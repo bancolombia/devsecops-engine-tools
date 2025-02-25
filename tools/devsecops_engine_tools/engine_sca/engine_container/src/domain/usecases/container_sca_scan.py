@@ -1,6 +1,3 @@
-from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
-    DevopsPlatformGateway,
-)
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
