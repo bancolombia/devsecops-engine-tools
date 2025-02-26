@@ -173,7 +173,7 @@ def test_validate_base_image_date_older_than_referenced_date(mock_docker_client)
         "Config": {"Labels": {"x86.baseline.date": "20230801"}}
     }
     
-    with pytest.raises(ValueError, match="The source base image date"):
+    with pytest.raises(ValueError, match="Compliance issue:"):
         docker_images.validate_base_image_date(matching_image, referenced_date)
     
     mock_client.api.inspect_image.assert_called_once_with("image_id")
