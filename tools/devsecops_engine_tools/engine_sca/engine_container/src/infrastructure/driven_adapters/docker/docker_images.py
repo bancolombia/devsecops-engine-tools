@@ -110,6 +110,6 @@ class DockerImages(ImagesGateway):
 
         if date < reference_date:
             raise ValueError(
-                f"The source base image date ({date.strftime('%Y-%m-%d')}) is older than the referenced date ({reference_date.strftime('%Y-%m-%d')})."
+                f"Compliance issue: the source base image date ({date.strftime('%Y-%m-%d')}) is older than the referenced date ({reference_date.strftime('%Y-%m-%d')})."
             )
         return True
