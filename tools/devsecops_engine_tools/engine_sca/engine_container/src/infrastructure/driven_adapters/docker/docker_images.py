@@ -34,14 +34,21 @@ class DockerImages(ImagesGateway):
             )
 
     def get_base_image(self, matching_image):
-        image_details = self.get_image_details(matching_image.id)
-        if not image_details:
+        try:
+            image_details = self.get_image_details(matching_image.id)
+            if not image_details:
+                return None
+
+            labels = image_details.get("Config", {}).get("Labels", {})
+            return self.extract_base_image_from_labels(labels, matching_image)
+        except Exception as e:
+            logger.warning(f"Error obtaining base image: {e}")
             return None
 
-        labels = image_details.get("Config", {}).get("Labels", {})
-        return self.extract_base_image_from_labels(labels, matching_image)
-
     def validate_base_image_date(self, matching_image, referenced_date):
+        if matching_image is None or matching_image.id is None:
+            logger.error("Error: matching_image ID is None")
+            return False
         image_details = self.get_image_details(matching_image.id)
         if not image_details:
             return False
