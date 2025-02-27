@@ -53,7 +53,7 @@ class GithubActions(DevopsPlatformGateway):
         return results.get(type)
 
     def get_source_code_management_uri(self):
-        return f"{SystemVariables.github_server_url}/{SystemVariables.github_repository}"
+        return f"{SystemVariables.github_server_url.value()}/{SystemVariables.github_repository.value()}"
 
     def get_base_compact_remote_config_url(self, remote_config_repo):
         github_repository = SystemVariables.github_repository.value()
