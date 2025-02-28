@@ -124,10 +124,21 @@ class BreakBuild:
         self, all_report: "list[Report]", new_report_list: "list[Report]"
     ):
         sp.init_printing(use_unicode=True)
-        RemediationRate, Mitigated, All, NewIndustryVulnerabilities, WhiteList, BaseImage = sp.symbols(
-            'RemediationRate Mitigated All NewIndustryVulnerabilities WhiteList BaseImage'
+        (
+            RemediationRate,
+            Mitigated,
+            All,
+            NewIndustryVulnerabilities,
+            WhiteList,
+            BaseImage,
+        ) = sp.symbols(
+            "RemediationRate Mitigated All NewIndustryVulnerabilities WhiteList BaseImage"
         )
-        formula = sp.Eq(RemediationRate, 100 * (Mitigated / (All - NewIndustryVulnerabilities - WhiteList - BaseImage)))
+        formula = sp.Eq(
+            RemediationRate,
+            100
+            * (Mitigated / (All - NewIndustryVulnerabilities - WhiteList - BaseImage)),
+        )
         print("\n")
         sp.pretty_print(formula)
         print("\n")
@@ -141,9 +152,11 @@ class BreakBuild:
         base_image = sum(
             1
             for report in all_report
-            if "Image Base" in report.vul_description and not "white_list" in report.tags and not report.mitigated
+            if "Image Base" in report.vul_description
+            and not "On Whitelist" in report.risk_status
+            and not report.mitigated
         )
-        all = len(all_report) 
+        all = len(all_report)
         print(
             f"Mitigated: {mitigated}   All: {len(all_report)}   BaseImage: {base_image}   NewIndustryVulnerabilities: {self.policy_excluded}   WhiteList: {white_list}\n\n"
         )
@@ -295,7 +308,7 @@ class BreakBuild:
                         [report for report, _ in filtered_reports_above_threshold]
                     )
                 )
-            
+
             for report in report_list:
                 if "On Blacklist" in report.risk_status:
                     self.break_build = True
@@ -303,7 +316,7 @@ class BreakBuild:
                     self.blacklisted += 1
                     self.report_breaker.append(copy.deepcopy(report))
                     print(
-                    self.devops_platform_gateway.message(
+                        self.devops_platform_gateway.message(
                             "error",
                             f"Report {report.vm_id} is blacklisted.",
                         )
