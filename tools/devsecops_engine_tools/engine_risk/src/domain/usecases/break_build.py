@@ -123,7 +123,7 @@ class BreakBuild:
     def _remediation_rate_control(
         self, all_report: "list[Report]", new_report_list: "list[Report]"
     ):
-        sp.init_printing(use_unicode=True)
+        sp.init_printing(use_unicode=True, num_columns=100)
         (
             remediation_rate_name,
             mitigated_name,
