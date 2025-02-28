@@ -101,4 +101,5 @@ class GetExclusions:
                     ).strftime("%d%m%Y")
                     exclusion_data["reason"] = "New vulnerability in the industry"
                     exclusions.append(Exclusions(**exclusion_data))
+                    finding.vul_description = finding.vul_description.replace("Image Base", "")
         return exclusions, len(exclusions)
