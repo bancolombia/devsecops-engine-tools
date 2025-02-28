@@ -125,43 +125,43 @@ class BreakBuild:
     ):
         sp.init_printing(use_unicode=True)
         (
-            remediationRate,
-            mitigatedCount,
-            allFindings,
-            newIndustryVulnerabilities,
-            whiteList,
-            baseImage,
+            remediation_rate_name,
+            mitigated_name,
+            all_findings_name,
+            new_industry_vulnerabilities,
+            white_list_name,
+            base_image_name,
         ) = sp.symbols(
             "RemediationRate Mitigated AllFindings NewIndustryVulnerabilities WhiteList BaseImage"
         )
         formula = sp.Eq(
-            remediationRate,
+            remediation_rate_name,
             100
-            * (mitigatedCount / (allFindings - newIndustryVulnerabilities - whiteList - baseImage)),
+            * (mitigated_name / (all_findings_name - new_industry_vulnerabilities - white_list_name - base_image_name)),
         )
         print("\n")
         sp.pretty_print(formula)
         print("\n")
 
-        mitigated = sum(1 for report in all_report if report.mitigated)
-        white_list = sum(
+        mitigated_count = sum(1 for report in all_report if report.mitigated)
+        white_list_count = sum(
             1
             for report in all_report
             if "On Whitelist" in report.risk_status and not report.mitigated
         )
-        base_image = sum(
+        base_image_count = sum(
             1
             for report in all_report
             if "Image Base" in report.vul_description
             and "On Whitelist" not in report.risk_status
             and not report.mitigated
         )
-        all_findings = len(all_report)
+        all_findings_count = len(all_report)
         print(
-            f"Mitigated: {mitigated}   AllFindings: {all_findings}   BaseImage: {base_image}   NewIndustryVulnerabilities: {self.policy_excluded}   WhiteList: {white_list}\n\n"
+            f"Mitigated: {mitigated_count}   AllFindings: {all_findings_count}   BaseImage: {base_image_count}   NewIndustryVulnerabilities: {self.policy_excluded}   WhiteList: {white_list_count}\n\n"
         )
-        total = all_findings - self.policy_excluded - white_list - base_image
-        remediation_rate_value = self._get_percentage(mitigated / total)
+        total = all_findings_count - self.policy_excluded - white_list_count - base_image_count
+        remediation_rate_value = self._get_percentage(mitigated_count / total)
 
         risk_threshold = self._get_remediation_rate_threshold(total)
         self.remediation_rate = remediation_rate_value
