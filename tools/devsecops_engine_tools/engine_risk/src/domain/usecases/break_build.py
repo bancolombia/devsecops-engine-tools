@@ -158,7 +158,7 @@ class BreakBuild:
         )
         all = len(all_report)
         print(
-            f"Mitigated: {mitigated}   All: {len(all_report)}   BaseImage: {base_image}   NewIndustryVulnerabilities: {self.policy_excluded}   WhiteList: {white_list}\n\n"
+            f"Mitigated: {mitigated}   All: {all}   BaseImage: {base_image}   NewIndustryVulnerabilities: {self.policy_excluded}   WhiteList: {white_list}\n\n"
         )
         total = all - self.policy_excluded - white_list - base_image
         remediation_rate_value = self._get_percentage(mitigated / total)
