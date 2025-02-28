@@ -182,7 +182,7 @@ class BreakBuild:
             )
             self.warning_build = True
         else:
-            missing_findings = math.ceil((risk_threshold / 100 * total) - mitigated)
+            missing_findings = math.ceil((risk_threshold / 100 * total) - mitigated_count)
             print(
                 self.devops_platform_gateway.message(
                     "error",
