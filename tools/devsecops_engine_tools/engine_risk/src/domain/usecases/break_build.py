@@ -125,19 +125,19 @@ class BreakBuild:
     ):
         sp.init_printing(use_unicode=True)
         (
-            RemediationRate,
-            Mitigated,
-            All,
-            NewIndustryVulnerabilities,
-            WhiteList,
-            BaseImage,
+            remediationRate,
+            mitigatedCount,
+            allFindings,
+            newIndustryVulnerabilities,
+            whiteList,
+            baseImage,
         ) = sp.symbols(
-            "RemediationRate Mitigated All NewIndustryVulnerabilities WhiteList BaseImage"
+            "RemediationRate Mitigated AllFindings NewIndustryVulnerabilities WhiteList BaseImage"
         )
         formula = sp.Eq(
-            RemediationRate,
+            remediationRate,
             100
-            * (Mitigated / (All - NewIndustryVulnerabilities - WhiteList - BaseImage)),
+            * (mitigatedCount / (allFindings - newIndustryVulnerabilities - whiteList - baseImage)),
         )
         print("\n")
         sp.pretty_print(formula)
@@ -153,14 +153,14 @@ class BreakBuild:
             1
             for report in all_report
             if "Image Base" in report.vul_description
-            and not "On Whitelist" in report.risk_status
+            and "On Whitelist" not in report.risk_status
             and not report.mitigated
         )
-        all = len(all_report)
+        all_findings = len(all_report)
         print(
-            f"Mitigated: {mitigated}   All: {all}   BaseImage: {base_image}   NewIndustryVulnerabilities: {self.policy_excluded}   WhiteList: {white_list}\n\n"
+            f"Mitigated: {mitigated}   AllFindings: {all_findings}   BaseImage: {base_image}   NewIndustryVulnerabilities: {self.policy_excluded}   WhiteList: {white_list}\n\n"
         )
-        total = all - self.policy_excluded - white_list - base_image
+        total = all_findings - self.policy_excluded - white_list - base_image
         remediation_rate_value = self._get_percentage(mitigated / total)
 
         risk_threshold = self._get_remediation_rate_threshold(total)
@@ -182,11 +182,11 @@ class BreakBuild:
             )
             self.warning_build = True
         else:
-            missing_hallazgos = math.ceil((risk_threshold / 100 * total) - mitigated)
+            missing_findings = math.ceil((risk_threshold / 100 * total) - mitigated)
             print(
                 self.devops_platform_gateway.message(
                     "error",
-                    f"Remediation rate {remediation_rate_value}% is less than {risk_threshold}%. Minimum findings to mitigate: {missing_hallazgos}.",
+                    f"Remediation rate {remediation_rate_value}% is less than {risk_threshold}%. Minimum findings to mitigate: {missing_findings}.",
                 )
             )
             self.break_build = True
