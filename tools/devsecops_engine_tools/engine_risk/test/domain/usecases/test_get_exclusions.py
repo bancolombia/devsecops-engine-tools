@@ -141,7 +141,11 @@ def test_get_exclusions_new_vuln(mock_datetime, mock_exclusions):
     mock_datetime.now.return_value = fixed_date
     mock_datetime.strptime.side_effect = lambda s, fmt: datetime.strptime(s, fmt)
 
-    finding = SimpleNamespace(publish_date="2023-01-10", id="123")
+    finding = SimpleNamespace(
+        publish_date="2023-01-10",
+        id="123",
+        vul_description="New vulnerability in the industry",
+    )
 
     get_exclusions = GetExclusions(
         devops_platform_gateway=MagicMock(),
