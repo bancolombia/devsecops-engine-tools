@@ -40,7 +40,9 @@ class TestReportSonar(unittest.TestCase):
 
         mock_devops_platform_gateway.get_remote_config.return_value = {
             "PIPELINE_COMPONENTS": {},
-            "MAX_RETRIES_QUERY_SONAR": 5
+            "MAX_RETRIES_QUERY_SONAR": 5,
+            "USE_COMMUNITY_EDITION": True,
+            "SEARCH_PULL_REQUEST": False,
         }
         
         mock_sonar_gateway.get_project_keys.return_value = ["project_key_1"]

@@ -115,18 +115,35 @@ class ReportSonar:
                 )[0]
                 filtered_findings = self.sonar_gateway.filter_by_sonarqube_tag(findings)
 
+                sonar_vulns_params = {
+                    "componentKeys": project_key,
+                    "types": "VULNERABILITY",
+                    "ps": 500,
+                    "p": 1,
+                    "s": "CREATION_DATE",
+                    "asc": "false"
+                }
+                sonar_hotspots_params = {
+                    "projectKey": project_key,
+                    "ps": 100,
+                    "p": 1,
+                }
+
+                if not report_config_tool["USE_COMMUNITY_EDITION"]:
+                    sonar_vulns_params["branch"] = branch
+                    sonar_hotspots_params["branch"] = branch
+                    if report_config_tool["SEARCH_PULL_REQUEST"]:
+                        try:
+                            pull_request_id = self.devops_platform_gateway.get_variable("pull_request_id")
+                            sonar_vulns_params["pullRequest"] = pull_request_id
+                            sonar_hotspots_params["pullRequest"] = pull_request_id
+                        except: pass
+
                 sonar_vulnerabilities = self.sonar_gateway.get_findings(
                     args["sonar_url"],
                     secret["token_sonar"],
                     "/api/issues/search",
-                    {
-                        "componentKeys": project_key,
-                        "types": "VULNERABILITY",
-                        "ps": 500,
-                        "p": 1,
-                        "s": "CREATION_DATE",
-                        "asc": "false"
-                    },
+                    sonar_vulns_params,
                     "issues",
                     report_config_tool["MAX_RETRIES_QUERY_SONAR"]
                 )
@@ -134,11 +151,7 @@ class ReportSonar:
                     args["sonar_url"],
                     secret["token_sonar"],
                     "/api/hotspots/search",
-                    {
-                        "projectKey": project_key,
-                        "ps": 100,
-                        "p": 1,
-                    },
+                    sonar_hotspots_params,
                     "hotspots",
                     report_config_tool["MAX_RETRIES_QUERY_SONAR"]
                 )
