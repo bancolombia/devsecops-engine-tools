@@ -30,7 +30,8 @@ class TestReportSonar(unittest.TestCase):
             "commit_hash",
             "repository_provider",
             "vm_product_type_name",
-            "vm_product_name"
+            "vm_product_name",
+            "12345"
         ]
         mock_set_repository.return_value = "repository_uri"
         mock_define_env.return_value = "dev"
@@ -42,7 +43,7 @@ class TestReportSonar(unittest.TestCase):
             "PIPELINE_COMPONENTS": {},
             "MAX_RETRIES_QUERY_SONAR": 5,
             "USE_BRANCH_PARAMETER": False,
-            "USE_PULL_REQUEST_PARAMETER": [],
+            "USE_PULL_REQUEST_PARAMETER": ["project_key_1"],
         }
         
         mock_sonar_gateway.get_project_keys.return_value = ["project_key_1"]
@@ -79,7 +80,8 @@ class TestReportSonar(unittest.TestCase):
                         "ps": 500,
                         "p": 1,
                         "s": "CREATION_DATE",
-                        "asc": "false"
+                        "asc": "false",
+                        "pullRequest": 12345
                     },
                     "issues",
                     5
@@ -90,7 +92,8 @@ class TestReportSonar(unittest.TestCase):
                     {
                         "projectKey": "project_key_1",
                         "ps": 100,
-                        "p": 1
+                        "p": 1,
+                        "pullRequest": 12345
                     },
                     "hotspots",
                     5
