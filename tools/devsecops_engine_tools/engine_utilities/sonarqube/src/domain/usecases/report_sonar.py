@@ -134,7 +134,7 @@ class ReportSonar:
                     sonar_hotspots_params["branch"] = branch
                     if report_config_tool["SEARCH_PULL_REQUEST"]:
                         try:
-                            pull_request_id = self.devops_platform_gateway.get_variable("pull_request_id")
+                            pull_request_id = int(self.devops_platform_gateway.get_variable("pull_request_id"))
                             sonar_vulns_params["pullRequest"] = pull_request_id
                             sonar_hotspots_params["pullRequest"] = pull_request_id
                         except: pass
