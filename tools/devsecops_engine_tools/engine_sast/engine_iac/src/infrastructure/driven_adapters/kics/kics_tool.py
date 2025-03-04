@@ -106,7 +106,7 @@ class KicsTool(ToolGateway):
         path_kics = path_kics.replace("/", "\\") if os_platform == "Windows" else path_kics
         work_folder = work_folder.replace("/", "\\") if os_platform == "Windows" else work_folder
         
-        command_prefix = f"{work_folder}\\{path_kics}.exe" if os_platform == "Windows" else f"{work_folder}/{path_kics}"
+        command_prefix = f"{work_folder}\\{path_kics}" if os_platform == "Windows" else f"{work_folder}/{path_kics}"
         
         if not self.validate_kics(command_prefix):
             logger.info("KICS binary not found or invalid, downloading assets...")
