@@ -31,7 +31,7 @@ class TestReportSonar(unittest.TestCase):
             "repository_provider",
             "vm_product_type_name",
             "vm_product_name",
-            "pull_request_id_00000",
+            "00000",
         ]
         mock_set_repository.return_value = "repository_uri"
         mock_define_env.return_value = "dev"
@@ -82,7 +82,7 @@ class TestReportSonar(unittest.TestCase):
                         "s": "CREATION_DATE",
                         "asc": "false",
                         "branch": "branch_name",
-                        "pullRequest": "pull_request_id_00000"
+                        "pullRequest": 00000
                     },
                     "issues",
                     5
@@ -95,7 +95,7 @@ class TestReportSonar(unittest.TestCase):
                         "ps": 100,
                         "p": 1,
                         "branch": "branch_name",
-                        "pullRequest": "pull_request_id_00000"
+                        "pullRequest": 00000
                     },
                     "hotspots",
                     5
