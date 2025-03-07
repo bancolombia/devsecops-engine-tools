@@ -137,7 +137,7 @@ class ReportSonar:
                         pull_request_id = int(self.devops_platform_gateway.get_variable("pull_request_id"))
                         sonar_vulns_params["pullRequest"] = pull_request_id
                         sonar_hotspots_params["pullRequest"] = pull_request_id
-                    except: pass
+                    except Exception as e: pass
 
                 sonar_vulnerabilities = self.sonar_gateway.get_findings(
                     args["sonar_url"],
