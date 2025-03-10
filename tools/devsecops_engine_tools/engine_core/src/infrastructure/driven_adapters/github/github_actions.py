@@ -53,7 +53,7 @@ class GithubActions(DevopsPlatformGateway):
         return results.get(type)
 
     def get_source_code_management_uri(self):
-        return f"{SystemVariables.github_server_url}/{SystemVariables.github_repository}"
+        return f"{SystemVariables.github_server_url.value()}/{SystemVariables.github_repository.value()}"
 
     def get_base_compact_remote_config_url(self, remote_config_repo):
         github_repository = SystemVariables.github_repository.value()
@@ -89,6 +89,7 @@ class GithubActions(DevopsPlatformGateway):
             "target_branch": SystemVariables.github_event_base_ref,
             "source_branch": SystemVariables.github_ref,
             "repository_provider": BuildVariables.GitHub,
+            "pull_request_id": SystemVariables.github_event_number,
             "vm_product_type_name": VMVariables.Vm_Product_Type_Name,
             "vm_product_name": VMVariables.Vm_Product_Name,
             "vm_product_description": VMVariables.Vm_Product_Description,

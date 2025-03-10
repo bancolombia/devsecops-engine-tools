@@ -22,7 +22,8 @@ class ContainerScaScan:
         secret_tool,
         token_engine_container,
         image_to_scan,
-        exclusions
+        exclusions,
+        pipeline_name,
     ):
         self.tool_run = tool_run
         self.remote_config = remote_config
@@ -33,6 +34,7 @@ class ContainerScaScan:
         self.token_engine_container = token_engine_container
         self.image_to_scan = image_to_scan
         self.exclusions = exclusions
+        self.pipeline_name = pipeline_name
 
     def get_image(self, image_to_scan):
         """
@@ -44,13 +46,13 @@ class ContainerScaScan:
         return self.tool_images.list_images(image_to_scan)
 
     def get_base_image(self, matching_image):
-            """
+        """
             Process the base image.
 
             Returns:
                 String: base image.
             """
-            return self.tool_images.get_base_image(matching_image)
+        return self.tool_images.get_base_image(matching_image)
 
     def get_images_already_scanned(self):
         """
@@ -70,6 +72,17 @@ class ContainerScaScan:
         with open("scanned_images.txt", "a") as file:
             file.write(result_file + "\n")
 
+    def validate_base_image_date(self, matching_image, referenced_date):
+        """
+        Process the base image date validation.
+
+        Returns:
+            string: base image date.
+        """
+        return self.tool_images.validate_base_image_date(
+            matching_image, referenced_date
+        )
+
     def process(self):
         """
         Process SCA scanning.
@@ -80,8 +93,17 @@ class ContainerScaScan:
         base_image = None
         image_scanned = None
         matching_image = self.get_image(self.image_to_scan)
-        if self.remote_config['GET_IMAGE_BASE']:
+        if self.remote_config["GET_IMAGE_BASE"]:
             base_image = self.get_base_image(matching_image)
+        if self.remote_config["VALIDATE_BASE_IMAGE_DATE"][
+            "ENABLED"
+        ] and not self.exclusions.get(self.pipeline_name, {}).get(
+            "VALIDATE_BASE_IMAGE_DATE"
+        ):
+            self.validate_base_image_date(
+                matching_image,
+                self.remote_config["VALIDATE_BASE_IMAGE_DATE"]["REFERENCE_IMAGE_DATE"],
+            )
         sbom_components = None
         generate_sbom = self.remote_config["SBOM"]["ENABLED"] and any(
             branch in str(self.branch)
@@ -98,7 +120,9 @@ class ContainerScaScan:
                 self.secret_tool,
                 self.token_engine_container,
                 image_name,
-                result_file, base_image, self.exclusions,
+                result_file,
+                base_image,
+                self.exclusions,
                 generate_sbom,
             )
             self.set_image_scanned(image_name)
