@@ -74,6 +74,8 @@ class DockerImages(ImagesGateway):
 
     def extract_base_image_from_labels(self, labels, matching_image=None):
         try:
+            if labels.get("repository") == 'evc/uso_especifico':
+                return None
             source_image = labels.get("x86.image.name") or labels.get(
                 "image.base.ref.name"
             )
@@ -109,7 +111,8 @@ class DockerImages(ImagesGateway):
 
     def validate_date(self, date, referenced_date):
         if not date:
-            raise ValueError("Cannot validate date: Invalid or missing date.")
+            logger.error("Cannot validate date: Invalid or missing date.")
+            return False
 
         reference_date = self.parse_date(referenced_date)
         if not reference_date:
