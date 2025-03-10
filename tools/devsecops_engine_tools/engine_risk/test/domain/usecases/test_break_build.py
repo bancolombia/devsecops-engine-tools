@@ -17,7 +17,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
     "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._apply_exclusions"
 )
 @patch(
-    "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._tag_blacklist_control"
+    "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._blacklist_control"
 )
 @patch(
     "devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.BreakBuild._risk_score_control"
@@ -36,7 +36,7 @@ def test_process(
     map_applied_exclusion,
     print_exclusions,
     risk_score_control,
-    tag_blacklist_control,
+    blacklist_control,
     apply_exclusions,
     remediation_rate_control,
 ):
@@ -53,7 +53,7 @@ def test_process(
 
     remediation_rate_control.assert_called_once()
     apply_exclusions.assert_called_once()
-    tag_blacklist_control.assert_called_once()
+    blacklist_control.assert_called_once()
     risk_score_control.assert_called_once()
     print_exclusions.assert_called_once()
     map_applied_exclusion.assert_called_once()
@@ -174,7 +174,7 @@ def test_remediation_rate_control_less():
 
     devops_platform_gateway.message.assert_called_with(
         "error",
-        f"Remediation rate {remediation_rate_value}% is less than {risk_threshold}%",
+        f"Remediation rate {remediation_rate_value}% is less than {risk_threshold}%. Minimum findings to mitigate: 1.",
     )
 
 
@@ -266,7 +266,7 @@ def test_apply_exclusions_id():
     assert result == ([], exclusions)
 
 
-def test_tag_blacklist_control_error():
+def test_blacklist_control_error():
     report_list = [
         Report(
             vuln_id_from_tool="id1",
@@ -290,7 +290,7 @@ def test_tag_blacklist_control_error():
         {"TAG_MAX_AGE": 5},
         0,
     )
-    break_build._tag_blacklist_control(report_list)
+    break_build._blacklist_control(report_list)
 
     mock_devops_platform_gateway.message.assert_called_once_with(
         "error",
@@ -298,7 +298,7 @@ def test_tag_blacklist_control_error():
     )
 
 
-def test_tag_blacklist_control_warning():
+def test_blacklist_control_warning():
     report_list = [
         Report(
             vuln_id_from_tool="id2",
@@ -322,7 +322,7 @@ def test_tag_blacklist_control_warning():
         {"TAG_MAX_AGE": 5},
         0,
     )
-    break_build._tag_blacklist_control(report_list)
+    break_build._blacklist_control(report_list)
 
     mock_devops_platform_gateway.message.assert_called_once_with(
         "warning",
