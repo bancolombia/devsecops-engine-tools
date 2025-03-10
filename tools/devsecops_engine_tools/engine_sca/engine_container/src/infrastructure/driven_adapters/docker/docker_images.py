@@ -40,7 +40,7 @@ class DockerImages(ImagesGateway):
                 return None
 
             labels = image_details.get("Config", {}).get("Labels", {})
-            return self.extract_base_image_from_labels(labels, matching_image)
+            return self.extract_base_image_from_labels(labels, matching_image)[0]
         except Exception as e:
             logger.warning(f"Error obtaining base image: {e}")
             return None
@@ -55,12 +55,13 @@ class DockerImages(ImagesGateway):
 
         labels = image_details.get("Config", {}).get("Labels", {})
         baseline_date = labels.get("x86.baseline.date")
-
+        date_image = None
         if baseline_date:
             date_image = self.parse_date(baseline_date)
         else:
             base_image = self.extract_base_image_from_labels(labels)
-            date_image = self.extract_date_from_image(base_image)
+            if not base_image[1]:
+                date_image = self.extract_date_from_image(base_image[0])
 
         return self.validate_date(date_image, referenced_date)
 
@@ -74,23 +75,23 @@ class DockerImages(ImagesGateway):
 
     def extract_base_image_from_labels(self, labels, matching_image=None):
         try:
-            if labels.get("repository") == 'evc/uso_especifico':
-                return None
-            source_image = labels.get("x86.image.name") or labels.get(
-                "image.base.ref.name"
-            )
+            source_image = labels.get("x86.image.name") or labels.get("image.base.ref.name")
+            
             if not source_image:
                 source_image = labels.get("source_images") or labels.get("source-image")
-
+            
+            is_uso_especifico = labels.get("repository") == 'evc/uso_especifico'
+            
             if source_image and matching_image:
                 logger.info(f"Base image for '{matching_image}' found: {source_image}")
             elif matching_image:
                 logger.warning(f"Base image not found for '{matching_image}'.")
-
-            return source_image
+            
+            return source_image, is_uso_especifico
         except Exception as e:
             logger.error(f"Error extracting base image from labels: {e}")
-            return None
+            return None, False
+
 
     def extract_date_from_image(self, image_name):
         if not image_name:
