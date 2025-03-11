@@ -50,7 +50,7 @@ class DockerImages(ImagesGateway):
             logger.error("Error: matching_image ID is None")
             return False
         image_details = self.get_image_details(matching_image.id)
-        if not image_details:
+        if not image_details.get("Config", {}).get("Labels", {}):
             return False
 
         labels = image_details.get("Config", {}).get("Labels", {})
@@ -75,19 +75,19 @@ class DockerImages(ImagesGateway):
 
     def extract_base_image_from_labels(self, labels, matching_image=None):
         try:
-            source_image = labels.get("x86.image.name") or labels.get("image.base.ref.name")
-            
-            if not source_image:
-                source_image = labels.get("source_images") or labels.get("source-image")
-            
-            is_uso_especifico = labels.get("repository") == 'evc/uso_especifico'
-            
-            if source_image and matching_image:
-                logger.info(f"Base image for '{matching_image}' found: {source_image}")
-            elif matching_image:
-                logger.warning(f"Base image not found for '{matching_image}'.")
-            
-            return source_image, is_uso_especifico
+            if labels:
+                source_image = labels.get("x86.image.name") or labels.get("image.base.ref.name")
+                if not source_image:
+                    source_image = labels.get("source_images") or labels.get("source-image")
+                is_uso_especifico = labels.get("repository") == 'evc/uso_especifico'
+                if source_image and matching_image:
+                    logger.info(f"Base image for '{matching_image}' found: {source_image}")
+                elif matching_image:
+                    logger.warning(f"Base image not found for '{matching_image}'.")
+                return source_image, is_uso_especifico
+            else:
+                logger.warning("No labels found in image.")
+                return None, False
         except Exception as e:
             logger.error(f"Error extracting base image from labels: {e}")
             return None, False
