@@ -32,6 +32,10 @@ from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.json_handler 
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
     InputCore,
 )
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gateway):
     try:
@@ -99,6 +103,7 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gate
             target_data=target_config
         )
     except Exception as e:
+        logger.error(f"Error engine_dast: {e}")
         config_tool_dast = devops_platform_gateway.get_remote_config(
             dict_args["remote_config_repo"], "engine_dast/ConfigTool.json", dict_args["remote_config_branch"]
         )
@@ -111,7 +116,6 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gate
                 scope_pipeline="",
                 stage_pipeline=devops_platform_gateway.get_variable("stage"),
             )
-            input_core
             return [], input_core
         else:
             raise Exception(f"Error engine_dast: {e}")
