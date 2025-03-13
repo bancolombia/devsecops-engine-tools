@@ -11,6 +11,7 @@
         }
     },
     "MESSAGE_INFO_DAST": "If you have doubts, visit https://forum.example",
+    "IGNORE_ERRORS": false,
     "NUCLEI": {
         "VERSION": "3.3.5",
         "DOWNLOAD_URL": "https://github.com/projectdiscovery/nuclei/releases/download/",
