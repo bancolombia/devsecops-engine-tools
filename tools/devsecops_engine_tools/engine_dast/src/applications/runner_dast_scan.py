@@ -29,17 +29,24 @@ from devsecops_engine_tools.engine_dast.src.domain.model.wa_config import (
 from devsecops_engine_tools.engine_dast.src.infrastructure.helpers.json_handler import (
     load_json_file
 )
+from devsecops_engine_tools.engine_core.src.domain.model.input_core import (
+    InputCore,
+)
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gateway):
-    if config_tool["TOOL"].lower() == "nuclei": # tool_gateway is the main Tool
-        tool_run = NucleiTool()
-    extra_tools = []
-    target_config = None
-
-    # Filling operations list with adapters
-    data = load_json_file(dict_args["dast_file_path"])
-
     try:
+        if config_tool["TOOL"].lower() == "nuclei": # tool_gateway is the main Tool
+            tool_run = NucleiTool()
+        extra_tools = []
+        target_config = None
+
+        # Filling operations list with adapters
+        data = load_json_file(dict_args["dast_file_path"])
+
         if "operations" in data: # Api
             operations: List = []
             for elem in data["operations"]:
@@ -96,5 +103,20 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gate
             target_data=target_config
         )
     except Exception as e:
-        raise Exception(f"Error engine_dast: {e}")
+        logger.error(f"Error engine_dast: {e}")
+        config_tool_dast = devops_platform_gateway.get_remote_config(
+            dict_args["remote_config_repo"], "engine_dast/ConfigTool.json", dict_args["remote_config_branch"]
+        )
+        if config_tool_dast["IGNORE_ERRORS"]:
+            input_core = InputCore(
+                totalized_exclusions=[],
+                threshold_defined={},
+                path_file_results="",
+                custom_message_break_build=config_tool_dast.get("MESSAGE_INFO_DAST"),
+                scope_pipeline="",
+                stage_pipeline=devops_platform_gateway.get_variable("stage"),
+            )
+            return [], input_core
+        else:
+            raise Exception(f"Error engine_dast: {e}")
         
