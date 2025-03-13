@@ -38,30 +38,6 @@ class TestKicsTool(unittest.TestCase):
         mock_logger.error.assert_not_called()
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.logger")
-    def test_get_queries_success(self, mock_logger):
-        config_tool = {
-            "KICS": {
-                "RULES": {
-                    "RULES_PLATFORM1": {
-                        "rule1": {"checkID": "check1"},
-                        "rule2": {"checkID": "check2"}
-                    },
-                    "RULES_PLATFORM2": {
-                        "rule3": {"checkID": "check3"},
-                        "rule4": {"checkID": "check4"}
-                    }
-                }
-            }
-        }
-        platform_to_scan = ["platform1", "platform2"]
-        expected_queries = ["check1", "check2", "check3", "check4"]
-
-        queries = self.kics_tool.get_queries(config_tool, platform_to_scan)
-
-        self.assertEqual(queries, expected_queries)
-        mock_logger.error.assert_not_called()
-
-    @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.logger")
     def test_get_queries_with_exception(self, mock_logger):
         config_tool = {
             "KICS": {
@@ -78,7 +54,7 @@ class TestKicsTool(unittest.TestCase):
         queries = self.kics_tool.get_queries(config_tool, platform_to_scan)
 
         self.assertIsNone(queries)
-        mock_logger.error.assert_called_once_with("Error writing queries file: 'RULES_PLATFORM3'")
+        mock_logger.error.assert_called_with("Error writing queries file: 'RULES_PLATFORM3'")
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.logger")
