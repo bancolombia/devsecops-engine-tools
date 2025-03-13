@@ -104,12 +104,37 @@
     "KUBESCAPE": {
         "VERSION": "3.0.11"
     },
-    "KICS": {
-        "VERSION": "2.1.0",
-        "KICS_LINUX": "https://example.url/kics/bin/linux/kics.zip",
-        "KICS_WINDOWS": "https://example.url/kics/bin/windows/kics.zip",
-        "KICS_MAC": "https://example.url/kics/bin/mac/kics.zip",
-        "PATH_KICS": "./kics/kics",
-        "DOWNLOAD_KICS_ASSETS": false
+    "KICS":{
+        "CLI_VERSION":"2.1.5",
+        "PATH_KICS": "kics/bin/kics",
+        "DOWNLOAD_KICS_ASSETS": false,
+        "RULES":{
+            "RULES_OPENAPI":{
+                "CKV_OPENAPI_1":{
+                    "checkID": "6998389e-66b2-473d-8d05-c8d71ac4d04d",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "guideline",
+                    "severity": "Medium",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                },
+                "CKV_OPENAPI_2":{
+                    "checkID": "86e3702f-c868-44b2-b61d-ea5316c18110",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "guideline",
+                    "severity": "Low",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                }
+            }
+        }
     }
 }

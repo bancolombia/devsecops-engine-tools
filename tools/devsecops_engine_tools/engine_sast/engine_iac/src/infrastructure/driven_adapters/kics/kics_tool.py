@@ -29,8 +29,8 @@ class KicsTool(ToolGateway):
 
     def execute_kics(self, folders_to_scan, prefix, platform_to_scan, work_folder, os_platform, queries):
         folders = ','.join(folders_to_scan)
-        platforms = platform_to_scan[0] if len(platform_to_scan) == 1 else ','.join(platform_to_scan)
-        queries = queries[0] if len(queries) == 1 else ','.join(queries)
+        platforms = ','.join(platform_to_scan)
+        queries = ','.join(queries)
         command = [
             prefix,
             "scan",
@@ -62,12 +62,12 @@ class KicsTool(ToolGateway):
             logger.error(f"An error ocurred loading KICS results {ex}")
             return None
 
-    def get_assets(self, kics_version):
+    def get_assets(self, kics_version, work_folder):
         name_zip = "assets_compressed.zip"
         assets_url = f"https://github.com/Checkmarx/kics/releases/download/v{kics_version}/extracted-info.zip"
         self.download(name_zip, assets_url)
 
-        directory_assets = "kics_assets"
+        directory_assets = f"{work_folder}/kics-devsecops"
         utils = Utils()
         utils.unzip_file(name_zip, directory_assets)
 
@@ -81,13 +81,14 @@ class KicsTool(ToolGateway):
                 return False
         except Exception as e:
             logger.error(f"Error validating KICS binary: {e}")
-            return False
 
     def get_queries(self, config_tool, platform_to_scan):
         try:
             queries = []
             for platform in platform_to_scan:
                 platform = platform.strip().upper()
+                if f"RULES_{platform}" not in config_tool[self.TOOL_KICS]["RULES"]:
+                    logger.error(f"Platform {platform} not found in RULES")
                 rules = config_tool[self.TOOL_KICS]["RULES"][f"RULES_{platform}"]
                 for rule in rules.values():
                     queries.append(rule['checkID'])
@@ -106,14 +107,13 @@ class KicsTool(ToolGateway):
         path_kics = path_kics.replace("/", "\\") if os_platform == "Windows" else path_kics
         work_folder = work_folder.replace("/", "\\") if os_platform == "Windows" else work_folder
         
-        command_prefix = f"{work_folder}\\{path_kics}" if os_platform == "Windows" else f"{work_folder}/{path_kics}"
+        command_prefix = f"{work_folder}\\{path_kics}.exe" if os_platform == "Windows" else f"{work_folder}/{path_kics}"
         
         if not self.validate_kics(command_prefix):
             logger.info("KICS binary not found or invalid, downloading assets...")
-            self.get_assets(kics_version)
 
         if download_kics_assets:
-            self.get_assets(kics_version)
+            self.get_assets(kics_version, work_folder)
 
         queries = self.get_queries(config_tool, platform_to_scan)
         self.execute_kics(folders_to_scan, command_prefix, platform_to_scan, work_folder, os_platform, queries)
