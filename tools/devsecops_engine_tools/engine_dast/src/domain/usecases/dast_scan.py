@@ -121,9 +121,9 @@ class DastScan:
             totalized_exclusions=totalized_exclusions,
             threshold_defined=Utils.update_threshold(
                 self,
-                Threshold(self.config_tool['THRESHOLD']),
+                Threshold(config_tool['THRESHOLD']),
                 exclusions,
-                self.config_tool["SCOPE_PIPELINE"],
+                config_tool["SCOPE_PIPELINE"],
             ),
             path_file_results=path_file_results,
             custom_message_break_build=config_tool.get("MESSAGE_INFO_DAST"),
