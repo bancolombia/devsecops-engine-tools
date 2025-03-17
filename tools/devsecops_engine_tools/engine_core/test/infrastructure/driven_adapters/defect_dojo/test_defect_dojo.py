@@ -124,6 +124,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 version="1.0",
                 build_id="build_id",
                 source_code_management_uri="source_code_uri",
+                tool_scm_configuration=2,
                 branch_tag="trunk",
                 commit_hash="commit_hash",
                 environment="Development",
@@ -158,6 +159,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.input_core.path_file_results = "file_path"
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
+        self.vulnerability_management.repository_provider = "github"
         self.vulnerability_management.version = "1.0"
         self.vulnerability_management.build_id = "build_id"
         self.vulnerability_management.branch_tag = "trunk"
@@ -221,8 +223,6 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 vulnerability_management=self.vulnerability_management,
                 token_cmdb=self.token_cmdb,
                 token_dd=self.token_dd,
-                scan_type_mapping=self.scan_type_mapping,
-                enviroment_mapping=self.enviroment_mapping,
                 tags=tags,
                 use_cmdb=use_cmdb,
             )
@@ -252,6 +252,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 file="file_path",
                 engagement_name="engagement_name",
                 source_code_management_uri="source_code_uri",
+                tool_scm_configuration=3,
                 tags=tags,
                 version="1.0",
                 build_id="build_id",
@@ -276,6 +277,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.input_core.path_file_results = "file_path"
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
+        self.vulnerability_management.repository_provider = "tfsgit"
         self.vulnerability_management.version = "1.0"
         self.vulnerability_management.build_id = "build_id"
         self.vulnerability_management.branch_tag = "trunk"
@@ -321,8 +323,6 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 vulnerability_management=self.vulnerability_management,
                 token_cmdb=self.token_cmdb,
                 token_dd=self.token_dd,
-                scan_type_mapping=self.scan_type_mapping,
-                enviroment_mapping=self.enviroment_mapping,
                 tags=tags,
                 use_cmdb=use_cmdb,
             )
@@ -337,6 +337,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "file": "file_path",
                     "engagement_name": "engagement_name",
                     "source_code_management_uri": "source_code_uri",
+                    "tool_scm_configuration": 2,
                     "tags": tags,
                     "version": "1.0",
                     "build_id": "build_id",

@@ -14,6 +14,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
     Exclusions,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 class DastScan:
     def __init__(
@@ -118,7 +119,12 @@ class DastScan:
 
         input_core = InputCore(
             totalized_exclusions=totalized_exclusions,
-            threshold_defined=Threshold(config_tool.get("THRESHOLD")),
+            threshold_defined=Utils.update_threshold(
+                self,
+                Threshold(self.config_tool['THRESHOLD']),
+                exclusions,
+                self.config_tool["SCOPE_PIPELINE"],
+            ),
             path_file_results=path_file_results,
             custom_message_break_build=config_tool.get("MESSAGE_INFO_DAST"),
             scope_pipeline=config_tool.get("SCOPE_PIPELINE"),

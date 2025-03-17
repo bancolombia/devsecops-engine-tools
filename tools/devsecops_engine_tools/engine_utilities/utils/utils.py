@@ -126,6 +126,7 @@ class Utils:
             threshold.vulnerability = LevelVulnerability(new_threshold.get("VULNERABILITY"))
             threshold.compliance = LevelCompliance(new_threshold.get("COMPLIANCE")) if new_threshold.get("COMPLIANCE") else threshold.compliance
             threshold.cve = new_threshold.get("CVE") if new_threshold.get("CVE") is not None else threshold.cve
+            threshold.name = new_threshold.get("reason", "Exclusion")
             return threshold
 
         threshold_pipeline = exclusions_data.get(pipeline_name, {}).get("THRESHOLD", {})
