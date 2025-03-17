@@ -24,6 +24,7 @@ class TestReportSonar(unittest.TestCase):
             "pipeline_name",
             "branch_name",
             "repository",
+            "repository_provider",
             "access_token",
             "build_execution_id",
             "build_id",
