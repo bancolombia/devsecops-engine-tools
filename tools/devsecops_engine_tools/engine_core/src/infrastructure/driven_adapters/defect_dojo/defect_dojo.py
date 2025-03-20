@@ -71,12 +71,6 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         "NUCLEI": "Nuclei Scan",
     }
 
-    tool_scm_conf_mapping = {
-        "default": 2,
-        "tfsgit": 2,
-        "github": 3,
-    }
-
     def send_vulnerability_management(
         self, vulnerability_management: VulnerabilityManagement
     ):
@@ -462,19 +456,20 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         tags,
         use_cmdb: bool,
     ):
+        tool_scm_conf_mapping = vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["TOOL_SCM_MAPPING"]
         common_fields = {
             "scan_type": self.scan_type_mapping[vulnerability_management.scan_type],
             "file": vulnerability_management.input_core.path_file_results,
             "engagement_name": vulnerability_management.input_core.scope_pipeline,
             "source_code_management_uri": vulnerability_management.source_code_management_uri,
             "tool_scm_configuration": (
-                self.tool_scm_conf_mapping[
-                    vulnerability_management.repository_provider.lower()
+                tool_scm_conf_mapping[
+                    vulnerability_management.repository_provider.upper()
                 ]
                 if vulnerability_management.repository_provider is not None
-                and vulnerability_management.repository_provider.lower()
-                in self.tool_scm_conf_mapping
-                else self.tool_scm_conf_mapping["default"]
+                and vulnerability_management.repository_provider.upper()
+                in tool_scm_conf_mapping
+                else tool_scm_conf_mapping["DEFAULT"]
             ),
             "tags": tags,
             "version": vulnerability_management.version,
