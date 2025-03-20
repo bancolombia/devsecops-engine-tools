@@ -46,6 +46,11 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
                     "REIMPORT_SCAN": True,
+                    "TOOL_SCM_MAPPING": {
+                        "DEFAULT": 2,
+                        "TFSGIT": 2,
+                        "GITHUB": 3
+                    },
                     "CMDB": {
                         "USE_CMDB": True,
                         "HOST_CMDB": "cmdb_host",
@@ -76,6 +81,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.input_core = MagicMock()
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
         self.vulnerability_management.input_core.path_file_results = "file_path"
+        self.vulnerability_management.repository_provider = "tfsgit"
         self.vulnerability_management.version = "1.0"
         self.vulnerability_management.build_id = "build_id"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
@@ -173,6 +179,11 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
+                    "TOOL_SCM_MAPPING": {
+                        "DEFAULT": 2,
+                        "TFSGIT": 2,
+                        "GITHUB": 3
+                    },                    
                     "CMDB": {
                         "USE_CMDB": True,
                         "HOST_CMDB": "cmdb_host",
@@ -293,6 +304,11 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
+                    "TOOL_SCM_MAPPING": {
+                        "DEFAULT": 2,
+                        "TFSGIT": 2,
+                        "GITHUB": 3
+                    },       
                     "REIMPORT_SCAN": True,
                     "CMDB": {"USE_CMDB": True, "REGEX_EXPRESSION_CMDB": "regex"},
                 },
