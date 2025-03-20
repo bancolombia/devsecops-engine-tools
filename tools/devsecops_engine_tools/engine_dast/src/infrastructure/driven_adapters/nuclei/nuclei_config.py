@@ -32,8 +32,13 @@ class NucleiConfig:
                 template_data["http"][0]["path"] = [
                     "{{BaseURL}}" + new_template_data["operation"]["path"]
                 ]
-                if "headers" in template_data.get("http", [{}])[0]:
-                    template_data["http"][0]["headers"] = new_template_data["operation"]["headers"]
+                if "headers" in new_template_data["operation"]:
+                    if "headers" not in template_data["http"][0]:
+                        template_data["http"][0]["headers"] = new_template_data["operation"]["headers"]
+                    else:
+                        for header, value in new_template_data["operation"]["headers"].items():
+                            if header not in template_data["http"][0]["headers"]:
+                                template_data["http"][0]["headers"][header] = value
                 if "payload" in new_template_data["operation"]:
                     body = json_dumps(new_template_data["operation"]["payload"])
                     template_data["http"][0]["body"] = body
