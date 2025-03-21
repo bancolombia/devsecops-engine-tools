@@ -94,6 +94,7 @@ class ReportSonar:
             config_tool = config_tool,
             source_code_management_uri = source_code_management_uri,
             base_compact_remote_config_url = compact_remote_config_url,
+            repository_provider = self.devops_platform_gateway.get_variable("repository_provider"),
             access_token = self.devops_platform_gateway.get_variable("access_token"),
             version = self.devops_platform_gateway.get_variable("build_execution_id"),
             build_id = self.devops_platform_gateway.get_variable("build_id"),

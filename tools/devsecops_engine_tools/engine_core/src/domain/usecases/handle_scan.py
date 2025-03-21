@@ -160,6 +160,7 @@ class HandleScan:
                             dict_args,
                             secret_tool,
                             config_tool,
+                            self.devops_platform_gateway.get_variable("repository_provider"),
                             self.devops_platform_gateway.get_source_code_management_uri(),
                             self.devops_platform_gateway.get_base_compact_remote_config_url(
                                 dict_args["remote_config_repo"]
@@ -218,11 +219,12 @@ class HandleScan:
     def _update_threshold_cve(
         self, input_core: InputCore, dict_args, secret_tool, config_tool
     ):
-        input_core.threshold_defined.cve.extend(
-            self.vulnerability_management.get_black_list(
-                dict_args, secret_tool, config_tool
+        if input_core.threshold_defined.name == "default":
+            input_core.threshold_defined.cve.extend(
+                self.vulnerability_management.get_black_list(
+                    dict_args, secret_tool, config_tool
+                )
             )
-        )
 
     def _define_threshold_quality_vuln(
         self, input_core: InputCore, dict_args, secret_tool, config_tool
@@ -230,7 +232,7 @@ class HandleScan:
         quality_vulnerability_management = (
             input_core.threshold_defined.quality_vulnerability_management
         )
-        if quality_vulnerability_management:
+        if quality_vulnerability_management and input_core.threshold_defined.name == "default":
             product_type = self.vulnerability_management.get_product_type_service(
                 input_core.scope_pipeline, dict_args, secret_tool, config_tool
             )

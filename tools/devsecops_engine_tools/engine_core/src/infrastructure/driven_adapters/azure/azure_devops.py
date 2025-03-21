@@ -7,7 +7,7 @@ from devsecops_engine_tools.engine_utilities.azuredevops.models.AzurePredefinedV
     SystemVariables,
     ReleaseVariables,
     AgentVariables,
-    VMVariables
+    VMVariables,
 )
 from devsecops_engine_tools.engine_utilities.azuredevops.infrastructure.azure_devops_api import (
     AzureDevopsApi,
@@ -57,11 +57,16 @@ class AzureDevops(DevopsPlatformGateway):
             return AzureMessageResultPipeline.SucceededWithIssues.value
 
     def get_source_code_management_uri(self):
-        source_code_management_uri = (
-            f"{SystemVariables.System_TeamFoundationCollectionUri.value()}"
-            f"{SystemVariables.System_TeamProject.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
-        )
-        return source_code_management_uri.replace(" ", "%20")
+        source_code_management_uri = {
+            "tfsgit": (
+                f"{SystemVariables.System_TeamFoundationCollectionUri.value()}"
+                f"{SystemVariables.System_TeamProject.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
+            ).replace(" ", "%20"),
+            "github": (
+                f"https://github.com/{BuildVariables.Build_Repository_Name.value()}"
+            ),
+        }
+        return source_code_management_uri.get(BuildVariables.Build_Repository_Provider.value().lower())
 
     def get_base_compact_remote_config_url(self, remote_config_repo):
         return (
@@ -75,36 +80,36 @@ class AzureDevops(DevopsPlatformGateway):
 
     def get_variable(self, variable):
 
-            variable_map = {
-                "branch_name": BuildVariables.Build_SourceBranchName,
-                "build_id": BuildVariables.Build_BuildNumber,
-                "build_execution_id": BuildVariables.Build_BuildId,
-                "commit_hash": BuildVariables.Build_SourceVersion,
-                "environment": ReleaseVariables.Environment,
-                "release_id": ReleaseVariables.Release_Releaseid,
-                "branch_tag": BuildVariables.Build_SourceBranch,
-                "access_token": SystemVariables.System_AccessToken,
-                "organization": SystemVariables.System_TeamFoundationCollectionUri,
-                "project_name": SystemVariables.System_TeamProject,
-                "repository": BuildVariables.Build_Repository_Name,
-                "pipeline_name": (
-                    BuildVariables.Build_DefinitionName
-                    if SystemVariables.System_HostType.value() == "build"
-                    else ReleaseVariables.Release_Definitionname
-                ),
-                "stage": SystemVariables.System_HostType,
-                "path_directory": SystemVariables.System_DefaultWorkingDirectory,
-                "os": AgentVariables.Agent_OS,
-                "temp_directory": AgentVariables.Agent_TempDirectory,
-                "target_branch": SystemVariables.System_TargetBranchName,
-                "source_branch": SystemVariables.System_SourceBranch,
-                "repository_provider": BuildVariables.Build_Repository_Provider,
-                "pull_request_id": SystemVariables.System_PullRequestId,
-                "vm_product_type_name": VMVariables.Vm_Product_Type_Name,
-                "vm_product_name": VMVariables.Vm_Product_Name,
-                "vm_product_description": VMVariables.Vm_Product_Description,
-            }
-            try:
-                return variable_map.get(variable).value()
-            except ValueError:
-                return None
+        variable_map = {
+            "branch_name": BuildVariables.Build_SourceBranchName,
+            "build_id": BuildVariables.Build_BuildNumber,
+            "build_execution_id": BuildVariables.Build_BuildId,
+            "commit_hash": BuildVariables.Build_SourceVersion,
+            "environment": ReleaseVariables.Environment,
+            "release_id": ReleaseVariables.Release_Releaseid,
+            "branch_tag": BuildVariables.Build_SourceBranch,
+            "access_token": SystemVariables.System_AccessToken,
+            "organization": SystemVariables.System_TeamFoundationCollectionUri,
+            "project_name": SystemVariables.System_TeamProject,
+            "repository": BuildVariables.Build_Repository_Name,
+            "pipeline_name": (
+                BuildVariables.Build_DefinitionName
+                if SystemVariables.System_HostType.value() == "build"
+                else ReleaseVariables.Release_Definitionname
+            ),
+            "stage": SystemVariables.System_HostType,
+            "path_directory": SystemVariables.System_DefaultWorkingDirectory,
+            "os": AgentVariables.Agent_OS,
+            "temp_directory": AgentVariables.Agent_TempDirectory,
+            "target_branch": SystemVariables.System_TargetBranchName,
+            "source_branch": SystemVariables.System_SourceBranch,
+            "repository_provider": BuildVariables.Build_Repository_Provider,
+            "pull_request_id": SystemVariables.System_PullRequestId,
+            "vm_product_type_name": VMVariables.Vm_Product_Type_Name,
+            "vm_product_name": VMVariables.Vm_Product_Name,
+            "vm_product_description": VMVariables.Vm_Product_Description,
+        }
+        try:
+            return variable_map.get(variable).value()
+        except ValueError:
+            return None

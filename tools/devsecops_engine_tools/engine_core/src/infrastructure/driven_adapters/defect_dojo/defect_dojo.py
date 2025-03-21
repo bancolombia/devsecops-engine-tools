@@ -49,6 +49,28 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
     TRANSFERRED_FINDING = "Transferred Finding"
     ON_WHITELIST = "On Whitelist"
 
+    enviroment_mapping = {
+        "dev": "Development",
+        "qa": "Staging",
+        "pdn": "Production",
+        "default": "Production",
+    }
+
+    scan_type_mapping = {
+        "CHECKOV": "Checkov Scan",
+        "PRISMA": "Twistlock Image Scan",
+        "XRAY": "JFrog Xray On Demand Binary Scan",
+        "TRUFFLEHOG": "Trufflehog Scan",
+        "TRIVY": "Trivy Scan",
+        "KUBESCAPE": "Kubescape JSON Importer",
+        "KICS": "KICS Scan",
+        "BEARER": "Bearer CLI",
+        "DEPENDENCY_CHECK": "Dependency Check Scan",
+        "SONARQUBE": "SonarQube API Import",
+        "GITLEAKS": "Gitleaks Scan",
+        "NUCLEI": "Nuclei Scan",
+    }
+
     def send_vulnerability_management(
         self, vulnerability_management: VulnerabilityManagement
     ):
@@ -65,27 +87,6 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 else vulnerability_management.secret_tool["token_cmdb"]
             )
 
-            enviroment_mapping = {
-                "dev": "Development",
-                "qa": "Staging",
-                "pdn": "Production",
-                "default": "Production",
-            }
-            scan_type_mapping = {
-                "CHECKOV": "Checkov Scan",
-                "PRISMA": "Twistlock Image Scan",
-                "XRAY": "JFrog Xray On Demand Binary Scan",
-                "TRUFFLEHOG": "Trufflehog Scan",
-                "TRIVY": "Trivy Scan",
-                "KUBESCAPE": "Kubescape Scanner",
-                "KICS": "KICS Scanner",
-                "BEARER": "Bearer CLI",
-                "DEPENDENCY_CHECK": "Dependency Check Scan",
-                "SONARQUBE": "SonarQube API Import",
-                "GITLEAKS": "Gitleaks Scan",
-                "NUCLEI": "Nuclei Scan",
-            }
-
             if any(
                 branch in str(vulnerability_management.branch_tag)
                 for branch in vulnerability_management.config_tool[
@@ -94,11 +95,24 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             ) or (vulnerability_management.dict_args["module"] == "engine_secret"):
                 tags = [vulnerability_management.dict_args["module"]]
                 if vulnerability_management.dict_args["module"] == "engine_iac":
-                    tags = [f"{vulnerability_management.dict_args['module']}_{'_'.join(vulnerability_management.dict_args['platform'])}"]
-                if vulnerability_management.dict_args["module"] == "engine_container" and sum(1 for line in open("scanned_images.txt", 'r', encoding='utf-8') if line.strip()) > 1:
-                    match = re.search(r"(?<=:)([^-]+)", vulnerability_management.dict_args['image_to_scan'])
+                    tags = [
+                        f"{vulnerability_management.dict_args['module']}_{'_'.join(vulnerability_management.dict_args['platform'])}"
+                    ]
+                if (
+                    vulnerability_management.dict_args["module"] == "engine_container"
+                    and sum(
+                        1
+                        for line in open("scanned_images.txt", "r", encoding="utf-8")
+                        if line.strip()
+                    )
+                    > 1
+                ):
+                    match = re.search(
+                        r"(?<=:)([^-]+)",
+                        vulnerability_management.dict_args["image_to_scan"],
+                    )
                     tags.append(match.group(1) if match else None)
-                  
+
                 use_cmdb = vulnerability_management.config_tool[
                     "VULNERABILITY_MANAGER"
                 ]["DEFECT_DOJO"]["CMDB"]["USE_CMDB"]
@@ -107,8 +121,6 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     vulnerability_management,
                     token_cmdb,
                     token_dd,
-                    scan_type_mapping,
-                    enviroment_mapping,
                     tags,
                     use_cmdb,
                 )
@@ -422,7 +434,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
             exclusions_black_list = self._get_finding_exclusion(
                 session_manager,
-                config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["MAX_RETRIES_QUERY"],
+                config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                    "MAX_RETRIES_QUERY"
+                ],
                 {
                     "type": "black_list",
                 },
@@ -439,28 +453,37 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         vulnerability_management: VulnerabilityManagement,
         token_cmdb,
         token_dd,
-        scan_type_mapping,
-        enviroment_mapping,
         tags,
         use_cmdb: bool,
     ):
+        tool_scm_conf_mapping = vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["TOOL_SCM_MAPPING"]
         common_fields = {
-            "scan_type": scan_type_mapping[vulnerability_management.scan_type],
+            "scan_type": self.scan_type_mapping[vulnerability_management.scan_type],
             "file": vulnerability_management.input_core.path_file_results,
             "engagement_name": vulnerability_management.input_core.scope_pipeline,
             "source_code_management_uri": vulnerability_management.source_code_management_uri,
+            "tool_scm_configuration": (
+                tool_scm_conf_mapping[
+                    vulnerability_management.repository_provider.upper()
+                ]
+                if vulnerability_management.repository_provider is not None
+                and vulnerability_management.repository_provider.upper()
+                in tool_scm_conf_mapping
+                else tool_scm_conf_mapping["DEFAULT"]
+            ),
             "tags": tags,
             "version": vulnerability_management.version,
             "build_id": vulnerability_management.build_id,
             "branch_tag": vulnerability_management.branch_tag,
             "commit_hash": vulnerability_management.commit_hash,
             "service": vulnerability_management.input_core.scope_pipeline,
-            "test_title": '_'.join(tags),
+            "test_title": "_".join(tags),
             "environment": (
-                enviroment_mapping[vulnerability_management.environment.lower()]
+                self.enviroment_mapping[vulnerability_management.environment.lower()]
                 if vulnerability_management.environment is not None
-                and vulnerability_management.environment.lower() in enviroment_mapping
-                else enviroment_mapping["default"]
+                and vulnerability_management.environment.lower()
+                in self.enviroment_mapping
+                else self.enviroment_mapping["default"]
             ),
             "token_defect_dojo": token_dd,
             "host_defect_dojo": vulnerability_management.config_tool[
@@ -469,8 +492,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             "expression": vulnerability_management.config_tool["VULNERABILITY_MANAGER"][
                 "DEFECT_DOJO"
             ]["CMDB"]["REGEX_EXPRESSION_CMDB"],
-            "reimport_scan": vulnerability_management.config_tool["VULNERABILITY_MANAGER"][
-                "DEFECT_DOJO"]["REIMPORT_SCAN"]
+            "reimport_scan": vulnerability_management.config_tool[
+                "VULNERABILITY_MANAGER"
+            ]["DEFECT_DOJO"]["REIMPORT_SCAN"],
         }
 
         if use_cmdb:
@@ -625,7 +649,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             ).results
 
         return Utils().retries_requests(request_func, max_retries, retry_delay=5)
-    
+
     def _get_finding_exclusion(self, session_manager, max_retries, query_params):
         def request_func():
             return FindingExclusion.get_finding_exclusion(
@@ -704,7 +728,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             where=self._get_where(finding, tool),
             create_date=create_date,
             expired_date=expired_date,
-            severity=finding.severity,
+            severity=finding.severity.lower(),
             reason=reason,
         )
 
