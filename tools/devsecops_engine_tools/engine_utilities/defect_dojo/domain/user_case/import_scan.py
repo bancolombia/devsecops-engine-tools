@@ -125,13 +125,13 @@ class ImportScanUserCase:
         engagement = self.__rest_engagement.get_engagements(request.engagement_name)
         if engagement.results == [] or not any(engagement.name == request.engagement_name for engagement in engagement.results):
             engagement = self.__rest_engagement.post_engagement(request, product_id, request.tool_scm_configuration)
-            logger.debug(f"Egagement created: {engagement.name}")
+            logger.debug(f"Engagement created: {engagement.name}")
         else:
             engagement = [engagement for engagement in engagement.results if engagement.product == product_id and engagement.name == request.engagement_name]
             if engagement:
                 logger.debug(f"Engagement found: {engagement[0].name} whit product id: {engagement[0].product}")
             else:
                 engagement = self.__rest_engagement.post_engagement(request, product_id, request.tool_scm_configuration)
-                logger.debug(f"Egagement created: {engagement.name} whit product id {engagement.product}")
+                logger.debug(f"Engagement created: {engagement.name} whit product id {engagement.product}")
 
         return self.import_scan(request, api_scan_bool)
