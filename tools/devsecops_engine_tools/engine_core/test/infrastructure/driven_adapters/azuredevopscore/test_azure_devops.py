@@ -48,6 +48,7 @@ class TestAzureDevops(unittest.TestCase):
         mock_system_variables.System_TeamFoundationCollectionUri.value.return_value = "System_TeamFoundationCollectionUri"
         mock_system_variables.System_TeamProject.value.return_value = "Build_Project_Name"
         mock_build_variables.Build_Repository_Name.value.return_value = "Build_Repository_Name"
+        mock_build_variables.Build_Repository_Provider.value.return_value = "tfsgit"
 
         assert azure_devops.get_source_code_management_uri() == "System_TeamFoundationCollectionUriBuild_Project_Name/_git/Build_Repository_Name"
 

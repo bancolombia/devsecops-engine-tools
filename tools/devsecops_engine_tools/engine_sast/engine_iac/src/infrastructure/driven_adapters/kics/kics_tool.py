@@ -18,6 +18,25 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class KicsTool(ToolGateway):
     TOOL_KICS = "KICS"
+    scan_type_platform_mapping = {
+        "openapi": "OpenAPI",
+        "terraform": "Terraform",
+        "k8s": "Kubernetes",
+        "docker": "Dockerfile",
+        "cloudformation": "CloudFormation",
+        "ansible": "Ansible",
+        "azureresourcemanager": "AzureResourceManager",
+        "bicep": "Bicep",
+        "buildah": "Buildah",
+        "cicd": "CICD",
+        "crossplane": "Crossplane",
+        "dockercompose": "DockerCompose",
+        "grpc": "GRPC",
+        "googledeploymentmanager": "GoogleDeploymentManager",
+        "knative": "Knative",
+        "pulumi": "Pulumi",
+        "serverlessfw": "ServerlessFW"
+    }
 
     def download(self, file, url):
         try:
@@ -29,8 +48,13 @@ class KicsTool(ToolGateway):
 
     def execute_kics(self, folders_to_scan, prefix, platform_to_scan, work_folder, os_platform, queries):
         folders = ','.join(folders_to_scan)
-        platforms = ','.join(platform_to_scan)
         queries = ','.join(queries)
+        mapped_platforms = [
+            self.scan_type_platform_mapping.get(platform.lower(), platform)
+            for platform in platform_to_scan
+        ]
+        platforms = ','.join(mapped_platforms)
+
         command = [
             prefix,
             "scan",
@@ -40,16 +64,16 @@ class KicsTool(ToolGateway):
             platforms,
             "--include-queries",
             queries,
-            "-q", 
-            f"{work_folder}\\kics-devsecops\\assets\\queries" if os_platform == "Windows" 
-                else f"{work_folder}/kics-devsecops/assets/queries",
+            "-q",
+            f"{work_folder}\\kics-devsecops\\assets\\queries" if os_platform == "Windows"
+            else f"{work_folder}/kics-devsecops/assets/queries",
             "--report-formats",
             "json",
-            "-o", 
+            "-o",
             work_folder
         ]
         try:
-           subprocess.run(command, capture_output=True)
+            subprocess.run(command, capture_output=True)
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during KICS execution: {e}")
 
