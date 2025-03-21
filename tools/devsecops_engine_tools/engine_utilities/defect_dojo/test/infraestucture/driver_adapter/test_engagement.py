@@ -46,7 +46,7 @@ def test_post_engagement_info_sucessfull():
         ImportScanRequest(),
         session_mock,
     )
-    response = rest_engagement.post_engagement(engagement_name="NU0212001_test_engagement_name", product_id=195)
+    response = rest_engagement.post_engagement(ImportScanRequest(), product_id=195, tool_scm_configuration_id=2)
     assert response.id == 195
 
 

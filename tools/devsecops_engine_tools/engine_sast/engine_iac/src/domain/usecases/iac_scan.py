@@ -13,7 +13,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclu
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
-from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()

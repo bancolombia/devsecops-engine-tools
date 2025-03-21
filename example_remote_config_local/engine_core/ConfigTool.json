@@ -17,6 +17,11 @@
             "HOST_DEFECT_DOJO": "",
             "LIMITS_QUERY": 100,
             "MAX_RETRIES_QUERY": 5,
+            "TOOL_SCM_MAPPING": {
+                "DEFAULT": 2,
+                "TFSGIT": 2,
+                "GITHUB": 3
+            },
             "REIMPORT_SCAN": false,
             "CMDB": {
                 "USE_CMDB": false,

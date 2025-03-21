@@ -46,6 +46,11 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
                     "REIMPORT_SCAN": True,
+                    "TOOL_SCM_MAPPING": {
+                        "DEFAULT": 2,
+                        "TFSGIT": 2,
+                        "GITHUB": 3
+                    },
                     "CMDB": {
                         "USE_CMDB": True,
                         "HOST_CMDB": "cmdb_host",
@@ -76,6 +81,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.input_core = MagicMock()
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
         self.vulnerability_management.input_core.path_file_results = "file_path"
+        self.vulnerability_management.repository_provider = "tfsgit"
         self.vulnerability_management.version = "1.0"
         self.vulnerability_management.build_id = "build_id"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
@@ -124,6 +130,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 version="1.0",
                 build_id="build_id",
                 source_code_management_uri="source_code_uri",
+                tool_scm_configuration=2,
                 branch_tag="trunk",
                 commit_hash="commit_hash",
                 environment="Development",
@@ -158,6 +165,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.input_core.path_file_results = "file_path"
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
+        self.vulnerability_management.repository_provider = "github"
         self.vulnerability_management.version = "1.0"
         self.vulnerability_management.build_id = "build_id"
         self.vulnerability_management.branch_tag = "trunk"
@@ -171,6 +179,11 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
+                    "TOOL_SCM_MAPPING": {
+                        "DEFAULT": 2,
+                        "TFSGIT": 2,
+                        "GITHUB": 3
+                    },                    
                     "CMDB": {
                         "USE_CMDB": True,
                         "HOST_CMDB": "cmdb_host",
@@ -221,8 +234,6 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 vulnerability_management=self.vulnerability_management,
                 token_cmdb=self.token_cmdb,
                 token_dd=self.token_dd,
-                scan_type_mapping=self.scan_type_mapping,
-                enviroment_mapping=self.enviroment_mapping,
                 tags=tags,
                 use_cmdb=use_cmdb,
             )
@@ -252,6 +263,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 file="file_path",
                 engagement_name="engagement_name",
                 source_code_management_uri="source_code_uri",
+                tool_scm_configuration=3,
                 tags=tags,
                 version="1.0",
                 build_id="build_id",
@@ -276,6 +288,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.input_core.path_file_results = "file_path"
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
+        self.vulnerability_management.repository_provider = "tfsgit"
         self.vulnerability_management.version = "1.0"
         self.vulnerability_management.build_id = "build_id"
         self.vulnerability_management.branch_tag = "trunk"
@@ -291,6 +304,11 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
+                    "TOOL_SCM_MAPPING": {
+                        "DEFAULT": 2,
+                        "TFSGIT": 2,
+                        "GITHUB": 3
+                    },       
                     "REIMPORT_SCAN": True,
                     "CMDB": {"USE_CMDB": True, "REGEX_EXPRESSION_CMDB": "regex"},
                 },
@@ -321,8 +339,6 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 vulnerability_management=self.vulnerability_management,
                 token_cmdb=self.token_cmdb,
                 token_dd=self.token_dd,
-                scan_type_mapping=self.scan_type_mapping,
-                enviroment_mapping=self.enviroment_mapping,
                 tags=tags,
                 use_cmdb=use_cmdb,
             )
@@ -337,6 +353,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "file": "file_path",
                     "engagement_name": "engagement_name",
                     "source_code_management_uri": "source_code_uri",
+                    "tool_scm_configuration": 2,
                     "tags": tags,
                     "version": "1.0",
                     "build_id": "build_id",

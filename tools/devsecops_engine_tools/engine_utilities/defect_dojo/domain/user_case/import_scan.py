@@ -25,6 +25,7 @@ class ImportScanUserCase:
         rest_product: ProductRestConsumer,
         rest_scan_configuration: ScanConfigrationRestConsumer,
         rest_engagement: EngagementRestConsumer,
+
     ):
         self.__rest_import_scan = rest_import_scan
         self.__rest_product_type = rest_product_type
@@ -110,7 +111,7 @@ class ImportScanUserCase:
             scan_configuration_list = self.__rest_scan_configurations.get_api_scan_configuration(request)
             if scan_configuration_list.results == []:
                 scan_configuration = self.__rest_scan_configurations.post_api_scan_configuration(
-                    request, product_id, request.tools_configuration
+                    request, product_id, request.tool_sonarqube_configuration
                 )
                 request.api_scan_configuration = scan_configuration.id
                 logger.debug(f"Scan configuration create service_key_1 : {scan_configuration.service_key_1}")
@@ -123,14 +124,14 @@ class ImportScanUserCase:
         logger.debug(f"search Engagement name: {request.engagement_name}")
         engagement = self.__rest_engagement.get_engagements(request.engagement_name)
         if engagement.results == [] or not any(engagement.name == request.engagement_name for engagement in engagement.results):
-            engagement = self.__rest_engagement.post_engagement(request.engagement_name, product_id)
-            logger.debug(f"Egagement created: {engagement.name}")
+            engagement = self.__rest_engagement.post_engagement(request, product_id, request.tool_scm_configuration)
+            logger.debug(f"Engagement created: {engagement.name}")
         else:
             engagement = [engagement for engagement in engagement.results if engagement.product == product_id and engagement.name == request.engagement_name]
             if engagement:
                 logger.debug(f"Engagement found: {engagement[0].name} whit product id: {engagement[0].product}")
             else:
-                engagement = self.__rest_engagement.post_engagement(request.engagement_name, product_id)
-                logger.debug(f"Egagement created: {engagement.name} whit product id {engagement.product}")
+                engagement = self.__rest_engagement.post_engagement(request, product_id, request.tool_scm_configuration)
+                logger.debug(f"Engagement created: {engagement.name} whit product id {engagement.product}")
 
         return self.import_scan(request, api_scan_bool)
