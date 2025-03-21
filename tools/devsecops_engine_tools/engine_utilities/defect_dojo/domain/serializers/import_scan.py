@@ -83,6 +83,7 @@ list_scan_type = [
     "JFrog Xray On Demand Binary Scan",
     "JFrog Xray Scan",
     "JFrog Xray Unified Scan",
+    "Kubescape JSON Importer",
     "KICS Scan",
     "Kiuwan Scan",
     "kube-bench Scan",

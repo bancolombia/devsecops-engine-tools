@@ -58,6 +58,7 @@ PYTHONPATH=tools/
                 "BUILD_DEFINITIONNAME": "[DEFINITIONNAME]",
                 "BUILD_REPOSITORY_ID": "57a0ece4-aa98-4a6a-a1f3-a17b2207fb6f",
                 "BUILD_REPOSITORY_NAME": "[REPOSITORY_NAME]",
+                "BUILD_REPOSITORY_PROVIDER": "tfsgit",
                 "BUILD_SOURCEBRANCH": "refs/heads/trunk",
                 "BUILD_STAGINGDIRECTORY": "[/PATH_STAGINGDIRECTORY/]",
                 "ARTIFACT_PATH": "[/ARTIFACT_PATH/]",
