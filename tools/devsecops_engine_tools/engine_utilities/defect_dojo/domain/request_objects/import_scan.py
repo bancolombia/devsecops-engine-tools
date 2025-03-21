@@ -37,7 +37,8 @@ class ImportScanRequest:
     create_finding_groups_for_all_findings: str = ""
     # ****another parameter outside defect dojo*****
     product_description: str = ""
-    tools_configuration: str = ""
+    tool_sonarqube_configuration: str = ""
+    tool_scm_configuration: str = ""
     code_app: str = ""
     token_cmdb: str = ""
     host_cmdb: str = ""

@@ -77,6 +77,7 @@ class BreakBuild:
                     lambda item: any(
                         exclusion.id == item.id
                         and (exclusion.where in item.where or "all" in exclusion.where)
+                        and exclusion.severity == item.severity
                         for exclusion in exclusions
                     ),
                     findings_list,
@@ -349,6 +350,7 @@ class BreakBuild:
                                     and (
                                         elem.where in item.where or "all" in elem.where
                                     )
+                                    and elem.severity == item.severity
                                 ),
                                 None,
                             ),
@@ -360,6 +362,7 @@ class BreakBuild:
                                     and (
                                         elem.where in item.where or "all" in elem.where
                                     )
+                                    and elem.severity == item.severity
                                 ),
                                 None,
                             ),
@@ -371,6 +374,7 @@ class BreakBuild:
                                     and (
                                         elem.where in item.where or "all" in elem.where
                                     )
+                                    and elem.severity == item.severity
                                 ),
                                 None,
                             ),

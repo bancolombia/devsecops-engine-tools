@@ -83,6 +83,7 @@ list_scan_type = [
     "JFrog Xray On Demand Binary Scan",
     "JFrog Xray Scan",
     "JFrog Xray Unified Scan",
+    "Kubescape JSON Importer",
     "KICS Scan",
     "Kiuwan Scan",
     "kube-bench Scan",
@@ -201,7 +202,8 @@ class ImportScanSerializer(Schema):
     test_title = fields.Str(required=False)
     product_description = fields.Str(required=False)
     create_finding_groups_for_all_findings = fields.Str(required=False)
-    tools_configuration = fields.Int(required=False, load_default=1)
+    tool_sonarqube_configuration = fields.Int(required=False, load_default=1)
+    tool_scm_configuration = fields.Int(required=False)
     code_app = fields.Str(required=False)
     # defect-dojo credential
     token_cmdb = fields.Str(required=False)
