@@ -282,7 +282,7 @@ class CheckovTool(ToolGateway):
         
     def download_tool(self, file, url):
         try:
-            response = requests.get(url, allow_redirects=True, verify=False)
+            response = requests.get(url, allow_redirects=True)
             with open(file, "wb") as compress_file:
                 compress_file.write(response.content)
         except Exception as e:
