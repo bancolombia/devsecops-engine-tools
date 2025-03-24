@@ -1,6 +1,6 @@
 from unittest import mock
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, mock_open, patch
 from queue import Queue
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_tool import (
     CheckovTool,
@@ -121,3 +121,51 @@ def test_run_tool(checkov_tool):
     )
 
     assert findings_list == []
+
+
+@patch('tools.requests.get')
+@patch('builtins.open', new_callable=mock_open)
+@patch('tools.logger')
+def test_download_tool(self, mock_logger, mock_open, mock_get):
+    mock_response = MagicMock()
+    mock_response.content = b'file content'
+    mock_get.return_value = mock_response
+
+    download_tool('file.zip', 'http://example.com/file.zip')
+
+    mock_get.assert_called_once_with('http://example.com/file.zip', allow_redirects=True, verify=False)
+    mock_open.assert_called_once_with('file.zip', 'wb')
+    mock_open().write.assert_called_once_with(b'file content')
+
+@patch('tools.subprocess.run')
+@patch('tools.download_tool')
+@patch('tools.zipfile.ZipFile')
+@patch('tools.shutil.move')
+@patch('tools.logger')
+def test_install_tool_unix(self, mock_logger, mock_move, mock_zipfile, mock_download_tool, mock_subprocess_run):
+    mock_subprocess_run.return_value.returncode = 1
+    mock_zipfile.return_value.__enter__.return_value.extract = MagicMock()
+
+    install_tool_unix('file.zip', 'http://example.com/file.zip')
+
+    mock_download_tool.assert_called_once_with('file.zip', 'http://example.com/file.zip')
+    mock_zipfile.assert_called_once_with('file.zip', 'r')
+    mock_zipfile.return_value.__enter__.return_value.extract.assert_called_once_with(member='dist/checkov')
+    mock_move.assert_called_once_with(os.path.join('dist', 'checkov'), 'checkov')
+    mock_subprocess_run.assert_any_call(['chmod', '+x', './checkov'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+@patch('tools.subprocess.run')
+@patch('tools.download_tool')
+@patch('tools.zipfile.ZipFile')
+@patch('tools.shutil.move')
+@patch('tools.logger')
+def test_install_tool_windows(self, mock_logger, mock_move, mock_zipfile, mock_download_tool, mock_subprocess_run):
+    mock_subprocess_run.side_effect = [subprocess.CalledProcessError(1, 'checkov.exe --version'), None]
+    mock_zipfile.return_value.__enter__.return_value.extract = MagicMock()
+
+    install_tool_windows('file.zip', 'http://example.com/file.zip')
+
+    mock_download_tool.assert_called_once_with('file.zip', 'http://example.com/file.zip')
+    mock_zipfile.assert_called_once_with('file.zip', 'r')
+    mock_zipfile.return_value.__enter__.return_value.extract.assert_called_once_with(member='dist/checkov.exe')
+    mock_move.assert_called_once_with(os.path.join('dist', 'checkov.exe'), 'checkov.exe')
