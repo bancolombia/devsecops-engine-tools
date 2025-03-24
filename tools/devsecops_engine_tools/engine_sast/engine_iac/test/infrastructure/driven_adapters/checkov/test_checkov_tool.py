@@ -34,7 +34,7 @@ def test_retryable_install_package(checkov_tool):
         response = checkov_tool.retryable_install_package("checkov", "2.3.96")
 
         mock_run.assert_called()
-        assert response is False
+        assert response is None
 
 def test_execute(checkov_tool):
     checkov_config = MagicMock()
