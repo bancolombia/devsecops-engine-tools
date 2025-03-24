@@ -46,7 +46,7 @@ def test_execute(checkov_tool):
     subprocess_mock.run.return_value.stderr = "Error"
 
     with patch("subprocess.run", return_value=subprocess_mock) as mock_run:
-        checkov_tool.execute(checkov_config)
+        checkov_tool.execute(checkov_config, "checkov")
 
         mock_run.assert_called_once_with(
             "checkov --config-file /path/to/config/checkov_configcheckov_config.yaml",
@@ -69,7 +69,7 @@ def test_async_scan(mock_checkov_tool, checkov_tool):
 
     mock_checkov_tool.return_value = '{"key": "value"}'
 
-    checkov_tool.async_scan(output_queue, checkov_config)
+    checkov_tool.async_scan(output_queue, checkov_config, "checkov")
 
     assert output_queue.get() == [{"key": "value"}]
 
@@ -98,7 +98,7 @@ def test_scan_folders(checkov_tool):
         checkov_tool, "async_scan", side_effect=output_queue.put
     ):
         result_scans, rules_run = checkov_tool.scan_folders(
-            folders_to_scan, config_tool, agent_env, environment, "eks"
+            folders_to_scan, config_tool, agent_env, environment, "eks", "checkov"
         )
 
     assert result_scans == []
