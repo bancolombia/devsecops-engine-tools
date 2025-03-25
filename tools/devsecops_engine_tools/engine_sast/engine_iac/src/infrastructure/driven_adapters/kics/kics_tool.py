@@ -54,7 +54,7 @@ class KicsTool(ToolGateway):
             for platform in platform_to_scan
         ]
         platforms = ','.join(mapped_platforms)
-
+        print("platform", platforms)
         command = [
             prefix,
             "scan",
