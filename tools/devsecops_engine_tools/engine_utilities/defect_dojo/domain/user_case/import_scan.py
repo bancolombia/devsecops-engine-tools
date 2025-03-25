@@ -33,7 +33,6 @@ class ImportScanUserCase:
         self.__rest_scan_configurations = rest_scan_configuration
         self.__rest_engagement = rest_engagement
 
-
     def get_file_type(self, path_file):
         __, extension = os.path.splitext(path_file)
         dict_rule_type_file = {
@@ -66,7 +65,7 @@ class ImportScanUserCase:
 
         response.url = f"{request.host_defect_dojo}/engagement/{str(response.engagement_id)}/finding/open"
         return response
-    
+
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
         product_id = None
 
@@ -74,9 +73,11 @@ class ImportScanUserCase:
             log = f"Name product {request.product_name} or product type {request.product_type_name} is empty"
             logger.error(log)
             raise ApiError(log)
-        
+
         logger.info(f"Match {request.scan_type}")
-        products = self.__rest_product.get_products({"name": request.product_name}) or self.__rest_product.get_products({"name": request.code_app})
+        products = self.__rest_product.get_products({"name": request.product_name})
+        if len(products.results) == 0:
+            products = self.__rest_product.get_products({"name": request.code_app})
         if len(products.results) > 0:
             product_id = products.results[0].id
             request.product_name = products.results[0].name
