@@ -76,7 +76,7 @@ class ImportScanUserCase:
             raise ApiError(log)
         
         logger.info(f"Match {request.scan_type}")
-        products = self.__rest_product.get_products({"name":request.product_name})
+        products = self.__rest_product.get_products({"name": request.product_name}) or self.__rest_product.get_products({"name": request.code_app})
         if len(products.results) > 0:
             product_id = products.results[0].id
             request.product_name = products.results[0].name
