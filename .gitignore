@@ -73,3 +73,7 @@ pytest.ini
 
 # Extensions
 out
+
+# Binarios
+checkov
+checkov.exe
