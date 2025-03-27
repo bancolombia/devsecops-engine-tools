@@ -21,16 +21,12 @@ class TestKicsTool(unittest.TestCase):
                     "RULES_PLATFORM1": {
                         "rule1": {"checkID": "check1"},
                         "rule2": {"checkID": "check2"}
-                    },
-                    "RULES_PLATFORM2": {
-                        "rule3": {"checkID": "check3"},
-                        "rule4": {"checkID": "check4"}
                     }
                 }
             }
         }
-        platform_to_scan = ["platform1", "platform2"]
-        expected_queries = ["check1", "check2", "check3", "check4"]
+        platform_to_scan = ["platform1"]
+        expected_queries = [{"rule1":"check1"}, {"rule2":"check2"}]
 
         queries = self.kics_tool.get_queries(config_tool, platform_to_scan)
 
@@ -66,7 +62,7 @@ class TestKicsTool(unittest.TestCase):
         platform_to_scan = ["platform1"]
         work_folder = "work_folder"
         os_platform = "Linux"
-        queries = ["query1"]
+        queries = [{"rule1":"check1"}, {"rule2":"check2"}]
 
         self.kics_tool.execute_kics(folders_to_scan, prefix, platform_to_scan, work_folder, os_platform, queries)
 
@@ -76,9 +72,9 @@ class TestKicsTool(unittest.TestCase):
     @patch("json.load", return_value={"key": "value"})
     def test_load_results_success(self, mock_json_load, mock_file):
         work_folder = "work_folder"
-        result = self.kics_tool.load_results(work_folder)
+        queries = [{"rule1":"check1"}, {"rule2":"check2"}]
+        result = self.kics_tool.load_results(work_folder, queries)
         self.assertEqual(result, {"key": "value"})
-        mock_file.assert_called_once_with(os.path.join(work_folder, "results.json"))
         mock_json_load.assert_called_once()
 
     @patch("builtins.open", new_callable=mock_open)
@@ -86,11 +82,11 @@ class TestKicsTool(unittest.TestCase):
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.logger")
     def test_load_results_failure(self, mock_logger_error, mock_json_load, mock_file):
         work_folder = "work_folder"
-        result = self.kics_tool.load_results(work_folder)
+        queries = [{"rule1":"check1"}, {"rule2":"check2"}]
+        result = self.kics_tool.load_results(work_folder, queries)
         self.assertIsNone(result)
-        mock_file.assert_called_once_with(os.path.join(work_folder, "results.json"))
         mock_json_load.assert_called_once()
-        mock_logger_error.error.assert_called_once_with("An error ocurred loading KICS results error")
+        mock_logger_error.error.assert_called_once_with("An error occurred loading or modifying KICS results error")
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.logger")

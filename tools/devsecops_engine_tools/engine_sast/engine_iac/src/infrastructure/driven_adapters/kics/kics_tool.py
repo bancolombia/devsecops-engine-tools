@@ -48,7 +48,7 @@ class KicsTool(ToolGateway):
 
     def execute_kics(self, folders_to_scan, prefix, platform_to_scan, work_folder, os_platform, queries):
         folders = ','.join(folders_to_scan)
-        queries = ','.join(queries)
+        queries = ','.join([list(query.values())[0] for query in queries])
         mapped_platforms = [
             self.scan_type_platform_mapping.get(platform.lower(), platform)
             for platform in platform_to_scan
@@ -77,13 +77,25 @@ class KicsTool(ToolGateway):
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during KICS execution: {e}")
 
-    def load_results(self, work_folder):
+    def load_results(self, work_folder, queries):
         try:
-            with open(os.path.join(work_folder, "results.json")) as f:
+            results_path = os.path.join(work_folder, "results.json")
+            with open(results_path, "r") as f:
                 data = json.load(f)
+
+            for finding in data.get("queries", []):
+                query_ids = {list(query.values())[0] for query in queries}
+                if finding.get("query_id") in query_ids:
+                    finding["custom_vuln_id"] = next(
+                        key for query in queries for key, value in query.items() if value == finding.get("query_id")
+                    )
+
+            with open(results_path, "w") as f:
+                json.dump(data, f, indent=4)
+
             return data
         except Exception as ex:
-            logger.error(f"An error ocurred loading KICS results {ex}")
+            logger.error(f"An error occurred loading or modifying KICS results {ex}")
             return None
 
     def get_assets(self, kics_version, work_folder):
@@ -113,9 +125,7 @@ class KicsTool(ToolGateway):
                 platform = platform.strip().upper()
                 if f"RULES_{platform}" not in config_tool[self.TOOL_KICS]["RULES"]:
                     logger.error(f"Platform {platform} not found in RULES")
-                rules = config_tool[self.TOOL_KICS]["RULES"][f"RULES_{platform}"]
-                for rule in rules.values():
-                    queries.append(rule['checkID'])
+                queries = [{key: value["checkID"]} for key, value in config_tool[self.TOOL_KICS]["RULES"][f"RULES_{platform}"].items()]
             return queries
         except Exception as e:
             logger.error(f"Error writing queries file: {e}")
@@ -141,7 +151,7 @@ class KicsTool(ToolGateway):
 
         queries = self.get_queries(config_tool, platform_to_scan)
         self.execute_kics(folders_to_scan, command_prefix, platform_to_scan, work_folder, os_platform, queries)
-        data = self.load_results(work_folder)
+        data = self.load_results(work_folder, queries)
         
         if data:
             kics_deserealizator = KicsDeserealizator()

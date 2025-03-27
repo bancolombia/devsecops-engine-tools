@@ -35,8 +35,8 @@ class KicsDeserealizator:
             severity = query.get("severity", "").upper()
             if severity in {"LOW", "MEDIUM", "HIGH", "CRITICAL"}:
                 description = query.get("query_name", "")
-                query_id = query.get("query_id", "")
                 for file in query.get("files", []):
+                    query_id = file.get("similarity_id", "")
                     file_name = file.get("file_name", "")
                     filtered_results.append({
                         "severity": severity,

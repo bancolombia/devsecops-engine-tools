@@ -1,4 +1,6 @@
 import yaml
+import requests
+import zipfile
 import subprocess
 import time
 import os
@@ -66,14 +68,14 @@ class CheckovTool(ToolGateway):
 
         installed = shutil.which(package)
         if installed:
-            return True
+            return "checkov"
 
         python_command = "python3" if platform.system() != "Windows" else "python"
 
         python_path = shutil.which(python_command)
         if python_path is None:
             logger.error("Python3 not found on the system.")
-            return False
+            return None
 
         def retry(attempt):
             if attempt < MAX_RETRIES:
@@ -98,17 +100,17 @@ class CheckovTool(ToolGateway):
                 result = subprocess.run(install_cmd, capture_output=True)
                 if result.returncode == 0:
                     logger.debug(INSTALL_SUCCESS_MSG)
-                    return True
+                    return "checkov"
             except Exception as e:
                 logger.error(f"Error during installation: {e}")
 
             retry(attempt)
 
-        return False
+        return None
 
-    def execute(self, checkov_config: CheckovConfig):
+    def execute(self, checkov_config: CheckovConfig, command_prefix):
         command = (
-            "checkov --config-file "
+            f"{command_prefix} --config-file "
             + checkov_config.path_config_file
             + checkov_config.config_file_name
             + self.CHECKOV_CONFIG_FILE
@@ -123,9 +125,9 @@ class CheckovTool(ToolGateway):
         error = result.stderr.strip()
         return output
 
-    def async_scan(self, queue, checkov_config: CheckovConfig):
+    def async_scan(self, queue, checkov_config: CheckovConfig, command_prefix):
         result = []
-        output = self.execute(checkov_config)
+        output = self.execute(checkov_config, command_prefix)
         result.append(json.loads(output))
         queue.put(result)
 
@@ -136,6 +138,7 @@ class CheckovTool(ToolGateway):
         agent_env,
         environment,
         platform_to_scan,
+        command_prefix
     ):
         output_queue = queue.Queue()
         # Crea una lista para almacenar los hilos
@@ -186,7 +189,7 @@ class CheckovTool(ToolGateway):
                     rules_run.update(config_tool[self.TOOL_CHECKOV]["RULES"][rule])
                     t = threading.Thread(
                         target=self.async_scan,
-                        args=(output_queue, checkov_config),
+                        args=(output_queue, checkov_config, command_prefix),
                     )
                     t.start()
                     threads.append(t)
@@ -213,13 +216,21 @@ class CheckovTool(ToolGateway):
         util = Utils()
         agent_env = util.configurate_external_checks(self.TOOL_CHECKOV,config_tool, secret_tool,secret_external_checks)
 
-        checkov_install = self.retryable_install_package(
-            "checkov", config_tool[self.TOOL_CHECKOV]["VERSION"]
-        )
 
-        if checkov_install:
+        install_type = config_tool[self.TOOL_CHECKOV].get("INSTALL_TYPE", "")
+
+        command_prefix = None
+
+        if install_type.casefold() == "remote-binary".casefold():
+            command_prefix = self.install_binary(config_tool[self.TOOL_CHECKOV])
+        else:
+            command_prefix = self.retryable_install_package(
+                "checkov", config_tool[self.TOOL_CHECKOV]["VERSION"]
+            )
+        
+        if command_prefix is not None:
             result_scans, rules_run = self.scan_folders(
-                folders_to_scan, config_tool, agent_env, environment, platform_to_scan
+                folders_to_scan, config_tool, agent_env, environment, platform_to_scan, command_prefix
             )
 
             checkov_deserealizator = CheckovDeserealizator()
@@ -242,3 +253,77 @@ class CheckovTool(ToolGateway):
             )
         else:
             return [], None
+        
+
+    def install_binary(self,config_tool):
+        os_platform = platform.system()
+        if os_platform == "Linux":
+            architecture = platform.machine()
+            if architecture == "aarch64":
+                url = config_tool["URL_FILE_LINUX_ARM64"]
+            else:
+                url = config_tool["URL_FILE_LINUX"]
+            file = os.path.basename(url)
+            self.install_tool_unix(file, url)
+            return "./checkov"
+        elif os_platform == "Darwin":
+            url = config_tool["URL_FILE_DARWIN"]
+            file = os.path.basename(url)
+            self.install_tool_unix(file, url)
+            return "./checkov"
+        elif os_platform == "Windows":
+            url = config_tool["URL_FILE_WINDOWS"]
+            file = os.path.basename(url)
+            self.install_tool_windows(file, url)
+            return "checkov.exe"
+        else:
+            logger.warning(f"{os_platform} is not supported.")
+            return None
+    
+        
+    def download_tool(self, file, url):
+        try:
+            response = requests.get(url, allow_redirects=True)
+            with open(file, "wb") as compress_file:
+                compress_file.write(response.content)
+        except Exception as e:
+            logger.error(f"Error downloading Checkov: {e}")
+
+    def install_tool_unix(self, file, url):
+        installed = subprocess.run(
+            ["which", "./checkov"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if installed.returncode == 1:
+            command = ["chmod", "+x", "./checkov"]
+            try:
+                self.download_tool(file, url)
+                with zipfile.ZipFile(file, 'r') as zip_file:
+                    zip_file.extract(member="dist/checkov")
+                source = os.path.join("dist", "checkov")
+                destination = "checkov"
+                shutil.move(source, destination)
+                subprocess.run(
+                    command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
+            except Exception as e:
+                logger.error(f"Error installing Checkov: {e}")
+        
+    def install_tool_windows(self, file, url):
+        try:
+            subprocess.run(
+                ["checkov.exe", "--version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        except:
+            try:
+                self.download_tool(file, url)
+                with zipfile.ZipFile(file, 'r') as zip_file:
+                    zip_file.extract(member="dist/checkov.exe")
+                source = os.path.join("dist", "checkov.exe")
+                destination = "checkov.exe"
+                shutil.move(source, destination)
+            except Exception as e:
+                logger.error(f"Error installing Checkov: {e}")
