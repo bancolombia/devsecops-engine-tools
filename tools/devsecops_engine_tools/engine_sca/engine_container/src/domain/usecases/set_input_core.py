@@ -21,10 +21,16 @@ class SetInputCore:
 
             for item in value[tool]:
                 if key == "All":
-                    source_images = item.get("x86.image.name", [])
-                    if source_images and base_image is None:
+                    source_images_x86 = item.get("x86.image.name", [])
+                    source_images_acemq = item.get("integracion.acemq.name", [])
+                    if (source_images_x86 or source_images_acemq) and base_image is None:
                         continue
-                    if source_images and not any(base_image in source for source in source_images):
+                    
+                    base_images_to_check = [base_image] if isinstance(base_image, str) else list(filter(None, base_image))
+
+                    if (source_images_x86 or source_images_acemq) and not any(
+                        img in source_images_x86 + source_images_acemq for img in base_images_to_check
+                    ):
                         continue
                     
                 list_exclusions.append(

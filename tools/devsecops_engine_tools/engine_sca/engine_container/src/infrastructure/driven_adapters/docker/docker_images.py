@@ -76,15 +76,23 @@ class DockerImages(ImagesGateway):
     def extract_base_image_from_labels(self, labels, matching_image=None):
         try:
             if labels:
-                source_image = labels.get("x86.image.name") or labels.get("image.base.ref.name")
-                if not source_image:
-                    source_image = labels.get("source_images") or labels.get("source-image")
+                x86_image = labels.get("x86.image.name")
+                acemq_image = labels.get("integracion.acemq.name")
+                source_image = labels.get("image.base.ref.name") or labels.get("source_images") or labels.get("source-image")
+
                 is_uso_especifico = labels.get("repository") == 'evc/uso_especifico'
-                if source_image and matching_image:
-                    logger.info(f"Base image for '{matching_image}' found: {source_image}")
+
+                if acemq_image:
+                    base_image = (x86_image, acemq_image) if x86_image else (None, acemq_image)
+                else:
+                    base_image = x86_image or source_image
+
+                if base_image and matching_image:
+                    logger.info(f"Base image for '{matching_image}' found: {base_image}")
                 elif matching_image:
                     logger.warning(f"Base image not found for '{matching_image}'.")
-                return source_image, is_uso_especifico
+
+                return base_image, is_uso_especifico
             else:
                 logger.warning("No labels found in image.")
                 return None, False
