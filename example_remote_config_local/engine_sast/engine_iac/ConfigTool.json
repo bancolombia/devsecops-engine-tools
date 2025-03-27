@@ -18,6 +18,11 @@
     "UPDATE_SERVICE_WITH_FILE_NAME_CFT": false,
     "CHECKOV": {
         "VERSION": "2.3.296",
+        "INSTALL_TYPE": "remote-binary",
+        "URL_FILE_LINUX": "https://github.com/bridgecrewio/checkov/releases/download/3.2.391/checkov_linux_X86_64.zip",
+        "URL_FILE_LINUX_ARM64": "https://github.com/bridgecrewio/checkov/releases/download/3.2.391/checkov_linux_arm64.zip",
+        "URL_FILE_DARWIN": "https://github.com/bridgecrewio/checkov/releases/download/3.2.391/checkov_windows_X86_64.zip",
+        "URL_FILE_WINDOWS": "https://github.com/bridgecrewio/checkov/releases/download/3.2.391/checkov_windows_X86_64.zip",
         "USE_EXTERNAL_CHECKS_GIT": false,
         "EXTERNAL_CHECKS_GIT": "",
         "EXTERNAL_GIT_SSH_HOST": "",
