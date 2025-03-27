@@ -5,6 +5,7 @@ import subprocess
 import logging
 import base64
 import json
+import platform
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -25,7 +26,25 @@ class PrismaCloudManagerScan(ToolGateway):
         prisma_console_url,
         prisma_api_version,
     ):
-        url = f"{prisma_console_url}/api/{prisma_api_version}/util/twistcli"
+        
+        machine = platform.machine()
+        system = platform.system()
+
+        base_url = f"{prisma_console_url}/api/{prisma_api_version}/util"
+
+        os_mapping = {
+            "Linux": "twistcli",
+            "Windows": "windows/twistcli.exe",
+            "Darwin": "osx/twistcli",
+        }
+
+        url = f"{base_url}/{os_mapping[system]}"
+
+        if system == "Linux" and machine == "aarch64":
+            url = f"{base_url}/arm64/twistcli"
+        elif system == "Darwin" and machine == "aarch64":
+            url = f"{base_url}/osx/arm64/twistcli"
+
         credentials = base64.b64encode(
             prisma_key.encode()
         ).decode()
