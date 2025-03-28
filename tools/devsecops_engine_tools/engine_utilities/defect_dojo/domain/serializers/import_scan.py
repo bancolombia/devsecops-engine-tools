@@ -179,7 +179,7 @@ class ImportScanSerializer(Schema):
     product_name = fields.Str(required=False)
     engagement_name = fields.Str(required=True)
     engagement_end_date = fields.Str(required=False)
-    source_code_management_uri = fields.Str(required=False)
+    source_code_management_uri = fields.Str(required=False, load_default=None)
     engagement = fields.Int(required=False)
     auto_create_context = fields.Str(required=False, load_default="true")
     deduplication_on_engagement = fields.Str(required=False)
