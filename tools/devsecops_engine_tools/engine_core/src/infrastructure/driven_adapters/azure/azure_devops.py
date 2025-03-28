@@ -65,6 +65,10 @@ class AzureDevops(DevopsPlatformGateway):
             "github": (
                 f"https://github.com/{BuildVariables.Build_Repository_Name.value()}"
             ),
+            "git": (
+                f"{SystemVariables.System_TeamFoundationCollectionUri.value()}"
+                f"{SystemVariables.System_TeamProject.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
+            ).replace(" ", "%20")
         }
         return source_code_management_uri.get(BuildVariables.Build_Repository_Provider.value().lower())
 
