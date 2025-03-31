@@ -69,7 +69,8 @@ class TestKicsDeserealizator(unittest.TestCase):
                     "query_name": "Test Query 1",
                     "query_id": "1",
                     "files": [
-                        {"file_name": "file1.py"}
+                        {"file_name": "file1.py",
+                         "similarity_id": "1"}
                     ]
                 },
                 {
@@ -77,7 +78,8 @@ class TestKicsDeserealizator(unittest.TestCase):
                     "query_name": "Test Query 2",
                     "query_id": "2",
                     "files": [
-                        {"file_name": "file2.py"}
+                        {"file_name": "file2.py",
+                         "similarity_id": "2"}
                     ]
                 },
                 {
@@ -85,7 +87,8 @@ class TestKicsDeserealizator(unittest.TestCase):
                     "query_name": "Test Query 3",
                     "query_id": "3",
                     "files": [
-                        {"file_name": "file3.py"}
+                        {"file_name": "file3.py",
+                         "similarity_id": "3"}
                     ]
                 },
                 {
@@ -93,7 +96,8 @@ class TestKicsDeserealizator(unittest.TestCase):
                     "query_name": "Test Query 4",
                     "query_id": "4",
                     "files": [
-                        {"file_name": "file4.py"}
+                        {"file_name": "file4.py",
+                         "similarity_id": "4"}
                     ]
                 },
                 {
@@ -101,7 +105,8 @@ class TestKicsDeserealizator(unittest.TestCase):
                     "query_name": "Test Query 5",
                     "query_id": "5",
                     "files": [
-                        {"file_name": "file5.py"}
+                        {"file_name": "file5.py",
+                         "similarity_id": "5"}
                     ]
                 }
             ]
