@@ -23,6 +23,7 @@
     },
     "MESSAGE_INFO_ENGINE_CONTAINER": "message custom",
     "IGNORE_SEARCH_PATTERN":"(.*_demo0|.*_cer)",
+    "FORMAT_RESULT": "json|csv",
     "THRESHOLD": {
         "VULNERABILITY": {
             "Critical": 4,

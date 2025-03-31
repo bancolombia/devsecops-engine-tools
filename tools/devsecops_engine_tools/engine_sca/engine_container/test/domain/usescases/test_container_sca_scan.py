@@ -102,6 +102,12 @@ def test_process_image_not_already_scanned(container_sca_scan):
     container_sca_scan.get_base_image = MagicMock(return_value="base_image:latest")
     container_sca_scan.get_images_already_scanned = MagicMock(return_value=[])
     container_sca_scan.tool_run = MagicMock()
+    container_sca_scan.remote_config = {
+        "FORMAT_RESULT": "csv",
+        "SBOM": {"ENABLED": False, "BRANCH_FILTER": []},
+        "GET_IMAGE_BASE": True,
+        "VALIDATE_BASE_IMAGE_DATE": {"ENABLED": False},
+    }
     component_list = [
         Component("component1", "version1"),
         Component("component2", "version2"),

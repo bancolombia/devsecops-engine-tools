@@ -50,6 +50,7 @@ twistcli
 trivy*
 trivy_*
 *scan_result.json
+*scan_result.csv
 jf
 jf.exe
 target
