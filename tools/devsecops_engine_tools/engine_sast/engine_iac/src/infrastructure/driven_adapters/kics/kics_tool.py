@@ -18,6 +18,25 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class KicsTool(ToolGateway):
     TOOL_KICS = "KICS"
+    scan_type_platform_mapping = {
+        "openapi": "OpenAPI",
+        "terraform": "Terraform",
+        "k8s": "Kubernetes",
+        "docker": "Dockerfile",
+        "cloudformation": "CloudFormation",
+        "ansible": "Ansible",
+        "azureresourcemanager": "AzureResourceManager",
+        "bicep": "Bicep",
+        "buildah": "Buildah",
+        "cicd": "CICD",
+        "crossplane": "Crossplane",
+        "dockercompose": "DockerCompose",
+        "grpc": "GRPC",
+        "googledeploymentmanager": "GoogleDeploymentManager",
+        "knative": "Knative",
+        "pulumi": "Pulumi",
+        "serverlessfw": "ServerlessFW"
+    }
 
     def download(self, file, url):
         try:
@@ -27,105 +46,117 @@ class KicsTool(ToolGateway):
         except Exception as ex:
             logger.error(f"An error ocurred downloading {file} {ex}")
 
-    def install_tool(self, file, url, command_prefix):
-        utils = Utils()
-        kics = f"./{command_prefix}/kics"
-        installed = subprocess.run(
-            ["which", command_prefix],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        if installed.returncode == 1:
-            try:
-                self.download(file, url)
-                utils.unzip_file(file, command_prefix)
-                subprocess.run(["chmod", "+x", kics])
-                return kics
-            except Exception as e:
-                logger.error(f"Error installing KICS: {e}")
-        else:
-            return command_prefix
-
-    def install_tool_windows(self, file, url, command_prefix):
-        try:
-            subprocess.run(
-                [command_prefix, "version"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            return command_prefix
-        except:
-            try:
-                utils = Utils()
-                self.download(file, url)
-                utils.unzip_file(file, command_prefix)
-                return f"./{command_prefix}/kics"
-
-            except Exception as e:
-                logger.error(f"Error installing KICS: {e}")
-
-    def execute_kics(self, folders_to_scan, prefix):
+    def execute_kics(self, folders_to_scan, prefix, platform_to_scan, work_folder, os_platform, queries):
         folders = ','.join(folders_to_scan)
-        command = [prefix, "scan", "-p", folders, "-q", "./kics_assets/assets", "--report-formats", "json", "-o", "./"]
+        queries = ','.join([list(query.values())[0] for query in queries])
+        mapped_platforms = [
+            self.scan_type_platform_mapping.get(platform.lower(), platform)
+            for platform in platform_to_scan
+        ]
+        platforms = ','.join(mapped_platforms)
+
+        command = [
+            prefix,
+            "scan",
+            "-p",
+            folders,
+            "-t",
+            platforms,
+            "--include-queries",
+            queries,
+            "-q",
+            f"{work_folder}\\kics-devsecops\\assets\\queries" if os_platform == "Windows"
+            else f"{work_folder}/kics-devsecops/assets/queries",
+            "--report-formats",
+            "json",
+            "-o",
+            work_folder
+        ]
         try:
             subprocess.run(command, capture_output=True)
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during KICS execution: {e}")
 
-    def load_results(self):
+    def load_results(self, work_folder, queries):
         try:
-            with open('results.json') as f:
+            results_path = os.path.join(work_folder, "results.json")
+            with open(results_path, "r") as f:
                 data = json.load(f)
+
+            for finding in data.get("queries", []):
+                query_ids = {list(query.values())[0] for query in queries}
+                if finding.get("query_id") in query_ids:
+                    finding["custom_vuln_id"] = next(
+                        key for query in queries for key, value in query.items() if value == finding.get("query_id")
+                    )
+
+            with open(results_path, "w") as f:
+                json.dump(data, f, indent=4)
+
             return data
         except Exception as ex:
-            logger.error(f"An error ocurred loading KICS results {ex}")
+            logger.error(f"An error occurred loading or modifying KICS results {ex}")
             return None
 
-    def select_operative_system(self, os_platform, config_tool, path_kics):
-        command_prefix = path_kics
-        if os_platform == "Linux":
-            kics_zip = "kics_linux.zip"
-            url_kics = config_tool[self.TOOL_KICS]["KICS_LINUX"]
-            return self.install_tool(kics_zip, url_kics, command_prefix)
-        elif os_platform == "Windows":
-            kics_zip = "kics_windows.zip"
-            url_kics = config_tool[self.TOOL_KICS]["KICS_WINDOWS"]
-            return self.install_tool_windows(kics_zip, url_kics, command_prefix)
-        elif os_platform == "Darwin":
-            kics_zip = "kics_macos.zip"
-            url_kics = config_tool[self.TOOL_KICS]["KICS_MAC"]
-            return self.install_tool(kics_zip, url_kics, command_prefix)
-        else:
-            logger.warning(f"{os_platform} is not supported.")
-            return [], None
-
-    def get_assets(self, kics_version):
+    def get_assets(self, kics_version, work_folder):
         name_zip = "assets_compressed.zip"
         assets_url = f"https://github.com/Checkmarx/kics/releases/download/v{kics_version}/extracted-info.zip"
         self.download(name_zip, assets_url)
 
-        directory_assets = "kics_assets"
+        directory_assets = f"{work_folder}/kics-devsecops"
         utils = Utils()
         utils.unzip_file(name_zip, directory_assets)
 
+    def validate_kics(self, command_prefix):
+        try:
+            result = subprocess.run([command_prefix, "version"], capture_output=True, text=True)
+            if result.returncode == 0:
+                return True
+            else:
+                logger.error(f"KICS binary not valid: {result.stderr}")
+                return False
+        except Exception as e:
+            logger.error(f"Error validating KICS binary: {e}")
+
+    def get_queries(self, config_tool, platform_to_scan):
+        try:
+            queries = []
+            for platform in platform_to_scan:
+                platform = platform.strip().upper()
+                if f"RULES_{platform}" not in config_tool[self.TOOL_KICS]["RULES"]:
+                    logger.error(f"Platform {platform} not found in RULES")
+                queries = [{key: value["checkID"]} for key, value in config_tool[self.TOOL_KICS]["RULES"][f"RULES_{platform}"].items()]
+            return queries
+        except Exception as e:
+            logger.error(f"Error writing queries file: {e}")
+
     def run_tool(
-            self, config_tool, folders_to_scan, **kwargs
+            self, config_tool, folders_to_scan, work_folder, platform_to_scan, **kwargs
     ):
-        kics_version = config_tool[self.TOOL_KICS]["VERSION"]
+        kics_version = config_tool[self.TOOL_KICS]["CLI_VERSION"]
         path_kics = config_tool[self.TOOL_KICS]["PATH_KICS"]
         download_kics_assets = config_tool[self.TOOL_KICS]["DOWNLOAD_KICS_ASSETS"]
-        if download_kics_assets:
-            self.get_assets(kics_version)
-
+        
         os_platform = platform.system()
-        command_prefix = self.select_operative_system(os_platform, config_tool, path_kics)
-        self.execute_kics(folders_to_scan, command_prefix)
+        path_kics = path_kics.replace("/", "\\") if os_platform == "Windows" else path_kics
+        work_folder = work_folder.replace("/", "\\") if os_platform == "Windows" else work_folder
+        
+        command_prefix = f"{work_folder}\\{path_kics}.exe" if os_platform == "Windows" else f"{work_folder}/{path_kics}"
+        
+        if not self.validate_kics(command_prefix):
+            logger.info("KICS binary not found or invalid, downloading assets...")
 
-        data = self.load_results()
+        if download_kics_assets:
+            self.get_assets(kics_version, work_folder)
+
+        queries = self.get_queries(config_tool, platform_to_scan)
+        self.execute_kics(folders_to_scan, command_prefix, platform_to_scan, work_folder, os_platform, queries)
+        data = self.load_results(work_folder, queries)
+        
         if data:
             kics_deserealizator = KicsDeserealizator()
             total_vulnerabilities = kics_deserealizator.calculate_total_vulnerabilities(data)
-            path_file = os.path.abspath("results.json")
+            path_file = os.path.join(work_folder, "results.json")
 
             if total_vulnerabilities == 0:
                 return [], path_file

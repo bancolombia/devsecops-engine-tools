@@ -211,6 +211,7 @@ class CheckovTool(ToolGateway):
         platform_to_scan,
         secret_tool,
         secret_external_checks,
+        **kwargs
     ):
         util = Utils()
         agent_env = util.configurate_external_checks(self.TOOL_CHECKOV,config_tool, secret_tool,secret_external_checks)
