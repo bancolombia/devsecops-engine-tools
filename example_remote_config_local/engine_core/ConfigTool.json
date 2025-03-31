@@ -15,6 +15,7 @@
         ],
         "DEFECT_DOJO": {
             "HOST_DEFECT_DOJO": "",
+            "PRINT_DOMAIN": "",
             "LIMITS_QUERY": 100,
             "MAX_RETRIES_QUERY": 5,
             "TOOL_SCM_MAPPING": {
