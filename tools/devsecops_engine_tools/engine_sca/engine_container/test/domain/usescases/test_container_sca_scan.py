@@ -67,7 +67,7 @@ def test_get_images_already_scanned(container_sca_scan):
 
 def test_set_image_scanned(container_sca_scan):
     with patch("builtins.open") as mock_open:
-        container_sca_scan.set_image_scanned("result.json")
+        container_sca_scan.set_image_scanned("result.csv")
         assert mock_open.call_count == 1
 
 
@@ -107,14 +107,14 @@ def test_process_image_not_already_scanned(container_sca_scan):
         Component("component2", "version2"),
     ]
     container_sca_scan.tool_run.run_tool_container_sca.return_value = (
-        "my_image:1234_scan_result.json",
+        "my_image:1234_scan_result.csv",
         component_list,
     )
     container_sca_scan.set_image_scanned = MagicMock()
 
     image_scanned, base_image, components = container_sca_scan.process()
 
-    assert image_scanned == "my_image:1234_scan_result.json"
+    assert image_scanned == "my_image:1234_scan_result.csv"
     container_sca_scan.get_image.assert_called_once_with(
         container_sca_scan.image_to_scan
     )
@@ -124,7 +124,7 @@ def test_process_image_not_already_scanned(container_sca_scan):
         container_sca_scan.secret_tool,
         container_sca_scan.token_engine_container,
         "my_image:1234",
-        "my_image:1234_scan_result.json",
+        "my_image:1234_scan_result.csv",
         "base_image:latest",
         {'exclusions': 'exclusions'},
         False,
