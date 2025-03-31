@@ -137,6 +137,10 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 )
 
                 if hasattr(response, "url"):
+                    if vulnerability_management.config_tool.get("VULNERABILITY_MANAGER").get("DEFECT_DOJO").get("PRINT_DOMAIN"):
+                        response.url = response.url.replace(vulnerability_management.config_tool["VULNERABILITY_MANAGER"][
+                            "DEFECT_DOJO"]["HOST_DEFECT_DOJO"
+                        ], vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["PRINT_DOMAIN"])
                     url_parts = response.url.split("//")
                     test_string = "//".join([url_parts[0] + "/", url_parts[1]])
                     print(
