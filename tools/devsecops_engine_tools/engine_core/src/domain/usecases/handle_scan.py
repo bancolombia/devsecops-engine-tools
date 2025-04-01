@@ -165,6 +165,7 @@ class HandleScan:
                             self.devops_platform_gateway.get_base_compact_remote_config_url(
                                 dict_args["remote_config_repo"]
                             ),
+                            None,
                             self.devops_platform_gateway.get_variable("access_token"),
                             self.devops_platform_gateway.get_variable(
                                 "build_execution_id"
