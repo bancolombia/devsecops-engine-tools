@@ -461,6 +461,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         use_cmdb: bool,
     ):
         tool_scm_conf_mapping = vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["TOOL_SCM_MAPPING"]
+        tool_sonar_conf_mapping = vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["TOOL_SONAR_MAPPING"]
         common_fields = {
             "scan_type": self.scan_type_mapping[vulnerability_management.scan_type],
             "file": vulnerability_management.input_core.path_file_results,
@@ -499,6 +500,15 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             "reimport_scan": vulnerability_management.config_tool[
                 "VULNERABILITY_MANAGER"
             ]["DEFECT_DOJO"]["REIMPORT_SCAN"],
+            "tool_sonarqube_configuration": (
+                tool_sonar_conf_mapping[
+                    vulnerability_management.sonar_instance.upper()
+                ]
+                if vulnerability_management.sonar_instance is not None
+                and vulnerability_management.sonar_instance.upper()
+                in tool_sonar_conf_mapping
+                else tool_sonar_conf_mapping["DEFAULT"]
+            ),
         }
 
         if use_cmdb:

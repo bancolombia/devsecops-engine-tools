@@ -51,6 +51,11 @@ class TestDefectDojoPlatform(unittest.TestCase):
                         "TFSGIT": 2,
                         "GITHUB": 3
                     },
+                    "TOOL_SONAR_MAPPING": {
+                        "DEFAULT": 4,
+                        "SONAR_INSTANCE_ONE": 4,
+                        "SONAR_INSTANCE_TWO": 5
+                    },
                     "CMDB": {
                         "USE_CMDB": True,
                         "HOST_CMDB": "cmdb_host",
@@ -78,6 +83,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         }
         self.vulnerability_management.access_token = "access_token"
         self.vulnerability_management.scan_type = "CHECKOV"
+        self.vulnerability_management.sonar_instance = "sonar_instance_one"
         self.vulnerability_management.input_core = MagicMock()
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
         self.vulnerability_management.input_core.path_file_results = "file_path"
@@ -131,6 +137,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 build_id="build_id",
                 source_code_management_uri="source_code_uri",
                 tool_scm_configuration=2,
+                tool_sonarqube_configuration=4,
                 branch_tag="trunk",
                 commit_hash="commit_hash",
                 environment="Development",
@@ -161,6 +168,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         tags = ["engine_iac_k8s"]
 
         self.vulnerability_management.scan_type = "CHECKOV"
+        self.vulnerability_management.sonar_instance = "sonar_instance_one"
         self.vulnerability_management.input_core = MagicMock()
         self.vulnerability_management.input_core.path_file_results = "file_path"
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
@@ -183,6 +191,11 @@ class TestDefectDojoPlatform(unittest.TestCase):
                         "DEFAULT": 2,
                         "TFSGIT": 2,
                         "GITHUB": 3
+                    },
+                    "TOOL_SONAR_MAPPING": {
+                        "DEFAULT": 4,
+                        "SONAR_INSTANCE_ONE": 4,
+                        "SONAR_INSTANCE_TWO": 5
                     },                    
                     "CMDB": {
                         "USE_CMDB": True,
@@ -264,6 +277,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 engagement_name="engagement_name",
                 source_code_management_uri="source_code_uri",
                 tool_scm_configuration=3,
+                tool_sonarqube_configuration=4,
                 tags=tags,
                 version="1.0",
                 build_id="build_id",
@@ -288,6 +302,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.input_core.path_file_results = "file_path"
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
+        self.vulnerability_management.sonar_instance = "sonar_instance_one"
         self.vulnerability_management.repository_provider = "tfsgit"
         self.vulnerability_management.version = "1.0"
         self.vulnerability_management.build_id = "build_id"
@@ -308,7 +323,12 @@ class TestDefectDojoPlatform(unittest.TestCase):
                         "DEFAULT": 2,
                         "TFSGIT": 2,
                         "GITHUB": 3
-                    },       
+                    },
+                    "TOOL_SONAR_MAPPING": {
+                        "DEFAULT": 4,
+                        "SONAR_INSTANCE_ONE": 4,
+                        "SONAR_INSTANCE_TWO": 5
+                    }, 
                     "REIMPORT_SCAN": True,
                     "CMDB": {"USE_CMDB": True, "REGEX_EXPRESSION_CMDB": "regex"},
                 },
@@ -354,6 +374,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "engagement_name": "engagement_name",
                     "source_code_management_uri": "source_code_uri",
                     "tool_scm_configuration": 2,
+                    "tool_sonarqube_configuration": 4,
                     "tags": tags,
                     "version": "1.0",
                     "build_id": "build_id",

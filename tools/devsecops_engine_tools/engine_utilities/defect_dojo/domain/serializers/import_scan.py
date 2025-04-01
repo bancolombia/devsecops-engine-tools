@@ -202,7 +202,7 @@ class ImportScanSerializer(Schema):
     test_title = fields.Str(required=False)
     product_description = fields.Str(required=False)
     create_finding_groups_for_all_findings = fields.Str(required=False)
-    tool_sonarqube_configuration = fields.Int(required=False, load_default=1)
+    tool_sonarqube_configuration = fields.Int(required=False)
     tool_scm_configuration = fields.Int(required=False)
     code_app = fields.Str(required=False)
     # defect-dojo credential
