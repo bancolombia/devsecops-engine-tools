@@ -23,6 +23,11 @@
                 "TFSGIT": 2,
                 "GITHUB": 3
             },
+            "TOOL_SONAR_MAPPING": {
+                "DEFAULT": 4,
+                "SONAR_INSTANCE_ONE": 4,
+                "SONAR_INSTANCE_TWO": 5
+            },
             "REIMPORT_SCAN": false,
             "CMDB": {
                 "USE_CMDB": false,

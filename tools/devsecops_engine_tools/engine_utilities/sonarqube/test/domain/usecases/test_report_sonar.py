@@ -64,7 +64,7 @@ class TestReportSonar(unittest.TestCase):
             sonar_gateway=mock_sonar_gateway,
         )
 
-        args = {"remote_config_repo": "repo", "use_secrets_manager": "true", "sonar_url": "sonar_url", "remote_config_branch": ""}
+        args = {"remote_config_repo": "repo", "use_secrets_manager": "true", "sonar_url": "sonar_url", "remote_config_branch": "", "sonar_instance": "sonar_instance_one"}
 
         # Act
         report_sonar.process(args)
