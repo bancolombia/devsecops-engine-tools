@@ -176,7 +176,6 @@ class BreakBuild:
                     "No findings to mitigate",
                 )
             )
-            self.remediation_rate = 0
             return
 
         remediation_rate_value = self._get_percentage(mitigated_count / total)
