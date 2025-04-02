@@ -178,6 +178,31 @@ def test_remediation_rate_control_less():
     )
 
 
+def test_remediation_rate_control_total_zero():
+    all_report = [
+        Report(mitigated=False),
+    ]
+    new_report_list = []
+    devops_platform_gateway = MagicMock()
+    break_build = BreakBuild(
+        devops_platform_gateway,
+        MagicMock(),
+        {},
+        [],
+        [],
+        [],
+        [],
+        {},
+        1,
+    )
+    break_build._remediation_rate_control(all_report, new_report_list)
+
+    devops_platform_gateway.message.assert_called_with(
+        "succeeded",
+        "No findings to mitigate",
+    )
+
+
 def test_map_applied_exclusion():
     exclusions = [
         Exclusions(
