@@ -168,8 +168,18 @@ class BreakBuild:
             f"Mitigated: {mitigated_count}   AllFindings: {all_findings_count}   BaseImage: {base_image_count}   NewFindings: {self.policy_excluded}   Transferred: {transferred_list_count}   WhiteList: {white_list_count}\n\n"
         )
         total = all_findings_count - self.policy_excluded - white_list_count - base_image_count - transferred_list_count
-        remediation_rate_value = self._get_percentage(mitigated_count / total)
 
+        if total == 0:
+            print(
+                self.devops_platform_gateway.message(
+                    "succeeded",
+                    "No findings to mitigate",
+                )
+            )
+            self.remediation_rate = 0
+            return
+
+        remediation_rate_value = self._get_percentage(mitigated_count / total)
         risk_threshold = self._get_remediation_rate_threshold(total)
         self.remediation_rate = remediation_rate_value
 
