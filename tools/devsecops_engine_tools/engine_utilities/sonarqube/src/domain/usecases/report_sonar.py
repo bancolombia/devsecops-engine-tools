@@ -66,7 +66,13 @@ class ReportSonar:
         
         if args["use_secrets_manager"] == "true": 
             secret = self.secrets_manager_gateway.get_secret(config_tool)
-            secret_tool = secret
+            secret_tool = secret.copy()
+            secret["token_sonar"] = (
+                secret[f"token_{args['sonar_instance'].lower()}"]
+                if args["sonar_instance"] is not None
+                and f"token_{args['sonar_instance'].lower()}" in secret
+                else secret["token_sonar"]
+            )
         else: 
             secret = args
             secret_tool = None
