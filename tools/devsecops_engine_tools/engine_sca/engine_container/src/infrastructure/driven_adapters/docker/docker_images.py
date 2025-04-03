@@ -33,19 +33,19 @@ class DockerImages(ImagesGateway):
                 f"Error listing images, docker must be running and added to PATH: {e}"
             )
 
-    def get_base_image(self, matching_image):
+    def get_base_image(self, matching_image, label_keys):
         try:
             image_details = self.get_image_details(matching_image.id)
             if not image_details:
                 return None
 
             labels = image_details.get("Config", {}).get("Labels", {})
-            return self.extract_base_image_from_labels(labels, matching_image)[0]
+            return self.extract_base_image_from_labels(labels, label_keys, matching_image)[0]
         except Exception as e:
             logger.warning(f"Error obtaining base image: {e}")
             return None
 
-    def validate_base_image_date(self, matching_image, referenced_date):
+    def validate_base_image_date(self, matching_image, referenced_date, label_keys):
         if matching_image is None or matching_image.id is None:
             logger.error("Error: matching_image ID is None")
             return False
@@ -59,7 +59,7 @@ class DockerImages(ImagesGateway):
         if baseline_date:
             date_image = self.parse_date(baseline_date)
         else:
-            base_image = self.extract_base_image_from_labels(labels)
+            base_image = self.extract_base_image_from_labels(labels, label_keys)
             if not base_image[1]:
                 date_image = self.extract_date_from_image(base_image[0])
 
@@ -73,19 +73,21 @@ class DockerImages(ImagesGateway):
             logger.error(f"Error obtaining image details for '{image_id}': {e}")
             return None
 
-    def extract_base_image_from_labels(self, labels, matching_image=None):
+    def extract_base_image_from_labels(self, labels, label_keys, matching_image=None):
         try:
             if labels:
-                x86_image = labels.get("x86.image.name")
-                acemq_image = labels.get("integracion.acemq.name")
-                source_image = labels.get("image.base.ref.name") or labels.get("source_images") or labels.get("source-image")
-
-                is_uso_especifico = labels.get("repository") == 'evc/uso_especifico'
-
-                if acemq_image:
-                    base_image = (x86_image, acemq_image) if x86_image else (None, acemq_image)
-                else:
-                    base_image = x86_image or source_image
+                extracted_labels = {key: labels.get(key) for key in label_keys}
+                base_image = []
+                
+                for key in label_keys:
+                    if extracted_labels.get(key):
+                        base_image.append(extracted_labels[key])
+                    
+                    if len(base_image) == 2:
+                        break
+                
+                base_image = tuple(base_image) if base_image else None
+                is_uso_especifico = extracted_labels.get("repository") == 'evc/uso_especifico'
 
                 if base_image and matching_image:
                     logger.info(f"Base image for '{matching_image}' found: {base_image}")
@@ -101,11 +103,12 @@ class DockerImages(ImagesGateway):
             return None, False
 
 
+
     def extract_date_from_image(self, image_name):
         if not image_name:
             return None
         try:
-            date = image_name.split("_")[-1]
+            date = image_name[0].split("_")[-1]
             return self.parse_date(date)
         except Exception as e:
             logger.error(f"Error extracting date from image name '{image_name}': {e}")

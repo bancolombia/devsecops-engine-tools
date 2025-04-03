@@ -45,14 +45,14 @@ class ContainerScaScan:
         """
         return self.tool_images.list_images(image_to_scan)
 
-    def get_base_image(self, matching_image):
+    def get_base_image(self, matching_image, label_keys):
         """
             Process the base image.
 
             Returns:
                 String: base image.
             """
-        return self.tool_images.get_base_image(matching_image)
+        return self.tool_images.get_base_image(matching_image,label_keys)
 
     def get_images_already_scanned(self):
         """
@@ -72,7 +72,7 @@ class ContainerScaScan:
         with open("scanned_images.txt", "a") as file:
             file.write(result_file + "\n")
 
-    def validate_base_image_date(self, matching_image, referenced_date):
+    def validate_base_image_date(self, matching_image, referenced_date, label_keys):
         """
         Process the base image date validation.
 
@@ -80,7 +80,7 @@ class ContainerScaScan:
             string: base image date.
         """
         return self.tool_images.validate_base_image_date(
-            matching_image, referenced_date
+            matching_image, referenced_date, label_keys
         )
 
     def process(self):
@@ -93,8 +93,9 @@ class ContainerScaScan:
         base_image = None
         image_scanned = None
         matching_image = self.get_image(self.image_to_scan)
-        if self.remote_config["GET_IMAGE_BASE"]:
-            base_image = self.get_base_image(matching_image)
+        if self.remote_config["GET_IMAGE_BASE"][
+            "ENABLED"]:
+            base_image = self.get_base_image(matching_image, self.remote_config["GET_IMAGE_BASE"]["LABEL_KEYS"])
         if self.remote_config["VALIDATE_BASE_IMAGE_DATE"][
             "ENABLED"
         ] and not self.exclusions.get(self.pipeline_name, {}).get(
@@ -103,6 +104,7 @@ class ContainerScaScan:
             self.validate_base_image_date(
                 matching_image,
                 self.remote_config["VALIDATE_BASE_IMAGE_DATE"]["REFERENCE_IMAGE_DATE"],
+                self.remote_config["GET_IMAGE_BASE"]["LABEL_KEYS"]
             )
         sbom_components = None
         generate_sbom = self.remote_config["SBOM"]["ENABLED"] and any(

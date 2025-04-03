@@ -7,7 +7,7 @@ class ImagesGateway(metaclass=ABCMeta):
         "get image to scan"
 
     @abstractmethod
-    def get_base_image(self, image_to_scan) -> str:
+    def get_base_image(self, image_to_scan, label_keys) -> str:
         "get base image"
 
     @abstractmethod
