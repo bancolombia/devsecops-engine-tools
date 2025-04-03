@@ -16,7 +16,10 @@
             "main"
         ]
     },
-    "GET_IMAGE_BASE": false,
+    "GET_IMAGE_BASE": {
+        "ENABLED": true,
+        "LABEL_KEYS": ["x86.image.name","integracion.acemq.name","image.base.ref.name","source_images","source-image","repository"]
+    },
     "VALIDATE_BASE_IMAGE_DATE": {
         "ENABLED": false,
         "REFERENCE_IMAGE_DATE": "20250206"
