@@ -97,8 +97,9 @@ def test_get_base_image_source_label(mock_docker_client):
         "Config": {"Labels": {"x86.image.name": "source_image:1.0"}},
     }
     
-    result = docker_images.get_base_image(matching_image)
-    assert result == "source_image:1.0"
+    label_keys = ["x86.image.name"]  
+    result = docker_images.get_base_image(matching_image, label_keys)
+    assert result == ("source_image:1.0",)
     mock_client.api.inspect_image.assert_called_once_with("image_id")
 
 def test_get_base_image_no_base_image(mock_docker_client):
@@ -109,8 +110,8 @@ def test_get_base_image_no_base_image(mock_docker_client):
     mock_client = MagicMock()
     mock_docker_client.return_value = mock_client
     mock_client.api.inspect_image.return_value = {"Config": {"Labels": {}}}
-    
-    result = docker_images.get_base_image(matching_image)
+    label_keys = []
+    result = docker_images.get_base_image(matching_image,label_keys)
     assert result is None
     mock_client.api.inspect_image.assert_called_once_with("image_id")
 
@@ -122,8 +123,8 @@ def test_get_base_image_exception(mock_docker_client):
     mock_client = MagicMock()
     mock_docker_client.return_value = mock_client
     mock_client.api.inspect_image.side_effect = Exception("Inspection failed")
-    
-    result = docker_images.get_base_image(matching_image)
+    label_keys = []
+    result = docker_images.get_base_image(matching_image,label_keys)
     assert result is None
     mock_client.api.inspect_image.assert_called_once_with("image_id")
 
@@ -138,8 +139,8 @@ def test_validate_base_image_date_with_baseline_date(mock_docker_client):
     mock_client.api.inspect_image.return_value = {
         "Config": {"Labels": {"x86.baseline.date": "20230802"}}
     }
-    
-    result = docker_images.validate_base_image_date(matching_image, referenced_date)
+    label_keys = ["label1", "label2"]
+    result = docker_images.validate_base_image_date(matching_image, referenced_date, label_keys)
     assert result is True
     mock_client.api.inspect_image.assert_called_once_with("image_id")
 
@@ -154,9 +155,9 @@ def test_validate_base_image_date_without_baseline_date(mock_docker_client):
     mock_client.api.inspect_image.return_value = {
         "Config": {"Labels": {"source_images": "base_image_20230802"}}
     }
-    
+    label_keys = ["label1", "label2"]
     with patch.object(docker_images, 'extract_date_from_image', return_value=datetime.strptime("20230802", "%Y%m%d")):
-        result = docker_images.validate_base_image_date(matching_image, referenced_date)
+        result = docker_images.validate_base_image_date(matching_image, referenced_date, label_keys)
     
     assert result is True
     mock_client.api.inspect_image.assert_called_once_with("image_id")
@@ -172,8 +173,8 @@ def test_validate_base_image_date_older_than_referenced_date(mock_docker_client)
     mock_client.api.inspect_image.return_value = {
         "Config": {"Labels": {"x86.baseline.date": "20230801"}}
     }
-    
+    label_keys = ["label1", "label2"]
     with pytest.raises(ValueError, match="Compliance issue:"):
-        docker_images.validate_base_image_date(matching_image, referenced_date)
+        docker_images.validate_base_image_date(matching_image, referenced_date, label_keys)
     
     mock_client.api.inspect_image.assert_called_once_with("image_id")
