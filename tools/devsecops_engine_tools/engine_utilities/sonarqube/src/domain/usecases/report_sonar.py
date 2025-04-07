@@ -66,7 +66,13 @@ class ReportSonar:
         
         if args["use_secrets_manager"] == "true": 
             secret = self.secrets_manager_gateway.get_secret(config_tool)
-            secret_tool = secret
+            secret_tool = secret.copy()
+            secret["token_sonar"] = (
+                secret[f"token_{args['sonar_instance'].lower()}"]
+                if args["sonar_instance"] is not None
+                and f"token_{args['sonar_instance'].lower()}" in secret
+                else secret["token_sonar"]
+            )
         else: 
             secret = args
             secret_tool = None
@@ -94,6 +100,7 @@ class ReportSonar:
             config_tool = config_tool,
             source_code_management_uri = source_code_management_uri,
             base_compact_remote_config_url = compact_remote_config_url,
+            sonar_instance = args["sonar_instance"],
             repository_provider = self.devops_platform_gateway.get_variable("repository_provider"),
             access_token = self.devops_platform_gateway.get_variable("access_token"),
             version = self.devops_platform_gateway.get_variable("build_execution_id"),
