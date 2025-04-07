@@ -27,6 +27,16 @@
             "CMDB": {
                 "USE_CMDB": false,
                 "HOST_CMDB": "",
+                "GENERATE_AUTH_CMDB": false,
+                "AUTH_CMDB_REQUEST_REPONSE": {
+                    "URL": "",
+                    "HEADERS": {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    "METHOD": "POST",
+                    "PARAMS": "username=test&password=#{passwordvalue}#",
+                    "RESPONSE": null
+                },
                 "REGEX_EXPRESSION_CMDB": "",
                 "CMDB_MAPPING_PATH": "",
                 "CMDB_MAPPING": {
