@@ -37,7 +37,8 @@ class TestReportSonar(unittest.TestCase):
         mock_set_repository.return_value = "repository_uri"
         mock_define_env.return_value = "dev"
         mock_secrets_manager_gateway.get_secret.return_value = {
-            "token_sonar": "sonar_token"
+            "token_sonar": "sonar_token",
+            "token_sonar_instance_one": "sonar_instance_one_token"
         }
 
         mock_devops_platform_gateway.get_remote_config.return_value = {
@@ -64,7 +65,7 @@ class TestReportSonar(unittest.TestCase):
             sonar_gateway=mock_sonar_gateway,
         )
 
-        args = {"remote_config_repo": "repo", "use_secrets_manager": "true", "sonar_url": "sonar_url", "remote_config_branch": ""}
+        args = {"remote_config_repo": "repo", "use_secrets_manager": "true", "sonar_url": "sonar_url", "remote_config_branch": "", "sonar_instance": "sonar_instance_one"}
 
         # Act
         report_sonar.process(args)
@@ -73,7 +74,7 @@ class TestReportSonar(unittest.TestCase):
         mock_sonar_gateway.get_findings.assert_has_calls(
             [
                 call("sonar_url", 
-                    "sonar_token", 
+                    "sonar_instance_one_token", 
                     "/api/issues/search",
                     {
                         "componentKeys": "project_key_1",
@@ -88,7 +89,7 @@ class TestReportSonar(unittest.TestCase):
                     5
                 ),
                 call("sonar_url", 
-                    "sonar_token", 
+                    "sonar_instance_one_token", 
                     "/api/hotspots/search",
                     {
                         "projectKey": "project_key_1",
@@ -106,7 +107,7 @@ class TestReportSonar(unittest.TestCase):
             [
                 call(
                     "sonar_url", 
-                    "sonar_token", 
+                    "sonar_instance_one_token", 
                     "/api/issues/do_transition", 
                     {
                         "issue": "123",
