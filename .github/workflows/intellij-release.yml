@@ -76,7 +76,7 @@ jobs:
         with:
           github-token: ${{ steps.generate_token.outputs.token }}
           push-branch: "trunk"
-          commit-message: 'upgrade version to ${{ env.RELEASE_VERSION }} version [skip ci]'
+          commit-message: 'docs: upgrade version to ${{ env.RELEASE_VERSION }} version [skip ci]'
           force-add: "true"
           force-push: "true"
           files: ide_extension/intellij/CHANGELOG.md ide_extension/intellij/gradle.properties
