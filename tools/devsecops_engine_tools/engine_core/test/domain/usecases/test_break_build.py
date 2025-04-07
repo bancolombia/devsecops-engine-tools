@@ -38,6 +38,7 @@ class BreakBuildTests(unittest.TestCase):
         )
         input_core.totalized_exclusions = []
         input_core.scope_pipeline = "App2"
+        input_core.scope_service = "App2"
         input_core.custom_message_break_build = "Custom message"
 
         self.devops_platform_gateway.message.return_value = "There are no findings"
@@ -152,6 +153,7 @@ class BreakBuildTests(unittest.TestCase):
             path_file_results="results.json",
             custom_message_break_build="message",
             scope_pipeline="test",
+            scope_service="test",
             stage_pipeline="Release",
         )
 
@@ -229,6 +231,7 @@ class BreakBuildTests(unittest.TestCase):
             path_file_results="results.json",
             custom_message_break_build="message",
             scope_pipeline="test",
+            scope_service="test",
             stage_pipeline="Release",
         )
 
@@ -316,6 +319,7 @@ class BreakBuildTests(unittest.TestCase):
             path_file_results="results.json",
             custom_message_break_build="message",
             scope_pipeline="test",
+            scope_service="test",
             stage_pipeline="Release",
         )
 

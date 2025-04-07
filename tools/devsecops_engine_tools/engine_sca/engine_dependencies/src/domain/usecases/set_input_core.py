@@ -54,5 +54,6 @@ class SetInputCore:
             dependencies_scanned,
             self.remote_config["MESSAGE_INFO_ENGINE_DEPENDENCIES"],
             self.pipeline_name,
+            self.pipeline_name,
             "Build",
         )

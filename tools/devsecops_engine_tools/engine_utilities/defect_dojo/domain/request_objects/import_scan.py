@@ -40,6 +40,8 @@ class ImportScanRequest:
     tool_sonarqube_configuration: str = ""
     tool_scm_configuration: str = ""
     code_app: str = ""
+    generate_auth_cmdb: bool = False
+    auth_cmdb_request_response: dict = None
     token_cmdb: str = ""
     host_cmdb: str = ""
     cmdb_request_response: dict = None

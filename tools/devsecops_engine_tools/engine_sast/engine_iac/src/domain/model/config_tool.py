@@ -9,6 +9,7 @@ class ConfigTool:
         self.message_info_engine_iac = json_data["MESSAGE_INFO_ENGINE_IAC"]
         self.threshold = Threshold(json_data["THRESHOLD"])
         self.scope_pipeline = ""
+        self.scope_service = ""
         self.exclusions = None
         self.exclusions_all = None
         self.exclusions_scope = None

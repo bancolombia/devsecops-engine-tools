@@ -19,6 +19,7 @@ def test_runner_engine_iac(mock_entry_point_tool):
         path_file_results="test/file",
         custom_message_break_build="message",
         scope_pipeline="pipeline",
+        scope_service="service",
         stage_pipeline="Release",
     )
 
@@ -66,6 +67,7 @@ def test_runner_engine_iac_kubescape(mock_entry_point_tool):
         path_file_results="test/file",
         custom_message_break_build="message",
         scope_pipeline="pipeline",
+        scope_service="pipeline",
         stage_pipeline="Release",
     )
 
@@ -95,6 +97,7 @@ def test_runner_engine_iac_kics(mock_entry_point_tool):
         path_file_results="test/file",
         custom_message_break_build="message",
         scope_pipeline="pipeline",
+        scope_service="pipeline",
         stage_pipeline="Release",
     )
 

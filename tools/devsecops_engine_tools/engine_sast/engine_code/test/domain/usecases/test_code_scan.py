@@ -189,7 +189,7 @@ class TestCodeScan(unittest.TestCase):
         mock_input_core.assert_called_once_with(
             totalized_exclusions=["exclusion1"], threshold_defined=self.code_scan.set_config_tool.return_value.threshold,
             path_file_results="/path/to/results", custom_message_break_build=self.code_scan.set_config_tool.return_value.message_info_engine_code,
-            scope_pipeline="test_scope", stage_pipeline="Test_stage"
+            scope_pipeline="test_scope", scope_service="test_scope", stage_pipeline="Test_stage"
         )
         self.assertEqual(findings_list, ["finding1", "finding2"])
 
@@ -213,5 +213,5 @@ class TestCodeScan(unittest.TestCase):
         mock_input_core.assert_called_once_with(
             totalized_exclusions=["exclusion1"], threshold_defined=self.code_scan.set_config_tool.return_value.threshold,
             path_file_results="", custom_message_break_build=self.code_scan.set_config_tool.return_value.message_info_engine_code,
-            scope_pipeline="test_scope", stage_pipeline="Test_stage"
+            scope_pipeline="test_scope", scope_service="test_scope", stage_pipeline="Test_stage"
         )

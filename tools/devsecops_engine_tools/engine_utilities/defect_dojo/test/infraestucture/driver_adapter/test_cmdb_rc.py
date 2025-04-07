@@ -1,12 +1,12 @@
 import pytest
-import json
+from unittest.mock import Mock, patch
 from unittest.mock import Mock
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.cmdb import Cmdb
 from devsecops_engine_tools.engine_utilities.defect_dojo.test.files.get_response import session_manager_post
 from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_adapters.cmdb import CmdbRestConsumer
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.request_objects.import_scan import ImportScanRequest
 from devsecops_engine_tools.engine_utilities.utils.api_error import ApiError
-
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 def test_get_product_info_success():
     request = ImportScanRequest()
@@ -211,3 +211,104 @@ def test_replace_placeholders_valid_replacement():
     # Assert
     expected = {"key": "new_value"}
     assert result == expected
+
+def test_make_request_get_success():
+    session_mock = Mock()
+    consumer = CmdbRestConsumer(
+        token="test_token",
+        host="http://test_host.com",
+        mapping_cmdb={"product_name": "name_cmdb", "product_type_name": "type_cmdb"},
+        session=session_mock,
+    )
+    request = ImportScanRequest()
+    request.generate_auth_cmdb = False
+    request.cmdb_request_response = {
+        "METHOD": "GET",
+        "HEADERS": {"Authorization": "Bearer tokenvalue"},
+        "PARAMS": {"key": "codappvalue"},
+        "RESPONSE": ["data"],
+    }
+    request.code_app = "123"
+    
+    consumer._CmdbRestConsumer__session.get.return_value.status_code = 200
+    consumer._CmdbRestConsumer__session.get.return_value.json.return_value = {"data": {"name_cmdb": "Test", "type_cmdb": "Software"}}
+    
+    with patch.object(Utils, "retries_requests", side_effect=lambda func, *_: func()):
+        cmdb_object = consumer.handle_request("GET", request, ["data"])
+    
+    assert cmdb_object.product_name == "Test"
+    assert cmdb_object.product_type_name == "Software"
+
+def test_make_request_post_success():
+    session_mock = Mock()
+    consumer = CmdbRestConsumer(
+        token="test_token",
+        host="http://test_host.com",
+        mapping_cmdb={"product_name": "name_cmdb", "product_type_name": "type_cmdb"},
+        session=session_mock,
+    )
+    request = ImportScanRequest()
+    request.generate_auth_cmdb = False
+    request.cmdb_request_response = {
+        "METHOD": "POST",
+        "HEADERS": {"Authorization": "Bearer tokenvalue"},
+        "BODY": {"key": "codappvalue"},
+        "RESPONSE": ["data"],
+    }
+    request.code_app = "123"
+    
+    consumer._CmdbRestConsumer__session.post.return_value.status_code = 200
+    consumer._CmdbRestConsumer__session.post.return_value.json.return_value = {"data": {"name_cmdb": "Test", "type_cmdb": "Software"}}
+    
+    with patch.object(Utils, "retries_requests", side_effect=lambda func, *_: func()):
+        cmdb_object = consumer.handle_request("POST", request, ["data"])
+    
+    assert cmdb_object.product_name == "Test"
+    assert cmdb_object.product_type_name == "Software"
+
+def test_make_request_auth_failure():
+    session_mock = Mock()
+    consumer = CmdbRestConsumer(
+        token="test_token",
+        host="http://test_host.com",
+        mapping_cmdb={"product_name": "name_cmdb", "product_type_name": "type_cmdb"},
+        session=session_mock,
+    )
+    request = ImportScanRequest()
+    request.generate_auth_cmdb = True
+    request.auth_cmdb_request_response = {
+        "METHOD": "POST",
+        "HEADERS": {"Authorization": "Bearer tokenvalue"},
+        "PARAMS": "#{passwordvalue}#",
+        "URL": "http://auth_url.com",
+    }
+    consumer._CmdbRestConsumer__session.post.return_value.status_code = 401
+    
+    with pytest.raises(ApiError):
+        consumer.auth_cmdb(request)
+
+def test_make_request_retries():
+    session_mock = Mock()
+    consumer = CmdbRestConsumer(
+        token="test_token",
+        host="http://test_host.com",
+        mapping_cmdb={"product_name": "name_cmdb", "product_type_name": "type_cmdb"},
+        session=session_mock,
+    )
+    request = ImportScanRequest()
+    request.generate_auth_cmdb = False
+    request.cmdb_request_response = {
+        "METHOD": "GET",
+        "HEADERS": {"Authorization": "Bearer tokenvalue"},
+        "PARAMS": {"key": "codappvalue"},
+        "RESPONSE": ["data"],
+    }
+    request.code_app = "123"
+    
+    consumer._CmdbRestConsumer__session.get.side_effect = [Exception("Transient error"), Mock(status_code=200, json=lambda: {"data": {"name_cmdb": "Test", "type_cmdb": "Software"}})]
+    
+    with patch.object(Utils, "retries_requests", side_effect=lambda func, *_: func()):
+        cmdb_object = consumer.handle_request("GET", request, ["data"])
+    
+    assert cmdb_object.product_name == "123_Product"
+    assert cmdb_object.product_type_name == "ORPHAN_PRODUCT_TYPE"
