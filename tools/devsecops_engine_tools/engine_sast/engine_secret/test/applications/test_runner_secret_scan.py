@@ -18,6 +18,7 @@ def test_runner_secret_scan(mock_entry_point_tool):
         path_file_results="test/file",
         custom_message_break_build="message",
         scope_pipeline="pipeline",
+        scope_service="pipeline",
         stage_pipeline="pipeline",
     )
 

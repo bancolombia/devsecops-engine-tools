@@ -128,6 +128,7 @@ class DastScan:
             path_file_results=path_file_results,
             custom_message_break_build=config_tool.get("MESSAGE_INFO_DAST"),
             scope_pipeline=config_tool.get("SCOPE_PIPELINE"),
+            scope_service=config_tool.get("SCOPE_PIPELINE"),
             stage_pipeline=self.devops_platform_gateway.get_variable("stage"),
         )
 

@@ -54,6 +54,16 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "CMDB": {
                         "USE_CMDB": True,
                         "HOST_CMDB": "cmdb_host",
+                        "GENERATE_AUTH_CMDB": True,
+                        "AUTH_CMDB_REQUEST_REPONSE": {
+                            "URL": "",
+                            "HEADERS": {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            "METHOD": "POST",
+                            "PARAMS": "username=test&password=#{passwordvalue}#",
+                            "RESPONSE": None
+                        },
                         "REGEX_EXPRESSION_CMDB": "regex",
                         "CMDB_MAPPING_PATH": "mapping_path",
                         "CMDB_MAPPING": {
@@ -80,6 +90,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.scan_type = "CHECKOV"
         self.vulnerability_management.input_core = MagicMock()
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
+        self.vulnerability_management.input_core.scope_service = "engagement_name"
         self.vulnerability_management.input_core.path_file_results = "file_path"
         self.vulnerability_management.repository_provider = "tfsgit"
         self.vulnerability_management.version = "1.0"
@@ -100,6 +111,16 @@ class TestDefectDojoPlatform(unittest.TestCase):
             )
 
             mock_cmdb.assert_called_with(
+                generate_auth_cmdb=True,
+                auth_cmdb_request_response={
+                    "URL": "",
+                    "HEADERS": {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    "METHOD": "POST",
+                    "PARAMS": "username=test&password=#{passwordvalue}#",
+                    "RESPONSE": None
+                },
                 cmdb_mapping={
                     "product_type_name": "nombreevc",
                     "product_name": "nombreapp",
@@ -164,6 +185,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.input_core = MagicMock()
         self.vulnerability_management.input_core.path_file_results = "file_path"
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
+        self.vulnerability_management.input_core.scope_service = "engagement_name"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
         self.vulnerability_management.repository_provider = "github"
         self.vulnerability_management.version = "1.0"
@@ -187,6 +209,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "CMDB": {
                         "USE_CMDB": True,
                         "HOST_CMDB": "cmdb_host",
+                        "GENERATE_AUTH_CMDB": False,
+                        "AUTH_CMDB_REQUEST_REPONSE": {},
                         "REGEX_EXPRESSION_CMDB": "regex",
                         "CMDB_MAPPING_PATH": "mapping_path",
                         "CMDB_MAPPING": {
@@ -239,6 +263,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
             )
 
             mock_cmdb.assert_called_once_with(
+                generate_auth_cmdb=False,
+                auth_cmdb_request_response={},
                 cmdb_mapping={
                     "product_type_name": "nombreevc",
                     "product_name": "nombreapp",
@@ -287,6 +313,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.input_core = MagicMock()
         self.vulnerability_management.input_core.path_file_results = "file_path"
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
+        self.vulnerability_management.input_core.scope_service = "engagement_name"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
         self.vulnerability_management.repository_provider = "tfsgit"
         self.vulnerability_management.version = "1.0"

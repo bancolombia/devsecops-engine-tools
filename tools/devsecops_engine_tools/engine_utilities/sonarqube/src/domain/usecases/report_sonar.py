@@ -49,6 +49,7 @@ class ReportSonar:
             "",
             "",
             "",
+            "",
             self.devops_platform_gateway.get_variable("stage").capitalize(),
         )
 

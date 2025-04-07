@@ -65,5 +65,6 @@ class SetInputCore:
             image_scanned,
             self.remote_config["MESSAGE_INFO_ENGINE_CONTAINER"],
             self.pipeline_name,
+            self.pipeline_name,
             self.stage.capitalize(),
         )

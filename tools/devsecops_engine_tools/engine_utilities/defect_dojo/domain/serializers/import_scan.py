@@ -206,6 +206,8 @@ class ImportScanSerializer(Schema):
     tool_scm_configuration = fields.Int(required=False)
     code_app = fields.Str(required=False)
     # defect-dojo credential
+    generate_auth_cmdb = fields.Bool(required=False, default=False)
+    auth_cmdb_request_response = fields.Dict(required=False)
     token_cmdb = fields.Str(required=False)
     host_cmdb = fields.Url(required=False)
     cmdb_request_response = fields.Dict(required=False)

@@ -98,6 +98,7 @@ def init_engine_dependencies(
     else:
         print("Tool skipped by DevSecOps policy")
         dict_args["send_metrics"] = "false"
+        dict_args["use_vulnerability_management"] = "false"
 
     core_input = input_core.set_input_core(dependencies_scanned)
 

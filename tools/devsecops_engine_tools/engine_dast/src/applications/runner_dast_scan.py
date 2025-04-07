@@ -114,6 +114,7 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gate
                 path_file_results="",
                 custom_message_break_build=config_tool_dast.get("MESSAGE_INFO_DAST"),
                 scope_pipeline="",
+                scope_service="",
                 stage_pipeline=devops_platform_gateway.get_variable("stage"),
             )
             return [], input_core

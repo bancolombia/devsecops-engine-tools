@@ -52,6 +52,7 @@ class IacScan:
         else:
             print("Tool skipped by DevSecOps policy")
             dict_args["send_metrics"] = "false"
+            dict_args["use_vulnerability_management"] = "false"
 
         totalized_exclusions = []
         (
@@ -80,6 +81,7 @@ class IacScan:
             path_file_results=path_file_results,
             custom_message_break_build=config_tool_core.message_info_engine_iac,
             scope_pipeline=config_tool_core.scope_pipeline,
+            scope_service=config_tool_core.scope_service,
             stage_pipeline=self.devops_platform_gateway.get_variable(
                 "stage"
             ).capitalize(),
@@ -121,7 +123,7 @@ class IacScan:
                 files = os.listdir(os.path.join(os.getcwd(), dict_args["folder_path"]))
                 if len(files) > 0:
                     name_file, _ = os.path.splitext(files[0])
-                    config_tool.scope_pipeline = (
+                    config_tool.scope_service = (
                         f"{config_tool.scope_pipeline}_{name_file}"
                     )
 
