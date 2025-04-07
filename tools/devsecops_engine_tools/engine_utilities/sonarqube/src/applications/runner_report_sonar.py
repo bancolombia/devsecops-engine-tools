@@ -60,6 +60,11 @@ def get_inputs_from_cli(args):
         help="Url to access sonar API",
     )
     parser.add_argument(
+        "--sonar_instance",
+        required=False,
+        help="Name of the sonar instance to recognize tool config",
+    )
+    parser.add_argument(
         "--token_cmdb", 
         required=False, 
         help="Token to connect to the CMDB"
@@ -82,6 +87,7 @@ def get_inputs_from_cli(args):
         "use_secrets_manager": args.use_secrets_manager,
         "send_metrics": args.send_metrics,
         "sonar_url": args.sonar_url,
+        "sonar_instance": args.sonar_instance,
         "token_cmdb": args.token_cmdb,
         "token_vulnerability_management": args.token_vulnerability_management,
         "token_sonar": args.token_sonar,
