@@ -70,7 +70,12 @@ class AzureDevops(DevopsPlatformGateway):
                 f"{SystemVariables.System_TeamProject.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
             ).replace(" ", "%20")
         }
-        return source_code_management_uri.get(BuildVariables.Build_Repository_Provider.value().lower())
+        build_repository = BuildVariables.Build_Repository_Provider.value()
+        if build_repository is None:
+            return None
+        
+        return source_code_management_uri.get(build_repository.lower())
+
 
     def get_base_compact_remote_config_url(self, remote_config_repo):
         return (
