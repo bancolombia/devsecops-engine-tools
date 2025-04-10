@@ -406,7 +406,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
     @patch(
         "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Connect.get_code_app"
     )
-    def test_get_product_type_service(
+    def test_get_product_type_pipeline(
         self, cmdb_code, mock_product, mock_session_manager
     ):
         service = "test"
@@ -442,7 +442,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         ]
         mock_product.side_effect = product_list
 
-        result = self.defect_dojo.get_product_type_service(
+        result = self.defect_dojo.get_product_type_pipeline(
             service, dict_args, secret_tool, config_tool
         )
 

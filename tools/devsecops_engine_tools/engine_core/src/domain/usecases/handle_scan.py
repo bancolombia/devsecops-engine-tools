@@ -207,7 +207,7 @@ class HandleScan:
             try:
                 input_core.totalized_exclusions.extend(
                     self.vulnerability_management.get_findings_excepted(
-                        input_core.scope_pipeline,
+                        input_core.scope_service,
                         dict_args,
                         secret_tool,
                         config_tool,
@@ -233,7 +233,7 @@ class HandleScan:
             input_core.threshold_defined.quality_vulnerability_management
         )
         if quality_vulnerability_management and input_core.threshold_defined.name == "default":
-            product_type = self.vulnerability_management.get_product_type_service(
+            product_type = self.vulnerability_management.get_product_type_pipeline(
                 input_core.scope_pipeline, dict_args, secret_tool, config_tool
             )
             if product_type:

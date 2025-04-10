@@ -199,7 +199,7 @@ class TestHandleScan(unittest.TestCase):
         mock_runner_engine_container.return_value = findings_list, input_core, component_list
         mock_product_type = Mock()
         mock_product_type.name = "PT1"
-        self.vulnerability_management.get_product_type_service.return_value = mock_product_type
+        self.vulnerability_management.get_product_type_pipeline.return_value = mock_product_type
 
         # Call the process method
         result_findings_list, result_input_core = self.handle_scan.process(

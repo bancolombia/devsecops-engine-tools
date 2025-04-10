@@ -126,6 +126,8 @@ class IacScan:
                     config_tool.scope_service = (
                         f"{config_tool.scope_pipeline}_{name_file}"
                     )
+            else:
+                config_tool.scope_service = config_tool.scope_pipeline
 
             folders_to_scan = [dict_args["folder_path"]]
         else:
