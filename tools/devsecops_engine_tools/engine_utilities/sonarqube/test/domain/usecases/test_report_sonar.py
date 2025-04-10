@@ -24,22 +24,28 @@ class TestReportSonar(unittest.TestCase):
             "pipeline_name",
             "branch_name",
             "repository",
+            "repository_provider",
             "access_token",
             "build_execution_id",
             "build_id",
             "commit_hash",
             "repository_provider",
             "vm_product_type_name",
-            "vm_product_name"
+            "vm_product_name",
+            "12345"
         ]
         mock_set_repository.return_value = "repository_uri"
         mock_define_env.return_value = "dev"
         mock_secrets_manager_gateway.get_secret.return_value = {
-            "token_sonar": "sonar_token"
+            "token_sonar": "sonar_token",
+            "token_sonar_instance_one": "sonar_instance_one_token"
         }
 
         mock_devops_platform_gateway.get_remote_config.return_value = {
-            "PIPELINE_COMPONENTS": {}
+            "PIPELINE_COMPONENTS": {},
+            "MAX_RETRIES_QUERY_SONAR": 5,
+            "USE_BRANCH_PARAMETER": False,
+            "USE_PULL_REQUEST_PARAMETER": ["project_key_1"],
         }
         
         mock_sonar_gateway.get_project_keys.return_value = ["project_key_1"]
@@ -59,7 +65,7 @@ class TestReportSonar(unittest.TestCase):
             sonar_gateway=mock_sonar_gateway,
         )
 
-        args = {"remote_config_repo": "repo", "use_secrets_manager": "true", "sonar_url": "sonar_url", "remote_config_branch": ""}
+        args = {"remote_config_repo": "repo", "use_secrets_manager": "true", "sonar_url": "sonar_url", "remote_config_branch": "", "sonar_instance": "sonar_instance_one"}
 
         # Act
         report_sonar.process(args)
@@ -68,7 +74,7 @@ class TestReportSonar(unittest.TestCase):
         mock_sonar_gateway.get_findings.assert_has_calls(
             [
                 call("sonar_url", 
-                    "sonar_token", 
+                    "sonar_instance_one_token", 
                     "/api/issues/search",
                     {
                         "componentKeys": "project_key_1",
@@ -76,19 +82,23 @@ class TestReportSonar(unittest.TestCase):
                         "ps": 500,
                         "p": 1,
                         "s": "CREATION_DATE",
-                        "asc": "false"
+                        "asc": "false",
+                        "pullRequest": 12345
                     },
-                    "issues"
+                    "issues",
+                    5
                 ),
                 call("sonar_url", 
-                    "sonar_token", 
+                    "sonar_instance_one_token", 
                     "/api/hotspots/search",
                     {
                         "projectKey": "project_key_1",
                         "ps": 100,
-                        "p": 1
+                        "p": 1,
+                        "pullRequest": 12345
                     },
-                    "hotspots"
+                    "hotspots",
+                    5
                 )
             ],
             any_order=False
@@ -97,13 +107,14 @@ class TestReportSonar(unittest.TestCase):
             [
                 call(
                     "sonar_url", 
-                    "sonar_token", 
+                    "sonar_instance_one_token", 
                     "/api/issues/do_transition", 
                     {
                         "issue": "123",
                         "transition": "reopen"
                     },
-                    "issue"
+                    "issue",
+                    5
                 )
             ],
             any_order=False

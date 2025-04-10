@@ -42,7 +42,8 @@ def container_sca_scan(
         "token",
         "token_engine_container",
         "image_to_scan",
-        "exclusions",
+        {"exclusions": "exclusions"},
+        "pipeline_name",
     )
 
 
@@ -125,7 +126,7 @@ def test_process_image_not_already_scanned(container_sca_scan):
         "my_image:1234",
         "my_image:1234_scan_result.json",
         "base_image:latest",
-        "exclusions",
+        {'exclusions': 'exclusions'},
         False,
     )
     container_sca_scan.set_image_scanned.assert_called_once_with("my_image:1234")

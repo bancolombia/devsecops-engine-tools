@@ -66,7 +66,13 @@ class ReportSonar:
         
         if args["use_secrets_manager"] == "true": 
             secret = self.secrets_manager_gateway.get_secret(config_tool)
-            secret_tool = secret
+            secret_tool = secret.copy()
+            secret["token_sonar"] = (
+                secret[f"token_{args['sonar_instance'].lower()}"]
+                if args["sonar_instance"] is not None
+                and f"token_{args['sonar_instance'].lower()}" in secret
+                else secret["token_sonar"]
+            )
         else: 
             secret = args
             secret_tool = None
@@ -85,7 +91,7 @@ class ReportSonar:
         else:
             project_keys = self.sonar_gateway.get_project_keys(pipeline_name)
 
-        args["tool"] = "sonarqube"
+        args["module"] = "sonarqube"
         vulnerability_manager = VulnerabilityManagement(
             scan_type = "SONARQUBE",
             input_core = input_core,
@@ -94,6 +100,8 @@ class ReportSonar:
             config_tool = config_tool,
             source_code_management_uri = source_code_management_uri,
             base_compact_remote_config_url = compact_remote_config_url,
+            sonar_instance = args["sonar_instance"],
+            repository_provider = self.devops_platform_gateway.get_variable("repository_provider"),
             access_token = self.devops_platform_gateway.get_variable("access_token"),
             version = self.devops_platform_gateway.get_variable("build_execution_id"),
             build_id = self.devops_platform_gateway.get_variable("build_id"),
@@ -115,30 +123,45 @@ class ReportSonar:
                 )[0]
                 filtered_findings = self.sonar_gateway.filter_by_sonarqube_tag(findings)
 
+                sonar_vulns_params = {
+                    "componentKeys": project_key,
+                    "types": "VULNERABILITY",
+                    "ps": 500,
+                    "p": 1,
+                    "s": "CREATION_DATE",
+                    "asc": "false"
+                }
+                sonar_hotspots_params = {
+                    "projectKey": project_key,
+                    "ps": 100,
+                    "p": 1,
+                }
+
+                if report_config_tool["USE_BRANCH_PARAMETER"] and pipeline_name not in report_config_tool["USE_PULL_REQUEST_PARAMETER"]:
+                    sonar_vulns_params["branch"] = branch
+                    sonar_hotspots_params["branch"] = branch
+                else:
+                    try:
+                        pull_request_id = int(self.devops_platform_gateway.get_variable("pull_request_id"))
+                        sonar_vulns_params["pullRequest"] = pull_request_id
+                        sonar_hotspots_params["pullRequest"] = pull_request_id
+                    except Exception as e: pass
+
                 sonar_vulnerabilities = self.sonar_gateway.get_findings(
                     args["sonar_url"],
                     secret["token_sonar"],
                     "/api/issues/search",
-                    {
-                        "componentKeys": project_key,
-                        "types": "VULNERABILITY",
-                        "ps": 500,
-                        "p": 1,
-                        "s": "CREATION_DATE",
-                        "asc": "false"
-                    },
-                    "issues"
+                    sonar_vulns_params,
+                    "issues",
+                    report_config_tool["MAX_RETRIES_QUERY_SONAR"]
                 )
                 sonar_hotspots = self.sonar_gateway.get_findings(
                     args["sonar_url"],
                     secret["token_sonar"],
                     "/api/hotspots/search",
-                    {
-                        "projectKey": project_key,
-                        "ps": 100,
-                        "p": 1,
-                    },
-                    "hotspots"
+                    sonar_hotspots_params,
+                    "hotspots",
+                    report_config_tool["MAX_RETRIES_QUERY_SONAR"]
                 )
 
                 sonar_findings = sonar_vulnerabilities + sonar_hotspots
@@ -164,7 +187,8 @@ class ReportSonar:
                                         "issue": related_sonar_finding["key"],
                                         "transition": status
                                     },
-                                    "issue"
+                                    "issue",
+                                    report_config_tool["MAX_RETRIES_QUERY_SONAR"]
                                 )
                         else:
                             resolution = None
@@ -185,7 +209,8 @@ class ReportSonar:
                                     secret["token_sonar"],
                                     "/api/hotspots/change_status",
                                     data,
-                                    "hotspot"
+                                    "hotspot",
+                                    report_config_tool["MAX_RETRIES_QUERY_SONAR"]
                                 )
 
             except Exception as e:

@@ -57,25 +57,30 @@ class EngagementRestConsumer:
             raise ApiError(e)
         return engagements
 
-    def post_engagement(self, engagement_name, product_id):
+    def post_engagement(self, request: ImportScanRequest, product_id, tool_scm_configuration_id):
         url = f"{self.__host}/api/v2/engagements/"
-        data = json.dumps(
-            {
-                "name": engagement_name,
+        data = {
+                "name": request.engagement_name,
                 "target_start": str(datetime.now().date()),
                 "target_end": str(datetime.now().date()),
                 "product": product_id,
                 "engagement_type": "CI/CD",
                 "status": "In Progress",
             }
-        )
+        
+        if request.source_code_management_uri:
+            data["source_code_management_uri"] = request.source_code_management_uri
+
+        if tool_scm_configuration_id:
+            data["source_code_management_server"] = tool_scm_configuration_id
+        
         headers = {
             "Authorization": f"Token {self.__token}",
             "Content-Type": "application/json",
         }
         try:
             response = self.__session.post(
-                url=url, headers=headers, data=data, verify=VERIFY_CERTIFICATE
+                url=url, headers=headers, data=json.dumps(data), verify=VERIFY_CERTIFICATE
             )
             if response.status_code != 201:
                 logger.error(response.json())

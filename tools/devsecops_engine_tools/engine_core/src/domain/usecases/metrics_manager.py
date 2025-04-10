@@ -45,7 +45,7 @@ class MetricsManager:
                 "date": datetime.datetime.now().strftime("%Y-%m-%d"),
                 "component": scope_pipeline,
                 "stage": input_core.stage_pipeline,
-                "check_type": dict_args["tool"],
+                "check_type": dict_args["module"],
                 "environment": define_env(
                     self.devops_platform_gateway.get_variable("environment"),
                     self.devops_platform_gateway.get_variable("branch_name"),
@@ -55,5 +55,5 @@ class MetricsManager:
             }
             json.dump(body, file)
         self.metrics_manager_gateway.send_metrics(
-            config_tool, dict_args["tool"], file_path
+            config_tool, dict_args["module"], file_path
         )

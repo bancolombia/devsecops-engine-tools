@@ -42,7 +42,7 @@ class BreakBuildTests(unittest.TestCase):
 
         self.devops_platform_gateway.message.return_value = "There are no findings"
 
-        args = {"tool": "engine_iac"}
+        args = {"module": "engine_iac"}
 
         result = self.break_build.process(findings_list, input_core, args)
 
@@ -155,7 +155,7 @@ class BreakBuildTests(unittest.TestCase):
             stage_pipeline="Release",
         )
 
-        args = {"tool": "engine_container"}
+        args = {"module": "engine_container"}
 
         result = self.break_build.process(findings_list, input_core, args)
 
@@ -233,7 +233,7 @@ class BreakBuildTests(unittest.TestCase):
         )
 
         result = self.break_build.process(
-            findings_list, input_core, {"tool": "engine_iac"}
+            findings_list, input_core, {"module": "engine_iac"}
         )
 
         result_compare = {
@@ -320,7 +320,7 @@ class BreakBuildTests(unittest.TestCase):
         )
 
         result = self.break_build.process(
-            findings_list, input_core, {"tool": "engine_iac"}
+            findings_list, input_core, {"module": "engine_iac"}
         )
 
         result_compare = {

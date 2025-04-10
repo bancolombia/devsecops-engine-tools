@@ -19,6 +19,11 @@
     "UPDATE_SERVICE_WITH_FILE_NAME_CFT": false,
     "CHECKOV": {
         "VERSION": "2.3.296",
+        "INSTALL_TYPE": "remote-binary",
+        "URL_FILE_LINUX": "https://github.com/bridgecrewio/checkov/releases/download/2.3.321/checkov_linux_X86_64_2.3.321.zip",
+        "URL_FILE_LINUX_ARM64": "https://github.com/bridgecrewio/checkov/releases/download/2.3.321/checkov_linux_arm64_2.3.321.zip",
+        "URL_FILE_DARWIN": "https://github.com/bridgecrewio/checkov/releases/download/2.3.321/checkov_darwin_X86_64_2.3.321.zip",
+        "URL_FILE_WINDOWS": "https://github.com/bridgecrewio/checkov/releases/download/2.3.321/checkov_windows_X86_64_2.3.321.zip",
         "USE_EXTERNAL_CHECKS_GIT": false,
         "EXTERNAL_CHECKS_GIT": "",
         "EXTERNAL_GIT_SSH_HOST": "",
@@ -671,6 +676,45 @@
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
+                },
+                "CKV_AWS_103": {
+                    "customID": "C-ELB-00501",
+                    "checkID": "C-ELB-00501-AWS ELB V2 Listener Secure Policy",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "https://bit.ly/44frBRZ",
+                    "severity": "Medium",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                },
+                "CKV_AWS_107": {
+                    "customID": "C-IAM-015",
+                    "checkID": "C-IAM-015-AWS IAM policies allow credentials exposure",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "https://bit.ly/44frBRZ",
+                    "severity": "Medium",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                },
+                "CKV_AWS_149": {
+                    "customID": "C-SCM-002",
+                    "checkID": "C-SCM-002-AWS Secret must be encrypted with its own CMK",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "https://bit.ly/44frBRZ",
+                    "severity": "Medium",
+                    "cvss": "",
+                    "category": "Vulnerability"
                 }
             },
             "RULES_TERRAFORM": {
@@ -692,12 +736,37 @@
     "KUBESCAPE": {
         "VERSION": "3.0.11"
     },
-    "KICS": {
-        "VERSION": "2.1.0",
-        "KICS_LINUX": "https://example.url/kics/bin/linux/kics.zip",
-        "KICS_WINDOWS": "https://example.url/kics/bin/windows/kics.zip",
-        "KICS_MAC": "https://example.url/kics/bin/mac/kics.zip",
-        "PATH_KICS": "./kics/kics",
-        "DOWNLOAD_KICS_ASSETS": false
+    "KICS":{
+        "CLI_VERSION":"2.1.5",
+        "PATH_KICS": "kics/bin/kics",
+        "DOWNLOAD_KICS_ASSETS": false,
+        "RULES":{
+            "RULES_OPENAPI":{
+                "CKV_OPENAPI_1":{
+                    "checkID": "6998389e-66b2-473d-8d05-c8d71ac4d04d",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "guideline",
+                    "severity": "Medium",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                },
+                "CKV_OPENAPI_2":{
+                    "checkID": "86e3702f-c868-44b2-b61d-ea5316c18110",
+                    "environment": {
+                        "dev": true,
+                        "pdn": true,
+                        "qa": true
+                    },
+                    "guideline": "guideline",
+                    "severity": "Low",
+                    "cvss": "",
+                    "category": "Vulnerability"
+                }
+            }
+        }
     }
 }

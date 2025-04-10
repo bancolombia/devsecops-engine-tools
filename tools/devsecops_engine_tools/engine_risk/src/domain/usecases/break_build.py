@@ -13,6 +13,8 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import (
 
 from collections import Counter
 import copy
+import sympy as sp
+import math
 
 
 class BreakBuild:
@@ -26,6 +28,7 @@ class BreakBuild:
         report_list: "list[Report]",
         all_report: "list[Report]",
         threshold: any,
+        policy_excluded: int,
     ):
         self.devops_platform_gateway = devops_platform_gateway
         self.printer_table_gateway = printer_table_gateway
@@ -35,6 +38,7 @@ class BreakBuild:
         self.report_list = report_list
         self.all_report = all_report
         self.threshold = threshold
+        self.policy_excluded = policy_excluded
         self.break_build = False
         self.warning_build = False
         self.report_breaker = []
@@ -50,11 +54,9 @@ class BreakBuild:
         }
 
     def process(self):
-        self._remediation_rate_control(self.all_report)
         new_report_list, applied_exclusions = self._apply_exclusions(self.report_list)
-        if self.break_build:
-            self.report_breaker.extend(copy.deepcopy(new_report_list))
-        self._tag_blacklist_control(new_report_list)
+        self._blacklist_control(new_report_list)
+        self._remediation_rate_control(self.all_report, new_report_list)
         self._risk_score_control(new_report_list)
         all_exclusions = list(self.vm_exclusions) + list(applied_exclusions)
         self._print_exclusions(self._map_applied_exclusion(all_exclusions))
@@ -118,12 +120,65 @@ class BreakBuild:
         else:
             print(self.devops_platform_gateway.result_pipeline("succeeded"))
 
-    def _remediation_rate_control(self, all_report: "list[Report]"):
-        mitigated = sum(1 for report in all_report if report.mitigated)
-        total = len(all_report)
-        print(f"Mitigated count: {mitigated}   Total count: {total}")
-        remediation_rate_value = self._get_percentage(mitigated / total)
+    def _remediation_rate_control(
+        self, all_report: "list[Report]", new_report_list: "list[Report]"
+    ):
+        sp.init_printing(use_unicode=True, num_columns=100)
+        (
+            remediation_rate_name,
+            mitigated_name,
+            all_findings_name,
+            new_findings,
+            white_list_name,
+            transferred_name,
+            base_image_name,
+        ) = sp.symbols(
+            "RemediationRate Mitigated AllFindings NewFindings WhiteList Transferred BaseImage"
+        )
+        formula = sp.Eq(
+            remediation_rate_name,
+            100
+            * (mitigated_name / (all_findings_name - new_findings - white_list_name - transferred_name - base_image_name)),
+        )
+        print("\n")
+        sp.pretty_print(formula)
+        print("\n")
 
+        mitigated_count = sum(1 for report in all_report if report.mitigated)
+        white_list_count = sum(
+            1
+            for report in all_report
+            if "On Whitelist" in report.risk_status and not report.mitigated
+        )
+        transferred_list_count = sum(
+            1
+            for report in all_report
+            if "Transfer Accepted" in report.risk_status and not report.mitigated
+        )
+        base_image_count = sum(
+            1
+            for report in all_report
+            if "Image Base" in report.vul_description
+            and "On Whitelist" not in report.risk_status
+            and "Transfer Accepted" not in report.risk_status
+            and not report.mitigated
+        )
+        all_findings_count = len(all_report)
+        print(
+            f"Mitigated: {mitigated_count}   AllFindings: {all_findings_count}   BaseImage: {base_image_count}   NewFindings: {self.policy_excluded}   Transferred: {transferred_list_count}   WhiteList: {white_list_count}\n\n"
+        )
+        total = all_findings_count - self.policy_excluded - white_list_count - base_image_count - transferred_list_count
+
+        if total == 0:
+            print(
+                self.devops_platform_gateway.message(
+                    "succeeded",
+                    "No findings to mitigate",
+                )
+            )
+            return
+
+        remediation_rate_value = self._get_percentage(mitigated_count / total)
         risk_threshold = self._get_remediation_rate_threshold(total)
         self.remediation_rate = remediation_rate_value
 
@@ -143,17 +198,26 @@ class BreakBuild:
             )
             self.warning_build = True
         else:
+            missing_findings = math.ceil((risk_threshold / 100 * total) - mitigated_count)
             print(
                 self.devops_platform_gateway.message(
                     "error",
-                    f"Remediation rate {remediation_rate_value}% is less than {risk_threshold}%",
+                    f"Remediation rate {remediation_rate_value}% is less than {risk_threshold}%. Minimum findings to mitigate: {missing_findings}.",
                 )
             )
             self.break_build = True
+            [
+                setattr(report, "reason", "Remediation Rate")
+                for report in new_report_list
+            ]
+            self.report_breaker.extend(copy.deepcopy(new_report_list))
 
     def _get_remediation_rate_threshold(self, total):
         remediation_rate = self.threshold["REMEDIATION_RATE"]
-        for key in sorted(remediation_rate.keys(), key=lambda x: int(x) if x.isdigit() else float('inf')):
+        for key in sorted(
+            remediation_rate.keys(),
+            key=lambda x: int(x) if x.isdigit() else float("inf"),
+        ):
             if key.isdigit() and total <= int(key):
                 return remediation_rate[key]
         return remediation_rate["other"]
@@ -209,29 +273,29 @@ class BreakBuild:
                         applied_exclusions.append(exclusion_copy)
                         break
             if not exclude:
-                report.reason = "Remediation Rate"
                 filtered_reports.append(report)
 
         return filtered_reports, applied_exclusions
 
-    def _tag_blacklist_control(self, report_list: "list[Report]"):
+    def _blacklist_control(self, report_list: "list[Report]"):
         remote_config = self.remote_config
         if report_list:
-            tag_blacklist = set(remote_config["TAG_BLACKLIST"])
-            tag_age_threshold = self.threshold["TAG_MAX_AGE"]
+            tag_blacklist = set(remote_config["TAG_BLACKLIST_EXCLUSION_DAYS"].keys())
 
             filtered_reports_above_threshold = [
                 (report, tag)
                 for report in report_list
                 for tag in report.tags
-                if tag in tag_blacklist and report.age >= tag_age_threshold
+                if tag in tag_blacklist
+                and report.age >= remote_config["TAG_BLACKLIST_EXCLUSION_DAYS"][tag]
             ]
 
             filtered_reports_below_threshold = [
                 (report, tag)
                 for report in report_list
                 for tag in report.tags
-                if tag in tag_blacklist and report.age < tag_age_threshold
+                if tag in tag_blacklist
+                and report.age < remote_config["TAG_BLACKLIST_EXCLUSION_DAYS"][tag]
             ]
 
             for report, tag in filtered_reports_above_threshold:
@@ -239,7 +303,7 @@ class BreakBuild:
                 print(
                     self.devops_platform_gateway.message(
                         "error",
-                        f"Report {report.vm_id} with tag {tag} is blacklisted and age {report.age} is above threshold {tag_age_threshold}",
+                        f"Report {report.vm_id} with tag '{tag}' is blacklisted and age {report.age} is above threshold {remote_config['TAG_BLACKLIST_EXCLUSION_DAYS'][tag]}",
                     )
                 )
 
@@ -247,18 +311,32 @@ class BreakBuild:
                 print(
                     self.devops_platform_gateway.message(
                         "warning",
-                        f"Report {report.vm_id} with tag {tag} is blacklisted but age {report.age} is below threshold {tag_age_threshold}",
+                        f"Report {report.vm_id} with tag '{tag}' is blacklisted but age {report.age} is below threshold {remote_config['TAG_BLACKLIST_EXCLUSION_DAYS'][tag]}",
                     )
                 )
+                self.policy_excluded += 1
 
             if filtered_reports_above_threshold:
                 self.break_build = True
-                self.blacklisted = len(filtered_reports_above_threshold)
+                self.blacklisted += len(filtered_reports_above_threshold)
                 self.report_breaker.extend(
                     copy.deepcopy(
                         [report for report, _ in filtered_reports_above_threshold]
                     )
                 )
+
+            for report in report_list:
+                if "On Blacklist" in report.risk_status:
+                    self.break_build = True
+                    report.reason = "Blacklisted"
+                    self.blacklisted += 1
+                    self.report_breaker.append(copy.deepcopy(report))
+                    print(
+                        self.devops_platform_gateway.message(
+                            "error",
+                            f"Report {report.vm_id} is blacklisted.",
+                        )
+                    )
 
     def _risk_score_control(self, report_list: "list[Report]"):
         remote_config = self.remote_config

@@ -29,7 +29,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.vulnerability_management.dict_args = {
             "token_vulnerability_management": "token1",
             "token_cmdb": "token2",
-            "tool": "engine_iac",
+            "module": "engine_iac",
             "platform": ["k8s"],
         }
         self.vulnerability_management.secret_tool = {
@@ -45,6 +45,17 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
+                    "REIMPORT_SCAN": True,
+                    "TOOL_SCM_MAPPING": {
+                        "DEFAULT": 2,
+                        "TFSGIT": 2,
+                        "GITHUB": 3
+                    },
+                    "TOOL_SONAR_MAPPING": {
+                        "DEFAULT": 4,
+                        "SONAR_INSTANCE_ONE": 4,
+                        "SONAR_INSTANCE_TWO": 5
+                    },
                     "CMDB": {
                         "USE_CMDB": True,
                         "HOST_CMDB": "cmdb_host",
@@ -72,9 +83,11 @@ class TestDefectDojoPlatform(unittest.TestCase):
         }
         self.vulnerability_management.access_token = "access_token"
         self.vulnerability_management.scan_type = "CHECKOV"
+        self.vulnerability_management.sonar_instance = "sonar_instance_one"
         self.vulnerability_management.input_core = MagicMock()
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
         self.vulnerability_management.input_core.path_file_results = "file_path"
+        self.vulnerability_management.repository_provider = "tfsgit"
         self.vulnerability_management.version = "1.0"
         self.vulnerability_management.build_id = "build_id"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
@@ -123,10 +136,14 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 version="1.0",
                 build_id="build_id",
                 source_code_management_uri="source_code_uri",
+                tool_scm_configuration=2,
+                tool_sonarqube_configuration=4,
                 branch_tag="trunk",
                 commit_hash="commit_hash",
                 environment="Development",
-                tags="engine_iac_k8s",
+                tags=["engine_iac_k8s"],
+                test_title="engine_iac_k8s",
+                reimport_scan=True,
             )
 
     def test_send_vulnerability_management_exception(self):
@@ -148,13 +165,15 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
     def test_build_request_with_cmdb(self):
         use_cmdb = True
-        tags = "engine_iac_k8s"
+        tags = ["engine_iac_k8s"]
 
         self.vulnerability_management.scan_type = "CHECKOV"
+        self.vulnerability_management.sonar_instance = "sonar_instance_one"
         self.vulnerability_management.input_core = MagicMock()
         self.vulnerability_management.input_core.path_file_results = "file_path"
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
+        self.vulnerability_management.repository_provider = "github"
         self.vulnerability_management.version = "1.0"
         self.vulnerability_management.build_id = "build_id"
         self.vulnerability_management.branch_tag = "trunk"
@@ -166,7 +185,18 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "BRANCH_FILTER": "trunk,master,release,develop",
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
+                    "TOOL_SCM_MAPPING": {
+                        "DEFAULT": 2,
+                        "TFSGIT": 2,
+                        "GITHUB": 3
+                    },
+                    "TOOL_SONAR_MAPPING": {
+                        "DEFAULT": 4,
+                        "SONAR_INSTANCE_ONE": 4,
+                        "SONAR_INSTANCE_TWO": 5
+                    },                    
                     "CMDB": {
                         "USE_CMDB": True,
                         "HOST_CMDB": "cmdb_host",
@@ -217,8 +247,6 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 vulnerability_management=self.vulnerability_management,
                 token_cmdb=self.token_cmdb,
                 token_dd=self.token_dd,
-                scan_type_mapping=self.scan_type_mapping,
-                enviroment_mapping=self.enviroment_mapping,
                 tags=tags,
                 use_cmdb=use_cmdb,
             )
@@ -248,6 +276,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 file="file_path",
                 engagement_name="engagement_name",
                 source_code_management_uri="source_code_uri",
+                tool_scm_configuration=3,
+                tool_sonarqube_configuration=4,
                 tags=tags,
                 version="1.0",
                 build_id="build_id",
@@ -258,18 +288,22 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 token_defect_dojo=self.token_dd,
                 host_defect_dojo="host_defect_dojo",
                 expression="regex",
+                test_title="engine_iac_k8s",
+                reimport_scan=True,
             )
             self.assertEqual(result, "cmdb_request_result")
 
     def test_build_request_without_cmdb(self):
         use_cmdb = False
-        tags = "engine_iac_k8s"
+        tags = ["engine_iac_k8s","test_2"]
 
         self.vulnerability_management.scan_type = "CHECKOV"
         self.vulnerability_management.input_core = MagicMock()
         self.vulnerability_management.input_core.path_file_results = "file_path"
         self.vulnerability_management.input_core.scope_pipeline = "engagement_name"
         self.vulnerability_management.source_code_management_uri = "source_code_uri"
+        self.vulnerability_management.sonar_instance = "sonar_instance_one"
+        self.vulnerability_management.repository_provider = "tfsgit"
         self.vulnerability_management.version = "1.0"
         self.vulnerability_management.build_id = "build_id"
         self.vulnerability_management.branch_tag = "trunk"
@@ -285,6 +319,17 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
+                    "TOOL_SCM_MAPPING": {
+                        "DEFAULT": 2,
+                        "TFSGIT": 2,
+                        "GITHUB": 3
+                    },
+                    "TOOL_SONAR_MAPPING": {
+                        "DEFAULT": 4,
+                        "SONAR_INSTANCE_ONE": 4,
+                        "SONAR_INSTANCE_TWO": 5
+                    }, 
+                    "REIMPORT_SCAN": True,
                     "CMDB": {"USE_CMDB": True, "REGEX_EXPRESSION_CMDB": "regex"},
                 },
             }
@@ -314,8 +359,6 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 vulnerability_management=self.vulnerability_management,
                 token_cmdb=self.token_cmdb,
                 token_dd=self.token_dd,
-                scan_type_mapping=self.scan_type_mapping,
-                enviroment_mapping=self.enviroment_mapping,
                 tags=tags,
                 use_cmdb=use_cmdb,
             )
@@ -330,6 +373,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "file": "file_path",
                     "engagement_name": "engagement_name",
                     "source_code_management_uri": "source_code_uri",
+                    "tool_scm_configuration": 2,
+                    "tool_sonarqube_configuration": 4,
                     "tags": tags,
                     "version": "1.0",
                     "build_id": "build_id",
@@ -340,6 +385,8 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "token_defect_dojo": self.token_dd,
                     "host_defect_dojo": "host_defect_dojo",
                     "expression": "regex",
+                    "test_title": "engine_iac_k8s_test_2",
+                    "reimport_scan": True,
                 }
             )
             self.assertEqual(result, "import_scan_request_result")
@@ -364,6 +411,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
                     "CMDB": {"REGEX_EXPRESSION_CMDB": "regex"},
                 }
@@ -415,13 +463,14 @@ class TestDefectDojoPlatform(unittest.TestCase):
         mock_date_reason_based,
     ):
         service = "test"
-        dict_args = {"tool": "engine_iac", "token_vulnerability_management": "token1"}
+        dict_args = {"module": "engine_iac", "token_vulnerability_management": "token1"}
         secret_tool = {"token_defect_dojo": "token2"}
         config_tool = {
             "VULNERABILITY_MANAGER": {
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
                 }
             }
@@ -633,7 +682,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
     ):
         service = "test"
         dict_args = {
-            "tool": "engine_dependencies",
+            "module": "engine_dependencies",
             "token_vulnerability_management": "token1",
         }
         secret_tool = {"token_defect_dojo": "token2"}
@@ -642,6 +691,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
                 }
             }
@@ -720,7 +770,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
         service = "test"
         dict_args = {
-            "tool": "engine_dependencies",
+            "module": "engine_dependencies",
             "token_vulnerability_management": "token1",
         }
         secret_tool = {"token_defect_dojo": "token2"}
@@ -729,6 +779,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 2,
                 }
             }
@@ -782,7 +833,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
     ):
         service = "test"
         dict_args = {
-            "tool": "engine_risk",
+            "module": "engine_risk",
             "token_vulnerability_management": "token1",
         }
         secret_tool = {"token_defect_dojo": "token2"}
@@ -791,6 +842,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 80,
+                    "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
                 }
             }
@@ -941,6 +993,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 999,
+                    "REIMPORT_SCAN": True,
                 }
             }
         }
@@ -954,6 +1007,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
         mock_import_scan_request.assert_called_once()
         mock_engagement.get_engagements.assert_called_once()
 
+
     def test_get_active_engagements_exception(self):
         dict_args = {"token_vulnerability_management": "token1"}
         secret_tool = MagicMock()
@@ -962,6 +1016,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "LIMITS_QUERY": 999,
+                    "REIMPORT_SCAN": True,
                 }
             }
         }
@@ -1053,6 +1108,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_DEFECT_DOJO": "http://defectdojo",
                     "MAX_RETRIES_QUERY": 3,
                     "LIMITS_QUERY": 100,
+                    "REIMPORT_SCAN": True,
                 }
             }
         }
@@ -1091,6 +1147,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_DEFECT_DOJO": "http://defectdojo",
                     "MAX_RETRIES_QUERY": 3,
                     "LIMITS_QUERY": 100,
+                    "REIMPORT_SCAN": True,
                 }
             }
         }
@@ -1217,3 +1274,41 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
         self.assertEqual(create_date, "default_date")
         self.assertEqual(expired_date, "default_date")
+
+    
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.FindingExclusion.get_finding_exclusion"
+    )
+    def test_get_black_list(self, mock_get_finding_exclusion):
+        dict_args = {"token_vulnerability_management": "token1"}
+        secret_tool = {"token_defect_dojo": "token2"}
+        config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "MAX_RETRIES_QUERY": 5,
+                }
+            }
+        }
+
+        mock_get_finding_exclusion.return_value.results = [
+            MagicMock(unique_id_from_tool="CVE-2024-0001"),
+            MagicMock(unique_id_from_tool="CVE-2024-0002"),
+        ]
+
+        result = self.defect_dojo.get_black_list(dict_args, secret_tool, config_tool)
+
+        self.assertEqual(result, ["CVE-2024-0001", "CVE-2024-0002"])
+
+    def test_get_black_list_exception(self):
+        dict_args = {"token_vulnerability_management": "token1"}
+        secret_tool = {"token_defect_dojo": "token2"}
+        config_tool = {"VULNERABILITY_MANAGER": {}}
+
+        with self.assertRaises(ExceptionVulnerabilityManagement) as context:
+            self.defect_dojo.get_black_list(dict_args, secret_tool, config_tool)
+        self.assertIn(
+            "Error getting black list with the following error:", str(context.exception)
+        )
+
+

@@ -13,7 +13,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclu
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
-from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
@@ -48,6 +47,7 @@ class IacScan:
                 platform_to_scan=dict_args["platform"],
                 secret_tool=secret_tool,
                 secret_external_checks=dict_args["token_external_checks"],
+                work_folder=self.devops_platform_gateway.get_variable("temp_directory"),
             )
         else:
             print("Tool skipped by DevSecOps policy")

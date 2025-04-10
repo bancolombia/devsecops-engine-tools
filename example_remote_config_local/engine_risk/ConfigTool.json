@@ -49,10 +49,10 @@
         "tag1": 10,
         "tag2": 20
     },
-    "TAG_BLACKLIST": [
-        "tag1",
-        "tag2"
-    ],
+    "TAG_BLACKLIST_EXCLUSION_DAYS": {
+        "tag3": 5,
+        "tag4": 0
+    },
     "THRESHOLD": {
         "REMEDIATION_RATE": {
             "1": 0,
@@ -60,7 +60,6 @@
             "10": 50,
             "other": 70
         },
-        "RISK_SCORE": 10,
-        "TAG_MAX_AGE": 999
+        "RISK_SCORE": 10
     }
 }

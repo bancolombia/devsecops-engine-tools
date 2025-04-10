@@ -43,7 +43,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_iac(self, mock_runner_engine_iac):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_iac",
+            "module": "engine_iac",
             "use_vulnerability_management": "true",
             "remote_config_repo": "test_repo",
             "remote_config_branch": ""
@@ -97,7 +97,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_iac_error(self, mock_runner_engine_iac):
         dict_args = {
             "use_secrets_manager": "false",
-            "tool": "engine_iac",
+            "module": "engine_iac",
             "use_vulnerability_management": "true",
             "remote_config_repo": "test_repo",
             "remote_config_branch": ""
@@ -144,7 +144,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_container(self, mock_runner_engine_container):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_container",
+            "module": "engine_container",
             "remote_config_repo": "test_repo",
             "remote_config_branch": "",
             "use_vulnerability_management": "true",
@@ -208,15 +208,54 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
 
-    @mock.patch("builtins.print")
-    def test_process_with_engine_dast(self, mock_print):
+    @mock.patch("devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_dast")
+    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data='''{
+        "endpoint": "https://example.com",
+        "operations": [
+            {
+                "operation": {
+                    "headers": {
+                        "accept": "/"
+                    },
+                    "method": "POST",
+                    "path": "/example_path",
+                    "security_auth": {
+                        "type": "jwt"
+                    }
+                }
+            }
+        ]
+    }''')
+    def test_process_with_engine_dast(self, mock_open, mock_runner_engine_dast):
         dict_args = {
-            "use_secrets_manager": "false",
-            "tool": "engine_dast",
+            "use_secrets_manager": "true",
+            "module": "engine_dast",
+            "dast_file_path": "example_dast.json",
+            "use_vulnerability_management": "true",
+            "remote_config_repo": "dummie_repo"
         }
-        config_tool = {"ENGINE_DAST": "some_config"}
-        self.handle_scan.process(dict_args, config_tool)
-        mock_print.assert_called_once_with("not yet enabled")
+        secret_tool = {"github_token": "example_token"}
+        self.secrets_manager_gateway.get_secret.return_value = secret_tool
+        config_tool = {"ENGINE_DAST":{"ENABLED": "true", "TOOL": "NUCLEI"}}
+        input_core = InputCore(
+            totalized_exclusions=[],
+            threshold_defined=self.threshold,
+            path_file_results="test/file",
+            custom_message_break_build="message",
+            scope_pipeline="pipeline",
+            stage_pipeline="Release",
+        )
+        # Simulates runner_engine_dast return
+        mock_runner_engine_dast.return_value = (["finding1", "finding2"], input_core)
+        # Call process method
+        result_findings_list, result_input_core = self.handle_scan.process(dict_args, config_tool)
+        # Verifies mock have been called correctly
+        mock_runner_engine_dast.assert_called_once_with(
+            dict_args, config_tool["ENGINE_DAST"], secret_tool, self.devops_platform_gateway
+        )
+        # Verifica los resultados devueltos
+        self.assertEqual(result_findings_list, ["finding1", "finding2"])
+        self.assertEqual(result_input_core, input_core)
 
     @mock.patch(
         "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_secret_scan"
@@ -224,7 +263,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_secret(self, mock_runner_secret_scan):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_secret",
+            "module": "engine_secret",
             "remote_config_repo": "test_repo",
             "remote_config_branch": "",
             "use_vulnerability_management": "true",
@@ -261,7 +300,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_secret_without_secret_manager(self, mock_runner_secret_scan):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_secret",
+            "module": "engine_secret",
             "remote_config_repo": "test_repo",
             "remote_config_branch": "",
             "use_vulnerability_management": "true",
@@ -298,7 +337,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_secret_without_secret_manager(self, mock_runner_secret_scan):
         dict_args = {
             "use_secrets_manager": "false",
-            "tool": "engine_secret",
+            "module": "engine_secret",
             "remote_config_repo": "test_repo",
             "remote_config_branch": "",
             "use_vulnerability_management": "true",
@@ -337,7 +376,7 @@ class TestHandleScan(unittest.TestCase):
     def test_process_with_engine_dependencies(self, mock_runner_engine_dependencies):
         dict_args = {
             "use_secrets_manager": "true",
-            "tool": "engine_dependencies",
+            "module": "engine_dependencies",
             "remote_config_repo": "test_repo",
             "remote_config_branch": "",
             "use_vulnerability_management": "true",

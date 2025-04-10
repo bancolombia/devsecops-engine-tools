@@ -59,6 +59,24 @@ class TestGithubActions(unittest.TestCase):
     @mock.patch(
         'devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.github.github_actions.BuildVariables',
         autospec=True)
+    def test_get_build_pipeline_execution_url(self,mock_build_variables, mock_system_variables):
+        github_actions = GithubActions()
+
+        # Mock the BuildVariables class
+        mock_build_variables.github_run_id.value.return_value = "github_run_id"
+
+        # Mock the SystemVariables class
+        mock_system_variables.github_server_url.value.return_value = "github_server_url"
+        mock_system_variables.github_repository.value.return_value = "github_repository"
+
+        assert github_actions.get_build_pipeline_execution_url() == "github_server_url/github_repository/actions/runs/github_run_id"
+
+    @mock.patch(
+        'devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.github.github_actions.SystemVariables',
+        autospec=True)
+    @mock.patch(
+        'devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.github.github_actions.BuildVariables',
+        autospec=True)
     @mock.patch(
         'devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.github.github_actions.ReleaseVariables',
         autospec=True)

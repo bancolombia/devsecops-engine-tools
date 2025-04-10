@@ -15,8 +15,20 @@
         ],
         "DEFECT_DOJO": {
             "HOST_DEFECT_DOJO": "",
+            "PRINT_DOMAIN": "",
             "LIMITS_QUERY": 100,
             "MAX_RETRIES_QUERY": 5,
+            "TOOL_SCM_MAPPING": {
+                "DEFAULT": 2,
+                "TFSGIT": 2,
+                "GITHUB": 3
+            },
+            "TOOL_SONAR_MAPPING": {
+                "DEFAULT": 4,
+                "SONAR_INSTANCE_ONE": 4,
+                "SONAR_INSTANCE_TWO": 5
+            },
+            "REIMPORT_SCAN": false,
             "CMDB": {
                 "USE_CMDB": false,
                 "HOST_CMDB": "",
@@ -74,8 +86,9 @@
         "TOOL": "PRISMA|TRIVY"
     },
     "ENGINE_DAST": {
-        "ENABLED": true,
-        "TOOL": "NUCLEI"
+        "ENABLED": "true",
+        "TOOL": "NUCLEI",
+        "EXTRA_TOOLS": ["JWT"]
     },
     "ENGINE_SECRET": {
         "ENABLED": true,

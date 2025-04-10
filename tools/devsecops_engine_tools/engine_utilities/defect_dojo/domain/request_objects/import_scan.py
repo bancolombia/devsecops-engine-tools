@@ -1,4 +1,5 @@
 import dataclasses
+from typing import List
 
 
 @dataclasses.dataclass
@@ -20,7 +21,7 @@ class ImportScanRequest:
     auto_create_context: str = ""
     deduplication_on_engagement: str = ""
     lead: str = ""
-    tags: str = ""
+    tags: List[str] = dataclasses.field(default_factory=list)
     close_old_findings: str = ""
     close_old_findings_product_scope: str = ""
     push_to_jira: str = ""
@@ -36,7 +37,8 @@ class ImportScanRequest:
     create_finding_groups_for_all_findings: str = ""
     # ****another parameter outside defect dojo*****
     product_description: str = ""
-    tools_configuration: str = ""
+    tool_sonarqube_configuration: str = ""
+    tool_scm_configuration: str = ""
     code_app: str = ""
     token_cmdb: str = ""
     host_cmdb: str = ""
@@ -52,10 +54,10 @@ class ImportScanRequest:
     cmdb_mapping: dict = None
     product_type_name_mapping: dict = None
     compact_remote_config_url: str = None
-    # ** Expression
     expression: str = ""
-    # ** Test url
     url: str = ""
+    reimport_scan: bool = None
+    test_title: str = ""
 
     @classmethod
     def from_dict(cls, obj):
@@ -100,6 +102,7 @@ class ImportScanRequest:
             product_type_name_mapping=obj.get("product_type_name_mapping"),
             expression=obj.get("expression"),
             compact_remote_config_url=obj.get("compact_remote_config_url"),
+            reimport_scan=obj.get("reimport_scan"),
         )
         return obj
 

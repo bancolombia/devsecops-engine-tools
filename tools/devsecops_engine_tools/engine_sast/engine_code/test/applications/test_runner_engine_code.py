@@ -49,23 +49,6 @@ class TestRunnerEngineCode(unittest.TestCase):
         self.assertEqual(kwargs["dict_args"], dict_args)
         self.assertEqual(kwargs["tool"], tool)
 
-    def test_runner_engine_code_git_azure(self, mock_init_engine_sast_code):
-        # Arrange
-        dict_args = {"platform_devops": "azure"}
-        tool = "TEST"
-        devops_platform_gateway = Mock()
-
-        # Act
-        runner_engine_code(dict_args, tool, devops_platform_gateway)
-
-        # Assert
-        _, kwargs = mock_init_engine_sast_code.call_args
-        mock_init_engine_sast_code.assert_called_once()
-        self.assertEqual(kwargs["devops_platform_gateway"], devops_platform_gateway)
-        self.assertIsInstance(kwargs["git_gateway"], GitRun)
-        self.assertEqual(kwargs["dict_args"], dict_args)
-        self.assertEqual(kwargs["tool"], tool)
-
     def test_runner_engine_code_exception(self, mock_init_engine_sast_code):
         # Arrange
         dict_args = {"platform_devops": "azure"}

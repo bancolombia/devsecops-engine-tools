@@ -253,3 +253,44 @@ def test_execute_error(
     assert isinstance(request, ImportScanRequest)
     with pytest.raises(ApiError):
         uc.execute(request)
+
+
+@pytest.mark.parametrize(
+    """mock_rest_import_scan,
+    mock_rest_product_type,
+    mock_rest_product,
+    mock_rest_scan_configuration,
+    import_scan_request_instance,
+    mock_rest_engagement""",
+    [
+        (
+            mock_rest_import_scan(file_path="sonar_qube.json"),
+            mock_rest_product_type(),
+            mock_rest_product(result_list_empty=True),
+            mock_rest_scan_configuration(),
+            import_scan_request_instance(par_scan_type="SonarQube API Import"),
+            mock_rest_engagement(),
+        ),
+    ],
+)
+def test_execute_reimport_scan(
+    mock_rest_import_scan,
+    mock_rest_product_type,
+    mock_rest_product,
+    mock_rest_scan_configuration,
+    import_scan_request_instance,
+    mock_rest_engagement,
+):
+    request = import_scan_request_instance
+    request.reimport_scan = True
+    uc = ImportScanUserCase(
+        rest_import_scan=mock_rest_import_scan,
+        rest_product_type=mock_rest_product_type,
+        rest_product=mock_rest_product,
+        rest_scan_configuration=mock_rest_scan_configuration,
+        rest_engagement=mock_rest_engagement,
+    )
+    assert isinstance(uc, ImportScanUserCase)
+    assert isinstance(request, ImportScanRequest)
+    response = uc.execute(request)
+    assert response.scan_type == import_scan_request_instance.scan_type

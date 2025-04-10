@@ -84,6 +84,26 @@ def get_inputs_from_cli(args):
         "-t",
         "--tool",
         choices=[
+            "nuclei",
+            "bearer",
+            "checkov",
+            "kics",
+            "kubescape",
+            "trufflehog",
+            "gitleaks",
+            "prisma",
+            "trivy",
+            "xray",
+            "dependency_check",
+        ],
+        type=str,
+        required=False,
+        help="Tool to execute according to the module",
+    )
+    parser.add_argument(
+        "-m",
+        "--module",
+        choices=[
             "engine_iac",
             "engine_dast",
             "engine_code",
@@ -94,7 +114,7 @@ def get_inputs_from_cli(args):
         ],
         type=str,
         required=True,
-        help="Tool to execute",
+        help="Module to execute",
     )
     parser.add_argument(
         "-fp",
@@ -109,7 +129,7 @@ def get_inputs_from_cli(args):
         type=parse_choices({"all", "docker", "k8s", "cloudformation", "openapi", "terraform"}),
         required=False,
         default="all",
-        help="Platform to scan, only apply engine_iac tool",
+        help="Platform to scan, applies only to the engine_iac tool and it is possible to select several {all, docker, k8s, cloudformation, openapi, terraform}",
     )
     parser.add_argument(
         "--use_secrets_manager",
@@ -160,7 +180,7 @@ def get_inputs_from_cli(args):
     )
     parser.add_argument(
         "--xray_mode",
-        choices=["scan", "audit"],
+        choices=["scan", "audit","build-scan"],
         required=False,
         default="scan",
         help="Mode to execute xray, only apply engine_dependencies xray tool",
@@ -170,12 +190,38 @@ def get_inputs_from_cli(args):
         required=False,
         help="Name of image to scan for engine_container",
     )
+    parser.add_argument(
+        "--dast_file_path",
+        required=False,
+        help="File path containing the configuration, structured according to the documentation, \
+        for the API or web application to be scanned by the DAST tool."
+    )
+
+    TOOLS = {
+        "engine_iac": ["checkov", "kics", "kubescape"],
+        "engine_secret": ["trufflehog", "gitleaks"],
+        "engine_container": ["prisma", "trivy"],
+        "engine_dependencies": ["xray", "dependency_check"],
+        "engine_code": ["bearer"],
+        "engine_dast": ["nuclei"],
+        "engine_risk": None,
+    }
+
     args = parser.parse_args()
+
+    if args.module in TOOLS and args.tool:
+        allowed_tools = TOOLS[args.module]
+        if allowed_tools is None:
+            parser.error(f"The tool flag should not be used with module {args.module}")
+        elif allowed_tools and (args.tool not in allowed_tools):
+            parser.error(f"Invalid value for tool. Allowed values for the provided module {args.module} are: {', '.join(allowed_tools)}")
+
     return {
         "platform_devops": args.platform_devops,
         "remote_config_repo": args.remote_config_repo,
         "remote_config_branch": args.remote_config_branch,
         "tool": args.tool,
+        "module": args.module,
         "folder_path": args.folder_path,
         "platform": args.platform,
         "use_secrets_manager": args.use_secrets_manager,
@@ -187,7 +233,8 @@ def get_inputs_from_cli(args):
         "token_engine_dependencies": args.token_engine_dependencies,
         "token_external_checks": args.token_external_checks,
         "xray_mode": args.xray_mode,
-        "image_to_scan": args.image_to_scan
+        "image_to_scan": args.image_to_scan,
+        "dast_file_path": args.dast_file_path
     }
 
 

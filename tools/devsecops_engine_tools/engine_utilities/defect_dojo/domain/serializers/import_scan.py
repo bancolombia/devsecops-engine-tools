@@ -83,6 +83,7 @@ list_scan_type = [
     "JFrog Xray On Demand Binary Scan",
     "JFrog Xray Scan",
     "JFrog Xray Unified Scan",
+    "Kubescape JSON Importer",
     "KICS Scan",
     "Kiuwan Scan",
     "kube-bench Scan",
@@ -137,6 +138,7 @@ list_scan_type = [
     "SSLyze Scan (JSON)",
     "StackHawk HawkScan",
     "Talisman Scan",
+    "Tenable Scan",
     "Terrascan Scan",
     "Testssl Scan",
     "TFSec Scan",
@@ -177,12 +179,12 @@ class ImportScanSerializer(Schema):
     product_name = fields.Str(required=False)
     engagement_name = fields.Str(required=True)
     engagement_end_date = fields.Str(required=False)
-    source_code_management_uri = fields.Str(required=False)
+    source_code_management_uri = fields.Str(required=False, load_default=None)
     engagement = fields.Int(required=False)
     auto_create_context = fields.Str(required=False, load_default="true")
     deduplication_on_engagement = fields.Str(required=False)
     lead = fields.Str(required=False)
-    tags = fields.Str(required=True)
+    tags = fields.List(fields.String(), required=True)
     close_old_findings = fields.Str(required=False, load_default=True)
     close_old_findings_product_scope = fields.Str(required=False)
     push_to_jira = fields.Str(required=False)
@@ -200,7 +202,8 @@ class ImportScanSerializer(Schema):
     test_title = fields.Str(required=False)
     product_description = fields.Str(required=False)
     create_finding_groups_for_all_findings = fields.Str(required=False)
-    tools_configuration = fields.Int(required=False, load_default=1)
+    tool_sonarqube_configuration = fields.Int(required=False)
+    tool_scm_configuration = fields.Int(required=False)
     code_app = fields.Str(required=False)
     # defect-dojo credential
     token_cmdb = fields.Str(required=False)
@@ -219,6 +222,7 @@ class ImportScanSerializer(Schema):
     project_remote_config = fields.Str(required=False)
     # regulare expression
     expression = fields.Str(required=True)
+    reimport_scan = fields.Bool(required=False, default=False)
 
     @post_load
     def make_cmdb(self, data, **kwargs):

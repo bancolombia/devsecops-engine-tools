@@ -17,6 +17,13 @@
         ]
     },
     "GET_IMAGE_BASE": false,
+<<<<<<< HEAD
+=======
+    "VALIDATE_BASE_IMAGE_DATE": {
+        "ENABLED": false,
+        "REFERENCE_IMAGE_DATE": "20250206"
+    },
+>>>>>>> 456d84cbd6aa719984ca1557fd1ac17bcf7ff0f0
     "MESSAGE_INFO_ENGINE_CONTAINER": "message custom",
     "IGNORE_SEARCH_PATTERN":"(.*_demo0|.*_cer)",
     "THRESHOLD": {

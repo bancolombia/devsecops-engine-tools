@@ -48,6 +48,7 @@ class TestAzureDevops(unittest.TestCase):
         mock_system_variables.System_TeamFoundationCollectionUri.value.return_value = "System_TeamFoundationCollectionUri"
         mock_system_variables.System_TeamProject.value.return_value = "Build_Project_Name"
         mock_build_variables.Build_Repository_Name.value.return_value = "Build_Repository_Name"
+        mock_build_variables.Build_Repository_Provider.value.return_value = "tfsgit"
 
         assert azure_devops.get_source_code_management_uri() == "System_TeamFoundationCollectionUriBuild_Project_Name/_git/Build_Repository_Name"
 
@@ -60,6 +61,17 @@ class TestAzureDevops(unittest.TestCase):
 
         assert azure_devops.get_base_compact_remote_config_url("my_repo") == "https://System_TeamFoundationCollectionUri.visualstudio.com/Build_Project_Name/_git/my_repo?path=/"
 
+    @mock.patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops.SystemVariables', autospec=True)
+    @mock.patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops.BuildVariables', autospec=True)
+    def test_get_build_pipeline_execution_url(self, mock_build_variables, mock_system_variables):
+        azure_devops = AzureDevops()
+
+        mock_system_variables.System_TeamFoundationCollectionUri.value.return_value = "System_TeamFoundationCollectionUri"
+        mock_system_variables.System_TeamProject.value.return_value = "Build_Project_Name"
+        mock_build_variables.Build_BuildId.value.return_value = "Build_BuildId"
+
+
+        assert azure_devops.get_build_pipeline_execution_url() == "System_TeamFoundationCollectionUriBuild_Project_Name/_build?buildId=Build_BuildId"
 
     @mock.patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops.SystemVariables', autospec=True)
     @mock.patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.azure.azure_devops.BuildVariables', autospec=True)
