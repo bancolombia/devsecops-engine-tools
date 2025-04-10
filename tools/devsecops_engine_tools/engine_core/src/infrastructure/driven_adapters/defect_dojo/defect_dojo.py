@@ -98,6 +98,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     tags = [
                         f"{vulnerability_management.dict_args['module']}_{'_'.join(vulnerability_management.dict_args['platform'])}"
                     ]
+                    if vulnerability_management.input_core.scope_service != vulnerability_management.input_core.scope_pipeline:
+                        tags.append(vulnerability_management.input_core.scope_service.replace(f"{vulnerability_management.input_core.scope_pipeline}_", ""))
                 if (
                     vulnerability_management.dict_args["module"] == "engine_container"
                     and sum(
