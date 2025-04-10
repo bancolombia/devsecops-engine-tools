@@ -21,7 +21,7 @@ def test_get_scan_configurations_info_success():
     session_mock = session_manager_get(status_code=200, response_json_file="scan_configuration_list.json")
     request = ImportScanRequest()
     rest_scan_configurations = ScanConfigrationRestConsumer(request, session_mock)
-    scan_configurations_list = rest_scan_configurations.get_api_scan_configuration(request)
+    scan_configurations_list = rest_scan_configurations.get_api_scan_configuration(request, 1)
     # Verificar el resultado
     assert isinstance(scan_configurations_list, ScanConfigurationList)
     assert isinstance(scan_configurations_list.results[0].id, int)
@@ -37,7 +37,7 @@ def test_get_scan_configrations_info_failure():
     request = ImportScanRequest()
     rest_scan_configuration = ScanConfigrationRestConsumer(request, session_mock)
     with pytest.raises(ApiError):
-        rest_scan_configuration.get_api_scan_configuration(request)
+        rest_scan_configuration.get_api_scan_configuration(request, 510)
 
 
 def test_post_scan_configuration_info_sucessfull():
