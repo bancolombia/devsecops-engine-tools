@@ -109,7 +109,7 @@ class ImportScanUserCase:
 
         api_scan_bool = re.search(" API ", request.scan_type)
         if api_scan_bool:
-            scan_configuration_list = self.__rest_scan_configurations.get_api_scan_configuration(request)
+            scan_configuration_list = self.__rest_scan_configurations.get_api_scan_configuration(request, product_id)
             if scan_configuration_list.results == []:
                 scan_configuration = self.__rest_scan_configurations.post_api_scan_configuration(
                     request, product_id, request.tool_sonarqube_configuration
