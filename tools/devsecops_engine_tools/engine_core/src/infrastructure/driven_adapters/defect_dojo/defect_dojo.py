@@ -158,7 +158,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 )
             )
 
-    def get_product_type_service(self, service, dict_args, secret_tool, config_tool):
+    def get_product_type_pipeline(self, service, dict_args, secret_tool, config_tool):
         try:
             session_manager = self._get_session_manager(
                 dict_args, secret_tool, config_tool
