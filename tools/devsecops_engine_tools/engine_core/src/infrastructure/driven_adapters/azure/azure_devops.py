@@ -57,20 +57,24 @@ class AzureDevops(DevopsPlatformGateway):
             return AzureMessageResultPipeline.SucceededWithIssues.value
 
     def get_source_code_management_uri(self):
-        source_code_management_uri = {
-            "tfsgit": (
-                f"{SystemVariables.System_TeamFoundationCollectionUri.value()}"
-                f"{SystemVariables.System_TeamProject.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
-            ).replace(" ", "%20"),
-            "github": (
-                f"https://github.com/{BuildVariables.Build_Repository_Name.value()}"
-            ),
-            "git": (
-                f"{SystemVariables.System_TeamFoundationCollectionUri.value()}"
-                f"{SystemVariables.System_TeamProject.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
-            ).replace(" ", "%20")
-        }
-        return source_code_management_uri.get(BuildVariables.Build_Repository_Provider.value().lower())
+        try:
+            source_code_management_uri = {
+                "tfsgit": (
+                    f"{SystemVariables.System_TeamFoundationCollectionUri.value()}"
+                    f"{SystemVariables.System_TeamProject.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
+                ).replace(" ", "%20"),
+                "github": (
+                    f"https://github.com/{BuildVariables.Build_Repository_Name.value()}"
+                ),
+                "git": (
+                    f"{SystemVariables.System_TeamFoundationCollectionUri.value()}"
+                    f"{SystemVariables.System_TeamProject.value()}/_git/{BuildVariables.Build_Repository_Name.value()}"
+                ).replace(" ", "%20")
+            }
+            return source_code_management_uri.get(BuildVariables.Build_Repository_Provider.value().lower())
+        except ValueError:
+            return None
+
 
     def get_base_compact_remote_config_url(self, remote_config_repo):
         return (
