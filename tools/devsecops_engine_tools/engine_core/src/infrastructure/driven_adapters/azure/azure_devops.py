@@ -72,7 +72,7 @@ class AzureDevops(DevopsPlatformGateway):
                 ).replace(" ", "%20")
             }
             return source_code_management_uri.get(BuildVariables.Build_Repository_Provider.value().lower())
-        except ValueError as e:
+        except ValueError:
             return None
 
 
