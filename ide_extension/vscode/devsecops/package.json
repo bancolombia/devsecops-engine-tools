@@ -1,0 +1,150 @@
+{
+  "name": "devsecops",
+  "icon": "resources/logo.png",
+  "displayName": "devsecops",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.91.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsWelcome": [
+      {
+        "view": "scm",
+        "contents": "Test",
+        "when": "devsecops.enabled"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "devsecops",
+          "title": "DevSecOps IDE Extension",
+          "icon": "resources/logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "devsecops": [
+        {
+          "id": "devsecops",
+          "name": "DevSecOps IDE Extension",
+          "icon": "resources/logo.svg"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "DevSecOps",
+      "properties": {
+        "devsecops.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/Disable DevSecOps IDE Extension"
+        },
+        "devsecops.organizationName": {
+          "type": "string",
+          "default": "GrupoBancolombia",
+          "description": "Organization Name"
+        },
+        "devsecops.projectName": {
+          "type": "string",
+          "default": "Vicepresidencia Servicios de Tecnología",
+          "description": "Project Name"
+        },
+        "devsecops.variablePlaceholder": {
+          "type": "string",
+          "default": "#{ ... }#",
+          "description": "Characters to identify variables"
+        },
+        "devsecops.groupName": {
+          "type": "string",
+          "default": "Empty",
+          "description": "Variables group name"
+        },
+        "devsecops.releaseId": {
+          "type": "string",
+          "description": "Azure Release Definition ID"
+        },
+        "devsecops.environment": {
+          "type": "string",
+          "default": "dev",
+          "enum": [
+            "pdn",
+            "cer",
+            "qa",
+            "dev"
+          ],
+          "description": "Environment to evaluate"
+        },
+        "devsecops.username": {
+          "type": "string",
+          "default": "",
+          "description": "Set your azure devops username"
+        },
+        "devsecops.personalAccessToken": {
+          "type": "string",
+          "default": "",
+          "description": "Set your user personal access token generated at azure devops",
+          "format": "password"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "devsecops.helloWorld",
+        "title": "HELLO WORLD"
+      },
+      {
+        "command": "devsecops.iacScan",
+        "title": "IAC SCAN"
+      },
+      {
+        "command": "devsecops.imageScan",
+        "title": "IMAGE SCAN"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "devsecops.helloWorld",
+          "when": "view == devsecopsView",
+          "group": "navigation"
+        },
+        {
+          "command": "devsecops.iacScan",
+          "when": "view == devsecopsView",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test",
+    "deploy": "vsce publish --yarn"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.9",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.91.0",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.11.0",
+    "@vscode/test-cli": "^0.0.9",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "docker-cli-js": "^2.10.0",
+    "keytar": "^7.9.0"
+  }
+}
