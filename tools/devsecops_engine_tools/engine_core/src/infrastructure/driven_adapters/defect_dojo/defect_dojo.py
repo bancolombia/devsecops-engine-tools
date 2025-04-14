@@ -209,6 +209,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
             risk_accepted_query_params = {
                 "risk_accepted": True,
+                "is_mitigated": False,
                 "tags": tool,
                 "limit": dd_limits_query,
             }
@@ -573,7 +574,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
     def _get_report_exclusions(self, total_findings, date_fn, host_dd, **kwargs):
         exclusions = []
         for finding in total_findings:
-            if finding.risk_accepted:
+            if finding.risk_accepted and not finding.mitigated:
                 exclusions.append(
                     self._create_report_exclusion(
                         finding,
