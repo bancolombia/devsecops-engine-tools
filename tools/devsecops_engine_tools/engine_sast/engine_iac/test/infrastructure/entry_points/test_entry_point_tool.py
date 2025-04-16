@@ -15,6 +15,7 @@ def test_init_engine_sast_rm(mock_iac_scan):
         path_file_results="test/file",
         custom_message_break_build="message",
         scope_pipeline="pipeline",
+        scope_service="service",
         stage_pipeline="Release",
     )
 

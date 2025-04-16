@@ -121,6 +121,7 @@ class CodeScan:
         else:
             print("Tool skipped by DevSecOps policy")
             dict_args["send_metrics"] = "false"
+            dict_args["use_vulnerability_management"] = "false"
 
         input_core = InputCore(
             totalized_exclusions=list_exclusions,
@@ -133,6 +134,7 @@ class CodeScan:
             path_file_results=path_file_results,
             custom_message_break_build=config_tool.message_info_engine_code,
             scope_pipeline=config_tool.scope_pipeline,
+            scope_service=config_tool.scope_pipeline,
             stage_pipeline=self.devops_platform_gateway.get_variable(
                 "stage"
             ).capitalize(),

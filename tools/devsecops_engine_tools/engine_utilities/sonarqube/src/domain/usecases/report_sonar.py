@@ -49,6 +49,7 @@ class ReportSonar:
             "",
             "",
             "",
+            "",
             self.devops_platform_gateway.get_variable("stage").capitalize(),
         )
 
@@ -217,10 +218,12 @@ class ReportSonar:
                 logger.warning(f"It was not possible to synchronize Sonar and Vulnerability Manager: {e}")
 
             input_core.scope_pipeline = project_key
+            input_core.scope_service = project_key
 
             self.vulnerability_management_gateway.send_vulnerability_management(
                 vulnerability_management=vulnerability_manager
             )
 
         input_core.scope_pipeline = pipeline_name
+        input_core.scope_service = pipeline_name
         return input_core

@@ -28,6 +28,7 @@ class TestMetricsManager(unittest.TestCase):
         input_core = InputCore(
             stage_pipeline="Release",
             scope_pipeline="Scope",
+            scope_service="Service",
             totalized_exclusions=[],
             threshold_defined=Threshold,
             path_file_results="test/file",

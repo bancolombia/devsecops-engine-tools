@@ -61,6 +61,7 @@ class TestHandleScan(unittest.TestCase):
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
+            scope_service="service",
             stage_pipeline="Release",
         )
         mock_runner_engine_iac.return_value = findings_list, input_core
@@ -112,6 +113,7 @@ class TestHandleScan(unittest.TestCase):
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
+            scope_service="service",
             stage_pipeline="Release",
         )
         mock_runner_engine_iac.return_value = findings_list, input_core
@@ -189,6 +191,7 @@ class TestHandleScan(unittest.TestCase):
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
+            scope_service="service",
             stage_pipeline="Release",
         )
         component_list = [Component("component1", "version1"), Component("component2", "version2")]
@@ -196,7 +199,7 @@ class TestHandleScan(unittest.TestCase):
         mock_runner_engine_container.return_value = findings_list, input_core, component_list
         mock_product_type = Mock()
         mock_product_type.name = "PT1"
-        self.vulnerability_management.get_product_type_service.return_value = mock_product_type
+        self.vulnerability_management.get_product_type_pipeline.return_value = mock_product_type
 
         # Call the process method
         result_findings_list, result_input_core = self.handle_scan.process(
@@ -243,6 +246,7 @@ class TestHandleScan(unittest.TestCase):
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
+            scope_service="service",
             stage_pipeline="Release",
         )
         # Simulates runner_engine_dast return
@@ -280,6 +284,7 @@ class TestHandleScan(unittest.TestCase):
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
+            scope_service="service",
             stage_pipeline="Release",
         )
         mock_runner_secret_scan.return_value = findings_list, input_core
@@ -317,6 +322,7 @@ class TestHandleScan(unittest.TestCase):
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
+            scope_service="service",
             stage_pipeline="Release",
         )
         mock_runner_secret_scan.return_value = findings_list, input_core
@@ -354,6 +360,7 @@ class TestHandleScan(unittest.TestCase):
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
+            scope_service="service",
             stage_pipeline="Release",
         )
         mock_runner_secret_scan.return_value = findings_list, input_core
@@ -396,6 +403,7 @@ class TestHandleScan(unittest.TestCase):
             path_file_results="test/file",
             custom_message_break_build="message",
             scope_pipeline="pipeline",
+            scope_service="service",
             stage_pipeline="Release",
         )
         mock_runner_engine_dependencies.return_value = findings_list, input_core, None

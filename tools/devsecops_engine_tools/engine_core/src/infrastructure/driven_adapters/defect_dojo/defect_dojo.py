@@ -98,6 +98,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     tags = [
                         f"{vulnerability_management.dict_args['module']}_{'_'.join(vulnerability_management.dict_args['platform'])}"
                     ]
+                    if vulnerability_management.input_core.scope_service != vulnerability_management.input_core.scope_pipeline:
+                        tags.append(vulnerability_management.input_core.scope_service.replace(f"{vulnerability_management.input_core.scope_pipeline}_", ""))
                 if (
                     vulnerability_management.dict_args["module"] == "engine_container"
                     and sum(
@@ -156,7 +158,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 )
             )
 
-    def get_product_type_service(self, service, dict_args, secret_tool, config_tool):
+    def get_product_type_pipeline(self, service, dict_args, secret_tool, config_tool):
         try:
             session_manager = self._get_session_manager(
                 dict_args, secret_tool, config_tool
@@ -482,7 +484,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             "build_id": vulnerability_management.build_id,
             "branch_tag": vulnerability_management.branch_tag,
             "commit_hash": vulnerability_management.commit_hash,
-            "service": vulnerability_management.input_core.scope_pipeline,
+            "service": vulnerability_management.input_core.scope_service,
             "test_title": "_".join(tags),
             "environment": (
                 self.enviroment_mapping[vulnerability_management.environment.lower()]
@@ -517,6 +519,10 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "VULNERABILITY_MANAGER"
             ]["DEFECT_DOJO"]["CMDB"]["CMDB_MAPPING"]
             return Connect.cmdb(
+                generate_auth_cmdb=vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB"]["GENERATE_AUTH_CMDB"],
+                auth_cmdb_request_response=vulnerability_management.config_tool[
+                    "VULNERABILITY_MANAGER"
+                ]["DEFECT_DOJO"]["CMDB"]["AUTH_CMDB_REQUEST_REPONSE"],
                 cmdb_mapping={
                     "product_type_name": cmdb_mapping["PRODUCT_TYPE_NAME"],
                     "product_name": cmdb_mapping["PRODUCT_NAME"],

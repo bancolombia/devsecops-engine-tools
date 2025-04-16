@@ -142,6 +142,7 @@ class HandleRisk:
             "",
             "",
             pipeline_name,
+            pipeline_name,
             self.devops_platform_gateway.get_variable("stage").capitalize(),
         )
 

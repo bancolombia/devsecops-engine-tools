@@ -84,5 +84,6 @@ class SetInputCore:
             path_file_results=finding_list,
             custom_message_break_build=self.config_tool["MESSAGE_INFO_ENGINE_SECRET"],
             scope_pipeline=self.config_tool["SCOPE_PIPELINE"],
+            scope_service=self.config_tool["SCOPE_PIPELINE"],
             stage_pipeline=self.tool_remote.get_variable("stage").capitalize(),
         )

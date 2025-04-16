@@ -61,6 +61,8 @@ def init_engine_sca_rm(
     else:
         print("Tool skipped by DevSecOps policy")
         dict_args["send_metrics"] = "false"
+        dict_args["use_vulnerability_management"] = "false"
+        
     core_input = input_core.set_input_core(image_scanned,base_image)
 
     return deseralized, core_input, sbom_components

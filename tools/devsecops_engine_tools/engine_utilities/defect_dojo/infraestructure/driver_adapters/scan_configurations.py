@@ -48,8 +48,8 @@ class ScanConfigrationRestConsumer:
             raise ApiError(e)
         return scan_configuration_object
 
-    def get_api_scan_configuration(self, request: ImportScanRequest) -> ScanConfigurationList:
-        url = f"{self.__host}/api/v2/product_api_scan_configurations/?service_key_1={request.engagement_name}"
+    def get_api_scan_configuration(self, request: ImportScanRequest, product_id) -> ScanConfigurationList:
+        url = f"{self.__host}/api/v2/product_api_scan_configurations/?service_key_1={request.engagement_name}&product={product_id}"
         headers = {
             "Authorization": f"Token {self.__token}",
             "Conten-Type": "application/json",
