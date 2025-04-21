@@ -406,6 +406,6 @@ class BreakBuild:
 
         # Extract context from IaC and container scan results
         iac_context = extract_context_from_results(
-            "results.json", category_filter="VULNERABILITY"
+            "results.json", category_filter="VULNERABILITY",module="engine_iac"
         )
         return scan_result
