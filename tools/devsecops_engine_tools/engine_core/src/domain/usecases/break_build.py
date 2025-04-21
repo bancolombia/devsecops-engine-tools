@@ -19,6 +19,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_g
 from collections import Counter
 from datetime import timedelta, datetime
 import pytz
+from devsecops_engine_tools.engine_utilities.utils.context_utils import extract_context_from_results
 
 
 @dataclass
@@ -401,5 +402,10 @@ class BreakBuild:
                 "info",
                 custom_message,
             )
+        )
+
+        # Extract context from IaC and container scan results
+        iac_context = extract_context_from_results(
+            "results.json", category_filter="VULNERABILITY"
         )
         return scan_result
