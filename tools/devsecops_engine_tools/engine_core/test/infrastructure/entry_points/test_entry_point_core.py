@@ -24,7 +24,7 @@ class TestEntryPointCore(unittest.TestCase):
     ):
         # Set up mock arguments
 
-        mock_config_tool = {"BANNER": "DevSecOps Engine Tools", "ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
+        mock_config_tool = {"BANNER": "DevSecOps Engine Tools", "WARNING_RELEASE": False, "ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
         mock_findings_list = []
         mock_input_core = {}
         mock_scan_result = {}
@@ -72,7 +72,7 @@ class TestEntryPointCore(unittest.TestCase):
             mock_config_tool,
         )
         mock_break_build.return_value.process.assert_called_once_with(
-            mock_findings_list, mock_input_core, args
+            mock_findings_list, mock_input_core, args, False
         )
         mock_metrics_manager.return_value.process.assert_called_once_with(
             mock_config_tool,
@@ -161,8 +161,8 @@ class TestEntryPointCore(unittest.TestCase):
     ):
         # Set up mock arguments
 
-        mock_config_tool = {"BANNER": "DevSecOps Engine Tools", "ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
-        mock_config_tool_flag = {"BANNER": "DevSecOps Engine Tools", "ENGINE_IAC": {"ENABLED": "true", "TOOL": "OTHER_TOOL"}}
+        mock_config_tool = {"BANNER": "DevSecOps Engine Tools", "WARNING_RELEASE": "false", "ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
+        mock_config_tool_flag = {"BANNER": "DevSecOps Engine Tools", "WARNING_RELEASE": "false", "ENGINE_IAC": {"ENABLED": "true", "TOOL": "OTHER_TOOL"}}
         mock_findings_list = []
         mock_input_core = {}
         mock_scan_result = {}
