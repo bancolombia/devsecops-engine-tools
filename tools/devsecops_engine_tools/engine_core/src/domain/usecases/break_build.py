@@ -53,7 +53,7 @@ class BreakBuild:
                             )
                         )
 
-    def process(self, findings_list: "list[Finding]", input_core: InputCore, args: any):
+    def process(self, findings_list: "list[Finding]", input_core: InputCore, args: any, warning_release: bool):
         sys.stdout.reconfigure(encoding="utf-8")
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
@@ -243,12 +243,8 @@ class BreakBuild:
                     )
                 )
 
-                if devops_platform_gateway.get_variable("stage") == "build":
-                    print(
-                        devops_platform_gateway.result_pipeline("succeeded_with_issues")
-                    )
-                else:
-                    print(devops_platform_gateway.result_pipeline("succeeded"))
+                result = "succeeded_with_issues" if warning_release or devops_platform_gateway.get_variable("stage") == "build" else "succeeded"
+                print(devops_platform_gateway.result_pipeline(result))
 
                 scan_result["vulnerabilities"] = {
                     "threshold": {
@@ -308,7 +304,7 @@ class BreakBuild:
                     print(devops_platform_gateway.result_pipeline("failed"))
                     status = "failed"
                 else:
-                    if devops_platform_gateway.get_variable("stage") == "build":
+                    if warning_release or devops_platform_gateway.get_variable("stage") == "build":
                         print(
                             devops_platform_gateway.result_pipeline(
                                 "succeeded_with_issues"
