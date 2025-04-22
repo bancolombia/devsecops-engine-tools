@@ -404,8 +404,32 @@ class BreakBuild:
             )
         )
 
-        # Extract context from IaC and container scan results
-        iac_context = extract_context_from_results(
-            "results.json", category_filter="VULNERABILITY",module="engine_iac"
-        )
+        module = args.get("module")  
+        if module == "engine_iac":
+            iac_context = extract_context_from_results(
+                "results.json", category_filter="VULNERABILITY", module="engine_iac"
+            )
+        elif module == "engine_dependencies":
+            print(devops_platform_gateway.message("info", f"I'm {module}"))
+        elif module == "engine_container":
+            image_to_scan = args.get("image_to_scan", "default_image")
+
+            if ":" in image_to_scan and "/" not in image_to_scan:
+                # Already in the correct format
+                container_scan_file = f"{image_to_scan}_scan_result.json"
+            else:
+                # Format the image_to_scan to match the desired file name format
+                formatted_image = image_to_scan.replace("/", "_")
+                if ":" not in formatted_image:
+                    formatted_image += ":latest"
+                container_scan_file = f"{formatted_image}_scan_result.json"
+
+            print(f"Looking for image scan file: {container_scan_file}")  
+
+            container_context = extract_context_from_results(
+                container_scan_file, category_filter=None, module="engine_container"
+            )
+
+        else:
+            print(devops_platform_gateway.message("info", f"No context extraction for module: {module}"))
         return scan_result
