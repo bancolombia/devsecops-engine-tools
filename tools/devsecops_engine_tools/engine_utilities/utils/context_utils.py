@@ -20,10 +20,10 @@ def extract_context_from_results(file_path, category_filter=None, module=None):
                     end_line = file_line_range[1] if len(file_line_range) > 1 else "N/A"
                     line_number = start_line if start_line == end_line else f"{start_line}-{end_line}"
 
-                    repo_file_path = check.get("file_abs_path", "N/A")
+                    repo_file_path = check.get("repo_file_path", "N/A")
                     resource = check.get("resource", "N/A")
 
-                    formatted_file_path = f"{os.path.basename(repo_file_path)}/{repo_file_path}: {resource} (line {line_number})"
+                    formatted_file_path = f"{repo_file_path}: {resource} (line {line_number})"
 
                     context_list.append({
                         "severity": check.get("severity"),
@@ -54,7 +54,7 @@ def extract_context_from_results(file_path, category_filter=None, module=None):
     except json.JSONDecodeError:
         print(f"Error decoding JSON from: {file_path}")
 
-    print(f"\nContext extracted from {module} scan:")
+    print(f"\n\nContext extracted from {module} scan:")
     for context in context_list:
         if module == "engine_iac":
             print(
