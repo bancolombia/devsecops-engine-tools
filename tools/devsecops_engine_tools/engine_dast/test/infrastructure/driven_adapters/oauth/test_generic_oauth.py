@@ -49,6 +49,6 @@ class TestGenericOauth(unittest.TestCase):
         token = self.oauth.get_access_token_client_credentials()
 
         mock_request.assert_called_once_with(
-            'POST', 'example.comoauth2/token', headers={'content-type': 'application/x-www-form-urlencoded', 'accept': 'application/json'}, data={'client_id': 'dummy-id', 'client_secret': 'dummy-secret', 'grant_type': 'client_credentials', 'scope': 'TermExample:read:user'}, timeout=5
+            'POST', 'example.comoauth2/token', headers={'content-type': 'application/x-www-form-urlencoded', 'accept': 'application/json'}, data={'client_id': 'dummy-id', 'client_secret': 'dummy-secret', 'grant_type': 'client_credentials', 'scope': 'TermExample:read:user'}, timeout=5, ssl_verify=False
         )
         self.assertEqual(token, ('Authorization', 'Bearer dummy_access_token'))
