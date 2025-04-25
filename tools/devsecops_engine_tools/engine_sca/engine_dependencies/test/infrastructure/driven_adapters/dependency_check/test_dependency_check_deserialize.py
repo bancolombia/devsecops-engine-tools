@@ -149,6 +149,23 @@ class TestDependencyCheckDeserialize(unittest.TestCase):
         # Assert
         self.assertEqual(result, ("group:artifact:1.0.0"))
 
+    def test_get_where_with_evidence_collected(self):
+        xml_content = '''
+        <dependency xmlns="http://example.com/schema">
+            <evidenceCollected>
+                <evidence type="product">
+                    <value>example-lib</value>
+                </evidence>
+                <evidence type="version">
+                    <value>1.2.3</value>
+                </evidence>
+            </evidenceCollected>
+        </dependency>
+        '''
+        dependency = ET.ElementTree(ET.fromstring(xml_content)).getroot()
+        result = DependencyCheckDeserialize().get_where(dependency, {"ns": "http://example.com/schema"})
+        self.assertEqual(result, "example-lib:1.2.3")
+
     def test_get_where_without_identifiers(self):
         # Arrange
         xml_content = """<?xml version="1.0" encoding="utf-8"?>
@@ -160,3 +177,4 @@ class TestDependencyCheckDeserialize(unittest.TestCase):
 
         # Assert
         self.assertEqual(result, "")
+    
