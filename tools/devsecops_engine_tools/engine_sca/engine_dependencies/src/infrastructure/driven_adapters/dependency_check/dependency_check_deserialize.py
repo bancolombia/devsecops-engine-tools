@@ -151,5 +151,22 @@ class DependencyCheckDeserialize(DeserializatorGateway):
                     component_name = maven_parts[0] + ":" + maven_parts[1]
                     component_version = maven_parts[2]
                     return f"{component_name}:{component_version}"
+        
+        evidence_collected_node = dependency.find(
+            ".//ns:evidenceCollected", namespace
+        )
+        if evidence_collected_node:
+            product_node = evidence_collected_node.find(
+                ".//ns:evidence[@type='product']", namespace
+            )
+            if product_node:
+                component_name = product_node.find("ns:value", namespace).text
+                version_node = evidence_collected_node.find(
+                    ".//ns:evidence[@type='version']", namespace
+                )
+                if version_node:
+                    component_version = version_node.find("ns:value", namespace).text
 
+                return f"{component_name}:{component_version}"
+        
         return ""
