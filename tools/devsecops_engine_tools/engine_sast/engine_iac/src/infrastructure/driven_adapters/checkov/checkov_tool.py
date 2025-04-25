@@ -117,6 +117,8 @@ class CheckovTool(ToolGateway):
 
             print(f"Attempt {attempt}: Running install command: {' '.join(install_cmd)}")
 
+            print(f"Attempt {attempt}: Running install command: {' '.join(install_cmd)}")
+
             try:
                 result = subprocess.run(install_cmd, capture_output=True)
                 print(f"Command output: {result.stdout.decode().strip()}")
