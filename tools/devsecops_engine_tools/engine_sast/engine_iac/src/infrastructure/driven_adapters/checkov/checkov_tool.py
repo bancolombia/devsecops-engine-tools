@@ -66,20 +66,27 @@ class CheckovTool(ToolGateway):
             f"Retrying installation of {package} in {RETRY_DELAY} seconds..."
         )
 
+        print(f"Checking if {package} is already installed...")
         installed = shutil.which(package)
         if installed:
+            print(f"{package} is already installed at {installed}.")
             return "checkov"
 
         python_command = "python3" if platform.system() != "Windows" else "python"
+        print(f"Using Python command: {python_command}")
 
         python_path = shutil.which(python_command)
         if python_path is None:
             logger.error("Python3 not found on the system.")
+            print("Python3 not found on the system.")
             return None
+
+        print(f"Python path resolved to: {python_path}")
 
         def retry(attempt):
             if attempt < MAX_RETRIES:
                 logger.warning(INSTALL_RETRY_MSG)
+                print(f"Attempt {attempt}: {INSTALL_RETRY_MSG}")
                 time.sleep(RETRY_DELAY)
 
         for attempt in range(1, MAX_RETRIES + 1):
@@ -96,16 +103,23 @@ class CheckovTool(ToolGateway):
                 str(RETRY_DELAY),
             ]
 
+            print(f"Attempt {attempt}: Running install command: {' '.join(install_cmd)}")
+
             try:
                 result = subprocess.run(install_cmd, capture_output=True)
+                print(f"Command output: {result.stdout.decode().strip()}")
+                print(f"Command error: {result.stderr.decode().strip()}")
                 if result.returncode == 0:
                     logger.debug(INSTALL_SUCCESS_MSG)
+                    print(INSTALL_SUCCESS_MSG)
                     return "checkov"
             except Exception as e:
                 logger.error(f"Error during installation: {e}")
+                print(f"Error during installation: {e}")
 
             retry(attempt)
 
+        print(f"Failed to install {package} after {MAX_RETRIES} attempts.")
         return None
 
     def execute(self, checkov_config: CheckovConfig, command_prefix):
