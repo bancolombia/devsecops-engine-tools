@@ -55,7 +55,7 @@ class GenericOauth(AuthenticationGateway):
             url = self.endpoint + self.config["path"] if not self.config["path"].startswith("http") else self.config["path"]
             headers = self.config["headers"]
             response = requests.request(
-                self.config["method"], url, headers=headers, data=data, timeout=5, ssl_verify=False
+                self.config["method"], url, headers=headers, data=data, timeout=5, verify=False
             )
             if 200 <= response.status_code < 300:
                 result = response.json()["access_token"]
