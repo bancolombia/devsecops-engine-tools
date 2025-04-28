@@ -135,13 +135,13 @@ public class ProjectConfiguration implements Configurable, Configurable.NoScroll
         variableGroups.setText(projectSettings.getAzureDevOpsVariableGroups());
         releaseDefinition.setText(projectSettings.getAzureReleaseDefinitionId());
         stageName.setText(projectSettings.getAzureReleaseStageName());
-        iacDirectory.addBrowseFolderListener(project, FileChooserDescriptorFactory.createMultipleFoldersDescriptor()
+        iacDirectory.addBrowseFolderListener(project, FileChooserDescriptorFactory.multiDirs()
                 .withTitle("Select IaC Resources").withDescription("Select IaC resources directory"));
-        dotEnvVariables.addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFileDescriptor()
+        dotEnvVariables.addBrowseFolderListener(project, FileChooserDescriptorFactory.singleFile()
                 .withTitle("Select .env File").withDescription("Select .env file"));
-        dockerFilePath.addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFileDescriptor()
+        dockerFilePath.addBrowseFolderListener(project, FileChooserDescriptorFactory.singleFile()
                 .withTitle("Select Dockerfile").withDescription("Select Dockerfile resource"));
-        buildContextPath.addBrowseFolderListener(project, FileChooserDescriptorFactory.createSingleFolderDescriptor()
+        buildContextPath.addBrowseFolderListener(project, FileChooserDescriptorFactory.singleDir()
                 .withTitle("Select Build Context Path").withDescription("Select image build context"));
     }
 
