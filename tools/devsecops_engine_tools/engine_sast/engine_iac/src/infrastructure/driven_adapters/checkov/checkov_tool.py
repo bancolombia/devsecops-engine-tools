@@ -57,85 +57,67 @@ class CheckovTool(ToolGateway):
             yaml.dump(checkov_config.dict_confg_file, file)
             file.close()
 
-
     def retryable_install_package(self, package: str, version: str) -> bool:
         MAX_RETRIES = 3
         RETRY_DELAY = 1  # in seconds
         INSTALL_SUCCESS_MSG = f"Installation of {package} successful"
-        INSTALL_RETRY_MSG = (
-            f"Retrying installation of {package} in {RETRY_DELAY} seconds..."
-        )
+        INSTALL_RETRY_MSG = f"Retrying installation of {package} in {RETRY_DELAY} seconds..."
 
-        print(f"Checking if {package} is already installed...")
         installed = shutil.which(package)
         if installed:
-            print(f"{package} is already installed at {installed}.")
             return "checkov"
 
         python_command = "python3" if platform.system() != "Windows" else "python"
-        print(f"Using Python command: {python_command}")
-
         python_path = shutil.which(python_command)
         if python_path is None:
-            logger.error("Python3 not found on the system.")
-            print("Python3 not found on the system.")
+            logger.error("Python not found on the system.")
             return None
 
-        print(f"Python path resolved to: {python_path}")
+        # Detect Python version
+        try:
+            result = subprocess.run(
+                [python_path, "--version"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            version_str = result.stdout.strip().split()[1]
+            major, minor, *_ = map(int, version_str.split("."))
+        except Exception as e:
+            logger.error(f"Failed to detect Python version: {e}")
+            return None
+
+        # Prepare install command parts
+        install_cmd_base = [
+            python_path, "-m", "pip", "install", "-q",
+            f"{package}=={version}",
+            "--retries", str(MAX_RETRIES),
+            "--timeout", str(RETRY_DELAY),
+        ]
+
+        if (major, minor) >= (3, 11):
+            install_cmd_base.append("--break-system-packages")
 
         def retry(attempt):
             if attempt < MAX_RETRIES:
                 logger.warning(INSTALL_RETRY_MSG)
-                print(f"Attempt {attempt}: {INSTALL_RETRY_MSG}")
                 time.sleep(RETRY_DELAY)
 
-        # Check Python version
-        python_version = subprocess.run(
-            [python_path, "--version"], capture_output=True, text=True
-        ).stdout.strip()
-        print(f"Detected Python version: {python_version}")
-
-        # Add --break-system-packages flag for Python >= 3.12
-        additional_flags = []
-        if "Python 3.12" in python_version or "Python 3.13" in python_version:
-            additional_flags.append("--break-system-packages")
-            print("Adding --break-system-packages flag for Python >= 3.12")
-
         for attempt in range(1, MAX_RETRIES + 1):
-            install_cmd = [
-                python_path,
-                "-m",
-                "pip",
-                "install",
-                "-q",
-                f"{package}=={version}",
-                "--retries",
-                str(MAX_RETRIES),
-                "--timeout",
-                str(RETRY_DELAY),
-            ] + additional_flags
-
-            print(f"Attempt {attempt}: Running install command: {' '.join(install_cmd)}")
-
-            print(f"Attempt {attempt}: Running install command: {' '.join(install_cmd)}")
-
             try:
-                result = subprocess.run(install_cmd, capture_output=True)
-                print(f"Command output: {result.stdout.decode().strip()}")
-                print(f"Command error: {result.stderr.decode().strip()}")
+                result = subprocess.run(install_cmd_base, capture_output=True)
                 if result.returncode == 0:
                     logger.debug(INSTALL_SUCCESS_MSG)
-                    print(INSTALL_SUCCESS_MSG)
                     return "checkov"
+                else:
+                    logger.error(f"Installation failed (attempt {attempt}): {result.stderr.decode().strip()}")
             except Exception as e:
-                logger.error(f"Error during installation: {e}")
-                print(f"Error during installation: {e}")
+                logger.error(f"Error during installation (attempt {attempt}): {e}")
 
             retry(attempt)
 
-        print(f"Failed to install {package} after {MAX_RETRIES} attempts.")
         return None
-
+   
     def execute(self, checkov_config: CheckovConfig, command_prefix):
         command = (
             f"{command_prefix} --config-file "
