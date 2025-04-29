@@ -1,7 +1,6 @@
 import sys
 from itertools import chain
 from dataclasses import dataclass
-from functools import reduce
 
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.finding import (
@@ -30,28 +29,6 @@ class BreakBuild:
     ):
         self.devops_platform_gateway = devops_platform_gateway
         self.printer_table_gateway = printer_table_gateway
-
-    def _apply_policie_exception_new_vulnerability_industry(
-        self, findings_list: "list[Finding]", exclusions: "list[Exclusions]", args: any
-    ):
-        if args["module"] in ["engine_container", "engine_dependencies"]:
-            date_actual = datetime.now(pytz.utc)
-            for item in findings_list:
-                if item.published_date_cve:
-                    date_initial = datetime.fromisoformat(item.published_date_cve)
-                    date_final = date_initial + timedelta(days=5)
-                    if date_initial <= date_actual <= date_final:
-                        exclusions.append(
-                            Exclusions(
-                                **{
-                                    "id": item.id,
-                                    "where": "all",
-                                    "create_date": date_initial.strftime("%d%m%Y"),
-                                    "expired_date": date_final.strftime("%d%m%Y"),
-                                    "reason": "New vulnerability in the industry",
-                                }
-                            )
-                        )
 
     def process(self, findings_list: "list[Finding]", input_core: InputCore, args: any, warning_release: bool):
         sys.stdout.reconfigure(encoding="utf-8")
@@ -91,6 +68,28 @@ class BreakBuild:
         print()
         print(devops_platform_gateway.message("info", custom_message))
         return scan_result
+    
+    def _apply_policie_exception_new_vulnerability_industry(
+        self, findings_list: "list[Finding]", exclusions: "list[Exclusions]", args: any
+    ):
+        if args["module"] in ["engine_container", "engine_dependencies"]:
+            date_actual = datetime.now(pytz.utc)
+            for item in findings_list:
+                if item.published_date_cve:
+                    date_initial = datetime.fromisoformat(item.published_date_cve)
+                    date_final = date_initial + timedelta(days=5)
+                    if date_initial <= date_actual <= date_final:
+                        exclusions.append(
+                            Exclusions(
+                                **{
+                                    "id": item.id,
+                                    "where": "all",
+                                    "create_date": date_initial.strftime("%d%m%Y"),
+                                    "expired_date": date_final.strftime("%d%m%Y"),
+                                    "reason": "New vulnerability in the industry",
+                                }
+                            )
+                        )
 
     def _filter_findings(self, findings_list, exclusions):
         findings_excluded_list = [
@@ -181,7 +180,6 @@ class BreakBuild:
 
     def _handle_cve_policy(self, vulnerabilities_list: list[Finding], threshold):
         devops_platform_gateway = self.devops_platform_gateway
-        from itertools import chain
 
         ids_vulnerabilities = list(
             chain.from_iterable(
@@ -230,7 +228,6 @@ class BreakBuild:
     def _handle_exclusions(self, findings_excluded_list, exclusions):
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
-        from collections import Counter
         print()
 
         if findings_excluded_list:
