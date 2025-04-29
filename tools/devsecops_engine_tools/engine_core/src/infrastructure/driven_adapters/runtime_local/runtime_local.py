@@ -39,6 +39,8 @@ class RuntimeLocal(DevopsPlatformGateway):
             return f"{self.FAIL}{self.ICON_FAIL}Failed{self.ENDC}"
         elif type == "succeeded":
             return f"{self.OKGREEN}{self.ICON_SUCCESS}Succeeded{self.ENDC}"
+        elif type == "succeeded_with_issues":
+            return f"{self.WARNING}{self.ICON_SUCCESS}Succeeded with issues{self.ENDC}"
 
     def get_source_code_management_uri(self):
         return os.environ.get("DET_SOURCE_CODE_MANAGEMENT_URI")

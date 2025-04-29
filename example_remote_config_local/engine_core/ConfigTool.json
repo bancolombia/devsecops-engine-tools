@@ -1,5 +1,6 @@
 {
     "BANNER": "DevSecOps Engine Tools",
+    "WARNING_RELEASE": false,
     "SECRET_MANAGER": {
         "AWS": {
             "SECRET_NAME": "",
@@ -111,6 +112,9 @@
     "ENGINE_CODE": {
         "ENABLED": true,
         "TOOL": "BEARER"
+    },
+    "ENGINE_RISK": {
+        "ENABLED": false
     },
     "REPORT_SONAR": {
         "ENABLED": true

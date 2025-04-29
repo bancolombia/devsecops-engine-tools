@@ -45,7 +45,7 @@ class BreakBuildTests(unittest.TestCase):
 
         args = {"module": "engine_iac"}
 
-        result = self.break_build.process(findings_list, input_core, args)
+        result = self.break_build.process(findings_list, input_core, args, False)
 
         self.assertEqual(
             result, {"findings_excluded": [], "vulnerabilities": {}, "compliances": {}}
@@ -159,7 +159,7 @@ class BreakBuildTests(unittest.TestCase):
 
         args = {"module": "engine_container"}
 
-        result = self.break_build.process(findings_list, input_core, args)
+        result = self.break_build.process(findings_list, input_core, args, False)
 
         result_compare = {
             "findings_excluded": [],
@@ -236,7 +236,7 @@ class BreakBuildTests(unittest.TestCase):
         )
 
         result = self.break_build.process(
-            findings_list, input_core, {"module": "engine_iac"}
+            findings_list, input_core, {"module": "engine_iac"}, False
         )
 
         result_compare = {
@@ -324,7 +324,7 @@ class BreakBuildTests(unittest.TestCase):
         )
 
         result = self.break_build.process(
-            findings_list, input_core, {"module": "engine_iac"}
+            findings_list, input_core, {"module": "engine_iac"}, False
         )
 
         result_compare = {

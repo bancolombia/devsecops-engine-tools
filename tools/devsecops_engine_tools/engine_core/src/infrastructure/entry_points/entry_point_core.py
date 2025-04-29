@@ -49,10 +49,13 @@ def init_engine_core(
                 sbom_tool_gateway
             ).process(args, config_tool)
 
+            warning_release = config_tool["WARNING_RELEASE"]
+
             results = BreakBuild(devops_platform_gateway, print_table_gateway).process(
                 findings_list,
                 input_core,
-                args
+                args,
+                warning_release
             )
         if args["send_metrics"] == "true":
             MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(
