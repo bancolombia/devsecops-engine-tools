@@ -178,7 +178,7 @@ class BreakBuild:
                 "found": [{"id": item.id, "severity": item.severity} for item in vulnerabilities_list],
             }
 
-    def _handle_cve_policy(self, vulnerabilities_list: list[Finding], threshold):
+    def _handle_cve_policy(self, vulnerabilities_list: "list[Finding]", threshold):
         devops_platform_gateway = self.devops_platform_gateway
 
         ids_vulnerabilities = list(
