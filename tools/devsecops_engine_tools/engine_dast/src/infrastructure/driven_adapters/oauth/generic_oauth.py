@@ -52,7 +52,9 @@ class GenericOauth(AuthenticationGateway):
                 "scope": self.config["scope"]
             }
 
-            url = self.endpoint + self.config["path"] if not self.config["path"].startswith("http") else self.config["path"]
+            if self.config["path"].startswith("http"): url = self.config["path"]
+            else: url = self.endpoint + self.config["path"]
+            
             headers = self.config["headers"]
             response = requests.request(
                 self.config["method"], url, headers=headers, data=data, timeout=5
