@@ -16,7 +16,7 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class FirstCsv(AddEpssGateway):
     def download_epss_data(self):
-        base_url = "https://epss.cyentia.com/epss_scores-{}.csv.gz"
+        base_url = "https://epss.empiricalsecurity.com/epss_scores-{}.csv.gz"
         date = datetime.datetime.now()
         attempts = 0
         while attempts < 2:
