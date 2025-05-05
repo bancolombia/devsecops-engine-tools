@@ -48,6 +48,7 @@ class IacScan:
                 secret_tool=secret_tool,
                 secret_external_checks=dict_args["token_external_checks"],
                 work_folder=self.devops_platform_gateway.get_variable("temp_directory"),
+                dict_args=dict_args
             )
         else:
             print("Tool skipped by DevSecOps policy")

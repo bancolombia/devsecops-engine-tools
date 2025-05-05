@@ -99,7 +99,7 @@ def test_scan_folders(checkov_tool):
         checkov_tool, "async_scan", side_effect=output_queue.put
     ):
         result_scans, rules_run = checkov_tool.scan_folders(
-            folders_to_scan, config_tool, agent_env, environment, "eks", "checkov"
+            folders_to_scan, config_tool, agent_env, environment, "eks", "checkov", {}
         )
 
     assert result_scans == []

@@ -124,6 +124,13 @@ def get_inputs_from_cli(args):
         help="Folder Path to scan, only apply engine_iac, engine_code, engine_secret and engine_dependencies tools",
     )
     parser.add_argument(
+        "-tr",
+        "--terraform_repo_root",
+        type=str,
+        required=False,
+        help="Folder Path containing the terraform code used to generate a given plan file, only apply engine_iac with checkov",
+    )
+    parser.add_argument(
         "-p",
         "--platform",
         type=parse_choices({"all", "docker", "k8s", "cloudformation", "openapi", "terraform"}),
@@ -223,6 +230,7 @@ def get_inputs_from_cli(args):
         "tool": args.tool,
         "module": args.module,
         "folder_path": args.folder_path,
+        "terraform_repo_root": args.terraform_repo_root,
         "platform": args.platform,
         "use_secrets_manager": args.use_secrets_manager,
         "use_vulnerability_management": args.use_vulnerability_management,

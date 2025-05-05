@@ -22,7 +22,8 @@ class CheckovConfigEnum(Enum):
     DOCKERFILEPATH = "dockerfile-path"
     EXTERNAL_CHECKS_GIT = "external-checks-git"
     SKIP_DOWNLOAD = "skip-download"
-
+    REPO_ROOT_FOR_PLAN_ENRICHMENT = "repo-root-for-plan-enrichment"
+    DEEP_ANALYSIS = "deep-analysis"
 
 class CheckovConfig:
     dict_confg_file = {}
@@ -45,6 +46,8 @@ class CheckovConfig:
         external_checks_git=None,
         skip_checks=None,
         skip_download=True,
+        repo_root_for_plan_enrichment=None,
+        deep_analysis=None
     ):
         self.path_config_file = path_config_file
         self.config_file_name = config_file_name
@@ -62,6 +65,8 @@ class CheckovConfig:
         self.skip_checks = skip_checks
         self.skip_download = skip_download
         self.env = env
+        self.repo_root_for_plan_enrichment = repo_root_for_plan_enrichment
+        self.deep_analysis = deep_analysis
 
     def create_config_dict(self):
         if self.framework is not None:
@@ -111,6 +116,20 @@ class CheckovConfig:
             raise ValueError(
                 MESSAGE_VALUE + CheckovConfigEnum.DIRECTORIES.value + MESSAGE_NIL
             )
+    
+        if self.repo_root_for_plan_enrichment is not None:
+            self.dict_confg_file[
+                CheckovConfigEnum.REPO_ROOT_FOR_PLAN_ENRICHMENT.value
+            ] = self.repo_root_for_plan_enrichment
+        else:
+            self.dict_confg_file.pop(CheckovConfigEnum.REPO_ROOT_FOR_PLAN_ENRICHMENT.value, None)
+    
+        if self.deep_analysis is not None:
+            self.dict_confg_file[
+                CheckovConfigEnum.DEEP_ANALYSIS.value
+            ] = self.deep_analysis
+        else:
+            self.dict_confg_file.pop(CheckovConfigEnum.DEEP_ANALYSIS.value, None)
 
         if self.evaluate_variables is not None:
             self.dict_confg_file[
