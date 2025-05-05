@@ -137,4 +137,6 @@ class ContainerScaScan:
         Returns:
             list: Deserialized list of findings.
         """
+        self.tool_deseralizator.get_container_context_from_results(image_scanned)
+        
         return self.tool_deseralizator.get_list_findings(image_scanned)

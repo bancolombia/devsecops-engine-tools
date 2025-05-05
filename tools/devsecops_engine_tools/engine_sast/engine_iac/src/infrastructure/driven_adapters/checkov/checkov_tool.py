@@ -1,3 +1,4 @@
+import argparse
 import yaml
 import requests
 import zipfile
@@ -27,6 +28,7 @@ from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
+import sys
 
 class CheckovTool(ToolGateway):
     
@@ -203,6 +205,8 @@ class CheckovTool(ToolGateway):
             result_scans.extend(result)
         return result_scans, rules_run
 
+  
+
     def run_tool(
         self,
         config_tool,
@@ -240,6 +244,15 @@ class CheckovTool(ToolGateway):
                 config_tool[self.TOOL_CHECKOV]["DEFAULT_SEVERITY"],
                 config_tool[self.TOOL_CHECKOV]["DEFAULT_CATEGORY"]
             )
+
+            context_flag = kwargs.get("context", "false")
+
+            if(context_flag == "true"):
+                checkov_deserealizator.get_iac_context_from_results(
+                    result_scans,
+                    rules_run, 
+                    config_tool[self.TOOL_CHECKOV]["DEFAULT_SEVERITY"],
+                )
 
             return (
                 findings_list,
