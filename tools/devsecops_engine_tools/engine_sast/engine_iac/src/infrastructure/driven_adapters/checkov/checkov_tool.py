@@ -148,7 +148,8 @@ class CheckovTool(ToolGateway):
         agent_env,
         environment,
         platform_to_scan,
-        command_prefix
+        command_prefix,
+        dict_args
     ):
         output_queue = queue.Queue()
         # Crea una lista para almacenar los hilos
@@ -160,8 +161,10 @@ class CheckovTool(ToolGateway):
                     elem.upper() in rule for elem in platform_to_scan
                 ):
                     framework = [self.framework_mapping[rule]]
+                    repo_root = None
                     if "terraform" in platform_to_scan or ("all" in platform_to_scan and self.framework_mapping[rule] == "terraform"): 
                         framework.append("terraform_plan")
+                        repo_root = dict_args.get("terraform_repo_root", None)
 
                     checkov_config = CheckovConfig(
                         path_config_file="",
@@ -192,6 +195,12 @@ class CheckovTool(ToolGateway):
                             and rule in self.framework_external_checks
                             else []
                         ),
+                        repo_root_for_plan_enrichment=repo_root,
+                        deep_analysis=(
+                            True
+                            if repo_root
+                            else None
+                        )
                     )
 
                     checkov_config.create_config_dict()
@@ -240,7 +249,7 @@ class CheckovTool(ToolGateway):
         
         if command_prefix is not None:
             result_scans, rules_run = self.scan_folders(
-                folders_to_scan, config_tool, agent_env, environment, platform_to_scan, command_prefix
+                folders_to_scan, config_tool, agent_env, environment, platform_to_scan, command_prefix, kwargs.get("dict_args")
             )
 
             checkov_deserealizator = CheckovDeserealizator()

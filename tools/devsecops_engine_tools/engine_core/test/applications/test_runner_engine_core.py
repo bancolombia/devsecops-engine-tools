@@ -94,6 +94,7 @@ def test_get_inputs_from_cli(mock_parse_args):
     mock_args.module = "engine_iac"
     mock_args.tool = None
     mock_args.folder_path = "/path/to/folder"
+    mock_args.terraform_repo_root = "/path/to/terraform/repo/root"
     mock_args.platform = "k8s,docker"
     mock_args.use_secrets_manager = "true"
     mock_args.use_vulnerability_management = "false"
@@ -121,6 +122,7 @@ def test_get_inputs_from_cli(mock_parse_args):
         "tool": None,
         "module": "engine_iac",
         "folder_path": "/path/to/folder",
+        "terraform_repo_root": "/path/to/terraform/repo/root",
         "platform": "k8s,docker",
         "use_secrets_manager": "true",
         "use_vulnerability_management": "false",
