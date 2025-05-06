@@ -17,7 +17,6 @@ from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
-
 class IacScan:
     def __init__(
         self, tool_gateway: ToolGateway, devops_platform_gateway: DevopsPlatformGateway
