@@ -14,7 +14,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.input_core import Input
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 from devsecops_engine_tools.engine_utilities.utils.utils import Utils
-import json
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
@@ -41,7 +40,7 @@ class IacScan:
 
         findings_list, path_file_results = [], None
         if skip_tool is False:
-            findings_list, path_file_results= self.tool_gateway.run_tool(
+            findings_list, path_file_results = self.tool_gateway.run_tool(
                 config_tool_iac,
                 folders_to_scan,
                 environment="pdn" if env not in ["dev", "qa", "pdn"] else env,

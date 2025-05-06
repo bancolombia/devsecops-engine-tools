@@ -1,4 +1,3 @@
-import argparse
 import yaml
 import requests
 import zipfile
@@ -28,7 +27,6 @@ from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
-import sys
 
 class CheckovTool(ToolGateway):
     

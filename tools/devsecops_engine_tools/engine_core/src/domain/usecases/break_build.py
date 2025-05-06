@@ -20,9 +20,6 @@ from collections import Counter
 from datetime import timedelta, datetime
 import pytz
 
-from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_deserealizator import CheckovDeserealizator
-
-
 
 @dataclass
 class BreakBuild:
@@ -405,5 +402,6 @@ class BreakBuild:
                 custom_message,
             )
         )
+        return scan_result
 
     
