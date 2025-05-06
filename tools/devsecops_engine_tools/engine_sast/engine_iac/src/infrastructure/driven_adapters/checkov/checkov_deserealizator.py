@@ -79,8 +79,9 @@ class CheckovDeserealizator:
                     )
                 
                     context_iac_list.append(context_iac)
-
+        print("===== BEGIN CONTEXT OUTPUT =====")
         print(json.dumps({"iac_context": [obj.__dict__ for obj in context_iac_list] }, indent=4))
+        print("===== END CONTEXT OUTPUT =====")
 
 
 

@@ -109,7 +109,3 @@ class TrivyDeserializator(DeseralizatorGateway):
         print("===== BEGIN CONTEXT OUTPUT =====")
         print(json.dumps({"container_context": [asdict(context) for context in context_container_list]}, indent=2))
         print("===== END CONTEXT OUTPUT =====")
-
-
-
-

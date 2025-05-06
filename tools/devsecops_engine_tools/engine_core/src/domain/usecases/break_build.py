@@ -403,5 +403,3 @@ class BreakBuild:
             )
         )
         return scan_result
-
-    
