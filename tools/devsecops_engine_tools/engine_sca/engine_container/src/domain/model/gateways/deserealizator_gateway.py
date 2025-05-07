@@ -6,3 +6,6 @@ class DeseralizatorGateway(metaclass=ABCMeta):
     @abstractmethod
     def get_list_findings(self, results_scan_list: list) -> "list[Finding]":
         "Deseralizator"
+
+    def get_container_context_from_results(self, results_scan_list: list) -> "list[ContextContainer]":
+        "Deseralizator"

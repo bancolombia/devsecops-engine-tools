@@ -203,6 +203,15 @@ def get_inputs_from_cli(args):
         help="File path containing the configuration, structured according to the documentation, \
         for the API or web application to be scanned by the DAST tool."
     )
+    parser.add_argument(
+        "-c",
+        "--context",
+        choices=["true", "false"],
+        type=str,
+        required=False,
+        default="false",
+        help="Enable or disable context creation. Default is false."
+    )
 
     TOOLS = {
         "engine_iac": ["checkov", "kics", "kubescape"],
@@ -242,7 +251,8 @@ def get_inputs_from_cli(args):
         "token_external_checks": args.token_external_checks,
         "xray_mode": args.xray_mode,
         "image_to_scan": args.image_to_scan,
-        "dast_file_path": args.dast_file_path
+        "dast_file_path": args.dast_file_path,
+        "context": args.context
     }
 
 

@@ -53,7 +53,8 @@ def init_engine_sca_rm(
             dict_args["token_engine_container"],
             image_to_scan,
             exclusions,
-            pipeline_name
+            pipeline_name,
+            context = dict_args["context"]
         )
         image_scanned, base_image, sbom_components = container_sca_scan.process()
         if image_scanned:

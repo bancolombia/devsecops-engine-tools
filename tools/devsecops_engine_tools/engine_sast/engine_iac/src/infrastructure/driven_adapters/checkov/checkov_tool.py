@@ -260,6 +260,15 @@ class CheckovTool(ToolGateway):
                 config_tool[self.TOOL_CHECKOV]["DEFAULT_CATEGORY"]
             )
 
+            context_flag = kwargs.get("context", "false")
+
+            if(context_flag == "true"):
+                checkov_deserealizator.get_iac_context_from_results(
+                    result_scans,
+                    rules_run, 
+                    config_tool[self.TOOL_CHECKOV]["DEFAULT_SEVERITY"],
+                )
+                
             return (
                 findings_list,
                 generate_file_from_tool(
