@@ -47,12 +47,14 @@ class IacScan:
                 secret_tool=secret_tool,
                 secret_external_checks=dict_args["token_external_checks"],
                 work_folder=self.devops_platform_gateway.get_variable("temp_directory"),
+                dict_args=dict_args
                 context=dict_args["context"],
                 dict_args=dict_args
             )
         else:
             print("Tool skipped by DevSecOps policy")
             dict_args["send_metrics"] = "false"
+            dict_args["use_vulnerability_management"] = "false"
             dict_args["use_vulnerability_management"] = "false"
 
         totalized_exclusions = []
@@ -82,6 +84,7 @@ class IacScan:
             path_file_results=path_file_results,
             custom_message_break_build=config_tool_core.message_info_engine_iac,
             scope_pipeline=config_tool_core.scope_pipeline,
+            scope_service=config_tool_core.scope_service,
             scope_service=config_tool_core.scope_service,
             stage_pipeline=self.devops_platform_gateway.get_variable(
                 "stage"
@@ -125,8 +128,11 @@ class IacScan:
                 if len(files) > 0:
                     name_file, _ = os.path.splitext(files[0])
                     config_tool.scope_service = (
+                    config_tool.scope_service = (
                         f"{config_tool.scope_pipeline}_{name_file}"
                     )
+            else:
+                config_tool.scope_service = config_tool.scope_pipeline
             else:
                 config_tool.scope_service = config_tool.scope_pipeline
 
