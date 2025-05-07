@@ -44,6 +44,7 @@ def container_sca_scan(
         "image_to_scan",
         {"exclusions": "exclusions"},
         "pipeline_name",
+        "context",
     )
 
 
