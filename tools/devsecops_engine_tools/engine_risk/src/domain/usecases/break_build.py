@@ -15,6 +15,8 @@ from collections import Counter
 import copy
 import sympy as sp
 import math
+from datetime import datetime, timedelta
+import holidays
 
 
 class BreakBuild:
@@ -138,7 +140,16 @@ class BreakBuild:
         formula = sp.Eq(
             remediation_rate_name,
             100
-            * (mitigated_name / (all_findings_name - new_findings - white_list_name - transferred_name - base_image_name)),
+            * (
+                mitigated_name
+                / (
+                    all_findings_name
+                    - new_findings
+                    - white_list_name
+                    - transferred_name
+                    - base_image_name
+                )
+            ),
         )
         print("\n")
         sp.pretty_print(formula)
@@ -167,7 +178,13 @@ class BreakBuild:
         print(
             f"Mitigated: {mitigated_count}   AllFindings: {all_findings_count}   BaseImage: {base_image_count}   NewFindings: {self.policy_excluded}   Transferred: {transferred_list_count}   WhiteList: {white_list_count}\n\n"
         )
-        total = all_findings_count - self.policy_excluded - white_list_count - base_image_count - transferred_list_count
+        total = (
+            all_findings_count
+            - self.policy_excluded
+            - white_list_count
+            - base_image_count
+            - transferred_list_count
+        )
 
         if total == 0:
             print(
@@ -198,7 +215,9 @@ class BreakBuild:
             )
             self.warning_build = True
         else:
-            missing_findings = math.ceil((risk_threshold / 100 * total) - mitigated_count)
+            missing_findings = math.ceil(
+                (risk_threshold / 100 * total) - mitigated_count
+            )
             print(
                 self.devops_platform_gateway.message(
                     "error",
@@ -281,62 +300,85 @@ class BreakBuild:
         remote_config = self.remote_config
         if report_list:
             tag_blacklist = set(remote_config["TAG_BLACKLIST_EXCLUSION_DAYS"].keys())
+            colombian_holidays = holidays.Colombia()
 
-            filtered_reports_above_threshold = [
-                (report, tag)
-                for report in report_list
-                for tag in report.tags
-                if tag in tag_blacklist
-                and report.age >= remote_config["TAG_BLACKLIST_EXCLUSION_DAYS"][tag]
-            ]
+        def calculate_working_days(start_date, days):
+            current_date = start_date
+            working_days = 0
+            while working_days < days:
+                current_date += timedelta(days=1)
+                if (
+                    current_date.weekday() < 5
+                    and current_date not in colombian_holidays
+                ):
+                    working_days += 1
+            return current_date
 
-            filtered_reports_below_threshold = [
-                (report, tag)
-                for report in report_list
-                for tag in report.tags
-                if tag in tag_blacklist
-                and report.age < remote_config["TAG_BLACKLIST_EXCLUSION_DAYS"][tag]
-            ]
+        filtered_reports_above_threshold = []
+        filtered_reports_below_threshold = []
 
-            for report, tag in filtered_reports_above_threshold:
+        for report in report_list:
+            for tag in report.tags:
+                if tag in tag_blacklist:
+                    exclusion_value = remote_config["TAG_BLACKLIST_EXCLUSION_DAYS"][tag]
+                    if isinstance(exclusion_value, str) and "WD" in exclusion_value:
+                        working_days_threshold = int(exclusion_value.replace("WD", ""))
+                        report_created_date = datetime.strptime(
+                            report.created.split("T")[0], "%Y-%m-%d"
+                        )
+                        threshold_date = calculate_working_days(
+                            report_created_date, working_days_threshold
+                        )
+                        if datetime.now() >= threshold_date:
+                            filtered_reports_above_threshold.append((report, tag))
+                        else:
+                            filtered_reports_below_threshold.append((report, tag))
+                    else:
+                        numeric_threshold = int(exclusion_value)
+                        if report.age >= numeric_threshold:
+                            filtered_reports_above_threshold.append((report, tag))
+                        else:
+                            filtered_reports_below_threshold.append((report, tag))
+
+        for report, tag in filtered_reports_above_threshold:
+            report.reason = "Blacklisted"
+            print(
+                self.devops_platform_gateway.message(
+                    "error",
+                    f"Report {report.vm_id} with tag '{tag}' is blacklisted and age {report.age} is above threshold {remote_config['TAG_BLACKLIST_EXCLUSION_DAYS'][tag]}",
+                )
+            )
+
+        for report, tag in filtered_reports_below_threshold:
+            print(
+                self.devops_platform_gateway.message(
+                    "warning",
+                    f"Report {report.vm_id} with tag '{tag}' is blacklisted but age {report.age} is below threshold {remote_config['TAG_BLACKLIST_EXCLUSION_DAYS'][tag]}",
+                )
+            )
+            self.policy_excluded += 1
+
+        if filtered_reports_above_threshold:
+            self.break_build = True
+            self.blacklisted += len(filtered_reports_above_threshold)
+            self.report_breaker.extend(
+                copy.deepcopy(
+                    [report for report, _ in filtered_reports_above_threshold]
+                )
+            )
+
+        for report in report_list:
+            if "On Blacklist" in report.risk_status:
+                self.break_build = True
                 report.reason = "Blacklisted"
+                self.blacklisted += 1
+                self.report_breaker.append(copy.deepcopy(report))
                 print(
                     self.devops_platform_gateway.message(
                         "error",
-                        f"Report {report.vm_id} with tag '{tag}' is blacklisted and age {report.age} is above threshold {remote_config['TAG_BLACKLIST_EXCLUSION_DAYS'][tag]}",
+                        f"Report {report.vm_id} is blacklisted.",
                     )
                 )
-
-            for report, tag in filtered_reports_below_threshold:
-                print(
-                    self.devops_platform_gateway.message(
-                        "warning",
-                        f"Report {report.vm_id} with tag '{tag}' is blacklisted but age {report.age} is below threshold {remote_config['TAG_BLACKLIST_EXCLUSION_DAYS'][tag]}",
-                    )
-                )
-                self.policy_excluded += 1
-
-            if filtered_reports_above_threshold:
-                self.break_build = True
-                self.blacklisted += len(filtered_reports_above_threshold)
-                self.report_breaker.extend(
-                    copy.deepcopy(
-                        [report for report, _ in filtered_reports_above_threshold]
-                    )
-                )
-
-            for report in report_list:
-                if "On Blacklist" in report.risk_status:
-                    self.break_build = True
-                    report.reason = "Blacklisted"
-                    self.blacklisted += 1
-                    self.report_breaker.append(copy.deepcopy(report))
-                    print(
-                        self.devops_platform_gateway.message(
-                            "error",
-                            f"Report {report.vm_id} is blacklisted.",
-                        )
-                    )
 
     def _risk_score_control(self, report_list: "list[Report]"):
         remote_config = self.remote_config
