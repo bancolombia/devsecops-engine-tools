@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from devsecops_engine_tools.engine_core.src.domain.model.finding import Finding
+from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.context_container import ContextContainer
 
 
 class DeseralizatorGateway(metaclass=ABCMeta):

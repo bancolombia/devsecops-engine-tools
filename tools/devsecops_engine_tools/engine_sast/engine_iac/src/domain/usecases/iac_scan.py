@@ -40,7 +40,7 @@ class IacScan:
 
         findings_list, path_file_results = [], None
         if skip_tool is False:
-            findings_list, path_file_results = self.tool_gateway.run_tool(
+            findings_list, path_file_results, results_scans = self.tool_gateway.run_tool(
                 config_tool_iac,
                 folders_to_scan,
                 environment="pdn" if env not in ["dev", "qa", "pdn"] else env,
@@ -55,7 +55,15 @@ class IacScan:
             print("Tool skipped by DevSecOps policy")
             dict_args["send_metrics"] = "false"
             dict_args["use_vulnerability_management"] = "false"
-
+        
+        if dict_args.get("context") == "true":
+            tool_config = config_tool_iac[tool]  
+            self.tool_gateway.get_iac_context_from_results(
+                results_scans,
+                tool_config["RULES"],
+                tool_config["DEFAULT_SEVERITY"],
+            )
+            
         totalized_exclusions = []
         (
             totalized_exclusions.extend(

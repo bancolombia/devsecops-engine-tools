@@ -1,4 +1,4 @@
-from devsecops_engine_tools.engine_core.src.domain.model.context_container import ContextContainer
+from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.context_container import ContextContainer
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.deserealizator_gateway import (
     DeseralizatorGateway,
 )
@@ -9,6 +9,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
 from dataclasses import asdict, dataclass
 import json
 from datetime import datetime, timezone
+import logging
 
 
 @dataclass
@@ -106,6 +107,7 @@ class TrivyDeserializator(DeseralizatorGateway):
                 )
                 context_container_list.append(context_container)
 
-        print("===== BEGIN CONTEXT OUTPUT =====")
-        print(json.dumps({"container_context": [asdict(context) for context in context_container_list]}, indent=2))
-        print("===== END CONTEXT OUTPUT =====")
+        logger = logging.getLogger(__name__)
+        logger.info("===== BEGIN CONTEXT OUTPUT =====")
+        logger.info(json.dumps({"container_context": [asdict(context) for context in context_container_list]}, indent=2))
+        logger.info("===== END CONTEXT OUTPUT =====")
