@@ -65,7 +65,6 @@ class TestIacScan(unittest.TestCase):
         self.tool_gateway.run_tool.return_value = (
             ["finding1", "finding2"],
             "/path/to/results",
-            {}
         )
 
         findings_list, input_core = self.iac_scan.process(dict_args, secret_tool, tool, "pdn")

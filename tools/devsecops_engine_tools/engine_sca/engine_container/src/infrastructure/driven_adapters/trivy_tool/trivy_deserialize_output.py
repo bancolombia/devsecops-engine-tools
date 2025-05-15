@@ -107,7 +107,6 @@ class TrivyDeserializator(DeseralizatorGateway):
                 )
                 context_container_list.append(context_container)
 
-        logger = logging.getLogger(__name__)
-        logger.info("===== BEGIN CONTEXT OUTPUT =====")
-        logger.info(json.dumps({"container_context": [asdict(context) for context in context_container_list]}, indent=2))
-        logger.info("===== END CONTEXT OUTPUT =====")
+        print("===== BEGIN CONTEXT OUTPUT =====")
+        print(json.dumps({"container_context": [asdict(context) for context in context_container_list]}, indent=2))
+        print("===== END CONTEXT OUTPUT =====")

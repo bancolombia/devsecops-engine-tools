@@ -1,4 +1,3 @@
-import json
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.context_iac import ContextIac
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import ToolGateway
 from devsecops_engine_tools.engine_core.src.domain.model.finding import (
@@ -7,9 +6,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
 )
 from datetime import datetime
 from dataclasses import dataclass
-import logging
-
-logger = logging.getLogger(__name__)
 
 @dataclass
 class CheckovDeserealizator:

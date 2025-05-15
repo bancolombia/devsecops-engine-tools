@@ -9,6 +9,7 @@ import threading
 import json
 import shutil
 import platform
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.context_iac import ContextIac
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -269,10 +270,40 @@ class CheckovTool(ToolGateway):
                     config_tool[self.TOOL_CHECKOV]["DEFAULT_SEVERITY"],
                     config_tool[self.TOOL_CHECKOV]["DEFAULT_CATEGORY"]
                 ),
-                result_scans,
             )
         else:
-            return [], None,None
+            return [], None
+        
+    def get_iac_context_from_results(
+        self, path_file_results: str
+    ):
+        with open(path_file_results, "r") as file:
+            context_results_scan_list = json.load(file)
+            context_iac_list = []
+            failed_checks = context_results_scan_list.get("results", {}).get("failed_checks", [])
+            for check in failed_checks:
+                file_line_range = check.get("file_line_range", ["unknown", "unknown"])
+                start_line = file_line_range[0] if len(file_line_range) > 0 else "unknown"
+                end_line = file_line_range[1] if len(file_line_range) > 1 else "unknown"
+                line_range_str = f"{start_line}-{end_line}" if start_line != end_line else str(start_line)
+
+                context_iac = ContextIac(
+                    id=check.get("check_id", "unknown"),
+                    check_name=check.get("check_name", "unknown"),
+                    check_class=check.get("check_class", "unknown"),
+                    severity=check.get("severity").lower(),
+                    where=f"{check.get('repo_file_path', 'unknown')}: {check.get('resource', 'unknown')} (line {line_range_str})",
+                    resource=check.get("resource", "unknown"),
+                    description=check.get("check_name", "unknown"),
+                    module="engine_iac",
+                    tool="Checkov"
+                )
+
+                context_iac_list.append(context_iac)
+                        
+            print("===== BEGIN CONTEXT OUTPUT =====")
+            print(json.dumps({"iac_context": [obj.__dict__ for obj in context_iac_list]}, indent=4))
+            print("===== END CONTEXT OUTPUT =====")
         
 
     def install_binary(self,config_tool):

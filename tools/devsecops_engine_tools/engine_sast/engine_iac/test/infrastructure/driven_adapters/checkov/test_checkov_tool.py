@@ -117,7 +117,7 @@ def test_run_tool(checkov_tool):
     checkov_tool.scan_folders = MagicMock(return_value=[{"key": "value"}, []])
     checkov_tool.TOOL_CHECKOV = "CHECKOV"
 
-    findings_list, file_from_tool, result_scans = checkov_tool.run_tool(
+    findings_list, file_from_tool = checkov_tool.run_tool(
         config_tool, folders_to_scan, environment, platform, secret_tool, secret_external_checks="github:token"
     )
 
