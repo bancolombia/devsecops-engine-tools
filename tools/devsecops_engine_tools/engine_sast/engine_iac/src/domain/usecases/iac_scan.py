@@ -48,13 +48,18 @@ class IacScan:
                 secret_tool=secret_tool,
                 secret_external_checks=dict_args["token_external_checks"],
                 work_folder=self.devops_platform_gateway.get_variable("temp_directory"),
-                dict_args=dict_args
+                dict_args=dict_args,
             )
         else:
             print("Tool skipped by DevSecOps policy")
             dict_args["send_metrics"] = "false"
             dict_args["use_vulnerability_management"] = "false"
-
+        
+        if dict_args.get("context") == "true":
+            self.tool_gateway.get_iac_context_from_results(
+                path_file_results
+            )
+            
         totalized_exclusions = []
         (
             totalized_exclusions.extend(

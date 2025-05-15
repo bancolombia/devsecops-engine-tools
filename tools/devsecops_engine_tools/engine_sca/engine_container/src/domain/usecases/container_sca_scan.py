@@ -24,6 +24,7 @@ class ContainerScaScan:
         image_to_scan,
         exclusions,
         pipeline_name,
+        context,
     ):
         self.tool_run = tool_run
         self.remote_config = remote_config
@@ -35,6 +36,7 @@ class ContainerScaScan:
         self.image_to_scan = image_to_scan
         self.exclusions = exclusions
         self.pipeline_name = pipeline_name
+        self.context = context
 
     def get_image(self, image_to_scan):
         """
@@ -137,4 +139,8 @@ class ContainerScaScan:
         Returns:
             list: Deserialized list of findings.
         """
+        context_flag = self.context
+        if context_flag == "true":
+            self.tool_deseralizator.get_container_context_from_results(image_scanned)
+                    
         return self.tool_deseralizator.get_list_findings(image_scanned)
