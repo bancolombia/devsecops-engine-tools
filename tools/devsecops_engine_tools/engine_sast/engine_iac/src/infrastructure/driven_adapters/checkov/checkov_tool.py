@@ -272,7 +272,7 @@ class CheckovTool(ToolGateway):
                 result_scans,
             )
         else:
-            return [], None
+            return [], None,None
         
 
     def install_binary(self,config_tool):
