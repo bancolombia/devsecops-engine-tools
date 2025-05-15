@@ -1,4 +1,3 @@
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.context_container import ContextContainer
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.deserealizator_gateway import (
     DeseralizatorGateway,
 )

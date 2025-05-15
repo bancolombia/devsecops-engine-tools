@@ -9,8 +9,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
 from dataclasses import asdict, dataclass
 import json
 from datetime import datetime, timezone
-import logging
-
 
 @dataclass
 class TrivyDeserializator(DeseralizatorGateway):

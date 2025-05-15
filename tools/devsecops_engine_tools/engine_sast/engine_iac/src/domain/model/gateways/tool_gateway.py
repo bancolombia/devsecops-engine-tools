@@ -1,6 +1,5 @@
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.context_iac import ContextIac
 from abc import ABCMeta, abstractmethod
-import json
 
 class ToolGateway(metaclass=ABCMeta):
     @abstractmethod
