@@ -24,18 +24,19 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 def init_engine_risk(
     add_epss_gateway,
     devops_platform_gateway,
+    remote_config_source_gateway,
     print_table_gateway,
     dict_args,
     findings,
     services,
     vm_exclusions,
 ):
-    remote_config = devops_platform_gateway.get_remote_config(
+    remote_config = remote_config_source_gateway.get_remote_config(
         dict_args["remote_config_repo"],
         "engine_risk/ConfigTool.json",
         dict_args["remote_config_branch"],
     )
-    risk_exclusions = devops_platform_gateway.get_remote_config(
+    risk_exclusions = remote_config_source_gateway.get_remote_config(
         dict_args["remote_config_repo"],
         "engine_risk/Exclusions.json",
         dict_args["remote_config_branch"],
@@ -61,6 +62,7 @@ def init_engine_risk(
 
     get_exclusions = GetExclusions(
         devops_platform_gateway,
+        remote_config_source_gateway,
         dict_args,
         data_added,
         remote_config,

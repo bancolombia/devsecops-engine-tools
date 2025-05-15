@@ -29,6 +29,7 @@ def test_init_engine_sca_rm():
             Mock(),
             Mock(),
             Mock(),
+            Mock(),
             dict_args,
             token,
             tool,
@@ -55,6 +56,7 @@ def test_init_engine_sca_rm_skip_tool():
         )
 
         deserialized, core_input, sbom_components = init_engine_sca_rm(
+            Mock(),
             Mock(),
             Mock(),
             Mock(),
@@ -92,6 +94,7 @@ def test_init_engine_sca_rm_no_exclusions():
             Mock(),
             Mock(),
             Mock(),
+            Mock(),
             dict_args,
             token,
             tool,
@@ -121,6 +124,7 @@ def test_init_engine_sca_rm_empty_remote_config():
         mock_container_sca_scan.process.return_value = "scan_result.json"
 
         deserialized, core_input, sbom_components = init_engine_sca_rm(
+            Mock(),
             Mock(),
             Mock(),
             Mock(),

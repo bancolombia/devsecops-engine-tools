@@ -16,7 +16,7 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.en
 
 
 def runner_engine_dependencies(
-    dict_args, config_tool, secret_tool, devops_platform_gateway, sbom_tool_gateway
+    dict_args, config_tool, secret_tool, devops_platform_gateway, remote_config_source_gateway, sbom_tool_gateway
 ):
     try:
         tools_mapping = {
@@ -40,6 +40,7 @@ def runner_engine_dependencies(
         return init_engine_dependencies(
             tool_run,
             devops_platform_gateway,
+            remote_config_source_gateway,
             tool_deserializator,
             dict_args,
             secret_tool,

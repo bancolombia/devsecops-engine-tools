@@ -15,11 +15,13 @@ class TestHandleRisk(unittest.TestCase):
         self.vulnerability_management = MagicMock()
         self.secrets_manager_gateway = MagicMock()
         self.devops_platform_gateway = MagicMock()
+        self.remote_config_source_gateway = MagicMock()
         self.print_table_gateway = MagicMock()
         self.handle_risk = HandleRisk(
             self.vulnerability_management,
             self.secrets_manager_gateway,
             self.devops_platform_gateway,
+            self.remote_config_source_gateway,
             self.print_table_gateway,
         )
 
@@ -51,7 +53,7 @@ class TestHandleRisk(unittest.TestCase):
             "remote_config_branch": ""
         }
         config_tool = {"ENGINE_RISK": {"ENABLED": "true"}}
-        self.devops_platform_gateway.get_remote_config.return_value = {
+        self.remote_config_source_gateway.get_remote_config.return_value = {
             "PARENT_ANALYSIS": {"ENABLED": "true", "REGEX_GET_PARENT": "^.*?_id"},
             "HANDLE_SERVICE_NAME": {
                 "ENABLED": "true",
@@ -179,7 +181,7 @@ class TestHandleRisk(unittest.TestCase):
             MagicMock(name="service_1"),
             MagicMock(name="service_2"),
         ]
-        self.devops_platform_gateway.get_remote_config.return_value = {
+        self.remote_config_source_gateway.get_remote_config.return_value = {
             "pipeline_name": {
                 "SKIP_SERVICE": {"services": ["code_service_1", "code_service_2"]}
             }

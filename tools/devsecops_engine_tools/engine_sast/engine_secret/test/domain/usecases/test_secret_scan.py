@@ -44,17 +44,21 @@ class TestSecretScan(unittest.TestCase):
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
     @patch(
+        "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
+    )
+    @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator.DeseralizatorGateway"
     )
     @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway.ToolGateway"
     )
     def test_process(
-        self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway, mock_git_gateway
+        self, mock_tool_gateway, mock_devops_gateway, mock_remote_config_source, mock_deserialize_gateway, mock_git_gateway
     ):
         # Configuración de mocks
         mock_tool_gateway_instance = mock_tool_gateway.return_value
         mock_devops_gateway_instance = mock_devops_gateway.return_value
+        mock_remote_config_source_instance = mock_remote_config_source.return_value
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
         mock_git_gateway_instance = mock_git_gateway.return_value
         mock_dict_args = {
@@ -71,6 +75,7 @@ class TestSecretScan(unittest.TestCase):
         secret_scan = SecretScan(
             mock_tool_gateway_instance,
             mock_devops_gateway_instance,
+            mock_remote_config_source_instance,
             mock_deserialize_gateway_instance,
             mock_git_gateway_instance
         )
@@ -79,7 +84,7 @@ class TestSecretScan(unittest.TestCase):
             "vulnerability_data"
         ]
 
-        mock_devops_gateway_instance.get_remote_config.return_value = json_config
+        mock_remote_config_source_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
         mock_tool_gateway_instance.run_tool_secret_scan.return_value = (
             "vulnerability_data", "path/findings"
@@ -99,17 +104,21 @@ class TestSecretScan(unittest.TestCase):
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
     @patch(
+        "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
+    )
+    @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator.DeseralizatorGateway"
     )
     @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway.ToolGateway"
     )
     def test_process_empty(
-        self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway, mock_git_gateway
+        self, mock_tool_gateway, mock_devops_gateway, mock_remote_config_source, mock_deserialize_gateway, mock_git_gateway
     ):
         # Configuración de mocks
         mock_tool_gateway_instance = mock_tool_gateway.return_value
         mock_devops_gateway_instance = mock_devops_gateway.return_value
+        mock_remote_config_source_instance = mock_remote_config_source.return_value
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
         mock_git_gateway_instance = mock_git_gateway.return_value
         mock_dict_args = {
@@ -126,13 +135,14 @@ class TestSecretScan(unittest.TestCase):
         secret_scan = SecretScan(
             mock_tool_gateway_instance,
             mock_devops_gateway_instance,
+            mock_remote_config_source_instance,
             mock_deserialize_gateway_instance,
             mock_git_gateway_instance
         )
 
         mock_deserialize_gateway_instance.get_list_vulnerability.return_value = []
 
-        mock_devops_gateway_instance.get_remote_config.return_value = json_config
+        mock_remote_config_source_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
         mock_tool_gateway_instance.run_tool_secret_scan.return_value = "", ""
 
@@ -150,20 +160,25 @@ class TestSecretScan(unittest.TestCase):
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
     @patch(
+        "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
+    )
+    @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator.DeseralizatorGateway"
     )
     @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway.ToolGateway"
     )
-    def test_skip_tool_true(self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway, mock_git_gateway):
+    def test_skip_tool_true(self, mock_tool_gateway, mock_devops_gateway, mock_remote_config_source, mock_deserialize_gateway, mock_git_gateway):
         mock_tool_gateway_instance = mock_tool_gateway.return_value
         mock_devops_gateway_instance = mock_devops_gateway.return_value
+        mock_remote_config_source_instance = mock_remote_config_source.return_value
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
         mock_git_gateway_instance = mock_git_gateway.return_value
     
         secret_scan = SecretScan(
             mock_tool_gateway_instance,
             mock_devops_gateway_instance,
+            mock_remote_config_source_instance,
             mock_deserialize_gateway_instance,
             mock_git_gateway_instance
         )
@@ -181,20 +196,25 @@ class TestSecretScan(unittest.TestCase):
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
     @patch(
+        "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
+    )
+    @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator.DeseralizatorGateway"
     )
     @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway.ToolGateway"
     )
-    def test_skip_tool_true_isp(self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway, mock_git_gateway):
+    def test_skip_tool_true_isp(self, mock_tool_gateway, mock_devops_gateway, mock_remote_config_source, mock_deserialize_gateway, mock_git_gateway):
         mock_tool_gateway_instance = mock_tool_gateway.return_value
         mock_devops_gateway_instance = mock_devops_gateway.return_value
+        mock_remote_config_source_instance = mock_remote_config_source.return_value
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
         mock_git_gateway_instance = mock_git_gateway.return_value
     
         secret_scan = SecretScan(
             mock_tool_gateway_instance,
             mock_devops_gateway_instance,
+            mock_remote_config_source_instance,
             mock_deserialize_gateway_instance,
             mock_git_gateway_instance
         )
@@ -212,20 +232,25 @@ class TestSecretScan(unittest.TestCase):
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
     @patch(
+        "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
+    )
+    @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator.DeseralizatorGateway"
     )
     @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway.ToolGateway"
     )
-    def test_skip_tool_false(self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway, mock_git_gateway):
+    def test_skip_tool_false(self, mock_tool_gateway, mock_devops_gateway, mock_remote_config_source, mock_deserialize_gateway, mock_git_gateway):
         mock_tool_gateway_instance = mock_tool_gateway.return_value
         mock_devops_gateway_instance = mock_devops_gateway.return_value
+        mock_remote_config_source_instance = mock_remote_config_source.return_value
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
         mock_git_gateway_instance = mock_git_gateway.return_value
     
         secret_scan = SecretScan(
             mock_tool_gateway_instance,
             mock_devops_gateway_instance,
+            mock_remote_config_source_instance,
             mock_deserialize_gateway_instance,
             mock_git_gateway_instance
         )
@@ -243,28 +268,33 @@ class TestSecretScan(unittest.TestCase):
         "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
     )
     @patch(
+        "devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway.DevopsPlatformGateway"
+    )
+    @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator.DeseralizatorGateway"
     )
     @patch(
         "devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.tool_gateway.ToolGateway"
     )
     def test_complete_config_tool(
-        self, mock_tool_gateway, mock_devops_gateway, mock_deserialize_gateway, mock_git_gateway
+        self, mock_tool_gateway, mock_devops_gateway, mock_remote_config_source, mock_deserialize_gateway, mock_git_gateway
     ):
         # Configuración de mocks
         mock_tool_gateway_instance = mock_tool_gateway.return_value
         mock_devops_gateway_instance = mock_devops_gateway.return_value
+        mock_remote_config_source_instance = mock_remote_config_source.return_value
         mock_deserialize_gateway_instance = mock_deserialize_gateway.return_value
         mock_git_gateway_instance = mock_git_gateway.return_value
 
         secret_scan = SecretScan(
             mock_tool_gateway_instance,
             mock_devops_gateway_instance,
+            mock_remote_config_source_instance,
             mock_deserialize_gateway_instance,
             mock_git_gateway_instance
         )
 
-        mock_devops_gateway_instance.get_remote_config.return_value = json_config
+        mock_remote_config_source_instance.get_remote_config.return_value = json_config
         mock_devops_gateway_instance.get_variable.return_value = "example_pipeline"
 
         config_tool_instance, skip_tool_isp = secret_scan.complete_config_tool(

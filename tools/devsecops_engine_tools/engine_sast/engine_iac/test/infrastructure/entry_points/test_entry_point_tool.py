@@ -23,13 +23,14 @@ def test_init_engine_sast_rm(mock_iac_scan):
 
     # Define the input arguments
     devops_platform_gateway = MagicMock()
+    remote_config_source_gateway = MagicMock()
     tool_gateway = MagicMock()
     dict_args = {}
     secret_tool = "secret"
     tool = "CHECKOV"
 
     # Call the function
-    [] , input_output = init_engine_sast_rm(devops_platform_gateway, tool_gateway, dict_args, secret_tool, tool, "dev")
+    [] , input_output = init_engine_sast_rm(devops_platform_gateway, remote_config_source_gateway, tool_gateway, dict_args, secret_tool, tool, "dev")
 
     # Assert the expected behavior
     assert input_output == input_core

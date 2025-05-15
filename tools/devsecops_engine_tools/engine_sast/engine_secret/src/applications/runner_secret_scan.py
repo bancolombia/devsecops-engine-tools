@@ -17,7 +17,7 @@ from devsecops_engine_tools.engine_utilities.git_cli.infrastructure.git_run impo
     GitRun
     )
 
-def runner_secret_scan(dict_args, tool, devops_platform_gateway, secret_tool):
+def runner_secret_scan(dict_args, tool, devops_platform_gateway, remote_config_source_gateway, secret_tool):
     try:
         tool_deserealizator = None
         tool_gateway = None
@@ -31,6 +31,7 @@ def runner_secret_scan(dict_args, tool, devops_platform_gateway, secret_tool):
 
         return engine_secret_scan(
             devops_platform_gateway = devops_platform_gateway,
+            remote_config_source_gateway=remote_config_source_gateway,
             tool_gateway = tool_gateway,
             dict_args = dict_args,
             tool=tool,
