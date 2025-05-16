@@ -27,14 +27,18 @@ class IacScan:
 
     def process(self, dict_args, secret_tool, tool, env):
         config_tool_iac = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_sast/engine_iac/ConfigTool.json", dict_args["remote_config_branch"]
+            dict_args["remote_config_repo"],
+            "engine_sast/engine_iac/ConfigTool.json",
+            dict_args["remote_config_branch"],
         )
 
         exclusions = self.devops_platform_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_sast/engine_iac/Exclusions.json", dict_args["remote_config_branch"]
+            dict_args["remote_config_repo"],
+            "engine_sast/engine_iac/Exclusions.json",
+            dict_args["remote_config_branch"],
         )
 
-        config_tool_core, folders_to_scan, skip_tool = self.complete_config_tool(
+        config_tool_core, folders_to_scan, skip_tool = self._complete_config_tool(
             config_tool_iac, exclusions, tool, dict_args
         )
 
@@ -54,12 +58,10 @@ class IacScan:
             print("Tool skipped by DevSecOps policy")
             dict_args["send_metrics"] = "false"
             dict_args["use_vulnerability_management"] = "false"
-        
+
         if dict_args.get("context") == "true":
-            self.tool_gateway.get_iac_context_from_results(
-                path_file_results
-            )
-            
+            self.tool_gateway.get_iac_context_from_results(path_file_results)
+
         totalized_exclusions = []
         (
             totalized_exclusions.extend(
@@ -95,7 +97,7 @@ class IacScan:
 
         return findings_list, input_core
 
-    def complete_config_tool(self, data_file_tool, exclusions, tool, dict_args):
+    def _complete_config_tool(self, data_file_tool, exclusions, tool, dict_args):
         config_tool = ConfigTool(json_data=data_file_tool)
 
         config_tool.exclusions = exclusions
@@ -137,7 +139,7 @@ class IacScan:
 
             folders_to_scan = [dict_args["folder_path"]]
         else:
-            folders_to_scan = self.search_folders(config_tool.search_pattern)
+            folders_to_scan = self._search_folders(config_tool.search_pattern)
 
         if len(folders_to_scan) == 0:
             logger.warning(
@@ -147,7 +149,7 @@ class IacScan:
 
         return config_tool, folders_to_scan, skip_tool
 
-    def search_folders(self, search_pattern):
+    def _search_folders(self, search_pattern):
         current_directory = os.getcwd()
         patron = "(?i).*?(" + "|".join(search_pattern) + ").*$"
         folders = [

@@ -30,7 +30,7 @@ class PrismaDeserealizator(DeseralizatorGateway):
             image_object = file.read()
 
             json_data = json.loads(image_object)
-            console_url = json_data.get("consoleURL",False)
+            console_url = json_data.get("consoleURL", False)
             if console_url:
                 print(f"Console URL: {console_url}")
             vulnerabilities_data = (
@@ -67,7 +67,7 @@ class PrismaDeserealizator(DeseralizatorGateway):
             list_open_vulnerabilities.extend(vulnerabilities)
 
         return list_open_vulnerabilities
-    
+
     def get_container_context_from_results(self, image_scanned):
-        #TODO: Implement this method
+        # TODO: Implement this method
         pass
