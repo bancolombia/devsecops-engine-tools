@@ -66,6 +66,14 @@ def get_inputs_from_cli(args):
         help="Platform where is executed",
     )
     parser.add_argument(
+        "-rcs",
+        "--remote_config_source",
+        choices=["azure", "github", "local"],
+        type=str,
+        required=True,
+        help="Source of the remote config repo",
+    )
+    parser.add_argument(
         "-rcf",
         "--remote_config_repo",
         type=str,
@@ -79,14 +87,6 @@ def get_inputs_from_cli(args):
         required=False,
         default="",
         help="Name of the branch of Remote Config Repo",
-    )
-    parser.add_argument(
-        "-rcs",
-        "--remote_config_source",
-        choices=["azure", "github", "local"],
-        type=str,
-        required=True,
-        help="Source of the remote config repo",
     )
     parser.add_argument(
         "-t",
