@@ -12,7 +12,7 @@ from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_ada
 )
 
 
-def runner_engine_iac(dict_args, tool, secret_tool, devops_platform_gateway, env):
+def runner_engine_iac(dict_args, tool, secret_tool, devops_platform_gateway, remote_config_source_gateway, env):
     try:
         # Define driven adapters for gateways
         tool_gateway = None
@@ -28,6 +28,7 @@ def runner_engine_iac(dict_args, tool, secret_tool, devops_platform_gateway, env
 
         return init_engine_sast_rm(
             devops_platform_gateway=devops_platform_gateway,
+            remote_config_source_gateway=remote_config_source_gateway,
             tool_gateway=tool_gateway,
             dict_args=dict_args,
             secret_tool=secret_tool,

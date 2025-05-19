@@ -40,7 +40,7 @@ pip3 install devsecops-engine-tools
 ### Scan running - flags (CLI)
 
 ```bash
-devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --remote_config_branch ["remote_config_branch"] --module ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container", "engine_risk", "engine_code"] --tool ["nuclei", "bearer", "checkov", "kics", "kubescape", "trufflehog", "gitleaks", "prisma", "trivy", "xray", "dependency_check"] --folder_path ["Folder path scan engine_iac, engine_code, engine_dependencies and engine_secret"] --platform ["k8s","cloudformation","docker", "openapi", "terraform"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] --token_external_checks ["token_external_checks"] --xray_mode ["scan", "audit","build-scan"] --image_to_scan ["image_to_scan"] --dast_file_path ["dast_file_path"]
+devsecops-engine-tools --platform_devops ["local","azure","github"] --remote_config_source ["local","azure","github"] --remote_config_repo ["remote_config_repo"] --remote_config_branch ["remote_config_branch"] --module ["engine_iac", "engine_dast", "engine_secret", "engine_dependencies", "engine_container", "engine_risk", "engine_code"] --tool ["nuclei", "bearer", "checkov", "kics", "kubescape", "trufflehog", "gitleaks", "prisma", "trivy", "xray", "dependency_check"] --folder_path ["Folder path scan engine_iac, engine_code, engine_dependencies and engine_secret"] --platform ["k8s","cloudformation","docker", "openapi", "terraform"] --use_secrets_manager ["false", "true"] --use_vulnerability_management ["false", "true"] --send_metrics ["false", "true"] --token_cmdb ["token_cmdb"] --token_vulnerability_management ["token_vulnerability_management"] --token_engine_container ["token_engine_container"] --token_engine_dependencies ["token_engine_dependencies"] --token_external_checks ["token_external_checks"] --xray_mode ["scan", "audit","build-scan"] --image_to_scan ["image_to_scan"] --dast_file_path ["dast_file_path"]
 ```
 
 ### Structure Remote Config
@@ -150,7 +150,7 @@ $ set +a
 
 
 ```bash
-devsecops-engine-tools --platform_devops local --remote_config_repo DevSecOps_Remote_Config --module engine_iac
+devsecops-engine-tools --platform_devops local --remote_config_source local --remote_config_repo DevSecOps_Remote_Config --module engine_iac
 
 ```
 
@@ -164,13 +164,13 @@ devsecops-engine-tools --platform_devops local --remote_config_repo DevSecOps_Re
 docker pull bancolombia/devsecops-engine-tools
 ```
 ```bash
-docker run --rm -v ./folder_to_analyze:/folder_to_analyze bancolombia/devsecops-engine-tools:latest devsecops-engine-tools --platform_devops local --remote_config_repo docker_default_remote_config --module engine_iac --folder_path /folder_to_analyze
+docker run --rm -v ./folder_to_analyze:/folder_to_analyze bancolombia/devsecops-engine-tools:latest devsecops-engine-tools --platform_devops local --remote_config_source local --remote_config_repo docker_default_remote_config --module engine_iac --folder_path /folder_to_analyze
 ```
 
 The docker image have it own default remote config with basic configuration called docker_default_remote_config, but you can define your own config and pass it as volume
 
 ```bash
-docker run --rm -v ./folder_to_analyze:/folder_to_analyze -v ./custom_remote_config:/custom_remote_config bancolombia/devsecops-engine-tools:latest devsecops-engine-tools --platform_devops local --remote_config_repo custom_remote_config --module engine_iac --folder_path /folder_to_analyze
+docker run --rm -v ./folder_to_analyze:/folder_to_analyze -v ./custom_remote_config:/custom_remote_config bancolombia/devsecops-engine-tools:latest devsecops-engine-tools --platform_devops local --remote_config_source local --remote_config_repo custom_remote_config --module engine_iac --folder_path /folder_to_analyze
 ```
 
 
@@ -200,7 +200,7 @@ stages:
           - script: |
               # Install devsecops-engine-tools
               pip3 install -q devsecops-engine-tools
-              devsecops-engine-tools --platform_devops azure --remote_config_repo remote_config --module engine_iac
+              devsecops-engine-tools --platform_devops azure --remote_config_source azure --remote_config_repo remote_config --module engine_iac
             displayName: "Engine Tools"
         env:
           SYSTEM_ACCESSTOKEN: $(System.AccessToken)
@@ -251,7 +251,7 @@ jobs:
         run: |
           # Install devsecops-engine-tools
           pip3 install -q devsecops-engine-tools
-          output=$(devsecops-engine-tools --platform_devops github --remote_config_repo remote_config --module engine_iac)
+          output=$(devsecops-engine-tools --platform_devops github --remote_config_source github --remote_config_repo remote_config --module engine_iac)
           echo "$output"
           if [[ $output == *"✘Failed"* ]]; then
             exit 1

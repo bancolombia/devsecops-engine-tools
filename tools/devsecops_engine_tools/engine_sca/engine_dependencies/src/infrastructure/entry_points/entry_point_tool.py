@@ -25,18 +25,19 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 def init_engine_dependencies(
     tool_run,
     tool_remote: DevopsPlatformGateway,
+    remote_config_source_gateway: DevopsPlatformGateway,
     tool_deserializator,
     dict_args,
     secret_tool,
     config_tool,
     tool_sbom: SbomManagerGateway,
 ):
-    remote_config = tool_remote.get_remote_config(
+    remote_config = remote_config_source_gateway.get_remote_config(
         dict_args["remote_config_repo"],
         "engine_sca/engine_dependencies/ConfigTool.json",
         dict_args["remote_config_branch"]
     )
-    exclusions = tool_remote.get_remote_config(
+    exclusions = remote_config_source_gateway.get_remote_config(
         dict_args["remote_config_repo"],
         "engine_sca/engine_dependencies/Exclusions.json",
         dict_args["remote_config_branch"]

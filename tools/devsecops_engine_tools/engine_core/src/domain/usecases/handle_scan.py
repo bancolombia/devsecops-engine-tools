@@ -53,11 +53,13 @@ class HandleScan:
         vulnerability_management: VulnerabilityManagementGateway,
         secrets_manager_gateway: SecretsManagerGateway,
         devops_platform_gateway: DevopsPlatformGateway,
+        remote_config_source_gateway: DevopsPlatformGateway,
         sbom_tool_gateway: SbomManagerGateway,
     ):
         self.vulnerability_management = vulnerability_management
         self.secrets_manager_gateway = secrets_manager_gateway
         self.devops_platform_gateway = devops_platform_gateway
+        self.remote_config_source_gateway = remote_config_source_gateway
         self.sbom_tool_gateway = sbom_tool_gateway
 
     def process(self, dict_args: any, config_tool: any):
@@ -74,6 +76,7 @@ class HandleScan:
                 config_tool["ENGINE_IAC"]["TOOL"],
                 secret_tool,
                 self.devops_platform_gateway,
+                self.remote_config_source_gateway,
                 env,
             )
             self._use_vulnerability_management(
@@ -86,6 +89,7 @@ class HandleScan:
                 config_tool["ENGINE_CONTAINER"]["TOOL"],
                 secret_tool,
                 self.devops_platform_gateway,
+                self.remote_config_source_gateway
             )
             self._use_vulnerability_management(
                 config_tool,
@@ -102,6 +106,7 @@ class HandleScan:
                 config_tool["ENGINE_DAST"],
                 secret_tool,
                 self.devops_platform_gateway,
+                self.remote_config_source_gateway,
             )
             self._use_vulnerability_management(
                 config_tool, input_core, dict_args, secret_tool, env
@@ -112,6 +117,7 @@ class HandleScan:
                 dict_args,
                 config_tool["ENGINE_CODE"]["TOOL"],
                 self.devops_platform_gateway,
+                self.remote_config_source_gateway
             )
             self._use_vulnerability_management(
                 config_tool, input_core, dict_args, secret_tool, env
@@ -122,6 +128,7 @@ class HandleScan:
                 dict_args,
                 config_tool["ENGINE_SECRET"]["TOOL"],
                 self.devops_platform_gateway,
+                self.remote_config_source_gateway,
                 secret_tool,
             )
             self._use_vulnerability_management(
@@ -134,6 +141,7 @@ class HandleScan:
                 config_tool,
                 secret_tool,
                 self.devops_platform_gateway,
+                self.remote_config_source_gateway,
                 self.sbom_tool_gateway,
             )
             self._use_vulnerability_management(

@@ -92,6 +92,7 @@ def test_get_inputs_from_cli(mock_parse_args):
     mock_args.platform_devops = "azure"
     mock_args.remote_config_repo = "https://github.com/example/repo"
     mock_args.remote_config_branch = ""
+    mock_args.remote_config_source = "azure"
     mock_args.module = "engine_iac"
     mock_args.tool = None
     mock_args.folder_path = "/path/to/folder"
@@ -121,6 +122,7 @@ def test_get_inputs_from_cli(mock_parse_args):
         "platform_devops": "azure",
         "remote_config_repo": "https://github.com/example/repo",
         "remote_config_branch": "",
+        "remote_config_source": "azure",
         "tool": None,
         "module": "engine_iac",
         "folder_path": "/path/to/folder",

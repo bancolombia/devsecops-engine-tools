@@ -37,7 +37,7 @@ from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
-def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gateway):
+def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gateway, remote_config_source_gateway):
     try:
         if config_tool["TOOL"].lower() == "nuclei": # tool_gateway is the main Tool
             tool_run = NucleiTool()
@@ -104,7 +104,7 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gate
         )
     except Exception as e:
         logger.error(f"Error engine_dast: {e}")
-        config_tool_dast = devops_platform_gateway.get_remote_config(
+        config_tool_dast = remote_config_source_gateway.get_remote_config(
             dict_args["remote_config_repo"], "engine_dast/ConfigTool.json", dict_args["remote_config_branch"]
         )
         if config_tool_dast["IGNORE_ERRORS"]:
