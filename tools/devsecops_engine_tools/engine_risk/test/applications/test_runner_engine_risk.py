@@ -9,6 +9,7 @@ from devsecops_engine_tools.engine_risk.src.applications.runner_engine_risk impo
 )
 def test_runner_engine_risk(mock_init_engine_risk):
     devops_platform_gateway = "devops_platform_gateway"
+    remote_config_source_gateway = "remote_config_source_gateway"
     print_table_gateway = "print_table_gateway"
     dict_args = {"key": "value"}
     findings = []
@@ -21,6 +22,7 @@ def test_runner_engine_risk(mock_init_engine_risk):
         vm_exclusions,
         services,
         devops_platform_gateway,
+        remote_config_source_gateway,
         print_table_gateway,
     )
 

@@ -8,6 +8,7 @@ class TestEngineSecretScan(unittest.TestCase):
     @patch('devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.set_input_core.SetInputCore')
     def test_engine_secret_scan(self, MockSetInputCore, MockSecretScan):
         mock_devops_platform_gateway = Mock()
+        mock_source_remote_config_gateway = Mock()
         mock_tool_gateway = Mock()
         mock_dict_args = {
             "remote_config_repo": "example_repo",
@@ -61,7 +62,7 @@ class TestEngineSecretScan(unittest.TestCase):
                     }
                 }
             }
-        mock_devops_platform_gateway.get_remote_config.side_effect = [json_exclusion ,json_config, json_exclusion]
+        mock_source_remote_config_gateway.get_remote_config.side_effect = [json_exclusion ,json_config, json_exclusion]
         secret_tool = "secret"
         skip_tool_isp = False
         
@@ -75,6 +76,7 @@ class TestEngineSecretScan(unittest.TestCase):
 
         findings, input_core_result = engine_secret_scan(
             mock_devops_platform_gateway,
+            mock_source_remote_config_gateway,
             mock_tool_gateway,
             mock_dict_args,
             mock_tool,

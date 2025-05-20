@@ -12,6 +12,7 @@ class TestInitEngineSastCode(unittest.TestCase):
     def test_init_engine_sast_code(self, mock_code_scan):
         # Arrange
         mock_devops_platform_gateway = MagicMock()
+        mock_remote_config_source_gateway = MagicMock()
         mock_tool_gateway = MagicMock()
         mock_git_gateway = MagicMock()
         
@@ -25,6 +26,7 @@ class TestInitEngineSastCode(unittest.TestCase):
         # Act
         findings_list, input_core = init_engine_sast_code(
             mock_devops_platform_gateway, 
+            mock_remote_config_source_gateway,
             mock_tool_gateway, 
             dict_args, 
             mock_git_gateway, 
@@ -35,6 +37,7 @@ class TestInitEngineSastCode(unittest.TestCase):
         mock_code_scan.assert_called_once_with(
             mock_tool_gateway,
             mock_devops_platform_gateway,
+            mock_remote_config_source_gateway,
             mock_git_gateway
         )
         mock_code_scan_instance.process.assert_called_once_with(dict_args, tool)

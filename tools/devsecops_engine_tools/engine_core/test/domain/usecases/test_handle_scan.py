@@ -18,6 +18,7 @@ class TestHandleScan(unittest.TestCase):
         self.vulnerability_management = MagicMock()
         self.secrets_manager_gateway = MagicMock()
         self.devops_platform_gateway = MagicMock()
+        self.remote_config_source_gateway = MagicMock()
         self.sbom_gateway = MagicMock()
         self.threshold = Threshold(
             {
@@ -34,6 +35,7 @@ class TestHandleScan(unittest.TestCase):
             self.vulnerability_management,
             self.secrets_manager_gateway,
             self.devops_platform_gateway,
+            self.remote_config_source_gateway,
             self.sbom_gateway,
         )
 
@@ -87,6 +89,7 @@ class TestHandleScan(unittest.TestCase):
             config_tool["ENGINE_IAC"]["TOOL"],
             secret_tool,
             self.devops_platform_gateway,
+            self.remote_config_source_gateway,
             "dev",
         )
         self.vulnerability_management.send_vulnerability_management.assert_called_once()
@@ -255,7 +258,7 @@ class TestHandleScan(unittest.TestCase):
         result_findings_list, result_input_core = self.handle_scan.process(dict_args, config_tool)
         # Verifies mock have been called correctly
         mock_runner_engine_dast.assert_called_once_with(
-            dict_args, config_tool["ENGINE_DAST"], secret_tool, self.devops_platform_gateway
+            dict_args, config_tool["ENGINE_DAST"], secret_tool, self.devops_platform_gateway, self.remote_config_source_gateway
         )
         # Verifica los resultados devueltos
         self.assertEqual(result_findings_list, ["finding1", "finding2"])
@@ -298,7 +301,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_findings_list, findings_list)
         self.assertEqual(result_input_core, input_core)
         mock_runner_secret_scan.assert_called_once_with(
-            dict_args, config_tool["ENGINE_SECRET"]["TOOL"], self.devops_platform_gateway, secret_tool
+            dict_args, config_tool["ENGINE_SECRET"]["TOOL"], self.devops_platform_gateway, self.remote_config_source_gateway, secret_tool
         )
 
     @mock.patch("devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_secret_scan")
@@ -374,7 +377,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_findings_list, findings_list)
         self.assertEqual(result_input_core, input_core)
         mock_runner_secret_scan.assert_called_once_with(
-            dict_args, config_tool["ENGINE_SECRET"]["TOOL"], self.devops_platform_gateway, secret_tool
+            dict_args, config_tool["ENGINE_SECRET"]["TOOL"], self.devops_platform_gateway, self.remote_config_source_gateway, secret_tool
         )
 
     @mock.patch(
@@ -418,5 +421,5 @@ class TestHandleScan(unittest.TestCase):
         self.assertEqual(result_input_core, input_core)
         self.secrets_manager_gateway.get_secret.assert_called_once_with(config_tool)
         mock_runner_engine_dependencies.assert_called_once_with(
-            dict_args, config_tool, secret_tool, self.devops_platform_gateway, self.sbom_gateway
+            dict_args, config_tool, secret_tool, self.devops_platform_gateway, self.remote_config_source_gateway, self.sbom_gateway
         )

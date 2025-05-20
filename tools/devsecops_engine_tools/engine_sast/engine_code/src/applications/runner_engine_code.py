@@ -8,7 +8,7 @@ from devsecops_engine_tools.engine_utilities.git_cli.infrastructure.git_run impo
     GitRun
 )
 
-def runner_engine_code(dict_args, tool, devops_platform_gateway):
+def runner_engine_code(dict_args, tool, devops_platform_gateway, remote_config_source_gateway):
     try:
         tool_gateway = None
         git_gateway = GitRun()
@@ -17,6 +17,7 @@ def runner_engine_code(dict_args, tool, devops_platform_gateway):
 
         return init_engine_sast_code(
             devops_platform_gateway=devops_platform_gateway,
+            remote_config_source_gateway=remote_config_source_gateway,
             tool_gateway=tool_gateway,
             dict_args=dict_args,
             git_gateway=git_gateway,

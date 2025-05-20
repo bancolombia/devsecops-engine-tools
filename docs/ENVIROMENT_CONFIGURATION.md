@@ -41,6 +41,8 @@ PYTHONPATH=tools/
             "args": [
                 "--platform_devops",
                 "local",
+                "--remote_config_source",
+                "github",
                 "--remote_config_repo",
                 "example_remote_config_local",
                 "--module",

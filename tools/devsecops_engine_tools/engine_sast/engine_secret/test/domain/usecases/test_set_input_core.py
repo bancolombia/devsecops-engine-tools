@@ -11,8 +11,12 @@ from devsecops_engine_tools.engine_sast.engine_secret.src.domain.usecases.set_in
 def mock_tool_remote():
     return Mock(spec=DevopsPlatformGateway)
 
+@pytest.fixture
+def mock_source_remote():
+    return Mock(spec=DevopsPlatformGateway)
 
-def test_get_exclusions(mock_tool_remote):
+
+def test_get_exclusions(mock_tool_remote, mock_source_remote):
     exclusions_data = {
       "All": {
           "TRUFFLEHOG": [
@@ -37,7 +41,7 @@ def test_get_exclusions(mock_tool_remote):
     config_tool = MagicMock()
 
     # Inicializa una instancia de SetInputCore
-    set_input_core = SetInputCore(mock_tool_remote, None, tool, config_tool)
+    set_input_core = SetInputCore(mock_tool_remote, mock_source_remote, None, tool, config_tool)
 
     # Llama al método get_exclusions
     exclusions = set_input_core.get_exclusions(exclusions_data, pipeline_name, tool)

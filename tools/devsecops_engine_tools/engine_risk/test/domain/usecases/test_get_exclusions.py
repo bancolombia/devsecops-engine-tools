@@ -20,6 +20,7 @@ def test_process(
 
     get_exclusions = GetExclusions(
         MagicMock(),
+        MagicMock(),
         {"remote_config_repo": "repo", "remote_config_branch": "repo"},
         MagicMock(),
         {"EXCLUSIONS_PATHS": {"tag1": "path1"}},
@@ -46,6 +47,7 @@ def test_get_risk_exclusions(mock_get_exclusions):
         MagicMock(),
         MagicMock(),
         MagicMock(),
+        MagicMock(),
         "pipeline_name",
         MagicMock(),
     )
@@ -60,6 +62,7 @@ def test_get_risk_exclusions(mock_get_exclusions):
 )
 def test_get_exclusions_by_practice(mock_get_exclusions):
     get_exclusions = GetExclusions(
+        MagicMock(),
         MagicMock(),
         MagicMock(),
         MagicMock(),
@@ -99,6 +102,7 @@ def test_get_exclusions(mock_exclusions):
         MagicMock(),
         MagicMock(),
         MagicMock(),
+        MagicMock(),
         ["service1", "service2"],
         MagicMock(),
     )
@@ -113,6 +117,7 @@ def test_get_unique_tags():
         MagicMock(tags=["tag2", "tag3"]),
     ]
     get_exclusions = GetExclusions(
+        MagicMock(),
         MagicMock(),
         MagicMock(),
         findings,
@@ -149,6 +154,7 @@ def test_get_exclusions_new_vuln(mock_datetime, mock_exclusions):
 
     get_exclusions = GetExclusions(
         devops_platform_gateway=MagicMock(),
+        remote_config_source_gateway=MagicMock(),
         dict_args={"remote_config_repo": "repo", "remote_config_branch": "branch"},
         findings=[],
         risk_config=MagicMock(),

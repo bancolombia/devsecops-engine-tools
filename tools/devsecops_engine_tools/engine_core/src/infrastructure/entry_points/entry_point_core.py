@@ -19,12 +19,13 @@ def init_engine_core(
     vulnerability_management_gateway: any,
     secrets_manager_gateway: any,
     devops_platform_gateway: any,
+    remote_config_source_gateway: any,
     print_table_gateway: any,
     metrics_manager_gateway: any,
     sbom_tool_gateway: any,
     args: any
 ):
-    config_tool = devops_platform_gateway.get_remote_config(
+    config_tool = remote_config_source_gateway.get_remote_config(
         args["remote_config_repo"], "/engine_core/ConfigTool.json", args["remote_config_branch"]
     )
     Printers.print_logo_tool(config_tool["BANNER"])
@@ -35,6 +36,7 @@ def init_engine_core(
                 vulnerability_management_gateway,
                 secrets_manager_gateway,
                 devops_platform_gateway,
+                remote_config_source_gateway,
                 print_table_gateway,
             ).process(args, config_tool)
 
@@ -46,6 +48,7 @@ def init_engine_core(
                 vulnerability_management_gateway,
                 secrets_manager_gateway,
                 devops_platform_gateway,
+                remote_config_source_gateway,
                 sbom_tool_gateway
             ).process(args, config_tool)
 

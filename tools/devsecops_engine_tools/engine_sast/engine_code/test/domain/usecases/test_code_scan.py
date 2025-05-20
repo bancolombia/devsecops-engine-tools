@@ -21,12 +21,14 @@ class TestCodeScan(unittest.TestCase):
         # Mock gateways
         self.mock_tool_gateway = Mock(spec=ToolGateway)
         self.mock_devops_platform_gateway = Mock(spec=DevopsPlatformGateway)
+        self.mock_remote_config_source_gateway = Mock(spec=DevopsPlatformGateway)
         self.mock_git_gateway = Mock(spec=GitGateway)
 
         # CodeScan instance with Mocks
         self.code_scan = CodeScan(
             tool_gateway=self.mock_tool_gateway,
             devops_platform_gateway=self.mock_devops_platform_gateway,
+            remote_config_source_gateway=self.mock_remote_config_source_gateway,
             git_gateway=self.mock_git_gateway
         )
 
@@ -35,14 +37,14 @@ class TestCodeScan(unittest.TestCase):
     )
     def test_set_config_tool(self, mock_config_tool):
         # Arrange
-        self.mock_devops_platform_gateway.get_remote_config.return_value = {"test_key": "test_value"}
+        self.mock_remote_config_source_gateway.get_remote_config.return_value = {"test_key": "test_value"}
         self.mock_devops_platform_gateway.get_variable.return_value = "pipeline_test_name"
 
         # Act
         self.code_scan.set_config_tool({"remote_config_repo": "test_repo", "remote_config_branch": ""})
 
         # Assert
-        self.mock_devops_platform_gateway.get_remote_config.assert_called_once_with(
+        self.mock_remote_config_source_gateway.get_remote_config.assert_called_once_with(
             "test_repo", "engine_sast/engine_code/ConfigTool.json", ""
         )
         self.mock_devops_platform_gateway.get_variable.assert_called_once_with("pipeline_name")

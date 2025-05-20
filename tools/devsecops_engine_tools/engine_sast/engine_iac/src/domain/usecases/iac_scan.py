@@ -20,19 +20,20 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class IacScan:
     def __init__(
-        self, tool_gateway: ToolGateway, devops_platform_gateway: DevopsPlatformGateway
+        self, tool_gateway: ToolGateway, devops_platform_gateway: DevopsPlatformGateway, remote_config_source_gateway: DevopsPlatformGateway
     ):
         self.tool_gateway = tool_gateway
         self.devops_platform_gateway = devops_platform_gateway
+        self.remote_config_source_gateway = remote_config_source_gateway
 
     def process(self, dict_args, secret_tool, tool, env):
-        config_tool_iac = self.devops_platform_gateway.get_remote_config(
+        config_tool_iac = self.remote_config_source_gateway.get_remote_config(
             dict_args["remote_config_repo"],
             "engine_sast/engine_iac/ConfigTool.json",
             dict_args["remote_config_branch"],
         )
 
-        exclusions = self.devops_platform_gateway.get_remote_config(
+        exclusions = self.remote_config_source_gateway.get_remote_config(
             dict_args["remote_config_repo"],
             "engine_sast/engine_iac/Exclusions.json",
             dict_args["remote_config_branch"],

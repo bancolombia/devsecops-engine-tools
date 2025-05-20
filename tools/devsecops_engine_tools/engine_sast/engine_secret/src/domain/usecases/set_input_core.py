@@ -10,11 +10,13 @@ class SetInputCore:
     def __init__(
         self,
         tool_remote: DevopsPlatformGateway,
+        remote_config_source_gateway: DevopsPlatformGateway,
         dict_args,
         tool,
         config_tool,
     ):
         self.tool_remote = tool_remote
+        self.remote_config_source_gateway = remote_config_source_gateway
         self.dict_args = dict_args
         self.tool = tool
         self.config_tool = config_tool
@@ -26,7 +28,7 @@ class SetInputCore:
         Returns:
             dict: Remote configuration.
         """
-        return self.tool_remote.get_remote_config(
+        return self.remote_config_source_gateway.get_remote_config(
             self.dict_args["remote_config_repo"], file_path, self.dict_args["remote_config_branch"]
         )
 
