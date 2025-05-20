@@ -9,11 +9,11 @@ plugins {
     id("java")
     id("jacoco")
     // IntelliJ Platform Gradle Plugin
-    id("org.jetbrains.intellij.platform") version "2.5.0"
+    id("org.jetbrains.intellij.platform") version "2.6.0"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.2.1"
     // Gradle Sonar Plugin
-    id("org.sonarqube") version "6.1.0.5360"
+    id("org.sonarqube") version "6.2.0.5505"
 }
 
 group = properties("pluginGroup").get()

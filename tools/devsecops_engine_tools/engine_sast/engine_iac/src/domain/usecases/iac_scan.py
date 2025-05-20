@@ -20,17 +20,18 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class IacScan:
     def __init__(
-        self, tool_gateway: ToolGateway, devops_platform_gateway: DevopsPlatformGateway
+        self, tool_gateway: ToolGateway, devops_platform_gateway: DevopsPlatformGateway, remote_config_source_gateway: DevopsPlatformGateway
     ):
         self.tool_gateway = tool_gateway
         self.devops_platform_gateway = devops_platform_gateway
+        self.remote_config_source_gateway = remote_config_source_gateway
 
     def process(self, dict_args, secret_tool, tool, env):
-        config_tool_iac = self.devops_platform_gateway.get_remote_config(
+        config_tool_iac = self.remote_config_source_gateway.get_remote_config(
             dict_args["remote_config_repo"], "engine_sast/engine_iac/ConfigTool.json", dict_args["remote_config_branch"]
         )
 
-        exclusions = self.devops_platform_gateway.get_remote_config(
+        exclusions = self.remote_config_source_gateway.get_remote_config(
             dict_args["remote_config_repo"], "engine_sast/engine_iac/Exclusions.json", dict_args["remote_config_branch"]
         )
 
@@ -48,13 +49,18 @@ class IacScan:
                 secret_tool=secret_tool,
                 secret_external_checks=dict_args["token_external_checks"],
                 work_folder=self.devops_platform_gateway.get_variable("temp_directory"),
-                dict_args=dict_args
+                dict_args=dict_args,
             )
         else:
             print("Tool skipped by DevSecOps policy")
             dict_args["send_metrics"] = "false"
             dict_args["use_vulnerability_management"] = "false"
-
+        
+        if dict_args.get("context") == "true":
+            self.tool_gateway.get_iac_context_from_results(
+                path_file_results
+            )
+            
         totalized_exclusions = []
         (
             totalized_exclusions.extend(

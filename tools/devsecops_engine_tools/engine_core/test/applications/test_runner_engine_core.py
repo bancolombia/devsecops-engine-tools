@@ -30,6 +30,7 @@ def test_application_core(mock_get_inputs_from_cli, mock_entry_point_tool):
         "token_engine_dependencies": None,
         "xray_mode": "scan",
         "dast_file_path": "dast_file_path",
+        "context": "false",
     }
 
     # Mock the dependencies
@@ -91,6 +92,7 @@ def test_get_inputs_from_cli(mock_parse_args):
     mock_args.platform_devops = "azure"
     mock_args.remote_config_repo = "https://github.com/example/repo"
     mock_args.remote_config_branch = ""
+    mock_args.remote_config_source = "azure"
     mock_args.module = "engine_iac"
     mock_args.tool = None
     mock_args.folder_path = "/path/to/folder"
@@ -107,7 +109,8 @@ def test_get_inputs_from_cli(mock_parse_args):
     mock_args.xray_mode = "scan"
     mock_args.image_to_scan = "image"
     mock_args.dast_file_path = "dast_file_path"
-
+    mock_args.context = "false"
+    
     # Mock the parse_args method
     mock_parse_args.return_value = mock_args
 
@@ -119,6 +122,7 @@ def test_get_inputs_from_cli(mock_parse_args):
         "platform_devops": "azure",
         "remote_config_repo": "https://github.com/example/repo",
         "remote_config_branch": "",
+        "remote_config_source": "azure",
         "tool": None,
         "module": "engine_iac",
         "folder_path": "/path/to/folder",
@@ -135,7 +139,7 @@ def test_get_inputs_from_cli(mock_parse_args):
         "xray_mode": "scan",
         "image_to_scan": "image",
         "dast_file_path": "dast_file_path",
-
+        "context": "false",
     }
 
 

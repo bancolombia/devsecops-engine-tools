@@ -16,16 +16,17 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 def init_engine_sca_rm(
     tool_run,
     tool_remote,
+    remote_config_source_gateway,
     tool_images,
     tool_deseralizator,
     dict_args,
     secret_tool,
     tool,
 ):
-    remote_config = tool_remote.get_remote_config(
+    remote_config = remote_config_source_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_sca/engine_container/ConfigTool.json", dict_args["remote_config_branch"]
     )
-    exclusions = tool_remote.get_remote_config(
+    exclusions = remote_config_source_gateway.get_remote_config(
         dict_args["remote_config_repo"], "engine_sca/engine_container/Exclusions.json", dict_args["remote_config_branch"]
     )
     pipeline_name = tool_remote.get_variable("pipeline_name")
@@ -53,7 +54,8 @@ def init_engine_sca_rm(
             dict_args["token_engine_container"],
             image_to_scan,
             exclusions,
-            pipeline_name
+            pipeline_name,
+            context = dict_args["context"]
         )
         image_scanned, base_image, sbom_components = container_sca_scan.process()
         if image_scanned:

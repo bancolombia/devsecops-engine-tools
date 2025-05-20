@@ -31,11 +31,13 @@ class HandleRisk:
         vulnerability_management: VulnerabilityManagementGateway,
         secrets_manager_gateway: SecretsManagerGateway,
         devops_platform_gateway: DevopsPlatformGateway,
+        remote_config_source_gateway: DevopsPlatformGateway,
         print_table_gateway: PrinterTableGateway,
     ):
         self.vulnerability_management = vulnerability_management
         self.secrets_manager_gateway = secrets_manager_gateway
         self.devops_platform_gateway = devops_platform_gateway
+        self.remote_config_source_gateway = remote_config_source_gateway
         self.print_table_gateway = print_table_gateway
 
     def _get_all_from_vm(self, dict_args, secret_tool, remote_config, service):
@@ -85,7 +87,7 @@ class HandleRisk:
         return filtered_engagements
 
     def _exclude_services(self, dict_args, pipeline_name, service_list):
-        risk_exclusions = self.devops_platform_gateway.get_remote_config(
+        risk_exclusions = self.remote_config_source_gateway.get_remote_config(
             dict_args["remote_config_repo"], "engine_risk/Exclusions.json", dict_args["remote_config_branch"]
         )
         if (
@@ -128,10 +130,10 @@ class HandleRisk:
         )
 
     def process(self, dict_args: any, remote_config: any):
-        risk_config = self.devops_platform_gateway.get_remote_config(
+        risk_config = self.remote_config_source_gateway.get_remote_config(
             dict_args["remote_config_repo"], "engine_risk/ConfigTool.json", dict_args["remote_config_branch"]
         )
-        risk_exclusions = self.devops_platform_gateway.get_remote_config(
+        risk_exclusions = self.remote_config_source_gateway.get_remote_config(
             dict_args["remote_config_repo"], "engine_risk/Exclusions.json", dict_args["remote_config_branch"]
         )
         pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
@@ -227,6 +229,7 @@ class HandleRisk:
             exclusions,
             [service.name for service in new_service_list],
             self.devops_platform_gateway,
+            self.remote_config_source_gateway,
             self.print_table_gateway,
         )
 

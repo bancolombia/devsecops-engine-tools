@@ -13,6 +13,6 @@ def test_init_engine_container():
         token = "token"
         tool = "PRISMA"
 
-        result = runner_engine_container(dict_args, tool, token, None)
+        result = runner_engine_container(dict_args, tool, token, None, None)
 
         mock_init_engine_sca_rm.assert_any_call

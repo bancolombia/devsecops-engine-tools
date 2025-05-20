@@ -5,7 +5,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
 from datetime import datetime
 from dataclasses import dataclass
 
-
 @dataclass
 class CheckovDeserealizator:
     @classmethod
@@ -17,7 +16,7 @@ class CheckovDeserealizator:
         for result in results_scan_list:
             if "failed_checks" in str(result):
                 for scan in result["results"]["failed_checks"]:
-                    check_id = scan.get("check_id")
+                    check_id = scan.get("check_id") 
                     if not rules.get(check_id):
                         description = scan.get("check_name")
                         severity = default_severity.lower()
@@ -40,6 +39,8 @@ class CheckovDeserealizator:
                         requirements=scan.get("guideline"),
                         tool="Checkov"
                     )
-                    list_open_findings.append(finding_open)
-
+                    list_open_findings.append(finding_open)      
+       
         return list_open_findings
+    
+    

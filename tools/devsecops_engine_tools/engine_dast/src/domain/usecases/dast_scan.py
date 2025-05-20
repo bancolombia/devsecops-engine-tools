@@ -21,11 +21,13 @@ class DastScan:
         self,
         tool_gateway: ToolGateway,
         devops_platform_gateway: DevopsPlatformGateway,
+        remote_config_source_gateway: DevopsPlatformGateway,
         data_target,
         aditional_tools: "List[ToolGateway]"
     ):
         self.tool_gateway = tool_gateway
         self.devops_platform_gateway = devops_platform_gateway
+        self.remote_config_source_gateway = remote_config_source_gateway
         self.data_target = data_target
         self.other_tools = aditional_tools
 
@@ -56,11 +58,11 @@ class DastScan:
     def process(
         self, dict_args, secret_tool, config_tool
     ) -> "Tuple[List, InputCore]":
-        init_config_tool = self.devops_platform_gateway.get_remote_config(
+        init_config_tool = self.remote_config_source_gateway.get_remote_config(
             dict_args["remote_config_repo"], "engine_dast/ConfigTool.json"
         )
 
-        exclusions = self.devops_platform_gateway.get_remote_config(
+        exclusions = self.remote_config_source_gateway.get_remote_config(
             dict_args["remote_config_repo"],
             "engine_dast/Exclusions.json"
         )

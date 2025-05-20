@@ -9,7 +9,8 @@ class TestIacScan(unittest.TestCase):
     def setUp(self):
         self.tool_gateway = MagicMock()
         self.devops_platform_gateway = MagicMock()
-        self.iac_scan = IacScan(self.tool_gateway, self.devops_platform_gateway)
+        self.remote_config_source_gateway = MagicMock()
+        self.iac_scan = IacScan(self.tool_gateway, self.devops_platform_gateway, self.remote_config_source_gateway)
 
     def side_effect(self, arg):
         if arg == "stage":
@@ -25,12 +26,13 @@ class TestIacScan(unittest.TestCase):
             "environment": "test",
             "platform": "cloudformation",
             "token_external_checks": "token",
+            "context": "false",
         }
         secret_tool = "example_secret"
         tool = "CHECKOV"
 
         # Mock the return values of the dependencies
-        self.devops_platform_gateway.get_remote_config.return_value = {
+        self.remote_config_source_gateway.get_remote_config.return_value = {
             "SEARCH_PATTERN": ["AW", "NU"],
             "IGNORE_SEARCH_PATTERN": "(.*_test)",
             "EXCLUSIONS_PATH": "Exclusions.json",
@@ -87,7 +89,7 @@ class TestIacScan(unittest.TestCase):
         secret_tool = "example_secret"
         tool = "CHECKOV"
 
-        self.devops_platform_gateway.get_remote_config.side_effect = [
+        self.remote_config_source_gateway.get_remote_config.side_effect = [
             # Resultado para el primer llamado (init_config_tool)
             {
                 "SEARCH_PATTERN": ["AW", "NU"],

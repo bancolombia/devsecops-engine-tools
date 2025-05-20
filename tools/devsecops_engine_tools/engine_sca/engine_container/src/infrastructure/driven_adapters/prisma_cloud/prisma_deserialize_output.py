@@ -67,3 +67,7 @@ class PrismaDeserealizator(DeseralizatorGateway):
             list_open_vulnerabilities.extend(vulnerabilities)
 
         return list_open_vulnerabilities
+    
+    def get_container_context_from_results(self, image_scanned):
+        #TODO: Implement this method
+        pass

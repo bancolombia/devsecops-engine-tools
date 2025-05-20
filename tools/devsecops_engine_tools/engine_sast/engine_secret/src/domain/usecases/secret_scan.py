@@ -18,11 +18,13 @@ class SecretScan:
         self,
         tool_gateway: ToolGateway,
         devops_platform_gateway: DevopsPlatformGateway,
+        remote_config_source_gateway: DevopsPlatformGateway,
         tool_deserialize: DeseralizatorGateway,
         git_gateway: GitGateway
         ):
         self.tool_gateway = tool_gateway
         self.devops_platform_gateway = devops_platform_gateway
+        self.remote_config_source_gateway = remote_config_source_gateway
         self.tool_deserialize = tool_deserialize
         self.git_gateway = git_gateway
 
@@ -69,7 +71,7 @@ class SecretScan:
     
     def complete_config_tool(self, dict_args, tool):
         tool = str(tool).lower()
-        init_config_tool = self.devops_platform_gateway.get_remote_config(
+        init_config_tool = self.remote_config_source_gateway.get_remote_config(
             dict_args["remote_config_repo"], "engine_sast/engine_secret/ConfigTool.json", dict_args["remote_config_branch"]
         )
         init_config_tool['SCOPE_PIPELINE'] = self.devops_platform_gateway.get_variable("pipeline_name")

@@ -117,3 +117,7 @@ class KubescapeTool(ToolGateway):
             return finding_list, path_results
         else:
             return [], None
+
+    def get_iac_context_from_results(self, path_file_results):
+        #TODO: Implement this method
+        pass

@@ -20,9 +20,10 @@ class TestRunnerEngineCode(unittest.TestCase):
         dict_args = {"platform_devops": "test"}
         tool = "BEARER"
         devops_platform_gateway = Mock()
+        remote_config_source_gateway = Mock()
 
         # Act
-        runner_engine_code(dict_args, tool, devops_platform_gateway)
+        runner_engine_code(dict_args, tool, devops_platform_gateway, remote_config_source_gateway)
 
         # Assert
         _, kwargs = mock_init_engine_sast_code.call_args
@@ -37,9 +38,10 @@ class TestRunnerEngineCode(unittest.TestCase):
         dict_args = {"platform_devops": "azure"}
         tool = "TEST"
         devops_platform_gateway = Mock()
+        remote_config_source_gateway = Mock()
 
         # Act
-        runner_engine_code(dict_args, tool, devops_platform_gateway)
+        runner_engine_code(dict_args, tool, devops_platform_gateway, remote_config_source_gateway)
 
         # Assert
         _, kwargs = mock_init_engine_sast_code.call_args
@@ -54,12 +56,13 @@ class TestRunnerEngineCode(unittest.TestCase):
         dict_args = {"platform_devops": "azure"}
         tool = "BEARER"
         devops_platform_gateway = Mock()
+        remote_config_source_gateway = Mock()
 
         # Custom exception
         mock_init_engine_sast_code.side_effect = Exception("Simulated error")
 
         # Act & Assert
         with self.assertRaises(Exception) as context:
-            runner_engine_code(dict_args, tool, devops_platform_gateway)
+            runner_engine_code(dict_args, tool, devops_platform_gateway, remote_config_source_gateway)
 
         self.assertEqual(str(context.exception), "Error engine_code : Simulated error")
