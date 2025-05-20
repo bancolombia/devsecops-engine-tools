@@ -48,7 +48,6 @@ class KicsTool(ToolGateway):
 
     def execute_kics(self, folders_to_scan, prefix, platform_to_scan, work_folder, os_platform, queries):
         folders = ','.join(folders_to_scan)
-        # queries = ','.join([list(query.values())[0] for query in queries])
         queries = ','.join(
                 uuid for query in queries for uuid in list(query.values())[0]
             )
