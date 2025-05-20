@@ -48,7 +48,10 @@ class KicsTool(ToolGateway):
 
     def execute_kics(self, folders_to_scan, prefix, platform_to_scan, work_folder, os_platform, queries):
         folders = ','.join(folders_to_scan)
-        queries = ','.join([list(query.values())[0] for query in queries])
+        # queries = ','.join([list(query.values())[0] for query in queries])
+        queries = ','.join(
+                uuid for query in queries for uuid in list(query.values())[0]
+            )
         mapped_platforms = [
             self.scan_type_platform_mapping.get(platform.lower(), platform)
             for platform in platform_to_scan
@@ -76,19 +79,32 @@ class KicsTool(ToolGateway):
             subprocess.run(command, capture_output=True)
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during KICS execution: {e}")
-
+            
     def load_results(self, work_folder, queries):
         try:
             results_path = os.path.join(work_folder, "results.json")
             with open(results_path, "r") as f:
                 data = json.load(f)
 
+            query_id_to_info = {}
+            for query in queries:
+                severity = query.get("severity")
+                for custom_id, ids in query.items():
+                    if custom_id == "severity":
+                        continue
+                    for query_id in ids:
+                        if query_id != "":
+                            query_id_to_info[query_id] = {
+                                "severity": severity,
+                                "custom_id": custom_id
+                            }
+
             for finding in data.get("queries", []):
-                query_ids = {list(query.values())[0] for query in queries}
-                if finding.get("query_id") in query_ids:
-                    finding["custom_vuln_id"] = next(
-                        key for query in queries for key, value in query.items() if value == finding.get("query_id")
-                    )
+                query_id = finding.get("query_id")
+                if query_id in query_id_to_info:
+                    info = query_id_to_info[query_id]
+                    finding["severity"] = info["severity"].upper()
+                    finding["custom_id"] = info["custom_id"]
 
             with open(results_path, "w") as f:
                 json.dump(data, f, indent=4)
@@ -125,7 +141,9 @@ class KicsTool(ToolGateway):
                 platform = platform.strip().upper()
                 if f"RULES_{platform}" not in config_tool[self.TOOL_KICS]["RULES"]:
                     logger.error(f"Platform {platform} not found in RULES")
-                queries = [{key: value["checkID"]} for key, value in config_tool[self.TOOL_KICS]["RULES"][f"RULES_{platform}"].items()]
+                queries = [{key: [value["checkID"], value["overrideID"]],
+                            "severity": value["severity"]}
+                           for key, value in config_tool[self.TOOL_KICS]["RULES"][f"RULES_{platform}"].items()]
             return queries
         except Exception as e:
             logger.error(f"Error writing queries file: {e}")
