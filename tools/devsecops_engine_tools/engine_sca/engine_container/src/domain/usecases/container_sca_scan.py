@@ -38,52 +38,6 @@ class ContainerScaScan:
         self.pipeline_name = pipeline_name
         self.context = context
 
-    def get_image(self, image_to_scan):
-        """
-        Process the list of images.
-
-        Returns:
-            list: List of processed images.
-        """
-        return self.tool_images.list_images(image_to_scan)
-
-    def get_base_image(self, matching_image):
-        """
-            Process the base image.
-
-            Returns:
-                String: base image.
-            """
-        return self.tool_images.get_base_image(matching_image)
-
-    def get_images_already_scanned(self):
-        """
-        Create images scanned file if it does not exist and get the images that have already been scanned.
-        """
-        scanned_images_file = os.path.join(os.getcwd(), "scanned_images.txt")
-        if not os.path.exists(scanned_images_file):
-            open(scanned_images_file, "w").close()
-        with open(scanned_images_file, "r") as file:
-            images_scanned = file.read().splitlines()
-        return images_scanned
-
-    def set_image_scanned(self, result_file):
-        """
-        Write in scanned_images.txt the result file
-        """
-        with open("scanned_images.txt", "a") as file:
-            file.write(result_file + "\n")
-
-    def validate_base_image_date(self, matching_image, referenced_date):
-        """
-        Process the base image date validation.
-
-        Returns:
-            string: base image date.
-        """
-        return self.tool_images.validate_base_image_date(
-            matching_image, referenced_date
-        )
 
     def process(self):
         """
@@ -94,15 +48,15 @@ class ContainerScaScan:
         """
         base_image = None
         image_scanned = None
-        matching_image = self.get_image(self.image_to_scan)
+        matching_image = self._get_image(self.image_to_scan)
         if self.remote_config["GET_IMAGE_BASE"]:
-            base_image = self.get_base_image(matching_image)
+            base_image = self._get_base_image(matching_image)
         if self.remote_config["VALIDATE_BASE_IMAGE_DATE"][
             "ENABLED"
         ] and not self.exclusions.get(self.pipeline_name, {}).get(
             "VALIDATE_BASE_IMAGE_DATE"
         ):
-            self.validate_base_image_date(
+            self._validate_base_image_date(
                 matching_image,
                 self.remote_config["VALIDATE_BASE_IMAGE_DATE"]["REFERENCE_IMAGE_DATE"],
             )
@@ -114,7 +68,7 @@ class ContainerScaScan:
         if matching_image:
             image_name = matching_image.tags[0]
             result_file = image_name.replace("/", "_") + "_scan_result.json"
-            if image_name in self.get_images_already_scanned():
+            if image_name in self._get_images_already_scanned():
                 print(f"The image {image_name} has already been scanned previously.")
                 return image_scanned, base_image, sbom_components
             image_scanned, sbom_components = self.tool_run.run_tool_container_sca(
@@ -127,7 +81,7 @@ class ContainerScaScan:
                 self.exclusions,
                 generate_sbom,
             )
-            self.set_image_scanned(image_name)
+            self._set_image_scanned(image_name)
         else:
             print(f"'Not image found for {self.image_to_scan}'. Tool skipped.")
         return image_scanned, base_image, sbom_components
@@ -142,5 +96,52 @@ class ContainerScaScan:
         context_flag = self.context
         if context_flag == "true":
             self.tool_deseralizator.get_container_context_from_results(image_scanned)
-                    
+
         return self.tool_deseralizator.get_list_findings(image_scanned)
+
+    def _get_image(self, image_to_scan):
+        """
+        Process the list of images.
+
+        Returns:
+            list: List of processed images.
+        """
+        return self.tool_images.list_images(image_to_scan)
+
+    def _get_base_image(self, matching_image):
+        """
+        Process the base image.
+
+        Returns:
+            String: base image.
+        """
+        return self.tool_images.get_base_image(matching_image)
+
+    def _validate_base_image_date(self, matching_image, referenced_date):
+        """
+        Process the base image date validation.
+
+        Returns:
+            string: base image date.
+        """
+        return self.tool_images.validate_base_image_date(
+            matching_image, referenced_date
+        )
+
+    def _get_images_already_scanned(self):
+        """
+        Create images scanned file if it does not exist and get the images that have already been scanned.
+        """
+        scanned_images_file = os.path.join(os.getcwd(), "scanned_images.txt")
+        if not os.path.exists(scanned_images_file):
+            open(scanned_images_file, "w").close()
+        with open(scanned_images_file, "r") as file:
+            images_scanned = file.read().splitlines()
+        return images_scanned
+
+    def _set_image_scanned(self, result_file):
+        """
+        Write in scanned_images.txt the result file
+        """
+        with open("scanned_images.txt", "a") as file:
+            file.write(result_file + "\n")

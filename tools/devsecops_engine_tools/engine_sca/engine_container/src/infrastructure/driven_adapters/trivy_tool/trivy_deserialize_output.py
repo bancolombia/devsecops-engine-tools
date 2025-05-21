@@ -1,4 +1,6 @@
-from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.context_container import ContextContainer
+from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.context_container import (
+    ContextContainer,
+)
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.deserealizator_gateway import (
     DeseralizatorGateway,
 )
@@ -10,20 +12,9 @@ from dataclasses import asdict, dataclass
 import json
 from datetime import datetime, timezone
 
+
 @dataclass
 class TrivyDeserializator(DeseralizatorGateway):
-    def check_date_format(self, vul):
-        try:
-            published_date_cve=datetime.strptime(
-                vul.get("PublishedDate"),
-                "%Y-%m-%dT%H:%M:%S.%fZ"
-            ).replace(tzinfo=timezone.utc).isoformat()
-        except:
-            published_date_cve=datetime.strptime(
-                vul.get("PublishedDate"),
-                "%Y-%m-%dT%H:%M:%SZ"
-            ).replace(tzinfo=timezone.utc).isoformat()
-        return published_date_cve
 
     def get_list_findings(self, image_scanned) -> "list[Finding]":
         list_open_vulnerabilities = []
@@ -34,23 +25,23 @@ class TrivyDeserializator(DeseralizatorGateway):
             vulnerabilities = [
                 Finding(
                     id=vul.get("VulnerabilityID", ""),
-                    cvss=str(next(
-                        (
-                            v["V3Score"]
-                            for v in vul["CVSS"].values()
-                            if "V3Score" in v
-                        ),
-                        None,
-                    )),
+                    cvss=str(
+                        next(
+                            (
+                                v["V3Score"]
+                                for v in vul["CVSS"].values()
+                                if "V3Score" in v
+                            ),
+                            None,
+                        )
+                    ),
                     where=vul.get("PkgName", "")
                     + " "
                     + vul.get("InstalledVersion", ""),
                     description=vul.get("Description", "").replace("\n", "")[:150],
                     severity=vul.get("Severity", "").lower(),
-                    identification_date=datetime.now().strftime(
-                        "%Y-%m-%dT%H:%M:%S%z"
-                    ),
-                    published_date_cve=self.check_date_format(vul),
+                    identification_date=datetime.now().strftime("%Y-%m-%dT%H:%M:%S%z"),
+                    published_date_cve=self._check_date_format(vul),
                     module="engine_container",
                     category=Category.VULNERABILITY,
                     requirements=vul.get("FixedVersion") or vul.get("Status", ""),
@@ -61,8 +52,10 @@ class TrivyDeserializator(DeseralizatorGateway):
             ]
             list_open_vulnerabilities.extend(vulnerabilities)
         return list_open_vulnerabilities
-    
-    def get_container_context_from_results(self, image_scanned) -> "list[ContextContainer]":
+
+    def get_container_context_from_results(
+        self, image_scanned
+    ) -> "list[ContextContainer]":
         context_container_list = []
 
         with open(image_scanned, "rb") as file:
@@ -96,9 +89,11 @@ class TrivyDeserializator(DeseralizatorGateway):
                     description=vul.get("Description", "unknown").replace("\n", ""),
                     os_type=result.get("Type", "unknown"),
                     layer_digest=vul.get("Layer", {}).get("DiffID", "unknown"),
-                    published_date=self.check_date_format(vul)
-                    if vul.get("PublishedDate")
-                    else None,
+                    published_date=(
+                        self._check_date_format(vul)
+                        if vul.get("PublishedDate")
+                        else None
+                    ),
                     last_modified_date=vul.get("LastModifiedDate", "unknown"),
                     references=vul.get("References", "unknown"),
                     source_tool="Trivy",
@@ -106,5 +101,29 @@ class TrivyDeserializator(DeseralizatorGateway):
                 context_container_list.append(context_container)
 
         print("===== BEGIN CONTEXT OUTPUT =====")
-        print(json.dumps({"container_context": [asdict(context) for context in context_container_list]}, indent=2))
+        print(
+            json.dumps(
+                {
+                    "container_context": [
+                        asdict(context) for context in context_container_list
+                    ]
+                },
+                indent=2,
+            )
+        )
         print("===== END CONTEXT OUTPUT =====")
+
+    def _check_date_format(self, vul):
+        try:
+            published_date_cve = (
+                datetime.strptime(vul.get("PublishedDate"), "%Y-%m-%dT%H:%M:%S.%fZ")
+                .replace(tzinfo=timezone.utc)
+                .isoformat()
+            )
+        except:
+            published_date_cve = (
+                datetime.strptime(vul.get("PublishedDate"), "%Y-%m-%dT%H:%M:%SZ")
+                .replace(tzinfo=timezone.utc)
+                .isoformat()
+            )
+        return published_date_cve

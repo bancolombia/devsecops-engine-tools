@@ -32,7 +32,7 @@ class TestKubescapeTool(unittest.TestCase):
         url = "http://example.com/test"
         file = "testfile.bin"
 
-        self.kubescape_tool.download_tool(file, url)
+        self.kubescape_tool._download_tool(file, url)
         
         mock_get.assert_called_once_with(url, allow_redirects=True)
 
@@ -40,7 +40,7 @@ class TestKubescapeTool(unittest.TestCase):
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
-    @patch.object(KubescapeTool, "download_tool")
+    @patch.object(KubescapeTool, "_download_tool")
     def test_install_tool_aleady_installed(self, mock_download_tool, mock_logger, mock_subprocess_run):
         mock_installed = MagicMock()
         mock_installed.returncode = 0
@@ -49,7 +49,7 @@ class TestKubescapeTool(unittest.TestCase):
         file = "testfile"
         url = "http://example.com/test"
         tool = self.kubescape_tool
-        tool.install_tool(file, url)
+        tool._install_tool(file, url)
 
         mock_subprocess_run.assert_called_once_with(
             ["which", f"./{file}"],
@@ -63,7 +63,7 @@ class TestKubescapeTool(unittest.TestCase):
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
-    @patch.object(KubescapeTool, "download_tool")
+    @patch.object(KubescapeTool, "_download_tool")
     def test_install_tool_not_installed(self, mock_download_tool, mock_logger, mock_subprocess_run):
         mock_installed = MagicMock()
         mock_installed.returncode = 1
@@ -72,7 +72,7 @@ class TestKubescapeTool(unittest.TestCase):
         file = "testfile"
         url = "http://example.com/test"
         tool = self.kubescape_tool
-        tool.install_tool(file, url)
+        tool._install_tool(file, url)
 
         self.assertEqual(mock_subprocess_run.call_count, 2)
         mock_subprocess_run.assert_any_call(
@@ -89,7 +89,7 @@ class TestKubescapeTool(unittest.TestCase):
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
-    @patch.object(KubescapeTool, "download_tool")
+    @patch.object(KubescapeTool, "_download_tool")
     def test_install_tool_exception(self, mock_download_tool, mock_logger, mock_subprocess_run):
         mock_installed = MagicMock()
         mock_installed.returncode = 1
@@ -100,7 +100,7 @@ class TestKubescapeTool(unittest.TestCase):
         file = "testfile"
         url = "http://example.com/test"
         tool = self.kubescape_tool
-        tool.install_tool(file, url)
+        tool._install_tool(file, url)
 
         mock_subprocess_run.assert_called_once_with(
             ["which", f"./{file}"],
@@ -114,7 +114,7 @@ class TestKubescapeTool(unittest.TestCase):
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
-    @patch.object(KubescapeTool, "download_tool")
+    @patch.object(KubescapeTool, "_download_tool")
     def test_install_tool_windows_already_installed(self, mock_download_tool, mock_logger, mock_subprocess_run):
         mock_installed = MagicMock()
         mock_subprocess_run.return_value = mock_installed
@@ -122,7 +122,7 @@ class TestKubescapeTool(unittest.TestCase):
         file = "testfile"
         url = "http://example.com/test"
         tool = self.kubescape_tool
-        tool.install_tool_windows(file, url)
+        tool._install_tool_windows(file, url)
 
         mock_subprocess_run.assert_called_once_with(
             [f"./{file}", "version"],
@@ -136,14 +136,14 @@ class TestKubescapeTool(unittest.TestCase):
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run", side_effect=Exception("Test exception"))
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
-    @patch.object(KubescapeTool, "download_tool")
+    @patch.object(KubescapeTool, "_download_tool")
     def test_install_tool_windows_not_installed(self, mock_download_tool, mock_logger, mock_subprocess_run):
         mock_download_tool.return_value = None
 
         file = "testfile"
         url = "http://example.com/test"
         tool = self.kubescape_tool
-        tool.install_tool_windows(file, url)
+        tool._install_tool_windows(file, url)
 
         mock_subprocess_run.assert_called_once_with(
             [f"./{file}", "version"],
@@ -157,13 +157,13 @@ class TestKubescapeTool(unittest.TestCase):
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run", side_effect=Exception("Test exception"))
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
-    @patch.object(KubescapeTool, "download_tool", side_effect=Exception("Download exception"))
+    @patch.object(KubescapeTool, "_download_tool", side_effect=Exception("Download exception"))
     def test_install_tool_windows_download_exception(self, mock_download_tool, mock_logger, mock_subprocess_run):
 
         file = "testfile"
         url = "http://example.com/test"
         tool = self.kubescape_tool
-        tool.install_tool_windows(file, url)
+        tool._install_tool_windows(file, url)
 
         mock_subprocess_run.assert_called_once_with(
             [f"./{file}", "version"],
@@ -182,7 +182,7 @@ class TestKubescapeTool(unittest.TestCase):
 
         folders_to_scan = ["folder1", "folder2"]
         prefix = "kubescape"
-        self.kubescape_tool.execute_kubescape(folders_to_scan, prefix)
+        self.kubescape_tool._execute_kubescape(folders_to_scan, prefix)
 
         expected_calls = [
             call(
@@ -200,7 +200,7 @@ class TestKubescapeTool(unittest.TestCase):
 
         folders_to_scan = ["folder1"]
         prefix = "kubescape"
-        self.kubescape_tool.execute_kubescape(folders_to_scan, prefix)
+        self.kubescape_tool._execute_kubescape(folders_to_scan, prefix)
 
         mock_subprocess_run.assert_called_once_with(
             ["kubescape", "scan"] + folders_to_scan + ["--format", "json", "--format-version", "v2", "--output", "results_kubescape.json", "-v"],
@@ -211,7 +211,7 @@ class TestKubescapeTool(unittest.TestCase):
 
     @patch("builtins.open", new_callable=mock.mock_open, read_data='{"key": "value"}')
     def test_load_json_success(self, mock_file):
-        result = self.kubescape_tool.load_json("json_name.json")
+        result = self.kubescape_tool._load_json("json_name.json")
         self.assertEqual(result, {"key": "value"})
         mock_file.assert_called_once_with("json_name.json")
 
@@ -229,37 +229,37 @@ class TestKubescapeTool(unittest.TestCase):
 
 
     @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.distro.name', return_value='Ubuntu')
-    @patch.object(KubescapeTool, 'install_tool')
+    @patch.object(KubescapeTool, '_install_tool')
     def test_select_operative_system_linux_ubuntu(self, mock_install_tool, mock_distro_name):
         executor = KubescapeTool()
         os_platform = 'Linux'
         base_url = 'http://example.com/'
         
-        result = executor.select_operative_system(os_platform, base_url)
+        result = executor._select_operative_system(os_platform, base_url)
         
         mock_install_tool.assert_called_once_with('kubescape-ubuntu-latest', 'http://example.com/kubescape-ubuntu-latest')
         self.assertEqual(result, './kubescape-ubuntu-latest')
 
-    @patch.object(KubescapeTool, 'install_tool_windows')
-    @patch.object(KubescapeTool, 'execute_kubescape', return_value=['result.json'])
+    @patch.object(KubescapeTool, '_install_tool_windows')
+    @patch.object(KubescapeTool, '_execute_kubescape', return_value=['result.json'])
     def test_select_operative_system_windows(self, mock_execute_kubescape, mock_install_tool_windows):
         executor = KubescapeTool()
         os_platform = 'Windows'
         base_url = 'http://example.com/'
         
-        result = executor.select_operative_system(os_platform, base_url)
+        result = executor._select_operative_system(os_platform, base_url)
         
         mock_install_tool_windows.assert_called_once_with('kubescape-windows-latest.exe', 'http://example.com/kubescape-windows-latest.exe')
         self.assertEqual(result, './kubescape-windows-latest.exe')
 
-    @patch.object(KubescapeTool, 'install_tool')
-    @patch.object(KubescapeTool, 'execute_kubescape', return_value=['result.json'])
+    @patch.object(KubescapeTool, '_install_tool')
+    @patch.object(KubescapeTool, '_execute_kubescape', return_value=['result.json'])
     def test_select_operative_system_darwin(self, mock_execute_kubescape, mock_install_tool):
         executor = KubescapeTool()
         os_platform = 'Darwin'
         base_url = 'http://example.com/'
         
-        result = executor.select_operative_system(os_platform, base_url)
+        result = executor._select_operative_system(os_platform, base_url)
         
         mock_install_tool.assert_called_once_with('kubescape-macos-latest', 'http://example.com/kubescape-macos-latest')
         self.assertEqual(result, './kubescape-macos-latest')

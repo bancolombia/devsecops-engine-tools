@@ -28,7 +28,7 @@ class TestKicsTool(unittest.TestCase):
         platform_to_scan = ["platform1"]
         expected_queries = [{"rule1":"check1"}, {"rule2":"check2"}]
 
-        queries = self.kics_tool.get_queries(config_tool, platform_to_scan)
+        queries = self.kics_tool._get_queries(config_tool, platform_to_scan)
 
         self.assertEqual(queries, expected_queries)
         mock_logger.error.assert_not_called()
@@ -47,7 +47,7 @@ class TestKicsTool(unittest.TestCase):
         }
         platform_to_scan = ["platform3"]
 
-        queries = self.kics_tool.get_queries(config_tool, platform_to_scan)
+        queries = self.kics_tool._get_queries(config_tool, platform_to_scan)
 
         self.assertIsNone(queries)
         mock_logger.error.assert_called_with("Error writing queries file: 'RULES_PLATFORM3'")
@@ -64,7 +64,7 @@ class TestKicsTool(unittest.TestCase):
         os_platform = "Linux"
         queries = [{"rule1":"check1"}, {"rule2":"check2"}]
 
-        self.kics_tool.execute_kics(folders_to_scan, prefix, platform_to_scan, work_folder, os_platform, queries)
+        self.kics_tool._execute_kics(folders_to_scan, prefix, platform_to_scan, work_folder, os_platform, queries)
 
         mock_logger.error.assert_called_once_with("Error during KICS execution: Command 'kics' returned non-zero exit status 1.")
 
@@ -73,7 +73,7 @@ class TestKicsTool(unittest.TestCase):
     def test_load_results_success(self, mock_json_load, mock_file):
         work_folder = "work_folder"
         queries = [{"rule1":"check1"}, {"rule2":"check2"}]
-        result = self.kics_tool.load_results(work_folder, queries)
+        result = self.kics_tool._load_results(work_folder, queries)
         self.assertEqual(result, {"key": "value"})
         mock_json_load.assert_called_once()
 
@@ -83,7 +83,7 @@ class TestKicsTool(unittest.TestCase):
     def test_load_results_failure(self, mock_logger_error, mock_json_load, mock_file):
         work_folder = "work_folder"
         queries = [{"rule1":"check1"}, {"rule2":"check2"}]
-        result = self.kics_tool.load_results(work_folder, queries)
+        result = self.kics_tool._load_results(work_folder, queries)
         self.assertIsNone(result)
         mock_json_load.assert_called_once()
         mock_logger_error.error.assert_called_once_with("An error occurred loading or modifying KICS results error")
@@ -94,7 +94,7 @@ class TestKicsTool(unittest.TestCase):
         mock_subprocess_run.return_value = MagicMock(returncode=0)
 
         command_prefix = "kics"
-        result = self.kics_tool.validate_kics(command_prefix)
+        result = self.kics_tool._validate_kics(command_prefix)
 
         self.assertTrue(result)
         mock_logger.error.assert_not_called()
@@ -105,7 +105,7 @@ class TestKicsTool(unittest.TestCase):
         mock_subprocess_run.return_value = MagicMock(returncode=1, stderr="error")
 
         command_prefix = "kics"
-        result = self.kics_tool.validate_kics(command_prefix)
+        result = self.kics_tool._validate_kics(command_prefix)
 
         self.assertFalse(result)
         mock_logger.error.assert_called_once_with("KICS binary not valid: error")
@@ -114,7 +114,7 @@ class TestKicsTool(unittest.TestCase):
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kics.kics_tool.logger")
     def test_validate_kics_exception(self, mock_logger, mock_subprocess_run):
         command_prefix = "kics"
-        result = self.kics_tool.validate_kics(command_prefix)
+        result = self.kics_tool._validate_kics(command_prefix)
 
         self.assertFalse(result)
         mock_logger.error.assert_called_once_with("Error validating KICS binary: Test exception")
@@ -127,7 +127,7 @@ class TestKicsTool(unittest.TestCase):
         file = "test_file"
         url = "http://example.com/test_file"
 
-        self.kics_tool.download(file, url)
+        self.kics_tool._download(file, url)
 
         mock_requests_get.assert_called_once_with(url)
         mock_file.assert_called_once_with(file, "wb")
@@ -140,7 +140,7 @@ class TestKicsTool(unittest.TestCase):
         file = "test_file"
         url = "http://example.com/test_file"
 
-        self.kics_tool.download(file, url)
+        self.kics_tool._download(file, url)
 
         mock_requests_get.assert_called_once_with(url)
         mock_logger.error.assert_called_once_with("An error ocurred downloading test_file Test exception")
