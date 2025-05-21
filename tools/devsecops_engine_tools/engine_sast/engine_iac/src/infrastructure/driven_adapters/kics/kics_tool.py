@@ -49,12 +49,11 @@ class KicsTool(ToolGateway):
     def execute_kics(self, folders_to_scan, prefix, platform_to_scan, work_folder, os_platform, queries):
         folders = ','.join(folders_to_scan)
         queries = ','.join(
-                uuid for query in queries for uuid in list(query.values())[0]
-            )
-        mapped_platforms = [
-            self.scan_type_platform_mapping.get(platform.lower(), platform)
-            for platform in platform_to_scan
-        ]
+            uuid for query in queries for uuid in list(query.values())[0]
+            ) if queries else ""
+        mapped_platforms = [ 
+                            self.scan_type_platform_mapping.get(platform.lower(), platform) 
+                            for platform in platform_to_scan ] if platform_to_scan != ["all"] else list(self.scan_type_platform_mapping.values())
         platforms = ','.join(mapped_platforms)
 
         command = [
@@ -78,6 +77,7 @@ class KicsTool(ToolGateway):
             subprocess.run(command, capture_output=True)
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during KICS execution: {e}")
+            return []
             
     def load_results(self, work_folder, queries):
         try:
