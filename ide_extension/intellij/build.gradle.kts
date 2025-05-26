@@ -58,7 +58,7 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:1.18.38")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
 
-    testImplementation("org.mockito:mockito-core:5.17.0")
+    testImplementation("org.mockito:mockito-core:5.18.0")
 
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
 }
