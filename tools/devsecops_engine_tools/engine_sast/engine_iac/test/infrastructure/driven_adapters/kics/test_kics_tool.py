@@ -19,14 +19,15 @@ class TestKicsTool(unittest.TestCase):
             "KICS": {
                 "RULES": {
                     "RULES_PLATFORM1": {
-                        "rule1": {"checkID": "check1"},
-                        "rule2": {"checkID": "check2"}
+                        "rule1": {"checkID": "check1", "overrideID": "override1", "severity": "high"},
+                        "rule2": {"checkID": "check2", "overrideID": "", "severity": "medium"}
                     }
                 }
             }
         }
         platform_to_scan = ["platform1"]
-        expected_queries = [{"rule1":"check1"}, {"rule2":"check2"}]
+        expected_queries = [{'rule1': ['check1', 'override1'], 'severity': 'high'}, 
+                            {'rule2': ['check2', ''], 'severity': 'medium'}] 
 
         queries = self.kics_tool._get_queries(config_tool, platform_to_scan)
 

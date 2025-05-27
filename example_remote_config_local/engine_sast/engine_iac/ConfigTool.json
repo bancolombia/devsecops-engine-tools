@@ -744,6 +744,7 @@
             "RULES_OPENAPI":{
                 "CKV_OPENAPI_1":{
                     "checkID": "6998389e-66b2-473d-8d05-c8d71ac4d04d",
+                    "overrideID": "6998389e-254as-473d-1234-c8d71ac4dabc",
                     "environment": {
                         "dev": true,
                         "pdn": true,
@@ -756,6 +757,7 @@
                 },
                 "CKV_OPENAPI_2":{
                     "checkID": "86e3702f-c868-44b2-b61d-ea5316c18110",
+                    "overrideID": "",
                     "environment": {
                         "dev": true,
                         "pdn": true,
