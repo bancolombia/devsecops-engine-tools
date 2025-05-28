@@ -56,7 +56,7 @@ def test_init_engine_dependencies_success(mock_exists, mock_dependencies_scan, m
     tool_remote.get_variable.return_value = "main"
     tool_deserializator = MagicMock()
     tool_sbom = MagicMock(spec=SbomManagerGateway)
-    dict_args = {"remote_config_repo": "repo", "folder_path": "path", "remote_config_branch": ""}
+    dict_args = {"remote_config_repo": "repo", "folder_path": "path", "remote_config_branch": "", "context": "test_context"}
     secret_tool = MagicMock()
     config_tool = {
         "SBOM_MANAGER": {"ENABLED": True, "BRANCH_FILTER": ["main"]},

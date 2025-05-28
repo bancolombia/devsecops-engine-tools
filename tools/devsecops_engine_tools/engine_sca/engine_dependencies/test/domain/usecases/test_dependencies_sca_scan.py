@@ -29,7 +29,8 @@ def test_init():
             to_scan,
             secret_tool,
             build_id,
-            build_url
+            build_url,
+            context="false"
         )
 
         assert dependencies_scan_instance.tool_run == mock_tool_gateway
@@ -61,6 +62,7 @@ def test_process():
         secret_tool = "secret_tool"
         build_id = "build_id"
         build_url = "build_url"
+        context = "false"
         dependencies_scan_instance = DependenciesScan(
             mock_tool_gateway,
             mock_deserializator_gateway,
@@ -71,7 +73,8 @@ def test_process():
             to_scan,
             secret_tool,
             build_id,
-            build_url
+            build_url,
+            context
         )
         dependencies_scan_instance.process()
 
@@ -84,7 +87,8 @@ def test_process():
             secret_tool,
             None,
             build_id=build_id,
-            build_url=build_url
+            build_url=build_url,
+            context=context
         )
 
 
@@ -103,6 +107,7 @@ def test_deserializator():
         dependencies_scanned = "scanned.json"
         build_id = "build_id"
         build_url = "build_url"
+        context = "false"
 
         dependencies_scan_instance = DependenciesScan(
             mock_tool_gateway,
@@ -114,8 +119,8 @@ def test_deserializator():
             to_scan,
             token,
             build_id,
-            build_url
-            
+            build_url,
+            context
         )
         dependencies_scan_instance.deserializator(dependencies_scanned)
 

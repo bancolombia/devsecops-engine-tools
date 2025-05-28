@@ -8,6 +8,7 @@ class ContextContainer:
     vendor_id: Optional[List[str]]
     severity: str
     vulnerability_status: str
+    risk_factors: Optional[List[str]]
     target_image: str
     package_name: str
     installed_version: str

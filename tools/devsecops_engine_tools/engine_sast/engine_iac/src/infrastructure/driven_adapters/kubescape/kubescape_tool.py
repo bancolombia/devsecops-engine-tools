@@ -4,6 +4,7 @@ import platform
 import requests
 import distro
 import os
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.context_iac import ContextIac
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -119,5 +120,43 @@ class KubescapeTool(ToolGateway):
             return [], None
 
     def get_iac_context_from_results(self, path_file_results):
-        #TODO: Implement this method
-        pass
+        try:
+            with open(path_file_results, "r") as file:
+                data = json.load(file)
+
+            kubescape_deserealizator = KubescapeDeserealizator()
+            extracted_controls = kubescape_deserealizator.extract_failed_controls(data)
+
+            context_iac_list = []
+
+            for control in extracted_controls:
+                for resource in control.get("resource", []):
+                    file_path = resource.get("filePath", "unknown")
+                    resource_name = resource.get("resourceID", "unknown")
+                    line = resource.get("lineNumber", "unknown")
+
+                    line_range_str = str(line) if isinstance(line, int) else "unknown"
+
+                    context_iac = ContextIac(
+                        id=control.get("controlID", "unknown"),
+                        check_name=control.get("name", "unknown"),
+                        check_class=control.get("controlID", "unknown"),
+                        severity=control.get("severity", "low").lower(),
+                        where=f"{file_path}: {resource_name} (line {line_range_str})",
+                        resource=resource_name,
+                        description=control.get("description", "unknown"),
+                        module="engine_iac",
+                        tool="Kubescape"
+                    )
+
+                    context_iac_list.append(context_iac)
+
+            print("===== BEGIN CONTEXT OUTPUT =====")
+            print(json.dumps({"iac_context": [obj.__dict__ for obj in context_iac_list]}, indent=4))
+            print("===== END CONTEXT OUTPUT =====")
+
+            return context_iac_list
+
+        except Exception as e:
+            logger.error(f"Error extracting Kubescape IaC context: {e}")
+            return []

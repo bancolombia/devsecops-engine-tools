@@ -80,6 +80,7 @@ class TrivyDeserializator(DeseralizatorGateway):
                     vendor_id=vul.get("VendorIDs", "unknown"),
                     severity=vul.get("Severity", "unknown").lower(),
                     vulnerability_status=vul.get("Status", "unknown"),
+                    risk_factors=None,  # Trivy does not expose risk factors
                     target_image=result.get("Target", "unknown"),
                     package_name=vul.get("PkgName", "unknown"),
                     installed_version=vul.get("InstalledVersion", "unknown"),
