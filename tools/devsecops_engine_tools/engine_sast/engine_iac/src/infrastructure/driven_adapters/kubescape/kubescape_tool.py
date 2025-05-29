@@ -97,7 +97,7 @@ class KubescapeTool(ToolGateway):
 
     def run_tool(self, config_tool, folders_to_scan, platform_to_scan, **kwargs):
 
-        if folders_to_scan and "k8s" in platform_to_scan:
+        if folders_to_scan and ("k8s" in platform_to_scan or "all" in platform_to_scan):
 
             kubescape_version = config_tool["KUBESCAPE"]["VERSION"]
             os_platform = platform.system()
@@ -120,43 +120,52 @@ class KubescapeTool(ToolGateway):
             return [], None
 
     def get_iac_context_from_results(self, path_file_results):
-        try:
+
             with open(path_file_results, "r") as file:
                 data = json.load(file)
 
             kubescape_deserealizator = KubescapeDeserealizator()
             extracted_controls = kubescape_deserealizator.extract_failed_controls(data)
+            frameworks = data.get("summaryDetails", {}).get("frameworks", [])
 
             context_iac_list = []
+            controls_by_id = {}
+
+            for result in data.get("results", []):
+                for ctrl in result.get("controls", []):
+                    controls_by_id[ctrl.get("controlID")] = ctrl
 
             for control in extracted_controls:
-                for resource in control.get("resource", []):
-                    file_path = resource.get("filePath", "unknown")
-                    resource_name = resource.get("resourceID", "unknown")
-                    line = resource.get("lineNumber", "unknown")
+                control_id = control.get("id")
+                severity = kubescape_deserealizator.get_severity_score(frameworks, control_id)
+                resource_ids = []
+                fix_key =[]
 
-                    line_range_str = str(line) if isinstance(line, int) else "unknown"
+                full_control = controls_by_id.get(control_id)
+                if full_control:
+                    for rule in full_control.get("rules", []):
+                        for path in rule.get("paths", []):
+                            resource_id = path.get("resourceID")
+                            if resource_id:
+                                resource_ids.append(resource_id)
+                            fix_path = path.get("fixPath", {}).get("path")
+                            if fix_path:
+                                fix_key.append(fix_path)
 
-                    context_iac = ContextIac(
-                        id=control.get("controlID", "unknown"),
-                        check_name=control.get("name", "unknown"),
-                        check_class=control.get("controlID", "unknown"),
-                        severity=control.get("severity", "low").lower(),
-                        where=f"{file_path}: {resource_name} (line {line_range_str})",
-                        resource=resource_name,
-                        description=control.get("description", "unknown"),
-                        module="engine_iac",
-                        tool="Kubescape"
-                    )
+                context_iac = ContextIac(
+                    id=control_id or "unknown",
+                    check_class=control_id or "unknown",
+                    severity=severity if severity else "unknown",
+                    where=control.get("where", "unknown"),
+                    fix_key=fix_key if fix_key else ["unknown"],
+                    resource=resource_ids if resource_ids else ["unknown"],
+                    description=control.get("description", "unknown"),
+                    module="engine_iac",
+                    tool="Kubescape"
+                )
 
-                    context_iac_list.append(context_iac)
+                context_iac_list.append(context_iac)
 
             print("===== BEGIN CONTEXT OUTPUT =====")
             print(json.dumps({"iac_context": [obj.__dict__ for obj in context_iac_list]}, indent=4))
             print("===== END CONTEXT OUTPUT =====")
-
-            return context_iac_list
-
-        except Exception as e:
-            logger.error(f"Error extracting Kubescape IaC context: {e}")
-            return []
