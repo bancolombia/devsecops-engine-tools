@@ -1,0 +1,10 @@
+.git
+node_modules
+target
+build
+build.gradle
+yarn.lock
+twistcli-scan
+.svg
+.drawio
+.rdl

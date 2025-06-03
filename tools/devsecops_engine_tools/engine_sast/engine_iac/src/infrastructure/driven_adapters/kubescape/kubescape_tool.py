@@ -97,7 +97,7 @@ class KubescapeTool(ToolGateway):
 
     def run_tool(self, config_tool, folders_to_scan, platform_to_scan, **kwargs):
 
-        if folders_to_scan and ("k8s" in platform_to_scan or "all" in platform_to_scan):
+        if folders_to_scan and "k8s" in platform_to_scan:
 
             kubescape_version = config_tool["KUBESCAPE"]["VERSION"]
             os_platform = platform.system()

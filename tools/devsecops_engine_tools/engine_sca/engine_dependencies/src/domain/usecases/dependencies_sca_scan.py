@@ -5,7 +5,6 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gate
     DeserializatorGateway,
 )
 
-
 class DependenciesScan:
     def __init__(
         self,
@@ -19,7 +18,6 @@ class DependenciesScan:
         secret_tool,
         build_id,
         build_url,
-        context,
     ):
         self.tool_run = tool_run
         self.tool_deserializator = tool_deserializator
@@ -31,7 +29,6 @@ class DependenciesScan:
         self.secret_tool = secret_tool
         self.build_id = build_id
         self.build_url = build_url
-        self.context = context
 
     def process(self):
         """
@@ -49,7 +46,6 @@ class DependenciesScan:
             self.dict_args["token_engine_dependencies"],
             build_id=self.build_id,
             build_url=self.build_url,
-            context= self.context
         )
 
     def deserializator(self, dependencies_scanned):
@@ -57,8 +53,5 @@ class DependenciesScan:
         Process the results deserializer.
         Terun: list: Deserialized list of findings.
         """
-        context_flag = self.context
-        if context_flag == "true":
-            self.tool_deserializator.get_dependencies_context_from_results(dependencies_scanned)
        
         return self.tool_deserializator.get_list_findings(dependencies_scanned, self.remote_config)
