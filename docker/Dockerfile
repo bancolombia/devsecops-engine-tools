@@ -98,7 +98,6 @@ RUN apt-get update && \
     docker-ce \
     docker-ce-cli \
     containerd.io && \
-    containerd.io && \
     rm -rf /var/lib/apt/lists/*
 
 
