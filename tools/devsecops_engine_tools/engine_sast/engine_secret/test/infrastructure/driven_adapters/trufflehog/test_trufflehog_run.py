@@ -144,7 +144,7 @@ class TestTrufflehogRun(unittest.TestCase):
             secret_external_checks,
             agent_temp_dir,
             "trufflehog",
-            "/")
+            None)
 
         expected_result = [
             {"SourceMetadata": {"Data": {"Filesystem": {"file": "/usr/bin/local/file1.txt", "line": 1}}}, "SourceID": 1,
@@ -164,7 +164,7 @@ class TestTrufflehogRun(unittest.TestCase):
     def test_config_include_path(self, mock_open):
         trufflehog_run = TrufflehogRun()
 
-        result = trufflehog_run.config_include_path(['/usr/file1.py', '/usr/file2.py'], '/usr/temp', 'Windows')
+        result = trufflehog_run.config_include_path(['/usr/file1.py', '/usr/file2.py'], '/usr/temp', 'Windows', None)
 
         expected_result = ['/usr/temp/includePath0.txt', '/usr/temp/includePath1.txt']
         self.assertEqual(result, expected_result)
