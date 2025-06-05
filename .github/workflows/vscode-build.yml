@@ -1,0 +1,50 @@
+name: VSCode Build
+
+on:
+  push:
+    branches:
+      - trunk
+      - feature/*
+      - fix/*
+    paths:
+      - "ide_extension/vscode/devsecops/**"
+      - ".github/workflows/vscode-build.yml"
+      - ".github/workflows/vscode-release.yml"
+
+  pull_request:
+    branches:
+      - trunk
+    paths:
+      - "ide_extension/vscode/devsecops/**"
+      - ".github/workflows/vscode-build.yml"
+      - ".github/workflows/vscode-release.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ide_extension/vscode/devsecops/
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Compile extension
+        run: npm run compile
+
+      - name: Package extension
+        run: npx @vscode/vsce package
+
+      - name: Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release

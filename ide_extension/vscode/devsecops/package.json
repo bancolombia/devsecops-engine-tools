@@ -1,25 +1,23 @@
 {
   "name": "devsecops",
   "icon": "resources/logo.png",
-  "displayName": "devsecops",
+  "displayName": "DevSecOps Engine Tools",
+  "publisher": "GrupoBancolombiaOSPO",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.0.7",
   "engines": {
-    "vscode": "^1.91.0"
+    "vscode": "^1.0.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onView:devsecops",
+    "onCommand:devsecops.iacScan",
+    "onCommand:devsecops.imageScan"
+  ],
   "main": "./out/extension.js",
   "contributes": {
-    "viewsWelcome": [
-      {
-        "view": "scm",
-        "contents": "Test",
-        "when": "devsecops.enabled"
-      }
-    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -96,32 +94,32 @@
     },
     "commands": [
       {
-        "command": "devsecops.helloWorld",
-        "title": "HELLO WORLD"
-      },
-      {
         "command": "devsecops.iacScan",
-        "title": "IAC SCAN"
+        "title": "DevSecOps: Scan IaC"
       },
       {
         "command": "devsecops.imageScan",
-        "title": "IMAGE SCAN"
+        "title": "DevSecOps: Scan Image"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "devsecops.helloWorld",
-          "when": "view == devsecopsView",
+          "command": "devsecops.iacScan",
+          "when": "view == devsecops",
           "group": "navigation"
         },
         {
-          "command": "devsecops.iacScan",
-          "when": "view == devsecopsView",
+          "command": "devsecops.imageScan",
+          "when": "view == devsecops",
           "group": "navigation"
         }
       ]
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bancolombia/devsecops-engine-tools"
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -130,9 +128,15 @@
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "vscode-test",
-    "deploy": "vsce publish --yarn"
+    "deploy": "vsce publish"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.2",
+    "@semantic-release/release-notes-generator": "^14.0.3",
+    "@types/lodash": "^4.17.16",
     "@types/mocha": "^10.0.9",
     "@types/node": "20.x",
     "@types/vscode": "^1.91.0",
@@ -141,10 +145,13 @@
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^2.4.1",
     "eslint": "^8.57.0",
+    "semantic-release": "^24.2.4",
     "typescript": "^5.4.5"
   },
   "dependencies": {
     "docker-cli-js": "^2.10.0",
-    "keytar": "^7.9.0"
+    "generator-code": "^1.11.9",
+    "keytar": "^7.9.0",
+    "lodash": "^4.17.21"
   }
 }

@@ -1,0 +1,12 @@
+src/
+test/
+*.map
+.vscode/
+.vscode-test/
+*.ts
+*.log
+README.md
+CHANGELOG.md
+.vscodeignore
+tsconfig.json
+vsc-extension-quickstart.md

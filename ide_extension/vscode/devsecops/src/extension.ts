@@ -17,21 +17,22 @@ class DevSecOpsTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeIt
 	private getItems(): vscode.TreeItem[] {
 		const items: vscode.TreeItem[] = [];
 
-		const helloWorldItem = new vscode.TreeItem('Hello world', vscode.TreeItemCollapsibleState.None);
-		helloWorldItem.command = {
-			command: 'devsecops.helloWorld',
-			title: 'Hello World',
-			arguments: [helloWorldItem]
-		};
-		items.push(helloWorldItem);
 
-		const iacScanItem = new vscode.TreeItem('Iac Scan', vscode.TreeItemCollapsibleState.None);
+		const iacScanItem = new vscode.TreeItem('Scan IaC', vscode.TreeItemCollapsibleState.None);
 		iacScanItem.command = {
 			command: 'devsecops.iacScan',
-			title: 'IAC SCAN',
+			title: 'Scan IaC',
 			arguments: [iacScanItem]
 		};
 		items.push(iacScanItem);
+
+		const imageScanItem = new vscode.TreeItem('Scan Image', vscode.TreeItemCollapsibleState.None);
+		imageScanItem.command = {
+			command: 'devsecops.imageScan',
+			title: 'Scan Image',
+			arguments: [imageScanItem]
+		};
+		items.push(imageScanItem);
 
 		return items;
 	}
@@ -43,10 +44,6 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.window.registerTreeDataProvider('devsecops', treeDataProvider);
 
 	console.log('DevSecOpse IDE Extension active');
-
-	const disposable = vscode.commands.registerCommand('devsecops.helloWorld', () => {
-		vscode.window.showInformationMessage('Hello World');
-	});
 
 	const iacScanDisposable = vscode.commands.registerCommand('devsecops.iacScan', async () => {
 		const selectedFolder = await vscode.window.showOpenDialog({
@@ -104,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
 				const imageSize = imageInfo[6];
 	
 				if (imageName && imageTag && imageSize) {
-					const imageLabel = `${imageName}:${imageTag} (${imageSize})`;
+					const imageLabel = `${imageName}:${imageTag}`;
 					const imageItem = new vscode.TreeItem(imageLabel, vscode.TreeItemCollapsibleState.None);
 					imageItem.command = {
 						command: 'devsecops.imageScan',
@@ -125,32 +122,30 @@ export function activate(context: vscode.ExtensionContext) {
 	const imageScanDisposable = vscode.commands.registerCommand('devsecops.imageScan', async () => {
 		const images = await getDockerImages();
 		images.map((image) => console.log(image));
-		const imageName = "defectdojo/defectdojo-django";
-		const imageOptions = images.map(image => image.label);
 		const quickPickItems: vscode.QuickPickItem[] = images.map(i => {
 			return {
 				label: i.label?.toString() ?? '',
 			};
 		});
 
-		await vscode.window.showQuickPick(quickPickItems,{
-			placeHolder: 'Select an image to scan'
+		const selectedImage = await vscode.window.showQuickPick(quickPickItems, {
+			placeHolder: 'Select an image to scan',
 		});		
 
-		vscode.window.showInformationMessage(`DevSecOps Image Scanning: ${imageName}`);
-
-		const scanner = imageScanRequest();
-		const outputChannel = vscode.window.createOutputChannel('IaC Scan Results');
-		scanner.makeScan(
-			imageName,
-			outputChannel
-		);
+		if (!selectedImage) {
+			return;
+		} else {
+			vscode.window.showInformationMessage(`DevSecOps Image Scanning: ${selectedImage.label}`);
+			const scanner = imageScanRequest();
+			const outputChannel = vscode.window.createOutputChannel('IaC Scan Results');
+			scanner.makeScan(
+				selectedImage.label,
+				outputChannel
+			);
+		}
 	});
 
-	context.subscriptions.push(disposable);
-	context.subscriptions.push(iacScanDisposable);
-	context.subscriptions.push(imageScanDisposable);
+	context.subscriptions.push(iacScanDisposable, imageScanDisposable);
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}
