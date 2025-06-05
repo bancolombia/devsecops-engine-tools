@@ -66,6 +66,14 @@ def get_inputs_from_cli(args):
         help="Platform where is executed",
     )
     parser.add_argument(
+        "-rcs",
+        "--remote_config_source",
+        choices=["azure", "github", "local"],
+        type=str,
+        required=True,
+        help="Source of the remote config repo",
+    )
+    parser.add_argument(
         "-rcf",
         "--remote_config_repo",
         type=str,
@@ -236,6 +244,7 @@ def get_inputs_from_cli(args):
         "platform_devops": args.platform_devops,
         "remote_config_repo": args.remote_config_repo,
         "remote_config_branch": args.remote_config_branch,
+        "remote_config_source": args.remote_config_source,
         "tool": args.tool,
         "module": args.module,
         "folder_path": args.folder_path,
@@ -269,6 +278,11 @@ def application_core():
             "github": GithubActions(),
             "local": RuntimeLocal(),
         }.get(args["platform_devops"])
+        remote_config_source_gateway = {
+            "azure": AzureDevops(),
+            "github": GithubActions(),
+            "local": RuntimeLocal(),
+        }.get(args["remote_config_source"])
         metrics_manager_gateway = S3Manager()
         printer_table_gateway = PrinterPrettyTable()
         sbom_tool_gateway = Syft()
@@ -277,6 +291,7 @@ def application_core():
             vulnerability_management_gateway,
             secrets_manager_gateway,
             devops_platform_gateway,
+            remote_config_source_gateway,
             printer_table_gateway,
             metrics_manager_gateway,
             sbom_tool_gateway,

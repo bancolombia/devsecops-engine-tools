@@ -29,9 +29,10 @@ def test_runner_secret_scan(mock_entry_point_tool):
     tool = "TRUFFLEHOG"
     secret_tool = "secret"
     devops_platform_gateway = None
+    remote_config_source_gateway = None
 
     # Call the function
-    [] , input_output = runner_secret_scan(dict_args, tool, devops_platform_gateway, secret_tool)
+    [] , input_output = runner_secret_scan(dict_args, tool, devops_platform_gateway, remote_config_source_gateway, secret_tool)
 
     # Assert the expected behavior
     assert input_output == input_core
@@ -43,13 +44,14 @@ def test_runner_secret_scan_exception(mock_entry_point_tool):
         tool = 'GITLEAKS'
         secret_tool = "secret"
         devops_platform_gateway = None
+        remote_config_source_gateway = None
         
         # Mock the necessary methods or properties to simulate an exception
         mock_entry_point_tool.side_effect = Exception("Simulated error")
 
         # Act and Assert
         with unittest.TestCase().assertRaises(Exception) as context:
-            runner_secret_scan(dict_args, tool, devops_platform_gateway, secret_tool)
+            runner_secret_scan(dict_args, tool, devops_platform_gateway, remote_config_source_gateway, secret_tool)
 
         # Optionally, you can check the exception message or other details
         assert str(context.exception) == "Error engine_secret : Simulated error"

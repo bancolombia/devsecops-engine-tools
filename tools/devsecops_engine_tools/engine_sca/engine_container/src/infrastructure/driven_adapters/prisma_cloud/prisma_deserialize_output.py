@@ -33,7 +33,7 @@ class PrismaDeserealizator(DeseralizatorGateway):
             image_object = file.read()
 
             json_data = json.loads(image_object)
-            console_url = json_data.get("consoleURL",False)
+            console_url = json_data.get("consoleURL", False)
             if console_url:
                 print(f"Console URL: {console_url}")
             vulnerabilities_data = (

@@ -24,6 +24,7 @@ def test_init_engine_risk(
     services = ["service1", "service2"]
     vm_exclusions = ["exclusion1", "exclusion2"]
     mock_devops_platform_gateway = MagicMock()
+    mock_remote_config_source_gateway = MagicMock()
     mock_print_table_gateway = MagicMock()
 
     # Configurar la instancia de HandleFilters correctamente
@@ -39,6 +40,7 @@ def test_init_engine_risk(
     init_engine_risk(
         MagicMock(),
         mock_devops_platform_gateway,
+        mock_remote_config_source_gateway,
         mock_print_table_gateway,
         dict_args,
         findings,
@@ -46,7 +48,7 @@ def test_init_engine_risk(
         vm_exclusions,
     )
 
-    assert mock_devops_platform_gateway.get_remote_config.call_count == 2
+    assert mock_remote_config_source_gateway.get_remote_config.call_count == 2
     instance_handle_filters.filter.assert_called_once_with(findings)
     instance_handle_filters.filter_duplicated.assert_called_once()
     instance_handle_filters.filter_tags_days.assert_called_once()
@@ -64,11 +66,13 @@ def test_init_engine_risk_no_findings(mock_logger):
     services = ["service1", "service2"]
     vm_exclusions = ["exclusion1", "exclusion2"]
     mock_devops_platform_gateway = MagicMock()
+    mock_remote_config_source_gateway = MagicMock()
     mock_print_table_gateway = MagicMock()
 
     init_engine_risk(
         MagicMock(),
         mock_devops_platform_gateway,
+        mock_remote_config_source_gateway,
         mock_print_table_gateway,
         dict_args,
         findings,

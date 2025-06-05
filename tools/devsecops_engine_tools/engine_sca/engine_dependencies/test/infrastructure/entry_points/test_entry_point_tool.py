@@ -30,6 +30,7 @@ def test_init_engine_dependencies():
             Mock(),
             Mock(),
             Mock(),
+            Mock(),
             dict_args,
             token,
             tool,
@@ -53,6 +54,7 @@ def test_init_engine_dependencies_success(mock_exists, mock_dependencies_scan, m
     # Crear mocks para las dependencias
     tool_run = MagicMock()
     tool_remote = MagicMock(spec=DevopsPlatformGateway)
+    remote_config_source_gateway = MagicMock(spec=DevopsPlatformGateway)
     tool_remote.get_variable.return_value = "main"
     tool_deserializator = MagicMock()
     tool_sbom = MagicMock(spec=SbomManagerGateway)
@@ -65,12 +67,12 @@ def test_init_engine_dependencies_success(mock_exists, mock_dependencies_scan, m
 
     # Llamar a la función
     deserialized, core_input, sbom_components = init_engine_dependencies(
-        tool_run, tool_remote, tool_deserializator, dict_args, secret_tool, config_tool, tool_sbom
+        tool_run, tool_remote, remote_config_source_gateway, tool_deserializator, dict_args, secret_tool, config_tool, tool_sbom
     )
 
     # Verificar que se llamaron las funciones esperadas
-    tool_remote.get_remote_config.assert_any_call("repo", "engine_sca/engine_dependencies/ConfigTool.json", "")
-    tool_remote.get_remote_config.assert_any_call("repo", "engine_sca/engine_dependencies/Exclusions.json", "")
+    remote_config_source_gateway.get_remote_config.assert_any_call("repo", "engine_sca/engine_dependencies/ConfigTool.json", "")
+    remote_config_source_gateway.get_remote_config.assert_any_call("repo", "engine_sca/engine_dependencies/Exclusions.json", "")
     # tool_remote.get_variable.assert_called_with("pipeline_name")
     mock_handle_remote_config_patterns.assert_called_once()
     mock_dependencies_scan.return_value.process.assert_called_once()

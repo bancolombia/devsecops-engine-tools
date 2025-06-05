@@ -12,6 +12,7 @@ class TestDastScan(unittest.TestCase):
         self.tool_gateway_mock = Mock(spec=ToolGateway)
         self.tool_gateway_mock.TOOL = "jwt"
         self.devops_platform_gateway_mock = Mock(spec=DevopsPlatformGateway)
+        self.remote_config_source_gateway = Mock(spec=DevopsPlatformGateway)
         self.data_target_mock = Mock()
         self.additional_tools_mock = [self.tool_gateway_mock]
 
@@ -19,6 +20,7 @@ class TestDastScan(unittest.TestCase):
         self.dast_scan = DastScan(
             tool_gateway=self.tool_gateway_mock,
             devops_platform_gateway=self.devops_platform_gateway_mock,
+            remote_config_source_gateway=self.remote_config_source_gateway,
             data_target=self.data_target_mock,
             aditional_tools=self.additional_tools_mock
         )
@@ -85,7 +87,7 @@ class TestDastScan(unittest.TestCase):
         finding_list = ["finding1", "finding2"]
         path_file_results = "path/to/results"
 
-        self.devops_platform_gateway_mock.get_remote_config.side_effect = [init_config_tool, exclusions]
+        self.remote_config_source_gateway.get_remote_config.side_effect = [init_config_tool, exclusions]
         self.tool_gateway_mock.run_tool.return_value = (finding_list, path_file_results)
         self.additional_tools_mock[0].run_tool.return_value = (finding_list, path_file_results)
 
@@ -93,7 +95,7 @@ class TestDastScan(unittest.TestCase):
 
         result, _ = self.dast_scan.process(dict_args, secret_tool, config_tool)
 
-        self.devops_platform_gateway_mock.get_remote_config.assert_any_call(
+        self.remote_config_source_gateway.get_remote_config.assert_any_call(
             dict_args["remote_config_repo"], "engine_dast/Exclusions.json"
         )
 

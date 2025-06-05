@@ -45,9 +45,10 @@ class TestRunnerEngineDast(unittest.TestCase):
         config_tool = {"ENABLED": "true", "TOOL": "NUCLEI", "EXTRA_TOOLS": ["JWT"]}
         secret_tool = {"github_token": "example_token"}
         devops_platform_gateway = mock.Mock()
+        remote_config_source_gateway = mock.Mock()
 
         # Llamar a la función
-        findings_list, input_core = runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gateway)
+        findings_list, input_core = runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gateway, remote_config_source_gateway)
 
         # Verificar que las funciones mockeadas fueron llamadas correctamente
         mock_load_json_file.assert_called_once_with(dict_args["dast_file_path"])
@@ -103,9 +104,10 @@ class TestRunnerEngineDast(unittest.TestCase):
         config_tool = {"ENABLED": "true", "TOOL": "NUCLEI", "EXTRA_TOOLS": []}
         secret_tool = {"github_token": "example_token"}
         devops_platform_gateway = mock.Mock()
+        remote_config_source_gateway = mock.Mock()
 
         # Llamar a la función
-        findings_list, input_core = runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gateway)
+        findings_list, input_core = runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gateway, remote_config_source_gateway)
 
         # Verificar que las funciones mockeadas fueron llamadas correctamente
         mock_load_json_file.assert_called_once_with(dict_args["dast_file_path"])

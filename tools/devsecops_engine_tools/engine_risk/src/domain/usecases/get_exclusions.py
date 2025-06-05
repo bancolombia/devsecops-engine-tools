@@ -8,6 +8,7 @@ class GetExclusions:
     def __init__(
         self,
         devops_platform_gateway,
+        remote_config_source_gateway,
         dict_args,
         findings,
         risk_config,
@@ -16,6 +17,7 @@ class GetExclusions:
         active_findings,
     ):
         self.devops_platform_gateway = devops_platform_gateway
+        self.remote_config_source_gateway = remote_config_source_gateway
         self.dict_args = dict_args
         self.findings = findings
         self.risk_config = risk_config
@@ -24,7 +26,7 @@ class GetExclusions:
         self.active_findings = active_findings
 
     def process(self):
-        core_config = self.devops_platform_gateway.get_remote_config(
+        core_config = self.remote_config_source_gateway.get_remote_config(
             self.dict_args["remote_config_repo"],
             "engine_core/ConfigTool.json",
             self.dict_args["remote_config_branch"],
@@ -49,7 +51,7 @@ class GetExclusions:
         return self._get_exclusions(self.risk_exclusions, "RISK")
 
     def _get_exclusions_by_practice(self, core_config, practice, path):
-        exclusions_config = self.devops_platform_gateway.get_remote_config(
+        exclusions_config = self.remote_config_source_gateway.get_remote_config(
             self.dict_args["remote_config_repo"],
             path,
             self.dict_args["remote_config_branch"],

@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock, patch
+from datetime import datetime
 from devsecops_engine_tools.engine_risk.src.domain.usecases.break_build import (
     BreakBuild,
 )
@@ -312,7 +313,7 @@ def test_blacklist_control_error():
         [],
         [],
         [],
-        {"TAG_MAX_AGE": 5},
+        {},
         0,
     )
     break_build._blacklist_control(report_list)
@@ -344,7 +345,7 @@ def test_blacklist_control_warning():
         [],
         [],
         [],
-        {"TAG_MAX_AGE": 5},
+        {},
         0,
     )
     break_build._blacklist_control(report_list)
@@ -352,6 +353,78 @@ def test_blacklist_control_warning():
     mock_devops_platform_gateway.message.assert_called_once_with(
         "warning",
         f"Report {report_list[0].vm_id} with tag '{report_list[0].tags[0]}' is blacklisted but age {report_list[0].age} is below threshold {tag_age_threshold}",
+    )
+
+
+@patch("devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.datetime")
+def test_blacklist_control_working_days_error(mock_datetime):
+    mock_datetime.now.return_value = datetime(2025, 4, 23)  # Wednesday, April 23, 2025
+    mock_datetime.strptime = datetime.strptime
+
+    report_list = [
+        Report(
+            vuln_id_from_tool="id1",
+            tags=["blacklisted"],
+            created="2025-04-16T21:20:17.108378Z",  # Thursday, April 16, 2025
+            age=7,
+            vm_id="vm_id",
+            vm_id_url="vm_id_url",
+        )
+    ]
+    remote_config = {"TAG_BLACKLIST_EXCLUSION_DAYS": {"blacklisted": "3WD"}}
+    mock_devops_platform_gateway = MagicMock()
+    break_build = BreakBuild(
+        mock_devops_platform_gateway,
+        MagicMock(),
+        remote_config,
+        [],
+        [],
+        [],
+        [],
+        {},
+        0,
+    )
+    break_build._blacklist_control(report_list)
+
+    mock_devops_platform_gateway.message.assert_called_once_with(
+        "error",
+        f"Report {report_list[0].vm_id} with tag '{report_list[0].tags[0]}' is blacklisted and age {report_list[0].age} is above threshold {remote_config['TAG_BLACKLIST_EXCLUSION_DAYS']['blacklisted']}",
+    )
+
+
+@patch("devsecops_engine_tools.engine_risk.src.domain.usecases.break_build.datetime")
+def test_blacklist_control_working_days_warning(mock_datetime):
+    mock_datetime.now.return_value = datetime(2025, 4, 23)  # Wednesday, April 23, 2025
+    mock_datetime.strptime = datetime.strptime
+
+    report_list = [
+        Report(
+            vuln_id_from_tool="id1",
+            tags=["blacklisted"],
+            created="2025-04-16T21:20:17.108378Z",  # Thursday, April 16, 2025
+            age=7,
+            vm_id="vm_id",
+            vm_id_url="vm_id_url",
+        )
+    ]
+    remote_config = {"TAG_BLACKLIST_EXCLUSION_DAYS": {"blacklisted": "5WD"}}
+    mock_devops_platform_gateway = MagicMock()
+    break_build = BreakBuild(
+        mock_devops_platform_gateway,
+        MagicMock(),
+        remote_config,
+        [],
+        [],
+        [],
+        [],
+        {},
+        0,
+    )
+    break_build._blacklist_control(report_list)
+
+    mock_devops_platform_gateway.message.assert_called_once_with(
+        "warning",
+        f"Report {report_list[0].vm_id} with tag '{report_list[0].tags[0]}' is blacklisted but age {report_list[0].age} is below threshold {remote_config['TAG_BLACKLIST_EXCLUSION_DAYS']['blacklisted']}",
     )
 
 

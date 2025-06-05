@@ -18,6 +18,7 @@ def runner_engine_risk(
     vm_exclusions,
     services,
     devops_platform_gateway,
+    remote_config_source_gateway,
     print_table_gateway,
 ):
     add_epss_gateway = FirstCsv()
@@ -25,6 +26,7 @@ def runner_engine_risk(
     return init_engine_risk(
         add_epss_gateway,
         devops_platform_gateway,
+        remote_config_source_gateway,
         print_table_gateway,
         dict_args,
         findings,

@@ -18,7 +18,7 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
 )
 
 
-def runner_engine_container(dict_args, tool, secret_tool, tool_remote):
+def runner_engine_container(dict_args, tool, secret_tool, tool_remote, remote_config_source_gateway):
     try:
         if tool.lower() == "trivy":
             tool_run = TrivyScan()
@@ -30,6 +30,7 @@ def runner_engine_container(dict_args, tool, secret_tool, tool_remote):
         return init_engine_sca_rm(
             tool_run,
             tool_remote,
+            remote_config_source_gateway,
             tool_images,
             tool_deseralizator,
             dict_args,

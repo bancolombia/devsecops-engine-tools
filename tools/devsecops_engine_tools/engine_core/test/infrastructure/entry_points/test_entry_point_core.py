@@ -30,8 +30,9 @@ class TestEntryPointCore(unittest.TestCase):
         mock_scan_result = {}
 
         mock_devops_platform_gateway = mock.Mock()
+        mock_remote_config_source_gateway = mock.Mock()
 
-        mock_devops_platform_gateway.get_remote_config.return_value = mock_config_tool
+        mock_remote_config_source_gateway.get_remote_config.return_value = mock_config_tool
 
         mock_handle_scan.return_value.process.return_value = (
             mock_findings_list,
@@ -52,6 +53,7 @@ class TestEntryPointCore(unittest.TestCase):
             vulnerability_management_gateway=mock.Mock(),
             secrets_manager_gateway=mock.Mock(),
             devops_platform_gateway=mock_devops_platform_gateway,
+            remote_config_source_gateway=mock_remote_config_source_gateway,
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
             sbom_tool_gateway=mock.Mock(),
@@ -59,7 +61,7 @@ class TestEntryPointCore(unittest.TestCase):
         )
 
         # Assert that the function calls were made with the expected arguments
-        mock_devops_platform_gateway.get_remote_config.assert_called_once_with(
+        mock_remote_config_source_gateway.get_remote_config.assert_called_once_with(
             "https://github.com/example/repo", "/engine_core/ConfigTool.json", ""
         )
         mock_handle_scan.return_value.process.assert_called_once_with(
@@ -90,14 +92,16 @@ class TestEntryPointCore(unittest.TestCase):
             "ENGINE_IAC": {"ENABLED": False, "TOOL": "tool"}
         }
         mock_devops_platform_gateway = mock.Mock()
+        mock_remote_config_source_gateway = mock.Mock()
 
-        mock_devops_platform_gateway.get_remote_config.return_value = mock_config_tool
+        mock_remote_config_source_gateway.get_remote_config.return_value = mock_config_tool
 
         # Call the function
         init_engine_core(
             vulnerability_management_gateway=mock.Mock(),
             secrets_manager_gateway=mock.Mock(),
             devops_platform_gateway=mock_devops_platform_gateway,
+            remote_config_source_gateway=mock_remote_config_source_gateway,
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
             sbom_tool_gateway=mock.Mock(),
@@ -121,7 +125,8 @@ class TestEntryPointCore(unittest.TestCase):
             "ENGINE_RISK": {"ENABLED": "true"}
         }
         mock_devops_platform_gateway = mock.Mock()
-        mock_devops_platform_gateway.get_remote_config.return_value = mock_config_tool
+        mock_remote_config_source_gateway = mock.Mock()
+        mock_remote_config_source_gateway.get_remote_config.return_value = mock_config_tool
         mock_handle_risk.return_value.process.return_value = (
             mock.Mock(),
             mock.Mock(),
@@ -133,6 +138,7 @@ class TestEntryPointCore(unittest.TestCase):
             vulnerability_management_gateway=mock.Mock(),
             secrets_manager_gateway=mock.Mock(),
             devops_platform_gateway=mock_devops_platform_gateway,
+            remote_config_source_gateway=mock_remote_config_source_gateway,
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
             sbom_tool_gateway=mock.Mock(),
@@ -168,8 +174,9 @@ class TestEntryPointCore(unittest.TestCase):
         mock_scan_result = {}
 
         mock_devops_platform_gateway = mock.Mock()
+        mock_remote_config_source_gateway = mock.Mock()
 
-        mock_devops_platform_gateway.get_remote_config.return_value = mock_config_tool
+        mock_remote_config_source_gateway.get_remote_config.return_value = mock_config_tool
 
         mock_handle_scan.return_value.process.return_value = (
             mock_findings_list,
@@ -191,6 +198,7 @@ class TestEntryPointCore(unittest.TestCase):
             vulnerability_management_gateway=mock.Mock(),
             secrets_manager_gateway=mock.Mock(),
             devops_platform_gateway=mock_devops_platform_gateway,
+            remote_config_source_gateway=mock_remote_config_source_gateway,
             print_table_gateway=mock.Mock(),
             metrics_manager_gateway=mock.Mock(),
             sbom_tool_gateway=mock.Mock(),

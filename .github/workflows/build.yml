@@ -5,6 +5,7 @@ on:
     branches:
       - trunk
       - feature/*
+      - fix/*
     paths-ignore:
       - 'ide_extension/**'
       - '.github/workflows/intellij-build.yml'

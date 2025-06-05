@@ -65,22 +65,23 @@ class TrufflehogRun(ToolGateway):
         tool,
         folder_path
     ):
+        path = agent_work_folder if folder_path is None else folder_path
         trufflehog_command = "trufflehog"
         if "Windows" in agent_os:
             trufflehog_command = f"{agent_temp_dir}/trufflehog.exe"
-        with open(f"{agent_work_folder}/excludedPath.txt", "w") as file:
+        with open(f"{path}/excludedPath.txt", "w") as file:
             file.write("\n".join(config_tool[tool]["EXCLUDE_PATH"]))
-        exclude_path = f"{agent_work_folder}/excludedPath.txt"
-        include_paths = self.config_include_path(files_commits, agent_work_folder, agent_os)
+        exclude_path = f"{path}/excludedPath.txt"
+        include_paths = self.config_include_path(files_commits, path, agent_os, folder_path)
         enable_custom_rules = config_tool[tool]["ENABLE_CUSTOM_RULES"]
         if enable_custom_rules:
-            Utils().configurate_external_checks(tool, config_tool, secret_tool, secret_external_checks, agent_work_folder)
+            Utils().configurate_external_checks(tool, config_tool, secret_tool, secret_external_checks, path)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=config_tool[tool]["NUMBER_THREADS"]) as executor:
             results = executor.map(
                 self.run_trufflehog,
                 [trufflehog_command] * len(include_paths),
-                [agent_work_folder] * len(include_paths),
+                [path] * len(include_paths),
                 [exclude_path] * len(include_paths),
                 include_paths,
                 [repository_name] * len(include_paths),
@@ -88,10 +89,10 @@ class TrufflehogRun(ToolGateway):
                 [agent_os] * len(include_paths),
                 [folder_path] * len(include_paths)
             )
-        findings, file_findings = self.create_file(self.decode_output(results), agent_work_folder, config_tool, tool)
+        findings, file_findings = self.create_file(self.decode_output(results), path, config_tool, tool)
         return  findings, file_findings
 
-    def config_include_path(self, files, agent_work_folder, agent_os):
+    def config_include_path(self, files, path, agent_os, folder_path):
         chunks = []
         if len(files) != 0:
             chunk_size = (len(files) + 3) // 4
@@ -102,19 +103,22 @@ class TrufflehogRun(ToolGateway):
         for i, chunk in enumerate(chunks):
             if not chunk:
                 continue
-            file_path = f"{agent_work_folder}/includePath{i}.txt"
+            file_path = f"{path}/includePath{i}.txt"
             include_paths.append(file_path)
             with open(file_path, "w") as file:
-                for file_pr_path in chunk:
-                    if "Windows" in agent_os:
-                        file_pr_path = str(file_pr_path).replace("/","\\\\")
-                    file.write(f"{file_pr_path.strip()}\n")
+                if folder_path is None:
+                    for file_pr_path in chunk:
+                        if "Windows" in agent_os:
+                            file_pr_path = str(file_pr_path).replace("/","\\\\")
+                        file.write(f"{file_pr_path.strip()}\n")
+                else:
+                    file.write(".\n")
         return include_paths
 
     def run_trufflehog(
         self,
         trufflehog_command,
-        agent_work_folder,
+        path,
         exclude_path,
         include_path,
         repository_name,
@@ -122,11 +126,11 @@ class TrufflehogRun(ToolGateway):
         agent_os,
         folder_path
     ):
-        path = agent_work_folder if folder_path is not None else f"{agent_work_folder}/{repository_name}"
-        command = f"{trufflehog_command} filesystem {path} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --no-update --json"
+        path_folder = folder_path if folder_path is not None else f"{path}/{repository_name}"
+        command = f"{trufflehog_command} filesystem {path_folder} --include-paths {include_path} --exclude-paths {exclude_path} --no-verification --no-update --json"
         if enable_custom_rules:
-            command = command.replace("--no-verification --no-update --json", f"--config {agent_work_folder}//rules//trufflehog//custom-rules.yaml --no-verification --no-update --json" if "Windows" in agent_os else
-                                      f"--config {agent_work_folder}/rules/trufflehog/custom-rules.yaml --no-verification --no-update --json" if "Linux" in agent_os else
+            command = command.replace("--no-verification --no-update --json", f"--config {path}//rules//trufflehog//custom-rules.yaml --no-verification --no-update --json" if "Windows" in agent_os else
+                                      f"--config {path}/rules/trufflehog/custom-rules.yaml --no-verification --no-update --json" if "Linux" in agent_os else
                                       "--no-verification --no-update --json")
             
         result = subprocess.run(command, capture_output=True, shell=True, text=True, encoding='utf-8')
@@ -142,13 +146,13 @@ class TrufflehogRun(ToolGateway):
                         result.append(json_obj)
         return result
     
-    def create_file(self, findings, agent_work_folder, config_tool, tool):
-        file_findings = os.path.join(agent_work_folder, "secret_scan_result.json")
+    def create_file(self, findings, path, config_tool, tool):
+        file_findings = os.path.join(path, "secret_scan_result.json")
         with open(file_findings, "w") as file:
             for find in findings:
                 original_where = str(find.get("SourceMetadata").get("Data").get("Filesystem").get("file"))
                 original_where = original_where.replace("\\", "/")
-                where_text = original_where.replace(agent_work_folder, "")
+                where_text = original_where.replace(path, "")
                 find["SourceMetadata"]["Data"]["Filesystem"]["file"] = where_text
                 find["Id"] = "MISCONFIGURATION_SCANNING" if "exposure" in find["Raw"] else "SECRET_SCANNING"
                 find["References"] = config_tool[tool]["RULES"][find["Id"]]["References"] if "SECRET_SCANNING" not in find["Id"] else "N.A"
