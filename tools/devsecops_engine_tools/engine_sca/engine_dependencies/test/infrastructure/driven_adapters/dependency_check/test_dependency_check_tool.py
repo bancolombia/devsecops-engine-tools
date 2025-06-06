@@ -1,13 +1,12 @@
 import unittest
-from unittest.mock import patch, mock_open, MagicMock
-import os
-import shutil
+from unittest.mock import patch, mock_open, MagicMock, Mock
 import subprocess
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool import (
     DependencyCheckTool,
 )
-from devsecops_engine_tools.engine_utilities.utils.utils import Utils
-
+from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.ContextDependencies import (
+    ContextDependencies,
+)
 
 class TestDependencyCheckTool(unittest.TestCase):
 
@@ -444,3 +443,59 @@ class TestDependencyCheckTool(unittest.TestCase):
         )
 
         self.assertEqual(result, {"key": "value"})
+
+    @patch(
+        "devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.dependency_check.dependency_check_tool.DependencyCheckDeserialize"
+    )
+    @patch(
+        "builtins.print"
+    )
+    def test_get_dependencies_context_from_results_prints(self, mock_print, mock_deserializer_cls):
+        # Arrange
+        tool = DependencyCheckTool()
+        mock_deserializer = MagicMock()
+        mock_deserializer_cls.return_value = mock_deserializer
+
+        mock_dependency = MagicMock()
+        mock_namespace = {"ns": "namespace"}
+        mock_deserializer.filter_vulnerabilities_by_confidence.return_value = ([mock_dependency], mock_namespace)
+
+        mock_vuln_node = MagicMock()
+        mock_vuln_node.findall.return_value = [mock_vuln_node]
+        mock_vuln_node.find.side_effect = lambda tag, ns=None: {
+            'ns:name': MagicMock(text="CVE-2024-1234"),
+            'ns:description': MagicMock(text="Test description"),
+            'ns:severity': MagicMock(text="HIGH"),
+            'ns:references': None,
+            'ns:vulnerableSoftware': None
+        }.get(tag, None)
+
+        mock_vulns_node = MagicMock()
+        mock_vulns_node.findall.return_value = [mock_vuln_node]
+        mock_dependency.find.side_effect = lambda tag, ns=None: {
+            'ns:vulnerabilities': mock_vulns_node
+        }.get(tag, None)
+
+        mock_deserializer.extract_common_vuln_data.return_value = {
+            "id": "CVE-2024-1234",
+            "fix": "1.2.3",
+            "where": "pkg:example:1.2.0",
+            "description": "Test description",
+            "severity": "high"
+        }
+        mock_deserializer.extract_references.return_value = ["https://vuln.com/CVE-2024-1234"]
+
+        remote_config = {
+            "DEPENDENCY_CHECK": {
+                "VULNERABILITY_CONFIDENCE": ["high", "medium", "low"]
+            }
+        }
+
+        # Act
+        tool.get_dependencies_context_from_results("fake_path.xml", remote_config)
+
+        # Assert
+        printed = [call[0][0] for call in mock_print.call_args_list]
+        self.assertTrue(any("===== BEGIN CONTEXT OUTPUT =====" in line for line in printed))
+        self.assertTrue(any("===== END CONTEXT OUTPUT =====" in line for line in printed))
+        self.assertTrue(any("CVE-2024-1234" in line for line in printed))

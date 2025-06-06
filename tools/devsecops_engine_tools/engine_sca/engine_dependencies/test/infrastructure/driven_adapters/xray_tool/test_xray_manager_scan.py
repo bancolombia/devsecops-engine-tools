@@ -5,6 +5,8 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.dr
 import pytest
 from unittest.mock import patch, Mock
 import os
+import json
+import tempfile
 
 import subprocess
 
@@ -406,3 +408,56 @@ def test_run_tool_dependencies_sca_darwin(xray_scan_instance):
         mock_scan_dependencies.assert_called_with(
             prefix, "working_dir",pipeline_name,build_id,build_url, remote_config, dict_args["xray_mode"], ""
         )
+
+def test_get_dependencies_context_from_results(monkeypatch):
+    # Arrange
+    scan_result = [
+        {
+            "scan_id": "ffc1e8d8-a7da-45da-78e5-a7acfd83daef",
+            "vulnerabilities": [
+                {
+                    "cves": [{"cve": "CVE-2024-0001"}],
+                    "summary": "Test summary",
+                    "severity": "High",
+                    "components": {
+                        "pkg:generic/testpkg:1.0.0": {
+                            "fixed_versions": ["1.0.1"],
+                            "impact_paths": [
+                                [
+                                    {"component_id": "npm://example:1.0.0"}
+                                ]
+                            ],
+                        }
+                    },
+                    "references": ["https://vuln.com/CVE-2024-0001"]
+                }
+            ],
+            "component_id": "generic://sha256:959099eb61b7c6a811d651b6a765cf1e51e27d8ed7e392cb294817abeb17b708/file_to_scan.tar",
+            "package_type": "generic",
+            "status": "completed"
+        }
+    ]
+    with tempfile.NamedTemporaryFile("w+", delete=False) as tmpfile:
+        json.dump(scan_result, tmpfile)
+        tmpfile.flush()
+        tmpfile_name = tmpfile.name
+
+    remote_config = {}
+
+    xray = XrayScan()
+
+    printed_lines = []
+    def fake_print(*args, **kwargs):
+        printed_lines.append(args[0] if args else "")
+
+    monkeypatch.setattr("builtins.print", fake_print)
+
+    # Act
+    xray.get_dependencies_context_from_results(tmpfile_name, remote_config)
+
+    # Assert
+    assert any("===== BEGIN CONTEXT OUTPUT =====" in line for line in printed_lines)
+    assert any("===== END CONTEXT OUTPUT =====" in line for line in printed_lines)
+    assert any("CVE-2024-0001" in line for line in printed_lines)
+    assert any("Test summary" in line for line in printed_lines)
+    assert any("Jfrog Xray" in line for line in printed_lines)

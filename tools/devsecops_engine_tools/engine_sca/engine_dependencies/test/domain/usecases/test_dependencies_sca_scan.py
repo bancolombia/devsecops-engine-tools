@@ -54,7 +54,7 @@ def test_process():
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.dependencies_sca_scan.DeserializatorGateway"
     ) as mock_deserializator_gateway:
         remote_config = {"remote_config_key": "remote_config_value"}
-        dict_args = {"key": "arg", "token_engine_dependencies": None}
+        dict_args = {"key": "arg", "token_engine_dependencies": None, "context": "false"}
         exclusion = {"exclusion_key": "exclusion_value"}
         pipeline_name = "pipeline_name"
         to_scan = "path/"

@@ -39,7 +39,7 @@ class DependenciesScan:
 
         Return: dict: SCA scanning results.
         """
-        return self.tool_run.run_tool_dependencies_sca(
+        dependencies_scanned = self.tool_run.run_tool_dependencies_sca(
             self.remote_config,
             self.dict_args,
             self.exclusions,
@@ -50,6 +50,11 @@ class DependenciesScan:
             build_id=self.build_id,
             build_url=self.build_url
         )
+    
+        if self.dict_args.get("context") == "true":
+            self.tool_run.get_dependencies_context_from_results(dependencies_scanned, remote_config=self.remote_config)
+        
+        return dependencies_scanned
 
     def deserializator(self, dependencies_scanned):
         """
