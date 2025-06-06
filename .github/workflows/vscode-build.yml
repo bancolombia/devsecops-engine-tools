@@ -22,6 +22,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     defaults:
       run:
         working-directory: ide_extension/vscode/devsecops/
