@@ -1,4 +1,3 @@
-export function findingDetailWebview(contextInfo: any): string {
 export interface IContextInfo {
     severity?: string;
     id?: string;
@@ -55,22 +54,6 @@ export function findingDetailWebview(contextInfo: IContextInfo): string {
             font-size: 1.5em;
             margin-bottom: 0.5em;
         }
-        .codicon {
-            font-size: 2em;
-            margin-right: 0.5em;
-            vertical-align: middle;
-            color: ${color};
-        }
-        .vuln-underline {
-            position: absolute;
-            left: 0;
-            bottom: -4px;
-            width: 100%;
-            height: 4px;
-            background: ${color};
-            border-radius: 2px;
-            content: "";
-        }
         .vuln-icon {
             font-size: 10rem; 
             color: ${color};
@@ -120,7 +103,6 @@ export function findingDetailWebview(contextInfo: IContextInfo): string {
     <div class="title-bar">
         <span class="codicon ${codicon} vuln-icon"></span>
         <span>${contextInfo.id || "Unknown Vulnerability"}</span>
-        <div class="vuln-underline"></div>
     </div>
     <div class="tabs">
         <button class="tab selected" id="descTab">Description</button>
@@ -142,8 +124,6 @@ export function findingDetailWebview(contextInfo: IContextInfo): string {
         ${scanInfoRow("CVSS 3", contextInfo.cvssScore)}
     </div>
     <div class="section" id="remSection">
-        <h3>Remediation Info</h3>
-       ${
         <h3>References</h3>
 ${
             contextInfo.references && contextInfo.references.length > 0
