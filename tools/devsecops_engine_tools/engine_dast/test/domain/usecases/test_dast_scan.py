@@ -26,19 +26,19 @@ class TestDastScan(unittest.TestCase):
         )
 
     def test_complete_config_tool(self):
-        data_file_tool = {"key": "value"}
+        data_file_tool = {
+            "tool_name": {},
+            "key": "value"
+        }
         exclusions = {
             "All": {
-                "tool_name": 
-                    [
-                        {"type": "exclusion"}
-                    ]
+                "tool_name": [
+                    {"type": "exclusion"}
+                ]
             },
             "pipeline_name": {
                 "tool_name": [
-                    {
-                        "type": "exclusion_scope"
-                    }
+                    {"type": "exclusion_scope"}
                 ]
             }
         }
@@ -46,11 +46,18 @@ class TestDastScan(unittest.TestCase):
 
         config_tool_instance = {
             "key": "value",
+            "tool_name": {},
             "EXCLUSIONS": exclusions,
             "EXCLUSIONS_ALL": exclusions["All"]["tool_name"],
             "EXCLUSIONS_SCOPE": exclusions["pipeline_name"]["tool_name"],
             "SCOPE_PIPELINE": "pipeline_name"
         }
+
+        self.data_target_mock.concurrency = 25
+        self.data_target_mock.rate_limit = 150
+        self.data_target_mock.response_size = 1048576
+        self.data_target_mock.bulk_size = 25
+        self.data_target_mock.timeout = 10
 
         self.devops_platform_gateway_mock.get_variable.return_value = "pipeline_name"
         config_tool, data_target_config = self.dast_scan.complete_config_tool(data_file_tool, exclusions, tool)
@@ -69,6 +76,7 @@ class TestDastScan(unittest.TestCase):
         config_tool = {"TOOL": "tool_name"}
 
         init_config_tool = {
+            "tool_name": {},
             "key": "init_value",
             "THRESHOLD": {
                 "VULNERABILITY": {

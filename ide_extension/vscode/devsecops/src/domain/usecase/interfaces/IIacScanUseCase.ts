@@ -1,13 +1,10 @@
 import { OutputChannel } from "vscode";
+import { ScannerRes } from "../../model/ScannerRes";
+import { ScanConfiguration } from "../../model/ScanConfiguration";
 
 export interface IIacScanUseCase {
     scan(folderToScan: string,
-        organizationName: string,
-        projectName: string,
-        definitionId: string,
-        adUserName: string,
-        adPersonalAccessToken: string,
-        environment: string,
-        outputChannel: OutputChannel
-    ): void;
+        outputChannel: OutputChannel,
+        scanConfiguration: ScanConfiguration,
+    ): Promise<ScannerRes>;
 }

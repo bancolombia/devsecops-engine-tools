@@ -5,4 +5,3 @@ class DeserializatorGateway(metaclass=ABCMeta):
     @abstractmethod
     def get_list_findings(self, results_scan_file, remote_config) -> "list[Finding]":
         "Deserializator"
-

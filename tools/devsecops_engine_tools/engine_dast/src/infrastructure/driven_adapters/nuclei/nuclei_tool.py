@@ -31,7 +31,7 @@ class NucleiTool(ToolGateway):
         self.data_config_cli = data_config_cli
         self.TOOL: str = "NUCLEI"
 
-    def download_tool(self, version):
+    def download_tool(self, version, binary_path):
         try:
             base_url = f"https://github.com/projectdiscovery/nuclei/releases/download/v{version}/"
             os_type = platform.system().lower()
@@ -49,35 +49,33 @@ class NucleiTool(ToolGateway):
             if response.status_code != 200:
                 raise Exception(f"Error [102]: Failed to download Nuclei version {version}. HTTP status code: {response.status_code}")
 
-            home_directory = os.path.expanduser("~")
-            zip_name = os.path.join(home_directory, file_name)
+            zip_name = os.path.join(binary_path, file_name)
             with open(zip_name, "wb") as f:
                 f.write(response.content)
 
-            Utils().unzip_file(zip_name, home_directory)
+            Utils().unzip_file(zip_name, binary_path)
             return 0
         except Exception as e:
             logger.error(f"Error [103]: An exception occurred during download: {e}")
             return e
 
-    def install_tool(self, version):
+    def install_tool(self, version, binary_path):
         try:
             nuclei_path = shutil.which("nuclei")
 
             if not nuclei_path:
-                download_result = self.download_tool(version)
+                download_result = self.download_tool(version, binary_path)
                 if download_result != 0:
                     raise Exception(f"Error [104]: Download failed with error: {download_result}")
 
             os_type = platform.system().lower()
-            home_directory = os.path.expanduser("~")
 
             if nuclei_path:
                 executable_path = nuclei_path
             elif os_type == "windows":
-                executable_path = os.path.join(home_directory, "nuclei.exe")
+                executable_path = os.path.join(binary_path, "nuclei.exe")
             else:
-                executable_path = os.path.join(home_directory, "nuclei")
+                executable_path = os.path.join(binary_path, "nuclei")
 
             if os_type == "darwin" or os_type == "linux":
                 subprocess.run(["chmod", "+x", executable_path], check=True)
@@ -104,11 +102,17 @@ class NucleiTool(ToolGateway):
             + (f" -ud {target_config.custom_templates_dir}" if target_config.custom_templates_dir else "")
             + " -ni "  # disable interactsh server
             + "-dc "  # disable clustering of requests
+            + "-sr " # use system DNS resolving as error fallback
+            + "-or " #  omit request/response pairs in the output
             + "-tags " # Excute only templates with the especified tag
             + target_config.target_type
+            + (f" -c {target_config.concurrency}" if target_config.concurrency else "") # concurrency
+            + (f" -rl {target_config.rate_limit}" if target_config.rate_limit else "") # rate limit
+            + (f" -rss {target_config.response_size}" if target_config.response_size else "") # max response size to save in bytes
+            + (f" -bs {target_config.bulk_size}" if target_config.bulk_size else "") #  max number of hosts to analyze
+            + (f" -timeout {target_config.timeout}" if target_config.timeout else "") # timeout for each request
             + " -je "  # file to export results in JSON format
             + str(target_config.output_file)
-            + " -sr"
         )
 
         if command is not None:
@@ -131,7 +135,11 @@ class NucleiTool(ToolGateway):
         secret_external_checks,
         agent_work_folder
     ):
-        result_install = self.install_tool(config_tool[self.TOOL]["VERSION"])
+        binary_path = agent_work_folder
+        if config_tool[self.TOOL].get("BINARY_PATH"):
+            binary_path = config_tool[self.TOOL]["BINARY_PATH"]
+
+        result_install = self.install_tool(config_tool[self.TOOL]["VERSION"], binary_path)
         if result_install["status"] < 200:
             return [], None
         

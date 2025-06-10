@@ -44,7 +44,7 @@ class TestNucleiTool(unittest.TestCase):
         mock_requests_get.return_value.status_code = 200
         mock_requests_get.return_value.content = b"fake zip content"
 
-        result = self.nuclei_tool.download_tool(self.version)
+        result = self.nuclei_tool.download_tool(self.version, '/home/user')
 
         self.assertEqual(result, 0)
         mock_requests_get.assert_called_once()
@@ -59,7 +59,7 @@ class TestNucleiTool(unittest.TestCase):
         mock_expanduser.return_value = "/home/user"
         mock_download_tool.return_value = 0
 
-        result = self.nuclei_tool.install_tool(self.version)
+        result = self.nuclei_tool.install_tool(self.version, '/home/user')
 
         self.assertEqual(result["status"], 201)
         mock_download_tool.assert_called_once()

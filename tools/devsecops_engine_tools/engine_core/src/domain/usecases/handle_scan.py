@@ -158,7 +158,7 @@ class HandleScan:
         env,
         sbom_components=None,
     ):
-        if dict_args["use_vulnerability_management"] == "true":
+        if dict_args["use_vulnerability_management"] == "true" and config_tool["VULNERABILITY_MANAGER"]["ENABLED"]:
             try:
                 if input_core.path_file_results:
                     self.vulnerability_management.send_vulnerability_management(

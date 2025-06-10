@@ -17,6 +17,3 @@ class ToolGateway(metaclass=ABCMeta):
                             tool,
                             folder_path) -> str:
         "run tool secret scan"
-    
-    
-    

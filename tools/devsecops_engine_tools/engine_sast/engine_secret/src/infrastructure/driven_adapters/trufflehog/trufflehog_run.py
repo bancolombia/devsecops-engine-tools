@@ -160,5 +160,3 @@ class TrufflehogRun(ToolGateway):
                 json_str = json.dumps(find)
                 file.write(json_str + '\n')
         return findings, file_findings
-    
-    

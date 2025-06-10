@@ -9,6 +9,11 @@ class NucleiConfig:
         self.target_type: str = target_config.target_type.lower()
         self.custom_templates_dir: str = ""
         self.output_file: str = "result_dast_scan.json"
+        self.concurrency: int = target_config.concurrency
+        self.rate_limit: int = target_config.rate_limit
+        self.response_size: int = target_config.response_size
+        self.bulk_size: int = target_config.bulk_size
+        self.timeout: int = target_config.timeout
         self.yaml = YAML()
         if self.target_type == "api":
             self.data: List = target_config.operations

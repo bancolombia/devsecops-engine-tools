@@ -54,6 +54,7 @@ class TestRunnerEngineDast(unittest.TestCase):
         mock_load_json_file.assert_called_once_with(dict_args["dast_file_path"])
         mock_init_engine_dast.assert_called_once_with(
             devops_platform_gateway=devops_platform_gateway,
+            remote_config_source_gateway=remote_config_source_gateway,
             tool_gateway=mock_nuclei_tool_instance,
             dict_args=dict_args,
             secret_tool=secret_tool,
@@ -113,6 +114,7 @@ class TestRunnerEngineDast(unittest.TestCase):
         mock_load_json_file.assert_called_once_with(dict_args["dast_file_path"])
         mock_init_engine_dast.assert_called_once_with(
             devops_platform_gateway=devops_platform_gateway,
+            remote_config_source_gateway=remote_config_source_gateway,
             tool_gateway=mock_nuclei_tool_instance,
             dict_args=dict_args,
             secret_tool=secret_tool,

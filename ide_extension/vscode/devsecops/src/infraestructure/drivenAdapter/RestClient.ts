@@ -1,11 +1,10 @@
 import { IRestClientGateway } from "../../domain/model/gateways/IRestClientGateway";
-import { AuthEncoder } from "../helper/AuthEncoder";
 
 export class RestClient implements IRestClientGateway {
 
     constructor(){}
 
-    async get(url: string, token: string): Promise<any> {
+    async get(url: string, token?: string): Promise<unknown> {
         try{
             const response = await fetch(url, {
                 method: 'GET',
@@ -21,13 +20,13 @@ export class RestClient implements IRestClientGateway {
             throw new Error("Error fetching data to " + url);
         }
     }
-    post(url: string, body: any): Promise<any> {
+    post(_url: string, _body: unknown): Promise<unknown> {
         throw new Error("Method not implemented.");
     }
-    put(url: string, body: any): Promise<any> {
+    put(_url: string, _body: unknown): Promise<unknown> {
         throw new Error("Method not implemented.");
     }
-    delete(url: string): Promise<any> {
+    delete(_url: string): Promise<unknown> {
         throw new Error("Method not implemented.");
     }
 

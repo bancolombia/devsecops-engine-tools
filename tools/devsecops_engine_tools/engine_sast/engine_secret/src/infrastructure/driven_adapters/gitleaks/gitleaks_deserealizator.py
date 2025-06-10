@@ -4,6 +4,8 @@ import json
 from typing import List
 from devsecops_engine_tools.engine_core.src.domain.model.finding import Finding, Category
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.context_secret import ContextSecret
+from typing import List
+from devsecops_engine_tools.engine_core.src.domain.model.finding import Finding, Category
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator import (
     DeseralizatorGateway
 )

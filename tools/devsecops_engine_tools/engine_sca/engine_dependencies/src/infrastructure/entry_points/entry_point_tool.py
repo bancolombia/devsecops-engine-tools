@@ -76,8 +76,8 @@ def init_engine_dependencies(
                 to_scan,
                 secret_tool,
                 build_id,
-                build_url,
-                context=dict_args["context"],
+                build_url
+
             )
             if config_sbom["ENABLED"] and any(
                 branch in str(tool_remote.get_variable("branch_tag"))

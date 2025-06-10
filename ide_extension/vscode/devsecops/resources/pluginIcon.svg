@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.0"
+   width="64.000000pt"
+   height="64.000000pt"
+   viewBox="0 0 64.000000 64.000000"
+   preserveAspectRatio="xMidYMid meet"
+   id="svg1"
+   sodipodi:docname="pluginIcon.svg"
+   inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="pt"
+     inkscape:zoom="10.289063"
+     inkscape:cx="38.147304"
+     inkscape:cy="42.909643"
+     inkscape:window-width="1512"
+     inkscape:window-height="916"
+     inkscape:window-x="0"
+     inkscape:window-y="38"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="g1" />
+  <style
+     id="style1">
+  g {
+    fill: var(--vscode-icon-foreground);
+  }
+</style>
+  <g
+     transform="translate(0.000000,64.000000) scale(0.100000,-0.100000)"
+     fill="currentColor"
+     stroke="none"
+     id="g1">
+    <path
+       style="fill:#ffffff;stroke-width:0.75"
+       d="m 10.42369,18.660592 c 0.728929,26.824602 0.728929,26.824602 0.728929,26.824602 0,0 23.617313,9.840546 24.127563,9.986332 0.510251,0.145786 18.879271,-10.205011 18.879271,-10.205011 0,0 -0.145786,-17.421413 -0.218678,-17.785878 -0.07289,-0.364464 -7.726652,-14.870159 -7.726652,-14.870159 0,0 -17.056948,-4.7380408 -18.077449,-4.7380408 -1.020501,0 -17.712984,10.7881548 -17.712984,10.7881548 z"
+       id="path2"
+       transform="matrix(9.9999998,0,0,-9.9999998,0,640)" />
+    <path
+       d="M223 622 c-95 -34 -144 -78 -194 -172 -34 -67 -34 -184 2 -261 32 -68 83 -120 152 -156 75 -39 188 -39 268 -2 68 32 120 83 156 152 39 75 39 188 2 268 -69 148 -240 223 -386 171z m197 -138 c15 -37 12 -54 -7 -54 -10 0 -63 -11 -118 -24 -55 -14 -104 -21 -108 -17 -4 4 -10 24 -14 44 -5 35 -5 36 37 47 67 18 122 28 163 29 32 1 39 -3 47 -25z m54 -106 c9 -12 16 -32 16 -43 0 -17 -10 -22 -67 -33 -38 -7 -116 -29 -176 -49 -59 -20 -110 -34 -113 -30 -3 3 -8 23 -11 45 l-5 39 58 21 c96 34 200 61 276 71 4 1 14 -9 22 -21z m6 -127 c24 -45 14 -59 -60 -81 -38 -11 -87 -27 -108 -34 -49 -18 -64 -8 -66 40 l-1 38 95 28 c115 33 126 33 140 9z"
+       id="path1"
+       inkscape:export-filename="icon.png"
+       inkscape:export-xdpi="96.719086"
+       inkscape:export-ydpi="96.719086" />
+  </g>
+</svg>

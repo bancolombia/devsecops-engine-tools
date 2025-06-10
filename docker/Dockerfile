@@ -1,11 +1,44 @@
-FROM debian@sha256:aadf411dc9ed5199bc7dab48b3e6ce18f8bbee4f170127f5ff1b75cd8035eb36
+FROM debian:stable-20250520-slim AS remote_config
+
 WORKDIR /app
 
 ARG VERSION
 ENV APP_VERSION=$VERSION
-
 ARG REMOTE_CONFIG="./example_remote_config_local"
 ENV REMOTE_CONFIG_PATH=$REMOTE_CONFIG
+
+RUN apt-get update && apt-get install -y bash
+RUN apt-get update && apt-get install -y dos2unix
+
+COPY $REMOTE_CONFIG /app/example_remote_config_local
+COPY ./docker/remoteConfigGeneration.sh /app/remoteConfigGeneration.sh
+COPY ./rules* /tmp/rules
+
+RUN dos2unix /app/remoteConfigGeneration.sh
+
+RUN chmod +x /app/remoteConfigGeneration.sh
+RUN /bin/bash remoteConfigGeneration.sh
+
+RUN apt-get update && \
+    apt-get install -y \
+    python3-venv \
+    python3-pip
+
+RUN ln -s /usr/bin/python3 /usr/local/bin/python3 && \
+    ln -s /usr/bin/pip3 /usr/local/bin/pip3
+
+RUN python3 -m venv /opt/venv
+
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN python3 -m pip install checkov==2.3.296
+RUN python3 -m pip install -i https://pypi.org/simple devsecops-engine-tools==$APP_VERSION
+
+FROM debian:stable-20250520-slim
+WORKDIR /app
+
+ARG VERSION
+ENV APP_VERSION=$VERSION
 
 ENV DET_PIPELINE_NAME="" \
     DET_PATH_DIRECTORY="." \
@@ -28,24 +61,20 @@ ENV DET_PIPELINE_NAME="" \
     DET_PROJECT_NAME="" \
     DET_REPOSITORY=""
 
-RUN apt-get update && apt-get install -y bash
-RUN apt-get update && apt-get install -y dos2unix
-
-COPY $REMOTE_CONFIG /app/example_remote_config_local
-COPY ./docker/remoteConfigGeneration.sh /app/remoteConfigGeneration.sh
 COPY ./rules* /tmp/rules
-
-RUN dos2unix /app/remoteConfigGeneration.sh
-
-RUN chmod +x /app/remoteConfigGeneration.sh
-RUN /bin/bash remoteConfigGeneration.sh
+COPY --from=remote_config /app/docker_default_remote_config /app/docker_default_remote_config
+COPY --from=remote_config /opt/venv /opt/venv
+COPY --from=remote_config /tmp/rules* /tmp/rules
 
 COPY .envdetlocal /app/.env
 
 RUN apt-get update && \
     apt-get install -y \
-    python3-venv \
-    python3-pip
+    python3-venv
+
+RUN ln -s /usr/bin/python3 /usr/local/bin/python3
+
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Update and install prerequisites
 RUN apt-get update && \
@@ -68,17 +97,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     docker-ce \
     docker-ce-cli \
-    containerd.io \
-    docker-buildx-plugin \
-    docker-compose-plugin && \
+    containerd.io && \
     rm -rf /var/lib/apt/lists/*
 
-RUN ln -s /usr/bin/python3 /usr/local/bin/python3 && \
-    ln -s /usr/bin/pip3 /usr/local/bin/pip3
-
-RUN python3 -m venv venv
-RUN python3 -m pip install --break-system-packages checkov==2.3.296
-
-RUN python3 -m pip install --break-system-packages -i https://pypi.org/simple devsecops-engine-tools==$APP_VERSION
 
 CMD ["sh", "-c", "dockerd & while ! docker info > /dev/null 2>&1; do sleep 1; done; sh"]

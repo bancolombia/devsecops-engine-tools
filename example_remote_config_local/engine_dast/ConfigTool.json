@@ -15,6 +15,11 @@
     "NUCLEI": {
         "VERSION": "3.3.5",
         "DOWNLOAD_URL": "https://github.com/projectdiscovery/nuclei/releases/download/",
+        "CONCURRENCY": 1,
+        "RESPONSE_SIZE": 256,
+        "BULK_SIZE": 1,
+        "TIMEOUT": 10,
+        "BINARY_PATH": "/usr/local/bin",
         "USE_EXTERNAL_CHECKS_GIT": false,
         "USE_EXTERNAL_CHECKS_DIR": true,
         "EXTERNAL_DIR_OWNER": "dummie-username",

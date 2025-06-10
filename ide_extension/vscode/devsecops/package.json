@@ -1,25 +1,23 @@
 {
   "name": "devsecops",
   "icon": "resources/logo.png",
-  "displayName": "devsecops",
+  "displayName": "DevSecOps Engine Tools",
+  "publisher": "GrupoBancolombiaOSPO",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.0.7",
   "engines": {
-    "vscode": "^1.91.0"
+    "vscode": "^1.95.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onView:devsecops",
+    "onCommand:devsecops.iacScan",
+    "onCommand:devsecops.imageScan"
+  ],
   "main": "./out/extension.js",
   "contributes": {
-    "viewsWelcome": [
-      {
-        "view": "scm",
-        "contents": "Test",
-        "when": "devsecops.enabled"
-      }
-    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -46,14 +44,17 @@
           "default": true,
           "description": "Enable/Disable DevSecOps IDE Extension"
         },
+        "devsecops.imageToUse": {
+          "type": "string",
+          "default": "bancolombia/devsecops-engine-tools",
+          "description": "Docker image to use for scanning"
+        },
         "devsecops.organizationName": {
           "type": "string",
-          "default": "GrupoBancolombia",
           "description": "Organization Name"
         },
         "devsecops.projectName": {
           "type": "string",
-          "default": "Vicepresidencia Servicios de Tecnología",
           "description": "Project Name"
         },
         "devsecops.variablePlaceholder": {
@@ -63,7 +64,6 @@
         },
         "devsecops.groupName": {
           "type": "string",
-          "default": "Empty",
           "description": "Variables group name"
         },
         "devsecops.releaseId": {
@@ -96,55 +96,115 @@
     },
     "commands": [
       {
-        "command": "devsecops.helloWorld",
-        "title": "HELLO WORLD"
-      },
-      {
         "command": "devsecops.iacScan",
-        "title": "IAC SCAN"
+        "title": "DevSecOps Iac Scan"
       },
       {
         "command": "devsecops.imageScan",
-        "title": "IMAGE SCAN"
+        "title": "DevSecOps Image Scan"
+      },
+      {
+        "command": "devsecops.openWithDiagnostic",
+        "title": "Open File with Security Diagnostic Highlighting"
+      },
+      {
+        "command": "devsecops.fixWithCopilot",
+        "title": "Fix Security Issue with GitHub Copilot"
+      },
+      {
+        "command": "devsecops.explainWithCopilot",
+        "title": "Explain Security Issue with GitHub Copilot"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "devsecops.helloWorld",
+          "command": "devsecops.imageScan",
           "when": "view == devsecopsView",
           "group": "navigation"
         },
         {
-          "command": "devsecops.iacScan",
-          "when": "view == devsecopsView",
+          "command": "devsecops.imageScan",
+          "when": "view == devsecops",
           "group": "navigation"
         }
       ]
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bancolombia/devsecops-engine-tools"
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "vscode-test",
-    "deploy": "vsce publish --yarn"
+    "test": "node ./run-tests.js",
+    "test:coverage": "nyc npm run test",
+    "report:coverage": "nyc report --reporter=lcov --reporter=text",
+    "deploy": "vsce publish",
+    "lint": "eslint 'src/**/*.{ts,js}'",
+    "lint:fix": "eslint 'src/**/*.{ts,js}' --fix",
+    "format": "prettier --write 'src/**/*.{ts,js,json,md,html,css,yml,yaml}'",
+    "format:check": "prettier --check 'src/**/*.{ts,js,json,md,html,css,yml,yaml}'",
+    "prepare": "husky"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "**/test/**",
+      ".vscode-test/**"
+    ],
+    "all": true,
+    "reporter": [
+      "html",
+      "text"
+    ]
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,html,css,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.2",
+    "@semantic-release/release-notes-generator": "^14.0.3",
+    "@types/lodash": "^4.17.16",
     "@types/mocha": "^10.0.9",
     "@types/node": "20.x",
+    "@types/sinon": "^17.0.4",
     "@types/vscode": "^1.91.0",
-    "@typescript-eslint/eslint-plugin": "^7.14.1",
-    "@typescript-eslint/parser": "^7.11.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^2.4.1",
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.0.0",
+    "mocha": "^11.1.0",
+    "mocha-lcov-reporter": "^1.3.0",
+    "nyc": "^17.1.0",
+    "prettier": "^3.5.3",
+    "sinon": "^20.0.0",
+    "semantic-release": "^24.2.4",
     "typescript": "^5.4.5"
   },
   "dependencies": {
     "docker-cli-js": "^2.10.0",
-    "keytar": "^7.9.0"
+    "generator-code": "^1.11.9",
+    "keytar": "^7.9.0",
+    "lodash": "^4.17.21"
   }
 }

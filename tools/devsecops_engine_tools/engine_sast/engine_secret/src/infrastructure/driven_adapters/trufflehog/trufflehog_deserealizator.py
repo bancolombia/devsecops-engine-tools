@@ -78,3 +78,4 @@ class SecretScanDeserealizator(DeseralizatorGateway):
             print("===== BEGIN CONTEXT OUTPUT =====")
             print(json.dumps({"secret_context": [obj.__dict__ for obj in context_secret_list]}, indent=4))
             print("===== END CONTEXT OUTPUT =====")
+        return where_text, raw

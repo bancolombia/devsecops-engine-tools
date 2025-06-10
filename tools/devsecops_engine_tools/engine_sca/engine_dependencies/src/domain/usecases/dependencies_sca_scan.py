@@ -17,7 +17,8 @@ class DependenciesScan:
         to_scan,
         secret_tool,
         build_id,
-        build_url,
+        build_url
+
     ):
         self.tool_run = tool_run
         self.tool_deserializator = tool_deserializator
@@ -36,7 +37,7 @@ class DependenciesScan:
 
         Return: dict: SCA scanning results.
         """
-        return self.tool_run.run_tool_dependencies_sca(
+        dependencies_scanned = self.tool_run.run_tool_dependencies_sca(
             self.remote_config,
             self.dict_args,
             self.exclusions,
@@ -45,13 +46,17 @@ class DependenciesScan:
             self.secret_tool,
             self.dict_args["token_engine_dependencies"],
             build_id=self.build_id,
-            build_url=self.build_url,
+            build_url=self.build_url
         )
+    
+        if self.dict_args.get("context") == "true":
+            self.tool_run.get_dependencies_context_from_results(dependencies_scanned, remote_config=self.remote_config)
+        
+        return dependencies_scanned
 
     def deserializator(self, dependencies_scanned):
         """
         Process the results deserializer.
         Terun: list: Deserialized list of findings.
         """
-       
         return self.tool_deserializator.get_list_findings(dependencies_scanned, self.remote_config)

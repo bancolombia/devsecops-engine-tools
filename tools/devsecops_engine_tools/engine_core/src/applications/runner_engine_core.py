@@ -218,7 +218,7 @@ def get_inputs_from_cli(args):
         type=str,
         required=False,
         default="false",
-        help="Enable or disable context creation. Applies only to engine_iac and engine_container. Default is false."
+        help="Enable or disable context creation. Applies to engine_iac, engine_container and engine_dependencies. Default is false."
     )
 
     TOOLS = {

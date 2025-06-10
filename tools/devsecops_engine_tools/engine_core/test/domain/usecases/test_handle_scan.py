@@ -50,7 +50,7 @@ class TestHandleScan(unittest.TestCase):
             "remote_config_repo": "test_repo",
             "remote_config_branch": ""
         }
-        config_tool = {"ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
+        config_tool = {"VULNERABILITY_MANAGER": {"ENABLED": True}, "ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
         secret_tool = "some_secret"
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
         self.devops_platform_gateway.get_variable.return_value = "dev"
@@ -106,7 +106,7 @@ class TestHandleScan(unittest.TestCase):
             "remote_config_repo": "test_repo",
             "remote_config_branch": ""
         }
-        config_tool = {"ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
+        config_tool = {"VULNERABILITY_MANAGER": {"ENABLED": True}, "ENGINE_IAC": {"ENABLED": "true", "TOOL": "tool"}}
 
         # Mock the runner_engine_iac function and its return values
         findings_list = ["finding1", "finding2"]
@@ -154,7 +154,7 @@ class TestHandleScan(unittest.TestCase):
             "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
-        config_tool = {"ENGINE_CONTAINER": {"ENABLED": "true", "TOOL": "tool"}}
+        config_tool = {"VULNERABILITY_MANAGER": {"ENABLED": False}, "ENGINE_CONTAINER": {"ENABLED": "true", "TOOL": "tool"}}
         secret_tool = {"token_prisma_cloud": "test"}
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
 
@@ -242,7 +242,7 @@ class TestHandleScan(unittest.TestCase):
         }
         secret_tool = {"github_token": "example_token"}
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
-        config_tool = {"ENGINE_DAST":{"ENABLED": "true", "TOOL": "NUCLEI"}}
+        config_tool = {"VULNERABILITY_MANAGER": {"ENABLED": False},"ENGINE_DAST":{"ENABLED": "true", "TOOL": "NUCLEI"}}
         input_core = InputCore(
             totalized_exclusions=[],
             threshold_defined=self.threshold,
@@ -275,7 +275,7 @@ class TestHandleScan(unittest.TestCase):
             "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
-        config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
+        config_tool = {"VULNERABILITY_MANAGER": {"ENABLED": False}, "ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
         secret_tool = {"token_github_external_rules": "test"}
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
 
@@ -313,7 +313,7 @@ class TestHandleScan(unittest.TestCase):
             "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
-        config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
+        config_tool = {"VULNERABILITY_MANAGER": {"ENABLED": False}, "ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
         secret_tool = None
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
 
@@ -351,7 +351,7 @@ class TestHandleScan(unittest.TestCase):
             "remote_config_branch": "",
             "use_vulnerability_management": "true",
         }
-        config_tool = {"ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
+        config_tool = {"VULNERABILITY_MANAGER": {"ENABLED": False}, "ENGINE_SECRET": {"ENABLED": "true", "TOOL": "trufflehog"}}
         secret_tool = None
         self.secrets_manager_gateway.get_secret.return_value = secret_tool
 
@@ -392,6 +392,7 @@ class TestHandleScan(unittest.TestCase):
             "use_vulnerability_management": "true",
         }
         config_tool = {
+            "VULNERABILITY_MANAGER": {"ENABLED": False},
             "ENGINE_DEPENDENCIES": "some_config",
             "ENGINE_DEPENDENCIES": {"TOOL": "some_tool"},
         }

@@ -29,8 +29,7 @@ def test_init():
             to_scan,
             secret_tool,
             build_id,
-            build_url,
-            context="false"
+            build_url
         )
 
         assert dependencies_scan_instance.tool_run == mock_tool_gateway
@@ -55,14 +54,13 @@ def test_process():
         "devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.usecases.dependencies_sca_scan.DeserializatorGateway"
     ) as mock_deserializator_gateway:
         remote_config = {"remote_config_key": "remote_config_value"}
-        dict_args = {"key": "arg", "token_engine_dependencies": None}
+        dict_args = {"key": "arg", "token_engine_dependencies": None, "context": "false"}
         exclusion = {"exclusion_key": "exclusion_value"}
         pipeline_name = "pipeline_name"
         to_scan = "path/"
         secret_tool = "secret_tool"
         build_id = "build_id"
         build_url = "build_url"
-        context = "false"
         dependencies_scan_instance = DependenciesScan(
             mock_tool_gateway,
             mock_deserializator_gateway,
@@ -73,8 +71,7 @@ def test_process():
             to_scan,
             secret_tool,
             build_id,
-            build_url,
-            context
+            build_url
         )
         dependencies_scan_instance.process()
 
@@ -87,8 +84,7 @@ def test_process():
             secret_tool,
             None,
             build_id=build_id,
-            build_url=build_url,
-            context=context
+            build_url=build_url
         )
 
 
@@ -107,7 +103,6 @@ def test_deserializator():
         dependencies_scanned = "scanned.json"
         build_id = "build_id"
         build_url = "build_url"
-        context = "false"
 
         dependencies_scan_instance = DependenciesScan(
             mock_tool_gateway,
@@ -119,8 +114,8 @@ def test_deserializator():
             to_scan,
             token,
             build_id,
-            build_url,
-            context
+            build_url
+            
         )
         dependencies_scan_instance.deserializator(dependencies_scanned)
 

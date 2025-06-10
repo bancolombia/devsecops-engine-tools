@@ -95,6 +95,7 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gate
 
         return init_engine_dast(
             devops_platform_gateway=devops_platform_gateway,
+            remote_config_source_gateway=remote_config_source_gateway,
             tool_gateway=tool_run,
             dict_args=dict_args,
             secret_tool=secret_tool,

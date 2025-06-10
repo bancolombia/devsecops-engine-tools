@@ -1,6 +1,9 @@
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
+from devsecops_engine_tools.engine_sca.engine_dependencies.src.domain.model.ContextDependencies import (
+    ContextDependencies,
+)
 
 import subprocess
 import platform
@@ -8,6 +11,7 @@ import requests
 import re
 import os
 import json
+from dataclasses import asdict, dataclass
 
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.helpers.get_artifacts import (
     GetArtifacts,
@@ -231,3 +235,53 @@ class XrayScan(ToolGateway):
         )
 
         return results_file
+
+    def get_dependencies_context_from_results(self, path_file_results, remote_config):
+        with open(path_file_results, "r") as file:
+            scan_results = json.load(file)
+            context_dependencies_list = []
+
+            for scan in scan_results:
+                vulnerabilities = scan.get("vulnerabilities", [])
+                for finding in vulnerabilities:
+                    cve_ids = [cve.get("cve") for cve in finding.get("cves", []) if cve.get("cve")]
+                    description = finding.get("summary", "")
+                    severity = finding.get("severity", "unknown").lower()
+                    references = finding.get("references", [])
+                    components = finding.get("components", {})
+                    component_list = list(components.keys()) if components else []
+                    for pkg_id, comp_data in components.items():
+                        fixed_version = comp_data.get("fixed_versions", [])
+                        impact_paths = comp_data.get("impact_paths", [])
+                        package_name = ""
+                        installed_version = ""
+                        if ":" in pkg_id:
+                            parts = pkg_id.split(":")
+                            package_name = parts[-2].replace("//", "")
+                            installed_version = parts[-1]
+                        context = ContextDependencies(
+                            cve_id=cve_ids,
+                            severity=severity,
+                            component=pkg_id,
+                            package_name=package_name,
+                            installed_version=installed_version,
+                            fixed_version=fixed_version,
+                            impact_paths=impact_paths,
+                            description=description,
+                            references=references,
+                            source_tool="Jfrog Xray"
+                        )
+                        context_dependencies_list.append(context)
+
+            print("===== BEGIN CONTEXT OUTPUT =====")
+            print(
+                json.dumps(
+                    {
+                        "dependencies_context": [
+                            asdict(context) for context in context_dependencies_list
+                        ]
+                    },
+                    indent=4,
+                )
+            )
+            print("===== END CONTEXT OUTPUT =====")

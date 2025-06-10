@@ -22,7 +22,6 @@ class DependencyCheckDeserialize(DeserializatorGateway):
 
     def get_list_findings(self, dependencies_scanned_file, remote_config) -> "list[Finding]":
         dependencies, namespace = self.filter_vulnerabilities_by_confidence(dependencies_scanned_file, remote_config)
-
         list_open_vulnerabilities = []
 
         for dependency in dependencies:
@@ -30,30 +29,21 @@ class DependencyCheckDeserialize(DeserializatorGateway):
             if vulnerabilities_node:
                 vulnerabilities = vulnerabilities_node.findall('ns:vulnerability', namespace)
                 for vulnerability in vulnerabilities:
-                    fix = "Not found"
-                    vulnerable_software = vulnerability.find('ns:vulnerableSoftware', namespace)
-                    if vulnerable_software:
-                        software = vulnerable_software.findall('ns:software', namespace)
-                        if len(software) > 0:
-                            fix = software[0].get("versionEndExcluding", "Not found").lower()
-                    
-                    id = vulnerability.find('ns:name', namespace).text[:28]
-                    cvss = ", ".join(f"{child.tag.split('}')[-1]}: {child.text}" for child in vulnerability.find('ns:cvssV3', namespace)) if vulnerability.find('ns:cvssV3', namespace) else ""
-                    where = self.get_where(dependency, namespace)
-                    description = vulnerability.find('ns:description', namespace).text if vulnerability.find('ns:description', namespace).text else ""
-                    severity = vulnerability.find('ns:severity', namespace).text.lower()
-                    
+                    data = self.extract_common_vuln_data(vulnerability, dependency, namespace)
+                    cvss_node = vulnerability.find('ns:cvssV3', namespace)
+                    cvss = ", ".join(f"{child.tag.split('}')[-1]}: {child.text}" for child in cvss_node) if cvss_node else ""
+
                     finding_open = Finding(
-                        id=id,
+                        id=data["id"],
                         cvss=cvss,
-                        where=where,
-                        description=description[:120].replace("\n\n", " ").replace("\n", " ").strip() if len(description) > 0 else "No description available",
-                        severity=severity,
+                        where=data["where"],
+                        description=data["description"][:120].replace("\n\n", " ").replace("\n", " ").strip() if data["description"] else "No description available",
+                        severity=data["severity"],
                         identification_date=datetime.now().strftime("%d%m%Y"),
                         published_date_cve=None,
                         module="engine_dependencies",
                         category=Category.VULNERABILITY,
-                        requirements=fix,
+                        requirements=data["fix"] or "Not found",
                         tool="DEPENDENCY_CHECK",
                     )
                     list_open_vulnerabilities.append(finding_open)
@@ -170,3 +160,42 @@ class DependencyCheckDeserialize(DeserializatorGateway):
                 return f"{component_name}:{component_version}"
         
         return ""
+    
+    def extract_fix_version(self, vulnerability, namespace):
+        fix = "Not found"
+        vulnerable_software = vulnerability.find('ns:vulnerableSoftware', namespace)
+        if vulnerable_software:
+            software = vulnerable_software.findall('ns:software', namespace)
+            if software:
+                fix = software[0].get("versionEndExcluding", "Not found").lower()
+        return fix if fix != "Not found" else None
+
+    def extract_common_vuln_data(self, vulnerability, dependency, namespace):
+        fix = self.extract_fix_version(vulnerability, namespace)
+        id = vulnerability.find('ns:name', namespace).text[:28]
+
+        where = self.get_where(dependency, namespace)
+
+        description = vulnerability.find('ns:description', namespace)
+        description_text = description.text if description is not None and description.text else ""
+
+        severity = vulnerability.find('ns:severity', namespace).text.lower()
+
+        return {
+            "id": id,
+            "fix": fix,
+            "where": where,
+            "description": description_text,
+            "severity": severity
+        }
+
+    def extract_references(self, vulnerability, namespace):
+        references_list = []
+        references_node = vulnerability.find('ns:references', namespace)
+        if references_node:
+            references = references_node.findall('ns:reference', namespace)
+            for ref in references:
+                url = ref.find('ns:url', namespace).text
+                if url:
+                    references_list.append(url)
+        return list(set(references_list))

@@ -1,51 +1,17 @@
-# devsecops README
+# DevSecOps Engine Tools
 
-This is the README for your extension "devsecops". After writing up a brief description, we recommend including the following sections.
+[![Maintained by Bancolombia](https://img.shields.io/badge/maintained_by-Bancolombia-yellow)](#)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/bancolombia/devsecops-engine-tools/intellij-build.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bancolombia_devsecops-engine-tool-intellij&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bancolombia_devsecops-engine-tool-intellij)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bancolombia_devsecops-engine-tool-intellij&metric=coverage)](https://sonarcloud.io/summary/new_code?id=bancolombia_devsecops-engine-tool-intellij)
+![Downloads](https://img.shields.io/jetbrains/plugin/d/25069-devsecops-engine-tools)
+![Rating](https://img.shields.io/jetbrains/plugin/r/rating/25069-devsecops-engine-tools)
+![Version](https://img.shields.io/jetbrains/plugin/v/25069-devsecops-engine-tools)
 
-## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+# Description
 
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+Visual Studio Code plugin that allows you to run DevSecOps Engine Tools from the IDE.
 
 ---
 

@@ -1,12 +1,10 @@
 import { OutputChannel } from "vscode";
+import { ScannerRes } from "../../model/ScannerRes";
+import { ScanConfiguration } from "../../model/ScanConfiguration";
 
 export interface ISecretScanUseCase {
     scan(folderToScan: string,
-        organizationName: string,
-        projectName: string,
-        groupName: string,
-        adUserName: string,
-        adPersonalAccessToken: string,
-        outputChannel: OutputChannel
-    ): void;
+        outputChannel: OutputChannel,
+        scannerConfiguration: ScanConfiguration
+    ): Promise<ScannerRes>;
 }

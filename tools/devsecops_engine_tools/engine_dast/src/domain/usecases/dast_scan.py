@@ -52,6 +52,11 @@ class DastScan:
                 config_tool["SCOPE_PIPELINE"]
             ).get(tool)
 
+        self.data_target.concurrency = config_tool.get(tool, {}).get("CONCURRENCY", 25)
+        self.data_target.response_size = config_tool.get(tool, {}).get("RESPONSE_SIZE", 1048576)
+        self.data_target.bulk_size = config_tool.get(tool, {}).get("BULK_SIZE", 25)
+        self.data_target.timeout = config_tool.get(tool, {}).get("TIMEOUT", 10)
+
         data_target_config = self.data_target
         return config_tool, data_target_config
 

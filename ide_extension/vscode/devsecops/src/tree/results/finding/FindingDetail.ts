@@ -1,4 +1,18 @@
 export function findingDetailWebview(contextInfo: any): string {
+export interface IContextInfo {
+    severity?: string;
+    id?: string;
+    description?: string;
+    vulnerabilityStatus?: string;
+    installedVersion?: string;
+    fixedVersion?: string;
+    targetImage?: string;
+    packageName?: string;
+    cvssScore?: string;
+    references?: string[];
+}
+
+export function findingDetailWebview(contextInfo: IContextInfo): string {
     const severity = (contextInfo.severity || "unknown").toLowerCase();
     let codicon = "codicon-warning";
     let color = "#cca700";
@@ -22,9 +36,10 @@ export function findingDetailWebview(contextInfo: any): string {
             color = "#e51400";
     }
 
-    function scanInfoRow(label: string, value: string | undefined) {
+    function scanInfoRow(label: string, value: string | undefined): string {
         return `<div class="scan-row"><span class="scan-label">${label}:</span> <span class="scan-value">${value || "-"}</span></div>`;
     }
+
 
     return  `
 <!DOCTYPE html>
@@ -129,10 +144,13 @@ export function findingDetailWebview(contextInfo: any): string {
     <div class="section" id="remSection">
         <h3>Remediation Info</h3>
        ${
+        <h3>References</h3>
+${
             contextInfo.references && contextInfo.references.length > 0
                 ? `<ul>${contextInfo.references.map((ref: string) => `<li><a href="${ref}" target="_blank">${ref}</a></li>`).join("")}</ul>`
                 : "<p>No remediation info available.</p>"
         }
+ 
     </div>
     <script>
         const descTab = document.getElementById('descTab');

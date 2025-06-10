@@ -1,6 +1,7 @@
 import { OutputChannel } from "vscode";
-import { IIacScanUseCase } from "../../domain/usecase/interfaces/IIacScanUseCase";
 import { ISecretScanUseCase } from "../../domain/usecase/interfaces/ISecretScanUseCase";
+import { ScannerRes } from "../../domain/model/ScannerRes";
+import { ScanConfiguration } from "../../domain/model/ScanConfiguration";
 
 export class SecretScanRequest {
 
@@ -8,20 +9,12 @@ export class SecretScanRequest {
 
     makeScan(
         folderToScan: string,
-        organizationName: string,
-        projectName: string,
-        groupName: string,
-        adUserName: string,
-        adPersonalAccessToken: string,
-        outputChannel: OutputChannel
-        ): any {
-        this.secretScannerUseCase.scan(folderToScan,
-            organizationName,
-            projectName,
-            groupName,
-            adUserName,
-            adPersonalAccessToken,
-            outputChannel
+        outputChannel: OutputChannel,
+        scannerConfiguration: ScanConfiguration
+        ): Promise<ScannerRes> {
+        return this.secretScannerUseCase.scan(folderToScan,
+            outputChannel,
+            scannerConfiguration
         );
     }
 
