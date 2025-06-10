@@ -161,6 +161,4 @@ class TrufflehogRun(ToolGateway):
                 file.write(json_str + '\n')
         return findings, file_findings
     
-    def get_secret_context_from_results(path_file_results):
-        #TODO: Implement this method to extract context from the results
-        pass
+    

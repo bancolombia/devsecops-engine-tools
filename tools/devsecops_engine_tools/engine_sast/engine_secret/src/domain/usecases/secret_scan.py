@@ -67,6 +67,10 @@ class SecretScan:
             print("Tool skipped by DevSecOps policy")
             dict_args["send_metrics"] = "false"
             dict_args["use_vulnerability_management"] = "false"
+               
+        if dict_args.get("context") == "true":
+            self.tool_deserialize.get_secret_context_from_results(file_path_findings)
+        
         return finding_list, file_path_findings
     
     def complete_config_tool(self, dict_args, tool):
