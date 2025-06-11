@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import mock_open, patch
 from devsecops_engine_tools.engine_core.src.domain.model.finding import Finding, Category
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.gitleaks.gitleaks_deserealizator import (
     GitleaksDeserealizator
@@ -66,3 +66,14 @@ class TestGitleaksDeserealizator(unittest.TestCase):
         
         # Assert
         self.assertEqual(where_correctly, "/file1.txt, Secret: ABC*********789")
+
+    @patch("builtins.print")
+    @patch("builtins.open", new_callable=mock_open, read_data='{"RuleID": "GITLEAKS_RULE_1", "Description": "Hardcoded secret found", "File": "/path/to/repo/file1.txt", "Secret": "ABCDEFG123456789", "Line": 42}\n')
+    def test_get_secret_context_from_results(self,mock_file, mock_print):
+        self.deserealizator.get_secret_context_from_results("fake_path.json")
+        printed = [call[0][0] for call in mock_print.call_args_list]
+        self.assertTrue(any("===== BEGIN CONTEXT OUTPUT =====" in line for line in printed))
+        self.assertTrue(any("GITLEAKS_RULE_1" in line for line in printed))
+        self.assertTrue(any("/file1.txt, Secret: ABC*********789: (line 42)" in line for line in printed))
+        self.assertTrue(any("Hardcoded secret found" in line for line in printed))
+        self.assertTrue(any("===== END CONTEXT OUTPUT =====" in line for line in printed))

@@ -320,4 +320,3 @@ def test_extra_colon_prisma_key():
     prisma_key = "your_access_key:your_secret_key:extra"
     with pytest.raises(ValueError, match="The string is not properly formatted. Make sure it contains a ':'."):
         scan_manager._split_prisma_token(prisma_key)
-    

@@ -1,3 +1,4 @@
+import json
 import unittest
 import subprocess
 import logging
@@ -263,3 +264,62 @@ class TestKubescapeTool(unittest.TestCase):
         
         mock_install_tool.assert_called_once_with('kubescape-macos-latest', 'http://example.com/kubescape-macos-latest')
         self.assertEqual(result, './kubescape-macos-latest')
+
+
+    def test_get_iac_context_from_results(self):
+        sample_json = {
+            "results": [
+                {
+                    "resourceID": "aws_s3_bucket.example",
+                    "controls": [
+                        {
+                            "controlID": "C-001",
+                            "name": "Ensure S3 bucket has access logging enabled",
+                            "status": {"status": "failed"},
+                            "rules": [
+                                {
+                                    "paths": [
+                                        {
+                                            "resourceID": "aws_s3_bucket.example",
+                                            "fixPath": {"path": "main.tf"}
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "resources": [
+                {
+                    "resourceID": "aws_s3_bucket.example",
+                    "source": {
+                        "relativePath": "main.tf"
+                    }
+                }
+            ],
+            "summaryDetails": {
+                "frameworks": [
+                    {
+                        "controls": {
+                            "C-001": {
+                                "scoreFactor": 7.5
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+        with patch("builtins.open", mock_open(read_data=json.dumps(sample_json))), \
+            patch("builtins.print") as mock_print:
+            tool = KubescapeTool() 
+            tool.get_iac_context_from_results("fake_kubescape_scan.json")
+            printed = [call[0][0] for call in mock_print.call_args_list]
+            
+            assert any("===== BEGIN CONTEXT OUTPUT =====" in line for line in printed)
+            assert any("C-001" in line for line in printed)
+            assert any("Ensure S3 bucket has access logging enabled" in line for line in printed)
+            assert any("main.tf" in line for line in printed)
+            assert any("Kubescape" in line for line in printed)
+            assert any("===== END CONTEXT OUTPUT =====" in line for line in printed)
