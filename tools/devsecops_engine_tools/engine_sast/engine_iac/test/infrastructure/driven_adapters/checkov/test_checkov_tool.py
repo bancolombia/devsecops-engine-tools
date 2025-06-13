@@ -175,3 +175,40 @@ def test_install_tool_windows(mock_move, mock_zipfile, mock_download_tool, mock_
     mock_zipfile.return_value.__enter__.return_value.extract.assert_called_once_with(member='dist/checkov.exe')
     mock_move.assert_called_once_with(os.path.join('dist', 'checkov.exe'), 'checkov.exe')
     assert result is None
+
+def test_get_iac_context_from_results():
+    sample_json = {
+        "results": {
+            "failed_checks": [
+                {
+                    "check_id": "CKV_AWS_20", 
+                    "check_class": "S3BucketLogging",
+                    "severity": "high",
+                    "repo_file_path": "main.tf",
+                    "fix_key":"aws_s3_bucket.example",
+                    "resource": "aws_s3_bucket.example",
+                    "check_name": "Ensure S3 bucket has access logging enabled",
+                    "module":"engine_iac",
+                    "tool": "Checkov",
+                }
+            ]
+        }
+    }
+    with patch("builtins.open", mock_open(read_data=json.dumps(sample_json))), \
+         patch("builtins.print") as mock_print:
+        tool = CheckovTool()
+        tool.get_iac_context_from_results("fake_checkov_scan.json")
+        printed = [call[0][0] for call in mock_print.call_args_list]
+        output = "\n".join(printed)
+
+        assert "===== BEGIN CONTEXT OUTPUT =====" in output
+        assert "CKV_AWS_20" in output  
+        assert "S3BucketLogging" in output 
+        assert "high" in output  
+        assert "main.tf" in output  
+        assert "aws_s3_bucket.example" in output 
+        assert "aws_s3_bucket.example" in output  
+        assert "Ensure S3 bucket has access logging enabled" in output  
+        assert "engine_iac" in output  
+        assert "Checkov" in output  
+        assert "===== END CONTEXT OUTPUT =====" in output

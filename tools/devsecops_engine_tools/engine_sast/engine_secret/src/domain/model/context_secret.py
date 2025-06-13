@@ -1,14 +1,11 @@
 from dataclasses import dataclass
 
-
 @dataclass
-class ContextIac:
+class ContextSecret:
     id: str
-    check_class: str
     severity: str
+    type: str
     where: str
-    fix_key: str
-    resource: str
     description: str
     module: str
     tool: str

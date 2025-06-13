@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import mock_open, patch
 from datetime import datetime
 from devsecops_engine_tools.engine_core.src.domain.model.finding import Finding, Category
 from devsecops_engine_tools.engine_sast.engine_secret.src.infrastructure.driven_adapters.trufflehog.trufflehog_deserealizator import SecretScanDeserealizator
@@ -110,3 +110,13 @@ class TestSecretScanDeserealizator(unittest.TestCase):
                 self.deserealizator.get_where_correctly(result,  "Win", "C:\\path\\to", ),
                 ("\\file.py", "sec*********ret")
             )
+
+    @patch("builtins.print")
+    @patch("builtins.open",new_callable=mock_open, read_data='{"Id": "SECRET_SCANNING", "Severity": "critical", "DetectorName": "ExampleDetector", "SourceMetadata": {"Data": {"Filesystem": {"line": 10, "file": "/path/to/file.py"}}}, "Raw": "secret"}\n')
+    def test_get_secret_context_from_results(self, mock_file,mock_print):
+        self.deserealizator.get_secret_context_from_results("fake_path.json")
+        printed = [call[0][0] for call in mock_print.call_args_list]
+        self.assertTrue(any("===== BEGIN CONTEXT OUTPUT =====" in line for line in printed))
+        self.assertTrue(any("SECRET_SCANNING" in line for line in printed))
+        self.assertTrue(any("/file.py: (line 10)" in line for line in printed))
+        self.assertTrue(any("Sensitive information in source code" in line for line in printed))

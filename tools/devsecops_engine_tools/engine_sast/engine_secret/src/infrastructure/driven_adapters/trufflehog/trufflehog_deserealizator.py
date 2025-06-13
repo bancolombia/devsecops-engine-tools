@@ -1,8 +1,10 @@
+import json
 import re
 from datetime import datetime
 from dataclasses import dataclass
 from typing import List
 from devsecops_engine_tools.engine_core.src.domain.model.finding import Finding, Category
+from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.context_secret import ContextSecret
 from devsecops_engine_tools.engine_sast.engine_secret.src.domain.model.gateway.gateway_deserealizator import DeseralizatorGateway
 
 @dataclass
@@ -51,3 +53,28 @@ class SecretScanDeserealizator(DeseralizatorGateway):
         path_remove = path_directory or ""
         where_text = original_where.replace(path_remove, "")
         return where_text, raw
+    
+    def get_secret_context_from_results(self,path_file_results:str):
+
+        context_secret_list = []
+
+        with open(path_file_results, "r") as file:
+            for line in file:
+                result = json.loads(line)
+
+                line_number = result.get('SourceMetadata', {}).get('Data', {}).get('Filesystem', {}).get('line', '')    
+                where_text, _ = self.get_where_correctly(result, os="Linux", path_directory="")
+                context_secret = ContextSecret(
+                    id=result.get("Id", ""),
+                    severity=result.get("Severity", "critical"),
+                    type=result.get("DetectorName", ""),
+                    where=f"{where_text}: (line {line_number})",
+                    description="Sensitive information in source code",
+                    module="engine_secret",
+                    tool="Trufflehog"
+                )
+                context_secret_list.append(context_secret)
+
+            print("===== BEGIN CONTEXT OUTPUT =====")
+            print(json.dumps({"secret_context": [obj.__dict__ for obj in context_secret_list]}, indent=4))
+            print("===== END CONTEXT OUTPUT =====")

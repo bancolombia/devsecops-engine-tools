@@ -129,10 +129,10 @@ class CheckovTool(ToolGateway):
 
                 context_iac = ContextIac(
                     id=check.get("check_id", "unknown"),
-                    check_name=check.get("check_name", "unknown"),
                     check_class=check.get("check_class", "unknown"),
                     severity=check.get("severity").lower(),
                     where=f"{check.get('repo_file_path', 'unknown')}: {check.get('resource', 'unknown')} (line {line_range_str})",
+                    fix_key=None,
                     resource=check.get("resource", "unknown"),
                     description=check.get("check_name", "unknown"),
                     module="engine_iac",

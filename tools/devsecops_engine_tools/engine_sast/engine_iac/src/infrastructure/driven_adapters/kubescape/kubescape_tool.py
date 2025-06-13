@@ -4,6 +4,7 @@ import platform
 import requests
 import distro
 import os
+from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.context_iac import ContextIac
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -47,8 +48,53 @@ class KubescapeTool(ToolGateway):
             return [], None
 
     def get_iac_context_from_results(self, path_file_results):
-        # TODO: Implement this method
-        pass
+            with open(path_file_results, "r") as file:
+                data = json.load(file)
+
+            kubescape_deserealizator = KubescapeDeserealizator()
+            extracted_controls = kubescape_deserealizator.extract_failed_controls(data)
+            frameworks = data.get("summaryDetails", {}).get("frameworks", [])
+
+            context_iac_list = []
+            controls_by_id = {}
+
+            for result in data.get("results", []):
+                for ctrl in result.get("controls", []):
+                    controls_by_id[ctrl.get("controlID")] = ctrl
+
+            for control in extracted_controls:
+                control_id = control.get("id")
+                severity = kubescape_deserealizator.get_severity_score(frameworks, control_id)
+                resource_ids = []
+                fix_key =[]
+                full_control = controls_by_id.get(control_id)
+
+                if full_control:
+                    for rule in full_control.get("rules", []):
+                        for path in rule.get("paths", []):
+                            resource_id = path.get("resourceID")
+                            if resource_id:
+                                resource_ids.append(resource_id)
+                            fix_path = path.get("fixPath", {}).get("path")
+                            if fix_path:
+                                fix_key.append(fix_path)
+
+                context_iac = ContextIac(
+                    id=control_id or "unknown",
+                    check_class=control_id or "unknown",
+                    severity=severity if severity else "unknown",
+                    where=control.get("where", "unknown"),
+                    fix_key=fix_key if fix_key else ["unknown"],
+                    resource=resource_ids if resource_ids else ["unknown"],
+                    description=control.get("description", "unknown"),
+                    module="engine_iac",
+                    tool="Kubescape"
+                )
+                context_iac_list.append(context_iac)
+
+            print("===== BEGIN CONTEXT OUTPUT =====")
+            print(json.dumps({"iac_context": [obj.__dict__ for obj in context_iac_list]}, indent=4))
+            print("===== END CONTEXT OUTPUT =====")
 
     def _select_operative_system(self, os_platform, base_url):
         if os_platform == "Linux":
