@@ -14,7 +14,7 @@ class CheckovDeserealizator:
     ) -> "list[Finding]":
 
         list_open_findings = []
-        for result in results_scan_list:
+        for result in results_scan_list:           
             if "failed_checks" in str(result):
                 for scan in result["results"]["failed_checks"]:
                     check_id = scan.get("check_id")
