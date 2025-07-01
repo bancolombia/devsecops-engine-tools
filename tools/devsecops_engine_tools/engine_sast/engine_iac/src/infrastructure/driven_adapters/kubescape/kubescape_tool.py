@@ -48,8 +48,11 @@ class KubescapeTool(ToolGateway):
             return [], None
 
     def get_iac_context_from_results(self, path_file_results):
-            with open(path_file_results, "r") as file:
-                data = json.load(file)
+        # Sanitize the file path to prevent path traversal attacks
+        safe_path = os.path.basename(path_file_results)
+        
+        with open(safe_path, "r") as file:
+            data = json.load(file)
 
             kubescape_deserealizator = KubescapeDeserealizator()
             extracted_controls = kubescape_deserealizator.extract_failed_controls(data)
