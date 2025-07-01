@@ -151,8 +151,10 @@ class KubescapeTool(ToolGateway):
 
     def _download_tool(self, file, url):
         try:
+            # Sanitize filename to prevent path traversal
+            safe_filename = os.path.basename(file)
             response = requests.get(url, allow_redirects=True)
-            with open(file, "wb") as binary_file:
+            with open(safe_filename, "wb") as binary_file:
                 binary_file.write(response.content)
         except Exception as e:
             logger.error(f"Error downloading Kubescape: {e}")
@@ -178,10 +180,12 @@ class KubescapeTool(ToolGateway):
 
     def _load_json(self, json_name):
         try:
-            with open(json_name) as file:
+            # Sanitize filename to prevent path traversal
+            safe_json_name = os.path.basename(json_name)
+            with open(safe_json_name) as file:
                 return json.load(file)
         except FileNotFoundError:
-            logger.error(f"The file {json_name} does not exist.")
+            logger.error(f"The file {safe_json_name} does not exist.")
         except json.JSONDecodeError:
             logger.error("The JSON result is empty.")
         return None
