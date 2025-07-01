@@ -122,29 +122,33 @@ class KubescapeTool(ToolGateway):
             return [], None
 
     def _install_tool(self, file, url):
+        # Sanitize filename to prevent path traversal
+        safe_filename = os.path.basename(file)
         installed = subprocess.run(
-            ["which", f"./{file}"],
+            ["which", f"./{safe_filename}"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
         if installed.returncode == 1:
             try:
-                self._download_tool(file, url)
-                subprocess.run(["chmod", "+x", f"./{file}"])
+                self._download_tool(safe_filename, url)
+                subprocess.run(["chmod", "+x", f"./{safe_filename}"])
 
             except Exception as e:
                 logger.error(f"Error installing Kubescape: {e}")
 
     def _install_tool_windows(self, file, url):
+        # Sanitize filename to prevent path traversal
+        safe_filename = os.path.basename(file)
         try:
             subprocess.run(
-                [f"./{file}", "version"],
+                [f"./{safe_filename}", "version"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
         except:
             try:
-                self._download_tool(file, url)
+                self._download_tool(safe_filename, url)
 
             except Exception as e:
                 logger.error(f"Error installing Kubescape: {e}")
@@ -160,9 +164,30 @@ class KubescapeTool(ToolGateway):
             logger.error(f"Error downloading Kubescape: {e}")
 
     def _execute_kubescape(self, folders_to_scan, prefix):
+        sanitized_folders = []
+        for folder in folders_to_scan:
+            # Sanitize each folder to prevent path traversal or command injection.
+            # os.path.normpath will help resolve any redundant separators or `.` parts.
+            # We also check if the path is absolute, and ensure it's within the current working directory.
+            safe_folder = os.path.normpath(folder)
+            if os.path.isabs(safe_folder):
+                if not safe_folder.startswith(os.getcwd()):
+                    logger.warning(f"Skipping folder outside of workspace: {folder}")
+                    continue
+            
+            if safe_folder.startswith(('..', '/')):
+                 logger.warning(f"Skipping potentially malicious folder path: {folder}")
+                 continue
+
+            sanitized_folders.append(safe_folder)
+
+        if not sanitized_folders:
+            logger.warning("No valid folders to scan after sanitization.")
+            return
+
         command = (
             [prefix, "scan"]
-            + folders_to_scan
+            + sanitized_folders
             + [
                 "--format",
                 "json",
