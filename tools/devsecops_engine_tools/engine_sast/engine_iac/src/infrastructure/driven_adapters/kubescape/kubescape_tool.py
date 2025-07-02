@@ -27,6 +27,11 @@ class KubescapeTool(ToolGateway):
             os_platform = platform.system()
             base_url = f"https://github.com/kubescape/kubescape/releases/download/v{kubescape_version}/"
             command_prefix = self._select_operative_system(os_platform, base_url)
+           
+            if not command_prefix:
+                logger.error("Could not determine command prefix for Kubescape. Aborting scan.")
+                return [], None
+           
             self._execute_kubescape(folders_to_scan, command_prefix)
 
             json_name = "results_kubescape.json"
@@ -48,8 +53,9 @@ class KubescapeTool(ToolGateway):
             return [], None
 
     def get_iac_context_from_results(self, path_file_results):
-        # Sanitize the file path to prevent path traversal attacks
-        safe_path = os.path.basename(path_file_results)
+        safe_path = self._get_safe_path(path_file_results)
+        if not safe_path:
+            return
         
         with open(safe_path, "r") as file:
             data = json.load(file)
@@ -99,6 +105,30 @@ class KubescapeTool(ToolGateway):
             print(json.dumps({"iac_context": [obj.__dict__ for obj in context_iac_list]}, indent=4))
             print("===== END CONTEXT OUTPUT =====")
 
+    def _get_safe_path(self, filename):
+        """
+        Resolves a filename to an absolute path and ensures it is within the current working directory.
+        This prevents path traversal attacks.
+        """
+        if not filename or not isinstance(filename, str):
+            logger.error("Invalid filename provided for sanitization.")
+            return None
+
+        # Prevent null byte injection
+        if '\x00' in filename:
+            logger.error("Filename contains null bytes.")
+            return None
+
+        # Get the absolute path of the intended file
+        abs_path = os.path.abspath(os.path.join(os.getcwd(), os.path.basename(filename)))
+
+        # Verify the path is within the current working directory
+        if os.path.commonpath([abs_path, os.getcwd()]) != os.getcwd():
+            logger.error(f"Path traversal attempt detected and blocked for: {filename}")
+            return None
+
+        return abs_path
+
     def _select_operative_system(self, os_platform, base_url):
         if os_platform == "Linux":
             distro_name = distro.name()
@@ -122,8 +152,10 @@ class KubescapeTool(ToolGateway):
             return [], None
 
     def _install_tool(self, file, url):
-        # Sanitize filename to prevent path traversal
-        safe_filename = os.path.basename(file)
+        safe_path = self._get_safe_path(file)
+        if not safe_path:
+            return
+        
         installed = subprocess.run(
             ["which", f"./{safe_filename}"],
             stdout=subprocess.PIPE,
@@ -138,8 +170,10 @@ class KubescapeTool(ToolGateway):
                 logger.error(f"Error installing Kubescape: {e}")
 
     def _install_tool_windows(self, file, url):
-        # Sanitize filename to prevent path traversal
-        safe_filename = os.path.basename(file)
+        safe_path = self._get_safe_path(file)
+        if not safe_path:
+            return
+        
         try:
             subprocess.run(
                 [f"./{safe_filename}", "version"],
@@ -153,12 +187,12 @@ class KubescapeTool(ToolGateway):
             except Exception as e:
                 logger.error(f"Error installing Kubescape: {e}")
 
-    def _download_tool(self, file, url):
+    def _download_tool(self, file_path, url):
         try:
-            # Sanitize filename to prevent path traversal
-            safe_filename = os.path.basename(file)
             response = requests.get(url, allow_redirects=True)
-            with open(safe_filename, "wb") as binary_file:
+            response.raise_for_status()
+
+            with open(file_path, "wb") as binary_file:
                 binary_file.write(response.content)
         except Exception as e:
             logger.error(f"Error downloading Kubescape: {e}")
@@ -203,14 +237,12 @@ class KubescapeTool(ToolGateway):
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during Kubescape execution: {e}")
 
-    def _load_json(self, json_name):
+    def _load_json(self, json_path):
         try:
-            # Sanitize filename to prevent path traversal
-            safe_json_name = os.path.basename(json_name)
-            with open(safe_json_name) as file:
+            with open(json_path) as file:
                 return json.load(file)
         except FileNotFoundError:
-            logger.error(f"The file {safe_json_name} does not exist.")
+            logger.error(f"The file {json_path} does not exist.")
         except json.JSONDecodeError:
             logger.error("The JSON result is empty.")
         return None
