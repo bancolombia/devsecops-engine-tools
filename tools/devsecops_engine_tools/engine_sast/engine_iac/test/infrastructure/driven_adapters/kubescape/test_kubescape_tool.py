@@ -42,7 +42,8 @@ class TestKubescapeTool(unittest.TestCase):
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
     @patch.object(KubescapeTool, "_download_tool")
-    def test_install_tool_aleady_installed(self, mock_download_tool, mock_logger, mock_subprocess_run):
+    @patch.object(KubescapeTool, "_get_safe_path", return_value="testfile")
+    def test_install_tool_aleady_installed(self,mock_get_safe_path, mock_download_tool, mock_logger, mock_subprocess_run):
         mock_installed = MagicMock()
         mock_installed.returncode = 0
         mock_subprocess_run.return_value = mock_installed
@@ -65,7 +66,8 @@ class TestKubescapeTool(unittest.TestCase):
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
     @patch.object(KubescapeTool, "_download_tool")
-    def test_install_tool_not_installed(self, mock_download_tool, mock_logger, mock_subprocess_run):
+    @patch.object(KubescapeTool, "_get_safe_path", return_value="testfile")
+    def test_install_tool_not_installed(self,mock_get_safe_path, mock_download_tool, mock_logger, mock_subprocess_run):
         mock_installed = MagicMock()
         mock_installed.returncode = 1
         mock_subprocess_run.side_effect = [mock_installed, MagicMock()]
@@ -91,7 +93,8 @@ class TestKubescapeTool(unittest.TestCase):
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
     @patch.object(KubescapeTool, "_download_tool")
-    def test_install_tool_exception(self, mock_download_tool, mock_logger, mock_subprocess_run):
+    @patch.object(KubescapeTool, "_get_safe_path", return_value="testfile")
+    def test_install_tool_exception(self, mock_get_safe_path,mock_download_tool, mock_logger, mock_subprocess_run):
         mock_installed = MagicMock()
         mock_installed.returncode = 1
         mock_subprocess_run.side_effect = [mock_installed, MagicMock()]
@@ -116,7 +119,8 @@ class TestKubescapeTool(unittest.TestCase):
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
     @patch.object(KubescapeTool, "_download_tool")
-    def test_install_tool_windows_already_installed(self, mock_download_tool, mock_logger, mock_subprocess_run):
+    @patch.object(KubescapeTool, "_get_safe_path", return_value="testfile")
+    def test_install_tool_windows_already_installed(self,mock_get_safe_path, mock_download_tool, mock_logger, mock_subprocess_run):
         mock_installed = MagicMock()
         mock_subprocess_run.return_value = mock_installed
 
@@ -138,7 +142,8 @@ class TestKubescapeTool(unittest.TestCase):
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run", side_effect=Exception("Test exception"))
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
     @patch.object(KubescapeTool, "_download_tool")
-    def test_install_tool_windows_not_installed(self, mock_download_tool, mock_logger, mock_subprocess_run):
+    @patch.object(KubescapeTool, "_get_safe_path", return_value="testfile")
+    def test_install_tool_windows_not_installed(self,mock_get_safe_path, mock_download_tool, mock_logger, mock_subprocess_run):
         mock_download_tool.return_value = None
 
         file = "testfile"
@@ -159,7 +164,8 @@ class TestKubescapeTool(unittest.TestCase):
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run", side_effect=Exception("Test exception"))
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
     @patch.object(KubescapeTool, "_download_tool", side_effect=Exception("Download exception"))
-    def test_install_tool_windows_download_exception(self, mock_download_tool, mock_logger, mock_subprocess_run):
+    @patch.object(KubescapeTool, "_get_safe_path", return_value="testfile")
+    def test_install_tool_windows_download_exception(self, mock_get_safe_path,mock_download_tool, mock_logger, mock_subprocess_run):
 
         file = "testfile"
         url = "http://example.com/test"

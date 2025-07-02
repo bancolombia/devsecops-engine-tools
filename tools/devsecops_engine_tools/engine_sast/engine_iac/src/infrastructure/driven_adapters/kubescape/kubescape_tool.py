@@ -157,14 +157,14 @@ class KubescapeTool(ToolGateway):
             return
         
         installed = subprocess.run(
-            ["which", f"./{safe_filename}"],
+            ["which", f"./{safe_path }"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
         if installed.returncode == 1:
             try:
-                self._download_tool(safe_filename, url)
-                subprocess.run(["chmod", "+x", f"./{safe_filename}"])
+                self._download_tool(safe_path , url)
+                subprocess.run(["chmod", "+x", f"./{safe_path }"])
 
             except Exception as e:
                 logger.error(f"Error installing Kubescape: {e}")
@@ -176,13 +176,13 @@ class KubescapeTool(ToolGateway):
         
         try:
             subprocess.run(
-                [f"./{safe_filename}", "version"],
+                [f"./{safe_path }", "version"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
         except:
             try:
-                self._download_tool(safe_filename, url)
+                self._download_tool(safe_path , url)
 
             except Exception as e:
                 logger.error(f"Error installing Kubescape: {e}")
