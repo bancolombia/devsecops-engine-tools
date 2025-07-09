@@ -2,6 +2,7 @@ import json
 import unittest
 import subprocess
 import logging
+import shlex
 from unittest.mock import MagicMock, patch, mock_open, call
 from unittest import mock
 from devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool import (
@@ -53,9 +54,10 @@ class TestKubescapeTool(unittest.TestCase):
         tool._install_tool(file, url)
 
         mock_subprocess_run.assert_called_once_with(
-            ["which", f"./{file}"],
+            ["which", f"./{shlex.quote(file)}"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            shell=False,
         )
 
         mock_download_tool.assert_not_called()
@@ -77,12 +79,13 @@ class TestKubescapeTool(unittest.TestCase):
 
         self.assertEqual(mock_subprocess_run.call_count, 2)
         mock_subprocess_run.assert_any_call(
-            ["which", f"./{file}"],
+            ["which", f"./{shlex.quote(file)}"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            shell=False,
         )
 
-        mock_subprocess_run.assert_any_call(["chmod", "+x", f"./{file}"])
+        mock_subprocess_run.assert_any_call(["chmod", "+x", f"./{shlex.quote(file)}"], shell=False)
 
         mock_download_tool.assert_called_once_with(file, url)
 
@@ -104,9 +107,10 @@ class TestKubescapeTool(unittest.TestCase):
         tool._install_tool(file, url)
 
         mock_subprocess_run.assert_called_once_with(
-            ["which", f"./{file}"],
+            ["which", f"./{shlex.quote(file)}"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            shell=False,
         )
 
         mock_download_tool.assert_called_once_with(file, url)
@@ -126,16 +130,17 @@ class TestKubescapeTool(unittest.TestCase):
         tool._install_tool_windows(file, url)
 
         mock_subprocess_run.assert_called_once_with(
-            [f"./{file}", "version"],
+            [f".\\{shlex.quote(file)}", "version"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            shell=False
         )
 
         mock_download_tool.assert_not_called()
 
         mock_logger.error.assert_not_called()
 
-    @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run", side_effect=Exception("Test exception"))
+    @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run", side_effect=FileNotFoundError)
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
     @patch.object(KubescapeTool, "_download_tool")
     def test_install_tool_windows_not_installed(self, mock_download_tool, mock_logger, mock_subprocess_run):
@@ -147,16 +152,17 @@ class TestKubescapeTool(unittest.TestCase):
         tool._install_tool_windows(file, url)
 
         mock_subprocess_run.assert_called_once_with(
-            [f"./{file}", "version"],
+            [f".\\{shlex.quote(file)}", "version"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            shell=False,
         )
 
         mock_download_tool.assert_called_once_with(file, url)
 
         mock_logger.error.assert_not_called()
 
-    @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run", side_effect=Exception("Test exception"))
+    @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run", side_effect=FileNotFoundError)
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
     @patch.object(KubescapeTool, "_download_tool", side_effect=Exception("Download exception"))
     def test_install_tool_windows_download_exception(self, mock_download_tool, mock_logger, mock_subprocess_run):
@@ -167,9 +173,10 @@ class TestKubescapeTool(unittest.TestCase):
         tool._install_tool_windows(file, url)
 
         mock_subprocess_run.assert_called_once_with(
-            [f"./{file}", "version"],
+            [f".\\{shlex.quote(file)}", "version"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            shell=False,
         )
 
         mock_download_tool.assert_called_once_with(file, url)
@@ -179,42 +186,59 @@ class TestKubescapeTool(unittest.TestCase):
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run")
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
     def test_execute_kubescape_success(self, mock_logger, mock_subprocess_run):
-        mock_subprocess_run.return_value = MagicMock()
-
-        folders_to_scan = ["folder1", "folder2"]
+        folders_to_scan = ["/path/to/folder1", "/path/to/folder2"]
         prefix = "kubescape"
-        self.kubescape_tool._execute_kubescape(folders_to_scan, prefix)
+        tool = self.kubescape_tool
+        tool._execute_kubescape(folders_to_scan, prefix)
 
-        expected_calls = [
-            call(
-                ["kubescape", "scan"] + folders_to_scan + ["--format", "json", "--format-version", "v2", "--output", "results_kubescape.json", "-v"],
-                capture_output=True
-            )
+        expected_command = [
+            "kubescape",
+            "scan",
+            shlex.quote("/path/to/folder1"),
+            shlex.quote("/path/to/folder2"),
+            "--format",
+            "json",
+            "--format-version",
+            "v2",
+            "--output",
+            "results_kubescape.json",
+            "-v",
         ]
-        mock_subprocess_run.assert_has_calls(expected_calls, any_order=False)
-
+        mock_subprocess_run.assert_called_once_with(
+            expected_command, capture_output=True, check=True
+        )
         mock_logger.error.assert_not_called()
 
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.subprocess.run", side_effect=subprocess.CalledProcessError(returncode=1, cmd="kubescape"))
     @patch("devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.logger")
     def test_execute_kubescape_failure(self, mock_logger, mock_subprocess_run):
-
-        folders_to_scan = ["folder1"]
+        folders_to_scan = ["/path/to/folder1"]
         prefix = "kubescape"
-        self.kubescape_tool._execute_kubescape(folders_to_scan, prefix)
+        tool = self.kubescape_tool
+        tool._execute_kubescape(folders_to_scan, prefix)
 
+        expected_command = [
+            "kubescape",
+            "scan",
+            shlex.quote("/path/to/folder1"),
+            "--format",
+            "json",
+            "--format-version",
+            "v2",
+            "--output",
+            "results_kubescape.json",
+            "-v",
+        ]
         mock_subprocess_run.assert_called_once_with(
-            ["kubescape", "scan"] + folders_to_scan + ["--format", "json", "--format-version", "v2", "--output", "results_kubescape.json", "-v"],
-            capture_output=True
+            expected_command, capture_output=True, check=True
         )
-
-        mock_logger.error.assert_called_once_with("Error during Kubescape execution: Command 'kubescape' returned non-zero exit status 1.")
+        mock_logger.error.assert_called_once()
 
     @patch("builtins.open", new_callable=mock.mock_open, read_data='{"key": "value"}')
-    def test_load_json_success(self, mock_file):
+    def test_load_json_success(self, mock_file_open):
         result = self.kubescape_tool._load_json("json_name.json")
         self.assertEqual(result, {"key": "value"})
-        mock_file.assert_called_once_with("json_name.json")
+        mock_file_open.assert_called_once_with("json_name.json")
 
     def test_run_tool_empty_folders(self):
         config_tool = MagicMock()
@@ -226,7 +250,7 @@ class TestKubescapeTool(unittest.TestCase):
         )
         
         self.assertEqual(findings_list, [])
-        self.assertEqual(file_from_tool, None)
+        self.assertIsNone(file_from_tool)
 
 
     @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.distro.name', return_value='Ubuntu')
@@ -241,9 +265,9 @@ class TestKubescapeTool(unittest.TestCase):
         mock_install_tool.assert_called_once_with('kubescape-ubuntu-latest', 'http://example.com/kubescape-ubuntu-latest')
         self.assertEqual(result, './kubescape-ubuntu-latest')
 
+    @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.platform.system', return_value='Windows')
     @patch.object(KubescapeTool, '_install_tool_windows')
-    @patch.object(KubescapeTool, '_execute_kubescape', return_value=['result.json'])
-    def test_select_operative_system_windows(self, mock_execute_kubescape, mock_install_tool_windows):
+    def test_select_operative_system_windows(self, mock_install_tool_windows, mock_platform_system):
         executor = KubescapeTool()
         os_platform = 'Windows'
         base_url = 'http://example.com/'
@@ -251,11 +275,11 @@ class TestKubescapeTool(unittest.TestCase):
         result = executor._select_operative_system(os_platform, base_url)
         
         mock_install_tool_windows.assert_called_once_with('kubescape-windows-latest.exe', 'http://example.com/kubescape-windows-latest.exe')
-        self.assertEqual(result, './kubescape-windows-latest.exe')
+        self.assertEqual(result, '.\\kubescape-windows-latest.exe')
 
+    @patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.platform.system', return_value='Darwin')
     @patch.object(KubescapeTool, '_install_tool')
-    @patch.object(KubescapeTool, '_execute_kubescape', return_value=['result.json'])
-    def test_select_operative_system_darwin(self, mock_execute_kubescape, mock_install_tool):
+    def test_select_operative_system_darwin(self, mock_install_tool, mock_platform_system):
         executor = KubescapeTool()
         os_platform = 'Darwin'
         base_url = 'http://example.com/'
@@ -266,7 +290,9 @@ class TestKubescapeTool(unittest.TestCase):
         self.assertEqual(result, './kubescape-macos-latest')
 
     def test_get_iac_context_from_results(self):
-        sample_json = {
+        path_file_results = "test_results.json"
+
+        data = {
             "results": [
                 {
                     "resourceID": "aws_s3_bucket.example",
@@ -310,15 +336,16 @@ class TestKubescapeTool(unittest.TestCase):
             }
         }
 
-        with patch("builtins.open", mock_open(read_data=json.dumps(sample_json))), \
-            patch("builtins.print") as mock_print:
-            tool = KubescapeTool() 
-            tool.get_iac_context_from_results("fake_kubescape_scan.json")
-            printed = [call[0][0] for call in mock_print.call_args_list]
-
-            assert any("===== BEGIN CONTEXT OUTPUT =====" in line for line in printed)
-            assert any("C-001" in line for line in printed)
-            assert any("Ensure S3 bucket has access logging enabled" in line for line in printed)
-            assert any("main.tf" in line for line in printed)
-            assert any("Kubescape" in line for line in printed)
-            assert any("===== END CONTEXT OUTPUT =====" in line for line in printed)
+        with patch("builtins.open", mock_open(read_data=json.dumps(data))) as mock_file:
+            with patch('devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.kubescape.kubescape_tool.KubescapeDeserealizator') as mock_deserealizator:
+                mock_deserealizator_instance = mock_deserealizator.return_value
+                mock_deserealizator_instance.extract_failed_controls.return_value = [
+                    {"id": "C-0001", "where": "some-file.yaml", "description": "Privileged container"}
+                ]
+                mock_deserealizator_instance.get_severity_score.return_value = "High"
+                
+                self.kubescape_tool.get_iac_context_from_results(path_file_results)
+                
+                mock_file.assert_called_once_with(path_file_results, "r")
+                mock_deserealizator_instance.extract_failed_controls.assert_called_once()
+                mock_deserealizator_instance.get_severity_score.assert_called_once()

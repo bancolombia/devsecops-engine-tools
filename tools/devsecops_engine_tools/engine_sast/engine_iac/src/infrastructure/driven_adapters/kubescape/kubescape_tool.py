@@ -4,6 +4,7 @@ import platform
 import requests
 import distro
 import os
+import shlex
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.context_iac import ContextIac
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
@@ -114,7 +115,7 @@ class KubescapeTool(ToolGateway):
         elif os_platform == "Windows":
             file = "kubescape-windows-latest.exe"
             self._install_tool_windows(file, base_url + file)
-            return f"./{file}"
+            return f".\\{file}"
         elif os_platform == "Darwin":
             file = "kubescape-macos-latest"
             self._install_tool(file, base_url + file)
@@ -124,27 +125,31 @@ class KubescapeTool(ToolGateway):
             return [], None
 
     def _install_tool(self, file, url):
+        safe_file = shlex.quote(file)
         installed = subprocess.run(
-            ["which", f"./{file}"],
+            ["which", f"./{safe_file}"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            shell=False,
         )
         if installed.returncode == 1:
             try:
                 self._download_tool(file, url)
-                subprocess.run(["chmod", "+x", f"./{file}"])
+                subprocess.run(["chmod", "+x", f"./{safe_file}"], shell=False)
 
             except Exception as e:
                 logger.error(f"Error installing Kubescape: {e}")
 
     def _install_tool_windows(self, file, url):
+        safe_file = shlex.quote(file)
         try:
             subprocess.run(
-                [f"./{file}", "version"],
+                [f".\\{safe_file}", "version"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                shell=False,
             )
-        except:
+        except FileNotFoundError:
             try:
                 self._download_tool(file, url)
 
@@ -160,9 +165,10 @@ class KubescapeTool(ToolGateway):
             logger.error(f"Error downloading Kubescape: {e}")
 
     def _execute_kubescape(self, folders_to_scan, prefix):
+        safe_folders = [shlex.quote(folder) for folder in folders_to_scan]
         command = (
             [prefix, "scan"]
-            + folders_to_scan
+            + safe_folders
             + [
                 "--format",
                 "json",
@@ -174,7 +180,7 @@ class KubescapeTool(ToolGateway):
             ]
         )
         try:
-            subprocess.run(command, capture_output=True)
+            subprocess.run(command, capture_output=True, check=True)
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during Kubescape execution: {e}")
 
