@@ -4,6 +4,8 @@ import platform
 import requests
 import distro
 import os
+import shlex
+
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.context_iac import ContextIac
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
@@ -157,14 +159,14 @@ class KubescapeTool(ToolGateway):
             return
         
         installed = subprocess.run(
-            ["which", f"./{safe_path }"],
+            ["which", safe_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
         if installed.returncode == 1:
             try:
                 self._download_tool(safe_path , url)
-                subprocess.run(["chmod", "+x", f"./{safe_path }"])
+                subprocess.run(["chmod", "+x", safe_path], check=True)
 
             except Exception as e:
                 logger.error(f"Error installing Kubescape: {e}")
@@ -220,9 +222,7 @@ class KubescapeTool(ToolGateway):
             return
 
         command = (
-            [prefix, "scan"]
-            + sanitized_folders
-            + [
+            [prefix, "scan", *sanitized_folders,
                 "--format",
                 "json",
                 "--format-version",
@@ -233,7 +233,7 @@ class KubescapeTool(ToolGateway):
             ]
         )
         try:
-            subprocess.run(command, capture_output=True)
+            subprocess.run(command, capture_output=True,check=True)
         except subprocess.CalledProcessError as e:
             logger.error(f"Error during Kubescape execution: {e}")
 

@@ -54,7 +54,7 @@ class TestKubescapeTool(unittest.TestCase):
         tool._install_tool(file, url)
 
         mock_subprocess_run.assert_called_once_with(
-            ["which", f"./{file}"],
+            ["which", file],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -79,12 +79,12 @@ class TestKubescapeTool(unittest.TestCase):
 
         self.assertEqual(mock_subprocess_run.call_count, 2)
         mock_subprocess_run.assert_any_call(
-            ["which", f"./{file}"],
+            ["which", file],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
 
-        mock_subprocess_run.assert_any_call(["chmod", "+x", f"./{file}"])
+        mock_subprocess_run.assert_any_call(["chmod", "+x", file], check=True)
 
         mock_download_tool.assert_called_once_with(file, url)
 
@@ -107,7 +107,7 @@ class TestKubescapeTool(unittest.TestCase):
         tool._install_tool(file, url)
 
         mock_subprocess_run.assert_called_once_with(
-            ["which", f"./{file}"],
+            ["which", file],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -194,7 +194,8 @@ class TestKubescapeTool(unittest.TestCase):
         expected_calls = [
             call(
                 ["kubescape", "scan"] + folders_to_scan + ["--format", "json", "--format-version", "v2", "--output", "results_kubescape.json", "-v"],
-                capture_output=True
+                capture_output=True,
+                check=True
             )
         ]
         mock_subprocess_run.assert_has_calls(expected_calls, any_order=False)
@@ -211,7 +212,8 @@ class TestKubescapeTool(unittest.TestCase):
 
         mock_subprocess_run.assert_called_once_with(
             ["kubescape", "scan"] + folders_to_scan + ["--format", "json", "--format-version", "v2", "--output", "results_kubescape.json", "-v"],
-            capture_output=True
+            capture_output=True,
+            check=True
         )
 
         mock_logger.error.assert_called_once_with("Error during Kubescape execution: Command 'kubescape' returned non-zero exit status 1.")
