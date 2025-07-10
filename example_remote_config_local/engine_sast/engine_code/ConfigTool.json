@@ -7,7 +7,7 @@
     "THRESHOLD": {
         "VULNERABILITY": {
             "Critical": 99,
-            "High": 99,
+            "High": 999,
             "Medium": 99,
             "Low": 99
         },
