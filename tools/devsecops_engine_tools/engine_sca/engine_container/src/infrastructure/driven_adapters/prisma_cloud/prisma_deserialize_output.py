@@ -50,7 +50,7 @@ class PrismaDeserealizator(DeseralizatorGateway):
                     + ":"
                     + vul.get("packageVersion", ""),
                     description=vul.get("description", "")[:150],
-                    severity=SEVERITY_MAP.get(vul.get("severity", ""), ""),
+                    severity=self.SEVERITY_MAP.get(vul.get("severity", ""), ""),
                     identification_date=datetime.strptime(
                         vul.get("discoveredDate", ""), "%Y-%m-%dT%H:%M:%S%z"
                     ),
