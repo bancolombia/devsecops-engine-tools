@@ -47,6 +47,7 @@ jobs:
         run: |
           mkdir -p bin
           go build -o ./bin/kics cmd/console/main.go
+          ls -la
           
       - name: Move KICS binary to custom folder
         run: |
