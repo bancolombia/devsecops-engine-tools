@@ -38,11 +38,16 @@ jobs:
           cd /tmp/kics
           git checkout tags/v2.1.11
 
-      - name: Build KICS
+      - name: Run go mod vendor
+        working-directory: /tmp/kics
+        run: go mod vendor
+        
+      - name: Build KICS binary
+        working-directory: /tmp/kics
         run: |
-          cd /tmp/kics
-          make build
-
+          mkdir -p bin
+          go build -o ./bin/kics cmd/console/main.go
+          
       - name: Move KICS binary to custom folder
         run: |
           mkdir -p ./tools/kics-bin
