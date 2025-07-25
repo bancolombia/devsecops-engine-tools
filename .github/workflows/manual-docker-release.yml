@@ -47,17 +47,25 @@ jobs:
         run: |
           mkdir -p bin
           go build -o ./bin/kics cmd/console/main.go
-          cd /bin
-          ls -la
-          cd /bih/kics
-          ls -la
-          
+          echo "Contenido de /tmp/kics/bin:"
+          ls -la /tmp/kics/bin
+
+      - name: Validate KICS
+        run: |
+          if [ ! -f /tmp/kics/bin/kics ]; then
+            echo "Error: el binario de KICS no fue generado"
+            exit 1
+          fi
+          file /tmp/kics/bin/kics
+          chmod +x /tmp/kics/bin/kics
+          /tmp/kics/bin/kics version || echo "KICS compilado, pero no ejecuta correctamente"
+
       - name: Move KICS binary to custom folder
         run: |
-          mkdir -p ./kics_binary
-          cp /tmp/kics/bin/kics ./kics_binary
-          cd /kics_binary
-          ls -la
+          mkdir -p ./kics_binary/kics-devsecops
+          cp /tmp/kics/bin/kics ./kics_binary/kics-devsecops/
+          ls -la ./kics_binary
+          ls -la ./kics_binary/kics-devsecops
           
       - name: Build and tag Docker image
         timeout-minutes: 3
