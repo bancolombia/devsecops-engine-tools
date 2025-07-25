@@ -47,12 +47,17 @@ jobs:
         run: |
           mkdir -p bin
           go build -o ./bin/kics cmd/console/main.go
+          cd /bin
+          ls -la
+          cd /bih/kics
           ls -la
           
       - name: Move KICS binary to custom folder
         run: |
-          mkdir -p ./tools/kics-bin
+          mkdir -p ./kics_binary
           cp /tmp/kics/bin/kics ./kics_binary
+          cd /kics_binary
+          ls -la
           
       - name: Build and tag Docker image
         timeout-minutes: 3
