@@ -76,9 +76,6 @@ class ContainerScaScan:
         if matching_image:
             image_name = matching_image.tags[0]
             result_file = image_name.replace("/", "_") + "_scan_result.json"
-            if image_name in self._get_images_already_scanned():
-                print(f"The image {image_name} has already been scanned previously.")
-                return image_scanned, base_image, sbom_components
             image_scanned, sbom_components = self.tool_run.run_tool_container_sca(
                 self.remote_config,
                 self.secret_tool,
@@ -89,7 +86,6 @@ class ContainerScaScan:
                 self.exclusions,
                 generate_sbom,
             )
-            self._set_image_scanned(image_name)
         else:
             print(f"'Not image found for {self.image_to_scan}'. Tool skipped.")
         return image_scanned, base_image, sbom_components
@@ -144,21 +140,3 @@ class ContainerScaScan:
             string: blacklist.
         """
         return self.tool_images.validate_black_list_base_image(base_image, black_list)
-
-    def _get_images_already_scanned(self):
-        """
-        Create images scanned file if it does not exist and get the images that have already been scanned.
-        """
-        scanned_images_file = os.path.join(os.getcwd(), "scanned_images.txt")
-        if not os.path.exists(scanned_images_file):
-            open(scanned_images_file, "w").close()
-        with open(scanned_images_file, "r") as file:
-            images_scanned = file.read().splitlines()
-        return images_scanned
-
-    def _set_image_scanned(self, result_file):
-        """
-        Write in scanned_images.txt the result file
-        """
-        with open("scanned_images.txt", "a") as file:
-            file.write(result_file + "\n")
