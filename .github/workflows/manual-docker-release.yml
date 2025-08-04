@@ -36,7 +36,9 @@ jobs:
         run: |
           git clone https://github.com/Checkmarx/kics.git /tmp/kics
           cd /tmp/kics
-          git checkout tags/${{ vars.KICS_VERSION }}
+          git checkout tags/$KICS_VERSION
+        env:
+          KICS_VERSION: ${{ vars.KICS_VERSION }}
 
       - name: Run go mod vendor
         working-directory: /tmp/kics
