@@ -38,7 +38,7 @@ jobs:
           cd /tmp/kics
           git checkout tags/$KICS_VERSION
         env:
-          KICS_VERSION: ${{ vars.KICS_VERSION }}
+          KICS_VERSION: ${{ vars.VAR_KICS_VERSION }}
 
       - name: Run go mod vendor
         working-directory: /tmp/kics
