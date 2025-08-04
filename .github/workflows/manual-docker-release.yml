@@ -36,7 +36,7 @@ jobs:
         run: |
           git clone https://github.com/Checkmarx/kics.git /tmp/kics
           cd /tmp/kics
-          git checkout tags/v2.1.11
+          git checkout tags/${{ vars.KICS_VERSION }}
 
       - name: Run go mod vendor
         working-directory: /tmp/kics
@@ -47,18 +47,16 @@ jobs:
         run: |
           mkdir -p bin
           go build -o ./bin/kics cmd/console/main.go
-          echo "Contenido de /tmp/kics/bin:"
-          ls -la /tmp/kics/bin
 
       - name: Validate KICS
         run: |
           if [ ! -f /tmp/kics/bin/kics ]; then
-            echo "Error: el binario de KICS no fue generado"
+            echo "Error: KICS binary was not generated"
             exit 1
           fi
           file /tmp/kics/bin/kics
           chmod +x /tmp/kics/bin/kics
-          /tmp/kics/bin/kics version || echo "KICS compilado, pero no ejecuta correctamente"
+          /tmp/kics/bin/kics version || echo "Error: KICS compiled, but does not run correctly"
 
       - name: Move KICS binary to custom folder
         run: |
