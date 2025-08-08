@@ -25,6 +25,7 @@ class ContainerScaScan:
         exclusions,
         pipeline_name,
         context,
+        platform_devops,
     ):
         self.tool_run = tool_run
         self.remote_config = remote_config
@@ -37,6 +38,7 @@ class ContainerScaScan:
         self.exclusions = exclusions
         self.pipeline_name = pipeline_name
         self.context = context
+        self.platform_devops = platform_devops
 
     def _is_compressed_file(self, image_to_scan):
         """Check if the input is a compressed file (tar, tar.gz, etc.)"""
@@ -101,7 +103,7 @@ class ContainerScaScan:
 
         result_file = image_name.replace("/", "_").replace(".", "_") + "_scan_result.json"
         
-        if not is_compressed_file and image_name in self._get_images_already_scanned():
+        if not is_compressed_file and image_name in self._get_images_already_scanned() and not self.platform_devops == "local":
             print(f"The image {image_name} has already been scanned previously.")
             return image_scanned, base_image, sbom_components
             

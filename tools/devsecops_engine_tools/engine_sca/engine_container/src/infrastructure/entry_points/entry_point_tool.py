@@ -50,6 +50,7 @@ def init_engine_sca_rm(
     branch = tool_remote.get_variable("branch_tag")
     stage = tool_remote.get_variable("stage")
     image_to_scan = dict_args["image_to_scan"]
+    platform_devops = dict_args.get("devops", "local")
     image_scanned = None
     base_image = None
     sbom_components = None
@@ -68,6 +69,7 @@ def init_engine_sca_rm(
             exclusions,
             pipeline_name,
             context=dict_args["context"],
+            platform_devops=platform_devops,
         )
         image_scanned, base_image, sbom_components = container_sca_scan.process()
         if image_scanned:

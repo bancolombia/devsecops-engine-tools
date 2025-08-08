@@ -45,6 +45,7 @@ def container_sca_scan(
         {"exclusions": "exclusions"},
         "pipeline_name",
         "context",
+        "azure",  
     )
 
 
