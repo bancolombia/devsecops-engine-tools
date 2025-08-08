@@ -35,7 +35,7 @@
         "VERSION": "8.21.1",
         "EXCLUDE_PATH": [".git"],
         "NUMBER_THREADS": 4,
-        "ALLOW_IGNORE_LEAKS": false,
+        "ALLOW_IGNORE_LEAKS": true,
         "ENABLE_CUSTOM_RULES" : false,
         "EXTERNAL_DIR_OWNER": "ExternalOrg",
         "EXTERNAL_DIR_REPOSITORY": "DevSecOps_Checks",

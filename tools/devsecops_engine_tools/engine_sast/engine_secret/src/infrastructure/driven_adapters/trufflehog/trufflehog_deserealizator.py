@@ -54,7 +54,7 @@ class SecretScanDeserealizator(DeseralizatorGateway):
         where_text = original_where.replace(path_remove, "")
         return where_text, raw
     
-    def get_secret_context_from_results(self,path_file_results:str):
+    def get_secret_context_from_results(self, path_file_results: str):
 
         context_secret_list = []
 
