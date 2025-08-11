@@ -98,34 +98,21 @@ class KicsTool(ToolGateway):
         with open(path_file_results, "r") as file:
             context_results_scan_list = json.load(file)
             context_iac_list = []
-            failed_checks = context_results_scan_list.get("results", {}).get(
-                "failed_checks", []
-            )
-            for check in failed_checks:
-                file_line_range = check.get("file_line_range", ["unknown", "unknown"])
-                start_line = (
-                    file_line_range[0] if len(file_line_range) > 0 else "unknown"
-                )
-                end_line = file_line_range[1] if len(file_line_range) > 1 else "unknown"
-                line_range_str = (
-                    f"{start_line}-{end_line}"
-                    if start_line != end_line
-                    else str(start_line)
-                )
-
-                context_iac = ContextIac(
-                    id=check.get("check_id", "unknown"),
-                    check_name=check.get("check_name", "unknown"),
-                    check_class=check.get("check_class", "unknown"),
-                    severity=check.get("severity").lower(),
-                    where=f"{check.get('repo_file_path', 'unknown')}: {check.get('resource', 'unknown')} (line {line_range_str})",
-                    resource=check.get("resource", "unknown"),
-                    description=check.get("check_name", "unknown"),
-                    module="engine_iac",
-                    tool="Checkov",
-                )
-
-                context_iac_list.append(context_iac)
+            
+            for query in context_results_scan_list.get("queries", []):
+                for file in query.get("files", []):
+                    context_iac = ContextIac(
+                        id = file.get("similarity_id", ""),
+                        check_name = query.get("query_name", ""),
+                        check_class = query.get("category", ""),
+                        severity = query.get("severity", ""),
+                        where = f"{file.get("file_name", "")} (line {file.get("line", "")}): expected value: {file.get("expected_value", "")}, actual value: {file.get("actual_value", "")}",
+                        resource = file.get("issue_type", "unknown"),
+                        description = query.get("description", ""),
+                        module="engine_iac",
+                        tool="Kics",
+                    )
+                    context_iac_list.append(context_iac)
 
             print("===== BEGIN CONTEXT OUTPUT =====")
             print(
