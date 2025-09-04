@@ -244,7 +244,7 @@ def get_inputs_from_cli(args):
         "engine_iac": ["checkov", "kics", "kubescape"],
         "engine_secret": ["trufflehog", "gitleaks"],
         "engine_container": ["prisma", "trivy"],
-        "engine_dependencies": ["xray", "dependency_check"],
+        "engine_dependencies": ["xray", "dependency_check", "trivy"],
         "engine_code": ["bearer", "kiuwan"],
         "engine_dast": ["nuclei"],
         "engine_risk": None,

@@ -83,9 +83,14 @@ For more information about structure remote config visit [Structure Remote Confi
     <td>Free</td>
   </tr>
   <tr>
+    <td rowspan="2">ENGINE_CODE</td>
     <td>ENGINE_CODE</td>
     <td><a href="https://docs.bearer.com/quickstart/">BEARER</a></td>
     <td>Free</td>
+  </tr>
+  <tr>
+    <td><a href="https://support.kiuwan.com/hc/en-us">KIUWAN</a></td>
+    <td>Paid</td>
   </tr>
 </table>
 

@@ -171,7 +171,7 @@ Configuration of the driven adapters in the main layer and management of on/off 
     },
     "ENGINE_CODE": {
         "ENABLED": true,
-        "TOOL": "BEARER"
+        "TOOL": "BEARER|KIUWAN"
     },
     "ENGINE_RISK": {
         "ENABLED": false
