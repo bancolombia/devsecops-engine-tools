@@ -63,9 +63,9 @@ class PrismaCloudManagerScan(ToolGateway):
             raise ValueError(f"Error downloading twistcli: {e}")
 
     def scan_image(
-        self, file_path, image_name, result_file, remoteconfig, prisma_key
+        self, file_path, image_name, result_file, remoteconfig, prisma_key, docker_address
     ):
-        command = (
+        command = [
             file_path,
             "images",
             "scan",
@@ -75,11 +75,18 @@ class PrismaCloudManagerScan(ToolGateway):
             self._split_prisma_token(prisma_key)[0],
             "--password",
             self._split_prisma_token(prisma_key)[1],
+        ]
+
+        if docker_address:
+            command.extend(["--docker-address", docker_address])
+        
+        command.extend([
             "--output-file",
             result_file,
             "--details",
             image_name,
-        )
+        ])
+
         try:
             subprocess.run(
                 command,
@@ -170,7 +177,7 @@ class PrismaCloudManagerScan(ToolGateway):
             raise ValueError("The string is not properly formatted. Make sure it contains a ':'.")
         
     def run_tool_container_sca(
-        self, remoteconfig, secret_tool, token_engine_container, image_name, result_file, base_image, exclusions, generate_sbom, is_compressed_file=False
+        self, remoteconfig, secret_tool, token_engine_container, image_name, result_file, base_image, exclusions, generate_sbom, docker_address, is_compressed_file=False
     ):
         if is_compressed_file:
             logger.warning("Prisma Cloud does not support compressed file scanning. Skipping.")
@@ -196,7 +203,8 @@ class PrismaCloudManagerScan(ToolGateway):
             image_name,
             result_file,
             remoteconfig,
-            prisma_key
+            prisma_key,
+            docker_address
         )
         if base_image:
             self._write_image_base(result_file, base_image, exclusions, remoteconfig)

@@ -129,12 +129,13 @@ def test_scan_image_success(mock_remoteconfig):
             "result.json",
             mock_remoteconfig,
             "prisma_access_key:some_secret_key",
+            "unix:///var/run/docker.sock"
         )
 
        
         assert result == "result.json"
         mock_run.assert_called_once_with(
-            (
+            [
                 "file_path",
                 "images",
                 "scan",
@@ -144,11 +145,13 @@ def test_scan_image_success(mock_remoteconfig):
                 "prisma_access_key",
                 "--password",
                 "some_secret_key",
+                "--docker-address",
+                "unix:///var/run/docker.sock",
                 "--output-file",
                 "result.json",
                 "--details",
                 "image_name"
-            ),
+            ],
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -176,6 +179,7 @@ def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image):
             "token_container",
             "image_name",
             "result.json" , None , {"exclusions": "all"},
+            "unix:///var/run/docker.sock",
             True,
         )
         
@@ -357,6 +361,7 @@ def test_run_tool_container_sca_compressed_file():
         base_image=None,
         exclusions={},
         generate_sbom=False,
+        docker_address="unix:///var/run/docker.sock",
         is_compressed_file=True
     )
     

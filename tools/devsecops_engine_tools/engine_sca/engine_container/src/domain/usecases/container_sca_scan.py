@@ -25,6 +25,7 @@ class ContainerScaScan:
         exclusions,
         pipeline_name,
         context,
+        docker_address,
     ):
         self.tool_run = tool_run
         self.remote_config = remote_config
@@ -37,6 +38,7 @@ class ContainerScaScan:
         self.exclusions = exclusions
         self.pipeline_name = pipeline_name
         self.context = context
+        self.docker_address = docker_address
 
     def _is_compressed_file(self, image_to_scan):
         """Check if the input is a compressed file (tar, tar.gz, etc.)"""
@@ -114,6 +116,7 @@ class ContainerScaScan:
             base_image,
             self.exclusions,
             generate_sbom,
+            self.docker_address,
             is_compressed_file,
         )
         

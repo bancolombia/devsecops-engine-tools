@@ -44,6 +44,7 @@ def container_sca_scan(
         "image_to_scan",
         {"exclusions": "exclusions"},
         "pipeline_name",
+        "docker_address",
         "context",
     )
 
@@ -128,6 +129,7 @@ def test_process_image_not_already_scanned(container_sca_scan):
         "base_image:latest",
         {'exclusions': 'exclusions'},
         False,
+        container_sca_scan.docker_address,
         False,
     )
     container_sca_scan._set_image_scanned.assert_called_once_with("my_image:1234")
@@ -240,6 +242,7 @@ def test_process_compressed_file_success(mock_exists, container_sca_scan):
         None,
         container_sca_scan.exclusions,
         False,
+        container_sca_scan.docker_address,
         True,  # is_compressed_file=True
     )
 

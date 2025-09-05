@@ -68,6 +68,7 @@ def init_engine_sca_rm(
             exclusions,
             pipeline_name,
             context=dict_args["context"],
+            docker_address=dict_args["docker_address"],
         )
         image_scanned, base_image, sbom_components = container_sca_scan.process()
         if image_scanned:
