@@ -10,7 +10,7 @@ requests_toolbelt==1.0.0
 pexpect==4.9.0
 PyGithub==2.8.1
 distro==1.9.0
-boto3==1.35.49
+boto3==1.40.56
 docker==7.1.0
 setuptools==78.1.1
 rich==14.1.0
