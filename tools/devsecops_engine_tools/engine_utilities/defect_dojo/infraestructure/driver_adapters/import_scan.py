@@ -62,13 +62,13 @@ class ImportScanRestConsumer:
         try:
             response = self.__session.post(url, headers=headers, data=multipart_data, verify=VERIFY_CERTIFICATE)
             if response.status_code != 201:
-                logger.error(f"Response status code {response.status_code}")
-                logger.error(f"Error {response.json()}")
+                logger.error(response.status_code)
+                logger.error(response.json())
                 raise ApiError(response.json())
             response = ImportScanRequest().from_dict(response.json())
         except Exception as e:
-            logger.error(f"from dict import Scan: {e} with data: {data}")
-            raise ApiError(e)
+            logger.error(f"from dict import Scan: {response.json()}")
+            raise ApiError(response.json())
         return response
 
     def import_scan(self, request: ImportScanRequest, files) -> ImportScanRequest:
@@ -119,12 +119,13 @@ class ImportScanRestConsumer:
                                            files=files,
                                            verify=VERIFY_CERTIFICATE)
             if response.status_code != 201:
-                logger.error(f"Response status code {response.status_code}")
-                logger.error(f"Error {response.json()}")
+                logger.error(data)
+                logger.error(response.json())
+                logger.error(response)
                 raise ApiError(response.json())
             logger.debug(f"Sucessfull {response}")
             response = ImportScanRequest.from_dict(response.json())
         except Exception as e:
-            logger.error(f"from dict import Scan: {e} with data: {data}")
+            logger.error(f"from dict import Scan: {response.json()}")
             raise ApiError(e)
         return response
