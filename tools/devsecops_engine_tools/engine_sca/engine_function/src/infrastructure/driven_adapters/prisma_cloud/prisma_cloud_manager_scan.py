@@ -50,13 +50,33 @@ class PrismaCloudManagerScan:
             remoteconfig,
             prisma_key,
         )
-        function_name = function_scan.get("results", [{}])[0].get("name", "function")
-        safe_name = function_name.replace("/", "_").replace(".", "_").replace(" ", "_")
-        result_file_name = f"{safe_name}_function_scan_result.json"
-        with open(result_file_name, "w", encoding="utf-8") as fp:
-            json.dump(function_scan, fp)
-        # Se expone la ruta del fichero para el core
-        self.dict_args["path_file_results"] = os.path.abspath(result_file_name)
+        if function_scan:
+            try:
+                function_name = "function"
+                if isinstance(function_scan, dict):
+                    results_list = function_scan.get("results")
+                    if results_list and isinstance(results_list, list):
+                        first_result = results_list[0] if results_list else {}
+                        if isinstance(first_result, dict):
+                            function_name = first_result.get("name", "function")
+                safe_name = (
+                    function_name.replace("/", "_")
+                    .replace(".", "_")
+                    .replace(" ", "_")
+                )
+                result_file_name = f"{safe_name}_function_scan_result.json"
+
+                # Escribir el JSON a disco
+                with open(result_file_name, "w", encoding="utf-8") as fp:
+                    json.dump(function_scan, fp)
+
+                # Exponer la ruta absoluta en dict_args para que el core la recoja
+                if isinstance(self.dict_args, dict):
+                    self.dict_args["path_file_results"] = os.path.abspath(result_file_name)
+
+            except Exception as exc:
+                # Registrar cualquier error durante la escritura, pero sin romper el flujo
+                logger.error(f"Failed to write function scan results to file: {exc}")
 
         return function_scan
 
