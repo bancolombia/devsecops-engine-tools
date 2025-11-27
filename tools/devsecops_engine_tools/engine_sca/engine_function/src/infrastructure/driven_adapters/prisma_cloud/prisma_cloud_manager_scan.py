@@ -2,6 +2,7 @@ import os
 import glob
 import subprocess
 import re
+import json
 from devsecops_engine_tools.engine_sca.engine_function.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -49,6 +50,13 @@ class PrismaCloudManagerScan:
             remoteconfig,
             prisma_key,
         )
+        function_name = function_scan.get("results", [{}])[0].get("name", "function")
+        safe_name = function_name.replace("/", "_").replace(".", "_").replace(" ", "_")
+        result_file_name = f"{safe_name}_function_scan_result.json"
+        with open(result_file_name, "w", encoding="utf-8") as fp:
+            json.dump(function_scan, fp)
+        # Se expone la ruta del fichero para el core
+        self.dict_args["path_file_results"] = os.path.abspath(result_file_name)
 
         return function_scan
 
