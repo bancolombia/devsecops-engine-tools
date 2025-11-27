@@ -28,7 +28,12 @@ def init_engine_core(
         args["remote_config_repo"], "/engine_core/ConfigTool.json", args["remote_config_branch"]
     )
     Printers.print_logo_tool(config_tool["BANNER"])
-    sbom_tool_gateway = sbom_tool_gateway.get(config_tool["SBOM_MANAGER"]["TOOL"].lower())
+
+    pipeline_name = devops_platform_gateway.get_variable("pipeline_name")
+    tool_override_pipelines = config_tool["SBOM_MANAGER"].get("TOOL_OVERRIDE_PIPELINES", {})
+    sbom_tool_name = tool_override_pipelines.get(pipeline_name, config_tool["SBOM_MANAGER"]["TOOL"])
+    
+    sbom_tool_gateway = sbom_tool_gateway.get(sbom_tool_name.lower())
 
     if config_tool[args["module"].upper()]["ENABLED"]:
         if args["module"] == "engine_risk":

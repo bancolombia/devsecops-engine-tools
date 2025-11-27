@@ -109,6 +109,10 @@ Configuration of the driven adapters in the main layer and management of on/off 
         "ENABLED": true,
         "TOOL": "SYFT|CDXGEN",
         "BRANCH_FILTER": [],
+        "TOOL_OVERRIDE_PIPELINES": {
+            "pipeline_exception_1": "SYFT",
+            "pipeline_exception_2": "CDXGEN"
+        },
         "SYFT": {
             "SYFT_VERSION": "1.17.0",
             "OUTPUT_FORMAT": "cyclonedx-json"

@@ -13,7 +13,7 @@ plugins {
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.4.0"
     // Gradle Sonar Plugin
-    id("org.sonarqube") version "7.0.1.6134"
+    id("org.sonarqube") version "7.1.0.6387"
 }
 
 group = properties("pluginGroup").get()

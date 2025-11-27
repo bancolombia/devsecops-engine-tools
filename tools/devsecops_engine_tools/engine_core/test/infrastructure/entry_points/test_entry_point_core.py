@@ -226,3 +226,71 @@ class TestEntryPointCore(unittest.TestCase):
             args,
             mock_scan_result,
         )
+
+    @mock.patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core.HandleScan"
+    )
+    @mock.patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.entry_points.entry_point_core.BreakBuild"
+    )
+    def test_init_engine_core_with_sbom_tool_override(
+        self,
+        mock_break_build,
+        mock_handle_scan
+    ):
+        """Test that TOOL_OVERRIDE_PIPELINES correctly overrides the default SBOM tool"""
+        # Set up mock config with tool override
+        mock_config_tool = {
+            "BANNER": "DevSecOps Engine Tools",
+            "WARNING_RELEASE": False,
+            "ENGINE_IAC": {"ENABLED": "true", "TOOL": "checkov"},
+            "SBOM_MANAGER": {
+                "TOOL": "CDXGEN",  # Default tool
+                "TOOL_OVERRIDE_PIPELINES": {
+                    "my_special_pipeline": "SYFT"  # Override for specific pipeline
+                }
+            }
+        }
+        mock_findings_list = []
+        mock_input_core = {}
+        mock_scan_result = {}
+
+        mock_devops_platform_gateway = mock.Mock()
+        mock_remote_config_source_gateway = mock.Mock()
+        mock_sbom_tool_gateway = mock.Mock()
+
+        # Configure mocks
+        mock_devops_platform_gateway.get_variable.return_value = "my_special_pipeline"
+        mock_remote_config_source_gateway.get_remote_config.return_value = mock_config_tool
+        mock_sbom_tool_gateway.get.return_value = mock.Mock()
+
+        mock_handle_scan.return_value.process.return_value = (
+            mock_findings_list,
+            mock_input_core,
+        )
+        mock_break_build.return_value.process.return_value = mock_scan_result
+
+        args = {
+            "remote_config_repo": "https://github.com/example/repo",
+            "module": "engine_iac",
+            "send_metrics": "false",
+            "remote_config_branch": ""
+        }
+
+        # Call the function
+        init_engine_core(
+            vulnerability_management_gateway=mock.Mock(),
+            secrets_manager_gateway=mock.Mock(),
+            devops_platform_gateway=mock_devops_platform_gateway,
+            remote_config_source_gateway=mock_remote_config_source_gateway,
+            print_table_gateway=mock.Mock(),
+            metrics_manager_gateway=mock.Mock(),
+            sbom_tool_gateway=mock_sbom_tool_gateway,
+            args=args,
+        )
+
+        # Assert that get_variable was called to get pipeline name
+        mock_devops_platform_gateway.get_variable.assert_called_with("pipeline_name")
+        
+        # Assert that the SBOM tool was selected with the override (SYFT instead of CDXGEN)
+        mock_sbom_tool_gateway.get.assert_called_once_with("syft")
