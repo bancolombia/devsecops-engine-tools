@@ -415,7 +415,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "product_type_name": "ProductType",
                     "product_name": "ProductName",
                     "product_description": "ProductDescription",
-                    "code_app": "ProductName",
+                    "code_app": "",
                     "scan_type": "Checkov Scan",
                     "file": "file_path",
                     "engagement_name": "engagement_name",

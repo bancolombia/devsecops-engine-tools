@@ -2,6 +2,7 @@ import zipfile
 import tarfile
 import platform
 import time
+from devsecops_engine_tools.engine_core.src.domain.model.level_priority import LevelPriority
 from devsecops_engine_tools.engine_utilities.github.infrastructure.github_api import (
     GithubApi,
 )
@@ -127,6 +128,7 @@ class Utils:
             threshold.compliance = LevelCompliance(new_threshold.get("COMPLIANCE")) if new_threshold.get("COMPLIANCE") else threshold.compliance
             threshold.cve = new_threshold.get("CVE") if new_threshold.get("CVE") is not None else threshold.cve
             threshold.name = new_threshold.get("reason", "Exclusion")
+            threshold.priority = LevelPriority(new_threshold.get("PRIORITY")) if new_threshold.get("PRIORITY") else threshold.priority
             return threshold
 
         threshold_pipeline = exclusions_data.get(pipeline_name, {}).get("THRESHOLD", {})

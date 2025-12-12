@@ -23,9 +23,10 @@ class TestPrinterRichTable:
                 tool="Tool 1",
             )
         ]
+        manager = {"MODEL": "severity", "CLASSIFICATION": ["critical", "high", "medium", "low"]}
         printer = PrinterRichTable()
 
-        result = printer.print_table_findings(finding_list)
+        result = printer.print_table_findings(finding_list, manager)
 
         assert result is None
 

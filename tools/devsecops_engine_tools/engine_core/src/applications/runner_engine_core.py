@@ -28,7 +28,9 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.syft.
 from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen import (
     CdxGen
 )
-
+from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.risk_score.risk_score import (
+    RiskScore,
+) 
 import sys
 import argparse
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
@@ -126,6 +128,7 @@ def get_inputs_from_cli(args):
             "engine_dependencies",
             "engine_container",
             "engine_risk",
+            "engine_function",
         ],
         type=str,
         required=True,
@@ -247,6 +250,7 @@ def get_inputs_from_cli(args):
         "engine_code": ["bearer", "kiuwan"],
         "engine_dast": ["nuclei"],
         "engine_risk": None,
+        "engine_function": ["prisma"],
     }
 
     args = parser.parse_args()
@@ -309,6 +313,7 @@ def application_core():
             "syft": Syft(),
             "cdxgen": CdxGen()
         }
+        risk_score_gateway = RiskScore()
 
         init_engine_core(
             vulnerability_management_gateway,
@@ -318,6 +323,7 @@ def application_core():
             printer_table_gateway,
             metrics_manager_gateway,
             sbom_tool_gateway,
+            risk_score_gateway,
             args,
         )
     except Exception as e:

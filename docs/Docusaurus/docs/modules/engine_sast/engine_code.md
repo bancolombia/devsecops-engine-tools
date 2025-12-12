@@ -28,6 +28,12 @@ The configuration file defines scan parameters, thresholds, and tool-specific se
     },
     "COMPLIANCE": {
       "Critical": 999
+    },
+    "PRIORITY": {
+        "Very Critical": 999,
+        "Critical": 999,
+        "High": 999,
+        "Medium Low": 999
     }
   },
   "TARGET_BRANCHES": [
@@ -73,6 +79,7 @@ The configuration file defines scan parameters, thresholds, and tool-specific se
 - **THRESHOLD**: Defines vulnerability and compliance thresholds for build breaking
   - **VULNERABILITY**: Thresholds for different severity levels (Critical, High, Medium, Low)
   - **COMPLIANCE**: Threshold for compliance issues (Critical)
+  - **PRIORITY**: Thresholds for different priority levels (Very Critical, Critical, High, Medium Low)
 - **TARGET_BRANCHES**: Array of branch names where scanning should be performed
 - **BEARER**: Bearer-specific configuration
   - **NUMBER_THREADS**: Number of threads for parallel processing

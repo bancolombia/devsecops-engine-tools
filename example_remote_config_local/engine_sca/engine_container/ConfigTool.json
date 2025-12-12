@@ -46,9 +46,9 @@
     "REGEX_CLEAN_END_PIPELINE_NAME": "",
     "THRESHOLD": {
         "VULNERABILITY": {
-            "Critical": 99,
-            "High": 99,
-            "Medium": 99,
+            "Critical": 999,
+            "High": 999,
+            "Medium": 999,
             "Low": 999
         },
         "QUALITY_VULNERABILITY_MANAGEMENT": {
@@ -60,13 +60,15 @@
                             "CodeApp1",
                             "CodeApp12"
                         ],
-                        "PROFILE": "STRONG"
+                        "PROFILE": "STRONG",
+                        "PROFILE_PRIORITY": "STRONG_PRIORITY"
                     }
                 },
                 {
                     "Product Type Name2": {
                         "APPS": "ALL",
-                        "PROFILE": "MODERATE"
+                        "PROFILE": "MODERATE",
+                        "PROFILE_PRIORITY": "MODERATE_PRIORITY"
                     }
                 }
             ],
@@ -81,10 +83,28 @@
                 "High": 3,
                 "Medium": 5,
                 "Low": 15
+            },
+            "STRONG_PRIORITY": {
+                "Very Critical": 0,
+                "Critical": 0,
+                "High": 5,
+                "Mediumv Low": 15
+            },
+            "MODERATE_PRIORITY": {
+                "Very Critical": 1,
+                "Critical": 3,
+                "High": 5,
+                "Mediumv Low": 15
             }
         },
         "COMPLIANCE": {
             "Critical": 1
+        },
+        "PRIORITY": {
+            "Very Critical": 1,
+            "Critical": 3,
+            "High": 5,
+            "Medium Low": 15
         }
     }
 }

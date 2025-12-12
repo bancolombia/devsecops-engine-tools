@@ -1,10 +1,8 @@
-import stat
 import requests
 import os
 import subprocess
 import base64
 import json
-import platform
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -13,55 +11,18 @@ from devsecops_engine_tools.engine_utilities.sbom.deserealizator import (
 )
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
+from devsecops_engine_tools.engine_utilities.twistcli_utils.twistcli_utils import download_twistcli
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class PrismaCloudManagerScan(ToolGateway):
-    def download_twistcli(
-        self,
-        file_path,
-        prisma_key,
-        prisma_console_url,
-        prisma_api_version,
-    ):
-        
-        machine = platform.machine()
-        system = platform.system()
-
-        base_url = f"{prisma_console_url}/api/{prisma_api_version}/util"
-
-        os_mapping = {
-            "Linux": "twistcli",
-            "Windows": "windows/twistcli.exe",
-            "Darwin": "osx/twistcli",
-        }
-
-        url = f"{base_url}/{os_mapping[system]}"
-
-        if system == "Linux" and machine == "aarch64":
-            url = f"{base_url}/arm64/twistcli"
-        elif system == "Darwin" and machine == "aarch64":
-            url = f"{base_url}/osx/arm64/twistcli"
-
-        credentials = base64.b64encode(
-            prisma_key.encode()
-        ).decode()
-        headers = {"Authorization": f"Basic {credentials}"}
-        try:
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-
-            with open(file_path, "wb") as file:
-                file.write(response.content)
-
-            os.chmod(file_path, stat.S_IRWXU)
-            logger.info(f"twistcli downloaded and saved to: {file_path}")
-            return 0
-
-        except Exception as e:
-            raise ValueError(f"Error downloading twistcli: {e}")
-
+    def download_twistcli(self, file_path, prisma_key, prisma_console_url, prisma_api_version) -> int:
+        """
+        Método de instancia separado (lo que usan los tests),
+        delega en el util compat 'basic' para no romper aserciones.
+        """
+        return download_twistcli(file_path, prisma_key, prisma_console_url, prisma_api_version)
     def scan_image(
         self, file_path, image_name, result_file, remoteconfig, prisma_key, docker_address
     ):
@@ -167,7 +128,6 @@ class PrismaCloudManagerScan(ToolGateway):
             return get_list_component(result_sbom, remoteconfig["PRISMA_CLOUD"]["SBOM_FORMAT"])
         except Exception as e:
             logger.error(f"Error generating SBOM: {e}")
-
 
     def _split_prisma_token(self, prisma_key):
         try:

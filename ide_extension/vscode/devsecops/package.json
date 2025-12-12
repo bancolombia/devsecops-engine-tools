@@ -79,7 +79,8 @@
           },
           "devsecops.azuredevops.releaseId": {
             "type": "string",
-            "description": "Azure Release Definition ID"
+            "description": "Azure Release Definition ID",
+            "title":"Definition ID"
           },
           "devsecops.azuredevops.environment": {
             "type": "string",

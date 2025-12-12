@@ -47,6 +47,12 @@ class TestIacScan(unittest.TestCase):
                     "Low": 30,
                 },
                 "COMPLIANCE": {"Critical": 4},
+                "PRIORITY": {
+                    "Very Critical": 1,
+                    "Critical": 3,
+                    "High": 5,
+                    "Medium Low": 15
+                }
             },
             "CHECKOV": {
                 "VERSION": "2.3.296",
@@ -106,6 +112,12 @@ class TestIacScan(unittest.TestCase):
                         "Low": 30,
                     },
                     "COMPLIANCE": {"Critical": 4},
+                    "PRIORITY": {
+                        "Very Critical": 1,
+                        "Critical": 3,
+                        "High": 5,
+                        "Medium Low": 15
+                    }
                 },
                 "CHECKOV": {
                     "VERSION": "2.3.296",

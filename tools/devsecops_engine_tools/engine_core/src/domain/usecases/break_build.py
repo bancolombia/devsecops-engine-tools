@@ -30,7 +30,7 @@ class BreakBuild:
         self.devops_platform_gateway = devops_platform_gateway
         self.printer_table_gateway = printer_table_gateway
 
-    def process(self, findings_list: "list[Finding]", input_core: InputCore, args: any, warning_release: bool):
+    def process(self, findings_list: "list[Finding]", input_core: InputCore, args: any, warning_release: bool, manager: any):
         sys.stdout.reconfigure(encoding="utf-8")
         devops_platform_gateway = self.devops_platform_gateway
         threshold = input_core.threshold_defined
@@ -54,13 +54,13 @@ class BreakBuild:
             vulnerabilities = [v for v in findings_without_exclusions if v.category == Category.VULNERABILITY]
             compliances = [v for v in findings_without_exclusions if v.category == Category.COMPLIANCE]
 
-            vulnerability_counts = self._count_severities(vulnerabilities)
-            compliance_counts = self._count_severities(compliances)
+            vulnerability_counts = self._count_severities(vulnerabilities, manager)
+            compliance_counts = self._count_severities_compliance(compliances)
 
-            self._handle_vulnerabilities(vulnerability_counts, vulnerabilities, threshold, warning_release, scan_result, args)
+            self._handle_vulnerabilities(vulnerability_counts, vulnerabilities, threshold, warning_release, scan_result, args, manager)
             self._handle_cve_policy(vulnerabilities, threshold)
-            self._handle_compliances(compliance_counts, compliances, threshold, warning_release, scan_result, args)
-            self._handle_exclusions(findings_excluded, exclusions)
+            self._handle_compliances(compliance_counts, compliances, threshold, warning_release, scan_result, args, manager)
+            self._handle_exclusions(findings_excluded, exclusions, manager)
         else:
             print(devops_platform_gateway.message("succeeded", "There are no findings"))
             print(devops_platform_gateway.result_pipeline("succeeded"))
@@ -84,9 +84,11 @@ class BreakBuild:
                                 **{
                                     "id": item.id,
                                     "where": "all",
+                                    "severity": item.severity,
                                     "create_date": date_initial.strftime("%d%m%Y"),
                                     "expired_date": date_final.strftime("%d%m%Y"),
                                     "reason": "New vulnerability in the industry",
+                                    "priority": item.priority.scale
                                 }
                             )
                         )
@@ -96,7 +98,7 @@ class BreakBuild:
             item for item in findings_list if any(
                 exclusion.id == item.id and
                 (exclusion.where in item.where or "all" in exclusion.where) and
-                exclusion.severity == item.severity
+                (exclusion.severity == item.severity or exclusion.priority == item.priority.scale)
                 for exclusion in exclusions
             )
         ]
@@ -112,49 +114,90 @@ class BreakBuild:
             "category": item.category.value,
         }
 
-    def _count_severities(self, findings_list):
+    def _count_severities(self, findings_list, manager):
+        counts = {
+            manager["CLASSIFICATION"][0]: 0,
+            manager["CLASSIFICATION"][1]: 0,
+            manager["CLASSIFICATION"][2]: 0,
+            manager["CLASSIFICATION"][3]: 0
+        }
+        model = manager.get("MODEL", "severity")
+        
+        for finding in findings_list:
+            if model == "priority":
+                if finding.priority and finding.priority.scale:
+                    severity = finding.priority.scale.lower()
+                else:
+                    continue
+            else:
+                severity = finding.severity.lower()
+            
+            if severity in counts:
+                counts[severity] += 1
+        return counts
+    
+    def _count_severities_compliance(self, findings_list):
         counts = {
             "critical": 0,
             "high": 0,
             "medium": 0,
             "low": 0
-        }
+        } 
         for finding in findings_list:
             severity = finding.severity.lower()
             if severity in counts:
                 counts[severity] += 1
         return counts
 
-    def _handle_vulnerabilities(self, counts, vulnerabilities_list, threshold, warning_release, scan_result, args):
+    def _handle_vulnerabilities(self, counts, vulnerabilities_list, threshold, warning_release, scan_result, args, manager):
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
         print()
 
-        total = sum(counts[severity] for severity in ["critical", "high", "medium", "low"])
+        classifications = manager["CLASSIFICATION"]
+        total = sum(counts[severity] for severity in classifications)
         if total == 0:
             print(devops_platform_gateway.message("succeeded", "There are no vulnerabilities"))
             print(devops_platform_gateway.result_pipeline("succeeded"))
             return
 
-        if (counts["critical"] >= threshold.vulnerability.critical or
-            counts["high"] >= threshold.vulnerability.high or
-            counts["medium"] >= threshold.vulnerability.medium or
-            counts["low"] >= threshold.vulnerability.low):
-            
+        model = manager.get("MODEL", "severity")
+
+        def get_threshold_value(idx):
+            if model == "severity":
+                return getattr(threshold.vulnerability, classifications[idx], 0)
+            else:
+                priority_map = {
+                    0: "very_critical_priority",
+                    1: "critical_priority",
+                    2: "high_priority",
+                    3: "medium_low_priority"
+                }
+                return getattr(threshold.priority, priority_map.get(idx, ""), 0)
+
+        threshold_exceeded = any(
+            counts.get(classifications[idx], 0) >= get_threshold_value(idx)
+            for idx in range(min(4, len(classifications)))
+        )
+
+        threshold_values = [get_threshold_value(idx) for idx in range(min(4, len(classifications)))]
+
+        if threshold_exceeded:
             print("Below are all vulnerabilities detected.")
             if vulnerabilities_list and args.get("tool", None) == "kiuwan":
                 print(f"Analysis url: {vulnerabilities_list[0].analysis_url}")
-            printer_table_gateway.print_table_findings(vulnerabilities_list)
+            printer_table_gateway.print_table_findings(vulnerabilities_list, manager)
             print(devops_platform_gateway.message(
                 "error",
-                "Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)".format(
-                    counts["critical"], counts["high"], counts["medium"], counts["low"],
-                    threshold.vulnerability.critical, threshold.vulnerability.high,
-                    threshold.vulnerability.medium, threshold.vulnerability.low
+                "Security count issues ({0}: {1}, {2}: {3}, {4}: {5}, {6}: {7}) is greater than or equal to failure criteria ({0}: {8}, {2}: {9}, {4}: {10}, {6}: {11}, operator: or)".format(
+                    classifications[0], counts.get(classifications[0], 0),
+                    classifications[1], counts.get(classifications[1], 0),
+                    classifications[2], counts.get(classifications[2], 0),
+                    classifications[3], counts.get(classifications[3], 0),
+                    *threshold_values
                 )
             ))
             print(devops_platform_gateway.result_pipeline("failed"))
-
             scan_result["vulnerabilities"] = {
                 "threshold": counts,
                 "status": "failed",
@@ -162,18 +205,19 @@ class BreakBuild:
             }
         else:
             print("Below are all vulnerabilities detected.")
-            printer_table_gateway.print_table_findings(vulnerabilities_list)
+            printer_table_gateway.print_table_findings(vulnerabilities_list, manager)
             print(devops_platform_gateway.message(
                 "warning",
-                "Security count issues (critical: {0}, high: {1}, medium: {2}, low: {3}) is not greater than or equal to failure criteria (critical: {4}, high: {5}, medium: {6}, low:{7}, operator: or)".format(
-                    counts["critical"], counts["high"], counts["medium"], counts["low"],
-                    threshold.vulnerability.critical, threshold.vulnerability.high,
-                    threshold.vulnerability.medium, threshold.vulnerability.low
+                "Security count issues ({0}: {1}, {2}: {3}, {4}: {5}, {6}: {7}) is not greater than or equal to failure criteria ({0}: {8}, {2}: {9}, {4}: {10}, {6}: {11}, operator: or)".format(
+                    classifications[0], counts.get(classifications[0], 0),
+                    classifications[1], counts.get(classifications[1], 0),
+                    classifications[2], counts.get(classifications[2], 0),
+                    classifications[3], counts.get(classifications[3], 0),
+                    *threshold_values
                 )
             ))
             result = "succeeded_with_issues" if warning_release or devops_platform_gateway.get_variable("stage") == "build" else "succeeded"
             print(devops_platform_gateway.result_pipeline(result))
-
             scan_result["vulnerabilities"] = {
                 "threshold": counts,
                 "status": "succeeded",
@@ -196,7 +240,7 @@ class BreakBuild:
             ))
             print(devops_platform_gateway.result_pipeline("failed"))
 
-    def _handle_compliances(self, counts, compliances_list, threshold, warning_release, scan_result, args):
+    def _handle_compliances(self, counts, compliances_list, threshold, warning_release, scan_result, args, manager):
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
         print()
@@ -205,7 +249,7 @@ class BreakBuild:
             print("Below are all compliances issues detected.")
             if compliances_list and args.get("tool", None) == "kiuwan":
                 print(f"Analysis url: {compliances_list[0].analysis_url}")
-            printer_table_gateway.print_table_findings(compliances_list)
+            printer_table_gateway.print_table_findings(compliances_list, manager)
             status = "succeeded"
             if counts["critical"] >= threshold.compliance.critical:
                 print(devops_platform_gateway.message(
@@ -229,21 +273,22 @@ class BreakBuild:
             print(devops_platform_gateway.message("succeeded", "There are no compliances issues"))
             print(devops_platform_gateway.result_pipeline("succeeded"))
 
-    def _handle_exclusions(self, findings_excluded_list, exclusions):
+    def _handle_exclusions(self, findings_excluded_list, exclusions, manager):
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
         print()
 
+        model = manager.get("MODEL", "severity")
         if findings_excluded_list:
             exclusions_list = []
             for item in findings_excluded_list:
                 matching = next(
-                    (e for e in exclusions if e.id == item.id and (e.where in item.where or "all" in e.where) and e.severity == item.severity),
+                    (e for e in exclusions if e.id == item.id and (e.where in item.where or "all" in e.where) and (e.severity == item.severity or e.priority == item.priority.scale)),
                     None
                 )
                 if matching:
                     exclusions_list.append({
-                        "severity": item.severity,
+                        "severity": item.severity if model == "severity" else item.priority.scale,
                         "id": item.id,
                         "where": item.where,
                         "create_date": matching.create_date,

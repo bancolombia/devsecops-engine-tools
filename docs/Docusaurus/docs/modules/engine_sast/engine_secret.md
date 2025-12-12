@@ -25,6 +25,12 @@ Main configuration file that defines scanning behavior, tool versions, and secur
     },
     "COMPLIANCE": {
       "Critical": 0
+    },
+    "PRIORITY": {
+        "Very Critical": 99,
+        "Critical": 99,
+        "High": 99,
+        "Medium Low": 99
     }
   },
   "TARGET_BRANCHES": ["trunk", "develop"],
@@ -79,6 +85,11 @@ Main configuration file that defines scanning behavior, tool versions, and secur
   - `Low`: Maximum 99 low severity vulnerabilities
 - **THRESHOLD.COMPLIANCE**: Maximum allowed compliance issues:
   - `Critical`: Maximum 0 critical compliance issues (zero tolerance)
+- **THRESHOLD.PRIORITY**: Maximum allowed vulnerabilities by priority level:
+  - `Very Critical`: Maximum 99 very critical priority vulnerability allowed
+  - `Critical`: Maximum 99 critical priority vulnerabilities
+  - `High`: Maximum 99 high priority vulnerabilities  
+  - `Medium Low`: Maximum 99 medium low priority vulnerabilities
 
 ##### Trufflehog Tool Configuration
 - **VERSION**: Trufflehog version to use (e.g., `"3.88.31"`)

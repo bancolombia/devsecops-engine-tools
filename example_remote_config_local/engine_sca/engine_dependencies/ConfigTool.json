@@ -20,7 +20,13 @@
         "COMPLIANCE": {
             "Critical": 1
         },
-        "CVE": ["CVE-123123"]
+        "CVE": ["CVE-123123"],
+        "PRIORITY": {
+            "Very Critical": 1,
+            "Critical": 3,
+            "High": 5,
+            "Medium Low": 15
+        }
     },
     "DEPENDENCY_CHECK": {
         "CLI_VERSION": "11.1.0",

@@ -33,6 +33,12 @@ class BreakBuildTests(unittest.TestCase):
                     "Low": 15,
                 },
                 "COMPLIANCE": {"Critical": 1},
+                "PRIORITY": {
+                    "Very Critical": 1,
+                    "Critical": 3,
+                    "High": 5,
+                    "Medium Low": 15
+                },
                 "CVE": ["CKV_K8S_22"],
             }
         )
@@ -44,8 +50,12 @@ class BreakBuildTests(unittest.TestCase):
         self.devops_platform_gateway.message.return_value = "There are no findings"
 
         args = {"module": "engine_iac"}
+        manager = {
+            "MODEL": "severity",
+            "CLASSIFICATION": ["critical", "high", "medium", "low"]
+        }
 
-        result = self.break_build.process(findings_list, input_core, args, False)
+        result = self.break_build.process(findings_list, input_core, args, False, manager)
 
         self.assertEqual(
             result, {"findings_excluded": [], "vulnerabilities": {}, "compliances": {}}
@@ -147,6 +157,12 @@ class BreakBuildTests(unittest.TestCase):
                         "Low": 15,
                     },
                     "COMPLIANCE": {"Critical": 1},
+                    "PRIORITY": {
+                        "Very Critical": 1,
+                        "Critical": 3,
+                        "High": 10,
+                        "Medium Low": 15
+                    },
                     "CVE": ["CKV_K8S_22"],
                 }
             ),
@@ -158,8 +174,12 @@ class BreakBuildTests(unittest.TestCase):
         )
 
         args = {"module": "engine_container"}
+        manager = {
+            "MODEL": "severity",
+            "CLASSIFICATION": ["critical", "high", "medium", "low"]
+        }
 
-        result = self.break_build.process(findings_list, input_core, args, False)
+        result = self.break_build.process(findings_list, input_core, args, False, manager)
 
         result_compare = {
             "findings_excluded": [],
@@ -226,6 +246,12 @@ class BreakBuildTests(unittest.TestCase):
                         "Low": 15,
                     },
                     "COMPLIANCE": {"Critical": 1},
+                    "PRIORITY": {
+                        "Very Critical": 1,
+                        "Critical": 3,
+                        "High": 10,
+                        "Medium Low": 15
+                    }
                 }
             ),
             path_file_results="results.json",
@@ -235,8 +261,12 @@ class BreakBuildTests(unittest.TestCase):
             stage_pipeline="Release",
         )
 
+        manager = {
+            "MODEL": "severity",
+            "CLASSIFICATION": ["critical", "high", "medium", "low"]
+        }
         result = self.break_build.process(
-            findings_list, input_core, {"module": "engine_iac"}, False
+            findings_list, input_core, {"module": "engine_iac"}, False, manager
         )
 
         result_compare = {
@@ -314,6 +344,12 @@ class BreakBuildTests(unittest.TestCase):
                         "Low": 15,
                     },
                     "COMPLIANCE": {"Critical": 1},
+                    "PRIORITY": {
+                        "Very Critical": 1,
+                        "Critical": 3,
+                        "High": 5,
+                        "Medium Low": 15
+                    }
                 }
             ),
             path_file_results="results.json",
@@ -323,8 +359,12 @@ class BreakBuildTests(unittest.TestCase):
             stage_pipeline="Release",
         )
 
+        manager = {
+            "MODEL": "severity",
+            "CLASSIFICATION": ["critical", "high", "medium", "low"]
+        }
         result = self.break_build.process(
-            findings_list, input_core, {"module": "engine_iac"}, False
+            findings_list, input_core, {"module": "engine_iac"}, False, manager
         )
 
         result_compare = {

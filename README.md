@@ -4,7 +4,7 @@
 [![Build](https://github.com/bancolombia/devsecops-engine-tools/actions/workflows/build.yml/badge.svg)](https://github.com/bancolombia/devsecops-engine-tools/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bancolombia_devsecops-engine-tools&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bancolombia_devsecops-engine-tools)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bancolombia_devsecops-engine-tools&metric=coverage)](https://sonarcloud.io/summary/new_code?id=bancolombia_devsecops-engine-tools)
-[![Python Version](https://img.shields.io/badge/python%20-%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20-blue)](#)
+[![Python Version](https://img.shields.io/badge/python%20-%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%20%7C%203.14%20-blue)](#)
 [![PyPI](https://img.shields.io/pypi/v/devsecops-engine-tools)](https://pypi.org/project/devsecops-engine-tools/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/bancolombia/devsecops-engine-tools
 )](https://hub.docker.com/r/bancolombia/devsecops-engine-tools)

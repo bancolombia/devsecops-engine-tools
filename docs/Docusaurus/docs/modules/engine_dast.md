@@ -27,6 +27,12 @@ Main configuration file that defines scanning behavior, tool versions, and secur
     },
     "COMPLIANCE": {
       "Critical": 1
+    },
+    "PRIORITY": {
+        "Very Critical": 1,
+        "Critical": 8,
+        "High": 10,
+        "Medium Low": 15
     }
   },
   "MESSAGE_INFO_DAST": "If you have doubts, visit https://forum.example",
@@ -77,6 +83,11 @@ Main configuration file that defines scanning behavior, tool versions, and secur
   - `Low`: Maximum 15 low severity vulnerabilities
 - **COMPLIANCE**: Compliance issue limits:
   - `Critical`: Maximum 1 critical compliance issue
+- **PRIORITY**: Maximum allowed vulnerabilities by priority level:
+  - `Very Critical`: Maximum 1 very critical priority vulnerability (strict control)
+  - `Critical`: Maximum 8 critical priority vulnerabilities
+  - `High`: Maximum 10 high priority vulnerabilities
+  - `Medium Low`: Maximum 15 medium low priority vulnerabilities
 
 ##### General Configuration
 - **MESSAGE_INFO_DAST**: Custom informational message displayed during DAST execution (e.g., forum links for support)

@@ -8,6 +8,12 @@
         },
         "COMPLIANCE": {
             "Critical": 1
+        },
+        "PRIORITY": {
+            "Very Critical": 1,
+            "Critical": 3,
+            "High": 5,
+            "Medium Low": 15
         }
     },
     "MESSAGE_INFO_DAST": "If you have doubts, visit https://forum.example",

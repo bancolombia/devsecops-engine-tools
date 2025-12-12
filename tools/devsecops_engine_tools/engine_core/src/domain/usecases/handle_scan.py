@@ -22,9 +22,15 @@ from devsecops_engine_tools.engine_core.src.domain.model.vulnerability_managemen
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.sbom_manager import (
     SbomManagerGateway,
 )
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.risk_score_gateway import (
+    RiskScoreGateway,
+)
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.level_vulnerability import (
     LevelVulnerability,
+)
+from devsecops_engine_tools.engine_core.src.domain.model.level_priority import (
+    LevelPriority,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.customs_exceptions import (
     ExceptionVulnerabilityManagement,
@@ -35,6 +41,9 @@ from devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_
 )
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.applications.runner_dependencies_scan import (
     runner_engine_dependencies,
+)
+from devsecops_engine_tools.engine_sca.engine_function.src.applications.runner_function_scan import (
+    runner_engine_function,
 )
 from devsecops_engine_tools.engine_dast.src.applications.runner_dast_scan import (
     runner_engine_dast,
@@ -55,12 +64,14 @@ class HandleScan:
         devops_platform_gateway: DevopsPlatformGateway,
         remote_config_source_gateway: DevopsPlatformGateway,
         sbom_tool_gateway: SbomManagerGateway,
+        risk_score_gateway: RiskScoreGateway,
     ):
         self.vulnerability_management = vulnerability_management
         self.secrets_manager_gateway = secrets_manager_gateway
         self.devops_platform_gateway = devops_platform_gateway
         self.remote_config_source_gateway = remote_config_source_gateway
         self.sbom_tool_gateway = sbom_tool_gateway
+        self.risk_score_gateway = risk_score_gateway
 
     def process(self, dict_args: any, config_tool: any):
         secret_tool = None
@@ -82,6 +93,7 @@ class HandleScan:
             self._use_vulnerability_management(
                 config_tool, input_core, dict_args, secret_tool, env
             )
+            self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
             return findings_list, input_core
         elif "engine_container" in dict_args["module"]:
             findings_list, input_core, sbom_components = runner_engine_container(
@@ -99,6 +111,24 @@ class HandleScan:
                 env,
                 sbom_components,
             )
+            self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
+            return findings_list, input_core
+        elif "engine_function" in dict_args["module"]:
+            findings_list, input_core = runner_engine_function(
+                dict_args,
+                config_tool["ENGINE_FUNCTION"],
+                secret_tool,
+                self.devops_platform_gateway,
+                self.remote_config_source_gateway
+            )
+            self._use_vulnerability_management(
+                config_tool,
+                input_core,
+                dict_args,
+                secret_tool,
+                env
+            )
+            self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
             return findings_list, input_core
         elif "engine_dast" in dict_args["module"]:
             findings_list, input_core = runner_engine_dast(
@@ -111,6 +141,7 @@ class HandleScan:
             self._use_vulnerability_management(
                 config_tool, input_core, dict_args, secret_tool, env
             )
+            self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
             return findings_list, input_core
         elif "engine_code" in dict_args["module"]:
             findings_list, input_core = runner_engine_code(
@@ -122,6 +153,7 @@ class HandleScan:
             self._use_vulnerability_management(
                 config_tool, input_core, dict_args, secret_tool, env
             )
+            self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
             return findings_list, input_core
         elif "engine_secret" in dict_args["module"]:
             findings_list, input_core = runner_secret_scan(
@@ -134,6 +166,7 @@ class HandleScan:
             self._use_vulnerability_management(
                 config_tool, input_core, dict_args, secret_tool, env
             )
+            self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
             return findings_list, input_core
         elif "engine_dependencies" in dict_args["module"]:
             findings_list, input_core, sbom_components = runner_engine_dependencies(
@@ -147,6 +180,7 @@ class HandleScan:
             self._use_vulnerability_management(
                 config_tool, input_core, dict_args, secret_tool, env, sbom_components
             )
+            self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
             return findings_list, input_core
 
     def _use_vulnerability_management(
@@ -261,6 +295,7 @@ class HandleScan:
                 if apply_qualitypt:
                     pt_info = apply_qualitypt[pt_name]
                     pt_profile = pt_info["PROFILE"]
+                    pt_profile_priority = pt_info["PROFILE_PRIORITY"]
                     pt_apps = pt_info["APPS"]
 
                     input_core.threshold_defined.vulnerability = (
@@ -268,4 +303,10 @@ class HandleScan:
                         if pt_apps == "ALL"
                         or any(map(lambda pd: pd in input_core.scope_pipeline, pt_apps))
                         else input_core.threshold_defined.vulnerability
+                    )
+                    input_core.threshold_defined.priority = (
+                        LevelPriority(quality_vulnerability_management[pt_profile_priority])
+                        if pt_apps == "ALL"
+                        or any(map(lambda pd: pd in input_core.scope_pipeline, pt_apps))
+                        else input_core.threshold_defined.priority
                     )

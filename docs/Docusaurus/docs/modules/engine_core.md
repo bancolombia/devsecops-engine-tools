@@ -88,7 +88,9 @@ Configuration of the driven adapters in the main layer and management of on/off 
                     "BODY": {
                         "appCode": "codappvalue"
                     },
-                    "RESPONSE": [0]
+                    "RESPONSE": [0],
+                    "MAX_RETRIES": 3,
+                    "RETRY_DELAY": 5
                 }
             }
         }
@@ -107,6 +109,10 @@ Configuration of the driven adapters in the main layer and management of on/off 
         "ENABLED": true,
         "TOOL": "SYFT|CDXGEN",
         "BRANCH_FILTER": [],
+        "TOOL_OVERRIDE_PIPELINES": {
+            "pipeline_exception_1": "SYFT",
+            "pipeline_exception_2": "CDXGEN"
+        },
         "SYFT": {
             "SYFT_VERSION": "1.17.0",
             "OUTPUT_FORMAT": "cyclonedx-json"
@@ -118,33 +124,100 @@ Configuration of the driven adapters in the main layer and management of on/off 
             "EXCLUDE_TYPES": ["jar"],
             "EXCLUDE_PATHS": ["**/test/**"],
             "RECURSE": true,
-            "DEBUG_PIPELINES": ["pipeline_name1", "pipeline_name2"]
+            "DEBUG_PIPELINES": ["pipeline_name1", "pipeline_name2"],
+            "LIFECYCLE_PIPELINES": {
+                "pipeline_name1": "pre-build"
+            }
         }
+    },
+    "PRIORITY_MANAGER":{
+        "USE_PRIORITY": true,
+        "HOST_PRIORITY": "",
+        "CVE_REGEX": "CVE-\\d{4}-\\d+",
+        "HOMOLOGATION_PRIORITY":{
+            "STANDARD": {
+                "critical":{
+                    "SCORE": 1.00,
+                    "CLASSIFICATION": "very critical"
+                },
+                "high":{
+                    "SCORE": 0.74,
+                    "CLASSIFICATION": "critical"
+                },
+                "medium":{
+                    "SCORE": 0.46,
+                    "CLASSIFICATION": "high"
+                },
+                "low":{
+                    "SCORE": 0.01,
+                    "CLASSIFICATION": "medium low"
+                }
+            },
+            "DISCREET":{
+                "critical":{
+                    "SCORE": 0.74,
+                    "CLASSIFICATION": "critical"
+                },
+                "high":{
+                    "SCORE": 0.46,
+                    "CLASSIFICATION": "high"
+                },
+                "medium":{
+                    "SCORE": 0.01,
+                    "CLASSIFICATION": "medium low"
+                },
+                "low":{
+                    "SCORE": 0.01,
+                    "CLASSIFICATION": "medium low"
+                }
+            }
+        },
+        "MAPPING_HOST":{
+            "Muy Crítica": "very critical",
+            "Crítica": "critical",
+            "Alta": "high",
+            "Baja y Media": "medium low"
+        }
+    },
+    "BREAK_BUILD_MANAGER":{
+        "MODEL": "severity|priority",
+        "CLASSIFICATION": ["critical|very critical", "high|critical", "medium|high", "low|medium low"]
     },
     "ENGINE_IAC": {
         "ENABLED": true,
-        "TOOL": "CHECKOV|KUBESCAPE|KICS"
+        "TOOL": "CHECKOV|KUBESCAPE|KICS",
+        "PRIORITY": "STANDARD|DISCREET"
     },
     "ENGINE_CONTAINER": {
         "ENABLED": true,
-        "TOOL": "PRISMA|TRIVY"
+        "TOOL": "PRISMA|TRIVY",
+        "PRIORITY": "STANDARD|DISCREET"
     },
     "ENGINE_DAST": {
         "ENABLED": true,
         "TOOL": "NUCLEI",
-        "EXTRA_TOOLS": ["JWT"]
+        "EXTRA_TOOLS": ["JWT"],
+        "PRIORITY": "STANDARD|DISCREET"
     },
     "ENGINE_SECRET": {
         "ENABLED": true,
-        "TOOL": "TRUFFLEHOG|GITLEAKS"
+        "TOOL": "TRUFFLEHOG|GITLEAKS",
+        "PRIORITY": "STANDARD|DISCREET"
     },
     "ENGINE_DEPENDENCIES": {
         "ENABLED": true,
-        "TOOL": "XRAY|DEPENDENCY_CHECK|TRIVY"
+        "TOOL": "XRAY|DEPENDENCY_CHECK|TRIVY",
+        "PRIORITY": "STANDARD|DISCREET"
     },
     "ENGINE_CODE": {
         "ENABLED": true,
-        "TOOL": "BEARER|KIUWAN"
+        "TOOL": "BEARER|KIUWAN",
+        "PRIORITY": "STANDARD|DISCREET"
+    },
+    "ENGINE_FUNCTION": {
+        "ENABLED": true,
+        "TOOL": "PRISMA",
+        "PRIORITY": "STANDARD|DISCREET"
     },
     "ENGINE_RISK": {
         "ENABLED": false
@@ -237,6 +310,8 @@ Configuration of the driven adapters in the main layer and management of on/off 
                 - **PARAMS**: Parameters for the CMDB query (used for `GET`).
                 - **BODY**: Body for the CMDB query (used for `POST`).
                 - **RESPONSE**: Path or keys to extract the relevant data from the CMDB response.
+                - **MAX_RETRIES**: Specifies the maximum number of retry attempts allowed for a given operation
+                - **RETRY_DELAY**: Specifies the amount of time in seconds, to wait before retrying a failed operation
 
         This section allows you to configure how the vulnerability management module interacts with your organization's CMDB, including authentication, data extraction, and field mapping, to ensure seamless integration and accurate data synchronization.
 
@@ -247,29 +322,74 @@ Configuration of the driven adapters in the main layer and management of on/off 
         - ROLE_ARN: ARN of the assumed role with permissions over this resource
         - REGION_NAME: AWS region name
 
+- **PRIORITY_MANAGER**: Configuración para el manejo de prioridades basadas en scores de vulnerabilidades CVE
+    - **USE_PRIORITY**: `true` o `false`. Habilita el uso del sistema de prioridades. Cuando está en `true`, el sistema consultará un API externo para obtener scores de prioridad de CVEs y aplicará homologación para findings sin formato CVE.
+    - **HOST_PRIORITY**: URL del API externo que proporciona los scores de prioridad para CVEs. Ejemplo: `https://api.example.com/priorities`
+    - **CVE_REGEX**: Expresión regular para identificar CVEs en los IDs de findings. Por defecto: `"CVE-\\d{4}-\\d+"`
+    - **HOMOLOGATION_PRIORITY**: Mapeo de severidades tradicionales a prioridades con scores. Permite dos perfiles:
+        - **STANDARD**: Perfil estándar con scores más altos
+            - `critical`: score 1.00 → "very critical"
+            - `high`: score 0.74 → "critical"
+            - `medium`: score 0.46 → "high"
+            - `low`: score 0.01 → "medium low"
+        - **DISCREET**: Perfil discreto con scores más conservadores
+            - `critical`: score 0.74 → "critical"
+            - `high`: score 0.46 → "high"
+            - `medium`: score 0.01 → "medium low"
+            - `low`: score 0.01 → "medium low"
+    - **MAPPING_HOST**: Mapeo de clasificaciones del API externo a escalas internas
+        - `"Muy Crítica"` → `"very critical"`
+        - `"Crítica"` → `"critical"`
+        - `"Alta"` → `"high"`
+        - `"Baja y Media"` → `"medium low"`
+
+- **BREAK_BUILD_MANAGER**: Configuración para el sistema de ruptura de build basado en severidad o prioridad
+    - **MODEL**: Define el modelo de evaluación a utilizar
+        - `"severity"`: Usa el modelo tradicional basado en severidades (critical, high, medium, low)
+        - `"priority"`: Usa el modelo basado en scores de prioridad (very critical, critical, high, medium low)
+    - **CLASSIFICATION**: Array con las clasificaciones a evaluar, en orden de mayor a menor criticidad
+        - Para `MODEL="severity"`: `["critical", "high", "medium", "low"]`
+        - Para `MODEL="priority"`: `["very critical", "critical", "high", "medium low"]`
+    
+    **Nota**: El modelo seleccionado determina:
+    - Qué campo del finding se usa para clasificación (`severity` vs `priority.scale`)
+    - Qué atributos de threshold se consultan (`vulnerability.critical` vs `vulnerability.get_level("very critical", "priority")`)
+    - Cómo se muestran los resultados en tablas y mensajes de error/warning
+
 - **ENGINE_IAC**: Configuration for the engine_iac tool
     - ENABLED: true or false
     - TOOL: CHECKOV |KUBESCAPE | KICS
+    - PRIORITY: STANDARD | DISCREET
 
 - **ENGINE_CONTAINER**: Configuration for the engine_container tool
     - ENABLED: true or false
     - TOOL: PRISMA | TRIVY
+    - PRIORITY: STANDARD | DISCREET
 
 - **ENGINE_DAST**: Configuration for the engine_dast tool
     - ENABLED: true or false
     - TOOL: NUCLEI
+    - PRIORITY: STANDARD | DISCREET
 
 - **ENGINE_SECRET**: Configuration for the engine_secret tool
     - ENABLED: true or false
     - TOOL: TRUFFLEHOG | GITLEAKS
+    - PRIORITY: STANDARD | DISCREET
 
 - **ENGINE_CODE**: Configuration for the engine_code tool
     - ENABLED: true or false
     - TOOL: BEARER
+    - PRIORITY: STANDARD | DISCREET
 
 - **ENGINE_DEPENDENCIES**: Configuration for the engine_dependencies tool
     - ENABLED: true or false
     - TOOL: XRAY | DEPENDENCY_CHECK | TRIVY
+    - PRIORITY: STANDARD | DISCREET
+
+- **ENGINE_FUNCTION**: Configuration for the engine_function tool
+    - ENABLED: true or false
+    - TOOL: PRISMA
+    - PRIORITY: STANDARD | DISCREET
 
 - **ENGINE_RISK**: Configuration for the engine_risk tool
     - ENABLED: true or false
@@ -395,6 +515,124 @@ The remote config settings should look similar to this:
         }
     }
 ```
+
+## Ejemplos de Configuración
+
+### Ejemplo 1: Modelo Severity (Tradicional)
+
+```json
+{
+    "BREAK_BUILD_MANAGER": {
+        "MODEL": "severity",
+        "CLASSIFICATION": ["critical", "high", "medium", "low"]
+    },
+    "PRIORITY_MANAGER": {
+        "USE_PRIORITY": false
+    },
+    "THRESHOLD": {
+        "VULNERABILITY": {
+            "Critical": 5,
+            "High": 10,
+            "Medium": 20,
+            "Low": 30
+        }
+    }
+}
+```
+
+En este caso:
+- El build se romperá si hay ≥5 vulnerabilidades críticas, ≥10 high, ≥20 medium o ≥30 low
+- Se usa el campo `severity` de los findings
+- No se consulta API externa de prioridades
+
+### Ejemplo 2: Modelo Priority con API Externa
+
+```json
+{
+    "BREAK_BUILD_MANAGER": {
+        "MODEL": "priority",
+        "CLASSIFICATION": ["very critical", "critical", "high", "medium low"]
+    },
+    "PRIORITY_MANAGER": {
+        "USE_PRIORITY": true,
+        "HOST_PRIORITY": "https://api.priorities.internal/v1",
+        "CVE_REGEX": "CVE-\\d{4}-\\d+",
+        "HOMOLOGATION_PRIORITY": {
+            "STANDARD": {
+                "critical": {
+                    "SCORE": 1.00,
+                    "CLASSIFICATION": "very critical"
+                },
+                "high": {
+                    "SCORE": 0.74,
+                    "CLASSIFICATION": "critical"
+                },
+                "medium": {
+                    "SCORE": 0.46,
+                    "CLASSIFICATION": "high"
+                },
+                "low": {
+                    "SCORE": 0.01,
+                    "CLASSIFICATION": "medium low"
+                }
+            }
+        },
+        "MAPPING_HOST": {
+            "Muy Crítica": "very critical",
+            "Crítica": "critical",
+            "Alta": "high",
+            "Baja y Media": "medium low"
+        }
+    },
+    "THRESHOLD": {
+        "VULNERABILITY": {
+            "Critical": 5,
+            "High": 10,
+            "Medium": 20,
+            "Low": 30
+        },
+        "VULNERABILITY_PRIORITY": {
+            "Very Critical": 3,
+            "Critical": 5,
+            "High": 10,
+            "Medium Low": 20
+        }
+    }
+}
+```
+
+En este caso:
+- Los CVEs se envían al API externa para obtener scores de prioridad
+- Los findings sin formato CVE se homologan por severidad usando `HOMOLOGATION_PRIORITY`
+- El build se romperá según los umbrales de `VULNERABILITY_PRIORITY`
+- Se usa el campo `priority.scale` de los findings
+
+### Ejemplo 3: Threshold con Exclusiones
+
+```json
+{
+    "THRESHOLD": {
+        "my-pipeline": {
+            "VULNERABILITY": {
+                "Critical": 0,
+                "High": 2,
+                "Medium": 10,
+                "Low": 50
+            },
+            "VULNERABILITY_PRIORITY": {
+                "Very Critical": 0,
+                "Critical": 1,
+                "High": 5,
+                "Medium Low": 20
+            },
+            "reason": "Pipeline crítico con umbrales más estrictos"
+        }
+    }
+}
+```
+
+Los umbrales se pueden personalizar por pipeline específico o por patrón regex.
+
 ## Main Responsibilities
 
 - **Orchestration:** Manages the workflow for running security tools (SAST, DAST, IaC, container, dependencies, secrets, risk).

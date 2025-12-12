@@ -35,7 +35,13 @@ Main configuration file that defines scanning behavior, tool versions, and secur
     "COMPLIANCE": {
       "Critical": 1
     },
-    "CVE": ["CVE-123123"]
+    "CVE": ["CVE-123123"],
+    "PRIORITY": {
+        "Very Critical": 3,
+        "Critical": 5,
+        "High": 10,
+        "Medium Low": 15
+    }
   },
   "DEPENDENCY_CHECK": {
     "CLI_VERSION": "11.1.0",
@@ -83,6 +89,11 @@ Main configuration file that defines scanning behavior, tool versions, and secur
 - **COMPLIANCE**: Compliance issue limits:
   - `Critical`: Maximum 1 critical compliance issue
 - **CVE**: Array of specific CVE identifiers to monitor or exclude (e.g., `["CVE-123123"]`)
+- **PRIORITY**: Maximum allowed vulnerabilities by priority level:
+  - `Very Critical`: Maximum 3 very critical priority vulnerability
+  - `Critical`: Maximum 5 critical priority vulnerabilities
+  - `High`: Maximum 10 high priority vulnerabilities
+  - `Medium Low`: Maximum 15 medium low priority vulnerabilities
 
 ### Exclusions.json
 

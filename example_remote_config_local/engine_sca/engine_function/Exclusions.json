@@ -1,0 +1,35 @@
+{
+  "All": {
+    "PRISMA": [
+      {
+        "id": "",
+        "where": "all",
+        "create_date": "24012023",
+        "expired_date": "22092023",
+        "hu": "345345",
+        "reason": "False Positive"
+      }
+    ]
+  },
+  "Repository_Test": {
+    "VALIDATE_BASE_IMAGE_DATE": {
+      "create_date": "21022024",
+      "expired_date": "26052024",
+      "hu": "2342342"
+    },
+    "BLACK_LIST_BASE_IMAGE": {
+      "create_date": "21022024",
+      "expired_date": "26052024",
+      "hu": "2342342"
+    },
+    "PRISMA": [
+      {
+        "id": "CVE-2023-6237",
+        "cve_id": "CVE-2023-6237",
+        "expired_date": "21092024",
+        "create_date": "24012023",
+        "hu": "345345"
+      }
+    ]
+  }
+}

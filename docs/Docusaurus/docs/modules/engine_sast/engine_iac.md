@@ -29,6 +29,12 @@ Main configuration file that defines scanning behavior, tool versions, and secur
     },
     "COMPLIANCE": {
       "Critical": 1
+    },
+    "PRIORITY": {
+        "Very Critical": 1,
+        "Critical": 4,
+        "High": 10,
+        "Medium Low": 15
     }
   },
   "CHECKOV": {
@@ -156,6 +162,11 @@ Main configuration file that defines scanning behavior, tool versions, and secur
   - `Low`: Maximum 15 low severity vulnerabilities
 - **THRESHOLD.COMPLIANCE**: Maximum allowed compliance issues:
   - `Critical`: Maximum 1 critical compliance issue
+- **THRESHOLD.PRIORITY**: Maximum allowed vulnerabilities by priority level:
+  - `Very Critical`: Maximum 1 very critical priority vulnerability allowed
+  - `Critical`: Maximum 4 critical priority vulnerabilities
+  - `High`: Maximum 10 high priority vulnerabilities  
+  - `Medium Low`: Maximum 15 medium low priority vulnerabilities
 
 ##### Checkov Tool Configuration
 - **VERSION**: Checkov version to use (e.g., `"3.2.427"`)

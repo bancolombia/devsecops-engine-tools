@@ -41,33 +41,29 @@ class GenericOauth(AuthenticationGateway):
 
     def get_access_token_client_credentials(self):
         """Obtain access token using client credentials flow."""
-        try:
-            required_keys = ["client_id", "client_secret"]
-            if not all(key in self.config for key in required_keys):
-                raise ValueError("One or more keys is missing in OAuth config")
+        required_keys = ["client_id", "client_secret"]
+        if not all(key in self.config for key in required_keys):
+            raise ValueError("One or more keys is missing in OAuth config")
 
-            data = {
-                "client_id": self.config["client_id"],
-                "client_secret": self.config["client_secret"],
-                "grant_type": "client_credentials",
-                "scope": self.config["scope"]
-            }
+        data = {
+            "client_id": self.config["client_id"],
+            "client_secret": self.config["client_secret"],
+            "grant_type": "client_credentials",
+            "scope": self.config["scope"]
+        }
 
-            if self.config["path"].startswith("http"): url = self.config["path"]
-            else: url = self.endpoint + self.config["path"]
-            
-            headers = self.config["headers"]
-            response = requests.request(
-                self.config["method"], url, headers=headers, data=data, timeout=5
+        if self.config["path"].startswith("http"): url = self.config["path"]
+        else: url = self.endpoint + self.config["path"]
+        
+        headers = self.config["headers"]
+        response = requests.request(
+            self.config["method"], url, headers=headers, data=data, timeout=5
+        )
+        if 200 <= response.status_code < 300:
+            result = response.json()["access_token"]
+            return ("Authorization",f"Bearer {result}")
+        else:
+            raise ValueError(
+                "OAuth: Can't obtain access token code {0}: -> {1}".format(response.status_code, response.text)
             )
-            if 200 <= response.status_code < 300:
-                result = response.json()["access_token"]
-                return ("Authorization",f"Bearer {result}")
-            else:
-                logger.warning(
-                    "OAuth: Can't obtain access token"
-                    "token Unknown status "
-                    "code {0}: -> {1}".format(response.status_code, response.text)
-                )
-        except (ConnectionError, ValueError, KeyError) as e:
-            logger.warning("OAuth: Can't obtain access token: {0}".format(e))
+            

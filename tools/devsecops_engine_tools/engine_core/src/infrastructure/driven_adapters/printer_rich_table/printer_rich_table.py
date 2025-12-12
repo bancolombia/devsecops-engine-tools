@@ -19,7 +19,7 @@ from rich import box
 
 @dataclass
 class PrinterRichTable(PrinterTableGateway):
-    def print_table_findings(self, finding_list: "list[Finding]"):
+    def print_table_findings(self, finding_list: "list[Finding]", break_build_manager):
         # To implement
         return
 

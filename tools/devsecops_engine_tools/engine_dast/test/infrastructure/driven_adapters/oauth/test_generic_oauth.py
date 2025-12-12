@@ -52,3 +52,21 @@ class TestGenericOauth(unittest.TestCase):
             'POST', 'example.comoauth2/token', headers={'content-type': 'application/x-www-form-urlencoded', 'accept': 'application/json'}, data={'client_id': 'dummy-id', 'client_secret': 'dummy-secret', 'grant_type': 'client_credentials', 'scope': 'TermExample:read:user'}, timeout=5
         )
         self.assertEqual(token, ('Authorization', 'Bearer dummy_access_token'))
+
+    @patch('devsecops_engine_tools.engine_dast.src.infrastructure.driven_adapters.oauth.generic_oauth.requests.request')
+    def test_get_access_token_client_credentials_flow_fail(self, mock_request):
+        self.oauth.config = self.oauth.process_data()
+        self.oauth.config["tenant_id"] = "dummy_tenant_id"
+        response_mock = Mock()
+        response_mock.status_code = 401
+        response_mock.text = "unauthorized"
+        response_mock.json.return_value = {"unauthorized": "client_unauthorized or not subscribed"}
+        mock_request.return_value = response_mock
+
+        with self.assertRaises(ValueError) as context:
+            self.oauth.get_access_token_client_credentials()
+
+        self.assertEqual(
+            str(context.exception), 
+            "OAuth: Can't obtain access token code 401: -> unauthorized"
+        )

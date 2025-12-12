@@ -62,13 +62,15 @@ Main configuration file that defines scanning behavior, tool versions, and secur
         {
           "Product Type Name": {
             "APPS": ["CodeApp", "CodeApp1", "CodeApp12"],
-            "PROFILE": "STRONG"
+            "PROFILE": "STRONG",
+            "PROFILE_PRIORITY": "STRONG_PRIORITY"
           }
         },
         {
           "Product Type Name2": {
             "APPS": "ALL",
-            "PROFILE": "MODERATE"
+            "PROFILE": "MODERATE",
+            "PROFILE_PRIORITY": "MODERATE_PRIORITY"
           }
         }
       ],
@@ -83,10 +85,28 @@ Main configuration file that defines scanning behavior, tool versions, and secur
         "High": 3,
         "Medium": 5,
         "Low": 15
+      },
+      "STRONG_PRIORITY": {
+          "Very Critical": 0,
+          "Critical": 0,
+          "High": 5,
+          "Mediumv Low": 15
+      },
+      "MODERATE_PRIORITY": {
+          "Very Critical": 1,
+          "Critical": 3,
+          "High": 5,
+          "Mediumv Low": 15
       }
     },
     "COMPLIANCE": {
       "Critical": 1
+    },
+    "PRIORITY": {
+        "Very Critical": 99,
+        "Critical": 99,
+        "High": 99,
+        "Medium Low": 99
     }
   }
 }
@@ -145,6 +165,7 @@ Main configuration file that defines scanning behavior, tool versions, and secur
   - Product type definitions with associated applications and security profiles
   - `APPS`: Array of application names or `"ALL"` for universal application
   - `PROFILE`: Security profile (`"STRONG"` or `"MODERATE"`)
+  - `PROFILE_PRIORITY`: Security profile to priority (`"STRONG_PRIORITY"` or `"MODERATE_PRIORITY"`)
 
 **Security Profiles:**
 - **STRONG Profile**: Strict security requirements:
@@ -157,10 +178,26 @@ Main configuration file that defines scanning behavior, tool versions, and secur
   - `High`: Maximum 3
   - `Medium`: Maximum 5
   - `Low`: Maximum 15
+- **STRONG_PRIORITY Profile**: Strict security requirements:
+  - `Very Critical`: 0 (zero tolerance)
+  - `Critical`: 0 (zero tolerance)
+  - `High`: Maximum 5
+  - `Medium Low`: Maximum 15
+- **MODERATE_PRIORITY Profile**: Balanced security requirements:
+  - `Very Critical`: Maximum 1
+  - `Critical`: Maximum 3
+  - `High`: Maximum 5
+  - `Medium Low`: Maximum 15
 
 **Compliance Thresholds:**
 - **COMPLIANCE**: Compliance issue limits:
   - `Critical`: Maximum 1 critical compliance issue
+
+- **PRIORITY**: High tolerance thresholds for development/testing:
+  - `Very Critical`: Maximum 99 very critical priority vulnerabilities
+  - `Critical`: Maximum 99 critical priority vulnerabilities
+  - `High`: Maximum 99 high priority vulnerabilities
+  - `Medium Low`: Maximum 999 medium low priority vulnerabilities
 
 ### Exclusions.json
 

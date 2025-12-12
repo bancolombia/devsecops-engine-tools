@@ -38,6 +38,9 @@ sidebar_position: 2
    ┃ ┗ 📂engine_dependencies
    ┃   ┗ 📜ConfigTool.json
    ┃   ┗ 📜Exclusions.json
+   ┃ ┗ 📂engine_function
+   ┃   ┗ 📜ConfigTool.json
+   ┃   ┗ 📜Exclusions.json
 ```
 
 ## **engine_core**
@@ -45,7 +48,6 @@ sidebar_position: 2
 Module is responsible to handle core configurations
 
 For more information about structure remote config for this module, visit [engine core](../modules/engine_core.md)
-
 
 ## **engine_dast**
 
@@ -104,7 +106,7 @@ For more information about structure remote config for this module, [engine depe
 
 ## **vulnerability_management**
 
-### **cmdb_mapping**
+## **vulnerability_management/cmdb_mapping**
 
 Mapping configuration for the names of the evcs obtained from the cmdb, to centralize a single name and have unified product types in Vulnerability Management.
 

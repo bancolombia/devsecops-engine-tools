@@ -1,0 +1,21 @@
+{
+  "PRISMA_CLOUD": {
+    "PRISMA_CONSOLE_URL": "https://<tu-prisma-console>",
+    "PRISMA_API_VERSION": "v1",
+    "TWISTCLI_PATH": "twistcli.exe"
+  },
+  "IGNORE_SEARCH_PATTERN": "(.*_legacy|.*_skip)",     
+  "MESSAGE_INFO_ENGINE_FUNCTION": "message custom",
+  "THRESHOLD": {
+    "VULNERABILITY": {
+      "Critical": 1,
+      "High": 3,
+      "Medium": 10,
+      "Low": 999
+    },
+    "COMPLIANCE": {
+      "Critical": 1
+    },
+    "CVE": ["CVE-2024-0001"]
+  }
+}

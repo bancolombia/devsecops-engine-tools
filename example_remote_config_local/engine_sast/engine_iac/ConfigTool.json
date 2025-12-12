@@ -15,10 +15,16 @@
         },
         "COMPLIANCE": {
             "Critical": 1
+        },
+        "PRIORITY": {
+            "Very Critical": 1,
+            "Critical": 3,
+            "High": 5,
+            "Medium Low": 15
         }
     },
     "CHECKOV": {
-        "VERSION": "3.2.477",
+        "VERSION": "3.2.492",
         "INSTALL_TYPE": "remote-binary",
         "URL_FILE_LINUX": "https://github.com/bridgecrewio/checkov/releases/download/2.3.321/checkov_linux_X86_64_2.3.321.zip",
         "URL_FILE_LINUX_ARM64": "https://github.com/bridgecrewio/checkov/releases/download/2.3.321/checkov_linux_arm64_2.3.321.zip",

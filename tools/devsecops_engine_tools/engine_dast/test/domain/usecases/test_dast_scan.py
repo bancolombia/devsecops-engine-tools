@@ -87,6 +87,12 @@ class TestDastScan(unittest.TestCase):
                 },
                 "COMPLIANCE": {
                     "Critical": 1
+                },
+                "PRIORITY": {
+                    "Very Critical": 1,
+                    "Critical": 3,
+                    "High": 5,
+                    "Medium Low": 15
                 }
             }
         }

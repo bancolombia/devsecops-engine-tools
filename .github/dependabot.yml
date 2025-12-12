@@ -20,7 +20,7 @@ updates:
     directory: "/tools/"
     target-branch: "next"
     schedule:
-      interval: "weekly"
+      interval: "daily"
   # Maintain dependencies for docker
   - package-ecosystem: "docker"
     directory: "/docker/"

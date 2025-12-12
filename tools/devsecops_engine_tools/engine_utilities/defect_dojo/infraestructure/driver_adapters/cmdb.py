@@ -81,7 +81,7 @@ class CmdbRestConsumer:
                 )
 
             return Utils().retries_requests(
-                make_request, 3, 5
+                make_request, request.cmdb_request_response.get("MAX_RETRIES", 3), request.cmdb_request_response.get("RETRY_DELAY", 5)
             )
         except Exception as e:
             logger.warning(e)

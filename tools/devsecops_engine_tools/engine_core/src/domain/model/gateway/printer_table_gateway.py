@@ -8,7 +8,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.report import (
 
 class PrinterTableGateway(metaclass=ABCMeta):
     @abstractmethod
-    def print_table_findings(self, finding_list: "list[Finding]"):
+    def print_table_findings(self, finding_list: "list[Finding]", break_build_manager):
         "print_table_findings"
 
     @abstractmethod

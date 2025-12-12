@@ -322,6 +322,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 dd_max_retries,
                 {
                     "type": "white_list",
+                    "limit": dd_limits_query
                 },
             )
 
@@ -436,7 +437,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
             if print_domain:
                 host_dd = print_domain
-                
+
             for engagement in engagements:
                 engagement.vm_url = f"{host_dd}/engagement/{engagement.id}/finding/open"
 
@@ -595,11 +596,16 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     "product_type_name": vulnerability_management.vm_product_type_name,
                     "product_name": vulnerability_management.vm_product_name,
                     "product_description": vulnerability_management.vm_product_description,
-                    "code_app": vulnerability_management.vm_product_name,
+                    "code_app": Connect.get_code_app(
+                        vulnerability_management.vm_product_name,
+                        vulnerability_management.config_tool["VULNERABILITY_MANAGER"][
+                            "DEFECT_DOJO"
+                        ]["CMDB"]["REGEX_EXPRESSION_CMDB"],
+                    ),
                     **common_fields,
                 }
             )
-        
+
         return request
 
     def _process_component(self, component_sbom, session_manager, engagement):
@@ -701,7 +707,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         findings = self._get_findings(
             session_manager, service, max_retries, query_params
         )
-        
+
         return map(
             partial(
                 self._create_exclusion,
@@ -797,6 +803,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             create_date=create_date,
             expired_date=expired_date,
             severity=finding.severity.lower(),
+            priority=finding.priority_classification.lower(),
             reason=reason,
         )
 
@@ -881,4 +888,3 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             return finding.file_path
         else:
             return finding.file_path
-        

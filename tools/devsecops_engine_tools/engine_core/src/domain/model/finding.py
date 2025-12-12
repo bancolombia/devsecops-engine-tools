@@ -1,11 +1,17 @@
 from enum import Enum
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Optional
 
 class Category(Enum):
     VULNERABILITY = "vulnerability"
     COMPLIANCE = "compliance"
 
 @dataclass
+class Priority:
+    score: float
+    scale: str
+
+@dataclass(kw_only=True)
 class Finding:
     id: str
     cvss: str
@@ -18,8 +24,9 @@ class Finding:
     category: Category
     requirements: str
     tool: str
+    priority: Optional[Priority] = field(default=None)
 
-@dataclass
+@dataclass(kw_only=True)
 class EngineCodeFinding(Finding):
     analysis_url: str
     analysis_code: str

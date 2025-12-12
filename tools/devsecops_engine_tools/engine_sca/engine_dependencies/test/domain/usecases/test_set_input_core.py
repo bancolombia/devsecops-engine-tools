@@ -97,6 +97,12 @@ def test_set_input_core():
                     "Low": 999,
                 },
                 "COMPLIANCE": {"Critical": 1},
+                "PRIORITY": {
+                    "Very Critical": 1,
+                    "Critical": 3,
+                    "High": 5,
+                    "Medium Low": 15
+                },
             },
             "MESSAGE_INFO_ENGINE_DEPENDENCIES": "Test",
         }

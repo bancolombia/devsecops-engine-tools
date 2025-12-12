@@ -31,6 +31,7 @@ suite("DevSecOpsTreeDataProvider Tests", () => {
         get: async () => undefined,
         store: async () => {},
         delete: async () => {},
+        keys: async () => [],
         onDidChange: ((listener: any, thisArgs?: any, disposables?: any) => {
           return { dispose() {} };
         }) as vscode.Event<vscode.SecretStorageChangeEvent>,

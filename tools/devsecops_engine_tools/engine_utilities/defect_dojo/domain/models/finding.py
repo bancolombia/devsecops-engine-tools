@@ -93,6 +93,7 @@ class Finding(FromDictMixin):
     notes: List[None] = dataclasses.field(default_factory=list)
     files: List[None] = dataclasses.field(default_factory=list)
     found_by: List[None] = dataclasses.field(default_factory=list)
+    priority_classification: str = ""
 
 
 @dataclasses.dataclass

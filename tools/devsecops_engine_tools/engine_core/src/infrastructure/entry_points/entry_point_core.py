@@ -22,13 +22,19 @@ def init_engine_core(
     print_table_gateway: any,
     metrics_manager_gateway: any,
     sbom_tool_gateway: any,
+    risk_score_gateway: any,
     args: any
 ):
     config_tool = remote_config_source_gateway.get_remote_config(
         args["remote_config_repo"], "/engine_core/ConfigTool.json", args["remote_config_branch"]
     )
     Printers.print_logo_tool(config_tool["BANNER"])
-    sbom_tool_gateway = sbom_tool_gateway.get(config_tool["SBOM_MANAGER"]["TOOL"].lower())
+
+    pipeline_name = devops_platform_gateway.get_variable("pipeline_name")
+    tool_override_pipelines = config_tool["SBOM_MANAGER"].get("TOOL_OVERRIDE_PIPELINES", {})
+    sbom_tool_name = tool_override_pipelines.get(pipeline_name, config_tool["SBOM_MANAGER"]["TOOL"])
+    
+    sbom_tool_gateway = sbom_tool_gateway.get(sbom_tool_name.lower())
 
     if config_tool[args["module"].upper()]["ENABLED"]:
         if args["module"] == "engine_risk":
@@ -49,16 +55,18 @@ def init_engine_core(
                 secrets_manager_gateway,
                 devops_platform_gateway,
                 remote_config_source_gateway,
-                sbom_tool_gateway
+                sbom_tool_gateway,
+                risk_score_gateway
             ).process(args, config_tool)
 
             warning_release = config_tool["WARNING_RELEASE"]
-
+            manager = config_tool["BREAK_BUILD_MANAGER"]
             results = BreakBuild(devops_platform_gateway, print_table_gateway).process(
                 findings_list,
                 input_core,
                 args,
-                warning_release
+                warning_release,
+                manager
             )
         if args["send_metrics"] == "true":
             MetricsManager(devops_platform_gateway, metrics_manager_gateway).process(

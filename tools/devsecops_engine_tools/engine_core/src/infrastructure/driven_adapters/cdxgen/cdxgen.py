@@ -32,6 +32,7 @@ class CdxGen(SbomManagerGateway):
             recurse = config["CDXGEN"].get("RECURSE", True)
             install_deps = config["CDXGEN"].get("INSTALL_DEPENDENCIES", True)
             debug_pipelines = config["CDXGEN"].get("DEBUG_PIPELINES", [])
+            lifecycle_pipelines = config["CDXGEN"].get("LIFECYCLE_PIPELINES", {})
             
             enable_debug = service_name in debug_pipelines if debug_pipelines else False
             if enable_debug:
@@ -63,13 +64,13 @@ class CdxGen(SbomManagerGateway):
                 logger.warning(f"{os_platform} is not supported.")
                 return None
 
-            result_sbom = self._run_cdxgen(command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, enable_debug)
+            result_sbom = self._run_cdxgen(command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug)
             return get_list_component(result_sbom, config["CDXGEN"]["OUTPUT_FORMAT"])
         except Exception as e:
             logger.error(f"Error generating SBOM: {e}")
             return None
 
-    def _run_cdxgen(self, command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, enable_debug=False):
+    def _run_cdxgen(self, command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug=False):
         result_file = f"{service_name}_SBOM.json"
         command = [
             command_prefix,
@@ -89,6 +90,11 @@ class CdxGen(SbomManagerGateway):
                 command.extend(
                     ["--exclude", ex]
                 )
+
+        if lifecycle_pipelines.get(service_name):
+            command.extend(
+                ["--lifecycle", lifecycle_pipelines.get(service_name)]
+            )
         
         if not recurse:
             command.append(
@@ -97,7 +103,7 @@ class CdxGen(SbomManagerGateway):
         
         if not install_deps:
             command.append(
-                "--install-deps false"
+                "--no-install-deps"
             )
 
         try:

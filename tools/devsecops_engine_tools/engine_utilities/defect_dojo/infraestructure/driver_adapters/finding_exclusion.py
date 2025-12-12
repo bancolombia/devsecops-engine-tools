@@ -22,6 +22,13 @@ class FindingExclusionRestConsumer:
             if response.status_code != 200:
                 raise ApiError(response.json())
             finding_exclusions_object = FindingExclusionList.from_dict(response.json())
+            while response.json().get("next", None):
+                next_url = response.json().get("next")
+                next_url = next_url.replace("http://", "https://", 1)
+                response = self.__session.get(next_url, headers=headers, verify=VERIFY_CERTIFICATE)
+                if response.status_code != 200:
+                    raise ApiError(response.json())
+                finding_exclusions_object.results += FindingExclusionList.from_dict(response.json()).results
         except Exception as e:
             logger.error(f"from dict FindingExclusion: {e}")
             raise ApiError(e)
