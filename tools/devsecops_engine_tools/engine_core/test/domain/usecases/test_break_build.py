@@ -213,6 +213,50 @@ class BreakBuildTests(unittest.TestCase):
 
         assert result == result_compare
 
+    def test_count_severities_with_piped_classification(self):
+        findings_list = [
+            Finding(
+                id="CVE-1",
+                cvss=9.8,
+                where="pkg:a",
+                description="test",
+                severity="critical",
+                priority=Priority(score=1.0, scale="very critical"),
+                identification_date="19012024",
+                published_date_cve=None,
+                module="engine_function",
+                category=Category.VULNERABILITY,
+                requirements=None,
+                tool="PrismaCloud",
+            ),
+            Finding(
+                id="CVE-2",
+                cvss=7.5,
+                where="pkg:b",
+                description="test",
+                severity="high",
+                priority=Priority(score=0.74, scale="critical"),
+                identification_date="19012024",
+                published_date_cve=None,
+                module="engine_function",
+                category=Category.VULNERABILITY,
+                requirements=None,
+                tool="PrismaCloud",
+            ),
+        ]
+
+        manager = {
+            "MODEL": "severity",
+            "CLASSIFICATION": ["critical|very critical", "high|critical", "medium|high", "low|medium low"],
+        }
+
+        counts = self.break_build._count_severities(findings_list, manager)
+
+        self.assertEqual(counts["critical|very critical"], 1)
+        self.assertEqual(counts["high|critical"], 1)
+        self.assertEqual(counts["medium|high"], 0)
+        self.assertEqual(counts["low|medium low"], 0
+
     def test_process_with_findings_warning(self):
         findings_list = [
             Finding(
