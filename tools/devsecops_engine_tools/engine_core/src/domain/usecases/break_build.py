@@ -124,17 +124,28 @@ class BreakBuild:
         }
         model = manager.get("MODEL", "severity")
         
+        def normalize_key(value: str) -> str:
+            return str(value).strip().lower().replace(" ", "_")
+
+        def get_expected_value(classification_value: str) -> str:
+            parts = [part.strip() for part in str(classification_value).split("|")]
+            if model == "priority" and len(parts) > 1:
+                return normalize_key(parts[1])
+            return normalize_key(parts[0])
+        
         for finding in findings_list:
             if model == "priority":
                 if finding.priority and finding.priority.scale:
-                    severity = finding.priority.scale.lower()
+                    severity = normalize_key(finding.priority.scale)
                 else:
                     continue
             else:
-                severity = finding.severity.lower()
-            
-            if severity in counts:
-                counts[severity] += 1
+                severity = normalize_key(finding.severity)
+
+            for classification in counts:
+                if get_expected_value(classification) == severity:
+                    counts[classification] += 1
+                    break
         return counts
     
     def _count_severities_compliance(self, findings_list):
