@@ -255,7 +255,7 @@ class BreakBuildTests(unittest.TestCase):
         self.assertEqual(counts["critical|very critical"], 1)
         self.assertEqual(counts["high|critical"], 1)
         self.assertEqual(counts["medium|high"], 0)
-        self.assertEqual(counts["low|medium low"], 0
+        self.assertEqual(counts["low|medium low"], 0)
 
     def test_process_with_findings_warning(self):
         findings_list = [
