@@ -30,7 +30,17 @@ class TrivyScanSBOM(ToolGateway):
         token_engine_dependencies,
         **kwargs,
     ):
-        trivy_version = remote_config["TRIVY"]["CLI_VERSION"]
+        # Support both TRIVY_VERSION (standardized) and CLI_VERSION (legacy)
+        trivy_config = remote_config.get("TRIVY", {})
+        trivy_version = trivy_config.get("TRIVY_VERSION") or trivy_config.get("CLI_VERSION")
+
+        if not trivy_version:
+            logger.error(
+                "Trivy version not found in configuration. "
+                "Please set either TRIVY_VERSION or CLI_VERSION in the TRIVY config block."
+            )
+            return None
+
         command_prefix = TrivyManagerScanUtils().identify_os_and_install(trivy_version)
         sbom = f"{pipeline_name}_SBOM.json"
 
@@ -41,17 +51,17 @@ class TrivyScanSBOM(ToolGateway):
             raise FileNotFoundError("SBOM file not found, enable SBOM generation to scan with Trivy.")
 
         if pipeline_name in remote_config["TRIVY"].get("PRINT_SBOM", []):
-            with open(sbom, "r") as file: 
+            with open(sbom, "r") as file:
                 print("SBOM content:")
                 print(json.dumps(json.load(file), indent=4))
-            
+
         dependencies_scanned = self._scan_dependencies_sbom(command_prefix, sbom)
 
         return dependencies_scanned
 
     def get_dependencies_context_from_results(
-            self, 
-            path_file_results, 
+            self,
+            path_file_results,
             remote_config
     ) -> List[ContextDependencies]:
         dependencies_container_list = []

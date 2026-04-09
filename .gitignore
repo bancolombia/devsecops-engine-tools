@@ -1,99 +1,171 @@
-#Proof Archives
-_AW1234
-_nu1234
-DevSecOps_Remote_Config
-*.jar
+# =============================================================================
+# Python
+# =============================================================================
+# Virtual environments
+.venv*/
+.venv_win/
+_venv/
 
-# Virtual Enviroment python
-.venv*
-.venv_win
-*.vscode
-.pytest*
-*pycache*
-*_pycache_*
-.*DS_Store
+# Byte-compiled / cached files
+*.pyc
+__pycache__/
+*_pycache_*/
+*.pyo
+
+# Distributions
+*.egg-info/
+*.egg
+dist/
+build/
+tools/build/
+build/lib/
+
+# Package managers
 Pipfile
+Pipfile.lock
+poetry.lock
 
-#Distribucioes de lib
-**dist**
-**.egg-info/
-*.pyc
-**_pycache_**
-**tools/build/**
-**build/lib**
+# =============================================================================
+# IDE & Editors
+# =============================================================================
+.vscode/
+*.vscode
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
 
-#Ignorar cualquir archivo TXT
-scanned_images.txt
-*.pyc
-data
-
-#Archivos de Pruebas
-.env
+# =============================================================================
+# Testing & Coverage
+# =============================================================================
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+.nyc_output/
+coverage/
 test-output.xml
 report.html
 out_report.xml
-htmlcov
-.coverage
-coverage.xml
-prueba.py
-main.py
-common_devsecops_lib/sheckov_scan.json
+out/
+pytest.ini
+
+# Test artifacts
 _core_test*
 results*.json
+test_file/
+
+# =============================================================================
+# Build & Compilation Artifacts
+# =============================================================================
+target/
+node_modules/
+*.jar
+*.js
+*.map
+*.vsix
+*-lock.json
+
+# =============================================================================
+# Security Scanning Tools & Artifacts
+# =============================================================================
+# Trivy
+trivy
+trivy_*.tar.gz
+trivy_*.zip
+*_SBOM.json
+*scan_result.json
+
+# Checkov
+checkov
+checkov.exe
+scanned_images.txt
 RULES_DOCKERcheckov_config.yaml
 RULES_K8Scheckov_config.yaml
 RULES_CLOUDFORMATIONcheckov_config.yaml
 RULES_OPENAPIcheckov_config.yaml
 RULES_TERRAFORMcheckov_config.yaml
 RULES_SERVERLESScheckov_config.yaml
-log/
-twistcli
-trivy
-trivy_*.zip
-*scan_result.json
+common_devsecops_lib/sheckov_scan.json
+
+# KICS
+kics/
+kics-devsecops/
+kics_*.zip
+kics_assets/
+
+# JFrog Xray
 jf
 jf.exe
-target
-dependencies_to_scan
-node_modules
-DevSecOps_Remote_Config
-*.js
-*.map
-kics/
-kics_assets/
-assets_compressed.zip
-kics_*.zip
-kubescape-macos-latest
-*.tar.gz
-*.zip
-*_SBOM.json
+
+# Syft
 syft
+
+# Copa
+copa
+copa.exe
+
+# cdxgen
+cdxgen-*
+
+# Gitleaks
 gitleaks_aux_report_*.json
 gitleaks_report.json
-result_dast_scan.json
-test_file/*
-pytest.ini
-kics-devsecops/
+
+# OWASP Dependency-Check
 dependency-check-report*
-*.vsix
-**-lock.json
 
-# Extensions
-out
-.nyc_output/
-coverage/
-.vscode-test
+# Prisma/Twistlock
+twistcli
 
-# Binarios
-checkov
-checkov.exe
-build/**
-copa
-cdxgen-*
-build/** 
-cdxgen-*
-copa
+# Kubescape
+kubescape-macos-latest
 
-# Doc
-.docusaurus
-docs/Docusaurus/build/**
+# =============================================================================
+# Test Files & Data
+# =============================================================================
+.env
+.env*local
+.envdetlocal
+.envdetlocalazure
+data/
+prueba.py
+main.py
+dependencies_to_scan/
+
+# DAST
+result_dast_scan.json
+
+# =============================================================================
+# Archives & Bundles
+# =============================================================================
+assets_compressed.zip
+_AW1234
+_nu1234
+DevSecOps_Remote_Config/
+
+# =============================================================================
+# Documentation Builds
+# =============================================================================
+.docusaurus/
+docs/Docusaurus/build/
+
+# =============================================================================
+# Logs
+# =============================================================================
+log/
+*.log
+
+# =============================================================================
+# Kiuwan Agent (generated files)
+# =============================================================================
+tools/agent.version
+tools/bin/
+tools/conf/
+tools/development/
+tools/doc/
+tools/kiuwan.cmd
+tools/kiuwan.sh
+tools/lib.custom/
+tools/readme.txt

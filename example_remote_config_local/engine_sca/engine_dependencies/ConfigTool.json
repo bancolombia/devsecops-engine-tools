@@ -35,7 +35,8 @@
         "VULNERABILITY_CONFIDENCE" : ["highest"]
     },
     "TRIVY": {
-        "CLI_VERSION": "0.65.0",
-        "PRINT_SBOM": ["pipeline_name_1"]
+        "TRIVY_VERSION": "0.69.3",
+        "PRINT_SBOM": ["pipeline_name_1"],
+        "_NOTE": "TRIVY_VERSION is the standardized key. CLI_VERSION is deprecated but still supported for backward compatibility."
     }
 }

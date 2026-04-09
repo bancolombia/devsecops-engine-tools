@@ -10,7 +10,7 @@
         "SCAN_RETRY_DELAY_TAR_SECONDS": 0
     },
     "TRIVY": {
-        "TRIVY_VERSION": "0.62.1",
+        "TRIVY_VERSION": "0.69.3",
         "SBOM_FORMAT": "cyclonedx",
         "VULN_TYPE": "all",
         "IGNORE_UNFIXED": false
@@ -37,7 +37,7 @@
     "VALIDATE_BASE_IMAGE_DATE": {
         "ENABLED": false,
         "REFERENCE_IMAGE_DATE": "20250206"
-        
+
     },
     "BLACK_LIST_BASE_IMAGE": {
         "ENABLED": false,

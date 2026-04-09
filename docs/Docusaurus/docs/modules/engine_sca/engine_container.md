@@ -25,7 +25,7 @@ Main configuration file that defines scanning behavior, tool versions, and secur
     "SCAN_RETRY_DELAY_TAR_SECONDS": 0
   },
   "TRIVY": {
-    "TRIVY_VERSION": "0.62.1",
+    "TRIVY_VERSION": "0.69.3",
     "SBOM_FORMAT": "cyclonedx",
     "VULN_TYPE": "all",
     "IGNORE_UNFIXED": false
@@ -129,7 +129,7 @@ Main configuration file that defines scanning behavior, tool versions, and secur
 - **SCAN_RETRY_DELAY_TAR_SECONDS**: Delay (seconds) between retries for TAR image scans
 
 ##### Trivy Configuration
-- **TRIVY_VERSION**: Trivy scanner version to use (e.g., `"0.62.1"`)
+- **TRIVY_VERSION**: Trivy scanner version to use (e.g., `"0.69.3"`)
 - **SBOM_FORMAT**: SBOM output format (`"cyclonedx"` for CycloneDX format)
 - **VULN_TYPE**: Types of vulnerabilities to scan (`"all"` for comprehensive scanning)
 - **IGNORE_UNFIXED**: Boolean flag to ignore vulnerabilities without available fixes

@@ -50,7 +50,7 @@ Main configuration file that defines scanning behavior, tool versions, and secur
     "VULNERABILITY_CONFIDENCE": ["highest"]
   },
   "TRIVY": {
-    "CLI_VERSION": "0.65.0",
+    "TRIVY_VERSION": "0.69.3",
     "PRINT_SBOM": ["pipeline_name_1"]
   }
 }
@@ -74,7 +74,8 @@ Main configuration file that defines scanning behavior, tool versions, and secur
 - **VULNERABILITY_CONFIDENCE**: Array of confidence levels for vulnerability detection (e.g., `["highest"]`)
 
 ##### Trivy Tool Configuration
-- **CLI_VERSION**: Trivy scanner version to use (e.g., `"0.65.0"`)
+- **TRIVY_VERSION**: Trivy scanner version to use (e.g., `"0.69.3"`)
+  - **Note**: `CLI_VERSION` is deprecated but still supported for backward compatibility
 
 ##### General Configuration
 - **IGNORE_ANALYSIS_PATTERN**: Regex pattern to exclude directories/files from analysis (e.g., `"(.*_test)"` ignores test directories)
