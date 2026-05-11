@@ -40,6 +40,7 @@
         "EXTERNAL_DIR_REPOSITORY": "",
         "APP_ID_GITHUB":"",
         "INSTALLATION_ID_GITHUB":"",
+        "DOWNLOAD_EXTERNAL_MODULES": false,
         "DEFAULT_SEVERITY": "Critical",
         "DEFAULT_CATEGORY": "Compliance",
         "SERVERLESS_ADITIONAL_CHECKS": ["RULES_CLOUDFORMATION"],
