@@ -359,6 +359,9 @@ class CheckovTool(ToolGateway):
                         ),
                         repo_root_for_plan_enrichment=repo_root,
                         deep_analysis=(True if repo_root else None),
+                        download_external_modules=config_tool[self.TOOL_CHECKOV].get(
+                            "DOWNLOAD_EXTERNAL_MODULES", False
+                        ),
                     )
 
                     checkov_config.create_config_dict()
