@@ -24,6 +24,7 @@ class CheckovConfigEnum(Enum):
     SKIP_DOWNLOAD = "skip-download"
     REPO_ROOT_FOR_PLAN_ENRICHMENT = "repo-root-for-plan-enrichment"
     DEEP_ANALYSIS = "deep-analysis"
+    DOWNLOAD_EXTERNAL_MODULES = "download-external-modules"
 
 class CheckovConfig:
     dict_confg_file = {}
@@ -47,7 +48,8 @@ class CheckovConfig:
         skip_checks=None,
         skip_download=True,
         repo_root_for_plan_enrichment=None,
-        deep_analysis=None
+        deep_analysis=None,
+        download_external_modules=False,
     ):
         self.path_config_file = path_config_file
         self.config_file_name = config_file_name
@@ -67,6 +69,7 @@ class CheckovConfig:
         self.env = env
         self.repo_root_for_plan_enrichment = repo_root_for_plan_enrichment
         self.deep_analysis = deep_analysis
+        self.download_external_modules = download_external_modules
 
     def create_config_dict(self):
         if self.framework is not None:
@@ -150,5 +153,10 @@ class CheckovConfig:
             self.dict_confg_file[
                 CheckovConfigEnum.SKIP_DOWNLOAD.value
             ] = self.skip_download
+
+        if self.download_external_modules is not None:
+            self.dict_confg_file[
+                CheckovConfigEnum.DOWNLOAD_EXTERNAL_MODULES.value
+            ] = self.download_external_modules
 
         return self.dict_confg_file
