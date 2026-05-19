@@ -13,6 +13,9 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.cortex_cloud.cortex_cloud_manager_scan import (
     CortexCloudManagerScan,
 )
+from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.cortex_cloud.cortex_deserialize_output import (
+    CortexDeserealizator,
+)
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.trivy_tool.trivy_manager_scan import (
     TrivyScan,
 )
@@ -31,7 +34,7 @@ def runner_engine_container(dict_args, tool, secret_tool, tool_remote, remote_co
             tool_deseralizator = PrismaDeserealizator()
         elif tool.lower() == "cortex":
             tool_run = CortexCloudManagerScan()
-            tool_deseralizator = PrismaDeserealizator()
+            tool_deseralizator = CortexDeserealizator()
         tool_images = DockerImages()
         
         findings_list, input_core, sbom_components = init_engine_sca_rm(

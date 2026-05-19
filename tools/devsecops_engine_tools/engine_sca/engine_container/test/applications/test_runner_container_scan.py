@@ -45,8 +45,8 @@ def test_init_engine_container_cortex():
     ) as mock_init_engine_sca_rm, patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan.CortexCloudManagerScan"
     ) as mock_cortex, patch(
-        "devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan.PrismaDeserealizator"
-    ) as mock_prisma_deser, patch(
+        "devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan.CortexDeserealizator"
+    ) as mock_cortex_deser, patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan.DockerImages"
     ) as mock_docker:
         mock_findings = ["finding1"]
