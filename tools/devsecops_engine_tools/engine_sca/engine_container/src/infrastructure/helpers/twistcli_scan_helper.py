@@ -1,11 +1,21 @@
 import os
 import subprocess
+import tempfile
 import time
 
 from devsecops_engine_tools.engine_utilities import settings
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
+
+
+def create_temp_tarball_path(image_name):
+    safe_prefix = image_name.replace("/", "_").replace(":", "_")
+    file_descriptor, tarball_path = tempfile.mkstemp(
+        suffix=".tar", prefix=f"{safe_prefix}_"
+    )
+    os.close(file_descriptor)
+    return tarball_path
 
 
 def split_basic_auth_token(key, error_message=None):
@@ -115,7 +125,7 @@ def scan_image_with_tarball_fallback(
     ):
         return result_file
 
-    tarball_path = f"/tmp/{image_name.replace('/', '_').replace(':', '_')}.tar"
+    tarball_path = create_temp_tarball_path(image_name)
     logger.warning(
         "Normal scan failed for %s, attempting tarball fallback at %s",
         image_name,

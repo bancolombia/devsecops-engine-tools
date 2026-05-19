@@ -5,6 +5,7 @@ import pytest
 
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.twistcli_scan_helper import (
     build_scan_base_command,
+    create_temp_tarball_path,
     execute_scan,
     get_scan_retry_settings,
     scan_image_with_tarball_fallback,
@@ -62,6 +63,22 @@ def test_get_scan_retry_settings_uses_defaults():
 def test_get_scan_retry_settings_clamps_tar_to_one():
     settings = get_scan_retry_settings({"SCAN_RETRIES_TAR": 0})
     assert settings[2] == 1
+
+
+def test_create_temp_tarball_path_uses_secure_tempfile():
+    with patch(
+        "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.twistcli_scan_helper.tempfile.mkstemp",
+        return_value=(7, "/tmp/ubuntu_latest_abcd.tar"),
+    ) as mock_mkstemp, patch(
+        "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.twistcli_scan_helper.os.close"
+    ) as mock_close:
+        tarball_path = create_temp_tarball_path("ubuntu:latest")
+
+        assert tarball_path == "/tmp/ubuntu_latest_abcd.tar"
+        mock_mkstemp.assert_called_once_with(
+            suffix=".tar", prefix="ubuntu_latest_"
+        )
+        mock_close.assert_called_once_with(7)
 
 
 def test_execute_scan_returns_true_on_success():
@@ -137,6 +154,9 @@ def test_scan_image_with_tarball_fallback_uses_docker_save_when_normal_fails():
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.twistcli_scan_helper.execute_scan",
         side_effect=[False, True],
     ), patch(
+        "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.twistcli_scan_helper.create_temp_tarball_path",
+        return_value="/tmp/secure_random.tar",
+    ), patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.twistcli_scan_helper.subprocess.run"
     ) as mock_run, patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.twistcli_scan_helper.os.path.exists",
@@ -154,13 +174,25 @@ def test_scan_image_with_tarball_fallback_uses_docker_save_when_normal_fails():
         )
         assert result == "result.json"
         mock_run.assert_called_once()
-        mock_remove.assert_called_once_with("/tmp/ubuntu_latest.tar")
+        mock_run.assert_called_once_with(
+            ["docker", "save", "-o", "/tmp/secure_random.tar", "ubuntu:latest"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        mock_remove.assert_called_once_with("/tmp/secure_random.tar")
 
 
 def test_scan_image_with_tarball_fallback_returns_none_when_docker_save_fails():
     with patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.twistcli_scan_helper.execute_scan",
         return_value=False,
+    ), patch(
+        "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.twistcli_scan_helper.create_temp_tarball_path",
+        return_value="/tmp/secure_random.tar",
     ), patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.helpers.twistcli_scan_helper.subprocess.run",
         side_effect=subprocess.CalledProcessError(1, ["docker"], stderr="boom"),
