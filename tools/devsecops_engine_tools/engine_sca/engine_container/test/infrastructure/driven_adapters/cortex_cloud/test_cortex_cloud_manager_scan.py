@@ -12,9 +12,9 @@ from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.drive
 def mock_remoteconfig():
     return {
         "CORTEX_CLOUD": {
-            "TWISTCLI_PATH": "twistcli",
-            "PRISMA_CONSOLE_URL": "https://console.example.com",
-            "PRISMA_API_VERSION": "v1",
+            "CORTEXCLI_PATH": "twistcli",
+            "CORTEX_CONSOLE_URL": "https://console.example.com",
+            "CORTEX_API_VERSION": "v1",
             "SBOM_FORMAT": "json",
         }
     }

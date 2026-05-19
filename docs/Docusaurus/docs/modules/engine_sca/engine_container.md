@@ -24,6 +24,16 @@ Main configuration file that defines scanning behavior, tool versions, and secur
     "SCAN_RETRIES_TAR": 1,
     "SCAN_RETRY_DELAY_TAR_SECONDS": 0
   },
+  "CORTEX_CLOUD": {
+    "CORTEXCLI_PATH": "twistcli",
+    "CORTEX_CONSOLE_URL": "",
+    "CORTEX_API_VERSION": "",
+    "SBOM_FORMAT": "cyclonedx_json",
+    "SCAN_RETRIES": 1,
+    "SCAN_RETRY_DELAY_SECONDS": 0,
+    "SCAN_RETRIES_TAR": 1,
+    "SCAN_RETRY_DELAY_TAR_SECONDS": 0
+  },
   "TRIVY": {
     "TRIVY_VERSION": "0.62.1",
     "SBOM_FORMAT": "cyclonedx",
@@ -128,6 +138,16 @@ Main configuration file that defines scanning behavior, tool versions, and secur
 - **SCAN_RETRIES_TAR**: Number of retry attempts for TAR image scans (minimum 1)
 - **SCAN_RETRY_DELAY_TAR_SECONDS**: Delay (seconds) between retries for TAR image scans
 
+##### Cortex Cloud Configuration
+- **CORTEXCLI_PATH**: Path to Cortex Cloud CLI binary (e.g., `"twistcli"`)
+- **CORTEX_CONSOLE_URL**: URL of the Cortex Cloud console for API access
+- **CORTEX_API_VERSION**: API version to use for Cortex Cloud integration
+- **SBOM_FORMAT**: SBOM output format (`"cyclonedx_json"` for CycloneDX JSON format)
+- **SCAN_RETRIES**: Number of retry attempts for normal image scans (minimum 1)
+- **SCAN_RETRY_DELAY_SECONDS**: Delay (seconds) between retries for normal image scans
+- **SCAN_RETRIES_TAR**: Number of retry attempts for TAR image scans (minimum 1)
+- **SCAN_RETRY_DELAY_TAR_SECONDS**: Delay (seconds) between retries for TAR image scans
+
 ##### Trivy Configuration
 - **TRIVY_VERSION**: Trivy scanner version to use (e.g., `"0.62.1"`)
 - **SBOM_FORMAT**: SBOM output format (`"cyclonedx"` for CycloneDX format)
@@ -224,6 +244,16 @@ Defines exclusion rules for repositories and specific vulnerability findings.
         "hu": "345345",
         "reason": "False Positive"
       }
+    ],
+    "CORTEX": [
+      {
+        "id": "",
+        "where": "all",
+        "create_date": "24012023",
+        "expired_date": "22092023",
+        "hu": "345345",
+        "reason": "False Positive"
+      }
     ]
   },
   "Repository_Test": {
@@ -245,6 +275,15 @@ Defines exclusion rules for repositories and specific vulnerability findings.
         "create_date": "24012023",
         "hu": "345345"
       }
+    ],
+    "CORTEX": [
+      {
+        "id": "CVE-2023-6237",
+        "cve_id": "CVE-2023-6237",
+        "expired_date": "21092024",
+        "create_date": "24012023",
+        "hu": "345345"
+      }
     ]
   }
 }
@@ -255,6 +294,7 @@ Defines exclusion rules for repositories and specific vulnerability findings.
 - **Repository-specific**: Exclusions for specific repositories (e.g., `"Repository_Test"`)
 - **Tool-specific exclusions**: Organized by scanning tool:
   - `PRISMA`: Exclusions for Prisma Cloud findings
+  - `CORTEX`: Exclusions for Cortex Cloud findings
   - `TRIVY`: Exclusions for Trivy findings (if needed)
 - **Feature-specific exclusions**: Configuration feature bypasses:
   - `VALIDATE_BASE_IMAGE_DATE`: Skip base image date validation
@@ -277,7 +317,7 @@ Defines exclusion rules for repositories and specific vulnerability findings.
 
 ## Main Responsibilities
 
-- **Container SCA Orchestration:** Executes container scanning tools (Trivy, Prisma Cloud) on container images
+- **Container SCA Orchestration:** Executes container scanning tools (Trivy, Prisma Cloud, Cortex Cloud) on container images
 - **Configuration Management:** Loads and processes scan configurations and exclusions from remote repositories
 - **Image Discovery:** Identifies and manages container images to be scanned with pattern-based filtering
 - **Exclusions Management:** Applies exclusion rules based on configuration and DevSecOps policy with audit trail
@@ -291,12 +331,13 @@ Defines exclusion rules for repositories and specific vulnerability findings.
 - `runner_container_scan.py`: Main entry point for container scan orchestration
 - `entry_point_tool.py`: Initializes the container SCA engine and triggers the scan process
 - `container_sca_scan.py`: Core use case for executing the scan, handling configuration, exclusions, and result aggregation
-- **Adapters:** Integrations for container scanning tools (Trivy, Prisma Cloud) and Docker image management
+- **Adapters:** Integrations for container scanning tools (Trivy, Prisma Cloud, Cortex Cloud) and Docker image management
 
 ## Supported Tools and Features
 
 - **Trivy:** Comprehensive vulnerability scanning with SBOM generation and configurable vulnerability types
 - **Prisma Cloud:** Advanced container security scanning with enterprise policy enforcement and console integration
+- **Cortex Cloud:** Container security scanning with Cortex Cloud CLI integration and console connectivity
 - **SBOM Support:** Extracts and manages SBOMs in CycloneDX format for container images with branch-specific triggers
 - **Base Image Management:** Validates base image compliance, dates, and blacklist rules with Docker label integration
 - **Quality-based Security:** Applies different security profiles (STRONG/MODERATE) based on product types and applications
@@ -326,6 +367,16 @@ devsecops-engine-tools \
 	--module engine_container \
 	--tool prisma \
 	--image_to_scan registry.example.com/myapp:v1.0.0
+```
+
+### Cortex Cloud Scanning
+```sh
+devsecops-engine-tools \
+  --platform_devops azure \
+  --remote_config_source azure \
+  --module engine_container \
+  --tool cortex \
+  --image_to_scan registry.example.com/myapp:v1.0.0
 ```
 
 ## Configuration Guidelines

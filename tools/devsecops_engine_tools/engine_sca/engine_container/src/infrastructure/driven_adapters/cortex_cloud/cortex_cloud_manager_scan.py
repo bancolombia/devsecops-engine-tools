@@ -24,7 +24,7 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 class CortexCloudManagerScan(ToolGateway):
     def _get_cortex_config(self, remoteconfig):
-        return remoteconfig.get("CORTEX_CLOUD") or remoteconfig.get("PRISMA_CLOUD", {})
+        return remoteconfig.get("CORTEX_CLOUD", {})
 
     def download_twistcli(
         self, file_path, cortex_key, cortex_console_url, cortex_api_version
@@ -54,7 +54,7 @@ class CortexCloudManagerScan(ToolGateway):
             "images",
             "scan",
             "--address",
-            cortex_config["PRISMA_CONSOLE_URL"],
+            cortex_config["CORTEX_CONSOLE_URL"],
             "--user",
             self._split_cortex_token(cortex_key)[0],
             "--password",
@@ -181,8 +181,8 @@ class CortexCloudManagerScan(ToolGateway):
     def _generate_sbom(self, image_scanned, remoteconfig, cortex_key, image_name):
         cortex_config = self._get_cortex_config(remoteconfig)
         url = (
-            f"{cortex_config['PRISMA_CONSOLE_URL']}/api/"
-            f"{cortex_config['PRISMA_API_VERSION']}/sbom/download/cli-images"
+            f"{cortex_config['CORTEX_CONSOLE_URL']}/api/"
+            f"{cortex_config['CORTEX_API_VERSION']}/sbom/download/cli-images"
         )
         credentials = base64.b64encode(cortex_key.encode()).decode()
         headers = {"Authorization": f"Basic {credentials}"}
@@ -239,21 +239,21 @@ class CortexCloudManagerScan(ToolGateway):
         cortex_config = self._get_cortex_config(remoteconfig)
 
         if secret_tool:
-            access_key = secret_tool.get("access_cortex") or secret_tool.get("access_prisma")
-            token_key = secret_tool.get("token_cortex") or secret_tool.get("token_prisma")
+            access_key = secret_tool.get("access_cortex")
+            token_key = secret_tool.get("token_cortex")
             cortex_key = f"{access_key}:{token_key}"
         else:
             cortex_key = token_engine_container
 
-        file_path = os.path.join(os.getcwd(), cortex_config["TWISTCLI_PATH"])
+        file_path = os.path.join(os.getcwd(), cortex_config["CORTEXCLI_PATH"])
         sbom_components = None
 
         if not os.path.exists(file_path):
             self.download_twistcli(
                 file_path,
                 cortex_key,
-                cortex_config["PRISMA_CONSOLE_URL"],
-                cortex_config["PRISMA_API_VERSION"],
+                cortex_config["CORTEX_CONSOLE_URL"],
+                cortex_config["CORTEX_API_VERSION"],
             )
         image_scanned = self.scan_image(
             file_path,
