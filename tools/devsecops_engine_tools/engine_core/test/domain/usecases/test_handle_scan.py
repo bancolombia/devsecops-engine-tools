@@ -984,3 +984,91 @@ class TestHandleScan(unittest.TestCase):
 
         self.handle_scan.process(dict_args, config_tool)
 
+
+    @mock.patch(
+        "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_license"
+    )
+    def test_process_with_engine_license_returns_runner_input_core(
+        self, mock_runner_engine_license
+    ):
+        """engine_license is standalone: runner builds the InputCore and the
+        handle_scan branch just forwards it. No VM, no risk_score."""
+        dict_args = {
+            "use_secrets_manager": "false",
+            "module": "engine_license",
+            "use_vulnerability_management": "true",
+            "remote_config_repo": "test_repo",
+            "remote_config_branch": "",
+        }
+        config_tool = {
+            "VULNERABILITY_MANAGER": {},
+            "ENGINE_LICENSE": {"ENABLED": "true", "TOOL": "GRANT"},
+        }
+
+        runner_input_core = InputCore(
+            totalized_exclusions=[],
+            threshold_defined=self.threshold,
+            path_file_results="/abs/svc_LICENSE.json",
+            custom_message_break_build="License scan completed",
+            scope_pipeline="svc",
+            scope_service="svc",
+            stage_pipeline="Build",
+        )
+        mock_runner_engine_license.return_value = (
+            [],
+            runner_input_core,
+            ["sbom_component"],
+        )
+
+        findings, input_core = self.handle_scan.process(dict_args, config_tool)
+
+        self.assertEqual(findings, [])
+        self.assertIs(input_core, runner_input_core)
+
+        self.vulnerability_management.send_vulnerability_management.assert_not_called()
+        self.risk_score_gateway.get_risk_score.assert_not_called()
+
+        mock_runner_engine_license.assert_called_once_with(
+            dict_args,
+            config_tool,
+            mock.ANY,  # secret_tool
+            self.devops_platform_gateway,
+            self.remote_config_source_gateway,
+            self.sbom_gateway,
+        )
+
+    @mock.patch(
+        "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_license"
+    )
+    def test_process_with_engine_license_propagates_runner_failure_input_core(
+        self, mock_runner_engine_license
+    ):
+        """When the runner reports a failed license report, handle_scan still
+        returns the InputCore the runner produced."""
+        dict_args = {
+            "use_secrets_manager": "false",
+            "module": "engine_license",
+            "use_vulnerability_management": "true",
+            "remote_config_repo": "test_repo",
+            "remote_config_branch": "",
+        }
+        config_tool = {
+            "VULNERABILITY_MANAGER": {},
+            "ENGINE_LICENSE": {"ENABLED": "true", "TOOL": "GRANT"},
+        }
+
+        failure_input_core = InputCore(
+            totalized_exclusions=[],
+            threshold_defined=self.threshold,
+            path_file_results=None,
+            custom_message_break_build="License scan completed",
+            scope_pipeline="svc",
+            scope_service="svc",
+            stage_pipeline="Build",
+        )
+        mock_runner_engine_license.return_value = ([], failure_input_core, None)
+
+        findings, input_core = self.handle_scan.process(dict_args, config_tool)
+        self.assertEqual(findings, [])
+        self.assertIsNone(input_core.path_file_results)
+        self.assertEqual(input_core.scope_pipeline, "svc")

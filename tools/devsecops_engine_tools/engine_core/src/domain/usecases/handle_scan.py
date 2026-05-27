@@ -46,6 +46,9 @@ from devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_
 from devsecops_engine_tools.engine_sca.engine_dependencies.src.applications.runner_dependencies_scan import (
     runner_engine_dependencies,
 )
+from devsecops_engine_tools.engine_sca.engine_license.src.applications.runner_license_scan import (
+    runner_engine_license,
+)
 from devsecops_engine_tools.engine_sca.engine_function.src.applications.runner_function_scan import (
     runner_engine_function,
 )
@@ -221,6 +224,16 @@ class HandleScan:
             )
 
             self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
+            return findings_list, input_core
+        elif "engine_license" in dict_args["module"]:
+            findings_list, input_core, _sbom_components = runner_engine_license(
+                dict_args,
+                config_tool,
+                secret_tool,
+                self.devops_platform_gateway,
+                self.remote_config_source_gateway,
+                self.sbom_tool_gateway,
+            )
             return findings_list, input_core
 
     def _use_vulnerability_management(

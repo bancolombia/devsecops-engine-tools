@@ -234,6 +234,11 @@ Configuration of the driven adapters in the main layer and management of on/off 
         "TOOL": "XRAY|DEPENDENCY_CHECK|TRIVY",
         "PRIORITY": "STANDARD|DISCREET"
     },
+    "ENGINE_LICENSE": {
+        "ENABLED": true,
+        "TOOL": "GRANT",
+        "PRIORITY": "STANDARD|DISCREET"
+    },
     "ENGINE_CODE": {
         "ENABLED": true,
         "TOOL": "BEARER|KIUWAN",
@@ -438,6 +443,11 @@ Configuration of the driven adapters in the main layer and management of on/off 
 - **ENGINE_DEPENDENCIES**: Configuration for the engine_dependencies tool
     - ENABLED: true or false
     - TOOL: XRAY | DEPENDENCY_CHECK | TRIVY
+    - PRIORITY: STANDARD | DISCREET
+
+- **ENGINE_LICENSE**: Configuration for the engine_license tool
+    - ENABLED: true or false
+    - TOOL: GRANT
     - PRIORITY: STANDARD | DISCREET
 
 - **ENGINE_FUNCTION**: Configuration for the engine_function tool
