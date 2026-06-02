@@ -170,11 +170,9 @@ def test_get_license_context_from_results_success(tmp_path):
     scan = GrantScan()
     result = scan.get_license_context_from_results(str(path))
 
-    assert len(result) == 3
-    assert result[0].name == "lodash"
-    assert result[0].severity == "low"
-    assert result[1].name == "ngrx"
-    assert result[1].severity == "critical"
-    assert result[2].name == "biz-lib"
-    assert result[2].severity == "medium"
+    assert len(result) == 2
+    assert result[0].name == "ngrx"
+    assert result[0].severity == "critical"
+    assert result[1].name == "biz-lib"
+    assert result[1].severity == "medium"
     assert result[0].priority is None

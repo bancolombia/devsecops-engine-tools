@@ -33,9 +33,7 @@ class GrantScan(ToolGateway):
     _POLICY_TO_SEVERITY = {
         "fail": "critical",
         "warn": "medium",
-        "unlicensed": "low",
         "unknown": "low",
-        "ok": "low",
     }
 
     def __init__(self):
@@ -230,15 +228,18 @@ class GrantScan(ToolGateway):
 
         context_list = []
         for dep in data.get("dependencies", []):
+            policy = dep.get("policy_applied", "unknown")
+            if policy == "ok" or policy == "unlicensed":
+                continue
             context_list.append(
                 ContextLicense(
                     name=dep.get("name", "unknown"),
                     version=dep.get("version", ""),
                     licenses=dep.get("licenses", []),
-                    policy_applied=dep.get("policy_applied", "unknown"),
+                    policy_applied=policy,
                     policy_reason=dep.get("policy_reason", ""),
                     policy_pattern_matched=dep.get("policy_pattern_matched", ""),
-                    severity=self._POLICY_TO_SEVERITY.get(dep.get("policy_applied", ""), "low"),
+                    severity=self._POLICY_TO_SEVERITY.get(policy, "low"),
                 )
             )
         return context_list
