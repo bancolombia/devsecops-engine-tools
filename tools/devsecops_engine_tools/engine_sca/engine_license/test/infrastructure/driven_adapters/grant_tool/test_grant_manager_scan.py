@@ -130,3 +130,51 @@ def test_run_tool_license_sca_no_binary(mock_bin):
         {}, _base_args(), {}, "svc", "/tmp", None, None, None
     )
     assert out is None
+
+
+def test_get_license_context_from_results_success(tmp_path):
+    import json
+
+    license_data = {
+        "metadata": {"pipeline_name": "svc"},
+        "dependencies": [
+            {
+                "name": "lodash",
+                "version": "4.17.21",
+                "licenses": ["MIT"],
+                "policy_applied": "ok",
+                "policy_reason": "Allowed",
+                "policy_pattern_matched": "",
+            },
+            {
+                "name": "ngrx",
+                "version": "1.0.0",
+                "licenses": ["AGPL-3.0"],
+                "policy_applied": "fail",
+                "policy_reason": "Matched AGPL-*",
+                "policy_pattern_matched": "AGPL-*",
+            },
+            {
+                "name": "biz-lib",
+                "version": "2.0.0",
+                "licenses": ["BUSL-1.1"],
+                "policy_applied": "warn",
+                "policy_reason": "Matched BUSL-*",
+                "policy_pattern_matched": "BUSL-*",
+            },
+        ],
+    }
+    path = tmp_path / "svc_LICENSE.json"
+    path.write_text(json.dumps(license_data))
+
+    scan = GrantScan()
+    result = scan.get_license_context_from_results(str(path))
+
+    assert len(result) == 3
+    assert result[0].name == "lodash"
+    assert result[0].severity == "low"
+    assert result[1].name == "ngrx"
+    assert result[1].severity == "critical"
+    assert result[2].name == "biz-lib"
+    assert result[2].severity == "medium"
+    assert result[0].priority is None

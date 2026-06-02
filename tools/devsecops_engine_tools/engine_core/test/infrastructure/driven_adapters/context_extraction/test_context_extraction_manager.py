@@ -27,7 +27,7 @@ class TestContextExtractionManager(unittest.TestCase):
         self.assertIsNotNone(self.manager._tool_gateways)
         self.assertIsNotNone(self.manager._method_mapping)
         self.assertEqual(len(self.manager._tool_gateways), 0)
-        self.assertEqual(len(self.manager._method_mapping), 3)
+        self.assertEqual(len(self.manager._method_mapping), 4)
         self.assertIsNotNone(self.manager._risk_score_gateway)
 
     def test_register_tool_gateway_iac(self):
@@ -302,6 +302,85 @@ class TestContextExtractionManager(unittest.TestCase):
             self.remote_config,
             self.config_tool
         )
+
+    def test_extract_context_license(self):
+        """Test extracting context for License module."""
+        path_file_results = "/path/to/svc_LICENSE.json"
+        mock_license_gateway = Mock()
+        mock_license_gateway.get_license_context_from_results.return_value = []
+        self.manager.register_tool_gateway("engine_license", mock_license_gateway)
+
+        self.manager.extract_context(
+            "engine_license",
+            path_file_results,
+            self.remote_config,
+            self.config_tool
+        )
+
+        mock_license_gateway.get_license_context_from_results.assert_called_once_with(
+            path_file_results
+        )
+
+    def test_extract_context_license_prints_output(self):
+        """Test that license context extraction prints the correct JSON between markers."""
+        from io import StringIO
+        import sys
+        from dataclasses import dataclass, field
+        from typing import List, Optional
+
+        @dataclass
+        class FakeContextLicense:
+            name: str
+            version: str
+            licenses: List[str]
+            policy_applied: str
+            policy_reason: str
+            policy_pattern_matched: str
+            severity: str
+            priority: Optional[str] = field(default=None)
+
+        context_items = [
+            FakeContextLicense(
+                name="ngrx",
+                version="1.0.0",
+                licenses=["AGPL-3.0"],
+                policy_applied="fail",
+                policy_reason="Matched AGPL-*",
+                policy_pattern_matched="AGPL-*",
+                severity="critical",
+            )
+        ]
+
+        mock_license_gateway = Mock()
+        mock_license_gateway.get_license_context_from_results.return_value = context_items
+        self.manager.register_tool_gateway("engine_license", mock_license_gateway)
+
+        # Mock risk_score_gateway to set priority
+        def set_priority(findings, config_tool, module):
+            from devsecops_engine_tools.engine_core.src.domain.model.finding import Priority
+            for f in findings:
+                f.priority = Priority(score=1.0, scale="very critical")
+
+        self.mock_risk_score_gateway.get_risk_score.side_effect = set_priority
+
+        captured = StringIO()
+        sys.stdout = captured
+        try:
+            self.manager.extract_context(
+                "engine_license",
+                "/path/to/svc_LICENSE.json",
+                self.remote_config,
+                self.config_tool
+            )
+        finally:
+            sys.stdout = sys.__stdout__
+
+        output = captured.getvalue()
+        assert "===== BEGIN CONTEXT OUTPUT =====" in output
+        assert "===== END CONTEXT OUTPUT =====" in output
+        assert '"license_context"' in output
+        assert '"ngrx"' in output
+        assert '"very critical"' in output
 
 if __name__ == '__main__':
     unittest.main()

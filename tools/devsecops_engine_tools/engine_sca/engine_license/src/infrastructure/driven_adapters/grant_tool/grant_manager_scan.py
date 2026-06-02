@@ -1,11 +1,16 @@
+import json
 import os
 import platform
 import shutil
 import subprocess
 import tarfile
+from typing import List
 
 import requests
 
+from devsecops_engine_tools.engine_sca.engine_license.src.domain.model.context_license import (
+    ContextLicense,
+)
 from devsecops_engine_tools.engine_sca.engine_license.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -24,6 +29,14 @@ class GrantScan(ToolGateway):
     """
 
     TOOL = "GRANT"
+
+    _POLICY_TO_SEVERITY = {
+        "fail": "critical",
+        "warn": "medium",
+        "unlicensed": "low",
+        "unknown": "low",
+        "ok": "low",
+    }
 
     def __init__(self):
         self.download_tool_called = False
@@ -210,3 +223,22 @@ class GrantScan(ToolGateway):
         except Exception as e:
             logger.error(f"Error executing Grant: {e}")
             return None
+
+    def get_license_context_from_results(self, path_file_results) -> List[ContextLicense]:
+        with open(path_file_results, "r") as fh:
+            data = json.load(fh)
+
+        context_list = []
+        for dep in data.get("dependencies", []):
+            context_list.append(
+                ContextLicense(
+                    name=dep.get("name", "unknown"),
+                    version=dep.get("version", ""),
+                    licenses=dep.get("licenses", []),
+                    policy_applied=dep.get("policy_applied", "unknown"),
+                    policy_reason=dep.get("policy_reason", ""),
+                    policy_pattern_matched=dep.get("policy_pattern_matched", ""),
+                    severity=self._POLICY_TO_SEVERITY.get(dep.get("policy_applied", ""), "low"),
+                )
+            )
+        return context_list

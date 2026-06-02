@@ -25,6 +25,7 @@ class ContextExtractionManager(ContextExtractionGateway):
             "engine_iac": "get_iac_context_from_results",
             "engine_container": "get_container_context_from_results",
             "engine_dependencies": "get_dependencies_context_from_results",
+            "engine_license": "get_license_context_from_results",
         }
         
         # Mapping of module names to their context output keys
@@ -32,6 +33,7 @@ class ContextExtractionManager(ContextExtractionGateway):
             "engine_iac": "iac_context",
             "engine_container": "container_context",
             "engine_dependencies": "dependencies_context",
+            "engine_license": "license_context",
         }
         
     def register_tool_gateway(self, module_name: str, tool_gateway: any):
@@ -116,6 +118,9 @@ class ContextExtractionManager(ContextExtractionGateway):
             elif hasattr(context_item, 'id'):
                 # For IaC: id is a string
                 finding_id = context_item.id
+            elif hasattr(context_item, 'name'):
+                # For license: name is the identifier
+                finding_id = context_item.name
             else:
                 finding_id = "unknown"
             

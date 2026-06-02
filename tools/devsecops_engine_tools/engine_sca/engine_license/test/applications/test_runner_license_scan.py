@@ -27,7 +27,7 @@ def test_runner_engine_license_grant_returns_findings_input_core_and_components(
         config_tool = {"ENGINE_LICENSE": {"TOOL": "GRANT"}}
         devops_gw = _make_devops_gateway()
 
-        findings, input_core, sbom_components = runner_engine_license(
+        findings, input_core, sbom_components, tool_gw = runner_engine_license(
             {"remote_config_repo": "r", "remote_config_branch": ""},
             config_tool,
             None,
@@ -40,6 +40,7 @@ def test_runner_engine_license_grant_returns_findings_input_core_and_components(
 
         assert findings == []
         assert sbom_components == ["c1"]
+        assert tool_gw is not None
 
         assert input_core.path_file_results == "/abs/svc_LICENSE.json"
         assert input_core.totalized_exclusions == []
@@ -64,7 +65,7 @@ def test_runner_engine_license_propagates_none_path():
         config_tool = {"ENGINE_LICENSE": {"TOOL": "GRANT"}}
         devops_gw = _make_devops_gateway()
 
-        findings, input_core, sbom_components = runner_engine_license(
+        findings, input_core, sbom_components, tool_gw = runner_engine_license(
             {"remote_config_repo": "r", "remote_config_branch": ""},
             config_tool,
             None,

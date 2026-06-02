@@ -1014,10 +1014,12 @@ class TestHandleScan(unittest.TestCase):
             scope_service="svc",
             stage_pipeline="Build",
         )
+        mock_tool_gateway = MagicMock()
         mock_runner_engine_license.return_value = (
             [],
             runner_input_core,
             ["sbom_component"],
+            mock_tool_gateway,
         )
 
         findings, input_core = self.handle_scan.process(dict_args, config_tool)
@@ -1066,7 +1068,8 @@ class TestHandleScan(unittest.TestCase):
             scope_service="svc",
             stage_pipeline="Build",
         )
-        mock_runner_engine_license.return_value = ([], failure_input_core, None)
+        mock_tool_gateway = MagicMock()
+        mock_runner_engine_license.return_value = ([], failure_input_core, None, mock_tool_gateway)
 
         findings, input_core = self.handle_scan.process(dict_args, config_tool)
         self.assertEqual(findings, [])

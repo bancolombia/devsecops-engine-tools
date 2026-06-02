@@ -62,7 +62,7 @@ def runner_engine_license(
             stage_pipeline="Build",
         )
 
-        return [], input_core, sbom_components
+        return [], input_core, sbom_components, tool_run
 
     except Exception as e:
         raise Exception(f"Error SCAN engine license : {str(e)}")

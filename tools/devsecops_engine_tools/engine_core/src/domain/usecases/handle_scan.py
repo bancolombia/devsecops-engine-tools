@@ -226,7 +226,7 @@ class HandleScan:
             self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
             return findings_list, input_core
         elif "engine_license" in dict_args["module"]:
-            findings_list, input_core, _sbom_components = runner_engine_license(
+            findings_list, input_core, _sbom_components, tool_gateway = runner_engine_license(
                 dict_args,
                 config_tool,
                 secret_tool,
@@ -234,6 +234,16 @@ class HandleScan:
                 self.remote_config_source_gateway,
                 self.sbom_tool_gateway,
             )
+
+            self._handle_context_extraction(
+                dict_args,
+                "engine_license",
+                input_core.path_file_results,
+                config_tool["ENGINE_LICENSE"],
+                tool_gateway,
+                config_tool
+            )
+
             return findings_list, input_core
 
     def _use_vulnerability_management(
