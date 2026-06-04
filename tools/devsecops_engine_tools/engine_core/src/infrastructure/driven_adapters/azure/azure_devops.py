@@ -25,15 +25,23 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 @dataclass
 class AzureDevops(DevopsPlatformGateway):
-    def get_remote_config(self, repository, path, branch=""):
-
-        base_compact_remote_config_url = (
-            f"https://{SystemVariables.System_TeamFoundationCollectionUri.value().rstrip('/').split('/')[-1].replace('.visualstudio.com','')}"
-            f".visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/"
-            f"{repository}?path={path}"
-        )
+    def get_remote_config(self, repository, path, branch="", use_remote_org=False, remote_org="", remote_pat="", remote_proj=""):
+        base_compact_remote_config_url = ''
+        if use_remote_org:
+            base_compact_remote_config_url = (
+                f"https://{remote_org.rstrip('/').split('/')[-1].replace('.visualstudio.com','')}"
+                f".visualstudio.com/{remote_proj}/_git/{repository}?path={path}"
+            )
+            pat = remote_pat
+        else:
+            base_compact_remote_config_url = (
+                f"https://{SystemVariables.System_TeamFoundationCollectionUri.value().rstrip('/').split('/')[-1].replace('.visualstudio.com','')}"
+                f".visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/"
+                f"{repository}?path={path}"
+            )
+            pat = SystemVariables.System_AccessToken.value()
         utils_azure = AzureDevopsApi(
-            personal_access_token=SystemVariables.System_AccessToken.value(),
+            personal_access_token=pat,
             compact_remote_config_url=base_compact_remote_config_url,
         )
         connection = utils_azure.get_azure_connection()

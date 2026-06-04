@@ -118,6 +118,10 @@ def test_get_inputs_from_cli(mock_parse_args):
     mock_args.token_license_analyzer = None
     mock_args.use_license_analyzer = "false"
     mock_args.docker_address = "unix:///var/run/docker.sock"
+    mock_args.use_remote_org = "false"
+    mock_args.remote_org = ""
+    mock_args.remote_pat = ""
+    mock_args.remote_proj = ""
     # Mock the parse_args method
     mock_parse_args.return_value = mock_args
 
@@ -151,6 +155,10 @@ def test_get_inputs_from_cli(mock_parse_args):
         "token_license_analyzer": None,
         "use_license_analyzer": "false",
         "docker_address": "unix:///var/run/docker.sock",
+        "use_remote_org": "false",
+        "remote_org": "",
+        "remote_pat": "",
+        "remote_proj": "",
     }
 
 
@@ -281,6 +289,10 @@ def test_application_core_exception_block(
         "dast_file_path": None,
         "context": "false",
         "docker_address": None,
+        "use_remote_org": "false",
+        "remote_org": "",
+        "remote_pat": "",
+        "remote_proj": "",
     }
     mock_get_inputs_from_cli.return_value = mock_args
     mock_init_engine_core.side_effect = Exception("simulated error")
