@@ -22,4 +22,4 @@ PyJWT==2.12.0
 sympy==1.14.0
 urllib3==2.7.0
 holidays==0.81
-pyarrow==22.0.0
+pyarrow==23.0.1
