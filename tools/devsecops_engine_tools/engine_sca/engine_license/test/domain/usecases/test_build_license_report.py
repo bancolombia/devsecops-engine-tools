@@ -98,7 +98,7 @@ def test_process_writes_license_json_with_mixed_classifications(tmp_path):
     assert no_lic["licenses"] == []
 
 
-def test_process_dual_license_ok_dominates(tmp_path):
+def test_process_dual_license_highest_risk_wins(tmp_path):
     packages = [
         {
             "name": "dual-pkg",
@@ -115,7 +115,7 @@ def test_process_dual_license_ok_dominates(tmp_path):
     with open(out) as fh:
         report = json.load(fh)
     dep = report["dependencies"][0]
-    assert dep["policy_applied"] == "ok"
+    assert dep["policy_applied"] == "fail"
     assert sorted(dep["licenses"]) == ["AGPL-3.0", "MIT"]
 
 

@@ -98,19 +98,19 @@ def test_classify_package_warn_pattern():
     assert result["severity"] == "medium"
 
 
-def test_classify_package_dual_license_ok_dominates():
+def test_classify_package_dual_license_highest_risk_wins():
     result = classify_package(
         [{"id": "AGPL-3.0"}, {"id": "MIT"}], _policy()
     )
-    assert result["policy_applied"] == "ok"
+    assert result["policy_applied"] == "fail"
     assert sorted(result["licenses"]) == ["AGPL-3.0", "MIT"]
 
 
-def test_classify_package_dual_warn_and_fail_picks_warn():
+def test_classify_package_dual_warn_and_fail_picks_fail():
     result = classify_package(
         [{"id": "AGPL-3.0"}, {"id": "BUSL-1.1"}], _policy()
     )
-    assert result["policy_applied"] == "warn"
+    assert result["policy_applied"] == "fail"
 
 
 def test_classify_package_synonyms_resolved():

@@ -153,11 +153,11 @@ def _extract_license_id(license_entry):
 def classify_package(licenses, policy):
     """Classify all licenses on a single package against the policy.
 
-    Dual-license semantics: if ANY license on the package is fully compliant
-    (bucket == "ok"), the package is compliant — the consumer can legally pick
-    the permissive option. The single most permissive non-ok candidate is
-    reported otherwise (warn ranks above fail and unknown because it is the
-    lightest restriction).
+    Highest-risk-wins semantics: if ANY license on the package matches a
+    ``fail`` pattern, the package is classified as ``fail``. Otherwise, if
+    any matches ``warn``, the package is ``warn``. Only when all licenses are
+    compliant (or a single ok is found with no risky siblings) the package is
+    ``ok``.
 
     Args:
         licenses: list of license entries (dicts) from the SBOM/Grant report.
@@ -205,18 +205,8 @@ def classify_package(licenses, policy):
         normalized_labels.append(normalized)
         classified.append((normalized, _classify_label(normalized, policy)))
 
-    for label, result in classified:
-        if result["bucket"] == "ok":
-            return {
-                "policy_applied": "ok",
-                "label": label,
-                "licenses": normalized_labels,
-                "reason": result["reason"],
-                "pattern_matched": result["pattern_matched"],
-                "severity": SEVERITY_BY_ACTION["ok"],
-            }
-
-    rank = {"warn": 0, "fail": 1, "unknown": 2}
+    # Highest risk wins: fail > warn > unknown > ok
+    rank = {"fail": 0, "warn": 1, "unknown": 2, "ok": 3}
 
     def _key(item):
         return rank.get(item[1]["bucket"], 99)
@@ -227,6 +217,8 @@ def classify_package(licenses, policy):
 
     if bucket == "unknown":
         severity = SEVERITY_BY_ACTION.get(policy["unknown_action"], "info")
+    elif bucket == "ok":
+        severity = SEVERITY_BY_ACTION["ok"]
     else:
         severity = SEVERITY_BY_ACTION.get(bucket, "info")
 

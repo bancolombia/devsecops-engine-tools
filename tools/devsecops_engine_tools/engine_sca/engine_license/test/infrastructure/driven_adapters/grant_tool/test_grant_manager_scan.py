@@ -143,15 +143,15 @@ def test_get_license_context_from_results_success(tmp_path):
                 "version": "4.17.21",
                 "licenses": ["MIT"],
                 "policy_applied": "ok",
-                "policy_reason": "Allowed",
-                "policy_pattern_matched": "",
+                "policy_reason": "compliant SPDX license",
+                "policy_pattern_matched": None,
             },
             {
                 "name": "ngrx",
                 "version": "1.0.0",
                 "licenses": ["AGPL-3.0"],
                 "policy_applied": "fail",
-                "policy_reason": "Matched AGPL-*",
+                "policy_reason": "matches FAIL pattern 'AGPL-*'",
                 "policy_pattern_matched": "AGPL-*",
             },
             {
@@ -159,8 +159,32 @@ def test_get_license_context_from_results_success(tmp_path):
                 "version": "2.0.0",
                 "licenses": ["BUSL-1.1"],
                 "policy_applied": "warn",
-                "policy_reason": "Matched BUSL-*",
+                "policy_reason": "matches WARN pattern 'BUSL-*'",
                 "policy_pattern_matched": "BUSL-*",
+            },
+            {
+                "name": "jakarta.servlet-api",
+                "version": "6.1.0",
+                "licenses": ["EPL-2.0", "GPL-2.0-with-classpath-exception"],
+                "policy_applied": "warn",
+                "policy_reason": "matches WARN pattern 'EPL-*'",
+                "policy_pattern_matched": "EPL-*",
+            },
+            {
+                "name": "no-lic",
+                "version": "0.1.0",
+                "licenses": [],
+                "policy_applied": "unlicensed",
+                "policy_reason": "no license detected",
+                "policy_pattern_matched": None,
+            },
+            {
+                "name": "weird-pkg",
+                "version": "0.0.1",
+                "licenses": ["Custom License"],
+                "policy_applied": "unknown",
+                "policy_reason": "non-SPDX license label",
+                "policy_pattern_matched": None,
             },
         ],
     }
@@ -170,9 +194,12 @@ def test_get_license_context_from_results_success(tmp_path):
     scan = GrantScan()
     result = scan.get_license_context_from_results(str(path))
 
-    assert len(result) == 2
+    # Only fail and warn appear in context
+    assert len(result) == 3
     assert result[0].name == "ngrx"
     assert result[0].severity == "critical"
     assert result[1].name == "biz-lib"
     assert result[1].severity == "medium"
+    assert result[2].name == "jakarta.servlet-api"
+    assert result[2].severity == "medium"
     assert result[0].priority is None
