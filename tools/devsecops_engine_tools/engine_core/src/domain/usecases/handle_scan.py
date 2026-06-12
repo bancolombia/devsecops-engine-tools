@@ -244,6 +244,7 @@ class HandleScan:
                 config_tool
             )
 
+            self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
             return findings_list, input_core
 
     def _use_vulnerability_management(

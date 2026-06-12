@@ -116,6 +116,7 @@ class BuildLicenseReport:
                         "policy_pattern_matched": classification[
                             "pattern_matched"
                         ],
+                        "license_matched": classification["label"],
                     }
                 )
         return dependencies

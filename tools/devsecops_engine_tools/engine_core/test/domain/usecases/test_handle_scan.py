@@ -1028,7 +1028,7 @@ class TestHandleScan(unittest.TestCase):
         self.assertIs(input_core, runner_input_core)
 
         self.vulnerability_management.send_vulnerability_management.assert_not_called()
-        self.risk_score_gateway.get_risk_score.assert_not_called()
+        self.risk_score_gateway.get_risk_score.assert_called_once()
 
         mock_runner_engine_license.assert_called_once_with(
             dict_args,
