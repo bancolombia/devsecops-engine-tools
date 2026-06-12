@@ -1,4 +1,4 @@
-"""Use case that builds the LICENSE.json artifact from a Grant scan report.
+"""Use case that builds the LICENSE.json artifact from a CycloneDX SBOM.
 
 The output is a hybrid JSON: top-level ``metadata`` block (pipeline name,
 scan date, tool, applied policy echo, summary counts) plus a flat
@@ -12,43 +12,40 @@ output directory (CWD by default).
 import copy
 import json
 import os
-import re
 from datetime import datetime
 
 from devsecops_engine_tools.engine_sca.engine_license.src.domain.usecases.license_policy import (
     build_policy_from_remote_config,
     classify_package,
-    get_value,
 )
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
-TOOL = "GRANT"
+TOOL = "CDXGEN"
 _SUMMARY_BUCKETS = ("ok", "fail", "warn", "unlicensed", "unknown")
 
 
 class BuildLicenseReport:
-    """Build the LICENSE.json artifact from a Grant scan report.
+    """Build the LICENSE.json artifact from a CycloneDX SBOM.
 
     The ``process`` method returns the absolute path to the file it writes
-    or ``None`` when no report could be generated (e.g. invalid input
-    file, missing policy).
+    or ``None`` when no report could be generated.
     """
 
     def __init__(self, output_dir: str = None):
         self.output_dir = output_dir or os.getcwd()
 
-    def process(self, grant_report_path, remote_config, pipeline_name):
+    def process(self, sbom_path, remote_config, pipeline_name):
         policy = build_policy_from_remote_config(remote_config)
         if policy is None:
             logger.error(
-                "Cannot build LICENSE report: GRANT.LICENSE_POLICY missing."
+                "Cannot build LICENSE report: LICENSE_POLICY missing in remote config."
             )
             return None
 
-        data = self._read_grant_report(grant_report_path)
+        data = self._read_sbom(sbom_path)
         if data is None:
             return None
 
@@ -62,91 +59,51 @@ class BuildLicenseReport:
         return self._write_report(report, pipeline_name)
 
     @staticmethod
-    def _read_grant_report(grant_report_path):
-        if not grant_report_path:
-            logger.error("Grant report path is empty; cannot build LICENSE report.")
+    def _read_sbom(sbom_path):
+        if not sbom_path:
+            logger.error("SBOM path is empty; cannot build LICENSE report.")
             return None
-        if not os.path.exists(grant_report_path):
-            logger.error(f"Grant report not found: {grant_report_path}")
+        if not os.path.exists(sbom_path):
+            logger.error(f"SBOM not found: {sbom_path}")
             return None
         try:
-            with open(grant_report_path, "r") as fh:
+            with open(sbom_path, "r") as fh:
                 return json.load(fh)
         except Exception as e:
-            logger.error(f"Error reading Grant report '{grant_report_path}': {e}")
+            logger.error(f"Error reading SBOM '{sbom_path}': {e}")
             return None
 
     def _build_dependencies(self, data, policy):
-        targets = self._extract_targets(data)
+        components = data.get("components", [])
         dependencies = []
-        for target in targets:
-            source = get_value(target, "source", "Source", default={})
-            source_ref = get_value(source, "ref", "Ref", default="")
-            source_root = self._source_root_name(source_ref)
+        for component in components:
+            pkg_name = component.get("name", "unknown")
+            pkg_version = component.get("version", "")
+            raw_licenses = component.get("licenses", [])
+            licenses = [
+                entry.get("license", entry) for entry in raw_licenses
+                if isinstance(entry, dict)
+            ]
 
-            evaluation = get_value(
-                target, "evaluation", "Evaluation", default={}
+            classification = classify_package(licenses, policy)
+            dependencies.append(
+                {
+                    "name": pkg_name,
+                    "version": pkg_version,
+                    "licenses": classification["licenses"],
+                    "policy_applied": classification["policy_applied"],
+                    "policy_reason": classification["reason"],
+                    "policy_pattern_matched": classification[
+                        "pattern_matched"
+                    ],
+                    "license_matched": classification["label"],
+                }
             )
-            findings_block = get_value(
-                evaluation, "findings", "Findings", default={}
-            )
-            packages = (
-                get_value(findings_block, "packages", "Packages", default=[])
-                or []
-            )
-
-            for pkg in packages:
-                pkg_name = get_value(pkg, "name", "Name", default="unknown")
-                pkg_version = get_value(pkg, "version", "Version", default="")
-                licenses = (
-                    get_value(pkg, "licenses", "Licenses", default=[]) or []
-                )
-
-                if source_root and self._is_root_project(pkg_name, source_root):
-                    continue
-
-                classification = classify_package(licenses, policy)
-                dependencies.append(
-                    {
-                        "name": pkg_name,
-                        "version": pkg_version,
-                        "licenses": classification["licenses"],
-                        "policy_applied": classification["policy_applied"],
-                        "policy_reason": classification["reason"],
-                        "policy_pattern_matched": classification[
-                            "pattern_matched"
-                        ],
-                        "license_matched": classification["label"],
-                    }
-                )
         return dependencies
-
-    @staticmethod
-    def _extract_targets(data):
-        run = get_value(data, "run", "Run", default={})
-        targets = get_value(run, "targets", "Targets")
-        if targets:
-            return targets
-        return data.get("results") or data.get("Results") or []
-
-    @staticmethod
-    def _source_root_name(source_ref):
-        if not source_ref:
-            return ""
-        base = os.path.basename(source_ref)
-        base = re.sub(r"\.(cdx|spdx)?\.?(json|xml|yaml|yml)$", "", base, flags=re.I)
-        base = re.sub(r"[_\-]sbom$", "", base, flags=re.I)
-        return base.strip().lower()
-
-    @staticmethod
-    def _is_root_project(pkg_name, source_root_name):
-        if not pkg_name or not source_root_name:
-            return False
-        return pkg_name.strip().lower() == source_root_name
 
     def _build_metadata(self, pipeline_name, remote_config, dependencies):
         policy_used = copy.deepcopy(
-            (remote_config or {}).get(TOOL, {}).get("LICENSE_POLICY", {})
+            (remote_config or {}).get("LICENSE", {}).get("LICENSE_POLICY", {})
         )
 
         summary = {

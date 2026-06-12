@@ -1,13 +1,10 @@
 """Entry point of the engine_license module.
 
-The flow is intentionally linear and standalone (it does NOT participate
-in the build pipeline gating logic):
+The flow is:
 
-    1. Always generate a fresh SBOM of the local repository (no cache reuse,
-       no branch filter, no image scanning).
-    2. Run Grant against that SBOM.
-    3. Build the ``{pipeline_name}_LICENSE.json`` artifact from Grant's
-       output, applying the policy declared in remote_config.
+    1. Generate a fresh SBOM via CdxGen.
+    2. Build the ``{pipeline_name}_LICENSE.json`` artifact directly from
+       the SBOM, applying the policy declared in remote_config.
 
 The entry point returns ``(license_json_path, sbom_components)``.
 """
@@ -30,11 +27,9 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 def init_engine_license(
-    tool_run,
     devops_platform_gateway: DevopsPlatformGateway,
-    remote_config_source_gateway: DevopsPlatformGateway,
+    remote_config_source_gateway,
     dict_args,
-    secret_tool,
     config_tool,
     tool_sbom: SbomManagerGateway,
 ):
@@ -68,21 +63,7 @@ def init_engine_license(
         )
         return None, sbom_components
 
-    grant_report_path = tool_run.run_tool_license_sca(
-        remote_config,
-        dict_args,
-        None,
-        pipeline_name,
-        to_scan,
-        sbom_path,
-        None,
-        secret_tool,
-    )
-    if not grant_report_path:
-        logger.error("Grant scan produced no output; aborting LICENSE report build.")
-        return None, sbom_components
-
     license_json_path = BuildLicenseReport().process(
-        grant_report_path, remote_config, pipeline_name
+        sbom_path, remote_config, pipeline_name
     )
     return license_json_path, sbom_components

@@ -219,7 +219,6 @@
     },
     "ENGINE_LICENSE": {
         "ENABLED": true,
-        "TOOL": "GRANT",
         "PRIORITY": "DISCREET"
     },
     "ENGINE_CODE": {

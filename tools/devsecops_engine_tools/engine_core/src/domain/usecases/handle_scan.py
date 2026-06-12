@@ -49,6 +49,9 @@ from devsecops_engine_tools.engine_sca.engine_dependencies.src.applications.runn
 from devsecops_engine_tools.engine_sca.engine_license.src.applications.runner_license_scan import (
     runner_engine_license,
 )
+from devsecops_engine_tools.engine_sca.engine_license.src.infrastructure.driven_adapters.license_scan.license_scan_manager import (
+    LicenseScanManager,
+)
 from devsecops_engine_tools.engine_sca.engine_function.src.applications.runner_function_scan import (
     runner_engine_function,
 )
@@ -226,7 +229,7 @@ class HandleScan:
             self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
             return findings_list, input_core
         elif "engine_license" in dict_args["module"]:
-            findings_list, input_core, _sbom_components, tool_gateway = runner_engine_license(
+            findings_list, input_core, _sbom_components = runner_engine_license(
                 dict_args,
                 config_tool,
                 secret_tool,
@@ -240,7 +243,7 @@ class HandleScan:
                 "engine_license",
                 input_core.path_file_results,
                 config_tool["ENGINE_LICENSE"],
-                tool_gateway,
+                LicenseScanManager(),
                 config_tool
             )
 

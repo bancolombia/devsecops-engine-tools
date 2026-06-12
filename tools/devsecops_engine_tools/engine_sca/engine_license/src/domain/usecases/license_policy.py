@@ -17,7 +17,7 @@ from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
-TOOL = "GRANT"
+TOOL = "LICENSE"
 
 SEVERITY_BY_ACTION = {
     "fail": "critical",
@@ -57,7 +57,7 @@ def looks_like_spdx_id(label):
 
 
 def build_policy_from_remote_config(remote_config):
-    """Build the policy dict exclusively from remote_config GRANT.LICENSE_POLICY.
+    """Build the policy dict from remote_config LICENSE_POLICY section.
 
     Returns None (and logs error) if the configuration is absent.
     """
@@ -68,7 +68,7 @@ def build_policy_from_remote_config(remote_config):
     override = (remote_config.get(TOOL) or {}).get("LICENSE_POLICY")
     if not isinstance(override, dict):
         logger.error(
-            "remote_config missing GRANT.LICENSE_POLICY: cannot classify licenses."
+            "remote_config missing LICENSE_POLICY configuration: cannot classify licenses."
         )
         return None
 
@@ -137,7 +137,7 @@ def _classify_label(normalized_label, policy):
 
 
 def _extract_license_id(license_entry):
-    """Best-effort extraction of a license identifier from a SBOM/Grant entry."""
+    """Best-effort extraction of a license identifier from a CycloneDX SBOM entry."""
     return (
         get_value(
             license_entry,
@@ -160,7 +160,7 @@ def classify_package(licenses, policy):
     ``ok``.
 
     Args:
-        licenses: list of license entries (dicts) from the SBOM/Grant report.
+        licenses: list of license entries (dicts) from the CycloneDX SBOM.
             May be empty, in which case the package is considered unlicensed.
         policy: policy dict produced by ``build_policy_from_remote_config``.
 

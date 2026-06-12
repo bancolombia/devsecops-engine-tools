@@ -45,12 +45,12 @@ def test_looks_like_spdx_id():
 def test_build_policy_returns_none_when_remote_config_missing():
     assert build_policy_from_remote_config(None) is None
     assert build_policy_from_remote_config({}) is None
-    assert build_policy_from_remote_config({"GRANT": {}}) is None
+    assert build_policy_from_remote_config({"LICENSE": {}}) is None
 
 
 def test_build_policy_normalises_lists_and_actions():
     raw = {
-        "GRANT": {
+        "LICENSE": {
             "LICENSE_POLICY": {
                 "fail": ["AGPL-*"],
                 "warn": ["BUSL-*"],
@@ -69,7 +69,7 @@ def test_build_policy_normalises_lists_and_actions():
 
 
 def test_build_policy_handles_non_list_fail_warn():
-    raw = {"GRANT": {"LICENSE_POLICY": {"fail": "not-a-list", "warn": None}}}
+    raw = {"LICENSE": {"LICENSE_POLICY": {"fail": "not-a-list", "warn": None}}}
     policy = build_policy_from_remote_config(raw)
     assert policy["fail"] == []
     assert policy["warn"] == []

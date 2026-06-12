@@ -236,7 +236,6 @@ Configuration of the driven adapters in the main layer and management of on/off 
     },
     "ENGINE_LICENSE": {
         "ENABLED": true,
-        "TOOL": "GRANT",
         "PRIORITY": "STANDARD|DISCREET"
     },
     "ENGINE_CODE": {
@@ -447,7 +446,6 @@ Configuration of the driven adapters in the main layer and management of on/off 
 
 - **ENGINE_LICENSE**: Configuration for the engine_license tool
     - ENABLED: true or false
-    - TOOL: GRANT
     - PRIORITY: STANDARD | DISCREET
 
 - **ENGINE_FUNCTION**: Configuration for the engine_function tool
