@@ -23,7 +23,7 @@ class TestAzureDevops(unittest.TestCase):
         remote_config_repo = "my_repo"
         remote_config_path = "my_path"
         # Llamar con los nuevos argumentos
-        result = azure_devops.get_remote_config(remote_config_repo, remote_config_path, use_remote_org=False, remote_org="", remote_pat="", remote_proj="")
+        result = azure_devops.get_remote_config(remote_config_repo, remote_config_path)
         assert result == {"key": "value"}
 
     def test_message(self):

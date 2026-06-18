@@ -91,6 +91,7 @@ class HandleRisk:
             dict_args["remote_config_repo"],
             "engine_risk/Exclusions.json",
             dict_args["remote_config_branch"],
+            remote_context=dict_args.get("remote_context", {}),
         )
         if (
             pipeline_name in risk_exclusions
@@ -133,11 +134,13 @@ class HandleRisk:
             dict_args["remote_config_repo"],
             "engine_risk/ConfigTool.json",
             dict_args["remote_config_branch"],
+            remote_context=dict_args.get("remote_context", {}),
         )
         risk_exclusions = self.remote_config_source_gateway.get_remote_config(
             dict_args["remote_config_repo"],
             "engine_risk/Exclusions.json",
             dict_args["remote_config_branch"],
+            remote_context=dict_args.get("remote_context", {}),
         )
         pipeline_name = self.devops_platform_gateway.get_variable("pipeline_name")
         definition_name = self.devops_platform_gateway.get_variable("definition_name")
