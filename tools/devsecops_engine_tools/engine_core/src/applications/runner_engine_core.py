@@ -37,6 +37,8 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.conte
 import sys
 import argparse
 import traceback
+import os
+import json
 from devsecops_engine_tools.engine_utilities.dependency_track.infrastructure.driver_adapters.dependency_track import DependencyTrack
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -62,6 +64,20 @@ def parse_choices(choices):
         return parse_separated_list(value, choices)
 
     return parse_with_choices
+
+
+def build_remote_context():
+    organization = os.environ.get("DET_REMOTE_ORG", "")
+    project = os.environ.get("DET_REMOTE_PROJ", "")
+    token = os.environ.get("DET_REMOTE_TOKEN", "")
+    github_repository = os.environ.get("DET_GITHUB_REPOSITORY", "")
+
+    return {
+        "organization": organization,
+        "project": project,
+        "token": token,
+        "github_repository": github_repository,
+    }
 
 
 def get_inputs_from_cli(args):
@@ -260,36 +276,6 @@ def get_inputs_from_cli(args):
         required=False,
         help="Address of the Docker daemon to connect to."
     )
-    parser.add_argument(
-        "--use_remote_org",
-        choices=["true", "false"],
-        type=str,
-        required=False,
-        default="false",
-        help="Set to true to use remote organization integration."
-    )
-    parser.add_argument(
-        "--remote_org",
-        type=str,
-        required=False,
-        default='',
-        help="Remote organization name (required if --use_remote_org is set)."
-    )
-    parser.add_argument(
-        "--remote_pat",
-        type=str,
-        required=False,
-        default='',
-        help="Remote personal access token (required if --use_remote_org is set)."
-    )
-    parser.add_argument(
-        "--remote_proj",
-        type=str,
-        required=False,
-        default='',
-        help="Remote project name (required if --use_remote_org is set)."
-    )
-
     TOOLS = {
         "engine_iac": ["checkov", "kics", "kubescape"],
         "engine_secret": ["trufflehog", "gitleaks", "all_tools"],
@@ -302,17 +288,6 @@ def get_inputs_from_cli(args):
     }
 
     args = parser.parse_args()
-
-    if args.use_remote_org == "true":
-        missing = []
-        if not args.remote_org:
-            missing.append("--remote_org")
-        if not args.remote_pat:
-            missing.append("--remote_pat")
-        if not args.remote_proj:
-            missing.append("--remote_proj")
-        if missing:
-            parser.error(f"When --use_remote_org is set, the following arguments are required: {', '.join(missing)}")
 
     if args.module in TOOLS and args.tool:
         allowed_tools = TOOLS[args.module]
@@ -347,10 +322,6 @@ def get_inputs_from_cli(args):
         "dast_file_path": args.dast_file_path,
         "context": args.context,
         "docker_address": args.docker_address,
-        "use_remote_org": args.use_remote_org,
-        "remote_org": args.remote_org,
-        "remote_pat": args.remote_pat,
-        "remote_proj": args.remote_proj,
     }
 
 
@@ -360,6 +331,8 @@ def application_core():
     try:
         # Get inputs from CLI
         args = get_inputs_from_cli(sys.argv[1:])
+        remote_context = build_remote_context()
+        args["remote_context"] = remote_context
 
         # Define driven adapters for gateways
         vulnerability_management_gateway = DefectDojoPlatform()
@@ -391,10 +364,7 @@ def application_core():
             args["remote_config_repo"],
             "/engine_core/ConfigTool.json",
             args["remote_config_branch"],
-            use_remote_org=args["use_remote_org"] == "true",
-            remote_org=args["remote_org"],
-            remote_pat=args["remote_pat"],
-            remote_proj=args["remote_proj"]
+            remote_context=remote_context,
         )
         tb = config_tool.get("TRACEBACK", False)
 
