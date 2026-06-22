@@ -65,9 +65,7 @@ class TestEntryPointCore(unittest.TestCase):
 
         # Assert that the function calls were made with the expected arguments
         mock_remote_config_source_gateway.get_remote_config.assert_called_once_with(
-            "https://github.com/example/repo",
-            "/engine_core/ConfigTool.json",
-            ""
+            "https://github.com/example/repo", "/engine_core/ConfigTool.json", ""
         )
         mock_handle_scan.return_value.process.assert_called_once_with(
             {

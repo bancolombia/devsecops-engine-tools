@@ -22,7 +22,7 @@ class TestAzureDevops(unittest.TestCase):
         mock_azure_devops_api.return_value = mock_azure_devops_api_instance
         remote_config_repo = "my_repo"
         remote_config_path = "my_path"
-        # Llamar con los nuevos argumentos
+
         result = azure_devops.get_remote_config(remote_config_repo, remote_config_path)
         assert result == {"key": "value"}
 

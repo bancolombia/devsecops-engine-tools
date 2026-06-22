@@ -3,12 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 class DevopsPlatformGateway(metaclass=ABCMeta):
     @abstractmethod
-    def get_remote_config(
-        self,
-        repository,
-        path,
-        branch=""
-    ):
+    def get_remote_config(self, repository, path, branch=""):
         "get_remote_config"
 
     @abstractmethod

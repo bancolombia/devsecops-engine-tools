@@ -24,13 +24,11 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.aws.s
 )
 import sys
 import argparse
-import os
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 from devsecops_engine_tools.version import version
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
-
 
 def validate_integration_requirements(args):
     integration = args.get("integration")

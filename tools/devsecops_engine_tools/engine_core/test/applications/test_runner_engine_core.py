@@ -150,7 +150,7 @@ def test_get_inputs_from_cli(mock_parse_args):
         "token_engine_code": None,
         "token_license_analyzer": None,
         "use_license_analyzer": "false",
-        "docker_address": "unix:///var/run/docker.sock"
+        "docker_address": "unix:///var/run/docker.sock",
     }
 
 
@@ -280,7 +280,7 @@ def test_application_core_exception_block(
         "image_to_scan": None,
         "dast_file_path": None,
         "context": "false",
-        "docker_address": None
+        "docker_address": None,
     }
     mock_get_inputs_from_cli.return_value = mock_args
     mock_init_engine_core.side_effect = Exception("simulated error")

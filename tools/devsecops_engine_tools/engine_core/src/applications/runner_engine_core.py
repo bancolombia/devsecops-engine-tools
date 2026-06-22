@@ -37,8 +37,6 @@ from devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.conte
 import sys
 import argparse
 import traceback
-import os
-import json
 from devsecops_engine_tools.engine_utilities.dependency_track.infrastructure.driver_adapters.dependency_track import DependencyTrack
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
@@ -345,9 +343,7 @@ def application_core():
 
         # Activate traceback
         config_tool = remote_config_source_gateway.get_remote_config(
-            args["remote_config_repo"],
-            "/engine_core/ConfigTool.json",
-            args["remote_config_branch"]
+            args["remote_config_repo"], "/engine_core/ConfigTool.json", args["remote_config_branch"]
         )
         tb = config_tool.get("TRACEBACK", False)
 
