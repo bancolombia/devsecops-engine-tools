@@ -27,15 +27,8 @@ def init_engine_core(
     license_tool_gateway: any,
     args: any
 ):
-    remote_context = args.get("remote_context", {
-        "organization": args.get("remote_org", ""),
-        "project": args.get("remote_proj", ""),
-        "token": args.get("remote_token", ""),
-        "github_repository": args.get("remote_config_repo", ""),
-    })
-
     config_tool = remote_config_source_gateway.get_remote_config(
-        args["remote_config_repo"], "/engine_core/ConfigTool.json", args["remote_config_branch"], remote_context=remote_context
+        args["remote_config_repo"], "/engine_core/ConfigTool.json", args["remote_config_branch"]
     )
     Printers.print_logo_tool(config_tool["BANNER"])
 

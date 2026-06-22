@@ -32,19 +32,6 @@ from devsecops_engine_tools.version import version
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
-def build_remote_context():
-    organization = os.environ.get("DET_REMOTE_ORG", "")
-    project = os.environ.get("DET_REMOTE_PROJ", "")
-    token = os.environ.get("DET_REMOTE_TOKEN", "")
-    github_repository = os.environ.get("DET_GITHUB_REPOSITORY", "")
-
-    return {
-        "organization": organization,
-        "project": project,
-        "token": token,
-        "github_repository": github_repository,
-    }
-
 def validate_integration_requirements(args):
     integration = args.get("integration")
     missing_args = []
@@ -204,8 +191,6 @@ def get_inputs_from_cli(args):
 def runner_engine_integrations():
     try:
         args = get_inputs_from_cli(sys.argv[1:])
-        remote_context = build_remote_context()
-        args["remote_context"] = remote_context
         if not args["remote_config_source"]: 
             args["remote_config_source"] = args["platform_devops"]
 

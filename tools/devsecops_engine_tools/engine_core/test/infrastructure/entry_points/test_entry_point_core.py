@@ -67,13 +67,7 @@ class TestEntryPointCore(unittest.TestCase):
         mock_remote_config_source_gateway.get_remote_config.assert_called_once_with(
             "https://github.com/example/repo",
             "/engine_core/ConfigTool.json",
-            "",
-            remote_context={
-                "organization": "",
-                "project": "",
-                "token": "",
-                "github_repository": "https://github.com/example/repo"
-            },
+            ""
         )
         mock_handle_scan.return_value.process.assert_called_once_with(
             {

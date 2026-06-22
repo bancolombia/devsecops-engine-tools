@@ -66,20 +66,6 @@ def parse_choices(choices):
     return parse_with_choices
 
 
-def build_remote_context():
-    organization = os.environ.get("DET_REMOTE_ORG", "")
-    project = os.environ.get("DET_REMOTE_PROJ", "")
-    token = os.environ.get("DET_REMOTE_TOKEN", "")
-    github_repository = os.environ.get("DET_GITHUB_REPOSITORY", "")
-
-    return {
-        "organization": organization,
-        "project": project,
-        "token": token,
-        "github_repository": github_repository,
-    }
-
-
 def get_inputs_from_cli(args):
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -331,8 +317,6 @@ def application_core():
     try:
         # Get inputs from CLI
         args = get_inputs_from_cli(sys.argv[1:])
-        remote_context = build_remote_context()
-        args["remote_context"] = remote_context
 
         # Define driven adapters for gateways
         vulnerability_management_gateway = DefectDojoPlatform()
@@ -363,8 +347,7 @@ def application_core():
         config_tool = remote_config_source_gateway.get_remote_config(
             args["remote_config_repo"],
             "/engine_core/ConfigTool.json",
-            args["remote_config_branch"],
-            remote_context=remote_context,
+            args["remote_config_branch"]
         )
         tb = config_tool.get("TRACEBACK", False)
 

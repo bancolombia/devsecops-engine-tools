@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
@@ -24,10 +25,9 @@ class GithubActions(DevopsPlatformGateway):
     ICON_FAIL = "\u2718"
     ICON_SUCCESS = "\u2714"
 
-    def get_remote_config(self, repository, path, branch="", **kwargs):
-        remote_context = kwargs.get("remote_context") or {}
-        token = remote_context.get("token") or SystemVariables.github_access_token.value()
-        github_repository = remote_context.get("github_repository") or SystemVariables.github_repository.value()
+    def get_remote_config(self, repository, path, branch=""):
+        token = os.environ.get("DET_REMOTE_TOKEN") or SystemVariables.github_access_token.value()
+        github_repository = os.environ.get("DET_GITHUB_REPOSITORY") or SystemVariables.github_repository.value()
 
         # Accept both owner/repo and full URL formats.
         if github_repository.startswith("https://") or github_repository.startswith("http://"):

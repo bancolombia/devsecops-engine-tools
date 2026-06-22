@@ -7,8 +7,7 @@ class DevopsPlatformGateway(metaclass=ABCMeta):
         self,
         repository,
         path,
-        branch="",
-        **kwargs,
+        branch=""
     ):
         "get_remote_config"
 
