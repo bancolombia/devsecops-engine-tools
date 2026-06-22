@@ -26,9 +26,9 @@ class ConftestDeserealizator:
                 msg = failure.get("msg", "unknown")
                 metadata = failure.get("metadata", {}) or {}
                 query = metadata.get("query", "unknown")
-                node_type = metadata.get("node_type", "unknown")
-                node_id = metadata.get("node_id", "unknown")
-                where = f"{filename}: {node_type}.{node_id}"
+                node_type = metadata.get("node_type")
+                node_id = metadata.get("node_id")
+                where = f"{filename}: {node_type}.{node_id}" if node_type and node_id else filename
 
                 rule_id = metadata.get("id", "")
                 rule_meta = rules_lookup.get(rule_id, {})

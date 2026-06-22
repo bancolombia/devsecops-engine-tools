@@ -37,7 +37,7 @@ class TestConftestDeserealizator(unittest.TestCase):
         finding = findings[0]
         self.assertEqual(finding.id, "data.main.deny")  # no metadata.id → fallback to query
         self.assertEqual(finding.description, "Containers must not run as root")
-        self.assertEqual(finding.where, "deploy.yaml: unknown.unknown")
+        self.assertEqual(finding.where, "deploy.yaml")
         self.assertEqual(finding.severity, "high")
         self.assertEqual(finding.category, Category.VULNERABILITY)
         self.assertEqual(finding.tool, "Conftest")
