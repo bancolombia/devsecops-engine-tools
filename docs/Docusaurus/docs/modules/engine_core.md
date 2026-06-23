@@ -715,6 +715,39 @@ devsecops-engine-tools \
 	--image_to_scan myimage:latest
 ```
 
+## Remote Config Environment Variables
+
+These variables are used to resolve authentication and repository context when loading remote configuration files.
+
+```bash
+DET_REMOTE_ORG="my-azure-organization"
+DET_REMOTE_PROJ="my-azure-project"
+DET_REMOTE_TOKEN="***"
+DET_GITHUB_REPOSITORY="owner/repository"
+```
+
+- **DET_REMOTE_ORG**
+    - **Use:** Azure DevOps organization used to build the remote config URL.
+    - **Applies to:** `--remote_config_source azure`.
+    - **Fallback if missing:** `System.TeamFoundationCollectionUri`.
+
+- **DET_REMOTE_PROJ**
+    - **Use:** Azure DevOps project used in the remote config URL path.
+    - **Applies to:** `--remote_config_source azure`.
+    - **Fallback if missing:** `System.TeamProject`.
+
+- **DET_REMOTE_TOKEN**
+    - **Use:** Token to authenticate against the remote config source.
+    - **Applies to:** `--remote_config_source azure` and `--remote_config_source github`.
+    - **Fallback if missing:**
+        - Azure: `System.AccessToken`.
+        - GitHub: `github.access.token`.
+
+- **DET_GITHUB_REPOSITORY**
+    - **Use:** GitHub repository context used to resolve owner/repository (accepts `owner/repo` or full GitHub URL).
+    - **Applies to:** `--remote_config_source github`.
+    - **Fallback if missing:** `github.repository`.
+
 ## Extensibility
 
 - New tools and modules can be added by extending the adapters and use cases.
