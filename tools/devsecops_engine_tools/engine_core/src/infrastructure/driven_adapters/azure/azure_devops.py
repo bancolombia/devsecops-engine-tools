@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
     DevopsPlatformGateway,
@@ -26,14 +27,17 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 @dataclass
 class AzureDevops(DevopsPlatformGateway):
     def get_remote_config(self, repository, path, branch=""):
+        organization = os.environ.get("DET_REMOTE_ORG") or SystemVariables.System_TeamFoundationCollectionUri.value()
+        project = os.environ.get("DET_REMOTE_PROJ") or SystemVariables.System_TeamProject.value()
+        pat = os.environ.get("DET_REMOTE_TOKEN") or SystemVariables.System_AccessToken.value()
 
         base_compact_remote_config_url = (
-            f"https://{SystemVariables.System_TeamFoundationCollectionUri.value().rstrip('/').split('/')[-1].replace('.visualstudio.com','')}"
-            f".visualstudio.com/{SystemVariables.System_TeamProject.value()}/_git/"
-            f"{repository}?path={path}"
+            f"https://{organization.rstrip('/').split('/')[-1].replace('.visualstudio.com','')}"
+            f".visualstudio.com/{project}/_git/{repository}?path={path}"
         )
+
         utils_azure = AzureDevopsApi(
-            personal_access_token=SystemVariables.System_AccessToken.value(),
+            personal_access_token=pat,
             compact_remote_config_url=base_compact_remote_config_url,
         )
         connection = utils_azure.get_azure_connection()

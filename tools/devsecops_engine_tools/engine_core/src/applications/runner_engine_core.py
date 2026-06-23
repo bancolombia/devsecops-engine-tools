@@ -261,7 +261,6 @@ def get_inputs_from_cli(args):
         required=False,
         help="Address of the Docker daemon to connect to."
     )
-
     TOOLS = {
         "engine_iac": ["checkov", "kics", "kubescape", "conftest"],
         "engine_secret": ["trufflehog", "gitleaks", "all_tools"],
@@ -313,6 +312,7 @@ def get_inputs_from_cli(args):
 
 def application_core():
     tb = True
+    devops_platform_gateway = None
     try:
         # Get inputs from CLI
         args = get_inputs_from_cli(sys.argv[1:])
