@@ -124,6 +124,8 @@
             "LIFECYCLE_PIPELINES": {
                 "pipeline_name1": "pre-build"
             },
+            "BREAK_ON_BUILD_FAILURE": true,
+            "BUILD_FAILURE_PATTERNS": ["BUILD FAILED", "BUILD FAILURE", "npm ERR!"],
             "OVERRIDE_REGISTRIES": false,
             "REGISTRIES": {
                 "MAVEN_CENTRAL_URL": "https://repo1.maven.org/maven2/",
