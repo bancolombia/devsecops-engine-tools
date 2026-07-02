@@ -145,6 +145,8 @@ Configuration of the driven adapters in the main layer and management of on/off 
             "LIFECYCLE_PIPELINES": {
                 "pipeline_name1": "pre-build"
             },
+            "BREAK_ON_BUILD_FAILURE": true,
+            "BUILD_FAILURE_PATTERNS": ["BUILD FAILED", "BUILD FAILURE", "npm ERR!"],
             "OVERRIDE_REGISTRIES": false,
             "REGISTRIES": {
                 "MAVEN_CENTRAL_URL": "",
@@ -368,6 +370,8 @@ Configuration of the driven adapters in the main layer and management of on/off 
     - **CDXGEN**
         - **FETCH_LICENSE**: `true` or `false`. When enabled, cdxgen fetches license information for each component from public registries and includes it in the generated SBOM. Recommended when `--use_license_analyzer true` is used.
         - **INSTALL_DEPENDENCIES**: `true` or `false`. When enabled, cdxgen installs project dependencies before generating the SBOM, improving component coverage.
+        - **BREAK_ON_BUILD_FAILURE**: `true` or `false` (default `true`). cdxgen can exit with return code `0` even when the underlying build tool actually failed, silently producing an incomplete/empty SBOM. When enabled, the stdout/stderr of the cdxgen process is checked against `BUILD_FAILURE_PATTERNS` and, if any pattern matches, the SBOM generation is aborted and the error is logged so the affected pipeline is easy to spot.
+        - **BUILD_FAILURE_PATTERNS**: Array of regular expressions (case-insensitive) used to detect build failures in the cdxgen output. There are no built-in defaults; patterns must be defined entirely via remote config for the languages/build tools relevant to your pipelines. Example: `["BUILD FAILED", "BUILD FAILURE", "npm ERR!"]`.
         - **OVERRIDE_REGISTRIES**: `true` or `false`. When enabled, the registry URLs defined in `REGISTRIES` are set as environment variables before cdxgen runs, redirecting dependency resolution to internal or private registries.
         - **REGISTRIES**: Map of environment variable names to registry URLs used when `OVERRIDE_REGISTRIES` is `true`.
             - **MAVEN_CENTRAL_URL**: Maven registry URL.
