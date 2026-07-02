@@ -32,6 +32,7 @@ class CdxGen(SbomManagerGateway):
             exclude_paths = config["CDXGEN"].get("EXCLUDE_PATHS", [])
             recurse = config["CDXGEN"].get("RECURSE", True)
             install_deps = config["CDXGEN"].get("INSTALL_DEPENDENCIES", True)
+            required_only = config["CDXGEN"].get("REQUIRED_ONLY", False)
             debug_pipelines = config["CDXGEN"].get("DEBUG_PIPELINES", [])
             lifecycle_pipelines = config["CDXGEN"].get("LIFECYCLE_PIPELINES", {})
             spec_version = config["CDXGEN"].get("SPEC_VERSION", "1.6")
@@ -86,13 +87,25 @@ class CdxGen(SbomManagerGateway):
                     logger.warning(f"{os_platform} is not supported.")
                     return None
 
-            result_sbom = self._run_cdxgen(command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug, spec_version)
+            result_sbom = self._run_cdxgen(
+                command_prefix,
+                artifact,
+                service_name,
+                exclude_types,
+                exclude_paths,
+                recurse,
+                install_deps,
+                lifecycle_pipelines,
+                enable_debug,
+                spec_version,
+                required_only=required_only,
+            )
             return get_list_component(result_sbom, config["CDXGEN"]["OUTPUT_FORMAT"])
         except Exception as e:
             logger.error(f"Error generating SBOM: {e}")
             return None
 
-    def _run_cdxgen(self, command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug=False, spec_version="1.6"):
+    def _run_cdxgen(self, command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug=False, spec_version="1.6", required_only=False):
         result_file = f"{service_name}_SBOM.json"
         command = [
             command_prefix,
@@ -129,6 +142,9 @@ class CdxGen(SbomManagerGateway):
             command.append(
                 "--no-install-deps"
             )
+
+        if required_only:
+            command.append("--required-only")
 
         try:
             result = subprocess.run(

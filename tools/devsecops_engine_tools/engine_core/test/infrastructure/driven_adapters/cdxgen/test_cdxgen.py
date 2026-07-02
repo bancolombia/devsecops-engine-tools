@@ -424,6 +424,50 @@ class TestCdxGen(unittest.TestCase):
                     mock_install.assert_called_once()
                     mock_run.assert_called_once_with('/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6')
 
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
+    def test_get_components_required_only_enabled(self, mock_platform, mock_get_list_component):
+        # Arrange
+        mock_platform.return_value = "Linux"
+        mock_get_list_component.return_value = self.mock_components
+
+        required_only_config = {
+            "CDXGEN": {
+                "CDXGEN_VERSION": "10.2.0",
+                "SLIM_BINARY": False,
+                "OUTPUT_FORMAT": "json",
+                "EXCLUDE_TYPES": [],
+                "EXCLUDE_PATHS": [],
+                "RECURSE": True,
+                "INSTALL_DEPENDENCIES": True,
+                "REQUIRED_ONLY": True,
+                "DEBUG_PIPELINES": [],
+                "LIFECYCLE_PIPELINES": {}
+            }
+        }
+
+        with patch.object(self.cdxgen, '_install_tool_unix', return_value='/usr/local/bin/cdxgen') as mock_install:
+            with patch.object(self.cdxgen, '_run_cdxgen', return_value='test_service_SBOM.json') as mock_run:
+                # Act
+                result = self.cdxgen.get_components(self.artifact, required_only_config, self.service_name)
+
+                # Assert
+                self.assertEqual(result, self.mock_components)
+                mock_install.assert_called_once()
+                mock_run.assert_called_once_with(
+                    '/usr/local/bin/cdxgen',
+                    self.artifact,
+                    self.service_name,
+                    [],
+                    [],
+                    True,
+                    True,
+                    {},
+                    False,
+                    '1.6',
+                    required_only=True
+                )
+
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.subprocess.run')
     def test_run_cdxgen_with_exclude_types_list(self, mock_subprocess):
         # Arrange
