@@ -31,5 +31,26 @@
         "hu": "345345"
       }
     ]
+  },
+  "BY_PATTERN_SEARCH": {
+    ".*_Repository_Test": {
+      "THRESHOLD": {
+        "VULNERABILITY": {
+          "Critical": 1,
+          "High": 4,
+          "Medium": 10,
+          "Low": 15
+        }
+      },
+      "PRISMA": [
+        {
+          "id": "CVE-2023-6237",
+          "cve_id": "CVE-2023-6237",
+          "expired_date": "21092024",
+          "create_date": "24012023",
+          "hu": "345345"
+        }
+      ]
+    }
   }
 }

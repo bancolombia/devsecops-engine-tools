@@ -138,7 +138,7 @@ class Utils:
         search_patterns = exclusions_data.get("BY_PATTERN_SEARCH", {})
         
         match_pattern = next(
-            (v["THRESHOLD"]
+            (v.get("THRESHOLD")
             for pattern, v in search_patterns.items()
             if re.match(pattern, pipeline_name, re.IGNORECASE)),
             None

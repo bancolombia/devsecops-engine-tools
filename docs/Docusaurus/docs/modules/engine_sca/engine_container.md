@@ -246,6 +246,27 @@ Defines exclusion rules for repositories and specific vulnerability findings.
         "hu": "345345"
       }
     ]
+  },
+  "BY_PATTERN_SEARCH": {
+    ".*_Repository_Test": {
+      "THRESHOLD": {
+        "VULNERABILITY": {
+          "Critical": 1,
+          "High": 4,
+          "Medium": 10,
+          "Low": 15
+        }
+      },
+      "PRISMA": [
+        {
+          "id": "CVE-2023-6237",
+          "cve_id": "CVE-2023-6237",
+          "expired_date": "21092024",
+          "create_date": "24012023",
+          "hu": "345345"
+        }
+      ]
+    }
   }
 }
 ```
@@ -253,6 +274,10 @@ Defines exclusion rules for repositories and specific vulnerability findings.
 #### Exclusion Types
 - **All**: Global exclusions applied to all repositories
 - **Repository-specific**: Exclusions for specific repositories (e.g., `"Repository_Test"`)
+- **BY_PATTERN_SEARCH**: Regex-based exclusions matching multiple pipeline names at once. Each key is a regex evaluated with `re.match(pattern, pipeline_name, re.IGNORECASE)` against the pipeline name; the first matching pattern's block is used
+  - Supports both **THRESHOLD** overrides and **tool-specific exclusion lists** (e.g., `PRISMA`), the same way an exact repository match does
+  - Only evaluated when there is no exact repository key match in `Exclusions.json` (exact match always takes precedence over pattern match)
+  - Note: base-image filtering (`key_image_exception`/`source_images`) only applies to the `"All"` block; it is not applied to repository-specific or `BY_PATTERN_SEARCH` matches
 - **Tool-specific exclusions**: Organized by scanning tool:
   - `PRISMA`: Exclusions for Prisma Cloud findings
   - `TRIVY`: Exclusions for Trivy findings (if needed)
@@ -348,6 +373,7 @@ devsecops-engine-tools \
 3. Set realistic expiration dates and review expired exclusions regularly
 4. Use repository-specific exclusions instead of global ones when possible
 5. Document business justification for risk acceptance
+6. Use `BY_PATTERN_SEARCH` when the same THRESHOLD and/or tool exclusions must apply to a group of pipelines matching a naming convention (e.g., `".*_Repository_Test"`), instead of duplicating the same block across many repository-specific entries
 
 ### SBOM Configuration
 1. Enable SBOM generation for production branches only to reduce overhead

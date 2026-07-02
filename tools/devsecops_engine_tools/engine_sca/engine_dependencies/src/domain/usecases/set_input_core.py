@@ -1,3 +1,5 @@
+import re
+
 from devsecops_engine_tools.engine_core.src.domain.model.input_core import InputCore
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
@@ -11,26 +13,38 @@ class SetInputCore:
         self.pipeline_name = pipeline_name
         self.tool = tool
 
+    def _build_exclusions(self, items):
+        return [
+            Exclusions(
+                id=item.get("id", ""),
+                where=item.get("where", ""),
+                cve_id=item.get("cve_id", ""),
+                create_date=item.get("create_date", ""),
+                expired_date=item.get("expired_date", ""),
+                severity=item.get("severity", ""),
+                priority=item.get("priority", ""),
+                hu=item.get("hu", ""),
+                reason=item.get("reason", "DevSecOps policy"),
+            )
+            for item in items
+        ]
+
     def get_exclusions(self, exclusions_data, pipeline_name, tool):
         list_exclusions = []
         for key, value in exclusions_data.items():
             if (key == "All") or (key == pipeline_name):
                 if value.get(tool, 0):
-                    exclusions = [
-                        Exclusions(
-                            id=item.get("id", ""),
-                            where=item.get("where", ""),
-                            cve_id=item.get("cve_id", ""),
-                            create_date=item.get("create_date", ""),
-                            expired_date=item.get("expired_date", ""),
-                            severity=item.get("severity", ""),
-                            priority=item.get("priority", ""),
-                            hu=item.get("hu", ""),
-                            reason=item.get("reason", "DevSecOps policy"),
-                        )
-                        for item in value[tool]
-                    ]
-                    list_exclusions.extend(exclusions)
+                    list_exclusions.extend(self._build_exclusions(value[tool]))
+
+        if pipeline_name not in exclusions_data:
+            for pattern, values in exclusions_data.get(
+                "BY_PATTERN_SEARCH", {}
+            ).items():
+                if re.match(pattern, pipeline_name, re.IGNORECASE):
+                    if values.get(tool, 0):
+                        list_exclusions.extend(self._build_exclusions(values[tool]))
+                    break
+
         return list_exclusions
 
     def set_input_core(self, dependencies_scanned):
