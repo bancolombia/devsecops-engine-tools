@@ -3,6 +3,7 @@ import requests
 import subprocess
 import platform
 import os
+import re
 
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.sbom_manager import (
     SbomManagerGateway,
@@ -35,6 +36,9 @@ class CdxGen(SbomManagerGateway):
             debug_pipelines = config["CDXGEN"].get("DEBUG_PIPELINES", [])
             lifecycle_pipelines = config["CDXGEN"].get("LIFECYCLE_PIPELINES", {})
             spec_version = config["CDXGEN"].get("SPEC_VERSION", "1.6")
+            break_on_build_failure = config["CDXGEN"].get("BREAK_ON_BUILD_FAILURE", True)
+            build_failure_patterns = config["CDXGEN"].get("BUILD_FAILURE_PATTERNS", [])
+            failure_patterns = build_failure_patterns if break_on_build_failure else []
 
             if config["CDXGEN"].get("OVERRIDE_REGISTRIES", False):
                 registries = config["CDXGEN"].get("REGISTRIES", {})
@@ -86,13 +90,14 @@ class CdxGen(SbomManagerGateway):
                     logger.warning(f"{os_platform} is not supported.")
                     return None
 
-            result_sbom = self._run_cdxgen(command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug, spec_version)
+            result_sbom = self._run_cdxgen(command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug, spec_version, failure_patterns)
             return get_list_component(result_sbom, config["CDXGEN"]["OUTPUT_FORMAT"])
         except Exception as e:
             logger.error(f"Error generating SBOM: {e}")
             return None
 
-    def _run_cdxgen(self, command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug=False, spec_version="1.6"):
+    def _run_cdxgen(self, command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug=False, spec_version="1.6", failure_patterns=None):
+        failure_patterns = failure_patterns or []
         result_file = f"{service_name}_SBOM.json"
         command = [
             command_prefix,
@@ -143,7 +148,18 @@ class CdxGen(SbomManagerGateway):
                     logger.info(f"CDXGEN stdout: {result.stdout}")
                 if result.stderr:
                     logger.info(f"CDXGEN stderr: {result.stderr}")
-            
+
+            matched_pattern = self._detect_build_failure(
+                f"{result.stdout or ''}\n{result.stderr or ''}", failure_patterns
+            )
+            if matched_pattern:
+                self._remove_incomplete_sbom(result_file)
+                raise Exception(
+                    f"Detected build failure pattern '{matched_pattern}' in cdxgen output for "
+                    f"'{service_name}'. The underlying build likely failed; aborting to avoid "
+                    "generating an incomplete or empty SBOM."
+                )
+
             if result.returncode == 0:
                 print(f"SBOM generated and saved to: {result_file}")
                 return result_file
@@ -152,6 +168,27 @@ class CdxGen(SbomManagerGateway):
 
         except Exception as e:
             logger.error(f"Error running cdxgen: {e}")
+
+    def _detect_build_failure(self, output, patterns):
+        """Return the first configured regex pattern that matches the cdxgen output, if any."""
+        if not output or not patterns:
+            return None
+        for pattern in patterns:
+            try:
+                if re.search(pattern, output, re.IGNORECASE):
+                    return pattern
+            except re.error as e:
+                logger.debug(f"Invalid build failure regex pattern '{pattern}': {e}")
+        return None
+
+    def _remove_incomplete_sbom(self, result_file):
+        """Best-effort removal of a possibly incomplete/empty SBOM file left by a failed build."""
+        try:
+            if result_file and os.path.exists(result_file):
+                os.remove(result_file)
+                logger.info(f"Removed incomplete SBOM file: {result_file}")
+        except OSError as e:
+            logger.debug(f"Could not remove incomplete SBOM file '{result_file}': {e}")
 
     def _check_cdxgen_in_path(self):
         """Check if cdxgen is available in PATH and return its path if found."""

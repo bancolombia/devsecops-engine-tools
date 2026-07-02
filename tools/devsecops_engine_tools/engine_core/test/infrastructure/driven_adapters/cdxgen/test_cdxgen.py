@@ -66,7 +66,7 @@ class TestCdxGen(unittest.TestCase):
             "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64",
             "cdxgen"
         )
-        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6')
+        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', [])
         mock_get_list_component.assert_called_once_with('test_service_SBOM.json', 'json')
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.machine')
@@ -92,7 +92,7 @@ class TestCdxGen(unittest.TestCase):
             "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-linux-arm64",
             "cdxgen"
         )
-        mock_run.assert_called_once_with('./cdxgen-linux-arm64', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6')
+        mock_run.assert_called_once_with('./cdxgen-linux-arm64', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', [])
         mock_get_list_component.assert_called_once_with('test_service_SBOM.json', 'json')
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
@@ -325,7 +325,7 @@ class TestCdxGen(unittest.TestCase):
         # Assert
         self.assertEqual(result, self.mock_components)
         mock_logger.info.assert_called_with(f"Enabling debug mode for pipeline: {self.service_name}")
-        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, False, {}, True, '1.6')
+        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, False, {}, True, '1.6', [])
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
@@ -356,7 +356,7 @@ class TestCdxGen(unittest.TestCase):
         
         # Assert
         self.assertEqual(result, self.mock_components)
-        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6')
+        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', [])
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
@@ -389,7 +389,7 @@ class TestCdxGen(unittest.TestCase):
                     self.assertEqual(result, self.mock_components)
                     self.assertEqual(os.environ.get("FETCH_LICENSE"), "true")
                     mock_install.assert_called_once()
-                    mock_run.assert_called_once_with('/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6')
+                    mock_run.assert_called_once_with('/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', [])
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
@@ -422,7 +422,7 @@ class TestCdxGen(unittest.TestCase):
                     self.assertEqual(result, self.mock_components)
                     self.assertIsNone(os.environ.get("FETCH_LICENSE"))
                     mock_install.assert_called_once()
-                    mock_run.assert_called_once_with('/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6')
+                    mock_run.assert_called_once_with('/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', [])
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.subprocess.run')
     def test_run_cdxgen_with_exclude_types_list(self, mock_subprocess):
@@ -611,7 +611,7 @@ class TestCdxGen(unittest.TestCase):
         # Assert
         self.assertEqual(result, self.mock_components)
         mock_logger.info.assert_called_with(f"Using cdxgen from PATH: {cdxgen_path}")
-        mock_run.assert_called_once_with(cdxgen_path, self.artifact, self.service_name, [], [], True, True, {}, False, '1.6')
+        mock_run.assert_called_once_with(cdxgen_path, self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', [])
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.subprocess.run')
     def test_install_tool_unix_success(self, mock_subprocess):
@@ -836,4 +836,221 @@ class TestCdxGen(unittest.TestCase):
         self.assertIsNone(result)
         mock_logger.error.assert_called_once_with(
             "Error running cdxgen: CDXGEN command failed with return code: 1"
+        )
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.os.remove')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.os.path.exists')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.logger')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.subprocess.run')
+    def test_run_cdxgen_gradle_build_failed_pattern_breaks_execution(
+        self, mock_subprocess, mock_logger, mock_exists, mock_remove
+    ):
+        """cdxgen can return 0 even when the underlying Gradle build failed."""
+        command_prefix = "/usr/local/bin/cdxgen"
+        mock_result = Mock(returncode=0, stdout="Some output\nBUILD FAILED\nmore output", stderr="")
+        mock_subprocess.return_value = mock_result
+        mock_exists.return_value = True
+
+        result = self.cdxgen._run_cdxgen(
+            command_prefix, self.artifact, self.service_name,
+            [], [], True, True, {}, False, "1.6", ["BUILD FAILED"]
+        )
+
+        self.assertIsNone(result)
+        expected_result_file = f"{self.service_name}_SBOM.json"
+        mock_remove.assert_called_once_with(expected_result_file)
+        mock_logger.error.assert_called_once_with(
+            "Error running cdxgen: Detected build failure pattern 'BUILD FAILED' in cdxgen output for "
+            f"'{self.service_name}'. The underlying build likely failed; aborting to avoid "
+            "generating an incomplete or empty SBOM."
+        )
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.os.path.exists')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.logger')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.subprocess.run')
+    def test_run_cdxgen_maven_build_failure_pattern_case_insensitive(self, mock_subprocess, mock_logger, mock_exists):
+        """Pattern matching is case-insensitive (e.g. Maven's 'BUILD FAILURE')."""
+        command_prefix = "/usr/local/bin/cdxgen"
+        mock_result = Mock(returncode=0, stdout="", stderr="[INFO] build failure summary")
+        mock_subprocess.return_value = mock_result
+        mock_exists.return_value = False
+
+        result = self.cdxgen._run_cdxgen(
+            command_prefix, self.artifact, self.service_name,
+            [], [], True, True, {}, False, "1.6", ["BUILD FAILURE"]
+        )
+
+        self.assertIsNone(result)
+        self.assertIn(
+            "Detected build failure pattern 'BUILD FAILURE'",
+            mock_logger.error.call_args[0][0]
+        )
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.os.remove')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.os.path.exists')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.subprocess.run')
+    def test_run_cdxgen_regex_failure_pattern(self, mock_subprocess, mock_exists, mock_remove):
+        """Patterns supplied via config are treated as regular expressions."""
+        command_prefix = "/usr/local/bin/cdxgen"
+        mock_result = Mock(returncode=0, stdout="npm ERR! code E404", stderr="")
+        mock_subprocess.return_value = mock_result
+        mock_exists.return_value = True
+
+        result = self.cdxgen._run_cdxgen(
+            command_prefix, self.artifact, self.service_name,
+            [], [], True, True, {}, False, "1.6", [r"npm ERR!\s+code\s+E\d+"]
+        )
+
+        self.assertIsNone(result)
+        mock_remove.assert_called_once_with(f"{self.service_name}_SBOM.json")
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.logger')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.subprocess.run')
+    def test_run_cdxgen_invalid_regex_pattern_is_skipped(self, mock_subprocess, mock_logger):
+        """An invalid regex pattern is logged and skipped instead of raising."""
+        command_prefix = "/usr/local/bin/cdxgen"
+        mock_result = Mock(returncode=0, stdout="all good", stderr="")
+        mock_subprocess.return_value = mock_result
+        expected_result_file = f"{self.service_name}_SBOM.json"
+
+        with patch('builtins.print'):
+            result = self.cdxgen._run_cdxgen(
+                command_prefix, self.artifact, self.service_name,
+                [], [], True, True, {}, False, "1.6", ["("]
+            )
+
+        self.assertEqual(result, expected_result_file)
+        mock_logger.debug.assert_called_once()
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.subprocess.run')
+    def test_run_cdxgen_no_failure_patterns_configured(self, mock_subprocess):
+        """When no patterns are configured, output is not inspected and success proceeds."""
+        command_prefix = "/usr/local/bin/cdxgen"
+        mock_result = Mock(returncode=0, stdout="BUILD FAILED", stderr="")
+        mock_subprocess.return_value = mock_result
+        expected_result_file = f"{self.service_name}_SBOM.json"
+
+        with patch('builtins.print'):
+            result = self.cdxgen._run_cdxgen(
+                command_prefix, self.artifact, self.service_name,
+                [], [], True, True, {}, False, "1.6", []
+            )
+
+        self.assertEqual(result, expected_result_file)
+
+    def test_detect_build_failure_no_match(self):
+        result = self.cdxgen._detect_build_failure(
+            "everything compiled successfully", ["BUILD FAILED", "BUILD FAILURE"]
+        )
+        self.assertIsNone(result)
+
+    def test_detect_build_failure_empty_output(self):
+        result = self.cdxgen._detect_build_failure("", ["BUILD FAILED"])
+        self.assertIsNone(result)
+
+    def test_detect_build_failure_no_patterns(self):
+        result = self.cdxgen._detect_build_failure("BUILD FAILED", [])
+        self.assertIsNone(result)
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.os.remove')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.os.path.exists')
+    def test_remove_incomplete_sbom_removes_existing_file(self, mock_exists, mock_remove):
+        mock_exists.return_value = True
+        self.cdxgen._remove_incomplete_sbom("test_service_SBOM.json")
+        mock_remove.assert_called_once_with("test_service_SBOM.json")
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.os.remove')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.os.path.exists')
+    def test_remove_incomplete_sbom_missing_file_is_noop(self, mock_exists, mock_remove):
+        mock_exists.return_value = False
+        self.cdxgen._remove_incomplete_sbom("test_service_SBOM.json")
+        mock_remove.assert_not_called()
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.logger')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.os.remove')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.os.path.exists')
+    def test_remove_incomplete_sbom_handles_os_error(self, mock_exists, mock_remove, mock_logger):
+        mock_exists.return_value = True
+        mock_remove.side_effect = OSError("permission denied")
+        self.cdxgen._remove_incomplete_sbom("test_service_SBOM.json")
+        mock_logger.debug.assert_called_once_with(
+            "Could not remove incomplete SBOM file 'test_service_SBOM.json': permission denied"
+        )
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
+    def test_get_components_break_on_build_failure_config_disabled(self, mock_platform, mock_get_list_component):
+        """When BREAK_ON_BUILD_FAILURE is False, _run_cdxgen receives an empty pattern list."""
+        mock_platform.return_value = "Linux"
+        mock_get_list_component.return_value = self.mock_components
+
+        config = {
+            "CDXGEN": {
+                "CDXGEN_VERSION": "10.2.0",
+                "SLIM_BINARY": False,
+                "OUTPUT_FORMAT": "json",
+                "EXCLUDE_TYPES": [],
+                "EXCLUDE_PATHS": [],
+                "RECURSE": True,
+                "DEBUG_PIPELINES": [],
+                "LIFECYCLE_PIPELINES": {},
+                "BUILD_FAILURE_PATTERNS": ["BUILD FAILED"],
+                "BREAK_ON_BUILD_FAILURE": False
+            }
+        }
+
+        with patch.object(self.cdxgen, '_check_cdxgen_in_path', return_value='/usr/local/bin/cdxgen'):
+            with patch.object(self.cdxgen, '_run_cdxgen', return_value='test_service_SBOM.json') as mock_run:
+                result = self.cdxgen.get_components(self.artifact, config, self.service_name)
+
+        self.assertEqual(result, self.mock_components)
+        mock_run.assert_called_once_with(
+            '/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', []
+        )
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
+    def test_get_components_build_failure_patterns_passed_through(self, mock_platform, mock_get_list_component):
+        """All build-failure patterns come exclusively from the remote config, no built-in defaults."""
+        mock_platform.return_value = "Linux"
+        mock_get_list_component.return_value = self.mock_components
+
+        config = {
+            "CDXGEN": {
+                "CDXGEN_VERSION": "10.2.0",
+                "SLIM_BINARY": False,
+                "OUTPUT_FORMAT": "json",
+                "EXCLUDE_TYPES": [],
+                "EXCLUDE_PATHS": [],
+                "RECURSE": True,
+                "DEBUG_PIPELINES": [],
+                "LIFECYCLE_PIPELINES": {},
+                "BUILD_FAILURE_PATTERNS": ["BUILD FAILED", r"npm ERR!\s+code\s+E\d+"]
+            }
+        }
+
+        with patch.object(self.cdxgen, '_check_cdxgen_in_path', return_value='/usr/local/bin/cdxgen'):
+            with patch.object(self.cdxgen, '_run_cdxgen', return_value='test_service_SBOM.json') as mock_run:
+                result = self.cdxgen.get_components(self.artifact, config, self.service_name)
+
+        self.assertEqual(result, self.mock_components)
+        mock_run.assert_called_once_with(
+            '/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6',
+            ["BUILD FAILED", r"npm ERR!\s+code\s+E\d+"]
+        )
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
+    def test_get_components_no_build_failure_patterns_configured(self, mock_platform, mock_get_list_component):
+        """When the config does not define BUILD_FAILURE_PATTERNS, an empty list is used (no defaults)."""
+        mock_platform.return_value = "Linux"
+        mock_get_list_component.return_value = self.mock_components
+
+        with patch.object(self.cdxgen, '_check_cdxgen_in_path', return_value='/usr/local/bin/cdxgen'):
+            with patch.object(self.cdxgen, '_run_cdxgen', return_value='test_service_SBOM.json') as mock_run:
+                result = self.cdxgen.get_components(self.artifact, self.mock_config, self.service_name)
+
+        self.assertEqual(result, self.mock_components)
+        mock_run.assert_called_once_with(
+            '/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', []
         )
