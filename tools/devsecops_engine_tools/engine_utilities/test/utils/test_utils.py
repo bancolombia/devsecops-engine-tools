@@ -1,4 +1,5 @@
 from devsecops_engine_tools.engine_utilities.utils.utils import Utils
+from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 
 def test_configurate_external_checks_git():
         json_data = {
@@ -80,3 +81,53 @@ def test_configurate_external_checks_dir():
     result = util.configurate_external_checks("checkov",json_data,None, "ssh:2231231:123123")
 
     assert result is None
+
+
+def test_update_threshold_by_pattern_search_with_only_tool_exclusions():
+    """
+    A BY_PATTERN_SEARCH entry that only defines tool exclusions (no THRESHOLD)
+    must not raise an error and should keep the default threshold.
+    """
+    threshold = Threshold(
+        {
+            "VULNERABILITY": {"Critical": 1, "High": 1, "Medium": 1, "Low": 1},
+            "COMPLIANCE": {"Critical": 1},
+        }
+    )
+    exclusions_data = {
+        "BY_PATTERN_SEARCH": {
+            ".*_Repository_Test": {
+                "XRAY": [{"id": "XRAY-522015", "where": "all"}],
+            }
+        }
+    }
+
+    result = Utils.update_threshold(
+        Utils(), threshold, exclusions_data, "my_Repository_Test"
+    )
+
+    assert result.name == "default"
+
+
+def test_update_threshold_by_pattern_search_with_threshold():
+    threshold = Threshold(
+        {
+            "VULNERABILITY": {"Critical": 1, "High": 1, "Medium": 1, "Low": 1},
+            "COMPLIANCE": {"Critical": 1},
+        }
+    )
+    exclusions_data = {
+        "BY_PATTERN_SEARCH": {
+            ".*_Repository_Test": {
+                "THRESHOLD": {"VULNERABILITY": {"Critical": 99}},
+                "XRAY": [{"id": "XRAY-522015", "where": "all"}],
+            }
+        }
+    }
+
+    result = Utils.update_threshold(
+        Utils(), threshold, exclusions_data, "my_Repository_Test"
+    )
+
+    assert result.vulnerability.critical == 99
+

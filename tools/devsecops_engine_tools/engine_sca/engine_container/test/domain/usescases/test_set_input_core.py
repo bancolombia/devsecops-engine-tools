@@ -122,3 +122,66 @@ def test_get_exclusions_no_matching_exclusions(mock_tool_remote):
     exclusions = set_input_core.get_exclusions(exclusions_data, pipeline_name, "PRISMA",base_image)
 
     assert len(exclusions) == 0
+
+
+def test_get_exclusions_by_pattern_search(mock_tool_remote):
+    exclusions_data = {
+        "All": {
+            "PRISMA": [
+                {
+                    "id": "CVE-2023-5363",
+                    "where": "all",
+                    "hu": "",
+                }
+            ]
+        },
+        "BY_PATTERN_SEARCH": {
+            ".*_Repository_Test": {
+                "THRESHOLD": {"VULNERABILITY": {"Critical": 1}},
+                "PRISMA": [
+                    {
+                        "id": "CVE-2023-6237",
+                        "cve_id": "CVE-2023-6237",
+                        "where": "all",
+                    }
+                ],
+            }
+        },
+    }
+    pipeline_name = "my_Repository_Test"
+    base_image = [["base_image:latest"]]
+
+    set_input_core = SetInputCore(
+        mock_tool_remote, None, pipeline_name, "PRISMA", "release"
+    )
+    exclusions = set_input_core.get_exclusions(
+        exclusions_data, pipeline_name, "PRISMA", base_image
+    )
+
+    assert len(exclusions) == 2
+    assert any(item.id == "CVE-2023-6237" for item in exclusions)
+
+
+def test_get_exclusions_direct_match_takes_precedence_over_pattern(mock_tool_remote):
+    exclusions_data = {
+        "my_Repository_Test": {
+            "PRISMA": [{"id": "direct-match", "where": "all"}]
+        },
+        "BY_PATTERN_SEARCH": {
+            ".*_Repository_Test": {
+                "PRISMA": [{"id": "pattern-match", "where": "all"}],
+            }
+        },
+    }
+    pipeline_name = "my_Repository_Test"
+    base_image = [["base_image:latest"]]
+
+    set_input_core = SetInputCore(
+        mock_tool_remote, None, pipeline_name, "PRISMA", "release"
+    )
+    exclusions = set_input_core.get_exclusions(
+        exclusions_data, pipeline_name, "PRISMA", base_image
+    )
+
+    assert len(exclusions) == 1
+    assert exclusions[0].id == "direct-match"

@@ -80,6 +80,74 @@ def test_get_exclusions():
     assert len(result) == 4
 
 
+def test_get_exclusions_by_pattern_search():
+    exclusions = {
+        "All": {
+            "XRAY": [
+                {
+                    "id": "1",
+                    "where": "module1",
+                    "cve_id": "CVE-2021-1234",
+                    "severity": "high",
+                    "hu": "user1",
+                },
+            ]
+        },
+        "BY_PATTERN_SEARCH": {
+            ".*_Repository_Test": {
+                "THRESHOLD": {"VULNERABILITY": {"Critical": 1}},
+                "XRAY": [
+                    {
+                        "id": "XRAY-522015",
+                        "where": "all",
+                        "cve_id": "CVE-2023-35116",
+                        "hu": "4662904",
+                    },
+                ],
+            }
+        },
+    }
+    pipeline_name = "my_Repository_Test"
+    tool = "XRAY"
+    remote_config = {"key": "value"}
+
+    set_input_core_instance = SetInputCore(
+        remote_config, exclusions, pipeline_name, tool
+    )
+    result = set_input_core_instance.get_exclusions(exclusions, pipeline_name, tool)
+
+    assert len(result) == 2
+    assert any(item.id == "XRAY-522015" for item in result)
+
+
+def test_get_exclusions_direct_match_takes_precedence_over_pattern():
+    exclusions = {
+        "my_Repository_Test": {
+            "XRAY": [
+                {"id": "direct-match", "where": "all"},
+            ]
+        },
+        "BY_PATTERN_SEARCH": {
+            ".*_Repository_Test": {
+                "XRAY": [
+                    {"id": "pattern-match", "where": "all"},
+                ],
+            }
+        },
+    }
+    pipeline_name = "my_Repository_Test"
+    tool = "XRAY"
+    remote_config = {"key": "value"}
+
+    set_input_core_instance = SetInputCore(
+        remote_config, exclusions, pipeline_name, tool
+    )
+    result = set_input_core_instance.get_exclusions(exclusions, pipeline_name, tool)
+
+    assert len(result) == 1
+    assert result[0].id == "direct-match"
+
+
 def test_set_input_core():
     with patch(
         "devsecops_engine_tools.engine_core.src.domain.model.input_core.InputCore"
