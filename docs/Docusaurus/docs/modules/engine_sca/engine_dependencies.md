@@ -114,6 +114,28 @@ Defines exclusion rules for repositories and specific vulnerability findings.
         "hu": "4662904"
       }
     ]
+  },
+  "BY_PATTERN_SEARCH": {
+    ".*_Repository_Test": {
+      "THRESHOLD": {
+        "VULNERABILITY": {
+          "Critical": 1,
+          "High": 4,
+          "Medium": 10,
+          "Low": 15
+        }
+      },
+      "XRAY": [
+        {
+          "id": "XRAY-522015",
+          "cve_id": "CVE-2023-35116",
+          "where": "all",
+          "create_date": "19022024",
+          "expired_date": "undefined",
+          "hu": "4662904"
+        }
+      ]
+    }
   }
 }
 ```
@@ -121,6 +143,9 @@ Defines exclusion rules for repositories and specific vulnerability findings.
 #### Exclusion Types
 - **All**: Global exclusions applied to all repositories
 - **Repository-specific**: Exclusions for specific repositories (can be added as needed)
+- **BY_PATTERN_SEARCH**: Regex-based exclusions matching multiple pipeline names at once. Each key is a regex evaluated with `re.match(pattern, pipeline_name, re.IGNORECASE)` against the pipeline name; the first matching pattern's block is used
+  - Supports both **THRESHOLD** overrides and **tool-specific exclusion lists** (e.g., `XRAY`), the same way an exact repository match does
+  - Only evaluated when there is no exact repository key match in `Exclusions.json` (exact match always takes precedence over pattern match)
 - **Tool-specific exclusions**: Organized by scanning tool:
   - `XRAY`: Exclusions for JFrog Xray findings
   - `DEPENDENCY_CHECK`: Exclusions for OWASP Dependency-Check findings
@@ -228,6 +253,7 @@ devsecops-engine-tools \
 3. Regularly review and clean up expired exclusions
 4. Use global exclusions sparingly - prefer repository-specific exclusions
 5. Document business justification for permanent exclusions
+6. Use `BY_PATTERN_SEARCH` when the same THRESHOLD and/or tool exclusions must apply to a group of pipelines matching a naming convention (e.g., `".*_Repository_Test"`), instead of duplicating the same block across many repository-specific entries
 
 ### Error Handling Optimization
 1. Customize `STDERR_EXPECTED_WORDS` based on your scanning environment
