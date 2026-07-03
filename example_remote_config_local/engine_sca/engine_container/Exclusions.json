@@ -6,6 +6,7 @@
         "where": "all",
         "create_date": "24012023",
         "expired_date": "22092023",
+        "severity": "high",
         "hu": "345345",
         "reason": "False Positive"
       }
@@ -28,6 +29,7 @@
         "cve_id": "CVE-2023-6237",
         "expired_date": "21092024",
         "create_date": "24012023",
+        "severity": "high",
         "hu": "345345"
       }
     ]
@@ -48,6 +50,7 @@
           "cve_id": "CVE-2023-6237",
           "expired_date": "21092024",
           "create_date": "24012023",
+          "severity": "high",
           "hu": "345345"
         }
       ]

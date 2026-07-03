@@ -34,7 +34,7 @@ class CdxGen(SbomManagerGateway):
             recurse = config["CDXGEN"].get("RECURSE", True)
             install_deps = config["CDXGEN"].get("INSTALL_DEPENDENCIES", True)
             debug_pipelines = config["CDXGEN"].get("DEBUG_PIPELINES", [])
-            lifecycle_pipelines = config["CDXGEN"].get("LIFECYCLE_PIPELINES", {})
+            required_only_pipelines = config["CDXGEN"].get("REQUIRED_ONLY_PIPELINES", [])
             spec_version = config["CDXGEN"].get("SPEC_VERSION", "1.6")
             break_on_build_failure = config["CDXGEN"].get("BREAK_ON_BUILD_FAILURE", True)
             build_failure_patterns = config["CDXGEN"].get("BUILD_FAILURE_PATTERNS", [])
@@ -90,13 +90,14 @@ class CdxGen(SbomManagerGateway):
                     logger.warning(f"{os_platform} is not supported.")
                     return None
 
-            result_sbom = self._run_cdxgen(command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug, spec_version, failure_patterns)
+            required_only = service_name in required_only_pipelines if required_only_pipelines else False
+            result_sbom = self._run_cdxgen(command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, required_only, enable_debug, spec_version, failure_patterns)
             return get_list_component(result_sbom, config["CDXGEN"]["OUTPUT_FORMAT"])
         except Exception as e:
             logger.error(f"Error generating SBOM: {e}")
             return None
 
-    def _run_cdxgen(self, command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug=False, spec_version="1.6", failure_patterns=None):
+    def _run_cdxgen(self, command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, required_only=False, enable_debug=False, spec_version="1.6", failure_patterns=None):
         failure_patterns = failure_patterns or []
         result_file = f"{service_name}_SBOM.json"
         command = [
@@ -120,11 +121,9 @@ class CdxGen(SbomManagerGateway):
                     ["--exclude", ex]
                 )
 
-        if lifecycle_pipelines.get(service_name):
-            command.extend(
-                ["--lifecycle", lifecycle_pipelines.get(service_name)]
-            )
-        
+        if required_only:
+            command.append("--required-only")
+
         if not recurse:
             command.append(
                 "--no-recurse"

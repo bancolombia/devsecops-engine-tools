@@ -111,6 +111,7 @@ Defines exclusion rules for repositories and specific vulnerability findings.
         "where": "all",
         "create_date": "19022024",
         "expired_date": "undefined",
+        "severity": "high",
         "hu": "4662904"
       }
     ]
@@ -132,6 +133,7 @@ Defines exclusion rules for repositories and specific vulnerability findings.
           "where": "all",
           "create_date": "19022024",
           "expired_date": "undefined",
+          "severity": "high",
           "hu": "4662904"
         }
       ]
@@ -158,6 +160,8 @@ Each exclusion entry contains:
 - `where`: Scope of exclusion (`"all"` for global or specific dependency/path)
 - `create_date`: Date when exclusion was created (format: DDMMYYYY)
 - `expired_date`: Expiration date for the exclusion (`"undefined"` for permanent exclusions)
+- `severity`: Vulnerability severity level in lowercase (e.g., `"critical"`, `"high"`, `"medium"`, `"low"`) used to match against the finding's severity
+- `priority`: Alternative to `severity` per the `Exclusions` model - equally interchangeable, since an exclusion is applied when either `severity` or `priority` matches the finding (e.g., `"Very Critical"`, `"Critical"`, `"High"`, `"Medium Low"`)
 - `hu`: Human user identifier for audit trail
 
 ## Main Responsibilities
