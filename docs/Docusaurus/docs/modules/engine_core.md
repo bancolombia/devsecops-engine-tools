@@ -142,9 +142,7 @@ Configuration of the driven adapters in the main layer and management of on/off 
             "RECURSE": true,
             "INSTALL_DEPENDENCIES": true,
             "DEBUG_PIPELINES": ["pipeline_name1", "pipeline_name2"],
-            "LIFECYCLE_PIPELINES": {
-                "pipeline_name1": "pre-build"
-            },
+            "REQUIRED_ONLY_PIPELINES": ["pipeline_name1", "pipeline_name2"],
             "BREAK_ON_BUILD_FAILURE": true,
             "BUILD_FAILURE_PATTERNS": ["BUILD FAILED", "BUILD FAILURE", "npm ERR!"],
             "OVERRIDE_REGISTRIES": false,

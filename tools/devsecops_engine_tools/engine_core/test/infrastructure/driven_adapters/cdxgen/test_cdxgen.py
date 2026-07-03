@@ -22,7 +22,7 @@ class TestCdxGen(unittest.TestCase):
                 "EXCLUDE_PATHS": [],
                 "RECURSE": True,
                 "DEBUG_PIPELINES": [],
-                "LIFECYCLE_PIPELINES": {}
+                "REQUIRED_ONLY_PIPELINES": []
             }
         }
         
@@ -35,7 +35,7 @@ class TestCdxGen(unittest.TestCase):
                 "EXCLUDE_PATHS": [],
                 "RECURSE": True,
                 "DEBUG_PIPELINES": [],
-                "LIFECYCLE_PIPELINES": {}
+                "REQUIRED_ONLY_PIPELINES": []
             }
         }
         
@@ -66,7 +66,7 @@ class TestCdxGen(unittest.TestCase):
             "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64",
             "cdxgen"
         )
-        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', [])
+        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, True, False, False, '1.6', [])
         mock_get_list_component.assert_called_once_with('test_service_SBOM.json', 'json')
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.machine')
@@ -92,7 +92,7 @@ class TestCdxGen(unittest.TestCase):
             "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-linux-arm64",
             "cdxgen"
         )
-        mock_run.assert_called_once_with('./cdxgen-linux-arm64', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', [])
+        mock_run.assert_called_once_with('./cdxgen-linux-arm64', self.artifact, self.service_name, [], [], True, True, False, False, '1.6', [])
         mock_get_list_component.assert_called_once_with('test_service_SBOM.json', 'json')
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
@@ -224,7 +224,7 @@ class TestCdxGen(unittest.TestCase):
         recurse = True
         install_deps = True
         enable_debug = False
-        lifecycle_pipelines = {}
+        required_only = False
         mock_result = Mock(returncode=0, stdout="", stderr="")
         mock_subprocess.return_value = mock_result
         expected_result_file = f"{self.service_name}_SBOM.json"
@@ -232,7 +232,7 @@ class TestCdxGen(unittest.TestCase):
         
         # Act
         with patch('builtins.print') as mock_print:
-            result = self.cdxgen._run_cdxgen(command_prefix, self.artifact, self.service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug)
+            result = self.cdxgen._run_cdxgen(command_prefix, self.artifact, self.service_name, exclude_types, exclude_paths, recurse, install_deps, required_only, enable_debug)
         
         # Assert
         self.assertEqual(result, expected_result_file)
@@ -254,12 +254,12 @@ class TestCdxGen(unittest.TestCase):
         recurse = True
         install_deps = True
         enable_debug = False
-        lifecycle_pipelines = {}
+        required_only = False
         error_message = "Command execution failed"
         mock_subprocess.side_effect = Exception(error_message)
         
         # Act
-        result = self.cdxgen._run_cdxgen(command_prefix, self.artifact, self.service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug)
+        result = self.cdxgen._run_cdxgen(command_prefix, self.artifact, self.service_name, exclude_types, exclude_paths, recurse, install_deps, required_only, enable_debug)
         
         # Assert
         self.assertIsNone(result)
@@ -275,14 +275,14 @@ class TestCdxGen(unittest.TestCase):
         recurse = True
         install_deps = True
         enable_debug = True
-        lifecycle_pipelines = {}
+        required_only = False
         mock_result = Mock(returncode=0, stdout="Debug stdout output", stderr="Debug stderr output")
         mock_subprocess.return_value = mock_result
         expected_result_file = f"{self.service_name}_SBOM.json"
         
         # Act
         with patch('builtins.print') as mock_print:
-            result = self.cdxgen._run_cdxgen(command_prefix, self.artifact, self.service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug)
+            result = self.cdxgen._run_cdxgen(command_prefix, self.artifact, self.service_name, exclude_types, exclude_paths, recurse, install_deps, required_only, enable_debug)
         
         # Assert
         self.assertEqual(result, expected_result_file)
@@ -312,7 +312,7 @@ class TestCdxGen(unittest.TestCase):
                 "RECURSE": True,
                 "INSTALL_DEPENDENCIES": False,
                 "DEBUG_PIPELINES": ["test_service", "another_service"],
-                "LIFECYCLE_PIPELINES": {}
+                "REQUIRED_ONLY_PIPELINES": []
             }
         }
         
@@ -325,7 +325,7 @@ class TestCdxGen(unittest.TestCase):
         # Assert
         self.assertEqual(result, self.mock_components)
         mock_logger.info.assert_called_with(f"Enabling debug mode for pipeline: {self.service_name}")
-        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, False, {}, True, '1.6', [])
+        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, False, False, True, '1.6', [])
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
@@ -344,7 +344,7 @@ class TestCdxGen(unittest.TestCase):
                 "EXCLUDE_PATHS": [],
                 "RECURSE": True,
                 "DEBUG_PIPELINES": ["other_service", "another_service"],
-                "LIFECYCLE_PIPELINES": {}
+                "REQUIRED_ONLY_PIPELINES": []
             }
         }
         
@@ -356,7 +356,36 @@ class TestCdxGen(unittest.TestCase):
         
         # Assert
         self.assertEqual(result, self.mock_components)
-        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', [])
+        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, True, False, False, '1.6', [])
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
+    def test_get_components_required_only_service_in_list(self, mock_platform, mock_get_list_component):
+        # Arrange
+        mock_platform.return_value = "Linux"
+        mock_get_list_component.return_value = self.mock_components
+
+        required_only_config = {
+            "CDXGEN": {
+                "CDXGEN_VERSION": "10.2.0",
+                "SLIM_BINARY": False,
+                "OUTPUT_FORMAT": "json",
+                "EXCLUDE_TYPES": [],
+                "EXCLUDE_PATHS": [],
+                "RECURSE": True,
+                "DEBUG_PIPELINES": [],
+                "REQUIRED_ONLY_PIPELINES": ["test_service", "another_service"]
+            }
+        }
+
+        with patch.object(self.cdxgen, '_check_cdxgen_in_path', return_value=None):
+            with patch.object(self.cdxgen, '_install_tool_unix', return_value='./cdxgen-linux-amd64'):
+                with patch.object(self.cdxgen, '_run_cdxgen', return_value='test_service_SBOM.json') as mock_run:
+                    result = self.cdxgen.get_components(self.artifact, required_only_config, self.service_name)
+
+        # Assert: required_only=True because service_name is in REQUIRED_ONLY_PIPELINES
+        self.assertEqual(result, self.mock_components)
+        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, True, True, False, '1.6', [])
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
@@ -375,7 +404,7 @@ class TestCdxGen(unittest.TestCase):
                 "RECURSE": True,
                 "FETCH_LICENSE": True,
                 "DEBUG_PIPELINES": [],
-                "LIFECYCLE_PIPELINES": {}
+                "REQUIRED_ONLY_PIPELINES": []
             }
         }
 
@@ -389,7 +418,7 @@ class TestCdxGen(unittest.TestCase):
                     self.assertEqual(result, self.mock_components)
                     self.assertEqual(os.environ.get("FETCH_LICENSE"), "true")
                     mock_install.assert_called_once()
-                    mock_run.assert_called_once_with('/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', [])
+                    mock_run.assert_called_once_with('/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, False, False, '1.6', [])
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
@@ -408,7 +437,7 @@ class TestCdxGen(unittest.TestCase):
                 "RECURSE": True,
                 "FETCH_LICENSE": False,
                 "DEBUG_PIPELINES": [],
-                "LIFECYCLE_PIPELINES": {}
+                "REQUIRED_ONLY_PIPELINES": []
             }
         }
 
@@ -422,7 +451,7 @@ class TestCdxGen(unittest.TestCase):
                     self.assertEqual(result, self.mock_components)
                     self.assertIsNone(os.environ.get("FETCH_LICENSE"))
                     mock_install.assert_called_once()
-                    mock_run.assert_called_once_with('/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', [])
+                    mock_run.assert_called_once_with('/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, False, False, '1.6', [])
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.subprocess.run')
     def test_run_cdxgen_with_exclude_types_list(self, mock_subprocess):
@@ -433,7 +462,7 @@ class TestCdxGen(unittest.TestCase):
         recurse = True
         install_deps = True
         enable_debug = False
-        lifecycle_pipelines = {}
+        required_only = False
         mock_result = Mock(returncode=0, stdout="", stderr="")
         mock_subprocess.return_value = mock_result
         expected_result_file = f"{self.service_name}_SBOM.json"
@@ -441,7 +470,7 @@ class TestCdxGen(unittest.TestCase):
         
         # Act
         with patch('builtins.print') as mock_print:
-            result = self.cdxgen._run_cdxgen(command_prefix, self.artifact, self.service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug)
+            result = self.cdxgen._run_cdxgen(command_prefix, self.artifact, self.service_name, exclude_types, exclude_paths, recurse, install_deps, required_only, enable_debug)
         
         # Assert
         self.assertEqual(result, expected_result_file)
@@ -461,7 +490,7 @@ class TestCdxGen(unittest.TestCase):
         recurse = True
         install_deps = True
         enable_debug = False
-        lifecycle_pipelines = {}
+        required_only = False
         mock_result = Mock(returncode=0, stdout="", stderr="")
         mock_subprocess.return_value = mock_result
         expected_result_file = f"{self.service_name}_SBOM.json"
@@ -469,7 +498,7 @@ class TestCdxGen(unittest.TestCase):
         
         # Act
         with patch('builtins.print') as mock_print:
-            result = self.cdxgen._run_cdxgen(command_prefix, self.artifact, self.service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug)
+            result = self.cdxgen._run_cdxgen(command_prefix, self.artifact, self.service_name, exclude_types, exclude_paths, recurse, install_deps, required_only, enable_debug)
         
         # Assert
         self.assertEqual(result, expected_result_file)
@@ -489,7 +518,7 @@ class TestCdxGen(unittest.TestCase):
         recurse = False
         enable_debug = False
         install_deps = True
-        lifecycle_pipelines = {}
+        required_only = False
         mock_result = Mock(returncode=0, stdout="", stderr="")
         mock_subprocess.return_value = mock_result
         expected_result_file = f"{self.service_name}_SBOM.json"
@@ -497,7 +526,7 @@ class TestCdxGen(unittest.TestCase):
         
         # Act
         with patch('builtins.print') as mock_print:
-            result = self.cdxgen._run_cdxgen(command_prefix, self.artifact, self.service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug)
+            result = self.cdxgen._run_cdxgen(command_prefix, self.artifact, self.service_name, exclude_types, exclude_paths, recurse, install_deps, required_only, enable_debug)
         
         # Assert
         self.assertEqual(result, expected_result_file)
@@ -611,7 +640,7 @@ class TestCdxGen(unittest.TestCase):
         # Assert
         self.assertEqual(result, self.mock_components)
         mock_logger.info.assert_called_with(f"Using cdxgen from PATH: {cdxgen_path}")
-        mock_run.assert_called_once_with(cdxgen_path, self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', [])
+        mock_run.assert_called_once_with(cdxgen_path, self.artifact, self.service_name, [], [], True, True, False, False, '1.6', [])
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.subprocess.run')
     def test_install_tool_unix_success(self, mock_subprocess):
@@ -741,7 +770,7 @@ class TestCdxGen(unittest.TestCase):
                 "RECURSE": True,
                 "INSTALL_DEPENDENCIES": True,
                 "DEBUG_PIPELINES": [],
-                "LIFECYCLE_PIPELINES": {},
+                "REQUIRED_ONLY_PIPELINES": [],
                 "OVERRIDE_REGISTRIES": True,
                 "REGISTRIES": {"MY_PRIVATE_REG": "http://my-registry.example.com"},
             }
@@ -754,25 +783,25 @@ class TestCdxGen(unittest.TestCase):
                     self.assertEqual(os.environ.get("MY_PRIVATE_REG"), "http://my-registry.example.com")
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.subprocess.run')
-    def test_run_cdxgen_with_lifecycle_pipeline(self, mock_subprocess):
-        """Covers lifecycle_pipelines branch (line 112)."""
+    def test_run_cdxgen_with_required_only(self, mock_subprocess):
+        """Covers required_only=True branch: --required-only flag is appended to the command."""
         command_prefix = "/usr/local/bin/cdxgen"
         exclude_types = []
         exclude_paths = []
         recurse = True
         install_deps = True
         enable_debug = False
-        lifecycle_pipelines = {self.service_name: "post-build"}
+        required_only = True
         mock_result = Mock(returncode=0, stdout="", stderr="")
         mock_subprocess.return_value = mock_result
         expected_result_file = f"{self.service_name}_SBOM.json"
-        expected_command = [command_prefix, self.artifact, "-o", expected_result_file, "--spec-version", "1.6", "--lifecycle", "post-build"]
+        expected_command = [command_prefix, self.artifact, "-o", expected_result_file, "--spec-version", "1.6", "--required-only"]
 
         with patch('builtins.print'):
             result = self.cdxgen._run_cdxgen(
                 command_prefix, self.artifact, self.service_name,
                 exclude_types, exclude_paths, recurse, install_deps,
-                lifecycle_pipelines, enable_debug
+                required_only, enable_debug
             )
 
         self.assertEqual(result, expected_result_file)
@@ -792,7 +821,7 @@ class TestCdxGen(unittest.TestCase):
         recurse = True
         install_deps = False
         enable_debug = False
-        lifecycle_pipelines = {}
+        required_only = False
         mock_result = Mock(returncode=0, stdout="", stderr="")
         mock_subprocess.return_value = mock_result
         expected_result_file = f"{self.service_name}_SBOM.json"
@@ -802,7 +831,7 @@ class TestCdxGen(unittest.TestCase):
             result = self.cdxgen._run_cdxgen(
                 command_prefix, self.artifact, self.service_name,
                 exclude_types, exclude_paths, recurse, install_deps,
-                lifecycle_pipelines, enable_debug
+                required_only, enable_debug
             )
 
         self.assertEqual(result, expected_result_file)
@@ -823,14 +852,14 @@ class TestCdxGen(unittest.TestCase):
         recurse = True
         install_deps = True
         enable_debug = False
-        lifecycle_pipelines = {}
+        required_only = False
         mock_result = Mock(returncode=1, stdout="", stderr="some cdxgen error")
         mock_subprocess.return_value = mock_result
 
         result = self.cdxgen._run_cdxgen(
             command_prefix, self.artifact, self.service_name,
             exclude_types, exclude_paths, recurse, install_deps,
-            lifecycle_pipelines, enable_debug
+            required_only, enable_debug
         )
 
         self.assertIsNone(result)
@@ -853,7 +882,7 @@ class TestCdxGen(unittest.TestCase):
 
         result = self.cdxgen._run_cdxgen(
             command_prefix, self.artifact, self.service_name,
-            [], [], True, True, {}, False, "1.6", ["BUILD FAILED"]
+            [], [], True, True, False, False, "1.6", ["BUILD FAILED"]
         )
 
         self.assertIsNone(result)
@@ -877,7 +906,7 @@ class TestCdxGen(unittest.TestCase):
 
         result = self.cdxgen._run_cdxgen(
             command_prefix, self.artifact, self.service_name,
-            [], [], True, True, {}, False, "1.6", ["BUILD FAILURE"]
+            [], [], True, True, False, False, "1.6", ["BUILD FAILURE"]
         )
 
         self.assertIsNone(result)
@@ -898,7 +927,7 @@ class TestCdxGen(unittest.TestCase):
 
         result = self.cdxgen._run_cdxgen(
             command_prefix, self.artifact, self.service_name,
-            [], [], True, True, {}, False, "1.6", [r"npm ERR!\s+code\s+E\d+"]
+            [], [], True, True, False, False, "1.6", [r"npm ERR!\s+code\s+E\d+"]
         )
 
         self.assertIsNone(result)
@@ -916,7 +945,7 @@ class TestCdxGen(unittest.TestCase):
         with patch('builtins.print'):
             result = self.cdxgen._run_cdxgen(
                 command_prefix, self.artifact, self.service_name,
-                [], [], True, True, {}, False, "1.6", ["("]
+                [], [], True, True, False, False, "1.6", ["("]
             )
 
         self.assertEqual(result, expected_result_file)
@@ -933,7 +962,7 @@ class TestCdxGen(unittest.TestCase):
         with patch('builtins.print'):
             result = self.cdxgen._run_cdxgen(
                 command_prefix, self.artifact, self.service_name,
-                [], [], True, True, {}, False, "1.6", []
+                [], [], True, True, False, False, "1.6", []
             )
 
         self.assertEqual(result, expected_result_file)
@@ -993,7 +1022,7 @@ class TestCdxGen(unittest.TestCase):
                 "EXCLUDE_PATHS": [],
                 "RECURSE": True,
                 "DEBUG_PIPELINES": [],
-                "LIFECYCLE_PIPELINES": {},
+                "REQUIRED_ONLY_PIPELINES": [],
                 "BUILD_FAILURE_PATTERNS": ["BUILD FAILED"],
                 "BREAK_ON_BUILD_FAILURE": False
             }
@@ -1005,7 +1034,7 @@ class TestCdxGen(unittest.TestCase):
 
         self.assertEqual(result, self.mock_components)
         mock_run.assert_called_once_with(
-            '/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', []
+            '/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, False, False, '1.6', []
         )
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
@@ -1024,7 +1053,7 @@ class TestCdxGen(unittest.TestCase):
                 "EXCLUDE_PATHS": [],
                 "RECURSE": True,
                 "DEBUG_PIPELINES": [],
-                "LIFECYCLE_PIPELINES": {},
+                "REQUIRED_ONLY_PIPELINES": [],
                 "BUILD_FAILURE_PATTERNS": ["BUILD FAILED", r"npm ERR!\s+code\s+E\d+"]
             }
         }
@@ -1035,7 +1064,7 @@ class TestCdxGen(unittest.TestCase):
 
         self.assertEqual(result, self.mock_components)
         mock_run.assert_called_once_with(
-            '/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6',
+            '/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, False, False, '1.6',
             ["BUILD FAILED", r"npm ERR!\s+code\s+E\d+"]
         )
 
@@ -1052,5 +1081,5 @@ class TestCdxGen(unittest.TestCase):
 
         self.assertEqual(result, self.mock_components)
         mock_run.assert_called_once_with(
-            '/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, {}, False, '1.6', []
+            '/usr/local/bin/cdxgen', self.artifact, self.service_name, [], [], True, True, False, False, '1.6', []
         )

@@ -7,6 +7,7 @@
                 "where": "all",
                 "create_date": "19022024",
                 "expired_date": "undefined",
+                "severity": "high",
                 "hu": "4662904"
             }
         ]
@@ -28,6 +29,7 @@
                     "where": "all",
                     "create_date": "19022024",
                     "expired_date": "undefined",
+                    "severity": "high",
                     "hu": "4662904"
                 }
             ]

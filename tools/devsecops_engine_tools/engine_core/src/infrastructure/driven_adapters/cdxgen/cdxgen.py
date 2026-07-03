@@ -34,7 +34,7 @@ class CdxGen(SbomManagerGateway):
             recurse = config["CDXGEN"].get("RECURSE", True)
             install_deps = config["CDXGEN"].get("INSTALL_DEPENDENCIES", True)
             debug_pipelines = config["CDXGEN"].get("DEBUG_PIPELINES", [])
-            lifecycle_pipelines = config["CDXGEN"].get("LIFECYCLE_PIPELINES", {})
+            required_only_pipelines = config["CDXGEN"].get("REQUIRED_ONLY_PIPELINES", [])
             spec_version = config["CDXGEN"].get("SPEC_VERSION", "1.6")
             break_on_build_failure = config["CDXGEN"].get("BREAK_ON_BUILD_FAILURE", True)
             build_failure_patterns = config["CDXGEN"].get("BUILD_FAILURE_PATTERNS", [])
@@ -90,50 +90,20 @@ class CdxGen(SbomManagerGateway):
                     logger.warning(f"{os_platform} is not supported.")
                     return None
 
-            result_sbom = self._run_cdxgen(command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug, spec_version, failure_patterns)
+            required_only = service_name in required_only_pipelines if required_only_pipelines else False
+            result_sbom = self._run_cdxgen(command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, required_only, enable_debug, spec_version, failure_patterns)
             return get_list_component(result_sbom, config["CDXGEN"]["OUTPUT_FORMAT"])
         except Exception as e:
             logger.error(f"Error generating SBOM: {e}")
             return None
 
-    def _run_cdxgen(self, command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, lifecycle_pipelines, enable_debug=False, spec_version="1.6", failure_patterns=None):
+    def _run_cdxgen(self, command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, required_only=False, enable_debug=False, spec_version="1.6", failure_patterns=None):
         failure_patterns = failure_patterns or []
         result_file = f"{service_name}_SBOM.json"
-        command = [
-            command_prefix,
-            artifact,
-            "-o",
-            result_file,
-            "--spec-version",
-            spec_version
-        ]
-
-        if exclude_types:
-            for ex in exclude_types:
-                command.extend(
-                    ["--exclude-type", ex]
-                )
-
-        if exclude_paths:
-            for ex in exclude_paths:
-                command.extend(
-                    ["--exclude", ex]
-                )
-
-        if lifecycle_pipelines.get(service_name):
-            command.extend(
-                ["--lifecycle", lifecycle_pipelines.get(service_name)]
-            )
-        
-        if not recurse:
-            command.append(
-                "--no-recurse"
-            )
-        
-        if not install_deps:
-            command.append(
-                "--no-install-deps"
-            )
+        command = self._build_cdxgen_command(
+            command_prefix, artifact, result_file, spec_version,
+            exclude_types, exclude_paths, required_only, recurse, install_deps
+        )
 
         try:
             result = subprocess.run(
@@ -142,23 +112,9 @@ class CdxGen(SbomManagerGateway):
                 stderr=subprocess.PIPE,
                 text=True
             )
-            
-            if enable_debug:
-                if result.stdout:
-                    logger.info(f"CDXGEN stdout: {result.stdout}")
-                if result.stderr:
-                    logger.info(f"CDXGEN stderr: {result.stderr}")
 
-            matched_pattern = self._detect_build_failure(
-                f"{result.stdout or ''}\n{result.stderr or ''}", failure_patterns
-            )
-            if matched_pattern:
-                self._remove_incomplete_sbom(result_file)
-                raise Exception(
-                    f"Detected build failure pattern '{matched_pattern}' in cdxgen output for "
-                    f"'{service_name}'. The underlying build likely failed; aborting to avoid "
-                    "generating an incomplete or empty SBOM."
-                )
+            self._log_debug_output(result, enable_debug)
+            self._check_build_failure(result, failure_patterns, service_name, result_file)
 
             if result.returncode == 0:
                 print(f"SBOM generated and saved to: {result_file}")
@@ -168,6 +124,53 @@ class CdxGen(SbomManagerGateway):
 
         except Exception as e:
             logger.error(f"Error running cdxgen: {e}")
+
+    def _build_cdxgen_command(self, command_prefix, artifact, result_file, spec_version, exclude_types, exclude_paths, required_only, recurse, install_deps):
+        command = [
+            command_prefix,
+            artifact,
+            "-o",
+            result_file,
+            "--spec-version",
+            spec_version
+        ]
+
+        for ex in exclude_types or []:
+            command.extend(["--exclude-type", ex])
+
+        for ex in exclude_paths or []:
+            command.extend(["--exclude", ex])
+
+        if required_only:
+            command.append("--required-only")
+
+        if not recurse:
+            command.append("--no-recurse")
+
+        if not install_deps:
+            command.append("--no-install-deps")
+
+        return command
+
+    def _log_debug_output(self, result, enable_debug):
+        if not enable_debug:
+            return
+        if result.stdout:
+            logger.info(f"CDXGEN stdout: {result.stdout}")
+        if result.stderr:
+            logger.info(f"CDXGEN stderr: {result.stderr}")
+
+    def _check_build_failure(self, result, failure_patterns, service_name, result_file):
+        matched_pattern = self._detect_build_failure(
+            f"{result.stdout or ''}\n{result.stderr or ''}", failure_patterns
+        )
+        if matched_pattern:
+            self._remove_incomplete_sbom(result_file)
+            raise Exception(
+                f"Detected build failure pattern '{matched_pattern}' in cdxgen output for "
+                f"'{service_name}'. The underlying build likely failed; aborting to avoid "
+                "generating an incomplete or empty SBOM."
+            )
 
     def _detect_build_failure(self, output, patterns):
         """Return the first configured regex pattern that matches the cdxgen output, if any."""

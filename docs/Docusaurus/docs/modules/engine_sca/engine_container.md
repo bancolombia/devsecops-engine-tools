@@ -221,6 +221,7 @@ Defines exclusion rules for repositories and specific vulnerability findings.
         "where": "all",
         "create_date": "24012023",
         "expired_date": "22092023",
+        "severity": "high",
         "hu": "345345",
         "reason": "False Positive"
       }
@@ -243,6 +244,7 @@ Defines exclusion rules for repositories and specific vulnerability findings.
         "cve_id": "CVE-2023-6237",
         "expired_date": "21092024",
         "create_date": "24012023",
+        "severity": "high",
         "hu": "345345"
       }
     ]
@@ -263,6 +265,7 @@ Defines exclusion rules for repositories and specific vulnerability findings.
           "cve_id": "CVE-2023-6237",
           "expired_date": "21092024",
           "create_date": "24012023",
+          "severity": "high",
           "hu": "345345"
         }
       ]
@@ -292,6 +295,8 @@ Defines exclusion rules for repositories and specific vulnerability findings.
 - `where`: Scope of exclusion (`"all"` for global or specific image/path)
 - `create_date`: Date when exclusion was created (format: DDMMYYYY)
 - `expired_date`: Expiration date for the exclusion (format: DDMMYYYY)
+- `severity`: Vulnerability severity level in lowercase (e.g., `"critical"`, `"high"`, `"medium"`, `"low"`) used to match against the finding's severity
+- `priority`: Alternative to `severity` per the `Exclusions` model - equally interchangeable, since an exclusion is applied when either `severity` or `priority` matches the finding (e.g., `"Very Critical"`, `"Critical"`, `"High"`, `"Medium Low"`)
 - `hu`: Human user identifier for audit trail
 - `reason`: Justification for exclusion (e.g., `"False Positive"`, `"Business Risk Accepted"`)
 
