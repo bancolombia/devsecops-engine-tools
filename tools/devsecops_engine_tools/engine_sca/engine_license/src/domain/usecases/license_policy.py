@@ -19,16 +19,14 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 TOOL = "LICENSE"
 
-SEVERITY_BY_ACTION = {
+_DEFAULT_SEVERITY_BY_ACTION = {
     "fail": "critical",
     "warn": "medium",
     "ok": "info",
     "ignore": "info",
 }
 
-ACTION_TO_SEVERITY = SEVERITY_BY_ACTION
-
-_VALID_ACTIONS = {"fail", "warn", "info", "ignore"}
+__DEFAULT_VALID_ACTIONS = {"fail", "warn", "info", "ignore"}
 
 
 def get_value(obj, *keys, default=None):
@@ -44,7 +42,7 @@ def get_value(obj, *keys, default=None):
 def validate_action(value, default):
     """Return value (lowercased) if it is a valid action, else default."""
     v = str(value).lower().strip()
-    return v if v in _VALID_ACTIONS else default
+    return v if v in __DEFAULT_VALID_ACTIONS else default
 
 
 def looks_like_spdx_id(label):
@@ -84,6 +82,13 @@ def build_policy_from_remote_config(remote_config):
         for k, v in (synonyms_raw.items() if isinstance(synonyms_raw, dict) else [])
     }
 
+    severity_mapping = dict(_DEFAULT_SEVERITY_BY_ACTION)
+    severity_mapping_raw = override.get("severity_mapping", {})
+    if isinstance(severity_mapping_raw, dict):
+        severity_mapping.update(
+            {str(k): str(v) for k, v in severity_mapping_raw.items()}
+        )
+
     return {
         "fail": fail_list,
         "warn": warn_list,
@@ -94,6 +99,7 @@ def build_policy_from_remote_config(remote_config):
         "unknown_action": validate_action(
             override.get("unknown_action", "ignore"), "ignore"
         ),
+        "severity_mapping": severity_mapping,
     }
 
 
@@ -181,7 +187,7 @@ def classify_package(licenses, policy):
             "licenses": [],
             "reason": "no policy available",
             "pattern_matched": None,
-            "severity": SEVERITY_BY_ACTION["ignore"],
+            "severity": _DEFAULT_SEVERITY_BY_ACTION["ignore"],
         }
 
     if not licenses:
@@ -192,7 +198,7 @@ def classify_package(licenses, policy):
             "licenses": [],
             "reason": "no license detected",
             "pattern_matched": None,
-            "severity": SEVERITY_BY_ACTION.get(action, "info"),
+            "severity": policy["severity_mapping"].get(action, "info"),
         }
 
     normalized_labels = []
@@ -216,11 +222,11 @@ def classify_package(licenses, policy):
     bucket = result["bucket"]
 
     if bucket == "unknown":
-        severity = SEVERITY_BY_ACTION.get(policy["unknown_action"], "info")
+        severity = policy["severity_mapping"].get(policy["unknown_action"], "info")
     elif bucket == "ok":
-        severity = SEVERITY_BY_ACTION["ok"]
+        severity = policy["severity_mapping"].get("ok", "info")
     else:
-        severity = SEVERITY_BY_ACTION.get(bucket, "info")
+        severity = policy["severity_mapping"].get(bucket, "info")
 
     return {
         "policy_applied": bucket,

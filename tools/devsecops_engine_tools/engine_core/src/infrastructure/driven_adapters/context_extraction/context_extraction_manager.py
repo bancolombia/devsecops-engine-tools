@@ -77,7 +77,7 @@ class ContextExtractionManager(ContextExtractionGateway):
                 # Dependencies requires remote_config
                 context_list = method(path_file_results, remote_config=remote_config, **kwargs)
             else:
-                # IaC and Container only need path_file_results
+                # IaC, Container, and License only need path_file_results
                 context_list = method(path_file_results)
             
             if not context_list:

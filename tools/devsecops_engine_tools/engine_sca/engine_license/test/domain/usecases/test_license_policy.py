@@ -4,9 +4,9 @@ from devsecops_engine_tools.engine_sca.engine_license.src.domain.usecases.licens
     get_value,
     looks_like_spdx_id,
     validate_action,
-    ACTION_TO_SEVERITY,
-    SEVERITY_BY_ACTION,
+    _DEFAULT_SEVERITY_BY_ACTION,
 )
+
 
 def _policy(**overrides):
     """Helper: build a default-flavoured policy and apply overrides."""
@@ -16,6 +16,7 @@ def _policy(**overrides):
         "synonyms": {},
         "unlicensed_action": "ignore",
         "unknown_action": "ignore",
+        "severity_mapping": dict(_DEFAULT_SEVERITY_BY_ACTION),
     }
     base.update(overrides)
     return base
@@ -73,6 +74,31 @@ def test_build_policy_handles_non_list_fail_warn():
     policy = build_policy_from_remote_config(raw)
     assert policy["fail"] == []
     assert policy["warn"] == []
+
+
+def test_build_policy_default_severity_mapping():
+    raw = {"LICENSE": {"LICENSE_POLICY": {"fail": [], "warn": []}}}
+    policy = build_policy_from_remote_config(raw)
+    assert policy["severity_mapping"] == _DEFAULT_SEVERITY_BY_ACTION
+
+
+def test_build_policy_severity_mapping_override():
+    raw = {
+        "LICENSE": {
+            "LICENSE_POLICY": {
+                "fail": ["AGPL-*"],
+                "warn": [],
+                "severity_mapping": {"fail": "high"},
+            }
+        }
+    }
+    policy = build_policy_from_remote_config(raw)
+    assert policy["severity_mapping"]["fail"] == "high"
+    assert policy["severity_mapping"]["warn"] == _DEFAULT_SEVERITY_BY_ACTION["warn"]
+
+    result = classify_package([{"id": "AGPL-3.0"}], policy)
+    assert result["policy_applied"] == "fail"
+    assert result["severity"] == "high"
 
 def test_classify_package_compliant_spdx():
     result = classify_package([{"id": "MIT"}], _policy())
@@ -156,10 +182,10 @@ def test_classify_package_with_none_policy():
     result = classify_package([{"id": "MIT"}], None)
     assert result["policy_applied"] == "unknown"
     assert result["label"] == "UNKNOWN"
+    assert result["severity"] == "info"
 
 
-def test_action_to_severity_mapping_exposed():
-    assert ACTION_TO_SEVERITY["fail"] == "critical"
-    assert ACTION_TO_SEVERITY["warn"] == "medium"
-    assert ACTION_TO_SEVERITY["ok"] == "info"
-    assert SEVERITY_BY_ACTION is ACTION_TO_SEVERITY  # alias
+def test_severity_by_action_defaults():
+    assert _DEFAULT_SEVERITY_BY_ACTION["fail"] == "critical"
+    assert _DEFAULT_SEVERITY_BY_ACTION["warn"] == "medium"
+    assert _DEFAULT_SEVERITY_BY_ACTION["ok"] == "info"

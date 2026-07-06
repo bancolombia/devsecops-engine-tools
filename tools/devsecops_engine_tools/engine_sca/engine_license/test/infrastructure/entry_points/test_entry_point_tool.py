@@ -56,7 +56,7 @@ def test_init_engine_license_happy_path(mock_exists, mock_builder):
     tool_sbom = MagicMock()
     tool_sbom.get_components.return_value = ["c1", "c2"]
 
-    license_path, sbom_components = init_engine_license(
+    license_path, sbom_components, remote_config = init_engine_license(
         devops_gw,
         remote_gw,
         {"remote_config_repo": "r", "remote_config_branch": ""},
@@ -66,6 +66,7 @@ def test_init_engine_license_happy_path(mock_exists, mock_builder):
 
     assert license_path == "/abs/svc_LICENSE.json"
     assert sbom_components == ["c1", "c2"]
+    assert remote_config == _remote_config()
     tool_sbom.get_components.assert_called_once()
     mock_builder.return_value.process.assert_called_once_with(
         "svc_SBOM.json", _remote_config(), "svc"
@@ -81,7 +82,7 @@ def test_init_engine_license_returns_none_when_to_scan_missing(mock_exists):
     remote_gw = _make_remote_gw(_remote_config())
     tool_sbom = MagicMock()
 
-    license_path, sbom_components = init_engine_license(
+    license_path, sbom_components, remote_config = init_engine_license(
         devops_gw,
         remote_gw,
         {"remote_config_repo": "r", "remote_config_branch": "", "folder_path": "/missing"},
@@ -91,6 +92,7 @@ def test_init_engine_license_returns_none_when_to_scan_missing(mock_exists):
 
     assert license_path is None
     assert sbom_components is None
+    assert remote_config == _remote_config()
     tool_sbom.get_components.assert_not_called()
 
 
@@ -104,7 +106,7 @@ def test_init_engine_license_returns_none_when_sbom_missing_after_generation(moc
     tool_sbom = MagicMock()
     tool_sbom.get_components.return_value = ["c"]
 
-    license_path, sbom_components = init_engine_license(
+    license_path, sbom_components, remote_config = init_engine_license(
         devops_gw,
         remote_gw,
         {"remote_config_repo": "r", "remote_config_branch": ""},
@@ -114,6 +116,7 @@ def test_init_engine_license_returns_none_when_sbom_missing_after_generation(moc
 
     assert license_path is None
     assert sbom_components == ["c"]
+    assert remote_config == _remote_config()
 
 
 @patch(
@@ -124,7 +127,7 @@ def test_init_engine_license_returns_none_when_tool_sbom_missing(mock_exists):
     devops_gw = _make_devops_gateway()
     remote_gw = _make_remote_gw(_remote_config())
 
-    license_path, sbom_components = init_engine_license(
+    license_path, sbom_components, remote_config = init_engine_license(
         devops_gw,
         remote_gw,
         {"remote_config_repo": "r", "remote_config_branch": ""},
@@ -134,6 +137,7 @@ def test_init_engine_license_returns_none_when_tool_sbom_missing(mock_exists):
 
     assert license_path is None
     assert sbom_components is None
+    assert remote_config == _remote_config()
 
 
 @patch(
@@ -150,7 +154,7 @@ def test_init_engine_license_returns_none_when_build_report_fails(mock_exists, m
     tool_sbom = MagicMock()
     tool_sbom.get_components.return_value = ["c"]
 
-    license_path, sbom_components = init_engine_license(
+    license_path, sbom_components, remote_config = init_engine_license(
         devops_gw,
         remote_gw,
         {"remote_config_repo": "r", "remote_config_branch": ""},
@@ -159,3 +163,4 @@ def test_init_engine_license_returns_none_when_build_report_fails(mock_exists, m
     )
     assert license_path is None
     assert sbom_components == ["c"]
+    assert remote_config == _remote_config()

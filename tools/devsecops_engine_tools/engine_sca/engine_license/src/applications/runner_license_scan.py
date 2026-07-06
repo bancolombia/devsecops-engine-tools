@@ -10,11 +10,8 @@ from devsecops_engine_tools.engine_sca.engine_license.src.infrastructure.entry_p
     init_engine_license,
 )
 
-_POLICY_TO_SEVERITY = {
-    "fail": "critical",
-    "warn": "medium",
-}
-
+_RELEVANT_POLICIES = ("fail", "warn")
+_DEFAULT_COMPLIANCE_THRESHOLD = {"Critical": 1}
 
 def _build_findings_from_license_json(license_json_path):
     if not license_json_path:
@@ -24,7 +21,7 @@ def _build_findings_from_license_json(license_json_path):
     findings = []
     for dep in data.get("dependencies", []):
         policy = dep.get("policy_applied", "")
-        if policy not in _POLICY_TO_SEVERITY:
+        if policy not in _RELEVANT_POLICIES:
             continue
         name = dep.get("name", "unknown")
         version = dep.get("version", "")
@@ -35,7 +32,7 @@ def _build_findings_from_license_json(license_json_path):
                 cvss="",
                 where=f"{name}:{version}",
                 description=f"License '{license_label}' for package '{name}' ({dep.get('policy_reason', '')}). ",
-                severity=_POLICY_TO_SEVERITY[policy],
+                severity=dep.get("severity", "info"),
                 identification_date="",
                 published_date_cve="",
                 module="engine_license",
@@ -63,7 +60,7 @@ def runner_engine_license(
         Tuple ''{findings_list, input_core, sbom_components}''.
     """
     try:
-        license_json_path, sbom_components = init_engine_license(
+        license_json_path, sbom_components, remote_config = init_engine_license(
             devops_platform_gateway,
             remote_config_source_gateway,
             dict_args,
@@ -74,9 +71,13 @@ def runner_engine_license(
         pipeline_name = devops_platform_gateway.get_variable("pipeline_name")
         findings_list = _build_findings_from_license_json(license_json_path)
 
+        threshold_data = (remote_config or {}).get("THRESHOLD", {})
         input_core = InputCore(
             totalized_exclusions=[],
-            threshold_defined=Threshold({"VULNERABILITY": {}, "COMPLIANCE": {}}),
+            threshold_defined=Threshold({
+                "VULNERABILITY": threshold_data.get("VULNERABILITY", {}),
+                "COMPLIANCE": threshold_data.get("COMPLIANCE", _DEFAULT_COMPLIANCE_THRESHOLD),
+            }),
             path_file_results=license_json_path,
             custom_message_break_build="License scan completed",
             scope_pipeline=pipeline_name,

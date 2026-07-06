@@ -5,10 +5,7 @@ from devsecops_engine_tools.engine_sca.engine_license.src.domain.model.context_l
     ContextLicense,
 )
 
-_POLICY_TO_SEVERITY = {
-    "fail": "critical",
-    "warn": "medium",
-}
+_RELEVANT_POLICIES = ("fail", "warn")
 
 
 class LicenseScanManager:
@@ -21,7 +18,7 @@ class LicenseScanManager:
         context_list = []
         for dep in data.get("dependencies", []):
             policy = dep.get("policy_applied", "unknown")
-            if policy not in _POLICY_TO_SEVERITY:
+            if policy not in _RELEVANT_POLICIES:
                 continue
             context_list.append(
                 ContextLicense(
@@ -31,7 +28,7 @@ class LicenseScanManager:
                     policy_applied=policy,
                     policy_reason=dep.get("policy_reason", ""),
                     policy_pattern_matched=dep.get("policy_pattern_matched", "") or "",
-                    severity=_POLICY_TO_SEVERITY[policy],
+                    severity=dep.get("severity", "info"),
                 )
             )
         return context_list

@@ -35,8 +35,10 @@ def init_engine_license(
 ):
     """Run the standalone engine_license flow.
 
-    Returns a tuple ``(license_json_path, sbom_components)``. Either or
-    both elements may be ``None`` if the corresponding step failed.
+    Returns a tuple ``(license_json_path, sbom_components, remote_config)``.
+    ``license_json_path``/``sbom_components`` may be ``None`` if the
+    corresponding step failed. ``remote_config`` is always the module's
+    remote config (used e.g. to build the compliance threshold).
     """
     remote_config = remote_config_source_gateway.get_remote_config(
         dict_args["remote_config_repo"],
@@ -49,21 +51,21 @@ def init_engine_license(
 
     if not os.path.exists(to_scan):
         logger.error(f"Path {to_scan} does not exist; aborting license scan.")
-        return None, None
+        return None, None, remote_config
 
     config_sbom = config_tool.get("SBOM_MANAGER", {}) or {}
     if tool_sbom is None:
         logger.error("SBOM tool gateway is not configured; aborting license scan.")
-        return None, None
+        return None, None, remote_config
     sbom_components = tool_sbom.get_components(to_scan, config_sbom, pipeline_name)
     sbom_path = f"{pipeline_name}_SBOM.json"
     if not os.path.exists(sbom_path):
         logger.error(
             f"SBOM file {sbom_path} not found after generation; aborting license scan."
         )
-        return None, sbom_components
+        return None, sbom_components, remote_config
 
     license_json_path = BuildLicenseReport().process(
         sbom_path, remote_config, pipeline_name
     )
-    return license_json_path, sbom_components
+    return license_json_path, sbom_components, remote_config

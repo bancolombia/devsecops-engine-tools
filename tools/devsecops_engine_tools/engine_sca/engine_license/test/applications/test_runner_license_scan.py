@@ -22,7 +22,7 @@ def test_runner_engine_license_returns_findings_input_core_and_components():
     ) as mock_init, patch(
         "devsecops_engine_tools.engine_sca.engine_license.src.applications.runner_license_scan._build_findings_from_license_json"
     ) as mock_findings:
-        mock_init.return_value = ("/abs/svc_LICENSE.json", ["c1"])
+        mock_init.return_value = ("/abs/svc_LICENSE.json", ["c1"], {"THRESHOLD": {"COMPLIANCE": {"Critical": 2}}})
         mock_findings.return_value = []
 
         config_tool = {"ENGINE_LICENSE": {"ENABLED": True}}
@@ -52,7 +52,7 @@ def test_runner_engine_license_returns_findings_input_core_and_components():
 
         assert input_core.threshold_defined is not None
         assert input_core.threshold_defined.vulnerability.critical is None
-        assert input_core.threshold_defined.compliance.critical is None
+        assert input_core.threshold_defined.compliance.critical == 2
 
 
 def test_runner_engine_license_propagates_none_path():
@@ -61,7 +61,7 @@ def test_runner_engine_license_propagates_none_path():
     ) as mock_init, patch(
         "devsecops_engine_tools.engine_sca.engine_license.src.applications.runner_license_scan._build_findings_from_license_json"
     ) as mock_findings:
-        mock_init.return_value = (None, None)
+        mock_init.return_value = (None, None, {})
         mock_findings.return_value = []
         config_tool = {"ENGINE_LICENSE": {"ENABLED": True}}
         devops_gw = _make_devops_gateway()
@@ -79,6 +79,7 @@ def test_runner_engine_license_propagates_none_path():
         assert sbom_components is None
         assert input_core.path_file_results is None
         assert input_core.scope_pipeline == "svc"
+        assert input_core.threshold_defined.compliance.critical == 1
 
 
 def test_runner_license_main_block():
@@ -100,10 +101,10 @@ def test_build_findings_from_license_json(tmp_path):
     license_data = {
         "metadata": {"pipeline_name": "svc"},
         "dependencies": [
-            {"name": "lodash", "version": "4.17.21", "licenses": ["MIT"], "policy_applied": "ok", "policy_reason": "compliant", "policy_pattern_matched": None, "license_matched": "MIT"},
-            {"name": "ngrx", "version": "1.0.0", "licenses": ["AGPL-3.0"], "policy_applied": "fail", "policy_reason": "matches FAIL pattern 'AGPL-*'", "policy_pattern_matched": "AGPL-*", "license_matched": "AGPL-3.0"},
-            {"name": "biz-lib", "version": "2.0.0", "licenses": ["Apache-2.0", "EPL-2.0"], "policy_applied": "warn", "policy_reason": "matches WARN pattern 'EPL-*'", "policy_pattern_matched": "EPL-*", "license_matched": "EPL-2.0"},
-            {"name": "no-lic", "version": "0.1.0", "licenses": [], "policy_applied": "unlicensed", "policy_reason": "no license detected", "policy_pattern_matched": None, "license_matched": "UNLICENSED"},
+            {"name": "lodash", "version": "4.17.21", "licenses": ["MIT"], "policy_applied": "ok", "policy_reason": "compliant", "policy_pattern_matched": None, "license_matched": "MIT", "severity": "info"},
+            {"name": "ngrx", "version": "1.0.0", "licenses": ["AGPL-3.0"], "policy_applied": "fail", "policy_reason": "matches FAIL pattern 'AGPL-*'", "policy_pattern_matched": "AGPL-*", "license_matched": "AGPL-3.0", "severity": "critical"},
+            {"name": "biz-lib", "version": "2.0.0", "licenses": ["Apache-2.0", "EPL-2.0"], "policy_applied": "warn", "policy_reason": "matches WARN pattern 'EPL-*'", "policy_pattern_matched": "EPL-*", "license_matched": "EPL-2.0", "severity": "medium"},
+            {"name": "no-lic", "version": "0.1.0", "licenses": [], "policy_applied": "unlicensed", "policy_reason": "no license detected", "policy_pattern_matched": None, "license_matched": "UNLICENSED", "severity": "info"},
         ],
     }
     path = tmp_path / "svc_LICENSE.json"

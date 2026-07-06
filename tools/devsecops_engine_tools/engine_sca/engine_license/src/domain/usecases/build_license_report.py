@@ -97,6 +97,7 @@ class BuildLicenseReport:
                         "pattern_matched"
                     ],
                     "license_matched": classification["label"],
+                    "severity": classification["severity"],
                 }
             )
         return dependencies

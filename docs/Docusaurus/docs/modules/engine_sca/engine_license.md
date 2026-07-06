@@ -14,19 +14,6 @@ Unlike other engines, `engine_license` does **not**:
 
 The intent is to ship an audit-friendly, policy-driven JSON that downstream consumers can analyse out-of-band of build pipelines.
 
-## Flow
-
-```mermaid
-flowchart TD
-    A[handle_scan: engine_license branch] --> B[runner_engine_license]
-    B --> C[init_engine_license entry_point_tool]
-    C --> D["CdxGen generates {pipeline}_SBOM.json"]
-    D --> E["BuildLicenseReport reads SBOM<br/>applies LICENSE_POLICY"]
-    E --> F["Writes {pipeline}_LICENSE.json in CWD"]
-    F --> G[runner builds findings from LICENSE.json]
-    G --> H[handle_scan prints compliance table & context]
-```
-
 ## Configuration Structure
 
 Only one configuration file is consumed: `engine_sca/engine_license/ConfigTool.json`. There is no `Exclusions.json`; the policy is declared inline.

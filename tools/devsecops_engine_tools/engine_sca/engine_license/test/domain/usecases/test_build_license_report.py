@@ -77,6 +77,10 @@ def test_process_writes_license_json_with_mixed_classifications(tmp_path):
     assert ngrx["policy_applied"] == "fail"
     assert ngrx["policy_pattern_matched"] == "AGPL-*"
     assert "AGPL-*" in ngrx["policy_reason"]
+    assert ngrx["severity"] == "critical"
+
+    biz_lib = next(d for d in deps if d["name"] == "biz-lib")
+    assert biz_lib["severity"] == "medium"
 
     no_lic = next(d for d in deps if d["name"] == "no-lic-pkg")
     assert no_lic["policy_applied"] == "unlicensed"
