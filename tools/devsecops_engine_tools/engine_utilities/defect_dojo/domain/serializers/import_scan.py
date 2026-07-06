@@ -232,6 +232,7 @@ class ImportScanSerializer(Schema):
     expression = fields.Str(required=True)
     reimport_scan = fields.Bool(required=False)
     get_exact_product = fields.Bool(required=False)
+    apply_tags_to_findings = fields.Bool(required=False, load_default=False)
 
     @post_load
     def make_cmdb(self, data, **kwargs):
