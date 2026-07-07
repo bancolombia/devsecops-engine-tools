@@ -238,10 +238,6 @@
         "title": "Generate Dependency Update Solution"
       },
       {
-        "command": "devsecops.autoFixDependenciesWithAgent",
-        "title": "Auto-Fix Dependencies with Copilot Agent"
-      },
-      {
         "command": "devsecops.deleteScanResult",
         "title": "Delete Scan Result"
       },
@@ -319,11 +315,6 @@
           "command": "devsecops.generateDependencyUpdate",
           "when": "view == devsecops-results && viewItem == findingItem-dependencies",
           "group": "copilot@3"
-        },
-        {
-          "command": "devsecops.autoFixDependenciesWithAgent",
-          "when": "view == devsecops-results && viewItem == findingItem-dependencies",
-          "group": "copilot@4"
         },
         {
           "command": "devsecops.showGeneralFindingWebview",

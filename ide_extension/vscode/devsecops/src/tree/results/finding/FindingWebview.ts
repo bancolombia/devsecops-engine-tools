@@ -5,7 +5,7 @@ import { AiMetricsService } from '../../../infrastructure/services/AiMetricsServ
 
 let vulnPanels: Map<string, vscode.WebviewPanel> = new Map();
 
-export function showVulnContextWebview(finding: Finding, sourceType?: string): void {
+export function showVulnContextWebview(finding: Finding, sourceType?: string, allFindings: Finding[] = []): void {
     const panelId = `vulnContext-${finding.getId()}-${new Date().getTime()}`;
 
     if (vulnPanels.has(panelId)) {
@@ -45,10 +45,10 @@ export function showVulnContextWebview(finding: Finding, sourceType?: string): v
 
         // Determine sourceType from finding module if not provided
         const actualSourceType = sourceType || getSourceTypeFromModule(finding.getModule());
-        vulnPanel.webview.html = findingDetailWebview(finding, actualSourceType);
+        vulnPanel.webview.html = findingDetailWebview(finding, actualSourceType, allFindings);
 
         // Setup message handler for Copilot buttons
-        setupMessageHandler(vulnPanel, finding);
+        setupMessageHandler(vulnPanel, finding, allFindings);
 
         vulnPanel.onDidDispose(() => {
             vulnPanels.delete(panelId);
@@ -74,7 +74,7 @@ function getSourceTypeFromModule(module: string): string {
     }
 }
 
-function setupMessageHandler(panel: vscode.WebviewPanel, finding: Finding): void {
+function setupMessageHandler(panel: vscode.WebviewPanel, finding: Finding, allFindings: Finding[] = []): void {
     // Handle messages from the webview
     panel.webview.onDidReceiveMessage(
         async (message) => {
@@ -96,14 +96,8 @@ function setupMessageHandler(panel: vscode.WebviewPanel, finding: Finding): void
                 case 'generateDependencyUpdate':
                     AiMetricsService.track('generate_dependency_update', finding, 'webview');
                     await vscode.commands.executeCommand('devsecops.generateDependencyUpdate', {
-                        finding: finding
-                    });
-                    break;
-                case 'autoFixWithAgent':
-                case 'autoFixDependenciesWithAgent':
-                    AiMetricsService.track('auto_fix_with_agent', finding, 'webview');
-                    await vscode.commands.executeCommand('devsecops.autoFixDependenciesWithAgent', {
-                        finding: finding
+                        finding: finding,
+                        allFindings: allFindings
                     });
                     break;
             }

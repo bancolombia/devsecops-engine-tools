@@ -7,7 +7,8 @@ export class FindingItem extends vscode.TreeItem {
   constructor(
     public readonly finding: Finding,
     private readonly scanPath?: string,
-    private readonly sourceType?: "iac" | "image" | "dependencies"
+    private readonly sourceType?: "iac" | "image" | "dependencies",
+    public readonly allFindings: Finding[] = []
   ) {
     super(finding.getDescription() || "Unknown Issue", vscode.TreeItemCollapsibleState.None);
     
@@ -51,7 +52,7 @@ export class FindingItem extends vscode.TreeItem {
     this.command = {
       command: "devsecops.showVulnContext",
       title: "Show Vulnerability Context",
-      arguments: [finding, sourceType], // Pass the full finding/context object and sourceType
+      arguments: [finding, sourceType, allFindings], // Pass the full finding/context object, sourceType and all findings of this scan
     };
 
     const fileInfo = this.extractFileInfo(finding.getWhere());

@@ -1,8 +1,7 @@
 export type AiAction =
     | 'fix_with_copilot'
     | 'explain_with_copilot'
-    | 'generate_dependency_update'
-    | 'auto_fix_with_agent';
+    | 'generate_dependency_update';
 
 export type AiTriggerOrigin = 'webview' | 'code_action' | 'tree_context_menu';
 

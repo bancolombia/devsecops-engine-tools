@@ -76,19 +76,10 @@ Take advantage of the integration with **GitHub Copilot** for an intelligent, as
 - **Icon:** 📦
 - **Function:**
   - Specific for dependency vulnerabilities
-  - Generates CLI commands to update affected libraries
-  - Shows which direct dependencies need upgrading
+  - Targets **all** dependency vulnerabilities found in that scan, not just the one you clicked
+  - Includes a compact CVE + fixed version list per finding (to keep the prompt short) instead of full details for each one
+  - Generates a single consolidated set of CLI commands to update all affected libraries
   - Suggests `npm`, `yarn`, or `maven` commands based on project type
-
-### 4. 🤖 Auto-Fix with Agent *(Dependencies Only)*  
-- **Color:** Green
-- **Icon:** 🤖
-- **Function:**
-  - Requires GitHub Copilot Agent mode
-  - Tries to apply fixes semi-automatically
-  - Scans files like `package.json`, `pom.xml`, etc.
-  - Generates a complete prompt with contextual details
-  - Suggests direct file changes
 
 ---
 
