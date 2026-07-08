@@ -100,6 +100,13 @@ function setupMessageHandler(panel: vscode.WebviewPanel, finding: Finding, allFi
                         allFindings: allFindings
                     });
                     break;
+                case 'generateImageUpdate':
+                    AiMetricsService.track('generate_image_update', finding, 'webview');
+                    await vscode.commands.executeCommand('devsecops.generateImageUpdate', {
+                        finding: finding,
+                        allFindings: allFindings
+                    });
+                    break;
             }
         }
     );

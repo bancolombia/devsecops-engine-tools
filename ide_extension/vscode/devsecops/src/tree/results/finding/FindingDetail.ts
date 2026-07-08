@@ -58,6 +58,18 @@ export function findingDetailWebview(finding: Finding, sourceType?: string, allF
                     </button>`;
         }
         
+        if (sourceType === 'image') {
+            const imageFindingsCount = Math.max(
+                allFindings.filter(f => f.getModule() === "engine_container" || f.getModule() === "engine_image").length,
+                1
+            );
+            buttons += `
+                    <button class="copilot-button update-button" onclick="generateImageUpdate()" title="Generates one consolidated solution to fix all ${imageFindingsCount} image vulnerabilities found in this scan">
+                        <span class="codicon codicon-package"></span>
+                        Generate Update Solution
+                    </button>`;
+        }
+        
         buttons += `
                 </div>
             </div>`;
@@ -346,6 +358,12 @@ export function findingDetailWebview(finding: Finding, sourceType?: string, allF
         window.generateDependencyUpdate = function() {
             vscode.postMessage({
                 command: 'generateDependencyUpdate'
+            });
+        }
+
+        window.generateImageUpdate = function() {
+            vscode.postMessage({
+                command: 'generateImageUpdate'
             });
         }
     </script>

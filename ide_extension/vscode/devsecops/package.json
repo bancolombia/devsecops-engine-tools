@@ -238,6 +238,10 @@
         "title": "Generate Dependency Update Solution"
       },
       {
+        "command": "devsecops.generateImageUpdate",
+        "title": "Generate Image Update Solution"
+      },
+      {
         "command": "devsecops.deleteScanResult",
         "title": "Delete Scan Result"
       },
@@ -314,6 +318,21 @@
         {
           "command": "devsecops.generateDependencyUpdate",
           "when": "view == devsecops-results && viewItem == findingItem-dependencies",
+          "group": "copilot@3"
+        },
+        {
+          "command": "devsecops.fixVulnerabilityWithCopilot",
+          "when": "view == devsecops-results && viewItem == findingItem-image",
+          "group": "copilot@1"
+        },
+        {
+          "command": "devsecops.explainVulnerabilityWithCopilot",
+          "when": "view == devsecops-results && viewItem == findingItem-image",
+          "group": "copilot@2"
+        },
+        {
+          "command": "devsecops.generateImageUpdate",
+          "when": "view == devsecops-results && viewItem == findingItem-image",
           "group": "copilot@3"
         },
         {

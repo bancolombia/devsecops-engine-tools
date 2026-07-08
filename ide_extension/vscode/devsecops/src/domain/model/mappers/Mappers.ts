@@ -107,6 +107,7 @@ export class Mappers {
         vendor_id: imageScanContext.vendor_id || "",
         vulnerability_status: imageScanContext.vulnerability_status || "unknown",
         target_image: imageScanContext.target_image || "",
+        package_name: imageScanContext.package_name || "",
         installed_version: imageScanContext.installed_version || "",
         fixed_version: imageScanContext.fixed_version || "",
         cvss_score: imageScanContext.cvss_score || "",

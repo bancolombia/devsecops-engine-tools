@@ -97,7 +97,7 @@ export function registerImageScanCommand(
           : ErrorHandlingService.isSelfSignedCertificateError(errorMessage)
           ? "SSL certificate error: self-signed certificate detected. Please update your certificates and try again."
           : ErrorHandlingService.isMicroserviceError(errorMessage)
-          ? "The microservice is unavailable or the connection was interrupted. Please try again."
+          ? "The microservice is experiencing high transaction load and the scan was retried automatically, but it still could not complete. Please try again later."
           : "Image Scan failed - Check Output for details";
         void vscode.window.showErrorMessage(userMessage);
         // Mark the scan as failed but keep it visible

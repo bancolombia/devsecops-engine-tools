@@ -28,6 +28,8 @@ export class FindingItem extends vscode.TreeItem {
     // Set context value based on module for right-click menu
     if (sourceType === "dependencies") {
       this.contextValue = "findingItem-dependencies";
+    } else if (sourceType === "image") {
+      this.contextValue = "findingItem-image";
     } else if (finding.getModule() === "engine_iac") {
       this.contextValue = "engine_iac";
     } else if (finding.getModule() === "engine_secrets") {

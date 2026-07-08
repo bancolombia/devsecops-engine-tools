@@ -206,9 +206,7 @@ export class ErrorHandlingService {
             lower.includes('http 504') ||
             lower.includes('service unavailable') ||
             lower.includes('upstream connect error') ||
-            lower.includes('connection termination') ||
-            lower.includes('enotfound') ||
-            lower.includes('getaddrinfo');
+            lower.includes('connection termination');
     }
 
     private static hasErrorCategory(logs: string[], category: keyof typeof ERROR_PATTERNS): boolean {
