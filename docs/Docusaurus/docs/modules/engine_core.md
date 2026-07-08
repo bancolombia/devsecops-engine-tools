@@ -127,6 +127,7 @@ Configuration of the driven adapters in the main layer and management of on/off 
         "SYFT": {
             "SYFT_VERSION": "1.17.0",
             "OUTPUT_FORMAT": "cyclonedx-json",
+            "SPEC_VERSION": "1.6",
             "EXCLUDE_PATHS": ["**/test/**", "**/node_modules/**"],
             "EXCLUDE_CATALOGERS": [],
             "DEBUG_PIPELINES": ["pipeline_name1", "pipeline_name2"]
@@ -361,6 +362,7 @@ Configuration of the driven adapters in the main layer and management of on/off 
     - **SYFT**
         - **SYFT_VERSION**: Version of Syft to download and use. Example: `"1.17.0"`.
         - **OUTPUT_FORMAT**: Output format for the SBOM. Default: `"cyclonedx-json"`. Other options include `"spdx-json"`, `"syft-json"`, `"table"`.
+        - **SPEC_VERSION**: Schema version to use for the SBOM output. Default: `"1.6"`. Only applied when `OUTPUT_FORMAT` supports versioning (`cyclonedx-json`, `cyclonedx-xml`, `spdx-json`, `spdx-tag-value`), appended to the format as `<format>@<version>` (e.g. `cyclonedx-json@1.6`). Ignored for formats without version support (e.g. `syft-json`, `table`).
         - **EXCLUDE_PATHS**: Array of glob patterns to exclude directories/files from analysis. Example: `["**/test/**", "**/node_modules/**"]`. Useful for skipping test files, build artifacts, or vendor directories.
         - **EXCLUDE_CATALOGERS**: Array of cataloger names to exclude from the default set. Catalogers are specialized modules that detect specific package types (e.g., `"java-archive-cataloger"`, `"python-package-cataloger"`). When specified, Syft uses `--select-catalogers -NAME` to remove these catalogers from analysis. Example: `["java-archive-cataloger", "binary-cataloger"]`.
         - **DEBUG_PIPELINES**: Array of pipeline names where Syft should run in verbose mode (`-v` flag). Useful for troubleshooting SBOM generation issues in specific pipelines. Example: `["pipeline_name1", "pipeline_name2"]`.

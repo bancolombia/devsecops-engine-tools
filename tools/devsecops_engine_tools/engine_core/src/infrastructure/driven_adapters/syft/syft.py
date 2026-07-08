@@ -21,6 +21,13 @@ from devsecops_engine_tools.engine_utilities import settings
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
+VERSIONED_OUTPUT_FORMATS = (
+    "cyclonedx-json",
+    "cyclonedx-xml",
+    "spdx-json",
+    "spdx-tag-value",
+)
+
 
 @dataclass
 class Syft(SbomManagerGateway):
@@ -62,12 +69,17 @@ class Syft(SbomManagerGateway):
     def _run_syft(self, command_prefix, artifact, config, service_name):
         result_file = f"{service_name}_SBOM.json"
         syft_config = config['SYFT']
-        
+
+        output_format = syft_config['OUTPUT_FORMAT']
+        spec_version = syft_config.get('SPEC_VERSION', "")
+        if spec_version and output_format in VERSIONED_OUTPUT_FORMATS:
+            output_format = f"{output_format}@{spec_version}"
+
         command = [
             command_prefix,
             artifact,
             "-o",
-            f"{syft_config['OUTPUT_FORMAT']}={result_file}",
+            f"{output_format}={result_file}",
         ]
         
         exclude_paths = syft_config.get('EXCLUDE_PATHS', [])

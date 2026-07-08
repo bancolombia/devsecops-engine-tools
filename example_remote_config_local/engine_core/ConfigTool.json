@@ -107,6 +107,7 @@
         "SYFT": {
             "SYFT_VERSION": "1.42.2",
             "OUTPUT_FORMAT": "cyclonedx-json",
+            "SPEC_VERSION": "1.6",
             "EXCLUDE_PATHS": ["**/test/**"],
             "EXCLUDE_CATALOGERS": ["java-archive-cataloger"],
             "DEBUG_PIPELINES": ["pipeline_name1", "pipeline_name2"]
