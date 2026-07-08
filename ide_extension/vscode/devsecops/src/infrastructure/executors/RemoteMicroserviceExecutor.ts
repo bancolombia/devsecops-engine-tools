@@ -351,10 +351,23 @@ export class RemoteMicroserviceExecutor implements IScanExecutor {
 
                 lastError = error instanceof Error ? error : new Error(errorMessage);
                 const delay = this.INITIAL_DELAY_MS * Math.pow(2, attempt - 1) + Math.random() * 500;
+                const retryReason = '⚠️ Microservice is experiencing high transaction load. Retrying the scan automatically';
                 outputChannel.appendLine(
-                    `⚠️ Microservice unavailable (attempt ${attempt}/${this.MAX_RETRIES}). Retrying in ${(delay / 1000).toFixed(1)}s...`
+                    `${retryReason} (attempt ${attempt}/${this.MAX_RETRIES}) in ${(delay / 1000).toFixed(1)}s...`
                 );
                 outputChannel.appendLine('');
+
+                if (progressReporter) {
+                    progressReporter.report({ message: 'Microservice busy, retrying scan...' });
+                }
+
+                // Notify the user only once so we don't spam them on every retry attempt
+                if (attempt === 1) {
+                    void vscode.window.showWarningMessage(
+                        '⚠️ The microservice is experiencing high transaction load. The scan is being retried automatically.'
+                    );
+                }
+
                 await new Promise(res => setTimeout(res, delay));
             }
         }

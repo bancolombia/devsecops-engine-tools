@@ -58,8 +58,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const showVulnContextDisposable = vscode.commands.registerCommand(
     "devsecops.showVulnContext",
-    (finding: Finding) => {
-      showVulnContextWebview(finding);
+    (finding: Finding, sourceType?: string, allFindings?: Finding[]) => {
+      showVulnContextWebview(finding, sourceType, allFindings);
     }
   );
 

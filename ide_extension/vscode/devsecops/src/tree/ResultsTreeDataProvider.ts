@@ -69,7 +69,7 @@ export class ResultsTreeDataProvider implements vscode.TreeDataProvider<vscode.T
       }
     } else {
       // No previous scan or it was empty - just create regular finding items
-      findingItems = findings.map((f) => new FindingItem(f, scanPath, sourceType));
+      findingItems = findings.map((f) => new FindingItem(f, scanPath, sourceType, findings));
     }
 
     const scanItem = new ScanResultItem(label, sourceType, timestamp, findingItems, false, undefined, outputChannel);
@@ -140,7 +140,7 @@ export class ResultsTreeDataProvider implements vscode.TreeDataProvider<vscode.T
       }
     } else {
       // No previous scan or it was empty - just create regular finding items
-      findingItems = findings.map((f) => new FindingItem(f, scanPath, sourceType));
+      findingItems = findings.map((f) => new FindingItem(f, scanPath, sourceType, findings));
     }
 
     // Update the scan item with the findings
@@ -268,7 +268,7 @@ export class ResultsTreeDataProvider implements vscode.TreeDataProvider<vscode.T
     const delta = newCount - oldCount;
 
     // Create finding items without comparison status
-    const findingItems = newFindings.map((f) => new FindingItem(f, scanPath, sourceType));
+    const findingItems = newFindings.map((f) => new FindingItem(f, scanPath, sourceType, newFindings));
 
     return {
       items: findingItems,

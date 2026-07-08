@@ -71,24 +71,15 @@ Take advantage of the integration with **GitHub Copilot** for an intelligent, as
   - Details potential impact and security risks
   - Helps you understand the issue before taking action
 
-### 3. 📦 Generate Update Solution *(Dependencies Only)*  
+### 3. 📦 Generate Update Solution *(Dependencies & Images)*  
 - **Color:** Orange
 - **Icon:** 📦
 - **Function:**
-  - Specific for dependency vulnerabilities
-  - Generates CLI commands to update affected libraries
-  - Shows which direct dependencies need upgrading
-  - Suggests `npm`, `yarn`, or `maven` commands based on project type
-
-### 4. 🤖 Auto-Fix with Agent *(Dependencies Only)*  
-- **Color:** Green
-- **Icon:** 🤖
-- **Function:**
-  - Requires GitHub Copilot Agent mode
-  - Tries to apply fixes semi-automatically
-  - Scans files like `package.json`, `pom.xml`, etc.
-  - Generates a complete prompt with contextual details
-  - Suggests direct file changes
+  - Available for dependency vulnerabilities and container image vulnerabilities
+  - Targets **all** vulnerabilities found in that scan, not just the one you clicked
+  - Includes a compact CVE + fixed version list per finding (to keep the prompt short) instead of full details for each one
+  - For dependencies: generates a single consolidated set of CLI commands (`npm`, `yarn`, `maven`, etc.) to update all affected libraries
+  - For images: generates a single consolidated update plan (base image/package updates, Dockerfile changes) to fix all affected packages
 
 ---
 

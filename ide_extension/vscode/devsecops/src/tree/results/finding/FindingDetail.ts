@@ -1,6 +1,6 @@
 import { Finding } from "../../../domain/model/Finding";
 
-export function findingDetailWebview(finding: Finding, sourceType?: string): string {
+export function findingDetailWebview(finding: Finding, sourceType?: string, allFindings: Finding[] = []): string {
     const severity = (finding.getSeverity() || "unknown").toLowerCase();
     let codicon = "codicon-warning";
     let color = "#cca700";
@@ -47,14 +47,26 @@ export function findingDetailWebview(finding: Finding, sourceType?: string): str
                     </button>`;
         
         if (sourceType === 'dependencies') {
+            const dependencyFindingsCount = Math.max(
+                allFindings.filter(f => f.getModule() === "engine_dependencies").length,
+                1
+            );
             buttons += `
-                    <button class="copilot-button update-button" onclick="generateDependencyUpdate()">
+                    <button class="copilot-button update-button" onclick="generateDependencyUpdate()" title="Generates one consolidated solution to fix all ${dependencyFindingsCount} dependency vulnerabilities found in this scan">
                         <span class="codicon codicon-package"></span>
                         Generate Update Solution
-                    </button>
-                    <button class="copilot-button agent-button" onclick="autoFixWithAgent()" title="Requires Copilot Chat in Agent Mode to automatically edit files">
-                        <span class="codicon codicon-robot"></span>
-                        Auto-Fix with Agent
+                    </button>`;
+        }
+        
+        if (sourceType === 'image') {
+            const imageFindingsCount = Math.max(
+                allFindings.filter(f => f.getModule() === "engine_container" || f.getModule() === "engine_image").length,
+                1
+            );
+            buttons += `
+                    <button class="copilot-button update-button" onclick="generateImageUpdate()" title="Generates one consolidated solution to fix all ${imageFindingsCount} image vulnerabilities found in this scan">
+                        <span class="codicon codicon-package"></span>
+                        Generate Update Solution
                     </button>`;
         }
         
@@ -244,11 +256,6 @@ export function findingDetailWebview(finding: Finding, sourceType?: string): str
             color: #ffffff;
             border-color: #e67300;
         }
-        .agent-button {
-            background: linear-gradient(135deg, #228b22, #1e7e1e);
-            color: #ffffff;
-            border-color: #1e7e1e;
-        }
         
         /* Links - Unified Style */
         a {
@@ -353,10 +360,10 @@ export function findingDetailWebview(finding: Finding, sourceType?: string): str
                 command: 'generateDependencyUpdate'
             });
         }
-        
-        window.autoFixWithAgent = function() {
+
+        window.generateImageUpdate = function() {
             vscode.postMessage({
-                command: 'autoFixDependenciesWithAgent'
+                command: 'generateImageUpdate'
             });
         }
     </script>
