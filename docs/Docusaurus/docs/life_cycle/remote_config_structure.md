@@ -41,6 +41,8 @@ sidebar_position: 2
    ┃ ┗ 📂engine_function
    ┃   ┗ 📜ConfigTool.json
    ┃   ┗ 📜Exclusions.json
+   ┃ ┗ 📂engine_license
+   ┃   ┗ 📜ConfigTool.json
 ```
 
 ## **engine_core**
@@ -103,6 +105,12 @@ For more information about structure remote config for this module, [engine cont
 Software Composition Analysis (SCA) is a process that detects compromised or vulnerable open-source components used in an application's source code. This automated process is part of Bancolombia's DevSecOps practices, through which security, code quality, and compliance are evaluated.
 
 For more information about structure remote config for this module, [engine dependencies](../modules/engine_sca/engine_dependencies.md)
+
+### **engine_license**
+
+Software license compliance scanning. Detects denied / unlicensed dependencies in source folders, container images, and SBOMs, and enforces a configurable policy.
+
+For more information about structure remote config for this module, [engine license](../modules/engine_sca/engine_license.md)
 
 ## **vulnerability_management**
 

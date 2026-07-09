@@ -1,0 +1,71 @@
+"""Entry point of the engine_license module.
+
+The flow is:
+
+    1. Generate a fresh SBOM via CdxGen.
+    2. Build the ``{pipeline_name}_LICENSE.json`` artifact directly from
+       the SBOM, applying the policy declared in remote_config.
+
+The entry point returns ``(license_json_path, sbom_components)``.
+"""
+
+import os
+
+from devsecops_engine_tools.engine_sca.engine_license.src.domain.usecases.build_license_report import (
+    BuildLicenseReport,
+)
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform_gateway import (
+    DevopsPlatformGateway,
+)
+from devsecops_engine_tools.engine_core.src.domain.model.gateway.sbom_manager import (
+    SbomManagerGateway,
+)
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
+
+
+def init_engine_license(
+    devops_platform_gateway: DevopsPlatformGateway,
+    remote_config_source_gateway,
+    dict_args,
+    config_tool,
+    tool_sbom: SbomManagerGateway,
+):
+    """Run the standalone engine_license flow.
+
+    Returns a tuple ``(license_json_path, sbom_components, remote_config)``.
+    ``license_json_path``/``sbom_components`` may be ``None`` if the
+    corresponding step failed. ``remote_config`` is always the module's
+    remote config (used e.g. to build the compliance threshold).
+    """
+    remote_config = remote_config_source_gateway.get_remote_config(
+        dict_args["remote_config_repo"],
+        "engine_sca/engine_license/ConfigTool.json",
+        dict_args["remote_config_branch"],
+    )
+
+    pipeline_name = devops_platform_gateway.get_variable("pipeline_name")
+    to_scan = dict_args.get("folder_path") or os.getcwd()
+
+    if not os.path.exists(to_scan):
+        logger.error(f"Path {to_scan} does not exist; aborting license scan.")
+        return None, None, remote_config
+
+    config_sbom = config_tool.get("SBOM_MANAGER", {}) or {}
+    if tool_sbom is None:
+        logger.error("SBOM tool gateway is not configured; aborting license scan.")
+        return None, None, remote_config
+    sbom_components = tool_sbom.get_components(to_scan, config_sbom, pipeline_name)
+    sbom_path = f"{pipeline_name}_SBOM.json"
+    if not os.path.exists(sbom_path):
+        logger.error(
+            f"SBOM file {sbom_path} not found after generation; aborting license scan."
+        )
+        return None, sbom_components, remote_config
+
+    license_json_path = BuildLicenseReport().process(
+        sbom_path, remote_config, pipeline_name
+    )
+    return license_json_path, sbom_components, remote_config

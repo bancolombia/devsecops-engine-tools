@@ -218,6 +218,10 @@
         "ENABLED": true,
         "TOOL": "XRAY|DEPENDENCY_CHECK|TRIVY"
     },
+    "ENGINE_LICENSE": {
+        "ENABLED": true,
+        "PRIORITY": "DISCREET"
+    },
     "ENGINE_CODE": {
         "ENABLED": true,
         "TOOL": "BEARER|KIUWAN",

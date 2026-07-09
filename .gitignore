@@ -76,6 +76,7 @@ kubescape-macos-latest
 *.tar.gz
 *.zip
 *_SBOM.json
+*_LICENSE.json
 syft
 gitleaks_aux_report_*.json
 gitleaks_report.json

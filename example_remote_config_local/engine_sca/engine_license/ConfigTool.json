@@ -1,0 +1,24 @@
+{
+    "LICENSE": {
+        "LICENSE_POLICY": {
+            "fail": ["AGPL-*", "SSPL-*"],
+            "warn": ["BUSL-*", "EPL-*", "LGPL-3.0*"],
+            "synonyms": {
+            },
+            "unlicensed_action": "ignore",
+            "unknown_action": "ignore",
+            "severity_mapping": {
+                "fail": "critical",
+                "warn": "medium",
+                "ok": "info",
+                "ignore": "info"
+            }
+        }
+    },
+    "THRESHOLD": {
+        "VULNERABILITY": {},
+        "COMPLIANCE": {
+            "Critical": 1
+        }
+    }
+}
