@@ -14,7 +14,7 @@ import json
 import os
 from datetime import datetime
 
-from devsecops_engine_tools.engine_sca.engine_license.src.domain.usecases.license_policy import (
+from devsecops_engine_tools.engine_sca.engine_license.src.infrastructure.helpers.license_policy import (
     build_policy_from_remote_config,
     classify_package,
 )

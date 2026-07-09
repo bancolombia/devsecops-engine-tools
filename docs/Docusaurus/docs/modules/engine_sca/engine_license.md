@@ -14,6 +14,8 @@ Unlike other engines, `engine_license` does **not**:
 
 The intent is to ship an audit-friendly, policy-driven JSON that downstream consumers can analyse out-of-band of build pipelines.
 
+> **Why CdxGen?** The module relies on CdxGen because it is the only mainstream SBOM generator that enriches license data by querying the package registry (e.g. Maven Central, npm, NuGet) via its `FETCH_LICENSE` option. Tools such as Syft and Trivy report only locally declared licenses (from lockfiles or existing package metadata) and do not perform active registry lookups, so licenses missing from local manifests (common in Maven/Gradle projects) would not be resolved. This is why `SBOM_MANAGER.CDXGEN.FETCH_LICENSE` must be `true` for the report to be complete.
+
 ## Configuration Structure
 
 Only one configuration file is consumed: `engine_sca/engine_license/ConfigTool.json`. There is no `Exclusions.json`; the policy is declared inline.
@@ -155,7 +157,7 @@ Only `fail` and `warn` dependencies appear in the context output.
 - `applications/runner_license_scan.py`: Entry point invoked by `engine_core/handle_scan`. Runs the flow and builds `Finding` objects for the compliance table.
 - `infrastructure/entry_points/entry_point_tool.py`: Orchestrator: fetch remote config → fresh SBOM → build report.
 - `infrastructure/driven_adapters/license_scan/license_scan_manager.py`: Reads the LICENSE.json and provides structured context extraction.
-- `domain/usecases/license_policy.py`: Pure helpers — `build_policy_from_remote_config`, `classify_package`, `looks_like_spdx_id`. No I/O, fully unit-testable.
+- `infrastructure/helpers/license_policy.py`: Pure helpers — `build_policy_from_remote_config`, `classify_package`, `looks_like_spdx_id`.
 - `domain/usecases/build_license_report.py`: `BuildLicenseReport` use case that reads the CycloneDX SBOM, classifies every dependency, and writes the LICENSE.json artifact.
 
 ## Example Usage

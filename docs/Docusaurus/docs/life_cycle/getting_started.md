@@ -34,7 +34,7 @@ For more information about structure remote config visit [Structure Remote Confi
     <td>Free</td>
   </tr>
   <tr>
-    <td rowspan="3">ENGINE_IAC</td>
+    <td rowspan="4">ENGINE_IAC</td>
     <td><a href="https://www.checkov.io/">CHECKOV</a></td>
     <td>Free</td>
   </tr>
