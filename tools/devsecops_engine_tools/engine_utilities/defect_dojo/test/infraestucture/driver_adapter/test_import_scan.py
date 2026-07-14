@@ -52,3 +52,23 @@ def test_post_import_scan_info_failure():
     )
     with pytest.raises(ApiError):
         rest_import_scan.import_scan(request, file)
+
+
+def test_import_scan_applies_tags_to_findings_when_enabled():
+    session_mock = session_manager_post(status_code=201, mock_response="import_scan.json")
+    request = ImportScanRequest(apply_tags_to_findings=True)
+    rest_import_scan = ImportScanRestConsumer(request, session_mock)
+    with open(f"{DEVSECOPS_ENGINE_UTILITIES_PATH}/defect_dojo/test/files/import_scan.json", "r") as fp:
+        rest_import_scan.import_scan(request, fp)
+    sent_data = session_mock._instance.post.call_args.kwargs["data"]
+    assert sent_data["apply_tags_to_findings"] == "true"
+
+
+def test_import_scan_does_not_apply_tags_to_findings_by_default():
+    session_mock = session_manager_post(status_code=201, mock_response="import_scan.json")
+    request = ImportScanRequest()
+    rest_import_scan = ImportScanRestConsumer(request, session_mock)
+    with open(f"{DEVSECOPS_ENGINE_UTILITIES_PATH}/defect_dojo/test/files/import_scan.json", "r") as fp:
+        rest_import_scan.import_scan(request, fp)
+    sent_data = session_mock._instance.post.call_args.kwargs["data"]
+    assert sent_data["apply_tags_to_findings"] == "false"
