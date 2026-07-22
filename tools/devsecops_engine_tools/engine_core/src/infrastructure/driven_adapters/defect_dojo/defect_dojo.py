@@ -577,6 +577,9 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             "get_exact_product": vulnerability_management.config_tool[
                 "VULNERABILITY_MANAGER"
             ]["DEFECT_DOJO"].get("GET_EXACT_PRODUCT", False),
+            "apply_tags_to_findings": vulnerability_management.config_tool[
+                "VULNERABILITY_MANAGER"
+            ]["DEFECT_DOJO"].get("APPLY_TAGS_TO_FINDINGS", False),
             "tool_sonarqube_configuration": (
                 tool_sonar_conf_mapping[
                     vulnerability_management.sonar_instance.upper()

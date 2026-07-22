@@ -57,6 +57,7 @@ Configuration of the driven adapters in the main layer and management of on/off 
             },
             "REGEX_EXPRESSION_CODE_APP": "",
             "REIMPORT_SCAN": false,
+            "APPLY_TAGS_TO_FINDINGS": false,
             "CMDB": {
                 "USE_CMDB": false,
                 "HOST_CMDB": "",
@@ -319,6 +320,9 @@ Configuration of the driven adapters in the main layer and management of on/off 
         - **REIMPORT_SCAN**: Boolean value that determines whether the scan results should be re-imported into DefectDojo. 
             - If set to `true`, the tool will attempt to re-import scan results, updating the same test.  
             - If set to `false`, each scan will be imported as a new test.  
+        - **APPLY_TAGS_TO_FINDINGS**: Optional boolean value (default `false`) that determines whether the tags applied to the test are also propagated to each individual finding when importing or reimporting into DefectDojo.
+            - If set to `true`, DefectDojo applies the test tags to every finding.
+            - If set to `false` (default), the tags remain only at the test level.
         - **CMDB**: Configuration for the integration with the Configuration Management Database (CMDB).
             - **USE_CMDB**: Boolean value indicating whether to use CMDB integration (`true` or `false`).
             - **HOST_CMDB**: URL endpoint for the CMDB API.
@@ -501,6 +505,7 @@ Then, the remote config settings should look similar to this:
     "MAX_RETRIES_QUERY": 5,
     "REGEX_EXPRESSION_CODE_APP": "^([^-]+)",
     "REIMPORT_SCAN": false,
+    "APPLY_TAGS_TO_FINDINGS": false,
     "CMDB": {
         "USE_CMDB": true,
         "HOST_CMDB": "http://host_cmdb_example",
@@ -574,6 +579,7 @@ The remote config settings should look similar to this:
         "MAX_RETRIES_QUERY": 5,
         "REGEX_EXPRESSION_CODE_APP": "^([^-]+)",
         "REIMPORT_SCAN": false,
+        "APPLY_TAGS_TO_FINDINGS": false,
         "CMDB": {
             "USE_CMDB": false
         }
