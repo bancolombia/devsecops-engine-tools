@@ -414,11 +414,6 @@ class CheckovTool(ToolGateway):
         try:
             output = self._execute(checkov_config, command_prefix)
             parsed_output = json.loads(output)
-            # Checkov returns a JSON list (one entry per framework) instead of
-            # a single dict when more than one framework is scanned in the
-            # same run (e.g. framework=["terraform", "terraform_plan"]).
-            # Extend instead of append so downstream code always receives a
-            # flat list of per-framework result dicts.
             if isinstance(parsed_output, list):
                 result.extend(parsed_output)
             else:

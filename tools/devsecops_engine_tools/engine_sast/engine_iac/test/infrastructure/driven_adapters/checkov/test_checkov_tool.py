@@ -115,9 +115,6 @@ def test_async_scan(mock_checkov_tool, checkov_tool):
     autospec=True,
 )
 def test_async_scan_with_multiple_frameworks_list_output(mock_checkov_tool, checkov_tool):
-    # When checkov scans more than one framework in the same run
-    # (e.g. framework=["terraform", "terraform_plan"]) it returns a JSON
-    # list with one result dict per framework instead of a single dict.
     checkov_config = MagicMock()
     checkov_config.path_config_file = "/path/to/config/"
     checkov_config.config_file_name = "checkov_config"
@@ -136,9 +133,6 @@ def test_async_scan_with_multiple_frameworks_list_output(mock_checkov_tool, chec
         {"check_type": "terraform", "results": {"failed_checks": []}},
         {"check_type": "terraform_plan", "results": {"failed_checks": []}},
     ]
-    # Each entry must be a dict, never a nested list, otherwise downstream
-    # CheckovDeserealizator.get_list_finding fails with
-    # "list indices must be integers or slices, not str".
     assert all(isinstance(entry, dict) for entry in result)
 
 @patch(
