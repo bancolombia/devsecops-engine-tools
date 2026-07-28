@@ -45,6 +45,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
+                    "REDIRECT_NEW_VIEWS": False,
                     "REIMPORT_SCAN": True,
                     "TOOL_SCM_MAPPING": {
                         "DEFAULT": 2,
@@ -229,6 +230,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
+                    "REDIRECT_NEW_VIEWS": True,
                     "TOOL_SCM_MAPPING": {
                         "DEFAULT": 2,
                         "TFSGIT": 2,
@@ -374,6 +376,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
+                    "REDIRECT_NEW_VIEWS": False,
                     "TOOL_SCM_MAPPING": {
                         "DEFAULT": 2,
                         "TFSGIT": 2,
@@ -477,6 +480,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "REIMPORT_SCAN": True,
                     "REGEX_EXPRESSION_CODE_APP": "regex",
                     "MAX_RETRIES_QUERY": 5,
+                    "REDIRECT_NEW_VIEWS": False,
                 }
             }
         }
@@ -535,6 +539,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "LIMITS_QUERY": 80,
                     "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
+                    "REDIRECT_NEW_VIEWS": False,
                 }
             }
         }
@@ -756,6 +761,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "LIMITS_QUERY": 80,
                     "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
+                    "REDIRECT_NEW_VIEWS": False,
                 }
             }
         }
@@ -845,6 +851,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "LIMITS_QUERY": 80,
                     "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 2,
+                    "REDIRECT_NEW_VIEWS": False,
                 }
             }
         }
@@ -908,6 +915,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "LIMITS_QUERY": 80,
                     "REIMPORT_SCAN": True,
                     "MAX_RETRIES_QUERY": 5,
+                    "REDIRECT_NEW_VIEWS": False,
                 }
             }
         }
@@ -1172,6 +1180,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "HOST_DEFECT_DOJO": "http://defectdojo",
                     "PRINT_DOMAIN": "",
                     "MAX_RETRIES_QUERY": 3,
+                    "REDIRECT_NEW_VIEWS": False,
                     "LIMITS_QUERY": 100,
                     "REIMPORT_SCAN": True,
                 }
@@ -1211,6 +1220,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "http://defectdojo",
                     "MAX_RETRIES_QUERY": 3,
+                    "REDIRECT_NEW_VIEWS": False,
                     "LIMITS_QUERY": 100,
                     "REIMPORT_SCAN": True,
                 }
@@ -1352,6 +1362,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 "DEFECT_DOJO": {
                     "HOST_DEFECT_DOJO": "host_defect_dojo",
                     "MAX_RETRIES_QUERY": 5,
+                    "REDIRECT_NEW_VIEWS": False,
                 }
             }
         }
