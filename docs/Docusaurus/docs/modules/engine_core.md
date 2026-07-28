@@ -38,6 +38,7 @@ Configuration of the driven adapters in the main layer and management of on/off 
         "DEFECT_DOJO": {
             "HOST_DEFECT_DOJO": "",
             "PRINT_DOMAIN": "",
+            "REDIRECT_NEW_VIEWS": false,
             "LIMITS_QUERY": 100,
             "MAX_RETRIES_QUERY": 5,
             "GET_EXACT_PRODUCT": false,
@@ -275,6 +276,7 @@ Configuration of the driven adapters in the main layer and management of on/off 
     - **DEFECT_DOJO**
         - HOST_DEFECT_DOJO: defect dojo host
         - PRINT_DOMAIN: Dominio to print
+        - REDIRECT_NEW_VIEWS: When set to `true`, the engine automatically redirects newly created views When set to `false`, new views are not automatically redirected and remain in their original state/URL.
         - LIMITS_QUERY: Query limit for platform queries.
         - MAX_RETRIES_QUERY: Maximum number of retry attempts for queries to the platform
         - GET_EXACT_PRODUCT: optional flag. Ensure product get from defect dojo before request is exact match otherwise use default behavior include match
@@ -759,7 +761,6 @@ DET_GITHUB_REPOSITORY="owner/repository"
     - **Use:** GitHub repository context used to resolve owner/repository (accepts `owner/repo` or full GitHub URL).
     - **Applies to:** `--remote_config_source github`.
     - **Fallback if missing:** `github.repository`.
-
 ## Extensibility
 
 - New tools and modules can be added by extending the adapters and use cases.
