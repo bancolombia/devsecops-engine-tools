@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Generate a token of Github APP
         id: generate_token
-        uses: actions/create-github-app-token@v2.2.0
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           app-id: ${{ secrets.SEMREL_GITHUB_APP_ID }}
           private-key: ${{ secrets.SEMREL_GITHUB_APP_PRIVATE_KEY }}
@@ -25,7 +25,7 @@ jobs:
 
       # Check out the current repository
       - name: Fetch Sources
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ steps.generate_token.outputs.token }}
           ref: ${{ github.event.release.tag_name }}
@@ -49,7 +49,7 @@ jobs:
           email: release-bot@bancolombia.com.co
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
 
@@ -75,7 +75,7 @@ jobs:
           packages-dir: tools/dist/
           
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.22'
 
@@ -137,7 +137,7 @@ jobs:
           fi
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c v4.5.2
         with:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
