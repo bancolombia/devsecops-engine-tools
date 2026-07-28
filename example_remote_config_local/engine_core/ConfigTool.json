@@ -38,6 +38,7 @@
             },
             "REGEX_EXPRESSION_CODE_APP": "^([^-]+)",
             "REIMPORT_SCAN": false,
+            "APPLY_TAGS_TO_FINDINGS": false,
             "CMDB": {
                 "USE_CMDB": false,
                 "HOST_CMDB": "",

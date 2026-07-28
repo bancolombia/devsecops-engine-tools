@@ -171,6 +171,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 test_title="engine_iac_k8s",
                 reimport_scan=True,
                 get_exact_product=False,
+                apply_tags_to_findings=False,
                 remote_config_source="github",
                 remote_config_repo="remote_config",
                 remote_config_path="mapping_path",
@@ -338,6 +339,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                 test_title="engine_iac_k8s",
                 reimport_scan=True,
                 get_exact_product=False,
+                apply_tags_to_findings=False,
                 remote_config_source="github",
                 remote_config_repo="remote_config",
                 remote_config_path="mapping_path",
@@ -447,6 +449,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
                     "test_title": "engine_iac_k8s_test_2",
                     "reimport_scan": True,
                     "get_exact_product": False,
+                    "apply_tags_to_findings": False,
                 }
             )
             self.assertEqual(result, "import_scan_request_result")
