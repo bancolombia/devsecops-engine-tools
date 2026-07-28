@@ -63,7 +63,7 @@ class ImportScanUserCase:
             except Exception as e:
                 raise ApiError(e)
 
-        response.url = f"{request.host_defect_dojo}/engagement/{str(response.engagement_id)}/finding/open"
+        response.url = f"{request.host_defect_dojo}/test/{str(response.test_id)}"
         return response
 
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:

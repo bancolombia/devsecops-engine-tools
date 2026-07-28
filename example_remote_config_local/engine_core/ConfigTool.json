@@ -18,6 +18,7 @@
         "DEFECT_DOJO": {
             "HOST_DEFECT_DOJO": "",
             "PRINT_DOMAIN": "",
+            "REDIRECT_NEW_VIEWS": false,
             "LIMITS_QUERY": 100,
             "MAX_RETRIES_QUERY": 5,
             "GET_EXACT_PRODUCT": false,

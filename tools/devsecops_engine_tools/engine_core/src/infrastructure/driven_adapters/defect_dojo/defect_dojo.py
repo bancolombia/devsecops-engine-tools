@@ -212,7 +212,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 test_string = "//".join([url_parts[0] + "/", url_parts[1]])
                 print(
                     "Report sent to vulnerability management: ",
-                    f"{test_string}?tags={vulnerability_management.dict_args['module']}",
+                    f"{test_string}/test_details" if vulnerability_management.config_tool['VULNERABILITY_MANAGER']['DEFECT_DOJO']['REDIRECT_NEW_VIEWS'] else test_string,
                 )
         else:
             raise ExceptionVulnerabilityManagement(response)
@@ -461,7 +461,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 host_dd = print_domain
 
             for engagement in engagements:
-                engagement.vm_url = f"{host_dd}/engagement/{engagement.id}/finding/open"
+                engagement.vm_url = f"{host_dd}/engagement/{engagement.id}"
 
             return engagements
 
