@@ -16,6 +16,8 @@ export class MetricsService {
     private static readonly REQUEST_TIMEOUT = 30000;
     private outputLogs: string[] = [];
 
+    private static readonly previousFindingsCounts = new Map<string, number>();
+
     // ===== Log Management Methods (from ScannerMetricsHelper) =====
 
     clearLogs(): void {
@@ -68,6 +70,13 @@ export class MetricsService {
             input.tool
         );
 
+        const findingsDelta = this.calculateRemediationDelta(
+            input.scan_component,
+            tool,
+            input.findings.length,
+            input.scan_success
+        );
+
         const metricsData: IMetricsData = {
             tool: tool,
             scan_component: input.scan_component,
@@ -81,10 +90,45 @@ export class MetricsService {
             exception_log: exceptionLog,
             scan_status: scanStatus,
             execution_mode: input.execution_mode,
-            scan_duration_s: (input.scan_duration_ms / 1000).toFixed(2)
+            scan_duration_s: (input.scan_duration_ms / 1000).toFixed(2),
+            ...(findingsDelta !== undefined && { findings_delta: findingsDelta })
         };
 
         return metricsData;
+    }
+
+    private static getComponentKey(scanComponent: string, tool: string): string {
+        return `${scanComponent}|${tool}`;
+    }
+
+    private static getPreviousFindingsCount(key: string): number | undefined {
+        return this.previousFindingsCounts.get(key);
+    }
+
+    private static setPreviousFindingsCount(key: string, value: number): void {
+        this.previousFindingsCounts.set(key, value);
+    }
+
+    private static calculateRemediationDelta(
+        scanComponent: string,
+        tool: string,
+        currentFindingsCount: number,
+        scanSuccess: boolean
+    ): string | undefined {
+        const key = this.getComponentKey(scanComponent, tool);
+
+        if (!scanSuccess) {
+            return undefined;
+        }
+
+        const previousCount = this.getPreviousFindingsCount(key);
+        this.setPreviousFindingsCount(key, currentFindingsCount);
+
+        if (previousCount === undefined) {
+            return undefined;
+        }
+
+        return (currentFindingsCount - previousCount).toString();
     }
 
     private static parseSeverityCounts(severityCounts: IMetricsInput['severityCounts']) {

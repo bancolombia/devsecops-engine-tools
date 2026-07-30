@@ -13,6 +13,8 @@ export interface IMetricsData {
     scan_status: 'Success with findings' | 'Success with no findings' | 'Error: Docker inactive' | 'Error: VPN inactive' | 'Error: Configuration issues' | 'Error: Microservice unavailable' | 'Error: SSL certificate' | 'Error: Unknown';
     execution_mode: 'local-docker' | 'remote-microservice';
     scan_duration_s: string;
+    // Only present when a previous successful scan exists for the same component
+    findings_delta?: string;
 }
 
 export interface IMetricsInput {
