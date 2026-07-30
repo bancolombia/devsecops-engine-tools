@@ -1,5 +1,6 @@
 import requests
 import os
+import shutil
 import subprocess
 import time
 import base64
@@ -209,7 +210,10 @@ class PrismaCloudManagerScan(ToolGateway):
         prisma_key = (
             f"{secret_tool['access_prisma']}:{secret_tool['token_prisma']}" if secret_tool else token_engine_container
         )
-        file_path = os.path.join(
+        twistcli_in_path = shutil.which(remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"])
+        if twistcli_in_path:
+            logger.info("twistcli found in PATH at %s, skipping download", twistcli_in_path)
+        file_path = twistcli_in_path or os.path.join(
             os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
         )
         sbom_components = None
