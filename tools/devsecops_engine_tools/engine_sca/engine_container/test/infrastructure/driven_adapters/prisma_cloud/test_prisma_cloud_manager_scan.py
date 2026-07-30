@@ -774,3 +774,86 @@ def test_scan_image_compressed_file_failure_triggers_tarball_fallback(mock_remot
         assert "--tarball" in first_call_cmd
         # Cleanup should happen
         mock_remove.assert_called_once()
+
+
+def test_get_container_context_from_results_maps_fields(twistcli_instance):
+    mock_file_data = json.dumps({
+        "results": [
+            {
+                "id": "sha256:abcd1234",
+                "name": "test_image:latest",
+                "distro": "Debian GNU/Linux 9 (stretch)",
+                "vulnerabilities": [
+                    {
+                        "id": "CVE-2013-7459",
+                        "status": "fixed in 2.6.2",
+                        "cvss": 9.8,
+                        "vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                        "description": "Heap-based buffer overflow\nin pycrypto.",
+                        "severity": "important",
+                        "packageName": "pycrypto",
+                        "packageVersion": "2.6.1",
+                        "link": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2013-7459",
+                        "publishedDate": "2014-01-01T00:00:00Z",
+                        "discoveredDate": "2023-01-01T00:00:00Z",
+                    }
+                ],
+            }
+        ]
+    })
+
+    with patch("builtins.open", mock_open(read_data=mock_file_data)):
+        context_list = twistcli_instance.get_container_context_from_results("result.json")
+
+    assert len(context_list) == 1
+    context = context_list[0]
+    assert context.cve_id == "CVE-2013-7459"
+    assert context.severity == "high"
+    assert context.vulnerability_status == "fixed in 2.6.2"
+    assert context.target_image == "test_image:latest"
+    assert context.package_name == "pycrypto"
+    assert context.installed_version == "2.6.1"
+    assert context.fixed_version == "2.6.2"
+    assert context.cvss_score == 9.8
+    assert context.cvss_vector == "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+    assert "\n" not in context.description
+    assert context.os_type == "Debian GNU/Linux 9 (stretch)"
+    assert context.layer_digest == "sha256:abcd1234"
+    assert context.published_date == "2014-01-01T00:00:00Z"
+    assert context.last_modified_date == "2023-01-01T00:00:00Z"
+    assert context.references == ["https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2013-7459"]
+    assert context.source_tool == "PrismaCloud"
+
+
+def test_get_container_context_from_results_defaults_missing_fields(twistcli_instance):
+    mock_file_data = json.dumps({
+        "results": [
+            {
+                "id": "sha256:abcd1234",
+                "vulnerabilities": [
+                    {"id": "CVE-9999-0000", "packageName": "openssl"}
+                ],
+            }
+        ]
+    })
+
+    with patch("builtins.open", mock_open(read_data=mock_file_data)):
+        context_list = twistcli_instance.get_container_context_from_results("result.json")
+
+    assert len(context_list) == 1
+    context = context_list[0]
+    assert context.cve_id == "CVE-9999-0000"
+    assert context.severity == "unknown"
+    assert context.fixed_version == "unknown"
+    assert context.target_image == "sha256:abcd1234"
+    assert context.references == "unknown"
+    assert context.cvss_score is None
+
+
+def test_get_container_context_from_results_no_results(twistcli_instance):
+    mock_file_data = json.dumps({"results": []})
+
+    with patch("builtins.open", mock_open(read_data=mock_file_data)):
+        context_list = twistcli_instance.get_container_context_from_results("result.json")
+
+    assert context_list == []
