@@ -8,6 +8,9 @@ from typing import List
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
+from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.context_container import (
+    ContextContainer,
+)
 from devsecops_engine_tools.engine_utilities.sbom.deserealizator import (
     get_list_component,
 )
@@ -239,6 +242,65 @@ class PrismaCloudManagerScan(ToolGateway):
 
         return image_scanned, sbom_components
 
-    def get_container_context_from_results(self, path_file_results: str) -> List:
-        # TODO: Implement Prisma Cloud context extraction
-        return []
+    def get_container_context_from_results(self, path_file_results: str) -> List[ContextContainer]:
+        SEVERITY_MAP = {
+            "unimportant": "low",
+            "unassigned": "low",
+            "negligible": "low",
+            "not yet assigned": "low",
+            "low": "low",
+            "medium": "medium",
+            "moderate": "medium",
+            "high": "high",
+            "important": "high",
+            "critical": "critical",
+        }
+
+        context_container_list = []
+
+        with open(path_file_results, "rb") as file:
+            image_object = file.read()
+            json_data = json.loads(image_object)
+
+        results = json_data.get("results", [])
+
+        for result in results:
+            target_image = result.get("name") or result.get("id", "unknown")
+            os_type = result.get("distro", "unknown")
+            vulnerabilities = result.get("vulnerabilities", [])
+
+            for vul in vulnerabilities:
+                status = vul.get("status", "unknown")
+                link = vul.get("link")
+                context_container = ContextContainer(
+                    cve_id=vul.get("id", "unknown"),
+                    cwe_id=vul.get("cwe", "unknown"),
+                    vendor_id=vul.get("vendorId", "unknown"),
+                    severity=SEVERITY_MAP.get(
+                        vul.get("severity", "").lower(), vul.get("severity", "unknown")
+                    ),
+                    vulnerability_status=status,
+                    target_image=target_image,
+                    package_name=vul.get("packageName", "unknown"),
+                    installed_version=vul.get("packageVersion", "unknown"),
+                    fixed_version=self._extract_fixed_version(status),
+                    cvss_score=vul.get("cvss"),
+                    cvss_vector=vul.get("vector", "unknown"),
+                    description=vul.get("description", "unknown").replace("\n", ""),
+                    os_type=os_type,
+                    layer_digest=result.get("id", "unknown"),
+                    published_date=vul.get("publishedDate"),
+                    last_modified_date=vul.get("discoveredDate", "unknown"),
+                    references=[link] if link else "unknown",
+                    source_tool="PrismaCloud",
+                )
+                context_container_list.append(context_container)
+
+        return context_container_list
+
+    def _extract_fixed_version(self, status: str) -> str:
+        """Extract fixed version from Prisma status like 'fixed in 1.2.3'."""
+        prefix = "fixed in "
+        if isinstance(status, str) and status.lower().startswith(prefix):
+            return status[len(prefix):].strip()
+        return "unknown"
