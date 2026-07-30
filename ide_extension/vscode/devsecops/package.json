@@ -4,7 +4,7 @@
   "displayName": "DevSecOps Engine Tools",
   "publisher": "GrupoBancolombiaOSPO",
   "description": "",
-  "version": "1.28.0",
+  "version": "1.29.0",
   "engines": {
     "vscode": "^1.95.0"
   },
