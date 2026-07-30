@@ -242,20 +242,20 @@ class PrismaCloudManagerScan(ToolGateway):
 
         return image_scanned, sbom_components
 
-    SEVERITY_MAP = {
-        "unimportant": "low",
-        "unassigned": "low",
-        "negligible": "low",
-        "not yet assigned": "low",
-        "low": "low",
-        "medium": "medium",
-        "moderate": "medium",
-        "high": "high",
-        "important": "high",
-        "critical": "critical",
-    }
-
     def get_container_context_from_results(self, path_file_results: str) -> List[ContextContainer]:
+        SEVERITY_MAP = {
+            "unimportant": "low",
+            "unassigned": "low",
+            "negligible": "low",
+            "not yet assigned": "low",
+            "low": "low",
+            "medium": "medium",
+            "moderate": "medium",
+            "high": "high",
+            "important": "high",
+            "critical": "critical",
+        }
+
         context_container_list = []
 
         with open(path_file_results, "rb") as file:
@@ -276,7 +276,7 @@ class PrismaCloudManagerScan(ToolGateway):
                     cve_id=vul.get("id", "unknown"),
                     cwe_id=vul.get("cwe", "unknown"),
                     vendor_id=vul.get("vendorId", "unknown"),
-                    severity=self.SEVERITY_MAP.get(
+                    severity=SEVERITY_MAP.get(
                         vul.get("severity", "").lower(), vul.get("severity", "unknown")
                     ),
                     vulnerability_status=status,
