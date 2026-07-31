@@ -286,6 +286,36 @@ def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image):
         assert result == ("result.json", None)
 
 
+def test_run_tool_container_sca_skips_download_when_binary_in_path(mock_remoteconfig):
+    with patch(
+        "os.path.exists", side_effect=lambda path: path == "/usr/local/bin/twistcli"
+    ), patch(
+        "shutil.which", return_value="/usr/local/bin/twistcli"
+    ) as mock_which, patch.object(
+        PrismaCloudManagerScan, "download_twistcli"
+    ) as mock_download, patch.object(
+        PrismaCloudManagerScan, "scan_image", return_value="result.json"
+    ) as mock_scan:
+
+        scan_manager = PrismaCloudManagerScan()
+        result = scan_manager.run_tool_container_sca(
+            mock_remoteconfig,
+            {"access_prisma": "asdasd", "token_prisma": "asdasd"},
+            "token_container",
+            "image_name",
+            "result.json", None, {"exclusions": "all"},
+            False,
+            "unix:///var/run/docker.sock",
+            False,
+        )
+
+        mock_which.assert_called_once_with(mock_remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"])
+        mock_download.assert_not_called()
+        mock_scan.assert_called_once()
+        assert mock_scan.call_args[0][0] == "/usr/local/bin/twistcli"
+        assert result == ("result.json", None)
+
+
 def test_generate_sbom_success():
     with patch(
         "builtins.open",
