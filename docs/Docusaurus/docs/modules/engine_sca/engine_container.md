@@ -16,6 +16,7 @@ Main configuration file that defines scanning behavior, tool versions, and secur
 {
   "PRISMA_CLOUD": {
     "TWISTCLI_PATH": "twistcli",
+    "MIN_TWISTCLI_VERSION": "",
     "PRISMA_CONSOLE_URL": "",
     "PRISMA_API_VERSION": "",
     "SBOM_FORMAT": "cyclonedx_json",
@@ -119,7 +120,8 @@ Main configuration file that defines scanning behavior, tool versions, and secur
 #### Configuration Parameters
 
 ##### Prisma Cloud Configuration
-- **TWISTCLI_PATH**: Path to Prisma Cloud's twistcli binary (e.g., `"twistcli"`)
+- **TWISTCLI_PATH**: Path to Prisma Cloud's twistcli binary (e.g., `"twistcli"`). If a binary with this name is found in `PATH`, it is reused instead of downloading a new one.
+- **MIN_TWISTCLI_VERSION**: Optional minimum required twistcli version (e.g., `"34.04.160"`). If the binary found in `PATH` is older, it is ignored and a fresh copy is downloaded instead. Leave empty to accept any version found in `PATH`.
 - **PRISMA_CONSOLE_URL**: URL of the Prisma Cloud console for API access
 - **PRISMA_API_VERSION**: API version to use for Prisma Cloud integration
 - **SBOM_FORMAT**: SBOM output format (`"cyclonedx_json"` for CycloneDX JSON format)
