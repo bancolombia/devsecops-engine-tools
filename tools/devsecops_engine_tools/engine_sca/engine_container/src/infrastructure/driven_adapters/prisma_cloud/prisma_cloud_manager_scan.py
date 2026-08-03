@@ -1,11 +1,12 @@
 import requests
 import os
+import re
 import shutil
 import subprocess
 import time
 import base64
 import json
-from typing import List
+from typing import List, Optional, Tuple
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -202,22 +203,48 @@ class PrismaCloudManagerScan(ToolGateway):
             return access_prisma, token_prisma
         except ValueError:
             raise ValueError("The string is not properly formatted. Make sure it contains a ':'.")
-        
-    def run_tool_container_sca(
-        self, remoteconfig, secret_tool, token_engine_container, image_name, result_file, base_image, exclusions, generate_sbom, docker_address, is_compressed_file=False
-    ):
 
-        prisma_key = (
-            f"{secret_tool['access_prisma']}:{secret_tool['token_prisma']}" if secret_tool else token_engine_container
-        )
+    def _parse_version(self, version_text: str) -> Optional[Tuple[int, ...]]:
+        match = re.search(r"(\d+(?:\.\d+)+)", version_text or "")
+        if not match:
+            return None
+        return tuple(int(part) for part in match.group(1).split("."))
+
+    def _get_twistcli_version(self, binary_path: str) -> Optional[Tuple[int, ...]]:
+        try:
+            result = subprocess.run(
+                [binary_path, "--version"],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            return self._parse_version(result.stdout or result.stderr)
+        except Exception as e:
+            logger.warning("Could not determine twistcli version at %s: %s", binary_path, e)
+            return None
+
+    def _resolve_twistcli_path(self, remoteconfig, prisma_key):
+        """Reuse the twistcli found in PATH unless it's older than PRISMA_CLOUD.MIN_TWISTCLI_VERSION."""
         twistcli_in_path = shutil.which(remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"])
+        min_version = remoteconfig["PRISMA_CLOUD"].get("MIN_TWISTCLI_VERSION")
+
+        if twistcli_in_path and min_version:
+            installed_version = self._get_twistcli_version(twistcli_in_path)
+            if not installed_version or installed_version < self._parse_version(min_version):
+                logger.warning(
+                    "twistcli found in PATH at %s (version %s) is older than required %s, downloading instead",
+                    twistcli_in_path,
+                    installed_version,
+                    min_version,
+                )
+                twistcli_in_path = None
+
         if twistcli_in_path:
             logger.info("twistcli found in PATH at %s, skipping download", twistcli_in_path)
-        file_path = twistcli_in_path or os.path.join(
-            os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"]
-        )
-        sbom_components = None
+            return twistcli_in_path
 
+        file_path = os.path.join(os.getcwd(), remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"])
         if not os.path.exists(file_path):
             self.download_twistcli(
                 file_path,
@@ -225,6 +252,18 @@ class PrismaCloudManagerScan(ToolGateway):
                 remoteconfig["PRISMA_CLOUD"]["PRISMA_CONSOLE_URL"],
                 remoteconfig["PRISMA_CLOUD"]["PRISMA_API_VERSION"],
             )
+        return file_path
+
+    def run_tool_container_sca(
+        self, remoteconfig, secret_tool, token_engine_container, image_name, result_file, base_image, exclusions, generate_sbom, docker_address, is_compressed_file=False
+    ):
+
+        prisma_key = (
+            f"{secret_tool['access_prisma']}:{secret_tool['token_prisma']}" if secret_tool else token_engine_container
+        )
+        file_path = self._resolve_twistcli_path(remoteconfig, prisma_key)
+        sbom_components = None
+
         image_scanned = self.scan_image(
             file_path,
             image_name,

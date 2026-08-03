@@ -265,7 +265,7 @@ def test_scan_image_retries_with_delay(mock_remoteconfig):
 def test_run_tool_container_sca_success(mock_remoteconfig, mock_scan_image):
     with patch("builtins.open") as mock_open, patch("os.path.join") as mock_join, patch(
         "os.path.exists"
-    ) as mock_exists, patch.object(
+    ) as mock_exists, patch("shutil.which", return_value=None), patch.object(
         PrismaCloudManagerScan, "download_twistcli"
     ), patch.object(
         PrismaCloudManagerScan, "scan_image", return_value="result.json"
@@ -312,6 +312,79 @@ def test_run_tool_container_sca_skips_download_when_binary_in_path(mock_remoteco
         mock_which.assert_called_once_with(mock_remoteconfig["PRISMA_CLOUD"]["TWISTCLI_PATH"])
         mock_download.assert_not_called()
         mock_scan.assert_called_once()
+        assert mock_scan.call_args[0][0] == "/usr/local/bin/twistcli"
+        assert result == ("result.json", None)
+
+
+def test_run_tool_container_sca_downloads_when_path_binary_too_old(mock_remoteconfig):
+    remoteconfig = {
+        **mock_remoteconfig,
+        "PRISMA_CLOUD": {
+            **mock_remoteconfig["PRISMA_CLOUD"],
+            "MIN_TWISTCLI_VERSION": "34.04.160",
+        },
+    }
+    _mod = "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan"
+
+    with patch("shutil.which", return_value="/usr/local/bin/twistcli"), patch(
+        "os.path.exists", return_value=False
+    ), patch(f"{_mod}.subprocess.run") as mock_run, patch.object(
+        PrismaCloudManagerScan, "download_twistcli"
+    ) as mock_download, patch.object(
+        PrismaCloudManagerScan, "scan_image", return_value="result.json"
+    ) as mock_scan:
+        mock_run.return_value = MagicMock(stdout="twistcli version 30.00.000", stderr="")
+
+        scan_manager = PrismaCloudManagerScan()
+        result = scan_manager.run_tool_container_sca(
+            remoteconfig,
+            {"access_prisma": "asdasd", "token_prisma": "asdasd"},
+            "token_container",
+            "image_name",
+            "result.json", None, {"exclusions": "all"},
+            False,
+            "unix:///var/run/docker.sock",
+            False,
+        )
+
+        mock_download.assert_called_once()
+        mock_scan.assert_called_once()
+        assert mock_scan.call_args[0][0] != "/usr/local/bin/twistcli"
+        assert result == ("result.json", None)
+
+
+def test_run_tool_container_sca_uses_path_binary_when_version_satisfies_minimum(mock_remoteconfig):
+    remoteconfig = {
+        **mock_remoteconfig,
+        "PRISMA_CLOUD": {
+            **mock_remoteconfig["PRISMA_CLOUD"],
+            "MIN_TWISTCLI_VERSION": "30.00.000",
+        },
+    }
+    _mod = "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.prisma_cloud.prisma_cloud_manager_scan"
+
+    with patch("shutil.which", return_value="/usr/local/bin/twistcli"), patch(
+        "os.path.exists", return_value=True
+    ), patch(f"{_mod}.subprocess.run") as mock_run, patch.object(
+        PrismaCloudManagerScan, "download_twistcli"
+    ) as mock_download, patch.object(
+        PrismaCloudManagerScan, "scan_image", return_value="result.json"
+    ) as mock_scan:
+        mock_run.return_value = MagicMock(stdout="twistcli version 34.04.160", stderr="")
+
+        scan_manager = PrismaCloudManagerScan()
+        result = scan_manager.run_tool_container_sca(
+            remoteconfig,
+            {"access_prisma": "asdasd", "token_prisma": "asdasd"},
+            "token_container",
+            "image_name",
+            "result.json", None, {"exclusions": "all"},
+            False,
+            "unix:///var/run/docker.sock",
+            False,
+        )
+
+        mock_download.assert_not_called()
         assert mock_scan.call_args[0][0] == "/usr/local/bin/twistcli"
         assert result == ("result.json", None)
 
