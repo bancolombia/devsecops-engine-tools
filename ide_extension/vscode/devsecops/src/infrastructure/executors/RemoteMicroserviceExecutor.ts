@@ -186,9 +186,13 @@ export class RemoteMicroserviceExecutor implements IScanExecutor {
                 error: errorMessage
             };
         } finally {
-            // Cleanup compressed file
+            // Cleanup prepared file: image scans use a devsecops-tmp-* dir that must be removed whole, not just the tar file
             if (compressedFilePath) {
-                FileCompressionHelper.cleanup(compressedFilePath);
+                if (scanConfig.scanType === 'image') {
+                    await ContainerEngineManager.removeFile(compressedFilePath);
+                } else {
+                    FileCompressionHelper.cleanup(compressedFilePath);
+                }
             }
         }
     }
@@ -264,7 +268,8 @@ export class RemoteMicroserviceExecutor implements IScanExecutor {
                 break;
 
             case 'image':
-                config['--tool'] = 'trivy';
+                config['--tool'] = 'prisma';
+                config['--use_secrets_manager'] = 'true';
                 break;
         }
 
