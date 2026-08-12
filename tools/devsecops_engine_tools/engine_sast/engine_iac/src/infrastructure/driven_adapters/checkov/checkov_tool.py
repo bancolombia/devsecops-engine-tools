@@ -413,7 +413,11 @@ class CheckovTool(ToolGateway):
         result = []
         try:
             output = self._execute(checkov_config, command_prefix)
-            result.append(json.loads(output))
+            parsed_output = json.loads(output)
+            if isinstance(parsed_output, list):
+                result.extend(parsed_output)
+            else:
+                result.append(parsed_output)
         except json.JSONDecodeError as e:
             error_msg = f"Failed to parse Checkov output as JSON: {e}"
             logger.error(error_msg)

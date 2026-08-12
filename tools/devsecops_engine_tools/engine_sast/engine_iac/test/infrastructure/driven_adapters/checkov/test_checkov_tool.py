@@ -114,6 +114,31 @@ def test_async_scan(mock_checkov_tool, checkov_tool):
     "devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_tool.CheckovTool._execute",
     autospec=True,
 )
+def test_async_scan_with_multiple_frameworks_list_output(mock_checkov_tool, checkov_tool):
+    checkov_config = MagicMock()
+    checkov_config.path_config_file = "/path/to/config/"
+    checkov_config.config_file_name = "checkov_config"
+
+    output_queue = Queue()
+
+    mock_checkov_tool.return_value = (
+        '[{"check_type": "terraform", "results": {"failed_checks": []}}, '
+        '{"check_type": "terraform_plan", "results": {"failed_checks": []}}]'
+    )
+
+    checkov_tool._async_scan(output_queue, checkov_config, "checkov")
+
+    result = output_queue.get()
+    assert result == [
+        {"check_type": "terraform", "results": {"failed_checks": []}},
+        {"check_type": "terraform_plan", "results": {"failed_checks": []}},
+    ]
+    assert all(isinstance(entry, dict) for entry in result)
+
+@patch(
+    "devsecops_engine_tools.engine_sast.engine_iac.src.infrastructure.driven_adapters.checkov.checkov_tool.CheckovTool._execute",
+    autospec=True,
+)
 def test_async_scan_with_execution_error(mock_checkov_tool, checkov_tool):
     checkov_config = MagicMock()
     checkov_config.path_config_file = "/path/to/config/"
