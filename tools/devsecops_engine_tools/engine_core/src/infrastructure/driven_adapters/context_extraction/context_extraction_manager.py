@@ -1,6 +1,7 @@
 from typing import Optional, Dict, Any, List
 from dataclasses import asdict
 import json
+import os
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.context_extraction_gateway import (
     ContextExtractionGateway,
 )
@@ -46,8 +47,13 @@ class ContextExtractionManager(ContextExtractionGateway):
         path_file_results: Optional[str],
         remote_config: Dict[str, Any],
         config_tool: Dict[str, Any],
+        print_to_logs: bool = False,
         **kwargs
     ) -> None:
+        if not remote_config.get("GENERATE_CONTEXT", False):
+            logger.info(f"Context generation disabled for {module_name}, skipping")
+            return
+
         if not path_file_results:
             logger.warning(f"No results file provided for {module_name}, skipping context extraction")
             return
@@ -87,8 +93,8 @@ class ContextExtractionManager(ContextExtractionGateway):
             # Calculate priority for each context finding
             self._calculate_priorities_for_context(context_list, config_tool, module_name)
             
-            # Print context with priorities
-            self._print_context(module_name, context_list)
+            # Save context to file, and print it to logs if requested
+            self._save_context(module_name, context_list, print_to_logs)
             
             logger.info(f"Context extraction completed for {module_name} with {len(context_list)} findings")
         except FileNotFoundError as e:
@@ -148,18 +154,24 @@ class ContextExtractionManager(ContextExtractionGateway):
             if finding.priority:
                 context_item.priority = finding.priority.scale
     
-    def _print_context(self, module_name: str, context_list: List) -> None:
+    def _save_context(self, module_name: str, context_list: List, print_to_logs: bool) -> None:
         context_key = self._context_key_mapping.get(module_name, f"{module_name}_context")
-        
-        print("===== BEGIN CONTEXT OUTPUT =====")
-        print(
-            json.dumps(
-                {
-                    context_key: [
-                        asdict(context) for context in context_list
-                    ]
-                },
-                indent=2,
-            )
-        )
-        print("===== END CONTEXT OUTPUT =====")
+        context_data = {
+            context_key: [
+                asdict(context) for context in context_list
+            ]
+        }
+        context_json = json.dumps(context_data, indent=2)
+
+        if print_to_logs:
+            print("===== BEGIN CONTEXT OUTPUT =====")
+            print(context_json)
+            print("===== END CONTEXT OUTPUT =====")
+
+        output_file = os.path.join(os.getcwd(), f"{context_key}.json")
+        try:
+            with open(output_file, "w") as f:
+                f.write(context_json)
+            logger.info(f"Context output for {module_name} saved to {output_file}")
+        except OSError as e:
+            logger.error(f"Failed to save context output for {module_name} to {output_file}: {str(e)}")

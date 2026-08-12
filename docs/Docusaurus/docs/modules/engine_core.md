@@ -214,12 +214,14 @@ Configuration of the driven adapters in the main layer and management of on/off 
     "ENGINE_IAC": {
         "ENABLED": true,
         "TOOL": "CHECKOV|KUBESCAPE|KICS|CONFTEST",
-        "PRIORITY": "STANDARD|DISCREET"
+        "PRIORITY": "STANDARD|DISCREET",
+        "GENERATE_CONTEXT": false
     },
     "ENGINE_CONTAINER": {
         "ENABLED": true,
         "TOOL": "PRISMA|TRIVY",
-        "PRIORITY": "STANDARD|DISCREET"
+        "PRIORITY": "STANDARD|DISCREET",
+        "GENERATE_CONTEXT": false
     },
     "ENGINE_DAST": {
         "ENABLED": true,
@@ -235,11 +237,13 @@ Configuration of the driven adapters in the main layer and management of on/off 
     "ENGINE_DEPENDENCIES": {
         "ENABLED": true,
         "TOOL": "XRAY|DEPENDENCY_CHECK|TRIVY",
-        "PRIORITY": "STANDARD|DISCREET"
+        "PRIORITY": "STANDARD|DISCREET",
+        "GENERATE_CONTEXT": false
     },
     "ENGINE_LICENSE": {
         "ENABLED": true,
-        "PRIORITY": "STANDARD|DISCREET"
+        "PRIORITY": "STANDARD|DISCREET",
+        "GENERATE_CONTEXT": false
     },
     "ENGINE_CODE": {
         "ENABLED": true,
@@ -428,11 +432,13 @@ Configuration of the driven adapters in the main layer and management of on/off 
     - ENABLED: true or false
     - TOOL: CHECKOV |KUBESCAPE | KICS
     - PRIORITY: STANDARD | DISCREET
+    - GENERATE_CONTEXT: true or false. See [Context Extraction](#context-extraction) below.
 
 - **ENGINE_CONTAINER**: Configuration for the engine_container tool
     - ENABLED: true or false
     - TOOL: PRISMA | TRIVY
     - PRIORITY: STANDARD | DISCREET
+    - GENERATE_CONTEXT: true or false. See [Context Extraction](#context-extraction) below.
 
 - **ENGINE_DAST**: Configuration for the engine_dast tool
     - ENABLED: true or false
@@ -453,10 +459,12 @@ Configuration of the driven adapters in the main layer and management of on/off 
     - ENABLED: true or false
     - TOOL: XRAY | DEPENDENCY_CHECK | TRIVY
     - PRIORITY: STANDARD | DISCREET
+    - GENERATE_CONTEXT: true or false. See [Context Extraction](#context-extraction) below.
 
 - **ENGINE_LICENSE**: Configuration for the engine_license tool
     - ENABLED: true or false
     - PRIORITY: STANDARD | DISCREET
+    - GENERATE_CONTEXT: true or false. See [Context Extraction](#context-extraction) below.
 
 - **ENGINE_FUNCTION**: Configuration for the engine_function tool
     - ENABLED: true or false
@@ -734,6 +742,13 @@ devsecops-engine-tools \
 	--tool trivy \
 	--image_to_scan myimage:latest
 ```
+
+## Context Extraction
+
+`engine_iac`, `engine_container`, `engine_dependencies`, and `engine_license` can extract structured context (e.g. `iac_context`, `container_context`, `dependencies_context`, `license_context`) from their scan results, enriched with a calculated priority.
+
+- **`GENERATE_CONTEXT`** (remote config, per module, e.g. `ENGINE_IAC.GENERATE_CONTEXT`): controls whether context is generated at all. When `true`, the module's context is computed and saved as `<context_key>.json` (e.g. `iac_context.json`) in the current working directory. When `false` or absent, no context is generated and no file is written.
+- **`--context true|false`** (CLI flag, default `false`): only controls whether the generated context is also printed to the execution logs between `===== BEGIN CONTEXT OUTPUT =====` and `===== END CONTEXT OUTPUT =====` markers.
 
 ## Remote Config Environment Variables
 

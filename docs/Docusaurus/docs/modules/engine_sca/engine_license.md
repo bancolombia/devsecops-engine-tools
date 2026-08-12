@@ -129,7 +129,7 @@ Dependencies classified as `ok`, `unlicensed`, or `unknown` do **not** appear in
 
 ## Structured Context (`--context true`)
 
-When run with `--context true`, the engine additionally prints a JSON block:
+Structured context generation and file saving are controlled by the `GENERATE_CONTEXT` property under `ENGINE_LICENSE` in the remote config. When `GENERATE_CONTEXT` is `true`, the engine writes a `license_context.json` file to the current working directory, and the `--context` flag only controls whether that same JSON is additionally printed to the execution logs:
 
 ```
 ===== BEGIN CONTEXT OUTPUT =====
