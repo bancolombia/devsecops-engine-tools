@@ -193,12 +193,14 @@
     "ENGINE_IAC": {
         "ENABLED": true,
         "TOOL": "CHECKOV|KUBESCAPE|KICS|CONFTEST",
-        "PRIORITY": "STANDARD|DISCREET"
+        "PRIORITY": "STANDARD|DISCREET",
+        "GENERATE_CONTEXT": false
     },
     "ENGINE_CONTAINER": {
         "ENABLED": true,
         "TOOL": "PRISMA|TRIVY",
-        "PRIORITY": "STANDARD|DISCREET"
+        "PRIORITY": "STANDARD|DISCREET",
+        "GENERATE_CONTEXT": false
     },
     "ENGINE_FUNCTION": {
         "ENABLED": true,
@@ -218,11 +220,13 @@
     },
     "ENGINE_DEPENDENCIES": {
         "ENABLED": true,
-        "TOOL": "XRAY|DEPENDENCY_CHECK|TRIVY"
+        "TOOL": "XRAY|DEPENDENCY_CHECK|TRIVY",
+        "GENERATE_CONTEXT": false
     },
     "ENGINE_LICENSE": {
         "ENABLED": true,
-        "PRIORITY": "DISCREET"
+        "PRIORITY": "DISCREET",
+        "GENERATE_CONTEXT": false
     },
     "ENGINE_CODE": {
         "ENABLED": true,

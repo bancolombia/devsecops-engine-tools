@@ -390,16 +390,14 @@ class HandleScan:
         if tool_gateway:
             self.context_extraction_gateway.register_tool_gateway(module_name, tool_gateway)
         
-        # Extract context if enabled
-        if dict_args.get("context") == "true":
-            try:
-                logger.info(f"Context extraction enabled for {module_name}")
-                self.context_extraction_gateway.extract_context(
-                    module_name=module_name,
-                    path_file_results=path_file_results,
-                    remote_config=module_config,
-                    config_tool=config_tool
-                )
-            except Exception as e:
-                logger.error(f"Context extraction failed for {module_name}: {str(e)}")
-                # Continue execution even if context extraction fails
+        try:
+            self.context_extraction_gateway.extract_context(
+                module_name=module_name,
+                path_file_results=path_file_results,
+                remote_config=module_config,
+                config_tool=config_tool,
+                print_to_logs=dict_args.get("context") == "true"
+            )
+        except Exception as e:
+            logger.error(f"Context extraction failed for {module_name}: {str(e)}")
+            # Continue execution even if context extraction fails

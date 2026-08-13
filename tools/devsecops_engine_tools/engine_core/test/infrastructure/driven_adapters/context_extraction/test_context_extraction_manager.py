@@ -14,7 +14,7 @@ class TestContextExtractionManager(unittest.TestCase):
         self.mock_iac_gateway = Mock()
         self.mock_container_gateway = Mock()
         self.mock_dependencies_gateway = Mock()
-        self.remote_config = {"TOOL": "test", "CONFIG": {}}
+        self.remote_config = {"TOOL": "test", "CONFIG": {}, "GENERATE_CONTEXT": True}
         self.config_tool = {
             "PRIORITY_MANAGER": {"USE_PRIORITY": False},
             "ENGINE_IAC": {},
@@ -150,6 +150,38 @@ class TestContextExtractionManager(unittest.TestCase):
         )
         
         # Verify method was not called
+        self.mock_iac_gateway.get_iac_context_from_results.assert_not_called()
+
+    def test_extract_context_skipped_when_generate_context_disabled(self):
+        """Test that extraction is skipped when GENERATE_CONTEXT is not true in remote_config."""
+        path_file_results = "/path/to/iac_results.json"
+        self.manager.register_tool_gateway("engine_iac", self.mock_iac_gateway)
+
+        disabled_remote_config = {"TOOL": "test", "GENERATE_CONTEXT": False}
+        self.manager.extract_context(
+            "engine_iac",
+            path_file_results,
+            disabled_remote_config,
+            self.config_tool
+        )
+
+        # Verify no extraction was attempted
+        self.mock_iac_gateway.get_iac_context_from_results.assert_not_called()
+
+    def test_extract_context_skipped_when_generate_context_missing(self):
+        """Test that extraction is skipped when GENERATE_CONTEXT is absent from remote_config."""
+        path_file_results = "/path/to/iac_results.json"
+        self.manager.register_tool_gateway("engine_iac", self.mock_iac_gateway)
+
+        remote_config_without_flag = {"TOOL": "test"}
+        self.manager.extract_context(
+            "engine_iac",
+            path_file_results,
+            remote_config_without_flag,
+            self.config_tool
+        )
+
+        # Verify no extraction was attempted
         self.mock_iac_gateway.get_iac_context_from_results.assert_not_called()
 
     def test_extract_context_without_registered_gateway(self):
@@ -366,12 +398,14 @@ class TestContextExtractionManager(unittest.TestCase):
         captured = StringIO()
         sys.stdout = captured
         try:
-            self.manager.extract_context(
-                "engine_license",
-                "/path/to/svc_LICENSE.json",
-                self.remote_config,
-                self.config_tool
-            )
+            with patch("builtins.open", MagicMock()):
+                self.manager.extract_context(
+                    "engine_license",
+                    "/path/to/svc_LICENSE.json",
+                    self.remote_config,
+                    self.config_tool,
+                    print_to_logs=True
+                )
         finally:
             sys.stdout = sys.__stdout__
 

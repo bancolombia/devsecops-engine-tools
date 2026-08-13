@@ -87,6 +87,7 @@ kics-devsecops/
 dependency-check-report*
 *.vsix
 **-lock.json
+*_context.json
 
 # Extensions
 out

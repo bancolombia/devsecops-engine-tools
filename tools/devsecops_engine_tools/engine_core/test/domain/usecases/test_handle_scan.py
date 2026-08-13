@@ -490,14 +490,15 @@ class TestHandleScan(unittest.TestCase):
             module_name="engine_iac",
             path_file_results="test/file/results.json",
             remote_config=config_tool["ENGINE_IAC"],
-            config_tool=config_tool
+            config_tool=config_tool,
+            print_to_logs=True
         )
 
     @mock.patch(
         "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_container"
     )
-    def test_context_extraction_not_invoked_when_false(self, mock_runner_engine_container):
-        """Test that context extraction is NOT invoked when context='false'"""
+    def test_context_extraction_invoked_with_print_disabled_when_false(self, mock_runner_engine_container):
+        """Test that context extraction is still invoked when context='false', but print_to_logs is disabled"""
         dict_args = {
             "use_secrets_manager": "false",
             "module": "engine_container",
@@ -528,14 +529,20 @@ class TestHandleScan(unittest.TestCase):
         # Call the process method
         self.handle_scan.process(dict_args, config_tool)
         
-        # Assert context extraction was NOT called
-        context_extraction_gateway.extract_context.assert_not_called()
+        # Assert context extraction was called but printing to logs was disabled
+        context_extraction_gateway.extract_context.assert_called_once_with(
+            module_name="engine_container",
+            path_file_results="test/file/results.json",
+            remote_config=config_tool["ENGINE_CONTAINER"],
+            config_tool=config_tool,
+            print_to_logs=False
+        )
 
     @mock.patch(
         "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_dependencies"
     )
-    def test_context_extraction_not_invoked_when_undefined(self, mock_runner_engine_dependencies):
-        """Test that context extraction is NOT invoked when context is not defined"""
+    def test_context_extraction_invoked_with_print_disabled_when_undefined(self, mock_runner_engine_dependencies):
+        """Test that context extraction is still invoked when context is not defined, with print_to_logs disabled"""
         dict_args = {
             "use_secrets_manager": "false",
             "module": "engine_dependencies",
@@ -566,8 +573,14 @@ class TestHandleScan(unittest.TestCase):
         # Call the process method
         self.handle_scan.process(dict_args, config_tool)
         
-        # Assert context extraction was NOT called
-        context_extraction_gateway.extract_context.assert_not_called()
+        # Assert context extraction was called but printing to logs was disabled
+        context_extraction_gateway.extract_context.assert_called_once_with(
+            module_name="engine_dependencies",
+            path_file_results="test/file/results.json",
+            remote_config=config_tool["ENGINE_DEPENDENCIES"],
+            config_tool=config_tool,
+            print_to_logs=False
+        )
 
     @mock.patch(
         "devsecops_engine_tools.engine_core.src.domain.usecases.handle_scan.runner_engine_iac"
