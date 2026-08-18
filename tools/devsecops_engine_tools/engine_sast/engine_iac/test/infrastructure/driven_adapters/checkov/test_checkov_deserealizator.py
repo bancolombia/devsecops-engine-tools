@@ -6,6 +6,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.finding import (
     Category,
 )
 from datetime import datetime
+import pytest
 
 def test_get_list_finding():
     results_scan_list = [
@@ -130,3 +131,38 @@ def test_get_list_finding():
     )
 
     assert list_findings == list_findings_compare
+
+
+def test_get_list_finding_does_not_raise_when_check_text_contains_error_word():
+    results_scan_list = [
+        {
+            "check_type": "terraform",
+            "results": {
+                "failed_checks": [
+                    {
+                        "check_id": "CKV_AWS_1",
+                        "check_name": "Ensure proper error handling is configured",
+                        "resource": "aws_lambda_function.this",
+                        "repo_file_path": "/main.tf",
+                        "guideline": "Add error handling",
+                    }
+                ]
+            },
+        }
+    ]
+
+    list_findings = CheckovDeserealizator.get_list_finding(
+        results_scan_list, {}, "high", "vulnerability"
+    )
+
+    assert len(list_findings) == 1
+    assert list_findings[0].id == "CKV_AWS_1"
+
+
+def test_get_list_finding_raises_on_real_error_result():
+    results_scan_list = [
+        {"error": "Checkov execution failed", "checkov_config": "terraform"}
+    ]
+
+    with pytest.raises(Exception, match="Checkov execution failed"):
+        CheckovDeserealizator.get_list_finding(results_scan_list, {}, "high", "vulnerability")
