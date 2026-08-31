@@ -210,10 +210,11 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             if print_url:
                 url_parts = response.url.split("//")
                 test_string = "//".join([url_parts[0] + "/", url_parts[1]])
-                print(
-                    "Report sent to vulnerability management: ",
-                    f"{test_string}/test_details" if vulnerability_management.config_tool['VULNERABILITY_MANAGER']['DEFECT_DOJO']['REDIRECT_NEW_VIEWS'] else test_string,
-                )
+                if "test/" in test_string:
+                    print(
+                        "Report sent to vulnerability management: ",
+                        f"{test_string}/test_details" if vulnerability_management.config_tool['VULNERABILITY_MANAGER']['DEFECT_DOJO']['REDIRECT_NEW_VIEWS'] else test_string,
+                    )
         else:
             raise ExceptionVulnerabilityManagement(response)
 

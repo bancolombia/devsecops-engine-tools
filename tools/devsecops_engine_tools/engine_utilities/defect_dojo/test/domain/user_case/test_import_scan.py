@@ -3,7 +3,7 @@ import json
 from devsecops_engine_tools.engine_utilities.settings import DEVSECOPS_ENGINE_UTILITIES_PATH
 from unittest.mock import MagicMock
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.product_type_list import ProductTypeList
-from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.scan_configuration import ScanConfiguration
+from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.scan_configuration import ScanConfiguration, ScanConfigurationList
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.product_list import ProductList, Prefetch
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.product import Product
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.product_type import ProductType
@@ -489,3 +489,122 @@ def test_execute_creates_engagement_when_name_matches_but_product_differs_withou
     uc.execute(request)
 
     mock_engagement.post_engagement.assert_called_once()
+
+
+def test_import_scan_timeout_returns_partial_response_with_url():
+    """Test import_scan handles a '504 Gateway Time-out' error by returning a partial response"""
+    request = import_scan_request_instance(
+        par_scan_type="Xray Scan",
+        file_name="jfrog-xray_on_demand_binary_scan.json",
+    )
+    mock_import_scan = MagicMock()
+    mock_import_scan.import_scan.side_effect = Exception("504 Gateway Time-out")
+
+    uc = ImportScanUserCase(
+        rest_import_scan=mock_import_scan,
+        rest_product_type=mock_rest_product_type(),
+        rest_product=mock_rest_product(),
+        rest_scan_configuration=mock_rest_scan_configuration(),
+        rest_engagement=mock_rest_engagement(),
+    )
+
+    response = uc.import_scan(request, api_scan_bool=False)
+
+    assert response.url == request.host_defect_dojo
+
+
+def test_execute_raises_when_product_name_and_type_name_empty():
+    """Test execute raises ApiError when both product_name and product_type_name are empty"""
+    request = import_scan_request_instance(par_scan_type="Xray Scan", product_name="")
+    request.product_type_name = ""
+
+    uc = ImportScanUserCase(
+        rest_import_scan=mock_rest_import_scan(file_path="import_scan.json"),
+        rest_product_type=mock_rest_product_type(),
+        rest_product=mock_rest_product(),
+        rest_scan_configuration=mock_rest_scan_configuration(),
+        rest_engagement=mock_rest_engagement(),
+    )
+
+    with pytest.raises(ApiError):
+        uc.execute(request)
+
+
+def test_execute_creates_product_type_when_none_found():
+    """Test execute creates a new product_type when none matches and no product was found"""
+    request = import_scan_request_instance(
+        par_scan_type="Xray Scan",
+        file_name="jfrog-xray_on_demand_binary_scan.json",
+    )
+
+    mock_product_type = mock_rest_product_type(product_type_empty=True)
+
+    uc = ImportScanUserCase(
+        rest_import_scan=mock_rest_import_scan(file_path="import_scan.json"),
+        rest_product_type=mock_product_type,
+        rest_product=mock_rest_product(result_list_empty=True),
+        rest_scan_configuration=mock_rest_scan_configuration(),
+        rest_engagement=mock_rest_engagement(),
+    )
+
+    uc.execute(request)
+
+    mock_product_type.post_product_type.assert_called_once_with(request.product_type_name)
+
+
+def test_execute_warns_when_multiple_product_types_found():
+    """Test execute logs a warning when more than one product_type matches the search"""
+    request = import_scan_request_instance(
+        par_scan_type="Xray Scan",
+        file_name="jfrog-xray_on_demand_binary_scan.json",
+    )
+
+    product_type_1 = ProductType(
+        id=1, name="type1", description="test", critical_product="false",
+        key_product="false", updated="2023-06-08T19:47:54.838512Z", created="2023-06-08T19:47:54.838527Z",
+    )
+    product_type_2 = ProductType(
+        id=2, name="type2", description="test", critical_product="false",
+        key_product="false", updated="2023-06-08T19:47:54.838512Z", created="2023-06-08T19:47:54.838527Z",
+    )
+    mock_product_type = MagicMock()
+    mock_product_type.get_product_types.return_value = ProductTypeList(
+        count=2, results=[product_type_1, product_type_2]
+    )
+
+    uc = ImportScanUserCase(
+        rest_import_scan=mock_rest_import_scan(file_path="import_scan.json"),
+        rest_product_type=mock_product_type,
+        rest_product=mock_rest_product(result_list_empty=True),
+        rest_scan_configuration=mock_rest_scan_configuration(),
+        rest_engagement=mock_rest_engagement(),
+    )
+
+    response = uc.execute(request)
+
+    assert response.scan_type == request.scan_type
+    mock_product_type.post_product_type.assert_not_called()
+
+
+def test_execute_creates_api_scan_configuration_when_none_found():
+    """Test execute creates an API scan configuration when none matches the search"""
+    request = import_scan_request_instance(par_scan_type="SonarQube API Import")
+
+    mock_scan_configuration = MagicMock()
+    mock_scan_configuration.get_api_scan_configuration.return_value = ScanConfigurationList(count=0, results=[])
+    mock_scan_configuration.post_api_scan_configuration.return_value = ScanConfiguration(
+        id=1, service_key_1="new service key", tool_configuration=1
+    )
+
+    uc = ImportScanUserCase(
+        rest_import_scan=mock_rest_import_scan(file_path="sonar_qube.json"),
+        rest_product_type=mock_rest_product_type(),
+        rest_product=mock_rest_product(),
+        rest_scan_configuration=mock_scan_configuration,
+        rest_engagement=mock_rest_engagement(),
+    )
+
+    response = uc.execute(request)
+
+    mock_scan_configuration.post_api_scan_configuration.assert_called_once()
+    assert response.scan_type == request.scan_type

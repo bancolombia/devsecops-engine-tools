@@ -94,7 +94,7 @@ The report is written to the current working directory with a `metadata` block p
 - **tool**: `"CDXGEN"`.
 - **policy_used**: Deep copy of `LICENSE.LICENSE_POLICY` for auditability.
 - **summary.total_dependencies**: Number of entries in `dependencies`.
-- **summary.{ok,fail,warn,unlicensed,unknown}**: Count per `policy_applied` bucket.
+- **`summary.{ok,fail,warn,unlicensed,unknown}`**: Count per `policy_applied` bucket.
 
 #### `dependencies[]`
 - **name / version**: Package identifiers from the CycloneDX SBOM.

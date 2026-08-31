@@ -61,6 +61,12 @@ class ImportScanUserCase:
                     response = self.__rest_import_scan.import_scan(request, files)
 
             except Exception as e:
+                if "504 Gateway Time-out" in str(e):
+                    logger.warning("Timeout balancer response, Vulnerability management keep Processing Import Scan in Background")
+                    response = ImportScanRequest()
+                    response.url = f"{request.host_defect_dojo}"
+                    return response
+                logger.error(f"from dict import Scan: {e}")
                 raise ApiError(e)
 
         response.url = f"{request.host_defect_dojo}/test/{str(response.test_id)}"
@@ -143,8 +149,11 @@ class ImportScanUserCase:
                         request.product_name = product_eng.name
                         request.product_type_name = product_engagement.prefetch.prod_type[str(product_eng.prod_type)].name
                         logger.debug(f"Hold Product engagement found: {request.product_name} with product type: {request.product_type_name}")
-                if request.engagement_description and engagement[0].description != request.engagement_description:
-                    engagement = self.__rest_engagement.patch_engagement(request, engagement[0].id)
+                description_changed = request.engagement_description and engagement[0].description != request.engagement_description
+                scm_uri_changed = request.source_code_management_uri and engagement[0].source_code_management_uri != request.source_code_management_uri
+                scm_server_changed = request.tool_scm_configuration and str(engagement[0].source_code_management_server) != str(request.tool_scm_configuration)
+                if description_changed or scm_uri_changed or scm_server_changed:
+                    engagement = self.__rest_engagement.patch_engagement(request, engagement[0].id, request.tool_scm_configuration)
                     logger.debug(f"Engagement updated: {engagement.name}")
 
             else:
