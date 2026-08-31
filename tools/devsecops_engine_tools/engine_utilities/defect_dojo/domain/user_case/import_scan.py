@@ -61,7 +61,7 @@ class ImportScanUserCase:
                     response = self.__rest_import_scan.import_scan(request, files)
 
             except Exception as e:
-                if "Failed to establish a new connection" in str(e):
+                if "504 Gateway Time-out" in str(e):
                     logger.warning("Timeout balancer response, Vulnerability management keep Processing Import Scan in Background")
                     response = ImportScanRequest()
                     response.url = f"{request.host_defect_dojo}"
