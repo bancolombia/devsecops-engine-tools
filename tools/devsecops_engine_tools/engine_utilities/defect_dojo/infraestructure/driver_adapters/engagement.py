@@ -92,11 +92,18 @@ class EngagementRestConsumer:
             raise ApiError(e)
         return response
 
-    def patch_engagement(self, request: ImportScanRequest, engagement_id):
+    def patch_engagement(self, request: ImportScanRequest, engagement_id, tool_scm_configuration_id=None):
         url = f"{self.__host}/api/v2/engagements/{engagement_id}/"
         data = {
             "description": request.engagement_description,
         }
+
+        if request.source_code_management_uri:
+            data["source_code_management_uri"] = request.source_code_management_uri
+
+        if tool_scm_configuration_id:
+            data["source_code_management_server"] = tool_scm_configuration_id
+
         headers = {
             "Authorization": f"Token {self.__token}",
             "Content-Type": CONTENT_TYPE_JSON,

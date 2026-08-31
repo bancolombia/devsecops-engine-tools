@@ -68,7 +68,6 @@ class ImportScanRestConsumer:
                 raise ApiError(response.text)
             response = ImportScanRequest().from_dict(response.json())
         except Exception as e:
-            logger.error(f"from dict import Scan: {e} with data: {data}")
             raise ApiError(e)
         return response
 
@@ -127,6 +126,5 @@ class ImportScanRestConsumer:
             logger.debug(f"Sucessfull {response}")
             response = ImportScanRequest.from_dict(response.json())
         except Exception as e:
-            logger.error(f"from dict import Scan: {e} with data: {data}")
             raise ApiError(e)
         return response
