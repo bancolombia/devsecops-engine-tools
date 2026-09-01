@@ -120,8 +120,6 @@ class ImportScanRestConsumer:
                                            files=files,
                                            verify=VERIFY_CERTIFICATE)
             if response.status_code != 201:
-                logger.error(f"Response status code {response.status_code}")
-                logger.error(f"Error {response.text}")
                 raise ApiError(response.text)
             logger.debug(f"Sucessfull {response}")
             response = ImportScanRequest.from_dict(response.json())
