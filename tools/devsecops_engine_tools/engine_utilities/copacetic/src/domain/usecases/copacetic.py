@@ -102,83 +102,108 @@ class Copacetic:
             )
 
     def _print_results_table(self, summary):
+        terminal_width = self._get_terminal_width()
+
+        self._print_table_header(terminal_width)
+        self._print_image_information(summary)
+        vuln_count, vex_generated = self._print_patching_statistics(summary)
+        self._print_image_details(summary)
+        self._print_patch_details(summary.get('patch_details', []))
+        self._print_summary(vuln_count, vex_generated)
+
+        logger.info(f"{'='*terminal_width}\n")
+
+    def _get_terminal_width(self):
         try:
-            terminal_width = min(shutil.get_terminal_size().columns, 100)
-        except:
-            terminal_width = 100
-        
+            return min(shutil.get_terminal_size().columns, 100)
+        except Exception:
+            return 100
+
+    def _print_table_header(self, terminal_width):
         logger.info(f"\n{'='*terminal_width}")
         title = " COPACETIC PATCHING RESULTS "
         padding = (terminal_width - len(title)) // 2
         logger.info(f"{' '*padding}{title}{' '*padding}")
         logger.info(f"{'='*terminal_width}")
-        
+
+    def _print_image_information(self, summary):
         logger.info("\n IMAGE INFORMATION:")
         logger.info(f"   Original Image: {summary['original_image']}")
         logger.info(f"   Patched Image:  {summary['patched_image']}")
 
+    def _print_patching_statistics(self, summary):
         logger.info("\n PATCHING STATISTICS:")
         vuln_count = summary.get('vulnerabilities_patched', 0)
         pkg_count = summary.get('packages_updated', 0)
         vex_generated = summary.get('vex_file_generated', False)
-        
+
         logger.info(f"   Vulnerabilities Patched: {vuln_count}")
         logger.info(f"   Packages Updated:        {pkg_count}")
         logger.info(f"   VEX Report Generated:    {'Yes' if vex_generated else 'No'}")
-        
+
         if not vex_generated:
             logger.info("   Note: VEX report not generated (no vulnerability report provided)")
 
         platforms = summary.get('platforms_processed', [])
         if platforms:
             logger.info(f"   Platforms Processed:     {', '.join(platforms)}")
-        
-        if summary.get('original_image_info'):
-            info = summary['original_image_info']
-            logger.info("\n  IMAGE DETAILS:")
-            logger.info(f"   Architecture: {info.get('architecture', 'N/A')}")
-            logger.info(f"   OS:           {info.get('os', 'N/A')}")
-            logger.info(f"   Size:         {info.get('size', 'N/A')}")
-            logger.info(f"   Layers:       {info.get('layers', 'N/A')}")
 
-        patch_details = summary.get('patch_details', [])
-        if patch_details:
-            logger.info("\n PATCH DETAILS:")
+        return vuln_count, vex_generated
 
-            for i, detail in enumerate(patch_details, 1):
-                if isinstance(detail, dict):
-                    cve = detail.get('vulnerability', detail.get('id', f'PATCH-{i}'))
-                    logger.info(f"   {cve}")
+    def _print_image_details(self, summary):
+        if not summary.get('original_image_info'):
+            return
 
-                    packages = detail.get('packages', [])
-                    if not packages:
-                        single_package = detail.get('package', detail.get('component'))
-                        if single_package:
-                            packages = [single_package]
+        info = summary['original_image_info']
+        logger.info("\n  IMAGE DETAILS:")
+        logger.info(f"   Architecture: {info.get('architecture', 'N/A')}")
+        logger.info(f"   OS:           {info.get('os', 'N/A')}")
+        logger.info(f"   Size:         {info.get('size', 'N/A')}")
+        logger.info(f"   Layers:       {info.get('layers', 'N/A')}")
 
-                    for pkg in packages:
-                        if isinstance(pkg, dict):
-                            pkg_name = pkg.get('name', pkg.get('package', 'Unknown'))
-                            version = pkg.get('version', pkg.get('fixed_version', ''))
-                            if version:
-                                logger.info(f"       {pkg_name} (v{version})")
-                            else:
-                                logger.info(f"       {pkg_name}")
-                        else:
-                            logger.info(f"       {pkg}")
+    def _print_patch_details(self, patch_details):
+        if not patch_details:
+            return
 
-                    if not packages:
-                        logger.info("       No package information available")
+        logger.info("\n PATCH DETAILS:")
+        for i, detail in enumerate(patch_details, 1):
+            if isinstance(detail, dict):
+                self._print_patch_detail(i, detail)
+            else:
+                logger.info(f"   {detail}")
 
-                else:
-                    logger.info(f"   {detail}")
+            if i < len(patch_details):
+                logger.info("")
 
-                if i < len(patch_details):
-                    logger.info("")
+    def _print_patch_detail(self, index, detail):
+        cve = detail.get('vulnerability', detail.get('id', f'PATCH-{index}'))
+        logger.info(f"   {cve}")
 
+        packages = detail.get('packages', [])
+        if not packages:
+            single_package = detail.get('package', detail.get('component'))
+            if single_package:
+                packages = [single_package]
+
+        for pkg in packages:
+            self._print_patch_package(pkg)
+
+        if not packages:
+            logger.info("       No package information available")
+
+    def _print_patch_package(self, pkg):
+        if isinstance(pkg, dict):
+            pkg_name = pkg.get('name', pkg.get('package', 'Unknown'))
+            version = pkg.get('version', pkg.get('fixed_version', ''))
+            if version:
+                logger.info(f"       {pkg_name} (v{version})")
+            else:
+                logger.info(f"       {pkg_name}")
+        else:
+            logger.info(f"       {pkg}")
+
+    def _print_summary(self, vuln_count, vex_generated):
         logger.info("\n SUMMARY:")
-        vex_generated = summary.get('vex_file_generated', False)
-        
         if vuln_count > 0:
             logger.info(f"   Status: SUCCESS - {vuln_count} vulnerabilities were patched")
         elif vex_generated:
@@ -186,5 +211,3 @@ class Copacetic:
         else:
             logger.info("   Status: COMPLETED - Image patched successfully without vulnerability report")
             logger.info("           Use --vulnerability_report to generate detailed VEX output")
-        
-        logger.info(f"{'='*terminal_width}\n")

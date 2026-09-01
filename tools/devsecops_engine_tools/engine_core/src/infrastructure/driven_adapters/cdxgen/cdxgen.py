@@ -26,26 +26,25 @@ class CdxGen(SbomManagerGateway):
 
     def get_components(self, artifact, config, service_name) -> "list[Component]":
         try:
-            cdxgen_version = config["CDXGEN"]["CDXGEN_VERSION"]
-            slim = "-slim" if config["CDXGEN"]["SLIM_BINARY"] else ""
-            fetch_license = config["CDXGEN"].get("FETCH_LICENSE", False)
-            exclude_types = config["CDXGEN"].get("EXCLUDE_TYPES", [])
-            exclude_paths = config["CDXGEN"].get("EXCLUDE_PATHS", [])
-            recurse = config["CDXGEN"].get("RECURSE", True)
-            install_deps = config["CDXGEN"].get("INSTALL_DEPENDENCIES", True)
-            debug_pipelines = config["CDXGEN"].get("DEBUG_PIPELINES", [])
-            required_only_pipelines = config["CDXGEN"].get("REQUIRED_ONLY_PIPELINES", [])
-            spec_version = config["CDXGEN"].get("SPEC_VERSION", "1.6")
-            break_on_build_failure = config["CDXGEN"].get("BREAK_ON_BUILD_FAILURE", True)
-            build_failure_patterns = config["CDXGEN"].get("BUILD_FAILURE_PATTERNS", [])
+            cdxgen_config = config["CDXGEN"]
+            cdxgen_version = cdxgen_config["CDXGEN_VERSION"]
+            slim = "-slim" if cdxgen_config["SLIM_BINARY"] else ""
+            fetch_license = cdxgen_config.get("FETCH_LICENSE", False)
+            exclude_types = cdxgen_config.get("EXCLUDE_TYPES", [])
+            exclude_paths = cdxgen_config.get("EXCLUDE_PATHS", [])
+            recurse = cdxgen_config.get("RECURSE", True)
+            install_deps = cdxgen_config.get("INSTALL_DEPENDENCIES", True)
+            debug_pipelines = cdxgen_config.get("DEBUG_PIPELINES", [])
+            required_only_pipelines = cdxgen_config.get("REQUIRED_ONLY_PIPELINES", [])
+            spec_version = cdxgen_config.get("SPEC_VERSION", "1.6")
+            break_on_build_failure = cdxgen_config.get("BREAK_ON_BUILD_FAILURE", True)
+            build_failure_patterns = cdxgen_config.get("BUILD_FAILURE_PATTERNS", [])
             failure_patterns = build_failure_patterns if break_on_build_failure else []
 
-            if config["CDXGEN"].get("OVERRIDE_REGISTRIES", False):
-                registries = config["CDXGEN"].get("REGISTRIES", {})
-                for env_var, url in registries.items():
-                    os.environ[env_var] = url
+            if cdxgen_config.get("OVERRIDE_REGISTRIES", False):
+                self._apply_registry_overrides(cdxgen_config.get("REGISTRIES", {}))
 
-            enable_debug = service_name in debug_pipelines if debug_pipelines else False
+            enable_debug = self._pipeline_in_list(service_name, debug_pipelines)
             if enable_debug:
                 logger.info(f"Enabling debug mode for pipeline: {service_name}")
                 os.environ["CDXGEN_DEBUG_MODE"] = "debug"
@@ -53,49 +52,56 @@ class CdxGen(SbomManagerGateway):
             if fetch_license:
                 os.environ["FETCH_LICENSE"] = "true"
 
-            os_platform = platform.system()
-            os_architecture = platform.machine()
+            command_prefix, is_supported = self._resolve_cdxgen_command_prefix(cdxgen_version, slim)
+            if not is_supported:
+                return None
 
-            command_prefix = self._check_cdxgen_in_path()
-            
-            if command_prefix:
-                logger.info(f"Using cdxgen from PATH: {command_prefix}")
-            else:
-                base_url = (
-                    f"https://github.com/CycloneDX/cdxgen/releases/download/v{cdxgen_version}/"
-                )
-                
-                if os_platform == "Linux":
-                    if os_architecture == "aarch64":
-                        file = f"cdxgen-linux-arm64{slim}"
-                    else:
-                        file = f"cdxgen-linux-amd64{slim}"
-                    command_prefix = self._install_tool_unix(
-                        file, base_url + file, "cdxgen"
-                    )
-                elif os_platform == "Darwin":
-                    if os_architecture == "arm64":
-                        file = f"cdxgen-darwin-arm64{slim}"
-                    else:
-                        file = f"cdxgen-darwin-amd64{slim}"
-                    command_prefix = self._install_tool_unix(
-                        file, base_url + file, "cdxgen"
-                    )
-                elif os_platform == "Windows":
-                    file = f"cdxgen-windows-amd64{slim}.exe"
-                    command_prefix = self._install_tool_windows(
-                        file, base_url + file, "cdxgen.exe"
-                    )
-                else:
-                    logger.warning(f"{os_platform} is not supported.")
-                    return None
-
-            required_only = service_name in required_only_pipelines if required_only_pipelines else False
+            required_only = self._pipeline_in_list(service_name, required_only_pipelines)
             result_sbom = self._run_cdxgen(command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, required_only, enable_debug, spec_version, failure_patterns)
-            return get_list_component(result_sbom, config["CDXGEN"]["OUTPUT_FORMAT"])
+            return get_list_component(result_sbom, cdxgen_config["OUTPUT_FORMAT"])
         except Exception as e:
             logger.error(f"Error generating SBOM: {e}")
             return None
+
+    def _apply_registry_overrides(self, registries):
+        for env_var, url in registries.items():
+            os.environ[env_var] = url
+
+    def _pipeline_in_list(self, service_name, pipelines):
+        return service_name in pipelines if pipelines else False
+
+    def _resolve_cdxgen_command_prefix(self, cdxgen_version, slim):
+        command_prefix = self._check_cdxgen_in_path()
+        if command_prefix:
+            logger.info(f"Using cdxgen from PATH: {command_prefix}")
+            return command_prefix, True
+
+        os_platform = platform.system()
+        os_architecture = platform.machine()
+        base_url = (
+            f"https://github.com/CycloneDX/cdxgen/releases/download/v{cdxgen_version}/"
+        )
+
+        if os_platform == "Linux":
+            file = (
+                f"cdxgen-linux-arm64{slim}"
+                if os_architecture == "aarch64"
+                else f"cdxgen-linux-amd64{slim}"
+            )
+            return self._install_tool_unix(file, base_url + file, "cdxgen"), True
+        if os_platform == "Darwin":
+            file = (
+                f"cdxgen-darwin-arm64{slim}"
+                if os_architecture == "arm64"
+                else f"cdxgen-darwin-amd64{slim}"
+            )
+            return self._install_tool_unix(file, base_url + file, "cdxgen"), True
+        if os_platform == "Windows":
+            file = f"cdxgen-windows-amd64{slim}.exe"
+            return self._install_tool_windows(file, base_url + file, "cdxgen.exe"), True
+
+        logger.warning(f"{os_platform} is not supported.")
+        return None, False
 
     def _run_cdxgen(self, command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, required_only=False, enable_debug=False, spec_version="1.6", failure_patterns=None):
         failure_patterns = failure_patterns or []

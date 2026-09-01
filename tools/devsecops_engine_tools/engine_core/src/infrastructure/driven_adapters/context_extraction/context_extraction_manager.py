@@ -111,48 +111,51 @@ class ContextExtractionManager(ContextExtractionGateway):
         module_name: str
     ) -> None:
         # Convert context objects to Finding objects for priority calculation
-        findings_for_priority = []
-        for context_item in context_list:
-            # Extract the ID depending on the context type
-            if hasattr(context_item, 'cve_id'):
-                if isinstance(context_item.cve_id, list):
-                    # For dependencies: cve_id is a list
-                    finding_id = context_item.cve_id[0] if context_item.cve_id else "unknown"
-                else:
-                    # For container: cve_id is a string
-                    finding_id = context_item.cve_id
-            elif hasattr(context_item, 'id'):
-                # For IaC: id is a string
-                finding_id = context_item.id
-            elif hasattr(context_item, 'name'):
-                # For license: name is the identifier
-                finding_id = context_item.name
-            else:
-                finding_id = "unknown"
-            
-            finding = Finding(
-                id=finding_id,
-                cvss="",
-                where="",
-                description="",
-                severity=context_item.severity,
-                identification_date="",
-                published_date_cve="",
-                module=module_name,
-                category=Category.VULNERABILITY,
-                requirements="",
-                tool="",
-            )
-            findings_for_priority.append(finding)
-        
+        findings_for_priority = [
+            self._build_finding_for_priority(context_item, module_name)
+            for context_item in context_list
+        ]
+
         # Calculate priorities using the risk_score_gateway
         self._risk_score_gateway.get_risk_score(findings_for_priority, config_tool, module_name)
-        
+
         # Update context objects with calculated priorities
         # Store only the scale as a string for all modules
         for context_item, finding in zip(context_list, findings_for_priority):
             if finding.priority:
                 context_item.priority = finding.priority.scale
+
+    def _build_finding_for_priority(self, context_item, module_name: str) -> Finding:
+        finding_id = self._resolve_context_finding_id(context_item)
+        return Finding(
+            id=finding_id,
+            cvss="",
+            where="",
+            description="",
+            severity=context_item.severity,
+            identification_date="",
+            published_date_cve="",
+            module=module_name,
+            category=Category.VULNERABILITY,
+            requirements="",
+            tool="",
+        )
+
+    def _resolve_context_finding_id(self, context_item) -> str:
+        # Extract the ID depending on the context type
+        if hasattr(context_item, 'cve_id'):
+            if isinstance(context_item.cve_id, list):
+                # For dependencies: cve_id is a list
+                return context_item.cve_id[0] if context_item.cve_id else "unknown"
+            # For container: cve_id is a string
+            return context_item.cve_id
+        if hasattr(context_item, 'id'):
+            # For IaC: id is a string
+            return context_item.id
+        if hasattr(context_item, 'name'):
+            # For license: name is the identifier
+            return context_item.name
+        return "unknown"
     
     def _save_context(self, module_name: str, context_list: List, print_to_logs: bool) -> None:
         context_key = self._context_key_mapping.get(module_name, f"{module_name}_context")

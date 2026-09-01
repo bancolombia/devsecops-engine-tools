@@ -54,45 +54,17 @@ class PrismaCloudManagerScan:
         if not function_scan:
             return function_scan
 
+        self._write_function_scan_report(function_scan)
+        return function_scan
+
+    def _write_function_scan_report(self, function_scan):
         try:
-            if isinstance(function_scan, dict):
-                if "results" in function_scan:
-                    report = function_scan
-                else:
-                    report = {"results": [function_scan]}
-            elif isinstance(function_scan, list):
-                report = {"results": function_scan}
-            else:
-                return function_scan
-            results_list = report.get("results", [])
-            for result in results_list:
-                if not isinstance(result, dict):
-                    continue
-                vulns = result.get("vulnerabilities", []) or []
-                for v in vulns:
-                    if not isinstance(v, dict):
-                        continue
-                    for field in ("publishedDate", "discoveredDate", "fixDate"):
-                        val = v.get(field)
-                        if not isinstance(val, str):
-                            continue
-                        if any(token in val for token in ("days", "months", "month", ">", "ago")):
-                            v.pop(field, None)
-                            continue
+            report = self._build_scan_report(function_scan)
+            if report is None:
+                return
 
-            function_name = "function"
-            if results_list:
-                first_result = results_list[0]
-                if isinstance(first_result, dict):
-                    function_name = first_result.get("name", function_name)
-
-            safe_name = (
-                function_name.replace("/", "_")
-                .replace(" ", "_")
-                .replace(":", "_")
-                .replace(".", "_")
-            )
-            result_file_name = f"{safe_name}_function_scan_result.json"
+            self._sanitize_vulnerability_dates(report)
+            result_file_name = self._resolve_result_file_name(report)
             with open(result_file_name, "w", encoding="utf-8") as fp:
                 json.dump(report, fp)
             if isinstance(self.dict_args, dict):
@@ -100,7 +72,46 @@ class PrismaCloudManagerScan:
 
         except Exception as exc:
             logger.error("Error generating function scan report file: %s", exc)
-        return function_scan
+
+    def _build_scan_report(self, function_scan):
+        if isinstance(function_scan, dict):
+            if "results" in function_scan:
+                return function_scan
+            return {"results": [function_scan]}
+        if isinstance(function_scan, list):
+            return {"results": function_scan}
+        return None
+
+    def _sanitize_vulnerability_dates(self, report):
+        for result in report.get("results", []):
+            if not isinstance(result, dict):
+                continue
+            vulns = result.get("vulnerabilities", []) or []
+            for v in vulns:
+                if not isinstance(v, dict):
+                    continue
+                for field in ("publishedDate", "discoveredDate", "fixDate"):
+                    val = v.get(field)
+                    if not isinstance(val, str):
+                        continue
+                    if any(token in val for token in ("days", "months", "month", ">", "ago")):
+                        v.pop(field, None)
+
+    def _resolve_result_file_name(self, report):
+        results_list = report.get("results", [])
+        function_name = "function"
+        if results_list:
+            first_result = results_list[0]
+            if isinstance(first_result, dict):
+                function_name = first_result.get("name", function_name)
+
+        safe_name = (
+            function_name.replace("/", "_")
+            .replace(" ", "_")
+            .replace(":", "_")
+            .replace(".", "_")
+        )
+        return f"{safe_name}_function_scan_result.json"
 
     def _split_prisma_token(self, prisma_key):
         try:
@@ -155,57 +166,6 @@ class PrismaCloudManagerScan:
         return download_twistcli(file_path, prisma_key, prisma_console_url, prisma_api_version)
 
     def _parse_scan_results(self, stdout: str) -> dict:
-        def extract_dist(pattern: str) -> dict:
-            match = re.search(pattern, stdout)
-            return {
-                "critical": int(match.group(2)),
-                "high": int(match.group(3)),
-                "medium": int(match.group(4)),
-                "low": int(match.group(5)),
-                "total": int(match.group(1))
-            } if match else {}
-
-        def clean_text(text) -> str:
-            cleaned_text = ANSI_ESCAPE_RE.sub("", str(text))
-            return cleaned_text.strip()
-
-        def extract_table() -> list:
-            lines = stdout.splitlines()
-            table_start = [i for i, line in enumerate(lines) if 'CVE-' in line]
-            table_data = []
-            if table_start:
-                i = table_start[0]
-                while i < len(lines):
-                    if "CVE-" in lines[i]:
-                        row = lines[i]
-                        desc_lines = []
-                        i += 1
-                        while i < len(lines) and not lines[i].strip().startswith("| CVE-") and not "+---" in lines[i]:
-                            desc_lines.append(lines[i])
-                            i += 1
-                        full_row = row + "\n" + "\n".join(desc_lines)
-                        table_data.append(full_row)
-                    else:
-                        i += 1
-
-            vulnerabilities = []
-            for row in table_data:
-                parts = [x.strip() for x in row.split("|")[1:-1]]
-                if len(parts) >= 9:
-                    vuln = {
-                        "id": clean_text(parts[0]),
-                        "severity": clean_text(parts[1]),
-                        "cvss": float(clean_text(parts[2])) if parts[2] else 0.0,
-                        "packageName": clean_text(parts[3]),
-                        "packageVersion": clean_text(parts[4]),
-                        "status": clean_text(parts[5]),
-                        "publishedDate": clean_text(parts[6]),
-                        "discoveredDate": clean_text(parts[7]),
-                        "description": clean_text(parts[8]).replace("u00a0", " ").strip(" .") + "..."
-                    }
-                    vulnerabilities.append(vuln)
-            return vulnerabilities
-
         name_match = re.search(r"Scan results for: function (.+?)\s", stdout)
         function_name = name_match.group(1) if name_match else "unknown.zip"
 
@@ -213,11 +173,75 @@ class PrismaCloudManagerScan:
             "results": [
                 {
                     "name": function_name,
-                    "complianceDistribution": extract_dist(r"Compliance found for function .*?: total - (\d+), critical - (\d+), high - (\d+), medium - (\d+), low - (\d+)"),
+                    "complianceDistribution": self._extract_distribution(
+                        stdout,
+                        r"Compliance found for function .*?: total - (\d+), critical - (\d+), high - (\d+), medium - (\d+), low - (\d+)"
+                    ),
                     "complianceScanPassed": "Compliance threshold check results: PASS" in stdout,
-                    "vulnerabilities": extract_table(),
-                    "vulnerabilityDistribution": extract_dist(r"Vulnerabilities found for function .*?: total - (\d+), critical - (\d+), high - (\d+), medium - (\d+), low - (\d+)"),
+                    "vulnerabilities": self._extract_vulnerability_table(stdout),
+                    "vulnerabilityDistribution": self._extract_distribution(
+                        stdout,
+                        r"Vulnerabilities found for function .*?: total - (\d+), critical - (\d+), high - (\d+), medium - (\d+), low - (\d+)"
+                    ),
                     "vulnerabilityScanPassed": "Vulnerability threshold check results: PASS" in stdout
                 }
             ]
+        }
+
+    def _extract_distribution(self, stdout: str, pattern: str) -> dict:
+        match = re.search(pattern, stdout)
+        if not match:
+            return {}
+        return {
+            "critical": int(match.group(2)),
+            "high": int(match.group(3)),
+            "medium": int(match.group(4)),
+            "low": int(match.group(5)),
+            "total": int(match.group(1))
+        }
+
+    def _clean_scan_text(self, text) -> str:
+        cleaned_text = ANSI_ESCAPE_RE.sub("", str(text))
+        return cleaned_text.strip()
+
+    def _extract_vulnerability_rows(self, stdout: str) -> list:
+        lines = stdout.splitlines()
+        table_start = [i for i, line in enumerate(lines) if 'CVE-' in line]
+        table_data = []
+        if not table_start:
+            return table_data
+
+        i = table_start[0]
+        while i < len(lines):
+            if "CVE-" not in lines[i]:
+                i += 1
+                continue
+            row = lines[i]
+            desc_lines = []
+            i += 1
+            while i < len(lines) and not lines[i].strip().startswith("| CVE-") and "+---" not in lines[i]:
+                desc_lines.append(lines[i])
+                i += 1
+            table_data.append(row + "\n" + "\n".join(desc_lines))
+        return table_data
+
+    def _extract_vulnerability_table(self, stdout: str) -> list:
+        vulnerabilities = []
+        for row in self._extract_vulnerability_rows(stdout):
+            parts = [x.strip() for x in row.split("|")[1:-1]]
+            if len(parts) >= 9:
+                vulnerabilities.append(self._build_vulnerability_entry(parts))
+        return vulnerabilities
+
+    def _build_vulnerability_entry(self, parts) -> dict:
+        return {
+            "id": self._clean_scan_text(parts[0]),
+            "severity": self._clean_scan_text(parts[1]),
+            "cvss": float(self._clean_scan_text(parts[2])) if parts[2] else 0.0,
+            "packageName": self._clean_scan_text(parts[3]),
+            "packageVersion": self._clean_scan_text(parts[4]),
+            "status": self._clean_scan_text(parts[5]),
+            "publishedDate": self._clean_scan_text(parts[6]),
+            "discoveredDate": self._clean_scan_text(parts[7]),
+            "description": self._clean_scan_text(parts[8]).replace("u00a0", " ").strip(" .") + "..."
         }

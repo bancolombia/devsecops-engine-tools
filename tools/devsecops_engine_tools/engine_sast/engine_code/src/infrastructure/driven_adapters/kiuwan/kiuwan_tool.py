@@ -156,28 +156,28 @@ class KiuwanTool(ToolGateway):
         for exclude_pattern in exclude_folders:
             # Buscar archivos/carpetas que coincidan con el patrón
             for root, dirs, files in os.walk(scan_dir):
-                # Verificar directorios
-                for dir_name in dirs[:]:  # Usar slice copy para modificar durante iteración
-                    if self._matches_exclude_pattern(dir_name, exclude_pattern):
-                        source_path = os.path.join(root, dir_name)
-                        relative_path = os.path.relpath(source_path, scan_dir)
-                        dest_path = os.path.join(exclude_dir, relative_path)
-                        
-                        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-                        shutil.move(source_path, dest_path)
-                        dirs.remove(dir_name)  # No procesar este directorio más
-                        logger.info("Excluded directory: %s", relative_path)
-                
-                # Verificar archivos
-                for file_name in files[:]:
-                    if self._matches_exclude_pattern(file_name, exclude_pattern):
-                        source_path = os.path.join(root, file_name)
-                        relative_path = os.path.relpath(source_path, scan_dir)
-                        dest_path = os.path.join(exclude_dir, relative_path)
-                        
-                        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-                        shutil.move(source_path, dest_path)
-                        logger.info("Excluded file: %s", relative_path)
+                self._exclude_matching_dirs(root, dirs, exclude_pattern, scan_dir, exclude_dir)
+                self._exclude_matching_files(root, files, exclude_pattern, scan_dir, exclude_dir)
+
+    def _exclude_matching_dirs(self, root, dirs, exclude_pattern, scan_dir, exclude_dir):
+        for dir_name in dirs[:]:  # Usar slice copy para modificar durante iteración
+            if self._matches_exclude_pattern(dir_name, exclude_pattern):
+                self._move_to_exclude_dir(root, dir_name, scan_dir, exclude_dir, "directory")
+                dirs.remove(dir_name)  # No procesar este directorio más
+
+    def _exclude_matching_files(self, root, files, exclude_pattern, scan_dir, exclude_dir):
+        for file_name in files[:]:
+            if self._matches_exclude_pattern(file_name, exclude_pattern):
+                self._move_to_exclude_dir(root, file_name, scan_dir, exclude_dir, "file")
+
+    def _move_to_exclude_dir(self, root, item_name, scan_dir, exclude_dir, item_kind):
+        source_path = os.path.join(root, item_name)
+        relative_path = os.path.relpath(source_path, scan_dir)
+        dest_path = os.path.join(exclude_dir, relative_path)
+
+        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+        shutil.move(source_path, dest_path)
+        logger.info("Excluded %s: %s", item_kind, relative_path)
 
     def _matches_exclude_pattern(self, item_name: str, pattern: str) -> bool:
         """Check if an item matches the exclusion pattern."""

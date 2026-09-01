@@ -175,66 +175,14 @@ class HandleRisk:
             dict_args["send_metrics"] = "false"
             return [], input_core
 
-        secret_tool = None
-        if dict_args["use_secrets_manager"] == "true":
-            secret_tool = self.secrets_manager_gateway.get_secret(remote_config)
+        secret_tool = self._resolve_secret_tool(dict_args, remote_config)
 
-        service = pipeline_name
-        service_list = []
-        initial_services = []
-        initial_services += [service]
-
-        match_parent = re.match(
-            risk_config["PARENT_ANALYSIS"]["REGEX_GET_PARENT"], service
+        service_list = self._resolve_service_list(
+            pipeline_name, dict_args, secret_tool, remote_config, risk_config
         )
-        if risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true" and match_parent:
-            parent_service = match_parent.group(0)
-            initial_services += [parent_service]
-
-        if risk_config["HANDLE_SERVICE_NAME"]["ENABLED"].lower() == "true":
-            service = next(
-                (
-                    pipeline_name.replace(ending, "")
-                    for ending in risk_config["HANDLE_SERVICE_NAME"]["CHECK_ENDING"]
-                    if pipeline_name.endswith(ending)
-                ),
-                pipeline_name,
-            )
-            initial_services += [service]
-            match_service_code = re.match(
-                risk_config["HANDLE_SERVICE_NAME"]["REGEX_GET_SERVICE_CODE"], service
-            )
-            if match_service_code:
-                service_code = match_service_code.group(0)
-                initial_services += [
-                    service.format(service_code=service_code)
-                    for service in risk_config["HANDLE_SERVICE_NAME"]["ADD_SERVICES"]
-                ]
-                engagements = self.vulnerability_management.get_active_engagements(
-                    service_code, dict_args, secret_tool, remote_config
-                )
-                service_list += self._filter_engagements(
-                    engagements, service, initial_services, risk_config
-                )
-        else:
-            for service in initial_services:
-                engagements = self.vulnerability_management.get_active_engagements(
-                    service, dict_args, secret_tool, remote_config
-                )
-                for engagement in engagements:
-                    if engagement.name.lower() == service.lower():
-                        service_list += [engagement]
-                        break
-
-        if definition_name and definition_name.lower() not in [
-            service.name.lower() for service in service_list
-        ]:
-            build_engagements = self.vulnerability_management.get_active_engagements(
-                definition_name, dict_args, secret_tool, remote_config
-            )
-            for build_engagement in build_engagements:
-                if build_engagement.name.lower() == definition_name.lower():
-                    service_list += [build_engagement]
+        service_list = self._add_definition_engagement(
+            service_list, definition_name, dict_args, secret_tool, remote_config
+        )
 
         new_service_list = self._exclude_services(
             dict_args, pipeline_name, service_list, risk_config
@@ -245,14 +193,9 @@ class HandleRisk:
                 f"Service to analyze: {engagement.name}, URL: {engagement.vm_url}"
             )
 
-        findings = []
-        exclusions = []
-        for service in new_service_list:
-            findings_list, exclusions_list = self._get_all_from_vm(
-                dict_args, secret_tool, remote_config, service.name
-            )
-            findings += findings_list
-            exclusions += exclusions_list
+        findings, exclusions = self._collect_findings_from_vm(
+            new_service_list, dict_args, secret_tool, remote_config
+        )
 
         result = runner_engine_risk(
             dict_args,
@@ -268,3 +211,108 @@ class HandleRisk:
         )
 
         return result, input_core
+
+    def _resolve_secret_tool(self, dict_args, remote_config):
+        if dict_args["use_secrets_manager"] == "true":
+            return self.secrets_manager_gateway.get_secret(remote_config)
+        return None
+
+    def _resolve_service_list(
+        self, pipeline_name, dict_args, secret_tool, remote_config, risk_config
+    ):
+        service = pipeline_name
+        initial_services = [service]
+
+        match_parent = re.match(
+            risk_config["PARENT_ANALYSIS"]["REGEX_GET_PARENT"], service
+        )
+        if risk_config["PARENT_ANALYSIS"]["ENABLED"].lower() == "true" and match_parent:
+            parent_service = match_parent.group(0)
+            initial_services += [parent_service]
+
+        if risk_config["HANDLE_SERVICE_NAME"]["ENABLED"].lower() == "true":
+            return self._resolve_service_list_with_handled_names(
+                pipeline_name,
+                initial_services,
+                dict_args,
+                secret_tool,
+                remote_config,
+                risk_config,
+            )
+
+        return self._resolve_service_list_by_exact_match(
+            initial_services, dict_args, secret_tool, remote_config
+        )
+
+    def _resolve_service_list_with_handled_names(
+        self, pipeline_name, initial_services, dict_args, secret_tool, remote_config, risk_config
+    ):
+        service = next(
+            (
+                pipeline_name.replace(ending, "")
+                for ending in risk_config["HANDLE_SERVICE_NAME"]["CHECK_ENDING"]
+                if pipeline_name.endswith(ending)
+            ),
+            pipeline_name,
+        )
+        initial_services += [service]
+        match_service_code = re.match(
+            risk_config["HANDLE_SERVICE_NAME"]["REGEX_GET_SERVICE_CODE"], service
+        )
+        if not match_service_code:
+            return []
+
+        service_code = match_service_code.group(0)
+        initial_services += [
+            add_service.format(service_code=service_code)
+            for add_service in risk_config["HANDLE_SERVICE_NAME"]["ADD_SERVICES"]
+        ]
+        engagements = self.vulnerability_management.get_active_engagements(
+            service_code, dict_args, secret_tool, remote_config
+        )
+        return self._filter_engagements(
+            engagements, service, initial_services, risk_config
+        )
+
+    def _resolve_service_list_by_exact_match(
+        self, initial_services, dict_args, secret_tool, remote_config
+    ):
+        service_list = []
+        for service in initial_services:
+            engagements = self.vulnerability_management.get_active_engagements(
+                service, dict_args, secret_tool, remote_config
+            )
+            for engagement in engagements:
+                if engagement.name.lower() == service.lower():
+                    service_list += [engagement]
+                    break
+        return service_list
+
+    def _add_definition_engagement(
+        self, service_list, definition_name, dict_args, secret_tool, remote_config
+    ):
+        if not definition_name or definition_name.lower() in [
+            service.name.lower() for service in service_list
+        ]:
+            return service_list
+
+        build_engagements = self.vulnerability_management.get_active_engagements(
+            definition_name, dict_args, secret_tool, remote_config
+        )
+        for build_engagement in build_engagements:
+            if build_engagement.name.lower() == definition_name.lower():
+                service_list += [build_engagement]
+        return service_list
+
+    def _collect_findings_from_vm(
+        self, new_service_list, dict_args, secret_tool, remote_config
+    ):
+        findings = []
+        exclusions = []
+        for service in new_service_list:
+            findings_list, exclusions_list = self._get_all_from_vm(
+                dict_args, secret_tool, remote_config, service.name
+            )
+            findings += findings_list
+            exclusions += exclusions_list
+        return findings, exclusions

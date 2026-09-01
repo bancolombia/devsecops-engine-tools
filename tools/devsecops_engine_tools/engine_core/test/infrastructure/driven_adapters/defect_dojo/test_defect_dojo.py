@@ -196,6 +196,20 @@ class TestDefectDojoPlatform(unittest.TestCase):
             in str(context.exception)
         )
 
+    def test_resolve_token_prefers_dict_arg_without_evaluating_secret_tool(self):
+        # Regression: when the dict_args token is provided, secret_tool must not
+        # be subscripted at all (it may legitimately be None, e.g. when
+        # --use_secrets_manager=false), otherwise this raises
+        # "'NoneType' object is not subscriptable".
+        result = self.defect_dojo._resolve_token("token1", None, "token_defect_dojo")
+        assert result == "token1"
+
+    def test_resolve_token_falls_back_to_secret_tool(self):
+        result = self.defect_dojo._resolve_token(
+            None, {"token_defect_dojo": "token2"}, "token_defect_dojo"
+        )
+        assert result == "token2"
+
     def test_build_request_with_cmdb(self):
         use_cmdb = True
         tags = ["engine_iac_k8s"]
@@ -1298,6 +1312,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
 
     def test_date_reason_based_on_whitelist_engine_risk(self):
         finding = MagicMock()
+        finding.id = None
         finding.vuln_id_from_tool = "CVE-2024-0001"
         date_fn = MagicMock(side_effect=["21022024", "29022024"])
         reason = self.defect_dojo.ON_WHITELIST

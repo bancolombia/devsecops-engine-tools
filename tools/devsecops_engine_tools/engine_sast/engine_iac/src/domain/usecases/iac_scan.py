@@ -93,13 +93,7 @@ class IacScan:
         config_tool = ConfigTool(json_data=data_file_tool)
 
         config_tool.exclusions = exclusions
-        regex_clean = data_file_tool.get("REGEX_CLEAN_END_PIPELINE_NAME")
-        config_tool.scope_pipeline = self.devops_platform_gateway.get_variable("pipeline_name")
-        if regex_clean:
-            pattern = re.compile(regex_clean)
-            match = pattern.match(config_tool.scope_pipeline)
-            if match:
-                config_tool.scope_pipeline = match.group(1)
+        config_tool.scope_pipeline = self._resolve_scope_pipeline(data_file_tool)
 
         skip_tool = bool(
             re.match(
@@ -112,36 +106,12 @@ class IacScan:
         if config_tool.exclusions.get("All") is not None:
             config_tool.exclusions_all = config_tool.exclusions.get("All").get(tool)
 
-        exclusions_scope = config_tool.exclusions.get(config_tool.scope_pipeline)
-        if exclusions_scope is None:
-            for pattern, values in config_tool.exclusions.get(
-                "BY_PATTERN_SEARCH", {}
-            ).items():
-                if re.match(pattern, config_tool.scope_pipeline, re.IGNORECASE):
-                    exclusions_scope = values
-                    break
-
+        exclusions_scope = self._resolve_exclusions_scope(config_tool)
         if exclusions_scope is not None:
             config_tool.exclusions_scope = exclusions_scope.get(tool)
             skip_tool = bool(exclusions_scope.get("SKIP_TOOL"))
 
-        if dict_args["folder_path"]:
-            if (
-                config_tool.update_service_file_name_cft
-                and "cloudformation" in dict_args["platform"]
-            ):
-                files = os.listdir(os.path.join(os.getcwd(), dict_args["folder_path"]))
-                if len(files) > 0:
-                    name_file, _ = os.path.splitext(files[0])
-                    config_tool.scope_service = (
-                        f"{config_tool.scope_pipeline}_{name_file}"
-                    )
-            else:
-                config_tool.scope_service = config_tool.scope_pipeline
-
-            folders_to_scan = [dict_args["folder_path"]]
-        else:
-            folders_to_scan = self._search_folders(config_tool.search_pattern)
+        folders_to_scan = self._resolve_scope_service_and_folders(config_tool, dict_args)
 
         if len(folders_to_scan) == 0:
             logger.warning(
@@ -150,6 +120,48 @@ class IacScan:
             )
 
         return config_tool, folders_to_scan, skip_tool
+
+    def _resolve_scope_pipeline(self, data_file_tool):
+        scope_pipeline = self.devops_platform_gateway.get_variable("pipeline_name")
+        regex_clean = data_file_tool.get("REGEX_CLEAN_END_PIPELINE_NAME")
+        if regex_clean:
+            pattern = re.compile(regex_clean)
+            match = pattern.match(scope_pipeline)
+            if match:
+                scope_pipeline = match.group(1)
+        return scope_pipeline
+
+    def _resolve_exclusions_scope(self, config_tool):
+        exclusions_scope = config_tool.exclusions.get(config_tool.scope_pipeline)
+        if exclusions_scope is not None:
+            return exclusions_scope
+
+        for pattern, values in config_tool.exclusions.get(
+            "BY_PATTERN_SEARCH", {}
+        ).items():
+            if re.match(pattern, config_tool.scope_pipeline, re.IGNORECASE):
+                return values
+
+        return None
+
+    def _resolve_scope_service_and_folders(self, config_tool, dict_args):
+        if not dict_args["folder_path"]:
+            return self._search_folders(config_tool.search_pattern)
+
+        if (
+            config_tool.update_service_file_name_cft
+            and "cloudformation" in dict_args["platform"]
+        ):
+            files = os.listdir(os.path.join(os.getcwd(), dict_args["folder_path"]))
+            if len(files) > 0:
+                name_file, _ = os.path.splitext(files[0])
+                config_tool.scope_service = (
+                    f"{config_tool.scope_pipeline}_{name_file}"
+                )
+        else:
+            config_tool.scope_service = config_tool.scope_pipeline
+
+        return [dict_args["folder_path"]]
 
     def _search_folders(self, search_pattern):
         current_directory = os.getcwd()

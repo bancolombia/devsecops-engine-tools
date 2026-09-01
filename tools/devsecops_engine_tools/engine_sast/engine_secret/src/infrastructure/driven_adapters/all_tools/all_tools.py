@@ -158,62 +158,62 @@ class AllToolsSecretScan(ToolGateway):
         """
         if not item:
             return ""
-        
-        # Extract filename
-        if is_gitleaks:
-            path = item.get("File", "") or ""
-        else:
-            # TruffleHog nested path extraction
-            try:
-                path = (
-                    item.get("SourceMetadata", {})
-                    .get("Data", {})
-                    .get("Filesystem", {})
-                    .get("file", "")
-                )
-            except (AttributeError, TypeError):
-                path = item.get("file", "") or ""
-        
-        # Extract only filename from path
-        filename = path.split('/')[-1] if '/' in path else path
-        filename = filename.split('\\')[-1] if '\\' in filename else filename
-        
-        # Extract line number if requested
-        line = ""
-        if include_line:
-            if is_gitleaks:
-                line = item.get("StartLine") or item.get("line") or ""
-            else:
-                try:
-                    line = (
-                        item.get("SourceMetadata", {})
-                        .get("Data", {})
-                        .get("Filesystem", {})
-                        .get("line", "")
-                    )
-                except (AttributeError, TypeError):
-                    line = item.get("line") or ""
-        
-        # Get the secret from various possible fields
-        if is_gitleaks:
-            secret = item.get("Secret") or item.get("Match") or ""
-        else:
-            secret = item.get("Raw") or item.get("RawV2") or item.get("Match") or item.get("Redacted") or ""
-        
+
+        path = self._extract_dedup_path(item, is_gitleaks)
+        filename = self._extract_dedup_filename(path)
+        line = self._extract_dedup_line(item, is_gitleaks) if include_line else ""
+        secret = self._extract_dedup_secret(item, is_gitleaks)
         masked = self._mask_secret(secret)
-        
+
         # Build normalized key
         if not (filename or masked):
             return ""
-        
+
         if include_line:
             # Strict: filename|line|secret
             normalized = f"{filename}|{line}|{masked}"
         else:
             # Fallback: filename|secret (no line)
             normalized = f"{filename}|{masked}"
-        
+
         return normalized.strip()
+
+    def _extract_dedup_path(self, item: dict, is_gitleaks: bool) -> str:
+        if is_gitleaks:
+            return item.get("File", "") or ""
+        # TruffleHog nested path extraction
+        try:
+            return (
+                item.get("SourceMetadata", {})
+                .get("Data", {})
+                .get("Filesystem", {})
+                .get("file", "")
+            )
+        except (AttributeError, TypeError):
+            return item.get("file", "") or ""
+
+    def _extract_dedup_filename(self, path: str) -> str:
+        # Extract only filename from path
+        filename = path.split('/')[-1] if '/' in path else path
+        return filename.split('\\')[-1] if '\\' in filename else filename
+
+    def _extract_dedup_line(self, item: dict, is_gitleaks: bool):
+        if is_gitleaks:
+            return item.get("StartLine") or item.get("line") or ""
+        try:
+            return (
+                item.get("SourceMetadata", {})
+                .get("Data", {})
+                .get("Filesystem", {})
+                .get("line", "")
+            )
+        except (AttributeError, TypeError):
+            return item.get("line") or ""
+
+    def _extract_dedup_secret(self, item: dict, is_gitleaks: bool):
+        if is_gitleaks:
+            return item.get("Secret") or item.get("Match") or ""
+        return item.get("Raw") or item.get("RawV2") or item.get("Match") or item.get("Redacted") or ""
 
     def _rewrite_trufflehog_file(self, filtered_findings: list, file_path: str) -> None:
         """Rewrite the TruffleHog findings file with deduplicated results."""

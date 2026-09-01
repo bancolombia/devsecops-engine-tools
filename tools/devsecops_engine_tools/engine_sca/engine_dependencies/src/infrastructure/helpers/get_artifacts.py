@@ -14,23 +14,27 @@ class GetArtifacts:
 
     def excluded_files(self, remote_config, pipeline_name, exclusions, tool):
         pattern = remote_config[tool]["REGEX_EXPRESSION_EXTENSIONS"]
-        if (pipeline_name in exclusions) and (
-            exclusions[pipeline_name].get(tool, None)
-        ):
-            for ex in exclusions[pipeline_name][tool]:
-                if ex.get("SKIP_FILES", 0):
-                    exclusion = ex.get("SKIP_FILES")
-                    if exclusion.get("files", 0):
-                        excluded_file_types = exclusion["files"]
-                        pattern2 = pattern
-                        for ext in excluded_file_types:
-                            pattern2 = (
-                                pattern2.replace("|" + ext, "")
-                                .replace(ext + "|", "")
-                                .replace(ext, "")
-                            )
-                        pattern = pattern2
+        if pipeline_name not in exclusions or not exclusions[pipeline_name].get(tool, None):
+            return pattern
 
+        for ex in exclusions[pipeline_name][tool]:
+            exclusion = ex.get("SKIP_FILES", 0)
+            if not exclusion:
+                continue
+            excluded_file_types = exclusion.get("files", 0)
+            if not excluded_file_types:
+                continue
+            pattern = self._remove_extensions_from_pattern(pattern, excluded_file_types)
+
+        return pattern
+
+    def _remove_extensions_from_pattern(self, pattern, excluded_file_types):
+        for ext in excluded_file_types:
+            pattern = (
+                pattern.replace("|" + ext, "")
+                .replace(ext + "|", "")
+                .replace(ext, "")
+            )
         return pattern
 
     def filter_ignored_files(self, files_list, ignore_files):
@@ -58,17 +62,22 @@ class GetArtifacts:
         extension_pattern = re.compile(pattern, re.IGNORECASE)
         for root, dirs, files in os.walk(working_dir):
             components = root.split(os.path.sep)
-            flag = 0
-            for package in packages:
-                if not (package in components):
-                    flag = 1
-                    if package in dirs:
-                        packages_list.append(os.path.join(root, package))
-            if flag:
-                for file in files:
-                    if extension_pattern.search(file):
-                        files_list.append(os.path.join(root, file))
+            has_new_package = self._collect_new_packages(root, dirs, components, packages, packages_list)
+            if has_new_package:
+                files_list.extend(self._matching_files(root, files, extension_pattern))
         return packages_list, files_list
+
+    def _collect_new_packages(self, root, dirs, components, packages, packages_list):
+        flag = 0
+        for package in packages:
+            if package not in components:
+                flag = 1
+                if package in dirs:
+                    packages_list.append(os.path.join(root, package))
+        return flag
+
+    def _matching_files(self, root, files, extension_pattern):
+        return [os.path.join(root, file) for file in files if extension_pattern.search(file)]
 
     def compress_and_mv(self, tar_path, package):
         try:

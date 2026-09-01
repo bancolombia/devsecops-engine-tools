@@ -57,49 +57,23 @@ class ContainerScaScan:
         base_image = None
         image_scanned = None
         sbom_components = None
-        
+
         is_compressed_file = self._is_compressed_file(self.image_to_scan)
-        
+
         if is_compressed_file:
-            if not os.path.exists(self.image_to_scan):
-                print(f"Compressed file not found: {self.image_to_scan}. Tool skipped.")
+            image_name = self._resolve_compressed_image_name()
+            if image_name is None:
                 return image_scanned, base_image, sbom_components
-                
-            matching_image = None
-            image_name = self.image_to_scan
-            print(f"Processing compressed file: {image_name}")
         else:
             matching_image = self._get_image(self.image_to_scan)
             if not matching_image:
                 print(f"'Not image found for {self.image_to_scan}'. Tool skipped.")
                 return image_scanned, base_image, sbom_components
-                
-            image_name = matching_image.tags[0]
-            
-            if self.remote_config["GET_IMAGE_BASE"]["ENABLED"]:
-                base_image = self._get_base_image(matching_image)
-            if self.remote_config["VALIDATE_BASE_IMAGE_DATE"][
-                "ENABLED"
-            ] and not self.exclusions.get(self.pipeline_name, {}).get(
-                "VALIDATE_BASE_IMAGE_DATE"
-            ):
-                self._validate_base_image_date(
-                    matching_image,
-                    self.remote_config["VALIDATE_BASE_IMAGE_DATE"]["REFERENCE_IMAGE_DATE"],
-                )
-            if self.remote_config["BLACK_LIST_BASE_IMAGE"][
-                "ENABLED"
-            ] and not self.exclusions.get(self.pipeline_name, {}).get(
-                "BLACK_LIST_BASE_IMAGE"
-            ):
-                self._validate_black_list_base_image(
-                    base_image, self.remote_config["BLACK_LIST_BASE_IMAGE"]["BLACK_LIST"]
-                )
 
-        generate_sbom = self.remote_config["SBOM"]["ENABLED"] and any(
-            branch in str(self.branch)
-            for branch in self.remote_config["SBOM"]["BRANCH_FILTER"]
-        )
+            image_name = matching_image.tags[0]
+            base_image = self._process_image_validations(matching_image)
+
+        generate_sbom = self._should_generate_sbom()
 
         result_file = image_name.replace("/", "_").replace(".", "_") + "_scan_result.json"
         
@@ -124,6 +98,56 @@ class ContainerScaScan:
             self._set_image_scanned(image_name)
             
         return image_scanned, base_image, sbom_components
+
+    def _resolve_compressed_image_name(self):
+        """
+        Resolve the image name for a compressed file input.
+
+        Returns:
+            string or None: image name, or None if the file does not exist.
+        """
+        if not os.path.exists(self.image_to_scan):
+            print(f"Compressed file not found: {self.image_to_scan}. Tool skipped.")
+            return None
+
+        image_name = self.image_to_scan
+        print(f"Processing compressed file: {image_name}")
+        return image_name
+
+    def _process_image_validations(self, matching_image):
+        """
+        Resolve base image and run base-image related validations.
+
+        Returns:
+            base image info, if enabled.
+        """
+        base_image = None
+        if self.remote_config["GET_IMAGE_BASE"]["ENABLED"]:
+            base_image = self._get_base_image(matching_image)
+        if self.remote_config["VALIDATE_BASE_IMAGE_DATE"][
+            "ENABLED"
+        ] and not self.exclusions.get(self.pipeline_name, {}).get(
+            "VALIDATE_BASE_IMAGE_DATE"
+        ):
+            self._validate_base_image_date(
+                matching_image,
+                self.remote_config["VALIDATE_BASE_IMAGE_DATE"]["REFERENCE_IMAGE_DATE"],
+            )
+        if self.remote_config["BLACK_LIST_BASE_IMAGE"][
+            "ENABLED"
+        ] and not self.exclusions.get(self.pipeline_name, {}).get(
+            "BLACK_LIST_BASE_IMAGE"
+        ):
+            self._validate_black_list_base_image(
+                base_image, self.remote_config["BLACK_LIST_BASE_IMAGE"]["BLACK_LIST"]
+            )
+        return base_image
+
+    def _should_generate_sbom(self):
+        return self.remote_config["SBOM"]["ENABLED"] and any(
+            branch in str(self.branch)
+            for branch in self.remote_config["SBOM"]["BRANCH_FILTER"]
+        )
 
     def deseralizator(self, image_scanned):
         """
