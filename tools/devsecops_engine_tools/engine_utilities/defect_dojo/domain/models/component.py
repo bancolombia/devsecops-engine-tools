@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List
+from typing import List, Optional
 from devsecops_engine_tools.engine_utilities.utils.dataclass_classmethod import FromDictMixin
 
 
@@ -15,6 +15,6 @@ class Component(FromDictMixin):
 @dataclasses.dataclass
 class ComponentList(FromDictMixin):
     count: int = 0
-    next = None
-    previous = None
+    next: Optional[str] = None
+    previous: Optional[str] = None
     results: List[Component] = dataclasses.field(default_factory=list)

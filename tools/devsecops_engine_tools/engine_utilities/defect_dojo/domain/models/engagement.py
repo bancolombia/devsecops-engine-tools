@@ -6,7 +6,7 @@ from devsecops_engine_tools.engine_utilities.utils.dataclass_classmethod import 
 @dataclasses.dataclass
 class Engagement(FromDictMixin):
     id: int = 0
-    tags = []
+    tags: List[None] = dataclasses.field(default_factory=list)
     name: str = ""
     description: str = ""
     version: str = ""
