@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Dict
 import re
 import os
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.vulnerability_management_gateway import (
@@ -49,14 +50,14 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
     TRANSFERRED_FINDING = "Transferred Finding"
     ON_WHITELIST = "On Whitelist"
 
-    enviroment_mapping = {
+    enviroment_mapping: Dict[str, str] = field(default_factory=lambda: {
         "dev": "Development",
         "qa": "Staging",
         "pdn": "Production",
         "default": "Production",
-    }
+    })
 
-    scan_type_mapping = {
+    scan_type_mapping: Dict[str, str] = field(default_factory=lambda: {
         "CHECKOV": "Checkov Scan",
         "CONFTEST": "Conftest Scan",
         "PRISMA": "Twistlock Image Scan",
@@ -71,16 +72,16 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         "GITLEAKS": "Gitleaks Scan",
         "NUCLEI": "Nuclei Scan",
         "KIUWAN": "Kiuwan Scan"
-    }
+    })
     
-    multiple_scan_types = {
+    multiple_scan_types: Dict[str, Dict[str, Dict[str, object]]] = field(default_factory=lambda: {
         "engine_secret": {
             "ALL_TOOLS": {
                 "scanners": ["GITLEAKS", "TRUFFLEHOG"],
                 "file_separator": "#"
             }
         }
-    }
+    })
 
     def send_vulnerability_management(
         self, vulnerability_management: VulnerabilityManagement
@@ -704,7 +705,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         **kwargs,
                     )
                 )
-            elif finding.risk_status == "Transfer Accepted":
+            elif finding.risk_status == "Transfer Accepted" and not finding.mitigated:
                 exclusions.append(
                     self._create_report_exclusion(
                         finding,
@@ -715,7 +716,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                         **kwargs,
                     )
                 )
-            elif finding.risk_status == self.ON_WHITELIST:
+            elif finding.risk_status == self.ON_WHITELIST and not finding.mitigated:
                 exclusions.append(
                     self._create_report_exclusion(
                         finding,
