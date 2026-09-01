@@ -289,12 +289,14 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             }
             transfer_finding_query_params = {
                 "risk_status": "Transfer Accepted",
+                "is_mitigated": False,
                 "tags": tool,
                 "limit": dd_limits_query,
                 "fields": "id,vuln_id_from_tool,vulnerability_ids,severity,priority_classification,transfer_finding,endpoints,component_name,component_version,tags,file_path"
             }
             white_list_query_params = {
                 "risk_status": self.ON_WHITELIST,
+                "is_mitigated": False,
                 "tags": tool,
                 "limit": dd_limits_query,
                 "fields": "id,vuln_id_from_tool,vulnerability_ids,severity,priority_classification,endpoints,component_name,component_version,tags,file_path"
