@@ -66,8 +66,9 @@ class ImportScanUserCase:
                     response = ImportScanRequest()
                     response.url = f"{request.host_defect_dojo}"
                     return response
-                logger.error(f"Response status code {response.status_code}")
-                logger.error(f"Error {response.text}")
+                if response is not None:
+                    logger.error(f"Response status code {response.status_code}")
+                    logger.error(f"Error {response.text}")
                 raise ApiError(e)
 
         response.url = f"{request.host_defect_dojo}/test/{str(response.test_id)}"

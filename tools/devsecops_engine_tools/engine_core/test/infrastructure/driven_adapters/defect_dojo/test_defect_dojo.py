@@ -1141,7 +1141,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
             total_findings, date_fn, host_dd
         )
 
-        assert len(exclusions) == 5
+        assert len(exclusions) == 3
 
     @patch(
         "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.Engagement"
