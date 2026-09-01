@@ -84,18 +84,24 @@ class PrismaCloudManagerScan:
 
     def _sanitize_vulnerability_dates(self, report):
         for result in report.get("results", []):
-            if not isinstance(result, dict):
-                continue
-            vulns = result.get("vulnerabilities", []) or []
-            for v in vulns:
-                if not isinstance(v, dict):
-                    continue
-                for field in ("publishedDate", "discoveredDate", "fixDate"):
-                    val = v.get(field)
-                    if not isinstance(val, str):
-                        continue
-                    if any(token in val for token in ("days", "months", "month", ">", "ago")):
-                        v.pop(field, None)
+            if isinstance(result, dict):
+                self._sanitize_result_vulnerabilities(result)
+
+    def _sanitize_result_vulnerabilities(self, result):
+        vulns = result.get("vulnerabilities", []) or []
+        for v in vulns:
+            if isinstance(v, dict):
+                self._sanitize_vulnerability_entry(v)
+
+    def _sanitize_vulnerability_entry(self, vulnerability):
+        for field in ("publishedDate", "discoveredDate", "fixDate"):
+            if self._is_relative_date(vulnerability.get(field)):
+                vulnerability.pop(field, None)
+
+    def _is_relative_date(self, val) -> bool:
+        if not isinstance(val, str):
+            return False
+        return any(token in val for token in ("days", "months", "month", ">", "ago"))
 
     def _resolve_result_file_name(self, report):
         results_list = report.get("results", [])

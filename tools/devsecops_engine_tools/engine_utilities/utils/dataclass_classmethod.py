@@ -107,7 +107,7 @@ class FromDictMixin:
         value_class = field_type.__args__[0]
         if hasattr(value_class, "from_dict") and callable(value_class.from_dict):
             return [value_class.from_dict(v) for v in value]
-        return [v for v in value]
+        return list(value)
 
     @staticmethod
     def _resolve_dict_field_value(field_type, value):

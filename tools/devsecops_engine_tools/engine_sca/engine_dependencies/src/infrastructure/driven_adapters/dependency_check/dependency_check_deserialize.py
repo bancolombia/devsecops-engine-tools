@@ -118,8 +118,8 @@ class DependencyCheckDeserialize(DeserializatorGateway):
         return None
 
     def _get_where_from_package(self, package_node, namespace):
-        id = package_node.find("ns:id", namespace).text
-        purl = PackageURL.from_string(id)
+        package_id = package_node.find("ns:id", namespace).text
+        purl = PackageURL.from_string(package_id)
         purl_parts = purl.to_dict()
         component_name = (
             purl_parts["namespace"] + ":"
@@ -141,8 +141,8 @@ class DependencyCheckDeserialize(DeserializatorGateway):
         return f"{component_name}:{component_version}"
 
     def _get_where_from_cpe(self, cpe_node, namespace):
-        id = cpe_node.find("ns:name", namespace).text
-        cpe = CPE(id)
+        cpe_id = cpe_node.find("ns:name", namespace).text
+        cpe = CPE(cpe_id)
         component_name = (
             cpe.get_vendor()[0] + ":"
             if len(cpe.get_vendor()) > 0
@@ -201,7 +201,7 @@ class DependencyCheckDeserialize(DeserializatorGateway):
 
     def extract_common_vuln_data(self, vulnerability, dependency, namespace):
         fix = self.extract_fix_version(vulnerability, namespace)
-        id = vulnerability.find('ns:name', namespace).text[:28]
+        vuln_id = vulnerability.find('ns:name', namespace).text[:28]
 
         where = self.get_where(dependency, namespace)
 
@@ -211,7 +211,7 @@ class DependencyCheckDeserialize(DeserializatorGateway):
         severity = vulnerability.find('ns:severity', namespace).text.lower()
 
         return {
-            "id": id,
+            "id": vuln_id,
             "fix": fix,
             "where": where,
             "description": description_text,
