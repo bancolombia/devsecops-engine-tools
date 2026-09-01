@@ -819,6 +819,7 @@ class TestDefectDojoPlatform(unittest.TestCase):
             session=mock_session_manager.return_value,
             service=service,
             risk_status="On Whitelist",
+            is_mitigated=False,
             tags="engine_dependencies",
             limit=80,
             fields="id,vuln_id_from_tool,vulnerability_ids,severity,priority_classification,endpoints,component_name,component_version,tags,file_path"
