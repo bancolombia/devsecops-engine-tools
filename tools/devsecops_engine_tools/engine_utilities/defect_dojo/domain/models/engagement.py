@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List
+from typing import Any, List, Optional
 from devsecops_engine_tools.engine_utilities.utils.dataclass_classmethod import FromDictMixin
 
 
@@ -42,15 +42,15 @@ class Engagement(FromDictMixin):
     source_code_management_server: str = ""
     orchestration_engine: str = ""
     vm_url: str = ""
-    notes = []
-    files = []
-    risk_acceptance = []
+    notes: List[None] = dataclasses.field(default_factory=list)
+    files: List[None] = dataclasses.field(default_factory=list)
+    risk_acceptance: List[None] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass
 class EngagementList(FromDictMixin):
     count: int = 0
-    next = None
-    previous = None
+    next: Optional[str] = None
+    previous: Optional[str] = None
     results: List[Engagement] = dataclasses.field(default_factory=list)
-    prefetch = None
+    prefetch: Optional[Any] = None

@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List
+from typing import List, Optional
 from devsecops_engine_tools.engine_utilities.utils.dataclass_classmethod import FromDictMixin
 
 
@@ -16,6 +16,6 @@ class ScanConfiguration(FromDictMixin):
 @dataclasses.dataclass
 class ScanConfigurationList(FromDictMixin):
     count: int = 2
-    next = None
-    previous = None
+    next: Optional[str] = None
+    previous: Optional[str] = None
     results: List[ScanConfiguration] = dataclasses.field(default_factory=list)
