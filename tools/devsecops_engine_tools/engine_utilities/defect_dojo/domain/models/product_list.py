@@ -12,7 +12,7 @@ class Prefetch(FromDictMixin):
 @dataclasses.dataclass
 class ProductList(FromDictMixin):
     count: int = 0
-    next = None
-    previous = None
+    next: Optional[str] = None
+    previous: Optional[str] = None
     results: List[Product] = dataclasses.field(default_factory=list)
     prefetch: Optional[Prefetch] = None

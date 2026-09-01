@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List
+from typing import List, Optional, Any
 from devsecops_engine_tools.engine_utilities.utils.dataclass_classmethod import FromDictMixin
 from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.product_type import ProductType
 
@@ -7,7 +7,7 @@ from devsecops_engine_tools.engine_utilities.defect_dojo.domain.models.product_t
 @dataclasses.dataclass
 class ProductTypeList(FromDictMixin):
     count: int = 0
-    next = None
-    previous = None
+    next: Optional[str] = None
+    previous: Optional[str] = None
     results: List[ProductType] = dataclasses.field(default_factory=list)
-    prefetch = None
+    prefetch: Optional[Any] = None
