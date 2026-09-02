@@ -58,90 +58,119 @@ class DependencyCheckDeserialize(DeserializatorGateway):
         namespace = {'ns': namespace_uri}
         ET.register_namespace('', namespace_uri)
 
-        confidence_levels = ["low", "medium", "high", "highest"]
         confidences = remote_config[self.TOOL]["VULNERABILITY_CONFIDENCE"]
 
         dependencies = root.find('ns:dependencies', namespace)
         if dependencies:
-            to_remove = []
-            for dep in dependencies.findall('ns:dependency', namespace):
-                identifiers = dep.find('ns:identifiers', namespace)
-                if identifiers:
-                    vulnerability_ids = identifiers.findall('ns:vulnerabilityIds', namespace)
-                    if vulnerability_ids:
-                        vul_ids_confidences = [conf.get("confidence", "").lower() for conf in vulnerability_ids]
-                        if len(vul_ids_confidences) > 0:
-                            if not max(vul_ids_confidences, key=lambda c: confidence_levels.index(c)) in confidences: 
-                                to_remove.append(dep)
-                    elif not "no_confidence" in confidences:
-                        to_remove.append(dep)
-            for dep in to_remove: dependencies.remove(dep)
+            to_remove = [
+                dep
+                for dep in dependencies.findall('ns:dependency', namespace)
+                if self._should_remove_dependency(dep, namespace, confidences)
+            ]
+            for dep in to_remove:
+                dependencies.remove(dep)
             data_result.write(dependencies_scanned_file, encoding="utf-8", xml_declaration=True)
         
         return dependencies, namespace
 
+    def _should_remove_dependency(self, dep, namespace, confidences):
+        confidence_levels = ["low", "medium", "high", "highest"]
+        identifiers = dep.find('ns:identifiers', namespace)
+        if not identifiers:
+            return False
+
+        vulnerability_ids = identifiers.findall('ns:vulnerabilityIds', namespace)
+        if not vulnerability_ids:
+            return "no_confidence" not in confidences
+
+        vul_ids_confidences = [conf.get("confidence", "").lower() for conf in vulnerability_ids]
+        if len(vul_ids_confidences) == 0:
+            return False
+
+        return max(vul_ids_confidences, key=lambda c: confidence_levels.index(c)) not in confidences
+
     def get_where(self, dependency, namespace):
         identifiers_node = dependency.find("ns:identifiers", namespace)
         if identifiers_node:
-            package_node = identifiers_node.find(".//ns:package", namespace)
-            if package_node:
-                id = package_node.find("ns:id", namespace).text
-                purl = PackageURL.from_string(id)
-                purl_parts = purl.to_dict()
-                component_name = (
-                    purl_parts["namespace"] + ":"
-                    if purl_parts["namespace"]
-                    and len(purl_parts["namespace"]) > 0
-                    else ""
-                )
-                component_name += (
-                    purl_parts["name"]
-                    if purl_parts["name"] and len(purl_parts["name"]) > 0
-                    else ""
-                )
-                component_name = component_name or None
-                component_version = (
-                    purl_parts["version"]
-                    if purl_parts["version"] and len(purl_parts["version"]) > 0
-                    else ""
-                )
-                return f"{component_name}:{component_version}"
+            result = self._get_where_from_identifiers(identifiers_node, namespace)
+            if result is not None:
+                return result
 
-            cpe_node = identifiers_node.find(
-                ".//ns:identifier[@type='cpe']", namespace
-            )
-            if cpe_node:
-                id = cpe_node.find("ns:name", namespace).text
-                cpe = CPE(id)
-                component_name = (
-                    cpe.get_vendor()[0] + ":"
-                    if len(cpe.get_vendor()) > 0
-                    else ""
-                )
-                component_name += (
-                    cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
-                )
-                component_name = component_name or None
-                component_version = (
-                    cpe.get_version()[0]
-                    if len(cpe.get_version()) > 0
-                    else None
-                )
-                return f"{component_name}:{component_version}"
+        return self._get_where_from_evidence(dependency, namespace)
 
-            maven_node = identifiers_node.find(
-                ".//ns:identifier[@type='maven']", namespace
-            )
-            if maven_node:
-                maven_parts = maven_node.find("ns:name", namespace).text.split(
-                    ":",
-                )
+    def _get_where_from_identifiers(self, identifiers_node, namespace):
+        package_node = identifiers_node.find(".//ns:package", namespace)
+        if package_node:
+            return self._get_where_from_package(package_node, namespace)
 
-                if len(maven_parts) == 3:
-                    component_name = maven_parts[0] + ":" + maven_parts[1]
-                    component_version = maven_parts[2]
-                    return f"{component_name}:{component_version}"
-        
+        cpe_node = identifiers_node.find(
+            ".//ns:identifier[@type='cpe']", namespace
+        )
+        if cpe_node:
+            return self._get_where_from_cpe(cpe_node, namespace)
+
+        maven_node = identifiers_node.find(
+            ".//ns:identifier[@type='maven']", namespace
+        )
+        if maven_node:
+            return self._get_where_from_maven(maven_node, namespace)
+
+        return None
+
+    def _get_where_from_package(self, package_node, namespace):
+        package_id = package_node.find("ns:id", namespace).text
+        purl = PackageURL.from_string(package_id)
+        purl_parts = purl.to_dict()
+        component_name = (
+            purl_parts["namespace"] + ":"
+            if purl_parts["namespace"]
+            and len(purl_parts["namespace"]) > 0
+            else ""
+        )
+        component_name += (
+            purl_parts["name"]
+            if purl_parts["name"] and len(purl_parts["name"]) > 0
+            else ""
+        )
+        component_name = component_name or None
+        component_version = (
+            purl_parts["version"]
+            if purl_parts["version"] and len(purl_parts["version"]) > 0
+            else ""
+        )
+        return f"{component_name}:{component_version}"
+
+    def _get_where_from_cpe(self, cpe_node, namespace):
+        cpe_id = cpe_node.find("ns:name", namespace).text
+        cpe = CPE(cpe_id)
+        component_name = (
+            cpe.get_vendor()[0] + ":"
+            if len(cpe.get_vendor()) > 0
+            else ""
+        )
+        component_name += (
+            cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
+        )
+        component_name = component_name or None
+        component_version = (
+            cpe.get_version()[0]
+            if len(cpe.get_version()) > 0
+            else None
+        )
+        return f"{component_name}:{component_version}"
+
+    def _get_where_from_maven(self, maven_node, namespace):
+        maven_parts = maven_node.find("ns:name", namespace).text.split(
+            ":",
+        )
+
+        if len(maven_parts) == 3:
+            component_name = maven_parts[0] + ":" + maven_parts[1]
+            component_version = maven_parts[2]
+            return f"{component_name}:{component_version}"
+        return None
+
+    def _get_where_from_evidence(self, dependency, namespace):
         evidence_collected_node = dependency.find(
             ".//ns:evidenceCollected", namespace
         )
@@ -172,7 +201,7 @@ class DependencyCheckDeserialize(DeserializatorGateway):
 
     def extract_common_vuln_data(self, vulnerability, dependency, namespace):
         fix = self.extract_fix_version(vulnerability, namespace)
-        id = vulnerability.find('ns:name', namespace).text[:28]
+        vuln_id = vulnerability.find('ns:name', namespace).text[:28]
 
         where = self.get_where(dependency, namespace)
 
@@ -182,7 +211,7 @@ class DependencyCheckDeserialize(DeserializatorGateway):
         severity = vulnerability.find('ns:severity', namespace).text.lower()
 
         return {
-            "id": id,
+            "id": vuln_id,
             "fix": fix,
             "where": where,
             "description": description_text,

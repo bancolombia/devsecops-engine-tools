@@ -1,4 +1,3 @@
-from typing import List
 from devsecops_engine_tools.engine_dast.src.infrastructure.entry_points.entry_point_dast import (
     init_engine_dast,
 )
@@ -40,56 +39,15 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gateway, remote_config_source_gateway):
     try:
+        tool_run = None
         if config_tool["TOOL"].lower() == "nuclei": # tool_gateway is the main Tool
             tool_run = NucleiTool()
         extra_tools = []
-        target_config = None
 
         # Filling operations list with adapters
         data = load_json_file(dict_args["dast_file_path"])
 
-        if "operations" in data: # Api
-            operations: List = []
-            for elem in data["operations"]:
-                security_type = elem["operation"]["security_auth"]["type"].lower()
-                if security_type == "jwt":
-                    operations.append(
-                        ApiOperation(
-                            elem,
-                            JwtObject(
-                                elem["operation"]["security_auth"]
-                            )
-                        )
-                    )
-                elif security_type == "oauth":
-                    operations.append(
-                        ApiOperation(
-                            elem,
-                            GenericOauth(
-                                elem["operation"]["security_auth"],
-                                data["endpoint"]
-                            )
-                        )
-                    )
-                else:
-                    operations.append(
-                        ApiOperation(
-                            elem,
-                            AuthClientCredential(
-                                elem["operation"]["security_auth"]
-                            )
-                        )
-                    )
-            data["operations"] = operations
-            target_config = ApiConfig(data)
-        elif "WA" in data: # Web Application
-            if data["data"].get["security_auth"] == "oauth":
-                authentication_gateway =  GenericOauth(
-                        data["data"]["security_auth"]
-                    )
-            target_config = WaConfig(data, authentication_gateway)
-        else:
-            raise ValueError("Can't match if the target type is an api or a web application")
+        target_config = _build_target_config(data)
 
         if any((k.lower() == "jwt") for k in config_tool["EXTRA_TOOLS"]) and any(isinstance(operation.authentication_gateway, JwtObject) for operation in data["operations"] ):
             extra_tools.append(JwtTool(target_config))
@@ -105,24 +63,70 @@ def runner_engine_dast(dict_args, config_tool, secret_tool, devops_platform_gate
             target_data=target_config
         )
     except Exception as e:
-        logger.error(f"Error engine_dast: {e}")
-        config_tool_dast = remote_config_source_gateway.get_remote_config(
-            dict_args["remote_config_repo"], "engine_dast/ConfigTool.json", dict_args["remote_config_branch"]
-        )
-        if config_tool_dast["PRINT_API_CONFIG"]:
-            result = subprocess.run(["cat", dict_args["dast_file_path"]], check=True, stdout=subprocess.PIPE)
-            print(result.stdout.decode('utf-8'))
-        if config_tool_dast["IGNORE_ERRORS"]:
-            input_core = InputCore(
-                totalized_exclusions=[],
-                threshold_defined={},
-                path_file_results="",
-                custom_message_break_build=config_tool_dast.get("MESSAGE_INFO_DAST"),
-                scope_pipeline="",
-                scope_service="",
-                stage_pipeline=devops_platform_gateway.get_variable("stage"),
+        return _handle_dast_error(e, dict_args, devops_platform_gateway, remote_config_source_gateway)
+
+
+def _build_api_operation(elem, endpoint):
+    security_type = elem["operation"]["security_auth"]["type"].lower()
+    if security_type == "jwt":
+        return ApiOperation(
+            elem,
+            JwtObject(
+                elem["operation"]["security_auth"]
             )
-            return [], input_core
-        else:
-            raise Exception(f"Error engine_dast: {e}")
-        
+        )
+    if security_type == "oauth":
+        return ApiOperation(
+            elem,
+            GenericOauth(
+                elem["operation"]["security_auth"],
+                endpoint
+            )
+        )
+    return ApiOperation(
+        elem,
+        AuthClientCredential(
+            elem["operation"]["security_auth"]
+        )
+    )
+
+
+def _build_target_config(data):
+    if "operations" in data: # Api
+        data["operations"] = [
+            _build_api_operation(elem, data["endpoint"]) for elem in data["operations"]
+        ]
+        return ApiConfig(data)
+
+    if "WA" in data: # Web Application
+        authentication_gateway = None
+        if data["data"].get["security_auth"] == "oauth":
+            authentication_gateway =  GenericOauth(
+                    data["data"]["security_auth"]
+                )
+        return WaConfig(data, authentication_gateway)
+
+    raise ValueError("Can't match if the target type is an api or a web application")
+
+
+def _handle_dast_error(e, dict_args, devops_platform_gateway, remote_config_source_gateway):
+    logger.error(f"Error engine_dast: {e}")
+    config_tool_dast = remote_config_source_gateway.get_remote_config(
+        dict_args["remote_config_repo"], "engine_dast/ConfigTool.json", dict_args["remote_config_branch"]
+    )
+    if config_tool_dast["PRINT_API_CONFIG"]:
+        result = subprocess.run(["cat", dict_args["dast_file_path"]], check=True, stdout=subprocess.PIPE)
+        print(result.stdout.decode('utf-8'))
+    if config_tool_dast["IGNORE_ERRORS"]:
+        input_core = InputCore(
+            totalized_exclusions=[],
+            threshold_defined={},
+            path_file_results="",
+            custom_message_break_build=config_tool_dast.get("MESSAGE_INFO_DAST"),
+            scope_pipeline="",
+            scope_service="",
+            stage_pipeline=devops_platform_gateway.get_variable("stage"),
+        )
+        return [], input_core
+
+    raise Exception(f"Error engine_dast: {e}")

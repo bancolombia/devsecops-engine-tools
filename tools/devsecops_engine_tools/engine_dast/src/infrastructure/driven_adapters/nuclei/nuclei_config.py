@@ -33,28 +33,40 @@ class NucleiConfig:
         with open(template_name, "r") as template_file:  # abrir  archivo
             template_data = self.yaml.load(template_file)
             if "http" in template_data:
-                parm_path = ""
-                if "parm" in new_template_data["operation"]:
-                    parm_path = f"?{'&'.join([str(key) + '=' + str(value) for key, value in new_template_data['operation']['parm'].items()])}" 
-                template_data["http"][0]["method"] = new_template_data["operation"]["method"]
-                template_data["http"][0]["path"] = [
-                    "{{BaseURL}}" + new_template_data["operation"]["path"] + parm_path
-                ]
-                if "headers" in new_template_data["operation"]:
-                    if "headers" not in template_data["http"][0]:
-                        template_data["http"][0]["headers"] = new_template_data["operation"]["headers"]
-                    else:
-                        for header, value in new_template_data["operation"]["headers"].items():
-                            if header not in template_data["http"][0]["headers"]:
-                                template_data["http"][0]["headers"][header] = value
-                if "payload" in new_template_data["operation"]:
-                    body = json_dumps(new_template_data["operation"]["payload"])
-                    template_data["http"][0]["body"] = body
+                self._apply_operation_to_http_template(template_data, new_template_data)
 
         new_template_path = os.path.join(dest_folder, new_template_name)
 
         with open(new_template_path, "w") as nf:
             self.yaml.dump(template_data, nf)
+
+    def _apply_operation_to_http_template(self, template_data: dict, new_template_data: dict) -> None:
+        operation = new_template_data["operation"]
+        parm_path = self._build_query_string(operation)
+
+        template_data["http"][0]["method"] = operation["method"]
+        template_data["http"][0]["path"] = [
+            "{{BaseURL}}" + operation["path"] + parm_path
+        ]
+
+        if "headers" in operation:
+            self._merge_headers(template_data["http"][0], operation["headers"])
+
+        if "payload" in operation:
+            template_data["http"][0]["body"] = json_dumps(operation["payload"])
+
+    def _build_query_string(self, operation: dict) -> str:
+        if "parm" not in operation:
+            return ""
+        return f"?{'&'.join([str(key) + '=' + str(value) for key, value in operation['parm'].items()])}"
+
+    def _merge_headers(self, http_template: dict, headers: dict) -> None:
+        if "headers" not in http_template:
+            http_template["headers"] = headers
+        else:
+            for header, value in headers.items():
+                if header not in http_template["headers"]:
+                    http_template["headers"][header] = value
 
     def process_templates_folder(self, base_folder: str) -> None:
         if not os.path.exists(self.custom_templates_dir):

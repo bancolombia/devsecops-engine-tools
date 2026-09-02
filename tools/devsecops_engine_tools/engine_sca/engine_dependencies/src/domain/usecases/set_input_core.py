@@ -30,22 +30,27 @@ class SetInputCore:
         ]
 
     def get_exclusions(self, exclusions_data, pipeline_name, tool):
-        list_exclusions = []
-        for key, value in exclusions_data.items():
-            if (key == "All") or (key == pipeline_name):
-                if value.get(tool, 0):
-                    list_exclusions.extend(self._build_exclusions(value[tool]))
+        list_exclusions = self._get_direct_exclusions(exclusions_data, pipeline_name, tool)
 
         if pipeline_name not in exclusions_data:
-            for pattern, values in exclusions_data.get(
-                "BY_PATTERN_SEARCH", {}
-            ).items():
-                if re.match(pattern, pipeline_name, re.IGNORECASE):
-                    if values.get(tool, 0):
-                        list_exclusions.extend(self._build_exclusions(values[tool]))
-                    break
+            list_exclusions.extend(self._get_pattern_exclusions(exclusions_data, pipeline_name, tool))
 
         return list_exclusions
+
+    def _get_direct_exclusions(self, exclusions_data, pipeline_name, tool):
+        exclusions = []
+        for key, value in exclusions_data.items():
+            if key in ("All", pipeline_name) and value.get(tool, 0):
+                exclusions.extend(self._build_exclusions(value[tool]))
+        return exclusions
+
+    def _get_pattern_exclusions(self, exclusions_data, pipeline_name, tool):
+        for pattern, values in exclusions_data.get("BY_PATTERN_SEARCH", {}).items():
+            if re.match(pattern, pipeline_name, re.IGNORECASE):
+                if values.get(tool, 0):
+                    return self._build_exclusions(values[tool])
+                break
+        return []
 
     def set_input_core(self, dependencies_scanned):
         """

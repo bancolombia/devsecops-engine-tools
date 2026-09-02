@@ -171,26 +171,37 @@ class DependencyCheckTool(ToolGateway):
         context_dependencies_list = []
 
         for dependency in dependencies:
-            vulnerabilities_node = dependency.find('ns:vulnerabilities', namespace)
-            if vulnerabilities_node:
-                vulnerabilities = vulnerabilities_node.findall('ns:vulnerability', namespace)
-                for vulnerability in vulnerabilities:
-                    data = deserializer.extract_common_vuln_data(vulnerability, dependency, namespace)
-                    references = deserializer.extract_references(vulnerability, namespace)
-
-                    context = ContextDependencies(
-                        cve_id=[data["id"]],
-                        severity=data["severity"],
-                        component=data["where"],
-                        package_name=data["where"].split(":")[0] if data["where"] else "",
-                        installed_version=data["where"].split(":")[2].lower() if len(data["where"].split(":")) == 3 else data["where"].split(":")[1].lower(),
-                        fixed_version=[data["fix"]] if data["fix"] else [],
-                        impact_paths=[],
-                        description=data["description"],
-                        references=references,
-                        source_tool="Dependency Check"
-                    )
-                    context_dependencies_list.append(context)
+            context_dependencies_list.extend(
+                self._build_context_dependencies_for_dependency(dependency, namespace, deserializer)
+            )
 
         return context_dependencies_list
+
+    def _build_context_dependencies_for_dependency(self, dependency, namespace, deserializer) -> List[ContextDependencies]:
+        vulnerabilities_node = dependency.find('ns:vulnerabilities', namespace)
+        if not vulnerabilities_node:
+            return []
+
+        vulnerabilities = vulnerabilities_node.findall('ns:vulnerability', namespace)
+        return [
+            self._build_context_dependency(vulnerability, dependency, namespace, deserializer)
+            for vulnerability in vulnerabilities
+        ]
+
+    def _build_context_dependency(self, vulnerability, dependency, namespace, deserializer) -> ContextDependencies:
+        data = deserializer.extract_common_vuln_data(vulnerability, dependency, namespace)
+        references = deserializer.extract_references(vulnerability, namespace)
+
+        return ContextDependencies(
+            cve_id=[data["id"]],
+            severity=data["severity"],
+            component=data["where"],
+            package_name=data["where"].split(":")[0] if data["where"] else "",
+            installed_version=data["where"].split(":")[2].lower() if len(data["where"].split(":")) == 3 else data["where"].split(":")[1].lower(),
+            fixed_version=[data["fix"]] if data["fix"] else [],
+            impact_paths=[],
+            description=data["description"],
+            references=references,
+            source_tool="Dependency Check"
+        )
         

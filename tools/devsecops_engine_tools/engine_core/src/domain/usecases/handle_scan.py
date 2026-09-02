@@ -343,39 +343,56 @@ class HandleScan:
         quality_vulnerability_management = (
             input_core.threshold_defined.quality_vulnerability_management
         )
-        if quality_vulnerability_management and input_core.threshold_defined.name == "default":
-            product_type = self.vulnerability_management.get_product_type_pipeline(
-                input_core.scope_pipeline, dict_args, secret_tool, config_tool
-            )
-            if product_type:
-                pt_name = product_type.name
-                apply_qualitypt = next(
-                    filter(
-                        lambda qapt: pt_name in qapt,
-                        quality_vulnerability_management["PTS"],
-                    ),
-                    None,
-                )
-                if apply_qualitypt:
-                    pt_info = apply_qualitypt[pt_name]
-                    pt_profile = pt_info["PROFILE"] if config_tool["BREAK_BUILD_MANAGER"]["MODEL"] == "severity" else None
-                    pt_profile_priority = pt_info["PROFILE_PRIORITY"] if config_tool["BREAK_BUILD_MANAGER"]["MODEL"] == "priority" else None
-                    pt_apps = pt_info["APPS"]
+        if not (
+            quality_vulnerability_management
+            and input_core.threshold_defined.name == "default"
+        ):
+            return
 
-                    if pt_profile and (
-                        pt_apps == "ALL"
-                        or any(pd in input_core.scope_pipeline for pd in pt_apps)
-                    ):
-                        input_core.threshold_defined.vulnerability = LevelVulnerability(
-                            quality_vulnerability_management[pt_profile]
-                        )
-                    if pt_profile_priority and (
-                        pt_apps == "ALL"
-                        or any(pd in input_core.scope_pipeline for pd in pt_apps)
-                    ):
-                        input_core.threshold_defined.priority = LevelPriority(
-                            quality_vulnerability_management[pt_profile_priority]
-                        )
+        product_type = self.vulnerability_management.get_product_type_pipeline(
+            input_core.scope_pipeline, dict_args, secret_tool, config_tool
+        )
+        if not product_type:
+            return
+
+        apply_qualitypt = self._find_matching_quality_pt(
+            product_type.name, quality_vulnerability_management["PTS"]
+        )
+        if not apply_qualitypt:
+            return
+
+        self._apply_quality_pt_threshold(
+            input_core,
+            config_tool,
+            quality_vulnerability_management,
+            apply_qualitypt[product_type.name],
+        )
+
+    def _find_matching_quality_pt(self, pt_name, quality_pts):
+        return next(
+            filter(lambda qapt: pt_name in qapt, quality_pts),
+            None,
+        )
+
+    def _apply_quality_pt_threshold(
+        self, input_core, config_tool, quality_vulnerability_management, pt_info
+    ):
+        model = config_tool["BREAK_BUILD_MANAGER"]["MODEL"]
+        pt_profile = pt_info["PROFILE"] if model == "severity" else None
+        pt_profile_priority = pt_info["PROFILE_PRIORITY"] if model == "priority" else None
+        pt_apps = pt_info["APPS"]
+        applies_to_pipeline = pt_apps == "ALL" or any(
+            pd in input_core.scope_pipeline for pd in pt_apps
+        )
+
+        if pt_profile and applies_to_pipeline:
+            input_core.threshold_defined.vulnerability = LevelVulnerability(
+                quality_vulnerability_management[pt_profile]
+            )
+        if pt_profile_priority and applies_to_pipeline:
+            input_core.threshold_defined.priority = LevelPriority(
+                quality_vulnerability_management[pt_profile_priority]
+            )
 
     def _handle_context_extraction(
         self,

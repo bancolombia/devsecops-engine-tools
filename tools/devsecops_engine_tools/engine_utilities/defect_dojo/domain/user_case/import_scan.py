@@ -75,91 +75,124 @@ class ImportScanUserCase:
         return response
 
     def execute(self, request: ImportScanRequest) -> ImportScanRequest:
-        product_id = None
-        
         if (request.product_name or request.product_type_name) == "":
             log = f"Name product {request.product_name} or product type {request.product_type_name} is empty"
             logger.error(log)
             raise ApiError(log)
 
         logger.debug(f"Match {request.scan_type}")
-        searchTypeKey = "name_exact" if request.get_exact_product is True else "name"
-        products = self.__rest_product.get_products({searchTypeKey: request.product_name})
+        product_id = self._resolve_product(request)
+
+        api_scan_bool = re.search(" API ", request.scan_type)
+        if api_scan_bool:
+            self._resolve_api_scan_configuration(request, product_id)
+
+        self._resolve_engagement(request, product_id)
+
+        return self.import_scan(request, api_scan_bool)
+
+    def _resolve_product(self, request):
+        search_type_key = "name_exact" if request.get_exact_product is True else "name"
+        products = self.__rest_product.get_products({search_type_key: request.product_name})
         if len(products.results) == 0 and request.product_name != "Orphan_Product":
-            products = self.__rest_product.get_products({searchTypeKey: request.code_app})
+            products = self.__rest_product.get_products({search_type_key: request.code_app})
+
         if len(products.results) > 0:
             product_id = products.results[0].id
             request.product_name = products.results[0].name
             request.product_type_name = self.__rest_product_type.get_product_type_id(products.results[0].prod_type).name
             logger.debug(f"product found: {request.product_name} with id: {product_id}")
-        else:
-            product_type_id = None
-            product_types = self.__rest_product_type.get_product_types(request.product_type_name)
-            if product_types.results == []:
-                product_type = self.__rest_product_type.post_product_type(request.product_type_name)
-                product_type_id = product_type.id
-                logger.debug(f"product_type created: {product_type.name} with id {product_type.id}")
-            else:
-                if len(product_types.results) != 1:
-                    logger.warning(f"there is more than one product type with the name: {product_types.results}")
+            return product_id
 
-                product_type_id = product_types.results[0].id
-                logger.debug(
-                    f"product_type found: {product_types.results[0].name}\
-                        with id {product_type_id}"
-                )
+        return self._create_product(request)
 
-            product = self.__rest_product.post_product(request, product_type_id)
-            product_id = product.id
-            logger.debug(
-                f"product created: {product.name}\
-                    found with id: {product.id}"
+    def _create_product(self, request):
+        product_type_id = self._resolve_product_type_id(request)
+        product = self.__rest_product.post_product(request, product_type_id)
+        logger.debug(
+            f"product created: {product.name}\
+                found with id: {product.id}"
+        )
+        return product.id
+
+    def _resolve_product_type_id(self, request):
+        product_types = self.__rest_product_type.get_product_types(request.product_type_name)
+        if product_types.results == []:
+            product_type = self.__rest_product_type.post_product_type(request.product_type_name)
+            logger.debug(f"product_type created: {product_type.name} with id {product_type.id}")
+            return product_type.id
+
+        if len(product_types.results) != 1:
+            logger.warning(f"there is more than one product type with the name: {product_types.results}")
+
+        product_type_id = product_types.results[0].id
+        logger.debug(
+            f"product_type found: {product_types.results[0].name}\
+                with id {product_type_id}"
+        )
+        return product_type_id
+
+    def _resolve_api_scan_configuration(self, request, product_id):
+        scan_configuration_list = self.__rest_scan_configurations.get_api_scan_configuration(request, product_id)
+        if scan_configuration_list.results == []:
+            scan_configuration = self.__rest_scan_configurations.post_api_scan_configuration(
+                request, product_id, request.tool_sonarqube_configuration
             )
+            request.api_scan_configuration = scan_configuration.id
+            logger.debug(f"Scan configuration create service_key_1 : {scan_configuration.service_key_1}")
+        else:
+            logger.debug(
+                f"Scan configuration found service_key: {scan_configuration_list.results[0].service_key_1}"
+            )
+            request.api_scan_configuration = scan_configuration_list.results[0].id
 
-        api_scan_bool = re.search(" API ", request.scan_type)
-        if api_scan_bool:
-            scan_configuration_list = self.__rest_scan_configurations.get_api_scan_configuration(request, product_id)
-            if scan_configuration_list.results == []:
-                scan_configuration = self.__rest_scan_configurations.post_api_scan_configuration(
-                    request, product_id, request.tool_sonarqube_configuration
-                )
-                request.api_scan_configuration = scan_configuration.id
-                logger.debug(f"Scan configuration create service_key_1 : {scan_configuration.service_key_1}")
-            else:
-                logger.debug(
-                    f"Scan configuration found service_key: {scan_configuration_list.results[0].service_key_1}"
-                )
-                request.api_scan_configuration = scan_configuration_list.results[0].id
-
+    def _resolve_engagement(self, request, product_id):
         logger.debug(f"search Engagement name: {request.engagement_name}")
-        engagement = self.__rest_engagement.get_engagements(request.engagement_name)
-        if engagement.results == [] or not any(engagement.name == request.engagement_name for engagement in engagement.results):
+        engagement_list = self.__rest_engagement.get_engagements(request.engagement_name)
+
+        if engagement_list.results == [] or not any(
+            engagement.name == request.engagement_name for engagement in engagement_list.results
+        ):
             engagement = self.__rest_engagement.post_engagement(request, product_id, request.tool_scm_configuration)
             logger.debug(f"Engagement created: {engagement.name}")
+            return
+
+        self._resolve_existing_engagement(request, product_id, engagement_list)
+
+    def _resolve_existing_engagement(self, request, product_id, engagement_list):
+        if request.hold_found_product_engagement:
+            matching = [e for e in engagement_list.results if e.name == request.engagement_name]
         else:
-            if request.hold_found_product_engagement:
-                engagement = [engagement for engagement in engagement.results if engagement.name == request.engagement_name]
-            else:
-                engagement = [engagement for engagement in engagement.results if engagement.product == product_id and engagement.name == request.engagement_name]
+            matching = [
+                e for e in engagement_list.results
+                if e.product == product_id and e.name == request.engagement_name
+            ]
 
-            if engagement:
-                logger.debug(f"Engagement found: {engagement[0].name} whit product id: {engagement[0].product}")
-                if request.hold_found_product_engagement and product_id != engagement[0].product:
-                    product_engagement = self.__rest_product.get_products({"id": engagement[0].product, "prefetch": "prod_type"})
-                    if len(product_engagement.results) > 0:
-                        product_eng = product_engagement.results[0]
-                        request.product_name = product_eng.name
-                        request.product_type_name = product_engagement.prefetch.prod_type[str(product_eng.prod_type)].name
-                        logger.debug(f"Hold Product engagement found: {request.product_name} with product type: {request.product_type_name}")
-                description_changed = request.engagement_description and engagement[0].description != request.engagement_description
-                scm_uri_changed = request.source_code_management_uri and engagement[0].source_code_management_uri != request.source_code_management_uri
-                scm_server_changed = request.tool_scm_configuration and str(engagement[0].source_code_management_server) != str(request.tool_scm_configuration)
-                if description_changed or scm_uri_changed or scm_server_changed:
-                    engagement = self.__rest_engagement.patch_engagement(request, engagement[0].id, request.tool_scm_configuration)
-                    logger.debug(f"Engagement updated: {engagement.name}")
+        if not matching:
+            engagement = self.__rest_engagement.post_engagement(request, product_id, request.tool_scm_configuration)
+            logger.debug(f"Engagement created: {engagement.name} whit product id {engagement.product}")
+            return
 
-            else:
-                engagement = self.__rest_engagement.post_engagement(request, product_id, request.tool_scm_configuration)
-                logger.debug(f"Engagement created: {engagement.name} whit product id {engagement.product}")
+        engagement = matching[0]
+        logger.debug(f"Engagement found: {engagement.name} whit product id: {engagement.product}")
 
-        return self.import_scan(request, api_scan_bool)
+        if request.hold_found_product_engagement and product_id != engagement.product:
+            self._apply_hold_found_product_context(request, engagement.product)
+
+        self._patch_engagement_if_changed(request, engagement)
+
+    def _apply_hold_found_product_context(self, request, engagement_product_id):
+        product_engagement = self.__rest_product.get_products({"id": engagement_product_id, "prefetch": "prod_type"})
+        if len(product_engagement.results) > 0:
+            product_eng = product_engagement.results[0]
+            request.product_name = product_eng.name
+            request.product_type_name = product_engagement.prefetch.prod_type[str(product_eng.prod_type)].name
+            logger.debug(f"Hold Product engagement found: {request.product_name} with product type: {request.product_type_name}")
+
+    def _patch_engagement_if_changed(self, request, engagement):
+        description_changed = request.engagement_description and engagement.description != request.engagement_description
+        scm_uri_changed = request.source_code_management_uri and engagement.source_code_management_uri != request.source_code_management_uri
+        scm_server_changed = request.tool_scm_configuration and str(engagement.source_code_management_server) != str(request.tool_scm_configuration)
+        if description_changed or scm_uri_changed or scm_server_changed:
+            updated_engagement = self.__rest_engagement.patch_engagement(request, engagement.id, request.tool_scm_configuration)
+            logger.debug(f"Engagement updated: {updated_engagement.name}")

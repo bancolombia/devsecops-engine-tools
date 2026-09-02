@@ -87,91 +87,119 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         self, vulnerability_management: VulnerabilityManagement
     ):
         try:
-
             use_cmdb = vulnerability_management.config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["CMDB"].get("USE_CMDB", False)
 
-            token_dd = (
-                vulnerability_management.dict_args["token_vulnerability_management"]
-                if vulnerability_management.dict_args["token_vulnerability_management"]
-                is not None
-                else vulnerability_management.secret_tool["token_defect_dojo"]
+            token_dd = self._resolve_token(
+                vulnerability_management.dict_args["token_vulnerability_management"],
+                vulnerability_management.secret_tool,
+                "token_defect_dojo",
             )
-            token_cmdb = None
-            if use_cmdb:
-                token_cmdb = (
-                    vulnerability_management.dict_args["token_cmdb"]
-                    if vulnerability_management.dict_args["token_cmdb"] is not None
-                    else vulnerability_management.secret_tool["token_cmdb"]
+            token_cmdb = (
+                self._resolve_token(
+                    vulnerability_management.dict_args["token_cmdb"],
+                    vulnerability_management.secret_tool,
+                    "token_cmdb",
                 )
+                if use_cmdb
+                else None
+            )
 
-            tags = []
-            if any(
-                branch in str(vulnerability_management.branch_tag)
-                for branch in vulnerability_management.config_tool[
-                    "VULNERABILITY_MANAGER"
-                ]["BRANCH_FILTER"]
-            ) or (vulnerability_management.dict_args["module"] == "engine_secret"):
-                tags = [vulnerability_management.dict_args["module"]]
+            if not self._should_send_to_vulnerability_management(vulnerability_management):
+                return
 
-                if vulnerability_management.dict_args["module"] == "engine_iac":
-                    tags = [
-                        f"{vulnerability_management.dict_args['module']}_{'_'.join(vulnerability_management.dict_args['platform'])}"
-                    ]
-                    if vulnerability_management.input_core.scope_service != vulnerability_management.input_core.scope_pipeline:
-                        tags.append(vulnerability_management.input_core.scope_service.replace(f"{vulnerability_management.input_core.scope_pipeline}_", ""))
+            tags = self._build_vulnerability_management_tags(vulnerability_management)
+            self._dispatch_vulnerability_management_report(
+                vulnerability_management, token_cmdb, token_dd, tags, use_cmdb
+            )
 
-                if (
-                    vulnerability_management.dict_args["module"] == "engine_container"
-                    and sum(
-                        1
-                        for line in open("scanned_images.txt", "r", encoding="utf-8")
-                        if line.strip()
-                    )
-                    > 1
-                ):
-                    match = re.search(
-                        r"(?<=:)([^-]+)",
-                        vulnerability_management.dict_args["image_to_scan"],
-                    )
-                    tags.append(match.group(1) if match else None)
-                if vulnerability_management.dict_args["module"] == "engine_dast":
-                    dast_file_path = vulnerability_management.dict_args["dast_file_path"]
-                    tag_suffix = os.path.splitext(os.path.basename(dast_file_path))[0].replace('-', '_')
-                    tags = [
-                        f"{vulnerability_management.dict_args['module']}_{tag_suffix}"
-                    ]
-                
-                if vulnerability_management.dict_args["module"] in self.multiple_scan_types and \
-                    vulnerability_management.scan_type in self.multiple_scan_types[vulnerability_management.dict_args["module"]]:
-                    files = vulnerability_management.input_core.path_file_results.split(
-                        self.multiple_scan_types[vulnerability_management.dict_args["module"]][vulnerability_management.scan_type]["file_separator"]
-                    )
-                    all_tools = self.multiple_scan_types[vulnerability_management.dict_args["module"]][vulnerability_management.scan_type]["scanners"]
-                    print_url = True
-                    for index, file in enumerate(files):
-                        vulnerability_management.input_core.path_file_results = file
-                        vulnerability_management.scan_type = all_tools[index]
-                        self._send_report_to_vulnerability_management(
-                            vulnerability_management,
-                            token_cmdb,
-                            token_dd,
-                            tags,
-                            use_cmdb,
-                            print_url
-                        )
-                        print_url = False
-                else:
-                    self._send_report_to_vulnerability_management(
-                        vulnerability_management,
-                        token_cmdb,
-                        token_dd,
-                        tags,
-                        use_cmdb,
-                    )
-                           
         except Exception as ex:
             raise ExceptionVulnerabilityManagement(
                 f"Error sending report to vulnerability management with the following error: {str(ex)}"
+            )
+
+    def _resolve_token(self, dict_arg_token, secret_tool, secret_key):
+        # secret_tool may be None; only subscript it when dict_arg_token is missing
+        return dict_arg_token if dict_arg_token is not None else secret_tool[secret_key]
+
+    def _should_send_to_vulnerability_management(self, vulnerability_management):
+        return any(
+            branch in str(vulnerability_management.branch_tag)
+            for branch in vulnerability_management.config_tool[
+                "VULNERABILITY_MANAGER"
+            ]["BRANCH_FILTER"]
+        ) or (vulnerability_management.dict_args["module"] == "engine_secret")
+
+    def _build_vulnerability_management_tags(self, vulnerability_management):
+        module = vulnerability_management.dict_args["module"]
+        tags = [module]
+
+        if module == "engine_iac":
+            tags = [
+                f"{module}_{'_'.join(vulnerability_management.dict_args['platform'])}"
+            ]
+            if vulnerability_management.input_core.scope_service != vulnerability_management.input_core.scope_pipeline:
+                tags.append(
+                    vulnerability_management.input_core.scope_service.replace(
+                        f"{vulnerability_management.input_core.scope_pipeline}_", ""
+                    )
+                )
+
+        if module == "engine_container" and self._has_multiple_scanned_images():
+            match = re.search(
+                r"(?<=:)([^-]+)",
+                vulnerability_management.dict_args["image_to_scan"],
+            )
+            tags.append(match.group(1) if match else None)
+
+        if module == "engine_dast":
+            dast_file_path = vulnerability_management.dict_args["dast_file_path"]
+            tag_suffix = os.path.splitext(os.path.basename(dast_file_path))[0].replace('-', '_')
+            tags = [f"{module}_{tag_suffix}"]
+
+        return tags
+
+    def _has_multiple_scanned_images(self):
+        return (
+            sum(
+                1
+                for line in open("scanned_images.txt", "r", encoding="utf-8")
+                if line.strip()
+            )
+            > 1
+        )
+
+    def _dispatch_vulnerability_management_report(
+        self, vulnerability_management, token_cmdb, token_dd, tags, use_cmdb
+    ):
+        module = vulnerability_management.dict_args["module"]
+        scan_type = vulnerability_management.scan_type
+        module_scan_types = self.multiple_scan_types.get(module, {})
+
+        if scan_type in module_scan_types:
+            files = vulnerability_management.input_core.path_file_results.split(
+                module_scan_types[scan_type]["file_separator"]
+            )
+            all_tools = module_scan_types[scan_type]["scanners"]
+            print_url = True
+            for index, file in enumerate(files):
+                vulnerability_management.input_core.path_file_results = file
+                vulnerability_management.scan_type = all_tools[index]
+                self._send_report_to_vulnerability_management(
+                    vulnerability_management,
+                    token_cmdb,
+                    token_dd,
+                    tags,
+                    use_cmdb,
+                    print_url
+                )
+                print_url = False
+        else:
+            self._send_report_to_vulnerability_management(
+                vulnerability_management,
+                token_cmdb,
+                token_dd,
+                tags,
+                use_cmdb,
             )
     
     def _send_report_to_vulnerability_management(
@@ -790,7 +818,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
         def get_dates_from_whitelist(vuln_id, white_list):
             matching_finding = next(
-                filter(lambda x: x.unique_id_from_tool == vuln_id, white_list), None
+                filter(lambda x: x.unique_id_from_tool == vuln_id or vuln_id in x.unique_id_from_tool, white_list), None
             )
             if matching_finding:
                 return date_fn(matching_finding.create_date), date_fn(matching_finding.expiration_date)

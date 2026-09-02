@@ -119,64 +119,69 @@ class XrayScan(ToolGateway):
         ]
 
         if mode == "build-scan":
-            #build info execution command
-            build_info_command =[
-               prefix,
-               "rt",
-               "bp",
-                pipeline_name,
-                build_id,
-                "--env-exclude=*password*;*psw*;*secret*;*key*;*token*;*auth*;",
-                f"--build-url={build_url}"  
-            ]
-            build_info_result = subprocess.run(build_info_command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            command = self._prepare_build_scan_command(prefix, cwd, mode, pipeline_name, build_id, build_url)
+            if command is None:
+                return None
 
-            if  not build_info_result.stdout:
-               logger.error(f"Build info  NOT  successfully deployed to Jfrog Arifactory.: {build_info_result.stderr}")
-               return None
-            print("##[info]Build info successfully deployed.")
-            #build-scan execution command
-            command = [
-                prefix,
-                mode,
-                pipeline_name,
-                build_id,
-                "--format=json",
-                "--vuln",
-                "--fail=false",
-                "--rescan=true"
-            ]
         result = subprocess.run(
             command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
         )
-        if result.stdout or all(
-            word in result.stderr for word in config["XRAY"]["STDERR_EXPECTED_WORDS"]
+        return self._process_scan_result(result, config)
+
+    def _prepare_build_scan_command(self, prefix, cwd, mode, pipeline_name, build_id, build_url):
+        build_info_command = [
+            prefix,
+            "rt",
+            "bp",
+            pipeline_name,
+            build_id,
+            "--env-exclude=*password*;*psw*;*secret*;*key*;*token*;*auth*;",
+            f"--build-url={build_url}"
+        ]
+        build_info_result = subprocess.run(build_info_command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        if not build_info_result.stdout:
+            logger.error(f"Build info  NOT  successfully deployed to Jfrog Arifactory.: {build_info_result.stderr}")
+            return None
+
+        print("##[info]Build info successfully deployed.")
+        return [
+            prefix,
+            mode,
+            pipeline_name,
+            build_id,
+            "--format=json",
+            "--vuln",
+            "--fail=false",
+            "--rescan=true"
+        ]
+
+    def _process_scan_result(self, result, config):
+        if not (
+            result.stdout
+            or all(word in result.stderr for word in config["XRAY"]["STDERR_EXPECTED_WORDS"])
         ):
-            if result.stdout:
-                scan_result = json.loads(result.stdout)
-            else:
-                scan_result = {}
-                if any(
-                    word in result.stderr
-                    for word in config["XRAY"]["STDERR_BREAK_ERRORS"]
-                ):
-                    raise Exception(f"Error executing Xray scan: {result.stderr}")
-                if any(
-                    word in result.stderr
-                    for word in config["XRAY"]["STDERR_ACCEPTED_ERRORS"]
-                ):
-                    logger.error(f"Error executing Xray scan: {result.stderr}")
-                    return None
-            if result.stdout == "null\n":
-                logger.warning(f"Xray scan returned null: {result.stderr}")
-                return None
-            file_result = os.path.join(os.getcwd(), "scan_result.json")
-            with open(file_result, "w") as file:
-                json.dump(scan_result, file, indent=4)
-            return file_result
-        else:
             logger.error(f"Error executing Xray scan: {result.stderr}")
             return None
+
+        if result.stdout:
+            scan_result = json.loads(result.stdout)
+        else:
+            scan_result = {}
+            if any(word in result.stderr for word in config["XRAY"]["STDERR_BREAK_ERRORS"]):
+                raise Exception(f"Error executing Xray scan: {result.stderr}")
+            if any(word in result.stderr for word in config["XRAY"]["STDERR_ACCEPTED_ERRORS"]):
+                logger.error(f"Error executing Xray scan: {result.stderr}")
+                return None
+
+        if result.stdout == "null\n":
+            logger.warning(f"Xray scan returned null: {result.stderr}")
+            return None
+
+        file_result = os.path.join(os.getcwd(), "scan_result.json")
+        with open(file_result, "w") as file:
+            json.dump(scan_result, file, indent=4)
+        return file_result
 
     def run_tool_dependencies_sca(
         self,

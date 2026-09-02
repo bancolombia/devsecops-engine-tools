@@ -138,27 +138,42 @@ class PrismaCloudManagerScan(ToolGateway):
                 data = json.load(file)
 
             prisma_exclusions = exclusions_data.get("All", {}).get("PRISMA", [])
-            modified = False
             base_image_list = base_image[0][0] if base_image and base_image[0][0] else []
-            
-            
             key_image_exception = remoteconfig.get("GET_IMAGE_BASE", {}).get("LABEL_KEYS", {}).get("key_image_exception", None)
-            
-            for result in data.get("results", []):
-                for vulnerability in result.get("vulnerabilities", []):
-                    for exclusion in prisma_exclusions:
-                        if (
-                            vulnerability.get("id") == exclusion.get("id") and
-                            any(b_image.startswith(ex_image) for b_image in base_image_list for ex_image in exclusion.get(key_image_exception, []))
-                        ):
-                            vulnerability["baseImage"] = str(base_image_list) if base_image_list else ""
-                            modified = True
+
+            modified = self._apply_base_image_exclusions(
+                data, prisma_exclusions, base_image_list, key_image_exception
+            )
 
             if modified:
                 with open(result_file, "w") as file:
                     json.dump(data, file, indent=4)
         except subprocess.CalledProcessError as e:
              logger.error(f"Error during write image base of {base_image}: {e.stderr}")
+
+    def _apply_base_image_exclusions(self, data, prisma_exclusions, base_image_list, key_image_exception):
+        modified = False
+        for result in data.get("results", []):
+            for vulnerability in result.get("vulnerabilities", []):
+                if self._matches_base_image_exclusion(
+                    vulnerability, prisma_exclusions, base_image_list, key_image_exception
+                ):
+                    vulnerability["baseImage"] = str(base_image_list) if base_image_list else ""
+                    modified = True
+        return modified
+
+    def _matches_base_image_exclusion(self, vulnerability, prisma_exclusions, base_image_list, key_image_exception):
+        for exclusion in prisma_exclusions:
+            if vulnerability.get("id") != exclusion.get("id"):
+                continue
+            exclusion_images = exclusion.get(key_image_exception, [])
+            if any(
+                b_image.startswith(ex_image)
+                for b_image in base_image_list
+                for ex_image in exclusion_images
+            ):
+                return True
+        return False
             
     def _generate_sbom(self, image_scanned, remoteconfig, prisma_key, image_name):
 
