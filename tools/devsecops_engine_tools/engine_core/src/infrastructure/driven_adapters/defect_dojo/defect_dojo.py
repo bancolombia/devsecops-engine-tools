@@ -943,6 +943,13 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             else None
         )
 
+    def _extract_package_name(self, component_name):
+        prefix, separator, suffix = component_name.rpartition("_")
+        # only unwrap Maven-style "groupId_artifactId" (dotted groupId), keep other ecosystems intact
+        if separator and "." in prefix:
+            return suffix
+        return component_name
+
     def _get_where(self, finding, tool):
         if tool == "engine_dependencies":
             return (
@@ -951,7 +958,11 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 + finding.component_version
             )
         elif tool == "engine_container":
-            return finding.component_name + ":" + finding.component_version
+            return (
+                self._extract_package_name(finding.component_name)
+                + ":"
+                + finding.component_version
+            )
         elif tool == "engine_dast":
             return finding.endpoints
         elif tool == "engine_risk":

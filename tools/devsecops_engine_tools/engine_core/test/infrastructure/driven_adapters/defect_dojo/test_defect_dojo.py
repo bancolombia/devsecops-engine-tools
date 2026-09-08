@@ -1366,6 +1366,42 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.assertEqual(create_date, "default_date")
         self.assertEqual(expired_date, "default_date")
 
+    def test_get_where_engine_container_maven_component(self):
+        finding = MagicMock()
+        finding.component_name = "org.apache.logging.log4j_log4j-api"
+        finding.component_version = "2.23.1"
+
+        where = self.defect_dojo._get_where(finding, "engine_container")
+
+        self.assertEqual(where, "log4j-api:2.23.1")
+
+    def test_get_where_engine_container_non_maven_underscore(self):
+        finding = MagicMock()
+        finding.component_name = "typing_extensions"
+        finding.component_version = "4.9.0"
+
+        where = self.defect_dojo._get_where(finding, "engine_container")
+
+        self.assertEqual(where, "typing_extensions:4.9.0")
+
+    def test_get_where_engine_container_os_package(self):
+        finding = MagicMock()
+        finding.component_name = "libc6"
+        finding.component_version = "2.35"
+
+        where = self.defect_dojo._get_where(finding, "engine_container")
+
+        self.assertEqual(where, "libc6:2.35")
+
+    def test_get_where_engine_dependencies_unaffected(self):
+        finding = MagicMock()
+        finding.component_name = "org.apache.logging.log4j_log4j-api"
+        finding.component_version = "2.23.1"
+
+        where = self.defect_dojo._get_where(finding, "engine_dependencies")
+
+        self.assertEqual(where, "org.apache.logging.log4j:log4j-api:2.23.1")
+
     
     @patch(
         "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.FindingExclusion.get_finding_exclusion"
