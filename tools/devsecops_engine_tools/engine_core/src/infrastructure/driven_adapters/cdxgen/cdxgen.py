@@ -79,7 +79,7 @@ class CdxGen(SbomManagerGateway):
         os_platform = platform.system()
         os_architecture = platform.machine()
         base_url = (
-            f"https://github.com/CycloneDX/cdxgen/releases/download/v{cdxgen_version}/"
+            f"https://github.com/cdxgen/cdxgen/releases/download/v{cdxgen_version}/"
         )
 
         if os_platform == "Linux":

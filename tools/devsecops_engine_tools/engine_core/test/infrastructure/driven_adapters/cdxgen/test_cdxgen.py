@@ -63,7 +63,7 @@ class TestCdxGen(unittest.TestCase):
         mock_check.assert_called_once()
         mock_install.assert_called_once_with(
             "cdxgen-linux-amd64",
-            "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64",
+            "https://github.com/cdxgen/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64",
             "cdxgen"
         )
         mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], True, True, False, False, '1.6', [])
@@ -89,7 +89,7 @@ class TestCdxGen(unittest.TestCase):
         mock_check.assert_called_once()
         mock_install.assert_called_once_with(
             "cdxgen-linux-arm64",
-            "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-linux-arm64",
+            "https://github.com/cdxgen/cdxgen/releases/download/v10.2.0/cdxgen-linux-arm64",
             "cdxgen"
         )
         mock_run.assert_called_once_with('./cdxgen-linux-arm64', self.artifact, self.service_name, [], [], True, True, False, False, '1.6', [])
@@ -113,7 +113,7 @@ class TestCdxGen(unittest.TestCase):
         mock_check.assert_called_once()
         mock_install.assert_called_once_with(
             "cdxgen-linux-amd64-slim",
-            "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64-slim",
+            "https://github.com/cdxgen/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64-slim",
             "cdxgen"
         )
 
@@ -135,7 +135,7 @@ class TestCdxGen(unittest.TestCase):
         mock_check.assert_called_once()
         mock_install.assert_called_once_with(
             "cdxgen-darwin-amd64",
-            "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-darwin-amd64",
+            "https://github.com/cdxgen/cdxgen/releases/download/v10.2.0/cdxgen-darwin-amd64",
             "cdxgen"
         )
 
@@ -159,7 +159,7 @@ class TestCdxGen(unittest.TestCase):
         mock_check.assert_called_once()
         mock_install.assert_called_once_with(
             "cdxgen-darwin-arm64",
-            "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-darwin-arm64",
+            "https://github.com/cdxgen/cdxgen/releases/download/v10.2.0/cdxgen-darwin-arm64",
             "cdxgen"
         )
 
@@ -181,7 +181,7 @@ class TestCdxGen(unittest.TestCase):
         mock_check.assert_called_once()
         mock_install.assert_called_once_with(
             "cdxgen-windows-amd64.exe",
-            "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-windows-amd64.exe",
+            "https://github.com/cdxgen/cdxgen/releases/download/v10.2.0/cdxgen-windows-amd64.exe",
             "cdxgen.exe"
         )
 
@@ -646,7 +646,7 @@ class TestCdxGen(unittest.TestCase):
     def test_install_tool_unix_success(self, mock_subprocess):
         # Arrange
         file = "cdxgen-linux-amd64"
-        url = "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64"
+        url = "https://github.com/cdxgen/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64"
         command_prefix = "cdxgen"
         
         mock_subprocess.return_value = Mock(returncode=0)
@@ -671,7 +671,7 @@ class TestCdxGen(unittest.TestCase):
     def test_install_tool_unix_download_failure(self, mock_subprocess, mock_logger):
         # Arrange
         file = "cdxgen-linux-amd64"
-        url = "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64"
+        url = "https://github.com/cdxgen/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64"
         command_prefix = "cdxgen"
         error_message = "Download failed"
         
@@ -687,7 +687,7 @@ class TestCdxGen(unittest.TestCase):
     def test_install_tool_windows_success(self, mock_subprocess):
         # Arrange
         file = "cdxgen-windows-amd64.exe"
-        url = "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-windows-amd64.exe"
+        url = "https://github.com/cdxgen/cdxgen/releases/download/v10.2.0/cdxgen-windows-amd64.exe"
         command_prefix = "cdxgen.exe"
         
         with patch.object(self.cdxgen, '_download_tool') as mock_download:
@@ -703,7 +703,7 @@ class TestCdxGen(unittest.TestCase):
     def test_install_tool_windows_download_failure(self, mock_subprocess, mock_logger):
         # Arrange
         file = "cdxgen-windows-amd64.exe"
-        url = "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-windows-amd64.exe"
+        url = "https://github.com/cdxgen/cdxgen/releases/download/v10.2.0/cdxgen-windows-amd64.exe"
         command_prefix = "cdxgen.exe"
         error_message = "Download failed"
         
@@ -719,7 +719,7 @@ class TestCdxGen(unittest.TestCase):
     def test_download_tool_success(self, mock_requests_get):
         # Arrange
         file = "cdxgen-linux-amd64"
-        url = "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64"
+        url = "https://github.com/cdxgen/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64"
         mock_content = b"binary content"
         
         mock_response = Mock()
@@ -742,7 +742,7 @@ class TestCdxGen(unittest.TestCase):
     def test_download_tool_failure(self, mock_requests_get, mock_logger):
         # Arrange
         file = "cdxgen-linux-amd64"
-        url = "https://github.com/CycloneDX/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64"
+        url = "https://github.com/cdxgen/cdxgen/releases/download/v10.2.0/cdxgen-linux-amd64"
         error_message = "Network error"
         
         mock_requests_get.side_effect = Exception(error_message)
