@@ -77,7 +77,7 @@ class CmdbRestConsumer:
                     )
 
                 return self.process_response(
-                    response, response_format, cmdb_object, request.code_app
+                    response, response_format, cmdb_object, request
                 )
 
             return Utils().retries_requests(
@@ -109,21 +109,24 @@ class CmdbRestConsumer:
         self.__token = response
 
     def process_response(
-        self, response, response_format, cmdb_object, code_app
+        self, response, response_format, cmdb_object, request
     ) -> Cmdb:
         if response.status_code != 200:
             logger.warning(response)
             raise ApiError(f"Error querying cmdb: {response.reason}")
 
         if response.json() == [] or '[]' in response.text:
-            logger.warning(f"Code app: {code_app} not found in CMDB")
+            logger.warning(f"Code app: {request.code_app} not found in CMDB")
             return cmdb_object  # Producto es Orphan
 
         data = self.get_nested_data(response, response_format)
         data_map = self.mapping_cmdb(data)
         logger.debug(data_map)
         cmdb_object = Cmdb.from_dict(data_map)
-        cmdb_object.codigo_app = code_app
+        if cmdb_object.codigo_app is None:
+            cmdb_object.codigo_app = request.code_app
+        else:
+            request.code_app = cmdb_object.codigo_app
         return cmdb_object
 
     def initialize_cmdb_object(self, request: ImportScanRequest) -> Cmdb:

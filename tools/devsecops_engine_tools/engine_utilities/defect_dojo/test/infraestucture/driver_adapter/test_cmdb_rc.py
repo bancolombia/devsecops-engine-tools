@@ -86,7 +86,7 @@ def test_process_response_success():
         Mock(),
     )
 
-    cmdb_object = consumer.process_response(response, [0], Cmdb(), "123")
+    cmdb_object = consumer.process_response(response, [0], Cmdb(), ImportScanRequest(code_app="123"))
 
     assert isinstance(cmdb_object, Cmdb)
     assert cmdb_object.product_name == "NU1245_Test"
@@ -111,7 +111,7 @@ def test_process_response_success_empty():
             tag_product="ORPHAN",
             product_description="Orphan Product Description",
             codigo_app=str(123),
-        ), "123")
+        ), ImportScanRequest(code_app="123"))
 
     assert isinstance(cmdb_object, Cmdb)
     assert cmdb_object.product_name == "123_Product"
