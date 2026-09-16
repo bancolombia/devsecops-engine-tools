@@ -169,12 +169,12 @@ class ImportScanUserCase:
             ]
 
         if not matching:
-            engagement = self.__rest_engagement.post_engagement(request, product_id, request.tool_scm_configuration)
-            logger.debug(f"Engagement created: {engagement.name} whit product id {engagement.product}")
+            updated_engagement = self.__rest_engagement.patch_engagement(request, engagement_list.results[0].id, request.tool_scm_configuration, product_id)
+            logger.debug(f"Engagement updated: {updated_engagement.name} with product id {updated_engagement.product}")
             return
 
         engagement = matching[0]
-        logger.debug(f"Engagement found: {engagement.name} whit product id: {engagement.product}")
+        logger.debug(f"Engagement found: {engagement.name} with product id: {engagement.product}")
 
         if request.hold_found_product_engagement and product_id != engagement.product:
             self._apply_hold_found_product_context(request, engagement.product)

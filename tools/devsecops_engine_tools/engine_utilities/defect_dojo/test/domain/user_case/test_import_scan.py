@@ -488,7 +488,7 @@ def test_execute_creates_engagement_when_name_matches_but_product_differs_withou
 
     uc.execute(request)
 
-    mock_engagement.post_engagement.assert_called_once()
+    mock_engagement.patch_engagement.assert_called_once()
 
 
 def test_import_scan_timeout_returns_partial_response_with_url():
