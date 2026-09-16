@@ -10,7 +10,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.report import (
     Report,
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
-    format_date,
+    format_optional_date,
     format_expired_date,
 )
 from prettytable import PrettyTable, DOUBLE_BORDER
@@ -120,7 +120,7 @@ class PrinterPrettyTable(PrinterTableGateway):
                     self._check_spaces(exclusion["vm_id"]),
                     self._check_spaces(exclusion["service"]),
                     ", ".join(exclusion["tags"]),
-                    format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
+                    format_optional_date(exclusion["create_date"]),
                     format_expired_date(exclusion["expired_date"]),
                     exclusion["reason"],
                 ]
@@ -163,7 +163,7 @@ class PrinterPrettyTable(PrinterTableGateway):
                     exclusion["severity"],
                     exclusion["id"],
                     exclusion["where"],
-                    format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
+                    format_optional_date(exclusion["create_date"]),
                     format_expired_date(exclusion["expired_date"]),
                     exclusion["reason"],
                 ]
