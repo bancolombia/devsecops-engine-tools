@@ -118,6 +118,7 @@ def test_get_inputs_from_cli(mock_parse_args):
     mock_args.token_license_analyzer = None
     mock_args.use_license_analyzer = "false"
     mock_args.docker_address = "unix:///var/run/docker.sock"
+    mock_args.excepted_checks = "CKV_AWS_18,CKV_AWS_21"
     # Mock the parse_args method
     mock_parse_args.return_value = mock_args
 
@@ -151,6 +152,7 @@ def test_get_inputs_from_cli(mock_parse_args):
         "token_license_analyzer": None,
         "use_license_analyzer": "false",
         "docker_address": "unix:///var/run/docker.sock",
+        "excepted_checks": "CKV_AWS_18,CKV_AWS_21",
     }
 
 

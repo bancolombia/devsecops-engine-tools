@@ -400,6 +400,28 @@ Defines exclusion rules for repositories and specific security checks.
   - `severity`: Rule severity level
   - `hu`: Human user identifier for audit trail
 
+### Excepted checks by CLI (soft fail)
+
+When the list of approved exceptions lives outside the remote config repository (for example in an
+exception table owned by the pipeline), it can be provided at execution time with the
+`--excepted_checks` flag, a comma separated list of check ids:
+
+```bash
+devsecops-engine-tools ... --module engine_iac --tool checkov --excepted_checks "CKV_AWS_18,CKV_AWS_21"
+```
+
+Behaviour:
+
+- The findings of those checks are still reported and sent to the vulnerability manager, but they are
+  moved to the excepted findings table so they do not count against the threshold and do not break the
+  build (soft fail).
+- The exclusions are built from the findings themselves, so they match any severity and any file
+  (`where: all`) and are reported with the reason `Excepted check (soft fail)`.
+- Check ids without findings in the execution are ignored and logged as informational.
+- The list is merged with the exclusions coming from `Exclusions.json`, it does not replace them.
+- Resolving which check ids are excepted is the responsibility of the caller (pipeline), the engine only
+  consumes the resulting list.
+
 ## Main Responsibilities
 
 - **IaC Security Orchestration:** Executes IaC security tools (Checkov, KICS, Kubescape, Conftest) on infrastructure code

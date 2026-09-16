@@ -1,7 +1,12 @@
 import unittest
+from datetime import datetime
 from unittest.mock import MagicMock
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.usecases.iac_scan import (
     IacScan,
+)
+from devsecops_engine_tools.engine_core.src.domain.model.finding import (
+    Category,
+    Finding,
 )
 
 
@@ -281,3 +286,101 @@ class TestIacScan(unittest.TestCase):
         self.assertEqual(input_core.totalized_exclusions[0].id, "CKV_K8S_8")
         self.assertEqual(input_core.totalized_exclusions[1].id, "CKV_K8S_9")
         self.tool_gateway.run_tool.assert_not_called()
+
+    def _finding(self, check_id, severity, where="deployment.yaml: resource"):
+        return Finding(
+            id=check_id,
+            cvss=None,
+            where=where,
+            description="description",
+            severity=severity,
+            identification_date="19012024",
+            published_date_cve=None,
+            module="engine_iac",
+            category=Category.VULNERABILITY,
+            requirements="guideline",
+            tool="Checkov",
+        )
+
+    def test_build_excepted_checks_exclusions(self):
+        findings_list = [
+            self._finding("CKV_AWS_18", "medium"),
+            self._finding("CKV_AWS_18", "high", where="other.yaml: resource"),
+            self._finding("CKV_AWS_21", "low"),
+            self._finding("CKV_AWS_99", "critical"),
+        ]
+
+        exclusions = self.iac_scan._build_excepted_checks_exclusions(
+            {"excepted_checks": " CKV_AWS_18 , CKV_AWS_21 ,, CKV_AWS_404 "},
+            findings_list,
+        )
+
+        self.assertEqual(
+            [(e.id, e.severity, e.where, e.reason) for e in exclusions],
+            [
+                ("CKV_AWS_18", "high", "all", IacScan.EXCEPTED_CHECKS_REASON),
+                ("CKV_AWS_18", "medium", "all", IacScan.EXCEPTED_CHECKS_REASON),
+                ("CKV_AWS_21", "low", "all", IacScan.EXCEPTED_CHECKS_REASON),
+            ],
+        )
+        # create_date must be set so the exclusions table can be rendered
+        today = datetime.now().strftime("%d%m%Y")
+        for exclusion in exclusions:
+            self.assertEqual(exclusion.create_date, today)
+            self.assertEqual(exclusion.expired_date, "")
+
+    def test_build_excepted_checks_exclusions_without_flag(self):
+        findings_list = [self._finding("CKV_AWS_18", "medium")]
+
+        self.assertEqual(self.iac_scan._build_excepted_checks_exclusions({}, findings_list), [])
+        self.assertEqual(
+            self.iac_scan._build_excepted_checks_exclusions({"excepted_checks": ""}, findings_list),
+            [],
+        )
+        self.assertEqual(
+            self.iac_scan._build_excepted_checks_exclusions(
+                {"excepted_checks": None}, findings_list
+            ),
+            [],
+        )
+
+    def test_process_with_excepted_checks(self):
+        dict_args = {
+            "remote_config_repo": "example_repo",
+            "remote_config_branch": "",
+            "folder_path": ".",
+            "environment": "test",
+            "platform": "cloudformation",
+            "token_external_checks": "token",
+            "context": "false",
+            "excepted_checks": "CKV_AWS_18",
+        }
+
+        self.remote_config_source_gateway.get_remote_config.return_value = {
+            "SEARCH_PATTERN": ["AW", "NU"],
+            "IGNORE_SEARCH_PATTERN": "(.*_test)",
+            "EXCLUSIONS_PATH": "Exclusions.json",
+            "MESSAGE_INFO_ENGINE_IAC": "message test",
+            "UPDATE_SERVICE_WITH_FILE_NAME_CFT": "False",
+            "THRESHOLD": {
+                "VULNERABILITY": {"Critical": 10, "High": 3, "Medium": 20, "Low": 30},
+                "COMPLIANCE": {"Critical": 4},
+                "PRIORITY": {"Very Critical": 1, "Critical": 3, "High": 5, "Medium Low": 15},
+            },
+            "CHECKOV": {"VERSION": "2.3.296", "RULES": ""},
+        }
+        self.devops_platform_gateway.get_variable.side_effect = self.side_effect
+
+        findings = [
+            self._finding("CKV_AWS_18", "medium"),
+            self._finding("CKV_AWS_99", "high"),
+        ]
+        self.tool_gateway.run_tool.return_value = (findings, "/path/to/results")
+
+        findings_list, input_core = self.iac_scan.process(dict_args, "secret", "CHECKOV", "pdn")
+
+        self.assertEqual(findings_list, findings)
+        self.assertEqual(len(input_core.totalized_exclusions), 1)
+        self.assertEqual(input_core.totalized_exclusions[0].id, "CKV_AWS_18")
+        self.assertEqual(input_core.totalized_exclusions[0].severity, "medium")
+        self.assertEqual(input_core.totalized_exclusions[0].where, "all")
