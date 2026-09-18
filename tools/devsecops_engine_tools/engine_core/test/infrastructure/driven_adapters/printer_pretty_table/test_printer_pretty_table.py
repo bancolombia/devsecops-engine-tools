@@ -130,6 +130,31 @@ class TestPrinterPrettyTable(unittest.TestCase):
         # Add more assertions to validate the output
 
     @patch("builtins.print")
+    def test_print_table_exclusions_without_dates(self, mock_print):
+        # Exclusions without dates are valid, the model defaults them to an empty
+        # string, so rendering them must not break the execution.
+        exclusions = [
+            {
+                "severity": "critical",
+                "id": "CKV_AWS_18",
+                "where": "all",
+                "create_date": "",
+                "expired_date": "",
+                "reason": "Excepted check (soft fail)",
+            }
+        ]
+        manager = {"MODEL": "severity", "CLASSIFICATION": ["critical", "high", "medium", "low"]}
+
+        printer = PrinterPrettyTable()
+
+        printer.print_table_exclusions(exclusions, manager)
+
+        assert mock_print.called
+        printed_table = str(mock_print.call_args[0][0])
+        assert "CKV_AWS_18" in printed_table
+        assert printed_table.count("NA") == 2
+
+    @patch("builtins.print")
     def test_print_table_report_model_risk(self, mock_print):
         # Arrange
         report_list = [

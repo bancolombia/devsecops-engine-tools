@@ -263,6 +263,15 @@ def get_inputs_from_cli(args):
         required=False,
         help="Address of the Docker daemon to connect to."
     )
+    parser.add_argument(
+        "--excepted_checks",
+        type=str,
+        required=False,
+        default="",
+        help="Comma-separated list of check ids already excepted for this execution, they are treated as \
+        soft-fail: the findings are reported but do not break the build. Only applies to engine_iac. \
+        Ej: CKV_AWS_18,CKV_AWS_21",
+    )
     TOOLS = {
         "engine_iac": ["checkov", "kics", "kubescape", "conftest"],
         "engine_secret": ["trufflehog", "gitleaks", "all_tools"],
@@ -310,6 +319,7 @@ def get_inputs_from_cli(args):
         "dast_file_path": args.dast_file_path,
         "context": args.context,
         "docker_address": args.docker_address,
+        "excepted_checks": args.excepted_checks,
     }
 
 

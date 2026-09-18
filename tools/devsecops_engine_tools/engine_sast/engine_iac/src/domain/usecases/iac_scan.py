@@ -1,5 +1,6 @@
 import os
 import re
+from datetime import datetime
 from devsecops_engine_tools.engine_sast.engine_iac.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -19,6 +20,8 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class IacScan:
+    EXCEPTED_CHECKS_REASON = "Excepted check (soft fail)"
+
     def __init__(
         self, tool_gateway: ToolGateway, devops_platform_gateway: DevopsPlatformGateway, remote_config_source_gateway: DevopsPlatformGateway
     ):
@@ -69,6 +72,9 @@ class IacScan:
             totalized_exclusions.extend(
                 [Exclusions(**elem) for elem in config_tool_core.exclusions_scope]
             )
+        totalized_exclusions.extend(
+            self._build_excepted_checks_exclusions(dict_args, findings_list)
+        )
 
         input_core = InputCore(
             totalized_exclusions=totalized_exclusions,
@@ -88,6 +94,56 @@ class IacScan:
         )
 
         return findings_list, input_core
+
+    def _build_excepted_checks_exclusions(self, dict_args, findings_list):
+        """
+        Translates the --excepted_checks CLI flag (comma separated check ids already
+        approved as exceptions outside the engine) into Exclusions, so those findings
+        are still reported but do not break the build.
+
+        The severity is taken from each finding instead of being hardcoded because
+        BreakBuild._filter_findings only excludes a finding when the exclusion matches
+        its severity or its priority scale, and the priority is not resolved yet at
+        this point of the execution.
+        """
+        excepted_checks = {
+            check.strip()
+            for check in (dict_args.get("excepted_checks") or "").split(",")
+            if check.strip()
+        }
+        if not excepted_checks:
+            return []
+
+        severities_by_check = {}
+        for finding in findings_list:
+            if finding.id in excepted_checks:
+                severities_by_check.setdefault(finding.id, set()).add(finding.severity)
+
+        without_findings = excepted_checks - set(severities_by_check)
+        if without_findings:
+            logger.info(
+                "%s of %s excepted checks have no findings in this execution",
+                len(without_findings),
+                len(excepted_checks),
+            )
+            logger.debug(
+                "Excepted checks without findings: %s", ", ".join(sorted(without_findings))
+            )
+
+        create_date = datetime.now().strftime("%d%m%Y")
+        return [
+            Exclusions(
+                **{
+                    "id": check_id,
+                    "where": "all",
+                    "severity": severity,
+                    "create_date": create_date,
+                    "reason": self.EXCEPTED_CHECKS_REASON,
+                }
+            )
+            for check_id in sorted(severities_by_check)
+            for severity in sorted(severities_by_check[check_id])
+        ]
 
     def _complete_config_tool(self, data_file_tool, exclusions, tool, dict_args):
         config_tool = ConfigTool(json_data=data_file_tool)

@@ -10,7 +10,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.report import (
     Report,
 )
 from devsecops_engine_tools.engine_core.src.infrastructure.helpers.util import (
-    format_date,
+    format_optional_date,
     format_expired_date,
 )
 from rich.console import Console
@@ -64,7 +64,7 @@ class PrinterRichTable(PrinterTableGateway):
                     self._check_spaces(exclusion["vm_id"], exclusion["vm_id_url"]),
                     ", ".join(exclusion["tags"]),
                     exclusion["service"],
-                    format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
+                    format_optional_date(exclusion["create_date"]),
                     format_expired_date(exclusion["expired_date"]),
                     exclusion["reason"],
                 ]
@@ -87,7 +87,7 @@ class PrinterRichTable(PrinterTableGateway):
                     self._check_spaces(exclusion["vm_id"], exclusion["vm_id_url"]),
                     exclusion.get("service", ""),
                     ", ".join(exclusion["tags"]),
-                    format_date(exclusion["create_date"], "%d%m%Y", "%d/%m/%Y"),
+                    format_optional_date(exclusion["create_date"]),
                     format_expired_date(exclusion["expired_date"]),
                     exclusion["reason"],
                 ]
