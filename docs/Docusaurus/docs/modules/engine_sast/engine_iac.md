@@ -66,7 +66,7 @@ Main configuration file that defines scanning behavior, tool versions, and secur
 					"pdn": true,
 					"qa": true
 				},
-				"guideline": "https://bit.ly/3IrJFQx",
+				"guideline": "",
 				"severity": "Critical",
 				"cvss": "",
 				"category": "Vulnerability"
@@ -80,7 +80,7 @@ Main configuration file that defines scanning behavior, tool versions, and secur
 					"pdn": true,
 					"qa": true
 				},
-				"guideline": "https://bit.ly/3IrJFQx",
+				"guideline": "",
 				"severity": "High",
 				"cvss": "",
 				"category": "Compliance"
@@ -95,7 +95,7 @@ Main configuration file that defines scanning behavior, tool versions, and secur
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
