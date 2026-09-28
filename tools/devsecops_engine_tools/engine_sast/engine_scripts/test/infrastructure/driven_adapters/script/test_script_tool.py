@@ -16,7 +16,7 @@ CONFIG_TOOL = {
         "RULES": {
             "RULES_ARTIFACT_HYGIENE": {
                 "NO_SOURCE_MAPS": {
-                    "SCRIPT_PATH": "scripts/check_no_maps.py",
+                    "SCRIPT_NAME": "check_no_maps.py",
                     "RESULT_MODE": "output_lines",
                     "severity": "High",
                     "category": "Vulnerability",
@@ -39,7 +39,7 @@ class TestScriptTool(unittest.TestCase):
         rule_data = CONFIG_TOOL["SCRIPT"]["RULES"]["RULES_ARTIFACT_HYGIENE"]["NO_SOURCE_MAPS"]
         result = self.tool._resolve_script("NO_SOURCE_MAPS", rule_data)
         self.assertEqual(
-            result, [__import__("sys").executable, "scripts/check_no_maps.py"]
+            result, [__import__("sys").executable, "check_no_maps.py"]
         )
 
     def test_resolve_script_rejects_non_python_extensions(self):
@@ -51,34 +51,27 @@ class TestScriptTool(unittest.TestCase):
             "scripts/check",
         ):
             with self.subTest(script_path=script_path):
-                rule_data = {"SCRIPT_PATH": script_path}
+                rule_data = {"SCRIPT_NAME": script_path}
                 self.assertIsNone(self.tool._resolve_script("R1", rule_data))
 
     def test_resolve_script_uses_downloaded_scripts_root(self):
-        rule_data = {"SCRIPT_PATH": "scripts/check.py"}
+        rule_data = {"SCRIPT_NAME": "check.py"}
         result = self.tool._resolve_script(
-            "R1", rule_data, "/tmp/rules/script"
+            "R1", rule_data, "/tmp/rules/scripts"
         )
         self.assertEqual(
             result,
-            [__import__("sys").executable, "/tmp/rules/script/scripts/check.py"],
+            [__import__("sys").executable, "/tmp/rules/scripts/check.py"],
         )
 
     @patch(
         "devsecops_engine_tools.engine_sast.engine_scripts.src.infrastructure.driven_adapters.script.script_tool.Utils"
     )
-    @patch(
-        "devsecops_engine_tools.engine_sast.engine_scripts.src.infrastructure.driven_adapters.script.script_tool.os.path.isdir",
-        return_value=True,
-    )
-    def test_resolve_scripts_root_downloads_external_scripts(
-        self, _isdir, mock_utils_cls
-    ):
+    def test_resolve_scripts_root_downloads_external_scripts(self, mock_utils_cls):
         scripts_config = {
             "USE_EXTERNAL_CHECKS_DIR": True,
             "EXTERNAL_DIR_OWNER": "org",
             "EXTERNAL_DIR_REPOSITORY": "script-assets",
-            "EXTERNAL_DIR_SCRIPTS_PATH": "artifact_checks",
             "APP_ID_GITHUB": "123",
             "INSTALLATION_ID_GITHUB": "456",
         }
@@ -94,7 +87,7 @@ class TestScriptTool(unittest.TestCase):
             "github_token:token",
             agent_work_folder="/tmp/agent",
         )
-        self.assertEqual(result, "/tmp/agent/rules/script/artifact_checks")
+        self.assertEqual(result, "/tmp/agent/rules/scripts")
 
     def test_resolve_scripts_root_disabled_uses_scanned_repository(self):
         result = self.tool._resolve_scripts_root(
@@ -106,7 +99,7 @@ class TestScriptTool(unittest.TestCase):
         "devsecops_engine_tools.engine_sast.engine_scripts.src.infrastructure.driven_adapters.script.script_tool.logger"
     )
     def test_resolve_script_rejects_path_outside_external_root(self, mock_logger):
-        rule_data = {"SCRIPT_PATH": "../../outside.py"}
+        rule_data = {"SCRIPT_NAME": "../../outside.py"}
         result = self.tool._resolve_script(
             "R1", rule_data, "/tmp/rules/script"
         )
@@ -117,7 +110,7 @@ class TestScriptTool(unittest.TestCase):
         "devsecops_engine_tools.engine_sast.engine_scripts.src.infrastructure.driven_adapters.script.script_tool.logger"
     )
     def test_resolve_script_rejects_absolute_external_path(self, mock_logger):
-        rule_data = {"SCRIPT_PATH": "/tmp/other/check.py"}
+        rule_data = {"SCRIPT_NAME": "/tmp/other/check.py"}
         result = self.tool._resolve_script(
             "R1", rule_data, "/tmp/rules/script"
         )
@@ -137,7 +130,7 @@ class TestScriptTool(unittest.TestCase):
         "devsecops_engine_tools.engine_sast.engine_scripts.src.infrastructure.driven_adapters.script.script_tool.logger"
     )
     def test_resolve_script_non_string_path_rejected(self, mock_logger):
-        rule_data = {"SCRIPT_PATH": ["scripts/check.py"]}
+        rule_data = {"SCRIPT_NAME": ["check.py"]}
         result = self.tool._resolve_script("SOME_RULE", rule_data)
         self.assertIsNone(result)
         mock_logger.error.assert_called_once()
@@ -147,7 +140,8 @@ class TestScriptTool(unittest.TestCase):
     # ------------------------------------------------------------------ #
 
     @patch("subprocess.run")
-    def test_run_script_success(self, mock_subprocess):
+    @patch("os.path.isfile", return_value=True)
+    def test_run_script_success(self, _isfile, mock_subprocess):
         mock_subprocess.return_value = MagicMock(
             returncode=0, stdout=b"a.map\n", stderr=b""
         )
@@ -159,11 +153,26 @@ class TestScriptTool(unittest.TestCase):
             script, cwd="dist", capture_output=True, timeout=30, shell=False
         )
 
+    @patch("os.path.isfile", return_value=False)
+    @patch("subprocess.run")
+    @patch("builtins.open", new_callable=mock_open)
+    @patch("json.dump")
+    @patch("os.path.abspath", return_value="/tmp/results_script.json")
+    def test_run_tool_missing_script_returns_finding(
+        self, _abspath, _dump, _open, mock_subprocess, _isfile
+    ):
+        findings, _ = self.tool.run_tool(CONFIG_TOOL, ["dist"])
+
+        self.assertEqual(len(findings), 1)
+        self.assertIn("Configured script not found", findings[0].description)
+        mock_subprocess.assert_not_called()
+
     @patch("subprocess.run", side_effect=__import__("subprocess").TimeoutExpired(cmd="find", timeout=30))
     @patch(
         "devsecops_engine_tools.engine_sast.engine_scripts.src.infrastructure.driven_adapters.script.script_tool.logger"
     )
-    def test_run_script_timeout(self, mock_logger, _):
+    @patch("os.path.isfile", return_value=True)
+    def test_run_script_timeout(self, _isfile, mock_logger, _):
         entry = self.tool._run_script("R1", [__import__("sys").executable, "check.py"], "dist", "output_lines", 30, "high")
         self.assertIsNone(entry["returncode"])
         self.assertEqual(entry["stderr"], "Command timed out")
@@ -173,7 +182,8 @@ class TestScriptTool(unittest.TestCase):
     @patch(
         "devsecops_engine_tools.engine_sast.engine_scripts.src.infrastructure.driven_adapters.script.script_tool.logger"
     )
-    def test_run_script_generic_exception(self, mock_logger, _):
+    @patch("os.path.isfile", return_value=True)
+    def test_run_script_generic_exception(self, _isfile, mock_logger, _):
         entry = self.tool._run_script("R1", [__import__("sys").executable, "check.py"], "dist", "output_lines", 30, "high")
         self.assertIsNone(entry["returncode"])
         self.assertEqual(entry["stderr"], "boom")
@@ -187,8 +197,9 @@ class TestScriptTool(unittest.TestCase):
     @patch("builtins.open", new_callable=mock_open)
     @patch("json.dump")
     @patch("os.path.abspath", return_value="/tmp/results_script.json")
+    @patch("os.path.isfile", return_value=True)
     def test_run_tool_returns_findings_and_path(
-        self, _abspath, _dump, _open, mock_subprocess
+        self, _isfile, _abspath, _dump, _open, mock_subprocess
     ):
         mock_subprocess.return_value = MagicMock(
             returncode=0, stdout=b"app.js.map\n", stderr=b""

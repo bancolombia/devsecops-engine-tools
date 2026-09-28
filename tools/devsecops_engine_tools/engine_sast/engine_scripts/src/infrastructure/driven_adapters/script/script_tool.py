@@ -69,16 +69,7 @@ class ScriptTool(ToolGateway):
             agent_work_folder=work_folder,
         )
 
-        scripts_root = os.path.join(work_folder, "rules", "script")
-        scripts_subfolder = scripts_config.get(
-            "EXTERNAL_DIR_SCRIPTS_PATH", ""
-        ).strip("/\\")
-        if scripts_subfolder:
-            candidate_path = os.path.join(scripts_root, scripts_subfolder)
-            if os.path.isdir(candidate_path):
-                return candidate_path
-
-        return scripts_root
+        return os.path.join(work_folder, "rules", "scripts")
 
     def _execute_rules(
         self, rules_config, folders_to_scan, timeout_seconds, scripts_root=None
@@ -108,47 +99,50 @@ class ScriptTool(ToolGateway):
         return results
 
     def _resolve_script(self, rule_id, rule_data, scripts_root=None):
-        script_path = rule_data.get("SCRIPT_PATH")
+        script_name = rule_data.get("SCRIPT_NAME")
 
-        if not script_path:
-            logger.warning(f"Rule '{rule_id}' has no SCRIPT_PATH configured, skipping")
+        if not script_name:
+            logger.warning(f"Rule '{rule_id}' has no SCRIPT_NAME configured, skipping")
             return None
 
-        if not isinstance(script_path, str):
+        if not isinstance(script_name, str):
             logger.error(
-                f"Rule '{rule_id}' SCRIPT_PATH must be a non-empty string, skipping"
+                f"Rule '{rule_id}' SCRIPT_NAME must be a non-empty string, skipping"
+            )
+            return None
+
+        if (
+            script_name in {".", ".."}
+            or os.path.basename(script_name) != script_name
+            or "/" in script_name
+            or "\\" in script_name
+        ):
+            logger.error(
+                f"Rule '{rule_id}' SCRIPT_NAME must contain only a filename, skipping"
+            )
+            return None
+
+        if os.path.splitext(script_name)[1].lower() != ".py":
+            logger.error(
+                f"Rule '{rule_id}' SCRIPT_NAME must name a Python file, skipping"
             )
             return None
 
         if scripts_root:
-            if os.path.isabs(script_path):
-                logger.error(
-                    f"Rule '{rule_id}' SCRIPT_PATH must be relative when using "
-                    "external scripts, skipping"
-                )
-                return None
-
             scripts_root = os.path.realpath(scripts_root)
-            script_path = os.path.realpath(os.path.join(scripts_root, script_path))
+            script_path = os.path.realpath(os.path.join(scripts_root, script_name))
             try:
                 if os.path.commonpath([scripts_root, script_path]) != scripts_root:
                     raise ValueError("path escapes external scripts directory")
             except ValueError:
                 logger.error(
-                    f"Rule '{rule_id}' SCRIPT_PATH escapes external scripts "
+                    f"Rule '{rule_id}' SCRIPT_NAME escapes external scripts "
                     "directory, skipping"
                 )
                 return None
+            return [sys.executable, script_path]
 
-        extension = os.path.splitext(script_path)[1].lower()
-        if extension != ".py":
-            logger.error(
-                f"Rule '{rule_id}' SCRIPT_PATH must point to a Python file, "
-                f"got '{extension or 'no extension'}', skipping"
-            )
-            return None
-
-        return [sys.executable, script_path]
+        return [sys.executable, script_name]
 
     def _run_script(
         self, rule_id, script, folder, result_mode, timeout_seconds, severity
@@ -162,6 +156,17 @@ class ScriptTool(ToolGateway):
             "stdout": "",
             "stderr": "",
         }
+        script_path = script[-1]
+        script_file = (
+            script_path if os.path.isabs(script_path) else os.path.join(folder, script_path)
+        )
+        if not os.path.isfile(script_file):
+            entry["stderr"] = f"Configured script not found: {script_path}"
+            logger.error(
+                f"Rule '{rule_id}' configured script not found: '{script_file}'"
+            )
+            return entry
+
         try:
             result = subprocess.run(
                 script,

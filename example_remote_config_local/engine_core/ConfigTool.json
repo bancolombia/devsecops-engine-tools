@@ -236,8 +236,7 @@
     "ENGINE_SCRIPTS": {
         "ENABLED": true,
         "TOOL": "SCRIPT",
-        "PRIORITY": "STANDARD|DISCREET",
-        "GENERATE_CONTEXT": false
+        "PRIORITY": "STANDARD|DISCREET"
     },
     "ENGINE_RISK": {
         "ENABLED": false
