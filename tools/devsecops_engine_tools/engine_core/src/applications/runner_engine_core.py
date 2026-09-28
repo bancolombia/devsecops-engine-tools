@@ -119,6 +119,7 @@ def get_inputs_from_cli(args):
             "kiuwan",
             "cdxgen",
             "all_tools",
+            "script",
         ],
         type=str,
         required=False,
@@ -137,6 +138,7 @@ def get_inputs_from_cli(args):
             "engine_license",
             "engine_risk",
             "engine_function",
+            "engine_scripts",
         ],
         type=str,
         required=True,
@@ -147,7 +149,7 @@ def get_inputs_from_cli(args):
         "--folder_path",
         type=str,
         required=False,
-        help="Folder Path to scan, only apply engine_iac, engine_code, engine_secret and engine_dependencies tools",
+        help="Folder Path to scan, only apply engine_iac, engine_scripts, engine_code, engine_secret and engine_dependencies tools",
     )
     parser.add_argument(
         "-tr",
@@ -282,6 +284,7 @@ def get_inputs_from_cli(args):
         "engine_dast": ["nuclei"],
         "engine_risk": None,
         "engine_function": ["prisma"],
+        "engine_scripts": ["script"],
     }
 
     args = parser.parse_args()

@@ -27,6 +27,7 @@ class ContextExtractionManager(ContextExtractionGateway):
             "engine_container": "get_container_context_from_results",
             "engine_dependencies": "get_dependencies_context_from_results",
             "engine_license": "get_license_context_from_results",
+            "engine_scripts": "get_scripts_context_from_results",
         }
         
         # Mapping of module names to their context output keys
@@ -35,6 +36,7 @@ class ContextExtractionManager(ContextExtractionGateway):
             "engine_container": "container_context",
             "engine_dependencies": "dependencies_context",
             "engine_license": "license_context",
+            "engine_scripts": "scripts_context",
         }
         
     def register_tool_gateway(self, module_name: str, tool_gateway: any):

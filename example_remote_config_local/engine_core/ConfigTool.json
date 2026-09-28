@@ -233,6 +233,12 @@
         "TOOL": "BEARER|KIUWAN",
         "PRIORITY": "STANDARD|DISCREET"
     },
+    "ENGINE_SCRIPTS": {
+        "ENABLED": true,
+        "TOOL": "SCRIPT",
+        "PRIORITY": "STANDARD|DISCREET",
+        "GENERATE_CONTEXT": false
+    },
     "ENGINE_RISK": {
         "ENABLED": false
     },

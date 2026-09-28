@@ -2,6 +2,9 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.license_manager
 from devsecops_engine_tools.engine_sast.engine_iac.src.applications.runner_iac_scan import (
     runner_engine_iac,
 )
+from devsecops_engine_tools.engine_sast.engine_scripts.src.applications.runner_scripts_scan import (
+    runner_engine_scripts,
+)
 from devsecops_engine_tools.engine_sast.engine_secret.src.applications.runner_secret_scan import (
     runner_secret_scan,
 )
@@ -247,6 +250,30 @@ class HandleScan:
                 config_tool
             )
 
+            self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
+            return findings_list, input_core
+        elif "engine_scripts" in dict_args["module"]:
+            findings_list, input_core, tool_gateway = runner_engine_scripts(
+                dict_args,
+                config_tool["ENGINE_SCRIPTS"]["TOOL"],
+                secret_tool,
+                self.devops_platform_gateway,
+                self.remote_config_source_gateway,
+                env,
+            )
+
+            self._handle_context_extraction(
+                dict_args,
+                "engine_scripts",
+                input_core.path_file_results,
+                config_tool["ENGINE_SCRIPTS"],
+                tool_gateway,
+                config_tool
+            )
+
+            self._use_vulnerability_management(
+                config_tool, input_core, dict_args, secret_tool, env
+            )
             self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
             return findings_list, input_core
 

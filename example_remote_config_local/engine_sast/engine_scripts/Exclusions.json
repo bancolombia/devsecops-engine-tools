@@ -1,0 +1,28 @@
+{
+    "All": {
+        "SCRIPT": [
+            {
+                "id": "CUSTOM_ID_1",
+                "where": "all",
+                "create_date": "28092026",
+                "expired_date": "31122026",
+                "severity": "HIGH",
+                "hu": "1234567"
+            }
+        ]
+    },
+    "BY_PATTERN_SEARCH": {
+        ".*_Repository_Test": {
+            "SCRIPT": [
+                {
+                    "id": "CUSTOM_ID_1",
+                    "where": "all",
+                    "create_date": "28092026",
+                    "expired_date": "31122026",
+                    "severity": "HIGH",
+                    "hu": "1234567"
+                }
+            ]
+        }
+    }
+}
