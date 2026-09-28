@@ -1,4 +1,5 @@
 import json
+import hashlib
 import os
 import subprocess
 import sys
@@ -25,6 +26,7 @@ class ScriptTool(ToolGateway):
 
     TOOL_SCRIPT = "SCRIPT"
     RESULTS_FILE = "results_script.json"
+    EXECUTION_RESULTS_FILE = "results_script_execution.json"
 
     def run_tool(self, config_tool, folders_to_scan, **kwargs):
         tool_config = config_tool.get(self.TOOL_SCRIPT, {})
@@ -43,8 +45,8 @@ class ScriptTool(ToolGateway):
             rules_config, folders_to_scan, timeout_seconds, scripts_root
         )
 
-        results_path = os.path.abspath(self.RESULTS_FILE)
-        with open(results_path, "w") as f:
+        execution_results_path = os.path.abspath(self.EXECUTION_RESULTS_FILE)
+        with open(execution_results_path, "w") as f:
             json.dump(results, f, indent=4)
 
         deserealizator = ScriptDeserealizator()
@@ -52,7 +54,79 @@ class ScriptTool(ToolGateway):
             results, default_severity, default_category, rules_config=rules_config
         )
 
+        report = self._build_generic_import_report(
+            results, rules_config, default_severity
+        )
+        results_path = os.path.abspath(self.RESULTS_FILE)
+        with open(results_path, "w") as f:
+            json.dump(report, f, indent=4)
+
         return findings_list, results_path
+
+    def _build_generic_import_report(
+        self, results, rules_config, default_severity
+    ):
+        rules_lookup = {
+            rule_id: rule_data
+            for rule_group in (rules_config or {}).values()
+            for rule_id, rule_data in rule_group.items()
+        }
+        findings = []
+
+        for entry in results:
+            rule_id = entry.get("rule_id", "unknown")
+            folder = entry.get("folder", "")
+            rule_meta = rules_lookup.get(rule_id, {})
+            severity = rule_meta.get("severity", default_severity)
+            severity = severity.strip().capitalize() if isinstance(severity, str) else "Info"
+
+            for message in ScriptDeserealizator.extract_messages(entry):
+                file_path = self._resolve_report_file_path(folder, message)
+                finding_identity = "\0".join(
+                    (rule_id, file_path or "", message)
+                )
+                generic_finding = {
+                    "title": rule_id,
+                    "severity": severity,
+                    "description": message,
+                    "unique_id_from_tool": hashlib.sha256(
+                        finding_identity.encode("utf-8")
+                    ).hexdigest(),
+                    "static_finding": True,
+                    "dynamic_finding": False,
+                }
+                if file_path:
+                    generic_finding["file_path"] = file_path
+                guideline = rule_meta.get("guideline")
+                if guideline:
+                    generic_finding["references"] = guideline
+                findings.append(generic_finding)
+
+        return {
+            "type": "DevSecOps Engine Scripts",
+            "static_tool": True,
+            "dynamic_tool": False,
+            "findings": findings,
+        }
+
+    @staticmethod
+    def _resolve_report_file_path(folder, message):
+        if not folder or not message:
+            return None
+
+        root_path = os.path.realpath(folder)
+        candidate_path = message if os.path.isabs(message) else os.path.join(folder, message)
+        candidate_path = os.path.realpath(candidate_path)
+        try:
+            if os.path.commonpath([root_path, candidate_path]) != root_path:
+                return None
+        except ValueError:
+            return None
+
+        if not os.path.isfile(candidate_path):
+            return None
+
+        return os.path.relpath(candidate_path, root_path).replace(os.sep, "/")
 
     def _resolve_scripts_root(
         self, scripts_config, secret_tool, secret_external_checks, work_folder

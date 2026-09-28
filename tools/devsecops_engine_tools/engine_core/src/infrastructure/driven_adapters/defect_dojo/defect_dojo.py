@@ -71,7 +71,8 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         "SONARQUBE": "SonarQube API Import",
         "GITLEAKS": "Gitleaks Scan",
         "NUCLEI": "Nuclei Scan",
-        "KIUWAN": "Kiuwan Scan"
+        "KIUWAN": "Kiuwan Scan",
+        "SCRIPT": "Generic Findings Import",
     })
     
     multiple_scan_types: Dict[str, Dict[str, Dict[str, object]]] = field(default_factory=lambda: {
