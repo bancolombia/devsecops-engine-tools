@@ -45,6 +45,7 @@ class Engagement(FromDictMixin):
     notes: List[None] = dataclasses.field(default_factory=list)
     files: List[None] = dataclasses.field(default_factory=list)
     risk_acceptance: List[None] = dataclasses.field(default_factory=list)
+    long_risk_acceptances: int = 0
 
 
 @dataclasses.dataclass
