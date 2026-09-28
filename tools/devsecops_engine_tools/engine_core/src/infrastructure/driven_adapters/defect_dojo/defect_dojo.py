@@ -17,6 +17,7 @@ from devsecops_engine_tools.engine_utilities.defect_dojo import (
     Product,
     Component,
     FindingExclusion,
+    LongRiskAcceptance,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_tools.engine_core.src.domain.model.report import Report
@@ -49,6 +50,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
     FALSE_POSITIVE = "False Positive"
     TRANSFERRED_FINDING = "Transferred Finding"
     ON_WHITELIST = "On Whitelist"
+    LONG_TERM_RISK_ACCEPTANCE_TAG = "long_term_risk_acceptance"
 
     enviroment_mapping: Dict[str, str] = field(default_factory=lambda: {
         "dev": "Development",
@@ -82,6 +84,11 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
             }
         }
     })
+
+    # memoizes the long-term risk acceptance object per service to avoid duplicate API calls
+    _long_risk_acceptance_cache: Dict[str, object] = field(
+        default_factory=dict, init=False, repr=False
+    )
 
     def send_vulnerability_management(
         self, vulnerability_management: VulnerabilityManagement
@@ -330,6 +337,14 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 "fields": "id,vuln_id_from_tool,vulnerability_ids,severity,priority_classification,endpoints,component_name,component_version,tags,file_path"
             }
 
+            long_term_risk_acceptance_lookup = partial(
+                self._get_long_risk_acceptance,
+                service,
+                dict_args,
+                secret_tool,
+                config_tool,
+            )
+
             exclusions_risk_accepted = self._get_findings_with_exclusions(
                 session_manager,
                 service,
@@ -338,6 +353,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 tool,
                 self._format_date_to_dd_format,
                 self.RISK_ACCEPTED,
+                long_term_risk_acceptance_lookup=long_term_risk_acceptance_lookup,
             )
 
             exclusions_false_positive = self._get_findings_with_exclusions(
@@ -447,11 +463,20 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                 },
             )
 
+            long_term_risk_acceptance_lookup = partial(
+                self._get_long_risk_acceptance,
+                service,
+                dict_args,
+                secret_tool,
+                config_tool,
+            )
+
             all_exclusions = self._get_report_exclusions(
                 all_findings,
                 self._format_date_to_dd_format,
                 host_dd=host_dd,
                 white_list=white_list,
+                long_term_risk_acceptance_lookup=long_term_risk_acceptance_lookup,
             )
 
             return all_findings, all_exclusions
@@ -699,6 +724,37 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
         )
         return session_manager
 
+    def _get_long_risk_acceptance(self, service, dict_args, secret_tool, config_tool):
+        if service in self._long_risk_acceptance_cache:
+            return self._long_risk_acceptance_cache[service]
+
+        long_risk_acceptance = None
+        engagements = self.get_active_engagements(
+            service, dict_args, secret_tool, config_tool
+        )
+        engagement = next((e for e in engagements if e.name == service), None)
+
+        if engagement and engagement.long_risk_acceptances:
+            session_manager = self._get_session_manager(
+                dict_args, secret_tool, config_tool
+            )
+            max_retries = config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"][
+                "MAX_RETRIES_QUERY"
+            ]
+
+            def request_func():
+                return LongRiskAcceptance.get_long_risk_acceptance(
+                    session=session_manager,
+                    long_risk_acceptance_id=engagement.long_risk_acceptances,
+                )
+
+            long_risk_acceptance = Utils().retries_requests(
+                request_func, max_retries, retry_delay=5
+            )
+
+        self._long_risk_acceptance_cache[service] = long_risk_acceptance
+        return long_risk_acceptance
+
     def _get_report_exclusions(self, total_findings, date_fn, host_dd, **kwargs):
         exclusions = []
         for finding in total_findings:
@@ -801,6 +857,29 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
 
         return Utils().retries_requests(request_func, max_retries, retry_delay=5)
 
+    def _long_term_risk_acceptance_for_finding(self, finding, long_term_risk_acceptance_lookup):
+        if long_term_risk_acceptance_lookup and self.LONG_TERM_RISK_ACCEPTANCE_TAG in (
+            finding.tags or []
+        ):
+            return long_term_risk_acceptance_lookup()
+        return None
+
+    def _risk_accepted_expiration_date(self, finding, date_fn, long_term_risk_acceptance_lookup):
+        long_risk_acceptance = self._long_term_risk_acceptance_for_finding(
+            finding, long_term_risk_acceptance_lookup
+        )
+        if long_risk_acceptance:
+            return date_fn(long_risk_acceptance.expiration_date)
+        return date_fn(finding.accepted_risks[-1]["expiration_date"])
+
+    def _risk_accepted_created_date(self, finding, date_fn, long_term_risk_acceptance_lookup):
+        long_risk_acceptance = self._long_term_risk_acceptance_for_finding(
+            finding, long_term_risk_acceptance_lookup
+        )
+        if long_risk_acceptance:
+            return date_fn(long_risk_acceptance.created)
+        return date_fn(finding.accepted_risks[-1]["created"])
+
     def _date_reason_based(self, finding, date_fn, reason, tool, **kwargs):
         def get_vuln_id(finding, tool):
             if tool == "engine_risk":
@@ -839,8 +918,12 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                     date_fn(finding.transfer_finding.expiration_date),
                 ),
                 self.RISK_ACCEPTED: lambda: (
-                    date_fn(finding.accepted_risks[-1]["created"]),
-                    date_fn(finding.accepted_risks[-1]["expiration_date"]),
+                    self._risk_accepted_created_date(
+                        finding, date_fn, kwargs.get("long_term_risk_acceptance_lookup")
+                    ),
+                    self._risk_accepted_expiration_date(
+                        finding, date_fn, kwargs.get("long_term_risk_acceptance_lookup")
+                    ),
                 ),
                 self.ON_WHITELIST: lambda: get_dates_from_whitelist(
                     get_vuln_id(finding, tool), kwargs.get("white_list", [])

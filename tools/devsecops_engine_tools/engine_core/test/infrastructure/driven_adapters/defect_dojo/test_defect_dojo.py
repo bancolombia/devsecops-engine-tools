@@ -1310,6 +1310,167 @@ class TestDefectDojoPlatform(unittest.TestCase):
         self.assertEqual(create_date, "10012024")
         self.assertEqual(expired_date, "10042024")
 
+    def test_date_reason_based_risk_accepted_long_term_tag(self):
+        finding = MagicMock()
+        finding.tags = ["long_term_risk_acceptance"]
+        finding.accepted_risks = [
+            {
+                "created": "2024-01-10T00:00:00Z",
+                "expiration_date": "2024-04-10T00:00:00Z",
+            }
+        ]
+        date_fn = MagicMock(side_effect=["10122026", "15122026"])
+        reason = self.defect_dojo.RISK_ACCEPTED
+        tool = "engine_risk"
+        long_risk_acceptance = MagicMock(
+            created="2026-12-10T00:00:00-05:00",
+            expiration_date="2026-12-15T00:00:00-05:00",
+        )
+        long_term_lookup = MagicMock(return_value=long_risk_acceptance)
+
+        create_date, expired_date = self.defect_dojo._date_reason_based(
+            finding,
+            date_fn,
+            reason,
+            tool,
+            long_term_risk_acceptance_lookup=long_term_lookup,
+        )
+
+        self.assertEqual(create_date, "10122026")
+        self.assertEqual(expired_date, "15122026")
+        date_fn.assert_any_call("2026-12-10T00:00:00-05:00")
+        date_fn.assert_any_call("2026-12-15T00:00:00-05:00")
+
+    def test_risk_accepted_expiration_date_without_long_term_tag(self):
+        finding = MagicMock()
+        finding.tags = ["engine_dependencies"]
+        finding.accepted_risks = [
+            {"created": "2024-01-10T00:00:00Z", "expiration_date": "2024-04-10T00:00:00Z"}
+        ]
+        date_fn = MagicMock(return_value="10042024")
+        long_term_lookup = MagicMock(return_value=MagicMock(expiration_date="2026-12-15T00:00:00-05:00"))
+
+        result = self.defect_dojo._risk_accepted_expiration_date(
+            finding, date_fn, long_term_lookup
+        )
+
+        self.assertEqual(result, "10042024")
+        long_term_lookup.assert_not_called()
+        date_fn.assert_called_once_with("2024-04-10T00:00:00Z")
+
+    def test_risk_accepted_expiration_date_no_lookup(self):
+        finding = MagicMock()
+        finding.tags = ["long_term_risk_acceptance"]
+        finding.accepted_risks = [
+            {"created": "2024-01-10T00:00:00Z", "expiration_date": "2024-04-10T00:00:00Z"}
+        ]
+        date_fn = MagicMock(return_value="10042024")
+
+        result = self.defect_dojo._risk_accepted_expiration_date(finding, date_fn, None)
+
+        self.assertEqual(result, "10042024")
+        date_fn.assert_called_once_with("2024-04-10T00:00:00Z")
+
+    def test_risk_accepted_created_date_without_long_term_tag(self):
+        finding = MagicMock()
+        finding.tags = ["engine_dependencies"]
+        finding.accepted_risks = [
+            {"created": "2024-01-10T00:00:00Z", "expiration_date": "2024-04-10T00:00:00Z"}
+        ]
+        date_fn = MagicMock(return_value="10012024")
+        long_term_lookup = MagicMock(return_value=MagicMock(created="2026-12-10T00:00:00-05:00"))
+
+        result = self.defect_dojo._risk_accepted_created_date(
+            finding, date_fn, long_term_lookup
+        )
+
+        self.assertEqual(result, "10012024")
+        long_term_lookup.assert_not_called()
+        date_fn.assert_called_once_with("2024-01-10T00:00:00Z")
+
+    def test_risk_accepted_created_date_no_lookup(self):
+        finding = MagicMock()
+        finding.tags = ["long_term_risk_acceptance"]
+        finding.accepted_risks = [
+            {"created": "2024-01-10T00:00:00Z", "expiration_date": "2024-04-10T00:00:00Z"}
+        ]
+        date_fn = MagicMock(return_value="10012024")
+
+        result = self.defect_dojo._risk_accepted_created_date(finding, date_fn, None)
+
+        self.assertEqual(result, "10012024")
+        date_fn.assert_called_once_with("2024-01-10T00:00:00Z")
+
+    @patch(
+        "devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.defect_dojo.defect_dojo.LongRiskAcceptance"
+    )
+    def test_get_long_risk_acceptance_fetches_and_caches(
+        self, mock_long_risk_acceptance
+    ):
+        service = "test_service"
+        dict_args = {"token_vulnerability_management": "token1"}
+        secret_tool = {"token_defect_dojo": "token2"}
+        config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "MAX_RETRIES_QUERY": 5,
+                }
+            }
+        }
+        engagement = MagicMock(name="engagement", long_risk_acceptances=42)
+        engagement.name = service
+        mock_long_risk_acceptance.get_long_risk_acceptance.return_value = MagicMock(
+            created="2026-12-10T00:00:00-05:00",
+            expiration_date="2026-12-15T00:00:00-05:00",
+        )
+
+        with patch.object(
+            self.defect_dojo, "get_active_engagements", return_value=[engagement]
+        ) as mock_get_active_engagements:
+            first_result = self.defect_dojo._get_long_risk_acceptance(
+                service, dict_args, secret_tool, config_tool
+            )
+            second_result = self.defect_dojo._get_long_risk_acceptance(
+                service, dict_args, secret_tool, config_tool
+            )
+
+        self.assertIs(first_result, second_result)
+        self.assertEqual(first_result.created, "2026-12-10T00:00:00-05:00")
+        self.assertEqual(first_result.expiration_date, "2026-12-15T00:00:00-05:00")
+        mock_get_active_engagements.assert_called_once()
+        mock_long_risk_acceptance.get_long_risk_acceptance.assert_called_once_with(
+            session=mock_long_risk_acceptance.get_long_risk_acceptance.call_args.kwargs[
+                "session"
+            ],
+            long_risk_acceptance_id=42,
+        )
+
+    def test_get_long_risk_acceptance_no_engagement_ids(self):
+        service = "test_service_no_ids"
+        dict_args = {"token_vulnerability_management": "token1"}
+        secret_tool = {"token_defect_dojo": "token2"}
+        config_tool = {
+            "VULNERABILITY_MANAGER": {
+                "DEFECT_DOJO": {
+                    "HOST_DEFECT_DOJO": "host_defect_dojo",
+                    "MAX_RETRIES_QUERY": 5,
+                }
+            }
+        }
+        engagement = MagicMock(long_risk_acceptances=0)
+        engagement.name = service
+
+        with patch.object(
+            self.defect_dojo, "get_active_engagements", return_value=[engagement]
+        ):
+            result = self.defect_dojo._get_long_risk_acceptance(
+                service, dict_args, secret_tool, config_tool
+            )
+
+        self.assertIsNone(result)
+        self.assertIsNone(self.defect_dojo._long_risk_acceptance_cache[service])
+
     def test_date_reason_based_on_whitelist_engine_risk(self):
         finding = MagicMock()
         finding.id = None
