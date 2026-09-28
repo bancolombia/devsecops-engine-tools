@@ -14,17 +14,19 @@
         }
     },
     "SCRIPT": {
+        "USE_EXTERNAL_CHECKS_DIR": false,
+        "EXTERNAL_DIR_OWNER": "",
+        "EXTERNAL_DIR_REPOSITORY": "",
+        "EXTERNAL_DIR_SCRIPTS_PATH": "",
+        "APP_ID_GITHUB": "",
+        "INSTALLATION_ID_GITHUB": "",
         "TIMEOUT_SECONDS": 120,
         "DEFAULT_SEVERITY": "high",
         "DEFAULT_CATEGORY": "vulnerability",
         "RULES": {
             "RULES_ARTIFACT_HYGIENE": {
                 "NO_SOURCE_MAPS_IN_BUILD": {
-                    "SCRIPT_PATH": {
-                        "Linux": "scripts/check_1.sh",
-                        "Darwin": "scripts/check_1.sh",
-                        "Windows": "scripts\\check_1.ps1"
-                    },
+                    "SCRIPT_PATH": "scripts/check_1.py",
                     "RESULT_MODE": "output_lines",
                     "severity": "High",
                     "category": "Vulnerability",

@@ -1,8 +1,8 @@
 import json
 import os
-import platform
 import subprocess
 import sys
+import tempfile
 from typing import List
 
 from devsecops_engine_tools.engine_sast.engine_scripts.src.domain.model.context_script import (
@@ -16,18 +16,12 @@ from devsecops_engine_tools.engine_sast.engine_scripts.src.infrastructure.driven
 )
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 DEFAULT_TIMEOUT_SECONDS = 120
 DEFAULT_RESULT_MODE = "output_lines"
-SCRIPT_INTERPRETERS = {
-    ".py": lambda: [sys.executable],
-    ".sh": lambda: ["bash"],
-    ".ps1": lambda: ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File"],
-    ".bat": lambda: ["cmd", "/c"],
-    ".cmd": lambda: ["cmd", "/c"],
-}
 
 
 class ScriptTool(ToolGateway):
@@ -42,8 +36,16 @@ class ScriptTool(ToolGateway):
         default_category = tool_config.get("DEFAULT_CATEGORY", "vulnerability")
         timeout_seconds = tool_config.get("TIMEOUT_SECONDS", DEFAULT_TIMEOUT_SECONDS)
         rules_config = tool_config.get("RULES", {})
+        scripts_root = self._resolve_scripts_root(
+            tool_config,
+            kwargs.get("secret_tool"),
+            kwargs.get("secret_external_checks"),
+            kwargs.get("work_folder"),
+        )
 
-        results = self._execute_rules(rules_config, folders_to_scan, timeout_seconds)
+        results = self._execute_rules(
+            rules_config, folders_to_scan, timeout_seconds, scripts_root
+        )
 
         results_path = os.path.abspath(self.RESULTS_FILE)
         with open(results_path, "w") as f:
@@ -79,13 +81,40 @@ class ScriptTool(ToolGateway):
 
         return context_list
 
-    def _execute_rules(self, rules_config, folders_to_scan, timeout_seconds):
+    def _resolve_scripts_root(
+        self, scripts_config, secret_tool, secret_external_checks, work_folder
+    ):
+        if not scripts_config.get("USE_EXTERNAL_CHECKS_DIR", False):
+            return None
+
+        work_folder = work_folder or tempfile.gettempdir()
+        Utils().configurate_external_checks(
+            self.TOOL_SCRIPT,
+            {self.TOOL_SCRIPT: scripts_config},
+            secret_tool,
+            secret_external_checks,
+            agent_work_folder=work_folder,
+        )
+
+        scripts_root = os.path.join(work_folder, "rules", "script")
+        scripts_subfolder = scripts_config.get(
+            "EXTERNAL_DIR_SCRIPTS_PATH", ""
+        ).strip("/\\")
+        if scripts_subfolder:
+            candidate_path = os.path.join(scripts_root, scripts_subfolder)
+            if os.path.isdir(candidate_path):
+                return candidate_path
+
+        return scripts_root
+
+    def _execute_rules(
+        self, rules_config, folders_to_scan, timeout_seconds, scripts_root=None
+    ):
         results = []
-        os_platform = platform.system()
 
         for rule_group in (rules_config or {}).values():
             for rule_id, rule_data in rule_group.items():
-                script = self._resolve_script(rule_id, rule_data, os_platform)
+                script = self._resolve_script(rule_id, rule_data, scripts_root)
                 if script is None:
                     continue
 
@@ -105,32 +134,48 @@ class ScriptTool(ToolGateway):
 
         return results
 
-    def _resolve_script(self, rule_id, rule_data, os_platform):
-        script_paths = rule_data.get("SCRIPT_PATH", {})
-        if not isinstance(script_paths, dict):
-            logger.error(f"Rule '{rule_id}' SCRIPT_PATH must map platform names to paths")
-            return None
-
-        script_path = script_paths.get(os_platform)
+    def _resolve_script(self, rule_id, rule_data, scripts_root=None):
+        script_path = rule_data.get("SCRIPT_PATH")
 
         if not script_path:
-            logger.warning(
-                f"Rule '{rule_id}' has no script path configured for platform "
-                f"'{os_platform}', skipping"
-            )
+            logger.warning(f"Rule '{rule_id}' has no SCRIPT_PATH configured, skipping")
             return None
 
         if not isinstance(script_path, str):
             logger.error(
-                f"Rule '{rule_id}' SCRIPT_PATH for '{os_platform}' must be a "
-                "non-empty string, skipping"
+                f"Rule '{rule_id}' SCRIPT_PATH must be a non-empty string, skipping"
             )
             return None
 
+        if scripts_root:
+            if os.path.isabs(script_path):
+                logger.error(
+                    f"Rule '{rule_id}' SCRIPT_PATH must be relative when using "
+                    "external scripts, skipping"
+                )
+                return None
+
+            scripts_root = os.path.realpath(scripts_root)
+            script_path = os.path.realpath(os.path.join(scripts_root, script_path))
+            try:
+                if os.path.commonpath([scripts_root, script_path]) != scripts_root:
+                    raise ValueError("path escapes external scripts directory")
+            except ValueError:
+                logger.error(
+                    f"Rule '{rule_id}' SCRIPT_PATH escapes external scripts "
+                    "directory, skipping"
+                )
+                return None
+
         extension = os.path.splitext(script_path)[1].lower()
-        interpreter_factory = SCRIPT_INTERPRETERS.get(extension)
-        interpreter = interpreter_factory() if interpreter_factory else []
-        return interpreter + [script_path]
+        if extension != ".py":
+            logger.error(
+                f"Rule '{rule_id}' SCRIPT_PATH must point to a Python file, "
+                f"got '{extension or 'no extension'}', skipping"
+            )
+            return None
+
+        return [sys.executable, script_path]
 
     def _run_script(
         self, rule_id, script, folder, result_mode, timeout_seconds, severity
