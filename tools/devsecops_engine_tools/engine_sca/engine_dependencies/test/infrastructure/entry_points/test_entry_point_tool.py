@@ -176,7 +176,7 @@ def test_generate_sbom_without_dependency_scan(mock_exists, mock_isfile, mock_de
     )
     mock_dependencies_scan.assert_not_called()
     mock_logger.info.assert_any_call(
-        "Dependency vulnerability scan skipped for this execution"
+        "Dependency vulnerability scan skipped for this execution. (Only SBOM generation)"
     )
     tool_license_manager.upload_sbom.assert_called_once()
     assert deserialized == []

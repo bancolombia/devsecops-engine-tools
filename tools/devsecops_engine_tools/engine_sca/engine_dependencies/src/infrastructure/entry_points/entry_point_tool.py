@@ -102,7 +102,7 @@ def init_engine_dependencies(
                 )
             else:
                 logger.info(
-                    "Dependency vulnerability scan skipped for this execution"
+                    "Dependency vulnerability scan skipped for this execution. (Only SBOM generation)"
                 )
         else:
             logger.error(f"Path {to_scan} does not exist")
