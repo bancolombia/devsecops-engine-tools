@@ -27,7 +27,7 @@ def runner_engine_scripts(dict_args, tool, secret_tool, devops_platform_gateway,
             env=env,
         )
 
-        return findings_list, input_core, tool_gateway
+        return findings_list, input_core
 
     except Exception as e:
         raise RuntimeError(f"Error engine_scripts : {str(e)}") from e

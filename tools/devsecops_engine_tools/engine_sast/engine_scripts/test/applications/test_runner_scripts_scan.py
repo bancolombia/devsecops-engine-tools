@@ -29,19 +29,18 @@ def test_runner_engine_scripts(mock_entry_point_tool):
     devops_platform_gateway = None
     remote_config_source_gateway = None
 
-    findings_list, input_output, tool_gateway = runner_engine_scripts(
+    findings_list, input_output = runner_engine_scripts(
         dict_args, tool, secret_tool, devops_platform_gateway, remote_config_source_gateway, "qa"
     )
 
     assert findings_list == []
     assert input_output == input_core
-    assert tool_gateway is not None
 
 
 @mock.patch(
     "devsecops_engine_tools.engine_sast.engine_scripts.src.applications.runner_scripts_scan.init_engine_sast_rm"
 )
-def test_runner_engine_scripts_unknown_tool_returns_none_gateway(mock_entry_point_tool):
+def test_runner_engine_scripts_unknown_tool(mock_entry_point_tool):
     input_core = InputCore(
         totalized_exclusions=[],
         threshold_defined=Threshold,
@@ -53,11 +52,12 @@ def test_runner_engine_scripts_unknown_tool_returns_none_gateway(mock_entry_poin
     )
     mock_entry_point_tool.return_value = [], input_core
 
-    findings_list, input_output, tool_gateway = runner_engine_scripts(
+    findings_list, input_output = runner_engine_scripts(
         {}, "UNKNOWN_TOOL", "secret", None, None, "qa"
     )
 
-    assert tool_gateway is None
+    assert findings_list == []
+    assert input_output == input_core
 
 
 @mock.patch(

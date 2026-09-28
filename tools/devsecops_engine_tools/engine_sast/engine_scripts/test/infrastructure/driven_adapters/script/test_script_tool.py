@@ -200,55 +200,5 @@ class TestScriptTool(unittest.TestCase):
         self.assertEqual(findings[0].severity, "high")
         self.assertEqual(path, "/tmp/results_script.json")
 
-    # ------------------------------------------------------------------ #
-    # get_scripts_context_from_results                                      #
-    # ------------------------------------------------------------------ #
-
-    @patch(
-        "builtins.open",
-        new_callable=mock_open,
-        read_data=json.dumps(
-            [
-                {
-                    "rule_id": "NO_SOURCE_MAPS",
-                    "folder": "dist",
-                    "result_mode": "output_lines",
-                    "severity": "high",
-                    "returncode": 0,
-                    "stdout": "app.js.map",
-                }
-            ]
-        ),
-    )
-    def test_get_scripts_context_from_results(self, _):
-        context_list = self.tool.get_scripts_context_from_results("results_script.json")
-        self.assertEqual(len(context_list), 1)
-        ctx = context_list[0]
-        self.assertEqual(ctx.id, "NO_SOURCE_MAPS")
-        self.assertEqual(ctx.tool, "Script")
-        self.assertEqual(ctx.where, "dist: app.js.map")
-        self.assertEqual(ctx.module, "engine_scripts")
-
-    @patch(
-        "builtins.open",
-        new_callable=mock_open,
-        read_data=json.dumps(
-            [
-                {
-                    "rule_id": "NO_SOURCE_MAPS",
-                    "folder": "dist",
-                    "result_mode": "output_lines",
-                    "severity": "high",
-                    "returncode": 0,
-                    "stdout": "",
-                }
-            ]
-        ),
-    )
-    def test_get_scripts_context_from_results_no_findings(self, _):
-        context_list = self.tool.get_scripts_context_from_results("results_script.json")
-        self.assertEqual(context_list, [])
-
-
 if __name__ == "__main__":
     unittest.main()

@@ -3,11 +3,7 @@ import os
 import subprocess
 import sys
 import tempfile
-from typing import List
 
-from devsecops_engine_tools.engine_sast.engine_scripts.src.domain.model.context_script import (
-    ContextScript,
-)
 from devsecops_engine_tools.engine_sast.engine_scripts.src.domain.model.gateways.tool_gateway import (
     ToolGateway,
 )
@@ -57,29 +53,6 @@ class ScriptTool(ToolGateway):
         )
 
         return findings_list, results_path
-
-    def get_scripts_context_from_results(self, path_file_results: str) -> List[ContextScript]:
-        with open(path_file_results, "r") as f:
-            results = json.load(f)
-
-        context_list = []
-        for entry in results:
-            folder = entry.get("folder", "unknown")
-            for message in ScriptDeserealizator.extract_messages(entry):
-                context_script = ContextScript(
-                    id=entry.get("rule_id", "unknown"),
-                    check_name=message,
-                    check_class="script",
-                    severity=entry.get("severity", "medium"),
-                    where=f"{folder}: {message}",
-                    resource=folder,
-                    description=message,
-                    module="engine_scripts",
-                    tool="Script",
-                )
-                context_list.append(context_script)
-
-        return context_list
 
     def _resolve_scripts_root(
         self, scripts_config, secret_tool, secret_external_checks, work_folder

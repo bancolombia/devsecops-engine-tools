@@ -27,7 +27,7 @@ class TestContextExtractionManager(unittest.TestCase):
         self.assertIsNotNone(self.manager._tool_gateways)
         self.assertIsNotNone(self.manager._method_mapping)
         self.assertEqual(len(self.manager._tool_gateways), 0)
-        self.assertEqual(len(self.manager._method_mapping), 5)
+        self.assertEqual(len(self.manager._method_mapping), 4)
         self.assertIsNotNone(self.manager._risk_score_gateway)
 
     def test_register_tool_gateway_iac(self):

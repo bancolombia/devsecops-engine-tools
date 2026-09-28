@@ -253,22 +253,13 @@ class HandleScan:
             self.risk_score_gateway.get_risk_score(findings_list, config_tool, dict_args["module"])
             return findings_list, input_core
         elif "engine_scripts" in dict_args["module"]:
-            findings_list, input_core, tool_gateway = runner_engine_scripts(
+            findings_list, input_core = runner_engine_scripts(
                 dict_args,
                 config_tool["ENGINE_SCRIPTS"]["TOOL"],
                 secret_tool,
                 self.devops_platform_gateway,
                 self.remote_config_source_gateway,
                 env,
-            )
-
-            self._handle_context_extraction(
-                dict_args,
-                "engine_scripts",
-                input_core.path_file_results,
-                config_tool["ENGINE_SCRIPTS"],
-                tool_gateway,
-                config_tool
             )
 
             self._use_vulnerability_management(
