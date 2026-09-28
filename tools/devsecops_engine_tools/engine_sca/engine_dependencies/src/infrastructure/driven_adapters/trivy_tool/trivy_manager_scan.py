@@ -32,7 +32,7 @@ class TrivyScanSBOM(ToolGateway):
     ):
         trivy_version = remote_config["TRIVY"]["CLI_VERSION"]
         command_prefix = TrivyManagerScanUtils().identify_os_and_install(trivy_version)
-        sbom = f"{pipeline_name}_SBOM.json"
+        sbom = to_scan if isinstance(to_scan, str) and os.path.isfile(to_scan) else f"{pipeline_name}_SBOM.json"
 
         if not command_prefix:
             return None

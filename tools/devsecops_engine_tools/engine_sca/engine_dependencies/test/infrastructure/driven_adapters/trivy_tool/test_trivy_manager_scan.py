@@ -122,6 +122,23 @@ class TestTrivyScanSBOM(unittest.TestCase):
         mock_identify_os.assert_called_once_with("0.45.0")
         mock_scan.assert_called_once_with("/usr/bin/trivy", f"{pipeline_name}_SBOM.json")
 
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.trivy_tool.trivy_manager_scan.os.path.isfile')
+    @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.trivy_tool.trivy_manager_scan.os.path.exists')
+    @patch('devsecops_engine_tools.engine_utilities.trivy_utils.infrastructure.driven_adapters.trivy_manager_scan_utils.TrivyManagerScanUtils.identify_os_and_install')
+    def test_run_tool_dependencies_sca_with_existing_sbom(self, mock_identify_os, mock_exists, mock_isfile):
+        mock_identify_os.return_value = "/usr/bin/trivy"
+        mock_exists.return_value = True
+        mock_isfile.return_value = True
+        sbom_path = "/tmp/existing_SBOM.json"
+
+        with patch.object(self.trivy_scanner, '_scan_dependencies_sbom', return_value="scan_result.json") as mock_scan:
+            result = self.trivy_scanner.run_tool_dependencies_sca(
+                self.mock_remote_config, {}, [], "test_pipeline", sbom_path, None, "test_token"
+            )
+
+        self.assertEqual(result, "scan_result.json")
+        mock_scan.assert_called_once_with("/usr/bin/trivy", sbom_path)
+
     @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.driven_adapters.trivy_tool.trivy_manager_scan.os.path.exists')
     @patch('devsecops_engine_tools.engine_utilities.trivy_utils.infrastructure.driven_adapters.trivy_manager_scan_utils.TrivyManagerScanUtils.identify_os_and_install')
     def test_run_tool_dependencies_sca_no_command_prefix(self, mock_identify_os, mock_exists):
