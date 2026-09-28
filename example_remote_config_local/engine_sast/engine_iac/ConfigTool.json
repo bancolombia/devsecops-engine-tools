@@ -54,7 +54,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "Critical",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -66,7 +66,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -78,7 +78,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "Medium",
                     "cvss": "",
                     "category": "Compliance"
@@ -90,7 +90,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "Critical",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -104,7 +104,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Compliance"
@@ -116,7 +116,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Compliance"
@@ -128,7 +128,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Compliance"
@@ -140,7 +140,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Compliance"
@@ -152,7 +152,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Compliance"
@@ -164,7 +164,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Compliance"
@@ -176,7 +176,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "Critical",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -188,7 +188,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -200,7 +200,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -212,7 +212,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -224,7 +224,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "Critical",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -236,7 +236,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Compliance"
@@ -248,7 +248,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -260,7 +260,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "Critical",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -272,7 +272,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "Medium",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -284,7 +284,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -296,7 +296,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "Critical",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -308,7 +308,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "Critical",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -320,7 +320,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -332,7 +332,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Compliance"
@@ -344,7 +344,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -356,7 +356,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -368,7 +368,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -380,7 +380,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -392,7 +392,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -404,7 +404,7 @@
                         "pdn": false,
                         "qa": false
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "Medium",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -416,7 +416,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -428,7 +428,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -440,7 +440,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -452,7 +452,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -464,7 +464,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -476,7 +476,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -488,7 +488,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -500,7 +500,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -512,7 +512,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -524,7 +524,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/3IrJFQx",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -539,7 +539,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -552,7 +552,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -565,7 +565,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "Low",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -578,7 +578,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "Low",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -591,7 +591,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -604,7 +604,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "Medium",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -617,7 +617,7 @@
                         "pdn": true,
                         "qa": false
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Compliance"
@@ -630,7 +630,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -643,7 +643,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -656,7 +656,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -669,7 +669,7 @@
                         "pdn": true,
                         "qa": false
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "Medium",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -682,7 +682,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "High",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -695,7 +695,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "Medium",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -708,7 +708,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "Medium",
                     "cvss": "",
                     "category": "Vulnerability"
@@ -721,7 +721,7 @@
                         "pdn": true,
                         "qa": true
                     },
-                    "guideline": "https://bit.ly/44frBRZ",
+                    "guideline": "",
                     "severity": "Medium",
                     "cvss": "",
                     "category": "Vulnerability"
