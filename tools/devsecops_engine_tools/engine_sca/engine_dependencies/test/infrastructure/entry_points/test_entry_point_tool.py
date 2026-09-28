@@ -91,6 +91,101 @@ def test_init_engine_dependencies_success(mock_exists, mock_dependencies_scan, m
 
 @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.HandleRemoteConfigPatterns')
 @patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.SetInputCore')
+@patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.DependenciesScan')
+@patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.os.path.isfile')
+@patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.os.path.exists')
+@patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.get_list_component')
+def test_init_engine_dependencies_with_existing_sbom(mock_get_list_component, mock_exists, mock_isfile, mock_dependencies_scan, mock_set_input_core, mock_handle_remote_config_patterns):
+    mock_exists.return_value = True
+    mock_isfile.return_value = True
+    mock_handle_remote_config_patterns.return_value.skip_from_exclusion.return_value = False
+    mock_handle_remote_config_patterns.return_value.ignore_analysis_pattern.return_value = True
+    mock_dependencies_scan.return_value.process.return_value = "scanned_dependencies"
+    mock_dependencies_scan.return_value.deserializator.return_value = []
+    mock_get_list_component.return_value = [Mock()]
+
+    tool_remote = MagicMock(spec=DevopsPlatformGateway)
+    tool_remote.get_variable.return_value = "main"
+    remote_config_source_gateway = MagicMock(spec=DevopsPlatformGateway)
+    tool_sbom = MagicMock(spec=SbomManagerGateway)
+    config_tool = {
+        "SBOM_MANAGER": {"ENABLED": True, "BRANCH_FILTER": ["main"]},
+        "ENGINE_DEPENDENCIES": {"TOOL": "tool"},
+        "LICENSE_ANALYZER": {"TOOL": "dep_track"},
+    }
+    sbom_path = "/tmp/existing_SBOM.json"
+    dict_args = {"remote_config_repo": "repo", "folder_path": sbom_path, "remote_config_branch": ""}
+
+    init_engine_dependencies(
+        Mock(), tool_remote, remote_config_source_gateway, Mock(), dict_args,
+        None, config_tool, tool_sbom, Mock()
+    )
+
+    mock_get_list_component.assert_called_once_with(sbom_path)
+    tool_sbom.get_components.assert_not_called()
+
+
+@patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.HandleRemoteConfigPatterns')
+@patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.SetInputCore')
+@patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.DependenciesScan')
+@patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.os.path.isfile')
+@patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.os.path.exists')
+def test_generate_sbom_without_dependency_scan(mock_exists, mock_isfile, mock_dependencies_scan, mock_set_input_core, mock_handle_remote_config_patterns):
+    mock_exists.return_value = True
+    mock_isfile.return_value = False
+    mock_handle_remote_config_patterns.return_value.skip_from_exclusion.return_value = False
+    mock_handle_remote_config_patterns.return_value.ignore_analysis_pattern.return_value = True
+    mock_set_input_core.return_value.set_input_core.return_value = "core_input"
+
+    tool_remote = MagicMock(spec=DevopsPlatformGateway)
+    tool_remote.get_variable.return_value = "main"
+    remote_config_source_gateway = MagicMock(spec=DevopsPlatformGateway)
+    tool_sbom = MagicMock(spec=SbomManagerGateway)
+    tool_sbom.get_components.return_value = [Mock()]
+    tool_license_manager = Mock()
+    tool_license_manager.upload_sbom.return_value = "task-id"
+    config_tool = {
+        "SBOM_MANAGER": {"ENABLED": True, "BRANCH_FILTER": ["main"]},
+        "ENGINE_DEPENDENCIES": {"TOOL": "trivy"},
+        "LICENSE_ANALYZER": {
+            "TOOL": "dep_track",
+            "dep_track": {
+                "API_KEY_SECRET_KEY": "license-token",
+                "HOST": "https://dependency-track.example",
+                "EXPORT_TASK_ID": False,
+            },
+        },
+    }
+    dict_args = {
+        "remote_config_repo": "repo",
+        "folder_path": "/project",
+        "remote_config_branch": "",
+        "generate_sbom_only": "true",
+        "use_license_analyzer": "true",
+        "token_license_analyzer": "license-api-key",
+    }
+
+    with patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.logger') as mock_logger:
+        deserialized, core_input, sbom_components = init_engine_dependencies(
+            Mock(), tool_remote, remote_config_source_gateway, Mock(), dict_args,
+            None, config_tool, tool_sbom, tool_license_manager
+        )
+
+    tool_sbom.get_components.assert_called_once_with(
+        "/project", config_tool["SBOM_MANAGER"], "main"
+    )
+    mock_dependencies_scan.assert_not_called()
+    mock_logger.info.assert_any_call(
+        "Dependency vulnerability scan skipped for this execution. (Only SBOM generation)"
+    )
+    tool_license_manager.upload_sbom.assert_called_once()
+    assert deserialized == []
+    assert core_input == "core_input"
+    assert sbom_components == tool_sbom.get_components.return_value
+
+
+@patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.HandleRemoteConfigPatterns')
+@patch('devsecops_engine_tools.engine_sca.engine_dependencies.src.infrastructure.entry_points.entry_point_tool.SetInputCore')
 def test_init_engine_dependencies_skip_tool(mock_set_input_core, mock_handle_remote_config_patterns):
     """Covers else branch: scan_flag=False → 'Tool skipped by DevSecOps policy'."""
     mock_handle_remote_config_patterns.return_value.skip_from_exclusion.return_value = False

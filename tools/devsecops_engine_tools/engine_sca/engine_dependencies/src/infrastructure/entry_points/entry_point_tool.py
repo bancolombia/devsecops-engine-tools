@@ -14,6 +14,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.devops_platform
 from devsecops_engine_tools.engine_core.src.domain.model.gateway.sbom_manager import (
     SbomManagerGateway,
 )
+from devsecops_engine_tools.engine_utilities.sbom.deserealizator import get_list_component
 
 import os
 
@@ -69,18 +70,6 @@ def init_engine_dependencies(
     if scan_flag and not (skip_flag):
         to_scan = dict_args["folder_path"] if dict_args["folder_path"] else os.getcwd()
         if os.path.exists(to_scan):
-            dependencies_sca_scan = DependenciesScan(
-                tool_run,
-                tool_deserializator,
-                remote_config,
-                dict_args,
-                exclusions,
-                pipeline_name,
-                to_scan,
-                secret_tool,
-                build_id,
-                build_url
-            )
             sbom_components = _process_sbom_and_license_analysis(
                 tool_remote,
                 tool_sbom,
@@ -92,12 +81,29 @@ def init_engine_dependencies(
                 to_scan,
             )
 
-            dependencies_scanned = dependencies_sca_scan.process()
-            deserialized = (
-                dependencies_sca_scan.deserializator(dependencies_scanned)
-                if dependencies_scanned is not None
-                else []
-            )
+            if dict_args.get("generate_sbom_only") != "true":
+                dependencies_sca_scan = DependenciesScan(
+                    tool_run,
+                    tool_deserializator,
+                    remote_config,
+                    dict_args,
+                    exclusions,
+                    pipeline_name,
+                    to_scan,
+                    secret_tool,
+                    build_id,
+                    build_url
+                )
+                dependencies_scanned = dependencies_sca_scan.process()
+                deserialized = (
+                    dependencies_sca_scan.deserializator(dependencies_scanned)
+                    if dependencies_scanned is not None
+                    else []
+                )
+            else:
+                logger.info(
+                    "Dependency vulnerability scan skipped for this execution. (Only SBOM generation)"
+                )
         else:
             logger.error(f"Path {to_scan} does not exist")
     else:
@@ -134,7 +140,10 @@ def _process_sbom_and_license_analysis(
     ):
         return None
 
-    sbom_components = tool_sbom.get_components(to_scan, config_sbom, pipeline_name)
+    if os.path.isfile(to_scan):
+        sbom_components = get_list_component(to_scan)
+    else:
+        sbom_components = tool_sbom.get_components(to_scan, config_sbom, pipeline_name)
 
     if dict_args.get("use_license_analyzer") == "true":
         _upload_sbom_to_license_analyzer(
@@ -144,13 +153,14 @@ def _process_sbom_and_license_analysis(
             dict_args,
             secret_tool,
             pipeline_name,
+            to_scan,
         )
 
     return sbom_components
 
 
 def _upload_sbom_to_license_analyzer(
-    tool_remote, tool_license_manager, config_license, dict_args, secret_tool, pipeline_name
+    tool_remote, tool_license_manager, config_license, dict_args, secret_tool, pipeline_name, to_scan
 ):
     license_tool = config_license.get("TOOL")
     token_license_analyzer = (
@@ -171,7 +181,7 @@ def _upload_sbom_to_license_analyzer(
         request=SbomUpload(
             project_name=pipeline_name,
             project_version=str(tool_remote.get_variable("branch_tag")),
-            sbom_filename=f"{pipeline_name}_SBOM.json"
+            sbom_filename=to_scan if os.path.isfile(to_scan) else f"{pipeline_name}_SBOM.json"
         )
     )
 

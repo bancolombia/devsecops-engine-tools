@@ -150,6 +150,14 @@ def get_inputs_from_cli(args):
         help="Folder Path to scan, only apply engine_iac, engine_code, engine_secret and engine_dependencies tools",
     )
     parser.add_argument(
+        "--generate_sbom_only",
+        choices=["true", "false"],
+        type=str,
+        required=False,
+        default="false",
+        help="Generate the dependencies SBOM without scanning it. Only applies to engine_dependencies.",
+    )
+    parser.add_argument(
         "-tr",
         "--terraform_repo_root",
         type=str,
@@ -301,6 +309,7 @@ def get_inputs_from_cli(args):
         "tool": args.tool,
         "module": args.module,
         "folder_path": args.folder_path,
+        "generate_sbom_only": args.generate_sbom_only,
         "terraform_repo_root": args.terraform_repo_root,
         "platform": args.platform,
         "use_secrets_manager": args.use_secrets_manager,
