@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest.mock import MagicMock
 from devsecops_engine_tools.engine_sast.engine_scripts.src.domain.usecases.script_scan import (
@@ -24,7 +25,7 @@ class TestScriptScan(unittest.TestCase):
         dict_args = {
             "remote_config_repo": "example_repo",
             "remote_config_branch": "",
-            "folder_path": ".",
+            "folder_path": "",
             "environment": "test",
             "platform": "all",
             "token_external_checks": "token",
@@ -34,7 +35,6 @@ class TestScriptScan(unittest.TestCase):
         tool = "SCRIPT"
 
         self.remote_config_source_gateway.get_remote_config.return_value = {
-            "SEARCH_PATTERN": ["AW", "NU"],
             "IGNORE_SEARCH_PATTERN": "(.*_test)",
             "MESSAGE_INFO_ENGINE_SCRIPTS": "message test",
             "THRESHOLD": {
@@ -72,6 +72,9 @@ class TestScriptScan(unittest.TestCase):
         self.assertEqual(input_core.totalized_exclusions, [])
         self.assertEqual(input_core.threshold_defined.vulnerability.critical, 10)
         self.assertEqual(input_core.path_file_results, "/path/to/results")
+        self.assertEqual(
+            self.tool_gateway.run_tool.call_args.args[1], [os.getcwd()]
+        )
         self.assertEqual(input_core.custom_message_break_build, "message test")
         self.assertEqual(input_core.stage_pipeline, "Release")
 
@@ -89,7 +92,6 @@ class TestScriptScan(unittest.TestCase):
         tool = "SCRIPT"
 
         config_payload = {
-            "SEARCH_PATTERN": ["AW", "NU"],
             "IGNORE_SEARCH_PATTERN": "(.*example_pipeline)",
             "MESSAGE_INFO_ENGINE_SCRIPTS": "message test",
             "THRESHOLD": {

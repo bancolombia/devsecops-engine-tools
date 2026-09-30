@@ -164,12 +164,6 @@ class ScriptScan:
 
         folders_to_scan = self._resolve_scope_service_and_folders(config_tool, dict_args)
 
-        if len(folders_to_scan) == 0:
-            logger.warning(
-                "No folders found with the search pattern: %s",
-                config_tool.search_pattern,
-            )
-
         return config_tool, folders_to_scan, skip_tool
 
     def _resolve_scope_pipeline(self, data_file_tool):
@@ -197,7 +191,8 @@ class ScriptScan:
 
     def _resolve_scope_service_and_folders(self, config_tool, dict_args):
         if not dict_args["folder_path"]:
-            return self._search_folders(config_tool.search_pattern)
+            config_tool.scope_service = config_tool.scope_pipeline
+            return [os.getcwd()]
 
         if (
             config_tool.update_service_file_name_cft
@@ -213,18 +208,3 @@ class ScriptScan:
             config_tool.scope_service = config_tool.scope_pipeline
 
         return [dict_args["folder_path"]]
-
-    def _search_folders(self, search_pattern):
-        current_directory = os.getcwd()
-        patron = "(?i).*?(" + "|".join(search_pattern) + ").*$"
-        folders = [
-            folder
-            for folder in os.listdir(current_directory)
-            if os.path.isdir(os.path.join(current_directory, folder))
-        ]
-        matching_folders = [
-            os.path.normpath(os.path.join(current_directory, folder))
-            for folder in folders
-            if re.match(patron, folder)
-        ]
-        return matching_folders

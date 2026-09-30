@@ -1,5 +1,4 @@
 {
-    "SEARCH_PATTERN": ["ms_"],
     "IGNORE_SEARCH_PATTERN": "(.*_test)",
     "MESSAGE_INFO_ENGINE_SCRIPTS": "engine_scripts run successfully",
     "THRESHOLD": {
