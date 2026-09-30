@@ -55,7 +55,6 @@ class TestScriptScan(unittest.TestCase):
             "SCRIPT": {
                 "TIMEOUT_SECONDS": 120,
                 "DEFAULT_SEVERITY": "high",
-                "DEFAULT_CATEGORY": "vulnerability",
                 "RULES": "",
             },
         }
@@ -111,7 +110,6 @@ class TestScriptScan(unittest.TestCase):
             "SCRIPT": {
                 "TIMEOUT_SECONDS": 120,
                 "DEFAULT_SEVERITY": "high",
-                "DEFAULT_CATEGORY": "vulnerability",
                 "RULES": "",
             },
         }

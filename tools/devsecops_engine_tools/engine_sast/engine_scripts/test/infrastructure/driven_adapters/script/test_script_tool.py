@@ -12,14 +12,12 @@ CONFIG_TOOL = {
     "SCRIPT": {
         "TIMEOUT_SECONDS": 30,
         "DEFAULT_SEVERITY": "high",
-        "DEFAULT_CATEGORY": "vulnerability",
         "RULES": {
             "RULES_ARTIFACT_HYGIENE": {
                 "NO_SOURCE_MAPS": {
                     "SCRIPT_NAME": "check_no_maps.py",
                     "RESULT_MODE": "output_lines",
                     "severity": "High",
-                    "category": "Vulnerability",
                 }
             }
         },
@@ -210,6 +208,90 @@ class TestScriptTool(unittest.TestCase):
         self.assertEqual(findings[0].id, "NO_SOURCE_MAPS")
         self.assertEqual(findings[0].severity, "high")
         self.assertEqual(path, "/tmp/results_script.json")
+
+    # ------------------------------------------------------------------ #
+    # _build_generic_import_report                                         #
+    # ------------------------------------------------------------------ #
+
+    def test_build_generic_import_report_uses_rule_title_and_description(self):
+        rules_config = {
+            "RULES_ARTIFACT_HYGIENE": {
+                "NO_SOURCE_MAPS": {
+                    "severity": "High",
+                    "title": "Custom title",
+                    "description": "Custom description",
+                }
+            }
+        }
+        results = [
+            {
+                "rule_id": "NO_SOURCE_MAPS",
+                "folder": "dist",
+                "result_mode": "output_lines",
+                "returncode": 0,
+                "stdout": "app.js.map",
+            }
+        ]
+
+        report = self.tool._build_generic_import_report(
+            results, rules_config, "low"
+        )
+
+        self.assertEqual(len(report["findings"]), 1)
+        finding = report["findings"][0]
+        self.assertEqual(finding["title"], "Custom title")
+        self.assertEqual(finding["description"], "Custom description")
+        self.assertEqual(finding["tags"], ["engine_scripts"])
+        self.assertEqual(
+            finding["vulnerability_ids"],
+            ["NO_SOURCE_MAPS"],
+        )
+
+    def test_build_generic_import_report_defaults_title_and_description(self):
+        results = [
+            {
+                "rule_id": "NO_SOURCE_MAPS",
+                "folder": "dist",
+                "result_mode": "output_lines",
+                "returncode": 0,
+                "stdout": "app.js.map",
+            }
+        ]
+
+        report = self.tool._build_generic_import_report(results, {}, "low")
+
+        finding = report["findings"][0]
+        self.assertEqual(finding["title"], "NO_SOURCE_MAPS")
+        self.assertEqual(finding["description"], "app.js.map")
+        self.assertEqual(finding["tags"], ["engine_scripts"])
+
+    def test_build_generic_import_report_derives_vulnerability_id_from_rule_id(self):
+        rules_config = {
+            "RULES_ARTIFACT_HYGIENE": {
+                "NO_SOURCE_MAPS": {
+                    "severity": "High",
+                }
+            }
+        }
+        results = [
+            {
+                "rule_id": "NO_SOURCE_MAPS",
+                "folder": "dist",
+                "result_mode": "output_lines",
+                "returncode": 0,
+                "stdout": "app.js.map",
+            }
+        ]
+
+        report = self.tool._build_generic_import_report(
+            results, rules_config, "low"
+        )
+
+        finding = report["findings"][0]
+        self.assertEqual(
+            finding["vulnerability_ids"],
+            ["NO_SOURCE_MAPS"],
+        )
 
 if __name__ == "__main__":
     unittest.main()

@@ -21,14 +21,14 @@
         "INSTALLATION_ID_GITHUB": "",
         "TIMEOUT_SECONDS": 120,
         "DEFAULT_SEVERITY": "high",
-        "DEFAULT_CATEGORY": "vulnerability",
         "RULES": {
             "RULES_ARTIFACT_HYGIENE": {
-                "NO_SOURCE_MAPS_IN_BUILD": {
+                "CHECK_1": {
                     "SCRIPT_NAME": "check_1.py",
                     "RESULT_MODE": "output_lines",
                     "severity": "High",
-                    "category": "Vulnerability",
+                    "title": "example of title check 1",
+                    "description": "example of description check 1",
                     "guideline": "https://example.org/check_1"
                 }
             }

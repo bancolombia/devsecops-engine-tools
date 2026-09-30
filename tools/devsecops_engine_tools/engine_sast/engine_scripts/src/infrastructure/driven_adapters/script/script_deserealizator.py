@@ -52,7 +52,6 @@ class ScriptDeserealizator:
         cls,
         results_scan_list: list,
         default_severity: str,
-        default_category: str,
         rules_config: dict = None,
     ) -> "list[Finding]":
         rules_lookup = {}
@@ -67,19 +66,18 @@ class ScriptDeserealizator:
             folder = entry.get("folder", "unknown")
             rule_meta = rules_lookup.get(rule_id, {})
             severity = rule_meta.get("severity", default_severity).lower()
-            category_str = rule_meta.get("category", default_category).lower()
 
             for message in cls.extract_messages(entry):
                 finding_open = Finding(
                     id=rule_id,
                     cvss=None,
                     where=f"{folder}: {message}",
-                    description=message,
+                    description=rule_meta.get("description", message),
                     severity=severity,
                     identification_date=datetime.now().strftime("%d%m%Y"),
                     published_date_cve=None,
                     module="engine_scripts",
-                    category=Category(category_str),
+                    category=Category.VULNERABILITY,
                     requirements=rule_meta.get("guideline"),
                     tool="Script",
                 )

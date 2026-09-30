@@ -31,7 +31,6 @@ class ScriptTool(ToolGateway):
     def run_tool(self, config_tool, folders_to_scan, **kwargs):
         tool_config = config_tool.get(self.TOOL_SCRIPT, {})
         default_severity = tool_config.get("DEFAULT_SEVERITY", "low")
-        default_category = tool_config.get("DEFAULT_CATEGORY", "vulnerability")
         timeout_seconds = tool_config.get("TIMEOUT_SECONDS", DEFAULT_TIMEOUT_SECONDS)
         rules_config = tool_config.get("RULES", {})
         scripts_root = self._resolve_scripts_root(
@@ -51,7 +50,7 @@ class ScriptTool(ToolGateway):
 
         deserealizator = ScriptDeserealizator()
         findings_list = deserealizator.get_list_finding(
-            results, default_severity, default_category, rules_config=rules_config
+            results, default_severity, rules_config=rules_config
         )
 
         report = self._build_generic_import_report(
@@ -62,6 +61,8 @@ class ScriptTool(ToolGateway):
             json.dump(report, f, indent=4)
 
         return findings_list, results_path
+
+    ENGINE_TAG = "engine_scripts"
 
     def _build_generic_import_report(
         self, results, rules_config, default_severity
@@ -81,26 +82,11 @@ class ScriptTool(ToolGateway):
             severity = severity.strip().capitalize() if isinstance(severity, str) else "Info"
 
             for message in ScriptDeserealizator.extract_messages(entry):
-                file_path = self._resolve_report_file_path(folder, message)
-                finding_identity = "\0".join(
-                    (rule_id, file_path or "", message)
+                findings.append(
+                    self._build_generic_finding(
+                        rule_id, rule_meta, folder, message, severity
+                    )
                 )
-                generic_finding = {
-                    "title": rule_id,
-                    "severity": severity,
-                    "description": message,
-                    "unique_id_from_tool": hashlib.sha256(
-                        finding_identity.encode("utf-8")
-                    ).hexdigest(),
-                    "static_finding": True,
-                    "dynamic_finding": False,
-                }
-                if file_path:
-                    generic_finding["file_path"] = file_path
-                guideline = rule_meta.get("guideline")
-                if guideline:
-                    generic_finding["references"] = guideline
-                findings.append(generic_finding)
 
         return {
             "type": "DevSecOps Engine Scripts",
@@ -108,6 +94,28 @@ class ScriptTool(ToolGateway):
             "dynamic_tool": False,
             "findings": findings,
         }
+
+    def _build_generic_finding(self, rule_id, rule_meta, folder, message, severity):
+        file_path = self._resolve_report_file_path(folder, message)
+        finding_identity = "\0".join((rule_id, file_path or "", message))
+        generic_finding = {
+            "title": rule_meta.get("title", rule_id),
+            "severity": severity,
+            "description": rule_meta.get("description", message),
+            "unique_id_from_tool": hashlib.sha256(
+                finding_identity.encode("utf-8")
+            ).hexdigest(),
+            "static_finding": True,
+            "dynamic_finding": False,
+            "tags": [self.ENGINE_TAG],
+        }
+        if file_path:
+            generic_finding["file_path"] = file_path
+        guideline = rule_meta.get("guideline")
+        if guideline:
+            generic_finding["references"] = guideline
+        generic_finding["vulnerability_ids"] = [rule_id]
+        return generic_finding
 
     @staticmethod
     def _resolve_report_file_path(folder, message):

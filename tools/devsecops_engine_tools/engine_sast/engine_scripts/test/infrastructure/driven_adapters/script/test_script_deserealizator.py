@@ -83,7 +83,7 @@ class TestScriptDeserealizator(unittest.TestCase):
     # ------------------------------------------------------------------ #
 
     def test_get_list_finding_empty(self):
-        result = self.deserealizator.get_list_finding([], "high", "vulnerability")
+        result = self.deserealizator.get_list_finding([], "high")
         self.assertEqual(result, [])
 
     def test_get_list_finding_uses_default_severity(self):
@@ -96,11 +96,12 @@ class TestScriptDeserealizator(unittest.TestCase):
                 "stdout": "app.js.map",
             }
         ]
-        findings = self.deserealizator.get_list_finding(results, "high", "vulnerability")
+        findings = self.deserealizator.get_list_finding(results, "high")
         self.assertEqual(len(findings), 1)
         finding = findings[0]
         self.assertEqual(finding.id, "NO_SOURCE_MAPS")
         self.assertEqual(finding.where, "dist: app.js.map")
+        self.assertEqual(finding.description, "app.js.map")
         self.assertEqual(finding.severity, "high")
         self.assertEqual(finding.category, Category.VULNERABILITY)
         self.assertEqual(finding.tool, "Script")
@@ -121,17 +122,18 @@ class TestScriptDeserealizator(unittest.TestCase):
             "RULES_ARTIFACT_HYGIENE": {
                 "NO_SOURCE_MAPS": {
                     "severity": "Critical",
-                    "category": "Compliance",
+                    "description": "Configured description",
                     "guideline": "https://example.org/no-source-maps",
                 }
             }
         }
         findings = self.deserealizator.get_list_finding(
-            results, "low", "vulnerability", rules_config=rules_config
+            results, "low", rules_config=rules_config
         )
         self.assertEqual(len(findings), 1)
         self.assertEqual(findings[0].severity, "critical")
-        self.assertEqual(findings[0].category, Category.COMPLIANCE)
+        self.assertEqual(findings[0].description, "Configured description")
+        self.assertEqual(findings[0].category, Category.VULNERABILITY)
         self.assertEqual(findings[0].requirements, "https://example.org/no-source-maps")
 
     def test_get_list_finding_no_messages_no_findings(self):
@@ -144,7 +146,7 @@ class TestScriptDeserealizator(unittest.TestCase):
                 "stdout": "",
             }
         ]
-        findings = self.deserealizator.get_list_finding(results, "high", "vulnerability")
+        findings = self.deserealizator.get_list_finding(results, "high")
         self.assertEqual(findings, [])
 
     def test_get_list_finding_execution_error_still_reported(self):
@@ -157,7 +159,7 @@ class TestScriptDeserealizator(unittest.TestCase):
                 "stderr": "command not found",
             }
         ]
-        findings = self.deserealizator.get_list_finding(results, "high", "vulnerability")
+        findings = self.deserealizator.get_list_finding(results, "high")
         self.assertEqual(len(findings), 1)
         self.assertIn("could not be executed", findings[0].description)
 
@@ -171,7 +173,7 @@ class TestScriptDeserealizator(unittest.TestCase):
                 "stdout": "a.map\nb.map",
             }
         ]
-        findings = self.deserealizator.get_list_finding(results, "high", "vulnerability")
+        findings = self.deserealizator.get_list_finding(results, "high")
         self.assertEqual(len(findings), 2)
 
 
