@@ -142,8 +142,8 @@ Configuration of the driven adapters in the main layer and management of on/off 
             "SPEC_VERSION": "1.6",
             "EXCLUDE_TYPES": ["jar"],
             "EXCLUDE_PATHS": ["**/test/**"],
-            "RECURSE": true,
-            "INSTALL_DEPENDENCIES": true,
+            "NO_RECURSE_PIPELINES": ["pipeline_name1", "pipeline_name2"],
+            "NO_INSTALL_DEPS_PIPELINES": ["pipeline_name1", "pipeline_name2"],
             "DEBUG_PIPELINES": ["pipeline_name1", "pipeline_name2"],
             "REQUIRED_ONLY_PIPELINES": ["pipeline_name1", "pipeline_name2"],
             "BREAK_ON_BUILD_FAILURE": true,
@@ -383,7 +383,8 @@ Configuration of the driven adapters in the main layer and management of on/off 
                 
     - **CDXGEN**
         - **FETCH_LICENSE**: `true` or `false`. When enabled, cdxgen fetches license information for each component from public registries and includes it in the generated SBOM. Recommended when `--use_license_analyzer true` is used.
-        - **INSTALL_DEPENDENCIES**: `true` or `false`. When enabled, cdxgen installs project dependencies before generating the SBOM, improving component coverage.
+        - **NO_RECURSE_PIPELINES**: Array of pipeline names where cdxgen should not scan recursively (`--no-recurse`). Defaults to an empty array.
+        - **NO_INSTALL_DEPS_PIPELINES**: Array of pipeline names where cdxgen should not install project dependencies (`--no-install-deps`). Defaults to an empty array; dependencies are installed for pipelines not listed.
         - **BREAK_ON_BUILD_FAILURE**: `true` or `false` (default `true`). cdxgen can exit with return code `0` even when the underlying build tool actually failed, silently producing an incomplete/empty SBOM. When enabled, the stdout/stderr of the cdxgen process is checked against `BUILD_FAILURE_PATTERNS` and, if any pattern matches, the SBOM generation is aborted and the error is logged so the affected pipeline is easy to spot.
         - **BUILD_FAILURE_PATTERNS**: Array of regular expressions (case-insensitive) used to detect build failures in the cdxgen output. There are no built-in defaults; patterns must be defined entirely via remote config for the languages/build tools relevant to your pipelines. Example: `["BUILD FAILED", "BUILD FAILURE", "npm ERR!"]`.
         - **OVERRIDE_REGISTRIES**: `true` or `false`. When enabled, the registry URLs defined in `REGISTRIES` are set as environment variables before cdxgen runs, redirecting dependency resolution to internal or private registries.

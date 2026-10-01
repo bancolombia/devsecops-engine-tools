@@ -20,7 +20,6 @@ class TestCdxGen(unittest.TestCase):
                 "OUTPUT_FORMAT": "json",
                 "EXCLUDE_TYPES": [],
                 "EXCLUDE_PATHS": [],
-                "RECURSE": True,
                 "DEBUG_PIPELINES": [],
                 "REQUIRED_ONLY_PIPELINES": []
             }
@@ -309,8 +308,7 @@ class TestCdxGen(unittest.TestCase):
                 "OUTPUT_FORMAT": "json",
                 "EXCLUDE_TYPES": [],
                 "EXCLUDE_PATHS": [],
-                "RECURSE": True,
-                "INSTALL_DEPENDENCIES": False,
+                "NO_INSTALL_DEPS_PIPELINES": ["test_service"],
                 "DEBUG_PIPELINES": ["test_service", "another_service"],
                 "REQUIRED_ONLY_PIPELINES": []
             }
@@ -342,7 +340,6 @@ class TestCdxGen(unittest.TestCase):
                 "OUTPUT_FORMAT": "json",
                 "EXCLUDE_TYPES": [],
                 "EXCLUDE_PATHS": [],
-                "RECURSE": True,
                 "DEBUG_PIPELINES": ["other_service", "another_service"],
                 "REQUIRED_ONLY_PIPELINES": []
             }
@@ -372,7 +369,6 @@ class TestCdxGen(unittest.TestCase):
                 "OUTPUT_FORMAT": "json",
                 "EXCLUDE_TYPES": [],
                 "EXCLUDE_PATHS": [],
-                "RECURSE": True,
                 "DEBUG_PIPELINES": [],
                 "REQUIRED_ONLY_PIPELINES": ["test_service", "another_service"]
             }
@@ -389,6 +385,31 @@ class TestCdxGen(unittest.TestCase):
 
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
     @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
+    def test_get_components_pipeline_lists_disable_recurse_and_dependency_installation(self, mock_platform, mock_get_list_component):
+        mock_platform.return_value = "Linux"
+        mock_get_list_component.return_value = self.mock_components
+        pipeline_config = {
+            "CDXGEN": {
+                "CDXGEN_VERSION": "10.2.0",
+                "SLIM_BINARY": False,
+                "OUTPUT_FORMAT": "json",
+                "NO_RECURSE_PIPELINES": ["test_service"],
+                "NO_INSTALL_DEPS_PIPELINES": ["test_service"],
+                "DEBUG_PIPELINES": [],
+                "REQUIRED_ONLY_PIPELINES": [],
+            }
+        }
+
+        with patch.object(self.cdxgen, '_check_cdxgen_in_path', return_value=None):
+            with patch.object(self.cdxgen, '_install_tool_unix', return_value='./cdxgen-linux-amd64'):
+                with patch.object(self.cdxgen, '_run_cdxgen', return_value='test_service_SBOM.json') as mock_run:
+                    result = self.cdxgen.get_components(self.artifact, pipeline_config, self.service_name)
+
+        self.assertEqual(result, self.mock_components)
+        mock_run.assert_called_once_with('./cdxgen-linux-amd64', self.artifact, self.service_name, [], [], False, False, False, False, '1.6', [])
+
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.get_list_component')
+    @patch('devsecops_engine_tools.engine_core.src.infrastructure.driven_adapters.cdxgen.cdxgen.platform.system')
     def test_get_components_fetch_license_enabled_sets_env(self, mock_platform, mock_get_list_component):
         # Arrange
         mock_platform.return_value = "Linux"
@@ -401,7 +422,6 @@ class TestCdxGen(unittest.TestCase):
                 "OUTPUT_FORMAT": "json",
                 "EXCLUDE_TYPES": [],
                 "EXCLUDE_PATHS": [],
-                "RECURSE": True,
                 "FETCH_LICENSE": True,
                 "DEBUG_PIPELINES": [],
                 "REQUIRED_ONLY_PIPELINES": []
@@ -434,7 +454,6 @@ class TestCdxGen(unittest.TestCase):
                 "OUTPUT_FORMAT": "json",
                 "EXCLUDE_TYPES": [],
                 "EXCLUDE_PATHS": [],
-                "RECURSE": True,
                 "FETCH_LICENSE": False,
                 "DEBUG_PIPELINES": [],
                 "REQUIRED_ONLY_PIPELINES": []
@@ -767,8 +786,6 @@ class TestCdxGen(unittest.TestCase):
                 "OUTPUT_FORMAT": "json",
                 "EXCLUDE_TYPES": [],
                 "EXCLUDE_PATHS": [],
-                "RECURSE": True,
-                "INSTALL_DEPENDENCIES": True,
                 "DEBUG_PIPELINES": [],
                 "REQUIRED_ONLY_PIPELINES": [],
                 "OVERRIDE_REGISTRIES": True,
@@ -1020,7 +1037,6 @@ class TestCdxGen(unittest.TestCase):
                 "OUTPUT_FORMAT": "json",
                 "EXCLUDE_TYPES": [],
                 "EXCLUDE_PATHS": [],
-                "RECURSE": True,
                 "DEBUG_PIPELINES": [],
                 "REQUIRED_ONLY_PIPELINES": [],
                 "BUILD_FAILURE_PATTERNS": ["BUILD FAILED"],
@@ -1051,7 +1067,6 @@ class TestCdxGen(unittest.TestCase):
                 "OUTPUT_FORMAT": "json",
                 "EXCLUDE_TYPES": [],
                 "EXCLUDE_PATHS": [],
-                "RECURSE": True,
                 "DEBUG_PIPELINES": [],
                 "REQUIRED_ONLY_PIPELINES": [],
                 "BUILD_FAILURE_PATTERNS": ["BUILD FAILED", r"npm ERR!\s+code\s+E\d+"]
