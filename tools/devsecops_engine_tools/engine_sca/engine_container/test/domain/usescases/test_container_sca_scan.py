@@ -102,6 +102,7 @@ def test_process_image_not_already_scanned(container_sca_scan):
     container_sca_scan._get_image = MagicMock(return_value=mock_image)
     container_sca_scan._get_base_image = MagicMock(return_value="base_image:latest")
     container_sca_scan._get_images_already_scanned = MagicMock(return_value=[])
+    container_sca_scan.cross_approval_exclusions = [MagicMock(id="CVE-2026-15157")]
     container_sca_scan.tool_run = MagicMock()
     component_list = [
         Component("component1", "version1"),
@@ -131,6 +132,7 @@ def test_process_image_not_already_scanned(container_sca_scan):
         False,
         container_sca_scan.docker_address,
         False,
+        container_sca_scan.cross_approval_exclusions,
     )
     container_sca_scan._set_image_scanned.assert_called_once_with("my_image:1234")
 
@@ -227,6 +229,33 @@ def test_validate_black_list_base_image_no_base_image(container_sca_scan):
     assert result is True
 
 
+def test_remote_feature_exclusions_still_skip_image_validations(container_sca_scan):
+    container_sca_scan.remote_config = {
+        "GET_IMAGE_BASE": {"ENABLED": False},
+        "VALIDATE_BASE_IMAGE_DATE": {
+            "ENABLED": True,
+            "REFERENCE_IMAGE_DATE": "20250206",
+        },
+        "BLACK_LIST_BASE_IMAGE": {
+            "ENABLED": True,
+            "BLACK_LIST": ["/test/"],
+        },
+    }
+    container_sca_scan.exclusions = {
+        "pipeline_name": {
+            "VALIDATE_BASE_IMAGE_DATE": {"hu": "12345"},
+            "BLACK_LIST_BASE_IMAGE": {"hu": "12345"},
+        }
+    }
+    container_sca_scan._validate_base_image_date = MagicMock()
+    container_sca_scan._validate_black_list_base_image = MagicMock()
+
+    container_sca_scan._process_image_validations(MagicMock())
+
+    container_sca_scan._validate_base_image_date.assert_not_called()
+    container_sca_scan._validate_black_list_base_image.assert_not_called()
+
+
 def test_is_compressed_file_tar(container_sca_scan):
     """Test detection of .tar files"""
     assert container_sca_scan._is_compressed_file("/path/to/image.tar") is True
@@ -290,6 +319,7 @@ def test_process_compressed_file_success(mock_exists, container_sca_scan):
         False,
         container_sca_scan.docker_address,
         True,  # is_compressed_file=True
+        [],
     )
 
 

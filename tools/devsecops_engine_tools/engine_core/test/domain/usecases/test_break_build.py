@@ -21,6 +21,111 @@ class BreakBuildTests(unittest.TestCase):
             self.devops_platform_gateway, self.printer_table_gateway
         )
 
+    def test_cross_approval_match_checks_image_and_severity_or_priority(self):
+        finding = Finding(
+            id="CVE-2026-15157",
+            cvss=5.0,
+            where="node:24.18.1",
+            description="Test vulnerability",
+            severity="medium",
+            priority=Priority(score=5.0, scale="high"),
+            identification_date="2026-10-01",
+            published_date_cve="2026-09-01",
+            module="engine_container",
+            category=Category.VULNERABILITY,
+            requirements="",
+            tool="PrismaCloud",
+        )
+        exclusion = Exclusions(
+            id="CVE-2026-15157",
+            where="all",
+            severity="medium",
+            **{
+                "x86.image.name": [
+                    "registry.example/node:24.18.1-builder_20260928"
+                ]
+            },
+        )
+        args = {
+            "module": "engine_container",
+            "image_to_scan": "registry.example/node:24.18.1-builder_20260928",
+        }
+
+        excluded, remaining = self.break_build._filter_findings(
+            [finding], [exclusion], args
+        )
+        self.assertEqual(excluded, [finding])
+        self.assertEqual(remaining, [])
+
+        args["image_to_scan"] = "registry.example/node:26.9.0-builder_20260928"
+        excluded, remaining = self.break_build._filter_findings(
+            [finding], [exclusion], args
+        )
+        self.assertEqual(excluded, [])
+        self.assertEqual(remaining, [finding])
+
+        args["image_to_scan"] = "registry.example/node:24.18.1-builder_20260928"
+        finding.severity = "low"
+        excluded, remaining = self.break_build._filter_findings(
+            [finding], [exclusion], args
+        )
+        self.assertEqual(excluded, [])
+        self.assertEqual(remaining, [finding])
+
+        exclusion.priority = "high"
+        excluded, remaining = self.break_build._filter_findings(
+            [finding], [exclusion], args
+        )
+        self.assertEqual(excluded, [finding])
+        self.assertEqual(remaining, [])
+
+    def test_exclusion_report_prefers_matching_image_specific_reason(self):
+        finding = Finding(
+            id="CVE-2026-15157",
+            cvss=5.0,
+            where="undici:6.27.0",
+            description="Test vulnerability",
+            severity="medium",
+            priority=Priority(score=5.0, scale="medium low"),
+            identification_date="2026-10-01",
+            published_date_cve=None,
+            module="engine_container",
+            category=Category.VULNERABILITY,
+            requirements="fixed in 8.9.0, 7.29.0, 6.28.0",
+            tool="PrismaCloud",
+        )
+        exclusions = [
+            Exclusions(
+                id="CVE-2026-15157",
+                where="all",
+                severity="medium",
+                reason="base image vulnerability",
+            ),
+            Exclusions(
+                id="CVE-2026-15157",
+                where="all",
+                severity="medium",
+                reason="Prueba Cross",
+                **{
+                    "x86.image.name": [
+                        "artifactory.example/node-rhel:24.18.1-builder_20260928"
+                    ]
+                },
+            ),
+        ]
+        args = {
+            "module": "engine_container",
+            "image_to_scan": "artifactory.example/node-rhel:24.18.1-builder_20260928",
+        }
+
+        self.break_build._handle_exclusions(
+            [finding], exclusions, {"MODEL": "priority"}, args
+        )
+
+        reported_exclusions = self.printer_table_gateway.print_table_exclusions.call_args.args[0]
+        self.assertEqual(reported_exclusions[0]["reason"], "Prueba Cross")
+        self.assertEqual(reported_exclusions[0]["severity"], "medium low")
+
     @patch("builtins.print")
     def test_process_no_findings(self, mock_print):
         findings_list = []
