@@ -20,6 +20,6 @@ ruamel.yaml==0.18.15
 Authlib==1.6.12
 PyJWT==2.13.0
 sympy==1.14.0
-urllib3==2.7.0
+urllib3==2.8.0
 holidays==0.81
 pyarrow==23.0.1
