@@ -502,6 +502,41 @@ def test_write_image_base_no_match():
         # Validar que el archivo no fue modificado
         mock_json_dump.assert_not_called()
 
+
+def test_write_image_base_uses_cross_approval_component_values():
+    mock_file_data = json.dumps(
+        {
+            "results": [
+                {"vulnerabilities": [{"id": "CVE-2026-15157"}]}
+            ]
+        }
+    )
+    cross_approval_exclusion = Mock(
+        id="CVE-2026-15157",
+        check_in_desc=["python:3.9"],
+    )
+    remote_config = {
+        "GET_IMAGE_BASE": {
+            "LABEL_KEYS": {
+                "key_image_exception": "x86.image.name"
+            }
+        }
+    }
+
+    with patch("builtins.open", mock_open(read_data=mock_file_data)), patch(
+        "json.dump"
+    ) as mock_json_dump:
+        PrismaCloudManagerScan()._write_image_base(
+            "result.json",
+            ([['python:3.9']], False),
+            {},
+            remote_config,
+            [cross_approval_exclusion],
+        )
+
+    written_data = mock_json_dump.call_args.args[0]
+    assert written_data["results"][0]["vulnerabilities"][0]["baseImage"] == "['python:3.9']"
+
 def test_write_image_base_file_not_found():
     exclusions_data = {
         "All": {
