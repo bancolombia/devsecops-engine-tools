@@ -32,8 +32,8 @@ class CdxGen(SbomManagerGateway):
             fetch_license = cdxgen_config.get("FETCH_LICENSE", False)
             exclude_types = cdxgen_config.get("EXCLUDE_TYPES", [])
             exclude_paths = cdxgen_config.get("EXCLUDE_PATHS", [])
-            recurse = cdxgen_config.get("RECURSE", True)
-            install_deps = cdxgen_config.get("INSTALL_DEPENDENCIES", True)
+            no_recurse_pipelines = cdxgen_config.get("NO_RECURSE_PIPELINES", [])
+            no_install_deps_pipelines = cdxgen_config.get("NO_INSTALL_DEPS_PIPELINES", [])
             debug_pipelines = cdxgen_config.get("DEBUG_PIPELINES", [])
             required_only_pipelines = cdxgen_config.get("REQUIRED_ONLY_PIPELINES", [])
             spec_version = cdxgen_config.get("SPEC_VERSION", "1.6")
@@ -57,6 +57,8 @@ class CdxGen(SbomManagerGateway):
                 return None
 
             required_only = self._pipeline_in_list(service_name, required_only_pipelines)
+            recurse = not self._pipeline_in_list(service_name, no_recurse_pipelines)
+            install_deps = not self._pipeline_in_list(service_name, no_install_deps_pipelines)
             result_sbom = self._run_cdxgen(command_prefix, artifact, service_name, exclude_types, exclude_paths, recurse, install_deps, required_only, enable_debug, spec_version, failure_patterns)
             return get_list_component(result_sbom, cdxgen_config["OUTPUT_FORMAT"])
         except Exception as e:
