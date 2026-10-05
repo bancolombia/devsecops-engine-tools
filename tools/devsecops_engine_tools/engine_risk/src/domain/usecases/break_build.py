@@ -624,7 +624,6 @@ class BreakBuild:
         )
 
     def _get_report_id(self, report):
-        # Report.id defaults to a list ([]); schema requires a string
         if isinstance(report.id, list):
             return ",".join(str(item) for item in report.id)
         return report.id
