@@ -409,7 +409,7 @@ class BreakBuild:
                 "id": (
                     report.vuln_id_from_tool
                     if report.vuln_id_from_tool
-                    else report.id
+                    else self._get_report_id(report)
                 ),
                 "severity": report.severity,
                 "risk_score": (
@@ -448,7 +448,7 @@ class BreakBuild:
                             "id": (
                                 report.vuln_id_from_tool
                                 if report.vuln_id_from_tool
-                                else report.id
+                                else self._get_report_id(report)
                             ),
                             "severity": report.severity,
                             "risk_score": str(report.risk_score),
@@ -614,7 +614,7 @@ class BreakBuild:
                 "id": (
                     report.vuln_id_from_tool
                     if report.vuln_id_from_tool
-                    else report.id
+                    else self._get_report_id(report)
                 ),
                 "severity": report.severity,
                 "risk_score": "0",
@@ -622,6 +622,12 @@ class BreakBuild:
                 "reason": reason,
             }
         )
+
+    def _get_report_id(self, report):
+        # Report.id defaults to a list ([]); schema requires a string
+        if isinstance(report.id, list):
+            return ",".join(str(item) for item in report.id)
+        return report.id
 
     def _print_exclusions(self, applied_exclusions: "list[Exclusions]"):
         if applied_exclusions:
