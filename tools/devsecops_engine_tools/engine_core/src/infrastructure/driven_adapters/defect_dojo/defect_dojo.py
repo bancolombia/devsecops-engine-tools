@@ -272,6 +272,7 @@ class DefectDojoPlatform(VulnerabilityManagementGateway):
                             service,
                             config_tool["VULNERABILITY_MANAGER"]["DEFECT_DOJO"]["REGEX_EXPRESSION_CODE_APP"]
                         ),
+                        "o": "created",
                         "prefetch": "prod_type",
                     },
                 )

@@ -93,9 +93,9 @@ class ImportScanUserCase:
 
     def _resolve_product(self, request):
         search_type_key = "name_exact" if request.get_exact_product is True else "name"
-        products = self.__rest_product.get_products({search_type_key: request.product_name})
+        products = self.__rest_product.get_products({search_type_key: request.product_name, "o": "created"})
         if len(products.results) == 0 and request.product_name != "Orphan_Product":
-            products = self.__rest_product.get_products({search_type_key: request.code_app})
+            products = self.__rest_product.get_products({search_type_key: request.code_app, "o": "created"})
 
         if len(products.results) > 0:
             product_id = products.results[0].id
