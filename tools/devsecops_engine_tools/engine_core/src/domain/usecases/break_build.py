@@ -48,7 +48,9 @@ class BreakBuild:
                 findings_list, exclusions, args
             )
 
-            findings_excluded, findings_without_exclusions = self._filter_findings(findings_list, exclusions)
+            findings_excluded, findings_without_exclusions = self._filter_findings(
+                findings_list, exclusions, args
+            )
             scan_result["findings_excluded"] = [self._map_finding_excluded(item) for item in findings_excluded]
             
             vulnerabilities = [v for v in findings_without_exclusions if v.category == Category.VULNERABILITY]
@@ -60,7 +62,7 @@ class BreakBuild:
             self._handle_vulnerabilities(vulnerability_counts, vulnerabilities, threshold, warning_release, scan_result, args, manager)
             self._handle_cve_policy(vulnerabilities, threshold)
             self._handle_compliances(compliance_counts, compliances, threshold, warning_release, scan_result, args, manager)
-            self._handle_exclusions(findings_excluded, exclusions, manager)
+            self._handle_exclusions(findings_excluded, exclusions, manager, args)
         else:
             print(devops_platform_gateway.message("succeeded", "There are no findings"))
             print(devops_platform_gateway.result_pipeline("succeeded"))
@@ -93,19 +95,38 @@ class BreakBuild:
                             )
                         )
 
-    def _filter_findings(self, findings_list, exclusions):
+    def _filter_findings(self, findings_list, exclusions, args):
         findings_excluded_list = [
-            item for item in findings_list if any(
-                exclusion.id == item.id and
-                (exclusion.where in item.where or "all" in exclusion.where) and
-                (exclusion.severity == item.severity or exclusion.priority == item.priority.scale)
-                for exclusion in exclusions
-            )
+            item
+            for item in findings_list
+            if any(self._matches_exclusion(item, exclusion, args) for exclusion in exclusions)
         ]
         findings_without_exclusions_list = [
             v for v in findings_list if v not in findings_excluded_list
         ]
         return findings_excluded_list, findings_without_exclusions_list
+
+    @staticmethod
+    def _matches_exclusion(item, exclusion, args):
+        if exclusion.id != item.id:
+            return False
+        if exclusion.where not in item.where and "all" not in exclusion.where:
+            return False
+
+        finding_priority = item.priority.scale if item.priority else None
+        if exclusion.severity != item.severity and not (
+            exclusion.priority and exclusion.priority == finding_priority
+        ):
+            return False
+
+        if args.get("module") == "engine_container" and exclusion.check_in_desc:
+            image_to_scan = args.get("image_to_scan", "")
+            if not image_to_scan or not any(
+                image_to_scan in image_name for image_name in exclusion.check_in_desc
+            ):
+                return False
+
+        return True
 
     def _map_finding_excluded(self, item):
         return {
@@ -276,7 +297,9 @@ class BreakBuild:
             print(devops_platform_gateway.message("succeeded", "There are no compliances issues"))
             print(devops_platform_gateway.result_pipeline("succeeded"))
 
-    def _handle_exclusions(self, findings_excluded_list, exclusions, break_build_manager):
+    def _handle_exclusions(
+        self, findings_excluded_list, exclusions, break_build_manager, args
+    ):
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
         print()
@@ -285,9 +308,18 @@ class BreakBuild:
         if findings_excluded_list:
             exclusions_list = []
             for item in findings_excluded_list:
+                matching_exclusions = [
+                    exclusion
+                    for exclusion in exclusions
+                    if self._matches_exclusion(item, exclusion, args)
+                ]
                 matching = next(
-                    (e for e in exclusions if e.id == item.id and (e.where in item.where or "all" in e.where) and (e.severity == item.severity or e.priority == item.priority.scale)),
-                    None
+                    (
+                        exclusion
+                        for exclusion in matching_exclusions
+                        if exclusion.check_in_desc
+                    ),
+                    matching_exclusions[0] if matching_exclusions else None,
                 )
                 if matching:
                     exclusions_list.append({
