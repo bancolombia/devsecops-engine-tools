@@ -37,6 +37,54 @@ def test_returns_only_approved_and_current_exclusions():
     assert [exclusion.id for exclusion in exclusions] == ["CVE-current"]
 
 
+def test_parses_approved_exclusions_from_cross_approval_api_response():
+    tomorrow = date.today() + timedelta(days=1)
+    response = CrossApprovalRequestList.from_dict(
+        {
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [
+                {
+                    "id": 34,
+                    "owner": "x86",
+                    "status": "approved",
+                    "exclusions": [
+                        {
+                            "exclusion_id": 586,
+                            "id": "CVE-2005-2541",
+                            "where": "all",
+                            "create_date": "15102026",
+                            "expired_date": tomorrow.strftime("%d%m%Y"),
+                            "expired_at": None,
+                            "priority": "",
+                            "severity": "low,medium",
+                            "hu": "7946061",
+                            "reason": "base image vulnerability",
+                            "cve_id": "CVE-2005-2541",
+                            "component": {
+                                "type": "image",
+                                "values": ["registry.example/python:3.10-slim"],
+                            },
+                        }
+                    ],
+                }
+            ],
+        }
+    )
+    adapter = Mock()
+    adapter.get_cross_approval_requests.return_value = response
+
+    exclusions = CrossApprovalRequestUserCase(adapter).execute(
+        "https://dojo.example/api/v2/crossapproval_requests/"
+    )
+
+    assert len(exclusions) == 1
+    assert exclusions[0].id == "CVE-2005-2541"
+    assert exclusions[0].severity == "low,medium"
+    assert exclusions[0].component.values == ["registry.example/python:3.10-slim"]
+
+
 def test_invalid_expiration_date_is_not_accepted():
     assert CrossApprovalRequestUserCase._is_current(None, "not-a-date") is False
 

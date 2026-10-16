@@ -79,6 +79,64 @@ class BreakBuildTests(unittest.TestCase):
         self.assertEqual(excluded, [finding])
         self.assertEqual(remaining, [])
 
+    def test_matches_exclusion_supports_comma_separated_severity_and_priority(self):
+        def make_finding(severity, priority_scale):
+            return Finding(
+                id="CVE-2005-2541",
+                cvss=5.0,
+                where="all",
+                description="Test vulnerability",
+                severity=severity,
+                priority=Priority(score=5.0, scale=priority_scale),
+                identification_date="2026-10-01",
+                published_date_cve=None,
+                module="engine_container",
+                category=Category.VULNERABILITY,
+                requirements="",
+                tool="PrismaCloud",
+            )
+
+        severity_exclusion = Exclusions(
+            id="CVE-2005-2541",
+            where="all",
+            severity="low,medium",
+            priority="",
+        )
+
+        self.assertTrue(
+            self.break_build._matches_exclusion(
+                make_finding("low", "low"), severity_exclusion, {}
+            )
+        )
+        self.assertTrue(
+            self.break_build._matches_exclusion(
+                make_finding("medium", "medium"), severity_exclusion, {}
+            )
+        )
+        self.assertFalse(
+            self.break_build._matches_exclusion(
+                make_finding("critical", "critical"), severity_exclusion, {}
+            )
+        )
+
+        priority_exclusion = Exclusions(
+            id="CVE-2005-2541",
+            where="all",
+            severity="",
+            priority="high, critical",
+        )
+
+        self.assertTrue(
+            self.break_build._matches_exclusion(
+                make_finding("medium", "critical"), priority_exclusion, {}
+            )
+        )
+        self.assertFalse(
+            self.break_build._matches_exclusion(
+                make_finding("medium", "low"), priority_exclusion, {}
+            )
+        )
+
     def test_exclusion_report_prefers_matching_image_specific_reason(self):
         finding = Finding(
             id="CVE-2026-15157",

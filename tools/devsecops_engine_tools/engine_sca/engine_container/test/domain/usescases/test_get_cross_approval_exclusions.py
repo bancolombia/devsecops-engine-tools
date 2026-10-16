@@ -29,6 +29,7 @@ def test_maps_exclusions_and_uses_available_defect_dojo_token():
             where="all",
             create_date="01092026",
             expired_date="01102026",
+            severity="low,medium",
             priority="high",
             hu="12345",
             reason="Approved exception",
@@ -48,6 +49,7 @@ def test_maps_exclusions_and_uses_available_defect_dojo_token():
     )
     assert len(result) == 1
     assert result[0].id == "CVE-2026-1000"
+    assert result[0].severity == "low,medium"
     assert result[0].priority == "high"
     assert result[0].reason == "Approved exception"
     assert result[0].check_in_desc == ["registry.example/node:24"]

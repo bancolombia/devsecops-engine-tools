@@ -114,9 +114,13 @@ class BreakBuild:
             return False
 
         finding_priority = item.priority.scale if item.priority else None
-        if exclusion.severity != item.severity and not (
-            exclusion.priority and exclusion.priority == finding_priority
-        ):
+        severity_match = BreakBuild._value_in_exclusion_list(
+            exclusion.severity, item.severity
+        )
+        priority_match = BreakBuild._value_in_exclusion_list(
+            exclusion.priority, finding_priority
+        )
+        if not severity_match and not priority_match:
             return False
 
         if args.get("module") == "engine_container" and exclusion.check_in_desc:
@@ -127,6 +131,13 @@ class BreakBuild:
                 return False
 
         return True
+
+    @staticmethod
+    def _value_in_exclusion_list(exclusion_value, finding_value):
+        if not exclusion_value or finding_value is None:
+            return False
+        values = [value.strip() for value in exclusion_value.split(",")]
+        return finding_value in values
 
     def _map_finding_excluded(self, item):
         return {
