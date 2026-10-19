@@ -7,6 +7,12 @@ from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.hand
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.set_input_core import (
     SetInputCore,
 )
+from devsecops_engine_tools.engine_sca.engine_container.src.domain.usecases.get_cross_approval_exclusions import (
+    GetCrossApprovalExclusions,
+)
+from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.defect_dojo.cross_approval_adapter import (
+    DefectDojoCrossApprovalAdapter,
+)
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 from devsecops_engine_tools.engine_utilities import settings
 import re
@@ -54,8 +60,21 @@ def init_engine_sca_rm(
     base_image = None
     sbom_components = None
     deseralized = []
-    input_core = SetInputCore(remote_config, exclusions, pipeline_name, tool, stage)
+    cross_approval_exclusions = []
     if scan_flag and not (skip_flag):
+        host_defect_dojo = None
+        if remote_config.get("CROSS_APPROVAL_EXCLUSIONS", {}).get("ENABLED", False):
+            core_config_tool = remote_config_source_gateway.get_remote_config(
+                dict_args["remote_config_repo"],
+                "engine_core/ConfigTool.json",
+                dict_args["remote_config_branch"],
+            )
+            host_defect_dojo = core_config_tool.get("VULNERABILITY_MANAGER", {}).get(
+                "DEFECT_DOJO", {}
+            ).get("HOST_DEFECT_DOJO")
+        cross_approval_exclusions = GetCrossApprovalExclusions(
+            DefectDojoCrossApprovalAdapter()
+        ).execute(remote_config, dict_args, secret_tool, host_defect_dojo)
         container_sca_scan = ContainerScaScan(
             tool_run,
             remote_config,
@@ -69,6 +88,7 @@ def init_engine_sca_rm(
             pipeline_name,
             context=dict_args["context"],
             docker_address=dict_args["docker_address"],
+            cross_approval_exclusions=cross_approval_exclusions,
         )
         image_scanned, base_image, sbom_components = container_sca_scan.process()
         if image_scanned:
@@ -78,6 +98,14 @@ def init_engine_sca_rm(
         dict_args["send_metrics"] = "false"
         dict_args["use_vulnerability_management"] = "false"
 
+    input_core = SetInputCore(
+        remote_config,
+        exclusions,
+        pipeline_name,
+        tool,
+        stage,
+        cross_approval_exclusions,
+    )
     core_input = input_core.set_input_core(image_scanned, base_image)
 
     return deseralized, core_input, sbom_components

@@ -774,7 +774,7 @@ class TestDownloadKiuwanCsvOfficial(TestKiuwanToolBase):
 
     def setUp(self):
         super().setUp()
-        self.tool = kiuwan_tool.KiuwanTool(self.config)
+        self.tool = self.create_kiuwan_tool()
 
     @patch("requests.get")
     @patch("builtins.open", new_callable=mock_open)
