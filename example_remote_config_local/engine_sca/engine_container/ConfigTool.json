@@ -47,8 +47,7 @@
         ]
     },
     "CROSS_APPROVAL_EXCLUSIONS": {
-        "ENABLED": false,
-        "URL": ""
+        "ENABLED": false
     },
     "MESSAGE_INFO_ENGINE_CONTAINER": "engine_container run successfully",
     "IGNORE_SEARCH_PATTERN": "(.*_demo0|.*_cer)",

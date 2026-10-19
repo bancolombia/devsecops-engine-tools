@@ -39,13 +39,14 @@ def test_maps_exclusions_and_uses_available_defect_dojo_token():
     ]
 
     result = GetCrossApprovalExclusions(gateway).execute(
-        {"CROSS_APPROVAL_EXCLUSIONS": {"ENABLED": True, "URL": "https://dojo.example/api/v2/crossapproval_requests/"}},
+        {"CROSS_APPROVAL_EXCLUSIONS": {"ENABLED": True}},
         {},
         {"token_defect_dojo": "dojo-token"},
+        "https://dojo.example",
     )
 
     gateway.get_approved_exclusions.assert_called_once_with(
-        "https://dojo.example/api/v2/crossapproval_requests/", "dojo-token"
+        "https://dojo.example", "dojo-token"
     )
     assert len(result) == 1
     assert result[0].id == "CVE-2026-1000"
@@ -65,18 +66,19 @@ def test_ignores_non_image_components():
     ]
 
     result = GetCrossApprovalExclusions(gateway).execute(
-        {"CROSS_APPROVAL_EXCLUSIONS": {"ENABLED": True, "URL": "https://dojo.example/api/"}},
+        {"CROSS_APPROVAL_EXCLUSIONS": {"ENABLED": True}},
         {},
         {"token_defect_dojo": "dojo-token"},
+        "https://dojo.example",
     )
 
     assert result == []
 
 
-def test_enabled_feature_requires_endpoint_url():
+def test_enabled_feature_requires_host_defect_dojo():
     gateway = Mock()
 
-    with pytest.raises(ValueError, match="URL is not configured"):
+    with pytest.raises(ValueError, match="HOST_DEFECT_DOJO is not configured"):
         GetCrossApprovalExclusions(gateway).execute(
-            {"CROSS_APPROVAL_EXCLUSIONS": {"ENABLED": True}}, {}, {}
+            {"CROSS_APPROVAL_EXCLUSIONS": {"ENABLED": True}}, {}, {}, None
         )

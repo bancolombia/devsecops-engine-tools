@@ -1,5 +1,3 @@
-from urllib.parse import urlsplit
-
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.cross_approval_gateway import (
     CrossApprovalGateway,
 )
@@ -8,8 +6,6 @@ from devsecops_engine_tools.engine_utilities.utils.session_manager import Sessio
 
 
 class DefectDojoCrossApprovalAdapter(CrossApprovalGateway):
-    def get_approved_exclusions(self, url: str, token: str):
-        parsed_url = urlsplit(url)
-        host = f"{parsed_url.scheme}://{parsed_url.netloc}"
+    def get_approved_exclusions(self, host: str, token: str):
         session = SessionManager(token, host)
-        return CrossApprovalRequest.get_approved_exclusions(session, url)
+        return CrossApprovalRequest.get_approved_exclusions(session)

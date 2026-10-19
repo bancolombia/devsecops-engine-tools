@@ -12,12 +12,11 @@ class CrossApprovalRequestUserCase:
     def __init__(self, rest_cross_approval_request: CrossApprovalRequestRestConsumer):
         self.__rest_cross_approval_request = rest_cross_approval_request
 
-    def execute(self, url: str):
-        response = self.__rest_cross_approval_request.get_cross_approval_requests(url)
+    def execute(self):
+        response = self.__rest_cross_approval_request.get_cross_approval_requests()
         return [
             exclusion
             for request in response.results
-            if request.status.lower() == "approved"
             for exclusion in request.exclusions
             if self._is_current(exclusion.expired_at, exclusion.expired_date)
         ]

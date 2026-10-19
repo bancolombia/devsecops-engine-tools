@@ -62,9 +62,19 @@ def init_engine_sca_rm(
     deseralized = []
     cross_approval_exclusions = []
     if scan_flag and not (skip_flag):
+        host_defect_dojo = None
+        if remote_config.get("CROSS_APPROVAL_EXCLUSIONS", {}).get("ENABLED", False):
+            core_config_tool = remote_config_source_gateway.get_remote_config(
+                dict_args["remote_config_repo"],
+                "engine_core/ConfigTool.json",
+                dict_args["remote_config_branch"],
+            )
+            host_defect_dojo = core_config_tool.get("VULNERABILITY_MANAGER", {}).get(
+                "DEFECT_DOJO", {}
+            ).get("HOST_DEFECT_DOJO")
         cross_approval_exclusions = GetCrossApprovalExclusions(
             DefectDojoCrossApprovalAdapter()
-        ).execute(remote_config, dict_args, secret_tool)
+        ).execute(remote_config, dict_args, secret_tool, host_defect_dojo)
         container_sca_scan = ContainerScaScan(
             tool_run,
             remote_config,

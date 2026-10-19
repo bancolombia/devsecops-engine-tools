@@ -8,7 +8,7 @@ from devsecops_engine_tools.engine_utilities.defect_dojo.infraestructure.driver_
 
 class CrossApprovalRequest:
     @staticmethod
-    def get_approved_exclusions(session, url: str):
+    def get_approved_exclusions(session):
         rest_cross_approval_request = CrossApprovalRequestRestConsumer(session=session)
         use_case = CrossApprovalRequestUserCase(rest_cross_approval_request)
-        return use_case.execute(url)
+        return use_case.execute()

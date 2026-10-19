@@ -17,16 +17,19 @@ logger = MyLogger.__call__(**SETTING_LOGGER).get_logger()
 class CrossApprovalRequestRestConsumer:
     def __init__(self, session: SessionManager):
         self.__token = session._token
+        self.__host = session._host
         self.__session = session._instance
 
-    def get_cross_approval_requests(self, url: str) -> CrossApprovalRequestList:
+    def get_cross_approval_requests(self) -> CrossApprovalRequestList:
+        url = f"{self.__host}/api/v2/crossapproval_requests/"
         headers = {
             "Authorization": f"Token {self.__token}",
             "Accept": "application/json",
         }
+        params = {"status": "approved"}
         try:
             response = self.__session.get(
-                url, headers=headers, verify=VERIFY_CERTIFICATE
+                url, headers=headers, params=params, verify=VERIFY_CERTIFICATE
             )
             if response.status_code != 200:
                 raise ApiError(response.json())

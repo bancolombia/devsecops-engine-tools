@@ -8,15 +8,15 @@ class GetCrossApprovalExclusions:
     def __init__(self, cross_approval_gateway: CrossApprovalGateway):
         self.cross_approval_gateway = cross_approval_gateway
 
-    def execute(self, remote_config, dict_args, secret_tool):
+    def execute(self, remote_config, dict_args, secret_tool, host_defect_dojo=None):
         config = remote_config.get("CROSS_APPROVAL_EXCLUSIONS", {})
         if not config.get("ENABLED", False):
             return []
 
-        url = config.get("URL")
-        if not url:
+        if not host_defect_dojo:
             raise ValueError(
-                "CROSS_APPROVAL_EXCLUSIONS is enabled but URL is not configured"
+                "CROSS_APPROVAL_EXCLUSIONS is enabled but "
+                "VULNERABILITY_MANAGER.DEFECT_DOJO.HOST_DEFECT_DOJO is not configured"
             )
 
         secret_tool = secret_tool or {}
@@ -28,7 +28,9 @@ class GetCrossApprovalExclusions:
                 "CROSS_APPROVAL_EXCLUSIONS is enabled but Defect Dojo token is missing"
             )
 
-        exclusions = self.cross_approval_gateway.get_approved_exclusions(url, token)
+        exclusions = self.cross_approval_gateway.get_approved_exclusions(
+            host_defect_dojo, token
+        )
         return [
             Exclusions(
                 id=exclusion.id or exclusion.cve_id,
