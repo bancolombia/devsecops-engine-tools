@@ -164,6 +164,7 @@ Main configuration file that defines scanning behavior, tool versions, and secur
 - **ENABLED**: Boolean flag to include approved and unexpired cross-approval exclusions from Defect Dojo in container vulnerability evaluation
 - The Defect Dojo host is taken from `VULNERABILITY_MANAGER.DEFECT_DOJO.HOST_DEFECT_DOJO` in `engine_core/ConfigTool.json` (the same host used by the rest of the Defect Dojo integration). The `crossapproval_requests` endpoint is appended automatically and only approved requests are requested via the `status=approved` query parameter. When enabled, the existing Defect Dojo token is used to authenticate the request.
 - An exclusion applies only when vulnerability ID, scope, and severity or priority match, and the scanned image is present in `component.values` for a component of type `image`. Other component types are ignored by this container flow.
+- When multiple image-specific exclusions match a finding, the exclusions table uses the reason and dates from the one with the latest `expired_date`, regardless of API response order. Dates are compared chronologically (`DDMMYYYY`); an empty date ranks below a populated date. Image-specific matches retain precedence over generic exclusions.
 - This setting only affects vulnerability findings. Base image date and blacklist exceptions continue to be controlled by `Exclusions.json`.
 
 ##### General Configuration

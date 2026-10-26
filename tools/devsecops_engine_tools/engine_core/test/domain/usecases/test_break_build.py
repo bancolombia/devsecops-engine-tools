@@ -184,6 +184,61 @@ class BreakBuildTests(unittest.TestCase):
         self.assertEqual(reported_exclusions[0]["reason"], "Prueba Cross")
         self.assertEqual(reported_exclusions[0]["severity"], "medium low")
 
+    def test_exclusion_report_selects_latest_expiration_regardless_of_order(self):
+        image = "registry.example/python:3.10-slim"
+        finding = Mock(
+            id="CVE-2025-8869",
+            where="tar:1.35",
+            severity="medium",
+            module="engine_container",
+            requirements="open",
+        )
+        args = {"module": "engine_container", "image_to_scan": image}
+
+        for earlier_date, later_date in [
+            ("29102026", "30102026"),
+            ("31102026", "01112026"),
+            ("31122026", "01012027"),
+            ("", "30102026"),
+        ]:
+            earlier = Exclusions(
+                id=finding.id,
+                severity="medium",
+                expired_date=earlier_date,
+                reason="Earlier approval",
+                **{"x86.image.name": [image]},
+            )
+            later = Exclusions(
+                id=finding.id,
+                severity="medium",
+                create_date="26102026",
+                expired_date=later_date,
+                reason="Later approval",
+                **{"x86.image.name": [image]},
+            )
+            non_matching = Exclusions(
+                id=finding.id,
+                severity="medium",
+                expired_date="01012028",
+                reason="Different image",
+                **{"x86.image.name": ["registry.example/other:latest"]},
+            )
+            for exclusions in ([earlier, later], [later, earlier]):
+                with self.subTest(earlier=earlier_date, later=later_date, first=exclusions[0].reason):
+                    excluded, remaining = self.break_build._filter_findings(
+                        [finding], exclusions + [non_matching], args
+                    )
+                    self.assertEqual(excluded, [finding])
+                    self.assertEqual(remaining, [])
+                    self.break_build._handle_exclusions(
+                        excluded, exclusions + [non_matching], {"MODEL": "severity"}, args
+                    )
+                    rows = self.printer_table_gateway.print_table_exclusions.call_args.args[0]
+                    self.assertEqual(len(rows), 1)
+                    self.assertEqual(rows[0]["expired_date"], later_date)
+                    self.assertEqual(rows[0]["create_date"], "26102026")
+                    self.assertEqual(rows[0]["reason"], "Later approval")
+
     @patch("builtins.print")
     def test_process_no_findings(self, mock_print):
         findings_list = []

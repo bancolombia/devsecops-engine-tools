@@ -324,13 +324,19 @@ class BreakBuild:
                     for exclusion in exclusions
                     if self._matches_exclusion(item, exclusion, args)
                 ]
-                matching = next(
-                    (
-                        exclusion
-                        for exclusion in matching_exclusions
-                        if exclusion.check_in_desc
+                image_exclusions = [
+                    exclusion
+                    for exclusion in matching_exclusions
+                    if exclusion.check_in_desc
+                ]
+                matching = max(
+                    image_exclusions or matching_exclusions,
+                    key=lambda exclusion: (
+                        datetime.strptime(exclusion.expired_date, "%d%m%Y")
+                        if exclusion.expired_date
+                        else datetime.min
                     ),
-                    matching_exclusions[0] if matching_exclusions else None,
+                    default=None,
                 )
                 if matching:
                     exclusions_list.append({
