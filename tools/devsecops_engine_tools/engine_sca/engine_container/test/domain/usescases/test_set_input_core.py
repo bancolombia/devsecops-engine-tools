@@ -185,3 +185,32 @@ def test_get_exclusions_direct_match_takes_precedence_over_pattern(mock_tool_rem
 
     assert len(exclusions) == 1
     assert exclusions[0].id == "direct-match"
+
+
+def test_get_exclusions_appends_cross_approval_exclusions(mock_tool_remote):
+    cross_approval_exclusion = Exclusions(
+        id="CVE-2026-1000",
+        where="all",
+        priority="high",
+        reason="Approved cross-approval",
+    )
+    exclusions_data = {
+        "All": {"PRISMA": [{"id": "CVE-2025-1000", "where": "all"}]}
+    }
+    set_input_core = SetInputCore(
+        mock_tool_remote,
+        exclusions_data,
+        "pipeline",
+        "PRISMA",
+        "release",
+        [cross_approval_exclusion],
+    )
+
+    exclusions = set_input_core.get_exclusions(
+        exclusions_data, "pipeline", "PRISMA", None
+    )
+
+    assert [exclusion.id for exclusion in exclusions] == [
+        "CVE-2025-1000",
+        "CVE-2026-1000",
+    ]

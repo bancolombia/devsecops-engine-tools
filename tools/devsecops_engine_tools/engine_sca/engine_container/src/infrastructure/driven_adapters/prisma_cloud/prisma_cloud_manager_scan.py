@@ -132,14 +132,34 @@ class PrismaCloudManagerScan(ToolGateway):
                         time.sleep(retry_delay)
         return False
 
-    def _write_image_base(self, result_file, base_image, exclusions_data, remoteconfig):
+    def _write_image_base(
+        self,
+        result_file,
+        base_image,
+        exclusions_data,
+        remoteconfig,
+        cross_approval_exclusions=None,
+    ):
         try:
             with open(result_file, "r") as file:
                 data = json.load(file)
 
-            prisma_exclusions = exclusions_data.get("All", {}).get("PRISMA", [])
+            prisma_exclusions = list(
+                exclusions_data.get("All", {}).get("PRISMA", [])
+            )
             base_image_list = base_image[0][0] if base_image and base_image[0][0] else []
-            key_image_exception = remoteconfig.get("GET_IMAGE_BASE", {}).get("LABEL_KEYS", {}).get("key_image_exception", None)
+            key_image_exception = (
+                remoteconfig.get("GET_IMAGE_BASE", {})
+                .get("LABEL_KEYS", {})
+                .get("key_image_exception", "x86.image.name")
+            )
+            for exclusion in cross_approval_exclusions or []:
+                prisma_exclusions.append(
+                    {
+                        "id": exclusion.id,
+                        key_image_exception: exclusion.check_in_desc,
+                    }
+                )
 
             modified = self._apply_base_image_exclusions(
                 data, prisma_exclusions, base_image_list, key_image_exception
@@ -270,7 +290,18 @@ class PrismaCloudManagerScan(ToolGateway):
         return file_path
 
     def run_tool_container_sca(
-        self, remoteconfig, secret_tool, token_engine_container, image_name, result_file, base_image, exclusions, generate_sbom, docker_address, is_compressed_file=False
+        self,
+        remoteconfig,
+        secret_tool,
+        token_engine_container,
+        image_name,
+        result_file,
+        base_image,
+        exclusions,
+        generate_sbom,
+        docker_address,
+        is_compressed_file=False,
+        cross_approval_exclusions=None,
     ):
 
         prisma_key = (
@@ -289,7 +320,13 @@ class PrismaCloudManagerScan(ToolGateway):
             is_compressed_file
         )
         if base_image:
-            self._write_image_base(result_file, base_image, exclusions, remoteconfig)
+            self._write_image_base(
+                result_file,
+                base_image,
+                exclusions,
+                remoteconfig,
+                cross_approval_exclusions,
+            )
         if generate_sbom:
             sbom_components = self._generate_sbom(
                 image_scanned,
