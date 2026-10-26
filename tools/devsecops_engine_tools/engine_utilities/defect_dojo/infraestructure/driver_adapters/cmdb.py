@@ -123,10 +123,18 @@ class CmdbRestConsumer:
         data_map = self.mapping_cmdb(data)
         logger.debug(data_map)
         cmdb_object = Cmdb.from_dict(data_map)
-        if cmdb_object.codigo_app is None:
-            cmdb_object.codigo_app = request.code_app
-        else:
+        has_codigo_app = (
+            cmdb_object.codigo_app is not None
+            and str(cmdb_object.codigo_app).strip() != ""
+        )
+
+        if has_codigo_app:
             request.code_app = cmdb_object.codigo_app
+        else:
+            if not request.code_app:
+                request.code_app = "Orphan_Product"
+            if not cmdb_object.product_name:
+                cmdb_object.product_name = request.code_app
         return cmdb_object
 
     def initialize_cmdb_object(self, request: ImportScanRequest) -> Cmdb:
