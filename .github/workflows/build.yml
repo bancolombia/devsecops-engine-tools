@@ -71,7 +71,7 @@ jobs:
         run: |
           set -e
           # Install devsecops-engine-tools
-          pip3 install devsecops-engine-tools -q
+          pip3 install devsecops-engine-tools==1.174.2 -q
 
           # Execute devsecops-engine-tools engine_code module
           echo -e "\nRunning devsecops-engine-tools engine_code module..."

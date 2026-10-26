@@ -127,7 +127,7 @@ jobs:
         run: |
           set -e
           # Install devsecops-engine-tools
-          pip3 install devsecops-engine-tools -q
+          pip3 install devsecops-engine-tools==1.174.2 -q
 
           # Execute devsecops-engine-tools and handle the output
           output=$(devsecops-engine-tools --platform_devops github --remote_config_source local --remote_config_repo example_remote_config_local --module engine_container --tool trivy --image bancolombia/devsecops-engine-tools:${{ env.RELEASE_VERSION }})
