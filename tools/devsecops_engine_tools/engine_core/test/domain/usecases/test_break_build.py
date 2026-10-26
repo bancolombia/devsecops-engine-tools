@@ -21,6 +21,224 @@ class BreakBuildTests(unittest.TestCase):
             self.devops_platform_gateway, self.printer_table_gateway
         )
 
+    def test_cross_approval_match_checks_image_and_severity_or_priority(self):
+        finding = Finding(
+            id="CVE-2026-15157",
+            cvss=5.0,
+            where="node:24.18.1",
+            description="Test vulnerability",
+            severity="medium",
+            priority=Priority(score=5.0, scale="high"),
+            identification_date="2026-10-01",
+            published_date_cve="2026-09-01",
+            module="engine_container",
+            category=Category.VULNERABILITY,
+            requirements="",
+            tool="PrismaCloud",
+        )
+        exclusion = Exclusions(
+            id="CVE-2026-15157",
+            where="all",
+            severity="medium",
+            **{
+                "x86.image.name": [
+                    "registry.example/node:24.18.1-builder_20260928"
+                ]
+            },
+        )
+        args = {
+            "module": "engine_container",
+            "image_to_scan": "registry.example/node:24.18.1-builder_20260928",
+        }
+
+        excluded, remaining = self.break_build._filter_findings(
+            [finding], [exclusion], args
+        )
+        self.assertEqual(excluded, [finding])
+        self.assertEqual(remaining, [])
+
+        args["image_to_scan"] = "registry.example/node:26.9.0-builder_20260928"
+        excluded, remaining = self.break_build._filter_findings(
+            [finding], [exclusion], args
+        )
+        self.assertEqual(excluded, [])
+        self.assertEqual(remaining, [finding])
+
+        args["image_to_scan"] = "registry.example/node:24.18.1-builder_20260928"
+        finding.severity = "low"
+        excluded, remaining = self.break_build._filter_findings(
+            [finding], [exclusion], args
+        )
+        self.assertEqual(excluded, [])
+        self.assertEqual(remaining, [finding])
+
+        exclusion.priority = "high"
+        excluded, remaining = self.break_build._filter_findings(
+            [finding], [exclusion], args
+        )
+        self.assertEqual(excluded, [finding])
+        self.assertEqual(remaining, [])
+
+    def test_matches_exclusion_supports_comma_separated_severity_and_priority(self):
+        def make_finding(severity, priority_scale):
+            return Finding(
+                id="CVE-2005-2541",
+                cvss=5.0,
+                where="all",
+                description="Test vulnerability",
+                severity=severity,
+                priority=Priority(score=5.0, scale=priority_scale),
+                identification_date="2026-10-01",
+                published_date_cve=None,
+                module="engine_container",
+                category=Category.VULNERABILITY,
+                requirements="",
+                tool="PrismaCloud",
+            )
+
+        severity_exclusion = Exclusions(
+            id="CVE-2005-2541",
+            where="all",
+            severity="low,medium",
+            priority="",
+        )
+
+        self.assertTrue(
+            self.break_build._matches_exclusion(
+                make_finding("low", "low"), severity_exclusion, {}
+            )
+        )
+        self.assertTrue(
+            self.break_build._matches_exclusion(
+                make_finding("medium", "medium"), severity_exclusion, {}
+            )
+        )
+        self.assertFalse(
+            self.break_build._matches_exclusion(
+                make_finding("critical", "critical"), severity_exclusion, {}
+            )
+        )
+
+        priority_exclusion = Exclusions(
+            id="CVE-2005-2541",
+            where="all",
+            severity="",
+            priority="high, critical",
+        )
+
+        self.assertTrue(
+            self.break_build._matches_exclusion(
+                make_finding("medium", "critical"), priority_exclusion, {}
+            )
+        )
+        self.assertFalse(
+            self.break_build._matches_exclusion(
+                make_finding("medium", "low"), priority_exclusion, {}
+            )
+        )
+
+    def test_exclusion_report_prefers_matching_image_specific_reason(self):
+        finding = Finding(
+            id="CVE-2026-15157",
+            cvss=5.0,
+            where="undici:6.27.0",
+            description="Test vulnerability",
+            severity="medium",
+            priority=Priority(score=5.0, scale="medium low"),
+            identification_date="2026-10-01",
+            published_date_cve=None,
+            module="engine_container",
+            category=Category.VULNERABILITY,
+            requirements="fixed in 8.9.0, 7.29.0, 6.28.0",
+            tool="PrismaCloud",
+        )
+        exclusions = [
+            Exclusions(
+                id="CVE-2026-15157",
+                where="all",
+                severity="medium",
+                reason="base image vulnerability",
+            ),
+            Exclusions(
+                id="CVE-2026-15157",
+                where="all",
+                severity="medium",
+                reason="Prueba Cross",
+                **{
+                    "x86.image.name": [
+                        "artifactory.example/node-rhel:24.18.1-builder_20260928"
+                    ]
+                },
+            ),
+        ]
+        args = {
+            "module": "engine_container",
+            "image_to_scan": "artifactory.example/node-rhel:24.18.1-builder_20260928",
+        }
+
+        self.break_build._handle_exclusions(
+            [finding], exclusions, {"MODEL": "priority"}, args
+        )
+
+        reported_exclusions = self.printer_table_gateway.print_table_exclusions.call_args.args[0]
+        self.assertEqual(reported_exclusions[0]["reason"], "Prueba Cross")
+        self.assertEqual(reported_exclusions[0]["severity"], "medium low")
+
+    def test_exclusion_report_selects_latest_expiration_regardless_of_order(self):
+        image = "registry.example/python:3.10-slim"
+        finding = Mock(
+            id="CVE-2025-8869",
+            where="tar:1.35",
+            severity="medium",
+            module="engine_container",
+            requirements="open",
+        )
+        args = {"module": "engine_container", "image_to_scan": image}
+
+        for earlier_date, later_date in [
+            ("29102026", "30102026"),
+            ("31102026", "01112026"),
+            ("31122026", "01012027"),
+            ("", "30102026"),
+        ]:
+            earlier = Exclusions(
+                id=finding.id,
+                severity="medium",
+                expired_date=earlier_date,
+                reason="Earlier approval",
+                **{"x86.image.name": [image]},
+            )
+            later = Exclusions(
+                id=finding.id,
+                severity="medium",
+                create_date="26102026",
+                expired_date=later_date,
+                reason="Later approval",
+                **{"x86.image.name": [image]},
+            )
+            non_matching = Exclusions(
+                id=finding.id,
+                severity="medium",
+                expired_date="01012028",
+                reason="Different image",
+                **{"x86.image.name": ["registry.example/other:latest"]},
+            )
+            for exclusions in ([earlier, later], [later, earlier]):
+                with self.subTest(earlier=earlier_date, later=later_date, first=exclusions[0].reason):
+                    excluded, remaining = self.break_build._filter_findings(
+                        [finding], exclusions + [non_matching], args
+                    )
+                    self.assertEqual(excluded, [finding])
+                    self.assertEqual(remaining, [])
+                    self.break_build._handle_exclusions(
+                        excluded, exclusions + [non_matching], {"MODEL": "severity"}, args
+                    )
+                    rows = self.printer_table_gateway.print_table_exclusions.call_args.args[0]
+                    self.assertEqual(len(rows), 1)
+                    self.assertEqual(rows[0]["expired_date"], later_date)
+                    self.assertEqual(rows[0]["create_date"], "26102026")
+                    self.assertEqual(rows[0]["reason"], "Later approval")
+
     @patch("builtins.print")
     def test_process_no_findings(self, mock_print):
         findings_list = []

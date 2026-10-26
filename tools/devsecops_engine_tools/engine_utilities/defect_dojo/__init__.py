@@ -7,4 +7,5 @@ from .applications.engagement import Engagement
 from .applications.product import Product
 from .applications.component import Component
 from .applications.finding_exclusion import FindingExclusion
+from .applications.cross_approval_request import CrossApprovalRequest
 from .applications.long_risk_acceptance import LongRiskAcceptance

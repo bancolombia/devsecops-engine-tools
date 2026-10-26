@@ -7,12 +7,21 @@ from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 
 class SetInputCore:
-    def __init__(self, remote_config, exclusions, pipeline_name, tool, stage):
+    def __init__(
+        self,
+        remote_config,
+        exclusions,
+        pipeline_name,
+        tool,
+        stage,
+        cross_approval_exclusions=None,
+    ):
         self.remote_config = remote_config
         self.exclusions = exclusions
         self.pipeline_name = pipeline_name
         self.tool = tool
         self.stage = stage
+        self.cross_approval_exclusions = cross_approval_exclusions or []
 
     def _build_exclusions(self, items, base_image_list, filter_by_base_image):
         list_exclusions = []
@@ -63,6 +72,7 @@ class SetInputCore:
                         )
                     break
 
+        list_exclusions.extend(self.cross_approval_exclusions)
         return list_exclusions
 
     def set_input_core(self, image_scanned,base_image):

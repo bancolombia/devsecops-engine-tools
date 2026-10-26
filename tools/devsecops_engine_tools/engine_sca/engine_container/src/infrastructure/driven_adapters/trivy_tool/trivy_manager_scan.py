@@ -96,7 +96,7 @@ class TrivyScan(ToolGateway):
         except Exception as e:
             logger.error(f"Unexpected error generating SBOM: {e}")
 
-    def run_tool_container_sca(self, remoteconfig, secret_tool, token_engine_container, image_name, result_file, base_image, exclusions, generate_sbom, docker_address, is_compressed_file=False):
+    def run_tool_container_sca(self, remoteconfig, secret_tool, token_engine_container, image_name, result_file, base_image, exclusions, generate_sbom, docker_address, is_compressed_file=False, cross_approval_exclusions=None):
         trivy_version = remoteconfig["TRIVY"]["TRIVY_VERSION"]
         vuln_type = remoteconfig["TRIVY"].get("VULN_TYPE", "all").lower()
         vuln_type = vuln_type if vuln_type in ["os", "library"] else "os,library"
