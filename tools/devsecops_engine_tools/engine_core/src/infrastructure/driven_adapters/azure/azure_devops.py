@@ -55,6 +55,7 @@ class AzureDevops(DevopsPlatformGateway):
 
     def result_pipeline(self, type):
         if type == "failed":
+            self.exit_code = 1
             return AzureMessageResultPipeline.Failed.value
         elif type == "succeeded":
             return AzureMessageResultPipeline.Succeeded.value

@@ -332,7 +332,7 @@ def get_inputs_from_cli(args):
     }
 
 
-def application_core():
+def application_core() -> int:
     tb = True
     devops_platform_gateway = None
     try:
@@ -383,19 +383,22 @@ def application_core():
             license_tool_gateway,
             args
         )
+        return devops_platform_gateway.exit_code
 
     except Exception as e:
         error_msg = ""
         if tb: error_msg = " | " + traceback.format_exc().replace("\n", " | ")
 
         logger.error("Error engine_core: {0} ".format(str(e)))
-        print(
-            devops_platform_gateway.message(
-                "error", "Error engine_core: {0}{1}".format(str(e), error_msg)
+        if devops_platform_gateway is not None:
+            print(
+                devops_platform_gateway.message(
+                    "error", "Error engine_core: {0}{1}".format(str(e), error_msg)
+                )
             )
-        )
-        print(devops_platform_gateway.result_pipeline("failed"))
+            print(devops_platform_gateway.result_pipeline("failed"))
+        return 1
 
 
 if __name__ == "__main__":
-    application_core()
+    sys.exit(application_core())

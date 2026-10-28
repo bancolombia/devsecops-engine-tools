@@ -27,6 +27,22 @@ Here are the channels we use to communicate about the project:
 
 Please follow our [Getting Started Guide](https://bancolombia.github.io/devsecops-engine-tools/)
 
+## Scan exit codes
+
+The `devsecops-engine-tools` command and the Python module entry point return:
+
+- `0` when the execution finishes without a failed pipeline result. Warnings
+  (`succeeded_with_issues`), excluded findings, skipped scans, and modules in
+  maintenance do not cause a nonzero exit code.
+- `1` when any scan policy declares the pipeline result as `failed`, including
+  vulnerability severity or priority thresholds, blocked CVEs, compliance
+  thresholds, and risk policies. Execution errors also return `1`.
+
+This applies to `--platform_devops azure`, `github`, and `local`, preserving each
+platform's existing result messages and policy rules. A later successful result
+does not clear an earlier failure. Reporting and enabled metrics finish before
+the command returns the policy failure exit code.
+
 # How can I help?
 
 Review the issues, we hear new ideas. Read more [Contributing](https://github.com/bancolombia/devsecops-engine-tools/blob/trunk/docs/CONTRIBUTING.md)

@@ -36,6 +36,7 @@ class RuntimeLocal(DevopsPlatformGateway):
 
     def result_pipeline(self, type):
         if type == "failed":
+            self.exit_code = 1
             return f"{self.FAIL}{self.ICON_FAIL}Failed{self.ENDC}"
         elif type == "succeeded":
             return f"{self.OKGREEN}{self.ICON_SUCCESS}Succeeded{self.ENDC}"
