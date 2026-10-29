@@ -1,7 +1,11 @@
 from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass, field
 
 
+@dataclass
 class DevopsPlatformGateway(metaclass=ABCMeta):
+    exit_code: int = field(default=0, init=False)
+
     @abstractmethod
     def get_remote_config(self, repository, path, branch):
         "get_remote_config"

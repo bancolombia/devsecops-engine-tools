@@ -52,6 +52,8 @@ class GithubActions(DevopsPlatformGateway):
         return formats.get(type, message)
 
     def result_pipeline(self, type):
+        if type == "failed":
+            self.exit_code = 1
         results = {
             "failed": f"{self.FAIL}{self.ICON_FAIL}Failed{self.ENDC}",
             "succeeded": f"{self.OKGREEN}{self.ICON_SUCCESS}Succeeded{self.ENDC}",
