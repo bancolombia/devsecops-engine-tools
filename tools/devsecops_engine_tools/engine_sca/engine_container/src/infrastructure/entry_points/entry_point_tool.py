@@ -61,6 +61,7 @@ def init_engine_sca_rm(
     sbom_components = None
     deseralized = []
     cross_approval_exclusions = []
+    debug_pipeline_enabled = False
     if scan_flag and not (skip_flag):
         host_defect_dojo = None
         if remote_config.get("CROSS_APPROVAL_EXCLUSIONS", {}).get("ENABLED", False):
@@ -75,6 +76,32 @@ def init_engine_sca_rm(
         cross_approval_exclusions = GetCrossApprovalExclusions(
             DefectDojoCrossApprovalAdapter()
         ).execute(remote_config, dict_args, secret_tool, host_defect_dojo)
+        debug_pipeline_config = remote_config.get("DEBUG_PIPELINE", {})
+        debug_pipelines = debug_pipeline_config.get("PIPELINES", [])
+        if (
+            debug_pipeline_config.get("ENABLED", False)
+            and isinstance(debug_pipelines, (list, tuple))
+            and pipeline_name in debug_pipelines
+        ):
+            debug_pipeline_enabled = True
+            logger.info(
+                "Container debug enabled for pipeline %s. Cross-approval exclusions: %s",
+                pipeline_name,
+                [
+                    {
+                        "id": exclusion.id,
+                        "where": exclusion.where,
+                        "create_date": exclusion.create_date,
+                        "expired_date": exclusion.expired_date,
+                        "severity": exclusion.severity,
+                        "priority": exclusion.priority,
+                        "hu": exclusion.hu,
+                        "reason": exclusion.reason,
+                        "images": exclusion.check_in_desc,
+                    }
+                    for exclusion in cross_approval_exclusions
+                ],
+            )
         container_sca_scan = ContainerScaScan(
             tool_run,
             remote_config,
@@ -105,6 +132,7 @@ def init_engine_sca_rm(
         tool,
         stage,
         cross_approval_exclusions,
+        debug_pipeline_enabled,
     )
     core_input = input_core.set_input_core(image_scanned, base_image)
 
