@@ -1,0 +1,5 @@
+ARG BASE_IMAGE=artifactory.apps.bancolombia.com/evc/stable/python:3.13.18-slim-trixie_20261029
+FROM ${BASE_IMAGE}
+
+ARG BASE_IMAGE
+LABEL x86.image.name=${BASE_IMAGE}

@@ -146,7 +146,7 @@ class BreakBuildTests(unittest.TestCase):
             severity="medium",
             **{
                 "x86.image.name": [
-                    "artifactory.apps.bancolombia.com/evc/stable/python:3.13.18-slim-trixie_20261029"
+                    "python:3.13.18-slim-trixie_20261029"
                 ]
             },
         )
@@ -160,7 +160,7 @@ class BreakBuildTests(unittest.TestCase):
             [exclusion],
             args,
             base_image_names=[
-                "artifactory.apps.bancolombia.com/evc/stable/python:3.13.18-slim-trixie_20261029",
+                "python:3.13.18-slim-trixie_20261029",
                 "python:3.13.18-slim-trixie_20261029",
             ],
         )
