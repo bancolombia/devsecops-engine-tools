@@ -1,15 +1,27 @@
 from unittest.mock import Mock, patch
 
+import pytest
+
 from devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool import (
     init_engine_sca_rm,
 )
 
 
-def test_successful_scan_loads_cross_approval_exclusions():
+@pytest.mark.parametrize(
+    ("debug_pipelines", "should_log_debug"),
+    [(["example_pipeline"], True), (["another_pipeline"], False)],
+)
+def test_successful_scan_loads_cross_approval_exclusions(
+    debug_pipelines, should_log_debug
+):
     remote_config = {
         "IGNORE_SEARCH_PATTERN": "^skip$",
         "CROSS_APPROVAL_EXCLUSIONS": {
             "ENABLED": True,
+        },
+        "DEBUG_PIPELINE": {
+            "ENABLED": True,
+            "PIPELINES": debug_pipelines,
         },
     }
     exclusions = {}
@@ -39,6 +51,15 @@ def test_successful_scan_loads_cross_approval_exclusions():
         "docker_address": "",
     }
     cross_approval_exclusions = [Mock()]
+    cross_approval_exclusions[0].id = "CVE-2026-1000"
+    cross_approval_exclusions[0].where = "all"
+    cross_approval_exclusions[0].create_date = "29102026"
+    cross_approval_exclusions[0].expired_date = "12112026"
+    cross_approval_exclusions[0].severity = "low"
+    cross_approval_exclusions[0].priority = ""
+    cross_approval_exclusions[0].hu = "7979069"
+    cross_approval_exclusions[0].reason = "base image vulnerability"
+    cross_approval_exclusions[0].check_in_desc = ["image:tag"]
 
     with patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool.ContainerScaScan"
@@ -48,7 +69,9 @@ def test_successful_scan_loads_cross_approval_exclusions():
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool.DefectDojoCrossApprovalAdapter"
     ) as adapter, patch(
         "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool.GetCrossApprovalExclusions"
-    ) as get_cross_approval_exclusions:
+    ) as get_cross_approval_exclusions, patch(
+        "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.entry_points.entry_point_tool.logger.info"
+    ) as logger_info:
         container_scan.return_value.process.return_value = (
             "scan-result.json",
             None,
@@ -82,6 +105,26 @@ def test_successful_scan_loads_cross_approval_exclusions():
     assert container_scan.call_args.kwargs["cross_approval_exclusions"] == (
         cross_approval_exclusions
     )
+    if should_log_debug:
+        logger_info.assert_called_once_with(
+            "Container debug enabled for pipeline %s. Cross-approval exclusions: %s",
+            "example_pipeline",
+            [
+                {
+                    "id": "CVE-2026-1000",
+                    "where": "all",
+                    "create_date": "29102026",
+                    "expired_date": "12112026",
+                    "severity": "low",
+                    "priority": "",
+                    "hu": "7979069",
+                    "reason": "base image vulnerability",
+                    "images": ["image:tag"],
+                }
+            ],
+        )
+    else:
+        logger_info.assert_not_called()
     set_input_core.assert_called_once_with(
         remote_config,
         exclusions,

@@ -75,6 +75,30 @@ def init_engine_sca_rm(
         cross_approval_exclusions = GetCrossApprovalExclusions(
             DefectDojoCrossApprovalAdapter()
         ).execute(remote_config, dict_args, secret_tool, host_defect_dojo)
+        debug_pipeline_config = remote_config.get("DEBUG_PIPELINE", {})
+        debug_pipelines = debug_pipeline_config.get("PIPELINES", [])
+        if (
+            debug_pipeline_config.get("ENABLED", False)
+            and pipeline_name in debug_pipelines
+        ):
+            logger.info(
+                "Container debug enabled for pipeline %s. Cross-approval exclusions: %s",
+                pipeline_name,
+                [
+                    {
+                        "id": exclusion.id,
+                        "where": exclusion.where,
+                        "create_date": exclusion.create_date,
+                        "expired_date": exclusion.expired_date,
+                        "severity": exclusion.severity,
+                        "priority": exclusion.priority,
+                        "hu": exclusion.hu,
+                        "reason": exclusion.reason,
+                        "images": exclusion.check_in_desc,
+                    }
+                    for exclusion in cross_approval_exclusions
+                ],
+            )
         container_sca_scan = ContainerScaScan(
             tool_run,
             remote_config,
