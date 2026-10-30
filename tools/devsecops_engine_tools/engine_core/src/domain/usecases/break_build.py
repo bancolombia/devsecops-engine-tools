@@ -58,6 +58,7 @@ class BreakBuild:
                 args,
                 debug=input_core.debug_exclusion_diagnostics,
                 pipeline_name=input_core.scope_pipeline,
+                base_image_names=input_core.base_image_names,
             )
             scan_result["findings_excluded"] = [self._map_finding_excluded(item) for item in findings_excluded]
             
@@ -70,7 +71,13 @@ class BreakBuild:
             self._handle_vulnerabilities(vulnerability_counts, vulnerabilities, threshold, warning_release, scan_result, args, manager)
             self._handle_cve_policy(vulnerabilities, threshold)
             self._handle_compliances(compliance_counts, compliances, threshold, warning_release, scan_result, args, manager)
-            self._handle_exclusions(findings_excluded, exclusions, manager, args)
+            self._handle_exclusions(
+                findings_excluded,
+                exclusions,
+                manager,
+                args,
+                input_core.base_image_names,
+            )
         else:
             print(devops_platform_gateway.message("succeeded", "There are no findings"))
             print(devops_platform_gateway.result_pipeline("succeeded"))
@@ -104,7 +111,13 @@ class BreakBuild:
                         )
 
     def _filter_findings(
-        self, findings_list, exclusions, args, debug=False, pipeline_name=""
+        self,
+        findings_list,
+        exclusions,
+        args,
+        debug=False,
+        pipeline_name="",
+        base_image_names=None,
     ):
         findings_excluded_list = []
         findings_without_exclusions_list = []
@@ -112,7 +125,12 @@ class BreakBuild:
 
         for item in findings_list:
             checks = [
-                (exclusion, self._exclusion_match_details(item, exclusion, args))
+                (
+                    exclusion,
+                    self._exclusion_match_details(
+                        item, exclusion, args, base_image_names
+                    ),
+                )
                 for exclusion in exclusions
             ]
             if debug:
@@ -137,6 +155,7 @@ class BreakBuild:
                         "priority": item.priority.scale if item.priority else None,
                         "module": args.get("module"),
                         "image_to_scan": image_to_scan,
+                        "base_image_names": base_image_names or [],
                     },
                     len(exclusions),
                     candidates,
@@ -150,11 +169,13 @@ class BreakBuild:
         return findings_excluded_list, findings_without_exclusions_list
 
     @staticmethod
-    def _matches_exclusion(item, exclusion, args):
-        return BreakBuild._exclusion_match_details(item, exclusion, args)["matched"]
+    def _matches_exclusion(item, exclusion, args, base_image_names=None):
+        return BreakBuild._exclusion_match_details(
+            item, exclusion, args, base_image_names
+        )["matched"]
 
     @staticmethod
-    def _exclusion_match_details(item, exclusion, args):
+    def _exclusion_match_details(item, exclusion, args, base_image_names=None):
         id_match = exclusion.id == item.id
         where_match = exclusion.where in item.where or "all" in exclusion.where
         finding_priority = item.priority.scale if item.priority else None
@@ -168,9 +189,14 @@ class BreakBuild:
             args.get("module") == "engine_container" and bool(exclusion.check_in_desc)
         )
         image_to_scan = args.get("image_to_scan", "")
+        image_names = [image_to_scan] if image_to_scan else []
+        image_names.extend(base_image_names or [])
         image_match = not image_check_required or (
-            bool(image_to_scan)
-            and any(image_to_scan in image_name for image_name in exclusion.check_in_desc)
+            any(
+                image_name in excluded_image
+                for image_name in image_names
+                for excluded_image in exclusion.check_in_desc
+            )
         )
         matched = (
             id_match
@@ -365,7 +391,12 @@ class BreakBuild:
             print(devops_platform_gateway.result_pipeline("succeeded"))
 
     def _handle_exclusions(
-        self, findings_excluded_list, exclusions, break_build_manager, args
+        self,
+        findings_excluded_list,
+        exclusions,
+        break_build_manager,
+        args,
+        base_image_names=None,
     ):
         devops_platform_gateway = self.devops_platform_gateway
         printer_table_gateway = self.printer_table_gateway
@@ -378,7 +409,9 @@ class BreakBuild:
                 matching_exclusions = [
                     exclusion
                     for exclusion in exclusions
-                    if self._matches_exclusion(item, exclusion, args)
+                    if self._matches_exclusion(
+                        item, exclusion, args, base_image_names
+                    )
                 ]
                 image_exclusions = [
                     exclusion
