@@ -177,7 +177,9 @@ class BreakBuild:
     @staticmethod
     def _exclusion_match_details(item, exclusion, args, base_image_names=None):
         id_match = exclusion.id == item.id
-        where_match = exclusion.where in item.where or "all" in exclusion.where
+        where_match = bool(exclusion.where) and (
+            exclusion.where in item.where or "all" in exclusion.where
+        )
         finding_priority = item.priority.scale if item.priority else None
         severity_match = BreakBuild._value_in_exclusion_list(
             exclusion.severity, item.severity

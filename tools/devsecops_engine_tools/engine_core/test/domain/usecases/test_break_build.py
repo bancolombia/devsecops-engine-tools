@@ -226,6 +226,33 @@ class BreakBuildTests(unittest.TestCase):
             )
         )
 
+    def test_empty_where_does_not_match_for_other_modules(self):
+        finding = Finding(
+            id="CVE-2026-1000",
+            cvss=5.0,
+            where="package:1.0",
+            description="Test vulnerability",
+            severity="low",
+            priority=Priority(score=3.0, scale="medium low"),
+            identification_date="2026-10-01",
+            published_date_cve=None,
+            module="engine_iac",
+            category=Category.VULNERABILITY,
+            requirements="",
+            tool="Checkov",
+        )
+        exclusion = Exclusions(
+            id="CVE-2026-1000",
+            where="",
+            severity="low",
+        )
+
+        self.assertFalse(
+            self.break_build._matches_exclusion(
+                finding, exclusion, {"module": "engine_iac"}
+            )
+        )
+
     def test_exclusion_report_prefers_matching_image_specific_reason(self):
         finding = Finding(
             id="CVE-2026-15157",
