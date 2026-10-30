@@ -11,3 +11,4 @@ class InputCore:
     scope_pipeline: str
     scope_service: str
     stage_pipeline: str
+    debug_exclusion_diagnostics: bool = False

@@ -79,6 +79,52 @@ class BreakBuildTests(unittest.TestCase):
         self.assertEqual(excluded, [finding])
         self.assertEqual(remaining, [])
 
+    def test_filter_logs_exclusion_match_diagnostics_when_enabled(self):
+        finding = Finding(
+            id="CVE-2026-15157",
+            cvss=5.0,
+            where="node:24.18.1",
+            description="Test vulnerability",
+            severity="medium",
+            priority=Priority(score=5.0, scale="high"),
+            identification_date="2026-10-01",
+            published_date_cve=None,
+            module="engine_container",
+            category=Category.VULNERABILITY,
+            requirements="",
+            tool="PrismaCloud",
+        )
+        exclusion = Exclusions(
+            id="CVE-2026-15157",
+            where="all",
+            severity="medium",
+            **{"x86.image.name": ["registry.example/other:tag"]},
+        )
+        args = {
+            "module": "engine_container",
+            "image_to_scan": "registry.example/image:tag",
+        }
+
+        with patch(
+            "devsecops_engine_tools.engine_core.src.domain.usecases.break_build.logger.info"
+        ) as logger_info:
+            excluded, remaining = self.break_build._filter_findings(
+                [finding],
+                [exclusion],
+                args,
+                debug=True,
+                pipeline_name="example_pipeline",
+            )
+
+        self.assertEqual(excluded, [])
+        self.assertEqual(remaining, [finding])
+        logged_candidates = logger_info.call_args.args[4]
+        self.assertEqual(len(logged_candidates), 1)
+        self.assertTrue(logged_candidates[0]["id_match"])
+        self.assertTrue(logged_candidates[0]["severity_match"])
+        self.assertFalse(logged_candidates[0]["image_match"])
+        self.assertFalse(logged_candidates[0]["matched"])
+
     def test_matches_exclusion_supports_comma_separated_severity_and_priority(self):
         def make_finding(severity, priority_scale):
             return Finding(

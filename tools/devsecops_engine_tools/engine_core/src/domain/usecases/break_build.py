@@ -1,4 +1,6 @@
 import sys
+from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
+from devsecops_engine_tools.engine_utilities import settings
 from itertools import chain
 from dataclasses import dataclass
 
@@ -18,6 +20,8 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.printer_table_g
 from collections import Counter
 from datetime import timedelta, datetime
 import pytz
+
+logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 @dataclass
@@ -49,7 +53,11 @@ class BreakBuild:
             )
 
             findings_excluded, findings_without_exclusions = self._filter_findings(
-                findings_list, exclusions, args
+                findings_list,
+                exclusions,
+                args,
+                debug=input_core.debug_exclusion_diagnostics,
+                pipeline_name=input_core.scope_pipeline,
             )
             scan_result["findings_excluded"] = [self._map_finding_excluded(item) for item in findings_excluded]
             
@@ -95,24 +103,60 @@ class BreakBuild:
                             )
                         )
 
-    def _filter_findings(self, findings_list, exclusions, args):
-        findings_excluded_list = [
-            item
-            for item in findings_list
-            if any(self._matches_exclusion(item, exclusion, args) for exclusion in exclusions)
-        ]
-        findings_without_exclusions_list = [
-            v for v in findings_list if v not in findings_excluded_list
-        ]
+    def _filter_findings(
+        self, findings_list, exclusions, args, debug=False, pipeline_name=""
+    ):
+        findings_excluded_list = []
+        findings_without_exclusions_list = []
+        image_to_scan = args.get("image_to_scan", "")
+
+        for item in findings_list:
+            checks = [
+                (exclusion, self._exclusion_match_details(item, exclusion, args))
+                for exclusion in exclusions
+            ]
+            if debug:
+                candidates = [
+                    {
+                        "exclusion_id": exclusion.id,
+                        "exclusion_images": exclusion.check_in_desc,
+                        **details,
+                    }
+                    for exclusion, details in checks
+                    if details["id_match"]
+                    or (details["image_check_required"] and details["image_match"])
+                ]
+                logger.info(
+                    "Cross-approval exclusion diagnostics for pipeline %s: "
+                    "finding=%s checked=%s candidates=%s",
+                    pipeline_name,
+                    {
+                        "id": item.id,
+                        "where": item.where,
+                        "severity": item.severity,
+                        "priority": item.priority.scale if item.priority else None,
+                        "module": args.get("module"),
+                        "image_to_scan": image_to_scan,
+                    },
+                    len(exclusions),
+                    candidates,
+                )
+
+            if any(details["matched"] for _, details in checks):
+                findings_excluded_list.append(item)
+            else:
+                findings_without_exclusions_list.append(item)
+
         return findings_excluded_list, findings_without_exclusions_list
 
     @staticmethod
     def _matches_exclusion(item, exclusion, args):
-        if exclusion.id != item.id:
-            return False
-        if exclusion.where not in item.where and "all" not in exclusion.where:
-            return False
+        return BreakBuild._exclusion_match_details(item, exclusion, args)["matched"]
 
+    @staticmethod
+    def _exclusion_match_details(item, exclusion, args):
+        id_match = exclusion.id == item.id
+        where_match = exclusion.where in item.where or "all" in exclusion.where
         finding_priority = item.priority.scale if item.priority else None
         severity_match = BreakBuild._value_in_exclusion_list(
             exclusion.severity, item.severity
@@ -120,17 +164,29 @@ class BreakBuild:
         priority_match = BreakBuild._value_in_exclusion_list(
             exclusion.priority, finding_priority
         )
-        if not severity_match and not priority_match:
-            return False
-
-        if args.get("module") == "engine_container" and exclusion.check_in_desc:
-            image_to_scan = args.get("image_to_scan", "")
-            if not image_to_scan or not any(
-                image_to_scan in image_name for image_name in exclusion.check_in_desc
-            ):
-                return False
-
-        return True
+        image_check_required = (
+            args.get("module") == "engine_container" and bool(exclusion.check_in_desc)
+        )
+        image_to_scan = args.get("image_to_scan", "")
+        image_match = not image_check_required or (
+            bool(image_to_scan)
+            and any(image_to_scan in image_name for image_name in exclusion.check_in_desc)
+        )
+        matched = (
+            id_match
+            and where_match
+            and (severity_match or priority_match)
+            and image_match
+        )
+        return {
+            "id_match": id_match,
+            "where_match": where_match,
+            "severity_match": severity_match,
+            "priority_match": priority_match,
+            "image_check_required": image_check_required,
+            "image_match": image_match,
+            "matched": matched,
+        }
 
     @staticmethod
     def _value_in_exclusion_list(exclusion_value, finding_value):

@@ -132,6 +132,7 @@ def test_successful_scan_loads_cross_approval_exclusions(
         "PRISMA",
         "dev",
         cross_approval_exclusions,
+        should_log_debug,
     )
 
 

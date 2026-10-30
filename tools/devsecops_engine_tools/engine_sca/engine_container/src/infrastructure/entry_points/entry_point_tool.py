@@ -61,6 +61,7 @@ def init_engine_sca_rm(
     sbom_components = None
     deseralized = []
     cross_approval_exclusions = []
+    debug_pipeline_enabled = False
     if scan_flag and not (skip_flag):
         host_defect_dojo = None
         if remote_config.get("CROSS_APPROVAL_EXCLUSIONS", {}).get("ENABLED", False):
@@ -79,8 +80,10 @@ def init_engine_sca_rm(
         debug_pipelines = debug_pipeline_config.get("PIPELINES", [])
         if (
             debug_pipeline_config.get("ENABLED", False)
+            and isinstance(debug_pipelines, (list, tuple))
             and pipeline_name in debug_pipelines
         ):
+            debug_pipeline_enabled = True
             logger.info(
                 "Container debug enabled for pipeline %s. Cross-approval exclusions: %s",
                 pipeline_name,
@@ -129,6 +132,7 @@ def init_engine_sca_rm(
         tool,
         stage,
         cross_approval_exclusions,
+        debug_pipeline_enabled,
     )
     core_input = input_core.set_input_core(image_scanned, base_image)
 
