@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclusions
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
 
@@ -12,3 +12,4 @@ class InputCore:
     scope_service: str
     stage_pipeline: str
     debug_exclusion_diagnostics: bool = False
+    base_image_names: list[str] = field(default_factory=list)

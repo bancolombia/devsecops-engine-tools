@@ -214,3 +214,19 @@ def test_get_exclusions_appends_cross_approval_exclusions(mock_tool_remote):
         "CVE-2025-1000",
         "CVE-2026-1000",
     ]
+
+
+def test_get_base_image_names_extracts_detected_base_tags():
+    base_image = (
+        [
+            "artifactory.example/python:3.13.18-slim",
+            "python:3.13.18-slim",
+        ],
+        {"key_image_exception": "x86.image.name"},
+    )
+
+    assert SetInputCore._get_base_image_names(base_image) == [
+        "artifactory.example/python:3.13.18-slim",
+        "python:3.13.18-slim",
+    ]
+    assert SetInputCore._get_base_image_names(None) == []

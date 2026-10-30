@@ -125,6 +125,49 @@ class BreakBuildTests(unittest.TestCase):
         self.assertFalse(logged_candidates[0]["image_match"])
         self.assertFalse(logged_candidates[0]["matched"])
 
+    def test_cross_approval_match_checks_detected_base_images(self):
+        finding = Finding(
+            id="CVE-2026-15534",
+            cvss=5.0,
+            where="perl:5.40.1-6+deb13u1",
+            description="Test base-image vulnerability",
+            severity="medium",
+            priority=Priority(score=5.0, scale="medium low"),
+            identification_date="2026-10-01",
+            published_date_cve=None,
+            module="engine_container",
+            category=Category.VULNERABILITY,
+            requirements="",
+            tool="PrismaCloud",
+        )
+        exclusion = Exclusions(
+            id="CVE-2026-15534",
+            where="all",
+            severity="medium",
+            **{
+                "x86.image.name": [
+                    "python:3.13.18-slim-trixie_20261029"
+                ]
+            },
+        )
+        args = {
+            "module": "engine_container",
+            "image_to_scan": "nu2300001-open-assistant-dev-ecr:application-tag",
+        }
+
+        excluded, remaining = self.break_build._filter_findings(
+            [finding],
+            [exclusion],
+            args,
+            base_image_names=[
+                "python:3.13.18-slim-trixie_20261029",
+                "python:3.13.18-slim-trixie_20261029",
+            ],
+        )
+
+        self.assertEqual(excluded, [finding])
+        self.assertEqual(remaining, [])
+
     def test_matches_exclusion_supports_comma_separated_severity_and_priority(self):
         def make_finding(severity, priority_scale):
             return Finding(
@@ -180,6 +223,33 @@ class BreakBuildTests(unittest.TestCase):
         self.assertFalse(
             self.break_build._matches_exclusion(
                 make_finding("medium", "low"), priority_exclusion, {}
+            )
+        )
+
+    def test_empty_where_does_not_match_for_other_modules(self):
+        finding = Finding(
+            id="CVE-2026-1000",
+            cvss=5.0,
+            where="package:1.0",
+            description="Test vulnerability",
+            severity="low",
+            priority=Priority(score=3.0, scale="medium low"),
+            identification_date="2026-10-01",
+            published_date_cve=None,
+            module="engine_iac",
+            category=Category.VULNERABILITY,
+            requirements="",
+            tool="Checkov",
+        )
+        exclusion = Exclusions(
+            id="CVE-2026-1000",
+            where="",
+            severity="low",
+        )
+
+        self.assertFalse(
+            self.break_build._matches_exclusion(
+                finding, exclusion, {"module": "engine_iac"}
             )
         )
 
