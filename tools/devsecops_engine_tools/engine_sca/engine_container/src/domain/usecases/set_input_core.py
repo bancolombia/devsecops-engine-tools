@@ -30,7 +30,13 @@ class SetInputCore:
         if not base_image:
             return []
 
-        images = base_image[0] if isinstance(base_image, (list, tuple)) else base_image
+        images = base_image
+        while (
+            isinstance(images, (list, tuple))
+            and images
+            and isinstance(images[0], (list, tuple))
+        ):
+            images = images[0]
         if isinstance(images, str):
             return [images]
         if isinstance(images, (list, tuple)):
