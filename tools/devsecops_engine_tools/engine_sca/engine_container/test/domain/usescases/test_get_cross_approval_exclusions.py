@@ -56,6 +56,57 @@ def test_maps_exclusions_and_uses_available_defect_dojo_token():
     assert result[0].check_in_desc == ["registry.example/node:24"]
 
 
+def test_retries_defect_dojo_query_using_configured_attempts(monkeypatch):
+    gateway = Mock()
+    gateway.get_approved_exclusions.side_effect = [
+        RuntimeError("temporary failure"),
+        [
+            CrossApprovalExclusion(
+                id="CVE-2026-1000",
+                component=Mock(type="image", values=["registry.example/node:24"]),
+            )
+        ],
+    ]
+    monkeypatch.setattr(
+        "devsecops_engine_tools.engine_utilities.utils.utils.time.sleep",
+        lambda _: None,
+    )
+
+    result = GetCrossApprovalExclusions(gateway).execute(
+        {"CROSS_APPROVAL_EXCLUSIONS": {"ENABLED": True, "MAX_RETRIES_QUERY": 3}},
+        {},
+        {"token_defect_dojo": "dojo-token"},
+        "https://dojo.example",
+    )
+
+    assert len(result) == 1
+    assert gateway.get_approved_exclusions.call_count == 2
+
+
+def test_raises_after_configured_defect_dojo_attempts_are_exhausted(monkeypatch):
+    gateway = Mock()
+    gateway.get_approved_exclusions.side_effect = RuntimeError("request failed")
+    monkeypatch.setattr(
+        "devsecops_engine_tools.engine_utilities.utils.utils.time.sleep",
+        lambda _: None,
+    )
+
+    with pytest.raises(RuntimeError, match="request failed"):
+        GetCrossApprovalExclusions(gateway).execute(
+            {
+                "CROSS_APPROVAL_EXCLUSIONS": {
+                    "ENABLED": True,
+                    "MAX_RETRIES_QUERY": 2,
+                }
+            },
+            {},
+            {"token_defect_dojo": "dojo-token"},
+            "https://dojo.example",
+        )
+
+    assert gateway.get_approved_exclusions.call_count == 2
+
+
 def test_ignores_non_image_components():
     gateway = Mock()
     gateway.get_approved_exclusions.return_value = [
