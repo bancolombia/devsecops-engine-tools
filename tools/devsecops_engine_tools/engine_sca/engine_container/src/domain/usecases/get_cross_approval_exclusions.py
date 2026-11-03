@@ -2,6 +2,7 @@ from devsecops_engine_tools.engine_core.src.domain.model.exclusions import Exclu
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.cross_approval_gateway import (
     CrossApprovalGateway,
 )
+from devsecops_engine_tools.engine_utilities.utils.utils import Utils
 
 
 class GetCrossApprovalExclusions:
@@ -28,8 +29,13 @@ class GetCrossApprovalExclusions:
                 "CROSS_APPROVAL_EXCLUSIONS is enabled but Defect Dojo token is missing"
             )
 
-        exclusions = self.cross_approval_gateway.get_approved_exclusions(
-            host_defect_dojo, token
+        max_retries = max(1, int(config.get("MAX_RETRIES_QUERY", 3)))
+        exclusions = Utils().retries_requests(
+            lambda: self.cross_approval_gateway.get_approved_exclusions(
+                host_defect_dojo, token
+            ),
+            max_retries,
+            retry_delay=5,
         )
         return [
             Exclusions(

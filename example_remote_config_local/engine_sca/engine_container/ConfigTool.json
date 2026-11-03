@@ -47,7 +47,8 @@
         ]
     },
     "CROSS_APPROVAL_EXCLUSIONS": {
-        "ENABLED": false
+        "ENABLED": false,
+        "MAX_RETRIES_QUERY": 3
     },
     "DEBUG_PIPELINE": {
         "ENABLED": false,
