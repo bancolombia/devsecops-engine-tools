@@ -316,6 +316,9 @@ class BreakBuildTests(unittest.TestCase):
             ("31102026", "01112026"),
             ("31122026", "01012027"),
             ("", "30102026"),
+            ("undefined", "30102026"),
+            ("UNDEFINED", "30102026"),
+            ("UnDeFiNeD", "30102026"),
         ]:
             earlier = Exclusions(
                 id=finding.id,
@@ -354,6 +357,41 @@ class BreakBuildTests(unittest.TestCase):
                     self.assertEqual(rows[0]["expired_date"], later_date)
                     self.assertEqual(rows[0]["create_date"], "26102026")
                     self.assertEqual(rows[0]["reason"], "Later approval")
+
+    def test_exclusion_report_preserves_undefined_expiration(self):
+        finding = Mock(
+            id="CKV_OPENAPI_3",
+            where="mocks",
+            severity="critical",
+            module="engine_iac",
+            requirements="",
+            priority=None,
+        )
+        for expired_date in ("undefined", "UNDEFINED", "UnDeFiNeD"):
+            with self.subTest(expired_date=expired_date):
+                exclusion = Exclusions(
+                    id=finding.id,
+                    where="mocks",
+                    create_date="03092024",
+                    expired_date=expired_date,
+                    severity="critical",
+                    hu="5644723",
+                    reason="Not Apply - Mocks Folder",
+                )
+                excluded, remaining = self.break_build._filter_findings(
+                    [finding], [exclusion], {"module": "engine_iac"}
+                )
+                self.assertEqual(excluded, [finding])
+                self.assertEqual(remaining, [])
+                self.break_build._handle_exclusions(
+                    excluded, [exclusion], {"MODEL": "severity"},
+                    {"module": "engine_iac"},
+                )
+                rows = self.printer_table_gateway.print_table_exclusions.call_args.args[0]
+                self.assertEqual(len(rows), 1)
+                self.assertEqual(rows[0]["expired_date"], expired_date)
+                self.assertEqual(rows[0]["create_date"], "03092024")
+                self.assertEqual(rows[0]["reason"], "Not Apply - Mocks Folder")
 
     @patch("builtins.print")
     def test_process_no_findings(self, mock_print):

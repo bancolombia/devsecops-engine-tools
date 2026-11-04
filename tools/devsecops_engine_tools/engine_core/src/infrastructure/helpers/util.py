@@ -11,7 +11,7 @@ def format_optional_date(date, input_format="%d%m%Y", output_format="%d/%m/%Y"):
     dates (the Exclusions model defaults them to an empty string), so rendering them
     must not fail.
     """
-    if date and date != "undefined":
+    if date and date.lower() != "undefined":
         return format_date(date, input_format, output_format)
     return "NA"
 

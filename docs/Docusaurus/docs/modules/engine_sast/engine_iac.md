@@ -396,7 +396,7 @@ Defines exclusion rules for repositories and specific security checks.
   - `id`: Security rule identifier
   - `where`: File or location scope ("all" for global)
   - `create_date`: Exclusion creation date
-  - `expired_date`: Exclusion expiration date
+  - `expired_date`: Exclusion expiration date (`DDMMYYYY`), or `"undefined"` (case-insensitive) for exclusions without an expiration date. Undefined dates are not parsed and are displayed as `NA`.
   - `severity`: Rule severity level
   - `hu`: Human user identifier for audit trail
 

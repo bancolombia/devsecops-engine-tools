@@ -155,6 +155,29 @@ class TestPrinterPrettyTable(unittest.TestCase):
         assert printed_table.count("NA") == 2
 
     @patch("builtins.print")
+    def test_print_table_exclusions_with_undefined_expiration(self, mock_print):
+        manager = {"MODEL": "severity", "CLASSIFICATION": ["critical", "high", "medium", "low"]}
+        printer = PrinterPrettyTable()
+        for expired_date in ("undefined", "UNDEFINED", "UnDeFiNeD"):
+            with self.subTest(expired_date=expired_date):
+                printer.print_table_exclusions(
+                    [{
+                        "severity": "critical",
+                        "id": "CKV_OPENAPI_3",
+                        "where": "mocks",
+                        "create_date": "03092024",
+                        "expired_date": expired_date,
+                        "reason": "Not Apply - Mocks Folder",
+                    }],
+                    manager,
+                )
+                printed_table = str(mock_print.call_args[0][0])
+                self.assertIn("CKV_OPENAPI_3", printed_table)
+                self.assertIn("03/09/2024", printed_table)
+                table = mock_print.call_args[0][0]
+                self.assertEqual(table.rows[0][table.field_names.index("Expired Date")], "NA")
+
+    @patch("builtins.print")
     def test_print_table_report_model_risk(self, mock_print):
         # Arrange
         report_list = [
