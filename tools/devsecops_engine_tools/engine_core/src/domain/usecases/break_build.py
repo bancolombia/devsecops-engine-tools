@@ -425,6 +425,7 @@ class BreakBuild:
                     key=lambda exclusion: (
                         datetime.strptime(exclusion.expired_date, "%d%m%Y")
                         if exclusion.expired_date
+                        and exclusion.expired_date.lower() != "undefined"
                         else datetime.min
                     ),
                     default=None,
