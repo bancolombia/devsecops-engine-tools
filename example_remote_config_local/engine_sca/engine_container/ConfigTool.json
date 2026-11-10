@@ -10,6 +10,12 @@
         "SCAN_RETRIES_TAR": 1,
         "SCAN_RETRY_DELAY_TAR_SECONDS": 0
     },
+    "CORTEX_CLOUD": {
+        "CORTEX_API_URL": "",
+        "CORTEX_CLI_VERSION": "0.37.0",
+        "SBOM_FORMAT": "cyclonedx_json",
+        "SBOM_TYPE": "cyclonedx1.4"
+    },
     "TRIVY": {
         "TRIVY_VERSION": "0.70.0",
         "SBOM_FORMAT": "cyclonedx",

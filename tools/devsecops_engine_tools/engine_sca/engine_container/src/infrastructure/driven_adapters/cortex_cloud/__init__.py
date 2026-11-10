@@ -1,0 +1,1 @@
+"""Cortex Cloud container scanning adapter."""

@@ -36,3 +36,23 @@ def test_init_engine_container():
         assert input_core == mock_input_core
         assert sbom_components == mock_sbom
         assert tool_run is not None  # tool_run should be the PrismaCloudManagerScan instance
+
+
+def test_runner_selects_cortex_cloud_adapter():
+    with patch(
+        "devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan.init_engine_sca_rm",
+        return_value=([], {}, None),
+    ) as init_scan, patch(
+        "devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan.CortexCloudManagerScan"
+    ) as cortex_manager, patch(
+        "devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan.CortexDeserealizator"
+    ) as cortex_deserializer, patch(
+        "devsecops_engine_tools.engine_sca.engine_container.src.applications.runner_container_scan.DockerImages"
+    ) as docker_images:
+        runner_engine_container({}, "CORTEX", None, None, None)
+
+    init_args = init_scan.call_args.args
+    assert init_args[0] is cortex_manager.return_value
+    assert init_args[3] is docker_images.return_value
+    assert init_args[4] is cortex_deserializer.return_value
+    assert init_args[-1] == "CORTEX"
