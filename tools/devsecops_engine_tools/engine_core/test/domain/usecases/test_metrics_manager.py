@@ -11,7 +11,6 @@ from devsecops_engine_tools.engine_core.src.domain.model.gateway.metrics_manager
     MetricsManagerGateway,
 )
 from devsecops_engine_tools.engine_core.src.domain.model.threshold import Threshold
-import os
 import datetime
 
 
@@ -42,13 +41,13 @@ class TestMetricsManager(unittest.TestCase):
 
         self.devops_platform_gateway.get_variable.return_value = execution_id
         self.metrics_manager_gateway.send_metrics.return_value = None
-        os.makedirs = MagicMock()
-
         # Act
-        with patch("builtins.open", create=True) as mock_open, patch("os.path.exists") as mock_exists:
+        with patch("os.makedirs") as mock_makedirs, patch(
+            "builtins.open", create=True
+        ) as mock_open, patch("os.path.exists") as mock_exists:
             mock_exists.return_value = False
             self.metrics_manager.process(None, input_core, dict_args, scan_result)
 
         # Assert
-        os.makedirs.assert_called_with(base_directory)
+        mock_makedirs.assert_called_with(base_directory)
         self.metrics_manager_gateway.send_metrics.assert_called()
