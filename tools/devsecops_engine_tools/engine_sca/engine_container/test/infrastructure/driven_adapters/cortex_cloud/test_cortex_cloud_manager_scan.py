@@ -87,6 +87,7 @@ def test_scan_image_uses_archive_option_for_compressed_images(tmp_path):
         )
 
     assert run.call_args.args[0][-2:] == ["--archive", "image.tar.gz"]
+    assert "--api-base-url" not in run.call_args.args[0]
     assert result == str(result_file)
 
 
@@ -109,6 +110,7 @@ def test_generate_sbom_uses_cyclonedx_output(tmp_path, monkeypatch):
         )
 
     command = run.call_args.args[0]
+    assert "--api-base-url" not in command
     assert command[command.index("image") : command.index("image") + 2] == ["image", "sbom"]
     assert command[command.index("--sbom-type") + 1] == "cyclonedx1.4"
     assert command[-1] == "biometriafacial:latest"

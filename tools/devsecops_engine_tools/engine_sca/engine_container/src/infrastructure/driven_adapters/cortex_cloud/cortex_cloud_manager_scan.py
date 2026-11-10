@@ -18,6 +18,21 @@ logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
 
 
 class CortexCloudManagerScan(ToolGateway):
+    def _build_auth_command(self, file_path, cortex_config, secret_tool):
+        command = [file_path]
+        api_base_url = cortex_config.get("CORTEX_API_URL")
+        if api_base_url:
+            command.extend(["--api-base-url", api_base_url])
+        command.extend(
+            [
+                "--api-key",
+                secret_tool["token_cortex"],
+                "--api-key-id",
+                secret_tool["access_cortex"],
+            ]
+        )
+        return command
+
     def scan_image(
         self,
         file_path,
@@ -29,14 +44,7 @@ class CortexCloudManagerScan(ToolGateway):
         is_compressed_file,
     ):
         cortex_config = remoteconfig.get("CORTEX_CLOUD", {})
-        command = [
-            file_path,
-            "--api-base-url",
-            cortex_config.get("CORTEX_API_URL", "https://api-grupo-bancolombia.xdr.us.paloaltonetworks.com"),
-            "--api-key",
-            secret_tool["token_cortex"],
-            "--api-key-id",
-            secret_tool["access_cortex"],
+        command = self._build_auth_command(file_path, cortex_config, secret_tool) + [
             "--soft-fail",
             "image",
             "scan",
@@ -82,14 +90,7 @@ class CortexCloudManagerScan(ToolGateway):
         sbom_format = cortex_config.get("SBOM_FORMAT", "cyclonedx_json")
         sbom_type = cortex_config.get("SBOM_TYPE", "cyclonedx1.4")
         sbom_file = f"{image_name.replace('/', '_').replace(':', '_')}_SBOM.json"
-        command = [
-            file_path,
-            "--api-base-url",
-            cortex_config.get("CORTEX_API_URL", "https://api-grupo-bancolombia.xdr.us.paloaltonetworks.com"),
-            "--api-key",
-            secret_tool["token_cortex"],
-            "--api-key-id",
-            secret_tool["access_cortex"],
+        command = self._build_auth_command(file_path, cortex_config, secret_tool) + [
             "image",
             "sbom",
             "--output-format",
