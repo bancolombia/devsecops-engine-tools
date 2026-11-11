@@ -113,6 +113,7 @@ def get_inputs_from_cli(args):
             "trufflehog",
             "gitleaks",
             "prisma",
+            "cortex",
             "trivy",
             "xray",
             "dependency_check",
@@ -283,7 +284,7 @@ def get_inputs_from_cli(args):
     TOOLS = {
         "engine_iac": ["checkov", "kics", "kubescape", "conftest"],
         "engine_secret": ["trufflehog", "gitleaks", "all_tools"],
-        "engine_container": ["prisma", "trivy"],
+        "engine_container": ["prisma", "cortex", "trivy"],
         "engine_dependencies": ["xray", "dependency_check", "trivy"],
         "engine_license": ["cdxgen"],
         "engine_code": ["bearer", "kiuwan"],

@@ -158,6 +158,44 @@ def test_get_inputs_from_cli(mock_parse_args):
     }
 
 
+def test_get_inputs_from_cli_accepts_cortex_for_engine_container(monkeypatch):
+    argv = [
+        "devsecops-engine-tools",
+        "--platform_devops", "local",
+        "--remote_config_source", "local",
+        "--remote_config_repo", "/path/to/remote-config",
+        "--module", "engine_container",
+        "--tool", "cortex",
+    ]
+    monkeypatch.setattr("sys.argv", argv)
+
+    result = get_inputs_from_cli(argv[1:])
+
+    assert result["tool"] == "cortex"
+    assert result["module"] == "engine_container"
+
+
+@pytest.mark.parametrize("module", ["engine_iac", "engine_function"])
+def test_get_inputs_from_cli_rejects_cortex_for_other_modules(
+    monkeypatch, capsys, module
+):
+    argv = [
+        "devsecops-engine-tools",
+        "--platform_devops", "local",
+        "--remote_config_source", "local",
+        "--remote_config_repo", "/path/to/remote-config",
+        "--module", module,
+        "--tool", "cortex",
+    ]
+    monkeypatch.setattr("sys.argv", argv)
+
+    with pytest.raises(SystemExit) as exc_info:
+        get_inputs_from_cli(argv[1:])
+
+    assert exc_info.value.code == 2
+    assert f"Allowed values for the provided module {module}" in capsys.readouterr().err
+
+
 def test_parse_choices():
     # Set up mock arguments
     result = parse_separated_list(
