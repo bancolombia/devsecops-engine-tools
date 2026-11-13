@@ -1,4 +1,5 @@
 import json
+import re
 import subprocess
 
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.gateways.tool_gateway import (
@@ -15,6 +16,14 @@ from devsecops_engine_tools.engine_utilities.utils.cortexcli_utils import downlo
 from devsecops_engine_tools.engine_utilities.utils.logger_info import MyLogger
 
 logger = MyLogger.__call__(**settings.SETTING_LOGGER).get_logger()
+
+
+SCAN_INTRO_PATTERN = re.compile(r"<SCAN_INTRO_START>.*?<SCAN_INTRO_END>", re.DOTALL)
+
+
+def extract_scan_json(stdout):
+    # cortexcli prefixes the JSON report with an intro block delimited by markers.
+    return json.loads(SCAN_INTRO_PATTERN.sub("", stdout).strip())
 
 
 class CortexCloudManagerScan(ToolGateway):
@@ -68,7 +77,7 @@ class CortexCloudManagerScan(ToolGateway):
                 errors="replace",
             )
             with open(result_file, "w", encoding="utf-8") as output_file:
-                json.dump(json.loads(result.stdout), output_file, indent=2)
+                json.dump(extract_scan_json(result.stdout), output_file, indent=2)
             print(f"The image {image_name} was scanned")
             return result_file
         except subprocess.CalledProcessError as error:

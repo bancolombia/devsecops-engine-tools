@@ -130,3 +130,26 @@ def test_run_tool_container_sca_requires_cortex_secrets():
         else:
             raise AssertionError("Missing Cortex credentials should be rejected")
     download.assert_not_called()
+
+def test_scan_image_ignores_scan_intro_block(tmp_path):
+    result_file = tmp_path / "scan.json"
+    stdout = (
+        '<SCAN_INTRO_START>{"imageName":"eclipse:test"}<SCAN_INTRO_END>\n'
+        '{"asset_name":"eclipse:test","analysis":[]}'
+    )
+    with patch(
+        "devsecops_engine_tools.engine_sca.engine_container.src.infrastructure.driven_adapters.cortex_cloud.cortex_cloud_manager_scan.subprocess.run",
+        return_value=Mock(stdout=stdout, stderr=""),
+    ):
+        result = CortexCloudManagerScan().scan_image(
+            "/tmp/cortexcli",
+            "eclipse:test",
+            str(result_file),
+            {"CORTEX_CLOUD": {}},
+            {"token_cortex": "token", "access_cortex": "id"},
+            None,
+            False,
+        )
+
+    assert result == str(result_file)
+    assert json.loads(result_file.read_text()) == {"asset_name": "eclipse:test", "analysis": []}

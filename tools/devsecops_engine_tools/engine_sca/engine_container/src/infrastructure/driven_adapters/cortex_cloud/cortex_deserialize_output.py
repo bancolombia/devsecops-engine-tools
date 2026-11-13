@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 
 from devsecops_engine_tools.engine_sca.engine_container.src.domain.model.context_container import (
     ContextContainer,
@@ -35,6 +36,33 @@ def _normalize_vulnerability(vulnerability):
     }
 
 
+def _epoch_to_iso(value, milliseconds=False):
+    if not value:
+        return None
+    seconds = value / 1000 if milliseconds else value
+    return datetime.fromtimestamp(seconds, tz=timezone.utc).isoformat()
+
+
+def _from_xdm_finding(finding):
+    fields = finding["xdm.finding.normalized_fields"]
+    return {
+        "cveId": fields.get("xdm.vulnerability.cve_id"),
+        "severity": fields.get("xdm.vulnerability.severity", "unknown"),
+        "status": fields.get("xdm.vulnerability.status"),
+        "link": fields.get("xdm.vulnerability.cve_vendor_link"),
+        "cvssScore": fields.get("xdm.vulnerability.cvss_score"),
+        "cvssVector": fields.get("xdm.vulnerability.cvss_vector") or "unknown",
+        "description": finding.get("xdm.finding.description", "unknown"),
+        "packageName": fields.get("xdm.software_package.id", "unknown"),
+        "packageVersion": fields.get("xdm.software_package.version", "unknown"),
+        "fixVersions": fields.get("xdm.vulnerability.fix_versions"),
+        "publishedDate": _epoch_to_iso(fields.get("xdm.vulnerability.publish_date")),
+        "discoveredDate": _epoch_to_iso(
+            finding.get("xdm.finding.observation_time"), milliseconds=True
+        ),
+    }
+
+
 def _is_vulnerability(value):
     has_identifier = any(key in value for key in ("cveId", "vulnerabilityId", "id"))
     has_package = any(key in value for key in ("packageName", "package", "packageVersion"))
@@ -43,6 +71,9 @@ def _is_vulnerability(value):
 
 def _find_vulnerabilities(value, found):
     if isinstance(value, dict):
+        if isinstance(value.get("xdm.finding.normalized_fields"), dict):
+            found.append(_from_xdm_finding(value))
+            return
         if _is_vulnerability(value):
             found.append(value)
             return
@@ -57,13 +88,16 @@ def _normalize_cortex_output(path_file_results):
     with open(path_file_results, "r", encoding="utf-8") as result_file:
         data = json.load(result_file)
     if not isinstance(data, dict) or not any(
-        key in data for key in ("scannersResults", "results", "vulnerabilities", "findings")
+        key in data
+        for key in ("scannersResults", "results", "vulnerabilities", "findings", "analysis")
     ):
         raise ValueError("Unsupported Cortex Cloud scan result format")
 
     vulnerabilities = []
     _find_vulnerabilities(data, vulnerabilities)
-    target_image = data.get("imageName") or data.get("image") or data.get("target", "unknown")
+    target_image = (
+        data.get("imageName") or data.get("asset_name") or data.get("image") or data.get("target", "unknown")
+    )
     distro = data.get("distro") or data.get("os", "unknown")
     return {
         "results": [
