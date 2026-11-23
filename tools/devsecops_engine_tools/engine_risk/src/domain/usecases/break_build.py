@@ -18,6 +18,9 @@ import math
 from datetime import datetime, timedelta
 import holidays
 
+ON_WHITELIST_STATUS = "On Whitelist"
+TRANSFER_ACCEPTED_STATUS = "Transfer Accepted"
+
 
 class BreakBuild:
     def __init__(
@@ -113,7 +116,7 @@ class BreakBuild:
 
         counts = self._compute_remediation_rate_counts(all_report)
         print(
-            f"Mitigated: {counts['mitigated']}   AllFindings: {counts['all_findings']}   BaseImage: {counts['base_image']}   NewFindings: {self.policy_excluded}   Transferred: {counts['transferred']}   WhiteList: {counts['white_list']}\n\n"
+            f"Mitigated: {counts['mitigated']}   AllFindings: {counts['all_findings']}   BaseImage: {counts['base_image']}   LongTermRiskAcceptance: {counts['long_term_risk_acceptance']}   NewFindings: {self.policy_excluded}   Transferred: {counts['transferred']}   WhiteList: {counts['white_list']}\n\n"
         )
         total = (
             counts["all_findings"]
@@ -121,6 +124,7 @@ class BreakBuild:
             - counts["white_list"]
             - counts["base_image"]
             - counts["transferred"]
+            - counts["long_term_risk_acceptance"]
         )
 
         if total == 0:
@@ -145,7 +149,6 @@ class BreakBuild:
         )
 
     def _print_remediation_rate_formula(self):
-        sp.init_printing(use_unicode=True, num_columns=100)
         (
             remediation_rate_name,
             mitigated_name,
@@ -154,8 +157,9 @@ class BreakBuild:
             white_list_name,
             transferred_name,
             base_image_name,
+            long_term_risk_acceptance_name,
         ) = sp.symbols(
-            "RemediationRate Mitigated AllFindings NewFindings WhiteList Transferred BaseImage"
+            "RemediationRate Mitigated AllFindings NewFindings WhiteList Transferred BaseImage LongTermRiskAcceptance"
         )
         formula = sp.Eq(
             remediation_rate_name,
@@ -168,11 +172,12 @@ class BreakBuild:
                     - white_list_name
                     - transferred_name
                     - base_image_name
+                    - long_term_risk_acceptance_name
                 )
             ),
         )
         print("\n")
-        sp.pretty_print(formula)
+        sp.pretty_print(formula, use_unicode=True, wrap_line=False)
         print("\n")
 
     def _compute_remediation_rate_counts(self, all_report):
@@ -180,19 +185,28 @@ class BreakBuild:
         white_list_count = sum(
             1
             for report in all_report
-            if "On Whitelist" in report.risk_status and not report.mitigated
+            if ON_WHITELIST_STATUS in report.risk_status and not report.mitigated
         )
         transferred_list_count = sum(
             1
             for report in all_report
-            if "Transfer Accepted" in report.risk_status and not report.mitigated
+            if TRANSFER_ACCEPTED_STATUS in report.risk_status and not report.mitigated
         )
         base_image_count = sum(
             1
             for report in all_report
             if "Image Base" in report.vul_description
-            and "On Whitelist" not in report.risk_status
-            and "Transfer Accepted" not in report.risk_status
+            and ON_WHITELIST_STATUS not in report.risk_status
+            and TRANSFER_ACCEPTED_STATUS not in report.risk_status
+            and not report.mitigated
+        )
+        long_term_risk_acceptance_count = sum(
+            1
+            for report in all_report
+            if "long_term_risk_acceptance" in report.tags
+            and ON_WHITELIST_STATUS not in report.risk_status
+            and TRANSFER_ACCEPTED_STATUS not in report.risk_status
+            and "Image Base" not in report.vul_description
             and not report.mitigated
         )
         return {
@@ -200,11 +214,17 @@ class BreakBuild:
             "white_list": white_list_count,
             "transferred": transferred_list_count,
             "base_image": base_image_count,
+            "long_term_risk_acceptance": long_term_risk_acceptance_count,
             "all_findings": len(all_report),
         }
 
     def _evaluate_remediation_rate(
-        self, remediation_rate_value, risk_threshold, total, mitigated_count, new_report_list
+        self,
+        remediation_rate_value,
+        risk_threshold,
+        total,
+        mitigated_count,
+        new_report_list,
     ):
         if remediation_rate_value >= (risk_threshold + 5):
             print(
@@ -333,7 +353,9 @@ class BreakBuild:
 
         self._check_blacklist_risk_status(report_list)
 
-    def _classify_blacklisted_reports(self, report_list, tag_blacklist, country_holidays, remote_config):
+    def _classify_blacklisted_reports(
+        self, report_list, tag_blacklist, country_holidays, remote_config
+    ):
         above_threshold = []
         below_threshold = []
         for report in report_list:
@@ -341,13 +363,17 @@ class BreakBuild:
                 if tag not in tag_blacklist:
                     continue
                 exclusion_value = remote_config["TAG_BLACKLIST_EXCLUSION_DAYS"][tag]
-                if self._is_blacklist_threshold_exceeded(report, exclusion_value, country_holidays):
+                if self._is_blacklist_threshold_exceeded(
+                    report, exclusion_value, country_holidays
+                ):
                     above_threshold.append((report, tag))
                 else:
                     below_threshold.append((report, tag))
         return above_threshold, below_threshold
 
-    def _is_blacklist_threshold_exceeded(self, report, exclusion_value, country_holidays):
+    def _is_blacklist_threshold_exceeded(
+        self, report, exclusion_value, country_holidays
+    ):
         if isinstance(exclusion_value, str) and "WD" in exclusion_value:
             working_days_threshold = int(exclusion_value.replace("WD", ""))
             report_created_date = datetime.strptime(
@@ -412,12 +438,8 @@ class BreakBuild:
                     else self._get_report_id(report)
                 ),
                 "severity": report.severity,
-                "risk_score": (
-                    str(report.risk_score) if report.risk_score else "0"
-                ),
-                "priority_score": (
-                    str(report.priority) if report.priority else "0"
-                ),
+                "risk_score": (str(report.risk_score) if report.risk_score else "0"),
+                "priority_score": (str(report.priority) if report.priority else "0"),
                 "reason": reason,
             }
         )
@@ -514,10 +536,14 @@ class BreakBuild:
             if priority_score_sum > max_priority_score:
                 max_priority_score = priority_score_sum
 
-            if self._evaluate_priority_score_sum(priority_score_sum, score_threshold, reports):
+            if self._evaluate_priority_score_sum(
+                priority_score_sum, score_threshold, reports
+            ):
                 break_build = True
 
-            if self._evaluate_priority_classification(reports, classification_threshold):
+            if self._evaluate_priority_classification(
+                reports, classification_threshold
+            ):
                 break_build = True
 
         if break_build:
@@ -531,7 +557,9 @@ class BreakBuild:
             service_reports.setdefault(report.service, []).append(report)
         return service_reports
 
-    def _evaluate_priority_score_sum(self, priority_score_sum, score_threshold, reports):
+    def _evaluate_priority_score_sum(
+        self, priority_score_sum, score_threshold, reports
+    ):
         if priority_score_sum > score_threshold:
             for report in reports:
                 self._append_priority_report_breaker(report, "Priority Score")
@@ -553,8 +581,10 @@ class BreakBuild:
 
     def _evaluate_priority_classification(self, reports, classification_threshold):
         classification_reports = self._group_reports_by_classification(reports)
-        classification_counts, has_threshold_violation = self._compute_classification_counts(
-            classification_reports, classification_threshold
+        classification_counts, has_threshold_violation = (
+            self._compute_classification_counts(
+                classification_reports, classification_threshold
+            )
         )
 
         counts_str = ", ".join(
@@ -590,10 +620,14 @@ class BreakBuild:
     def _group_reports_by_classification(self, reports):
         classification_reports = {}
         for report in reports:
-            classification_reports.setdefault(report.priority_classification, []).append(report)
+            classification_reports.setdefault(
+                report.priority_classification, []
+            ).append(report)
         return classification_reports
 
-    def _compute_classification_counts(self, classification_reports, classification_threshold):
+    def _compute_classification_counts(
+        self, classification_reports, classification_threshold
+    ):
         classification_counts = {}
         has_threshold_violation = False
         for classification in classification_threshold.keys():
