@@ -18,6 +18,9 @@ import math
 from datetime import datetime, timedelta
 import holidays
 
+ON_WHITELIST_STATUS = "On Whitelist"
+TRANSFER_ACCEPTED_STATUS = "Transfer Accepted"
+
 
 class BreakBuild:
     def __init__(
@@ -182,27 +185,27 @@ class BreakBuild:
         white_list_count = sum(
             1
             for report in all_report
-            if "On Whitelist" in report.risk_status and not report.mitigated
+            if ON_WHITELIST_STATUS in report.risk_status and not report.mitigated
         )
         transferred_list_count = sum(
             1
             for report in all_report
-            if "Transfer Accepted" in report.risk_status and not report.mitigated
+            if TRANSFER_ACCEPTED_STATUS in report.risk_status and not report.mitigated
         )
         base_image_count = sum(
             1
             for report in all_report
             if "Image Base" in report.vul_description
-            and "On Whitelist" not in report.risk_status
-            and "Transfer Accepted" not in report.risk_status
+            and ON_WHITELIST_STATUS not in report.risk_status
+            and TRANSFER_ACCEPTED_STATUS not in report.risk_status
             and not report.mitigated
         )
         long_term_risk_acceptance_count = sum(
             1
             for report in all_report
             if "long_term_risk_acceptance" in report.tags
-            and "On Whitelist" not in report.risk_status
-            and "Transfer Accepted" not in report.risk_status
+            and ON_WHITELIST_STATUS not in report.risk_status
+            and TRANSFER_ACCEPTED_STATUS not in report.risk_status
             and "Image Base" not in report.vul_description
             and not report.mitigated
         )
