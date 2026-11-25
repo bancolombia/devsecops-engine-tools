@@ -27,8 +27,8 @@ class RiskScore(RiskScoreGateway):
             return
 
         cve_regex = re.compile(priority_manager.get("CVE_REGEX"))
-        cve_findings = [f for f in finding_list if cve_regex.match(f.id)]
-        non_cve_findings = [f for f in finding_list if not cve_regex.match(f.id)]
+        cve_findings = [f for f in finding_list if cve_regex.match(self._get_cve_identifier(f))]
+        non_cve_findings = [f for f in finding_list if not cve_regex.match(self._get_cve_identifier(f))]
 
         if cve_findings:
             self._assign_priority_from_external_service(
@@ -42,11 +42,14 @@ class RiskScore(RiskScoreGateway):
                 homologation_priority
                 )
 
+    def _get_cve_identifier(self, finding):
+        return finding.description if finding.tool == "XRAY" else finding.id
+
     def _assign_priority_from_external_service(
         self, cve_findings, priority_manager, mapping_to_host, homologation_priority
     ):
         host = priority_manager.get("HOST_PRIORITY")
-        ids = [f.id for f in cve_findings]
+        ids = [self._get_cve_identifier(f) for f in cve_findings]
         cve_list_header = ",".join(ids)
         utils = Utils()
         max_retries = priority_manager.get("MAX_RETRIES", 3)
@@ -66,7 +69,7 @@ class RiskScore(RiskScoreGateway):
             priorities = response.json().get("priorities", {})
 
             for finding in cve_findings:
-                prio = priorities.get(finding.id)
+                prio = priorities.get(self._get_cve_identifier(finding))
                 if prio:
                     finding.priority = Priority(
                         score=float(prio.get("priority", 0.0)),
